@@ -2130,20 +2130,6 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.5.2.tgz#9b6cf005c50fdda72701da82f8db44635463d730"
   integrity sha512-foZ7qr0IsUBjzWIq+SuBLfdQCpJ1j8cTuNNT4owngTHoN5KsJb8L9t65fzz7SCeSWzescoOil/0ldqiL041ABg==
 
-"@bundled-es-modules/cookie@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@bundled-es-modules/cookie/-/cookie-2.0.1.tgz#b41376af6a06b3e32a15241d927b840a9b4de507"
-  integrity sha512-8o+5fRPLNbjbdGRRmJj3h6Hh1AQJf2dk3qQ/5ZFb+PXkRNiSoMGGUKlsgLfrxneb72axVJyIYji64E2+nNfYyw==
-  dependencies:
-    cookie "^0.7.2"
-
-"@bundled-es-modules/statuses@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@bundled-es-modules/statuses/-/statuses-1.0.1.tgz#761d10f44e51a94902c4da48675b71a76cc98872"
-  integrity sha512-yn7BklA5acgcBr+7w064fGV+SGIFySjCKpqjcWgBAIfrAkY+4GQTJJHQMeT3V/sgz23VTEVV8TtOmkvJAhFVfg==
-  dependencies:
-    statuses "^2.0.1"
-
 "@cfworker/json-schema@^4.0.2":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@cfworker/json-schema/-/json-schema-4.1.1.tgz#4a2a3947ee9fa7b7c24be981422831b8674c3be6"
@@ -9427,55 +9413,55 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.24.1"
 
-"@moonrepo/cli@1.41.3":
-  version "1.41.3"
-  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.41.3.tgz#f52cbf4107c67ce2a80983c03a891c450da2b195"
-  integrity sha512-jJeXwRsy5At5qJh1F0zRawcrZkVr4fSu+q6xHDoHSmnIkbvd9L1hbvlai05m9tF+GSGye5mYZjoQzUsom9mZQg==
+"@moonrepo/cli@1.41.4":
+  version "1.41.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.41.4.tgz#d724744557c9e55abe009f602797cc8738147900"
+  integrity sha512-rFr1yYlA/KQ5rX/JDy/Nj59bt2ZTDUks+S36i9771tqKuq4QGkx+g6DRTy5AhT2C0H03yYJR5ZfXmGvccAAHWw==
   dependencies:
     detect-libc "^2.0.4"
   optionalDependencies:
-    "@moonrepo/core-linux-arm64-gnu" "1.41.3"
-    "@moonrepo/core-linux-arm64-musl" "1.41.3"
-    "@moonrepo/core-linux-x64-gnu" "1.41.3"
-    "@moonrepo/core-linux-x64-musl" "1.41.3"
-    "@moonrepo/core-macos-arm64" "1.41.3"
-    "@moonrepo/core-macos-x64" "1.41.3"
-    "@moonrepo/core-windows-x64-msvc" "1.41.3"
+    "@moonrepo/core-linux-arm64-gnu" "1.41.4"
+    "@moonrepo/core-linux-arm64-musl" "1.41.4"
+    "@moonrepo/core-linux-x64-gnu" "1.41.4"
+    "@moonrepo/core-linux-x64-musl" "1.41.4"
+    "@moonrepo/core-macos-arm64" "1.41.4"
+    "@moonrepo/core-macos-x64" "1.41.4"
+    "@moonrepo/core-windows-x64-msvc" "1.41.4"
 
-"@moonrepo/core-linux-arm64-gnu@1.41.3":
-  version "1.41.3"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.41.3.tgz#0b1d805692a90081f6040e1db8208b7651b07293"
-  integrity sha512-43JpEGot16Pr54stfrsi7M+lL+h8pxcloj1Z8Y1g7ihNKL5zEBFU8rdSSjbhPxL0adXwzKEYAjj0bSjrydFr9Q==
+"@moonrepo/core-linux-arm64-gnu@1.41.4":
+  version "1.41.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.41.4.tgz#f3b8b994f41bb0e55709b808ec0025bfa2b51f5a"
+  integrity sha512-S7xHGxebpxNfJ6GB2m2xSxUHt6LyHKqSEtvqmSW0QKUqapkhzV9/hizdYAZQo0hP72gDDTM8UrUjv9V/xFrVyw==
 
-"@moonrepo/core-linux-arm64-musl@1.41.3":
-  version "1.41.3"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.41.3.tgz#fe595a0388d26536857d3103ac54c5396bb566c0"
-  integrity sha512-Ea1I91lXefZzwAi9e/6A1zHffEyf1FMyZVRU8R2Qh1A9mo0XIC8tWD/LZVci+Y5ln6QP5MEkh4pLCPeZc9EW8g==
+"@moonrepo/core-linux-arm64-musl@1.41.4":
+  version "1.41.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.41.4.tgz#1eaa0cb3b186a9edf1a0f48754d13de00ef5d6df"
+  integrity sha512-q5JeZUHzyySoOu1YOI4z84iekV4PABW+oyfEUsRR5SFx6TTKmwohaOIEq+fTRgrlTKnEmUTnSq6qLDwy23frvg==
 
-"@moonrepo/core-linux-x64-gnu@1.41.3":
-  version "1.41.3"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.41.3.tgz#b5088d29de803aab2f110bb207f23bbcc10094d8"
-  integrity sha512-R7JXyWRirF5YZ6rB8czVzJ058iJVK9AyW+cFXwJYbgJKyCXlGuv02RSi/2VmyA4MnJ+6wN9rtYRnLH+igqyb5w==
+"@moonrepo/core-linux-x64-gnu@1.41.4":
+  version "1.41.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.41.4.tgz#97e2ad4ed109f34c01173ca4e7f9ccbc043b03f9"
+  integrity sha512-s94anaFVdNJi1ZBC/2a0wNUTgaWj9Qxd3uoNoDwDvAA5Lmj047uvZ6kPKxivFQ8/jQSTgnFRgWjIjs0HMgT3Fg==
 
-"@moonrepo/core-linux-x64-musl@1.41.3":
-  version "1.41.3"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.41.3.tgz#694cdaad4162c57ab8416d6ca3d456ae6944919d"
-  integrity sha512-RTDRDabFFiWWRwZnfbktP95PyVfSdYCa5BYpBwQYDCkcr66twVNUdtEenNBhoYKKAuD9KxNZCC0ahfCUlimWhg==
+"@moonrepo/core-linux-x64-musl@1.41.4":
+  version "1.41.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.41.4.tgz#71760646e819a60a5c21d8904b610feb6a236bf2"
+  integrity sha512-dU7p7vxtZ2FpVevy8/NNweLhJ4x9xZ31AQpEvS/nw+41g+Tmj6qJzaz5WrULJOqSH7590W6c2A+ptIQw+A+62g==
 
-"@moonrepo/core-macos-arm64@1.41.3":
-  version "1.41.3"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.41.3.tgz#5c96f3848d37e6b80b54f709f0e54bf1e8b47fb0"
-  integrity sha512-Lc3tkGU+aHu9RvKx8dv0F9PbCIhULxKynBzQGYEZ5EzqjDUXQL0zXKwgQKLoky13pZb2g36HabLvlydx7CoKBg==
+"@moonrepo/core-macos-arm64@1.41.4":
+  version "1.41.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.41.4.tgz#b8b59207444b3ff45fb8c479d89186e6e0858d10"
+  integrity sha512-ZJvbATSxHA1NYgxKOpt+XwGb0C7H7dlh3bdNakBOgdbliv6bDVPoYsTnX35cteh8fqSEsqfpkMM+JJEMM8YHVg==
 
-"@moonrepo/core-macos-x64@1.41.3":
-  version "1.41.3"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.41.3.tgz#27cb75aa9b861b7aac5d76ffadbf6552d6f3316f"
-  integrity sha512-QLEHW2ZE0c5o0fVlc6O+0e0koXXKRAQva1SuHt0cjyWX3lcZbOdXpWUPJBmuX3UOIQ61srRIRdVlBWa8S9FxZA==
+"@moonrepo/core-macos-x64@1.41.4":
+  version "1.41.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.41.4.tgz#c351e36a169b0d94e3e52cbf97f90d00d09eb40b"
+  integrity sha512-wWISj+woFZVZaADkZXMwhoRcKCa8y8Q14jarRUCL5R3MkPXcBpzfeeI6NsChWwo4rXN019AaUMBlUJeR1ZGFoQ==
 
-"@moonrepo/core-windows-x64-msvc@1.41.3":
-  version "1.41.3"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.41.3.tgz#4b514ad0f480fcec0f44bc01ee312c4adacf37b3"
-  integrity sha512-M647V+DOGQEQsDuMrFEMMEHQY7+8QyV6ntIa3cU/AjeUfxeyq9eMzNn2gMQILrl87v8jeoxbQn20ms1YpszlCg==
+"@moonrepo/core-windows-x64-msvc@1.41.4":
+  version "1.41.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.41.4.tgz#899e4dccadb1a456993d236c383cd6722629df65"
+  integrity sha512-abiQW0bC+UgFHbMPGLsx025EzEgMF7eNEkFTCazIWpeaJR4byFAN3iBEY7tXxEYrg6lc8m5zIJ7a7IXiqKJlAw==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -9523,10 +9509,10 @@
     express "^4.18.2"
     strict-event-emitter "^0.5.1"
 
-"@mswjs/interceptors@^0.39.1":
-  version "0.39.2"
-  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.39.2.tgz#de9de0ab23f99d387c7904df7219a92157d1d666"
-  integrity sha512-RuzCup9Ct91Y7V79xwCb146RaBRHZ7NBbrIUySumd1rpKqHL5OonaqrGIbug5hNwP/fRyxFMA6ISgw4FTtYFYg==
+"@mswjs/interceptors@^0.40.0":
+  version "0.40.0"
+  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.40.0.tgz#1b45f215ba8c2983ed133763ca03af92896083d6"
+  integrity sha512-EFd6cVbHsgLa6wa4RljGj6Wk75qoHxUSyc5asLyyPSyuhIcdS2Q3Phw6ImS1q+CkALthJRShiYfKANcQMuMqsQ==
   dependencies:
     "@open-draft/deferred-promise" "^2.2.0"
     "@open-draft/logger" "^0.3.0"
@@ -9797,7 +9783,7 @@
     is-node-process "^1.2.0"
     outvariant "^1.4.0"
 
-"@open-draft/until@^2.0.0", "@open-draft/until@^2.1.0":
+"@open-draft/until@^2.0.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
@@ -12800,11 +12786,6 @@
   integrity sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==
   dependencies:
     "@types/node" "*"
-
-"@types/cookie@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@types/cookie/-/cookie-0.6.0.tgz#eac397f28bf1d6ae0ae081363eca2f425bedf0d5"
-  integrity sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==
 
 "@types/cookiejar@^2.1.5":
   version "2.1.5"
@@ -16602,7 +16583,7 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^141.0.0:
+chromedriver@^141.0.2:
   version "141.0.2"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-141.0.2.tgz#071dded2f6fb4fc6ba403ed8e2e597ebf69abfe4"
   integrity sha512-MNtgzm5SjTtbHDXlpuXkQ7brxkOYTK+qDbnmr7UrurfuhqJfIkL+nnKo7hev/hR6sFL8mV8r5+1Kn51Mo9zsDg==
@@ -17281,6 +17262,11 @@ cookie@^0.7.1, cookie@^0.7.2:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.7.2.tgz#556369c472a2ba910f2979891b526b3436237ed7"
   integrity sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==
+
+cookie@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/cookie/-/cookie-1.0.2.tgz#27360701532116bd3f1f9416929d176afe1e4610"
+  integrity sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==
 
 cookiejar@^2.1.4:
   version "2.1.4"
@@ -25861,28 +25847,28 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@~2.11.1:
-  version "2.11.1"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.11.1.tgz#77f7c5c60ffd08e4bc351cca4608418db15e5ac2"
-  integrity sha512-dGSRx0AJmQVQfpGXTsAAq4JFdwdhOBdJ6sJS/jnN0ac3s0NZB6daacHF1z5Pefx+IejmvuiLWw260RlyQOf3sQ==
+msw@~2.11.6:
+  version "2.11.6"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.11.6.tgz#9ae647c3b050fbc1e1a2300dee15b3605c14c25d"
+  integrity sha512-MCYMykvmiYScyUm7I6y0VCxpNq1rgd5v7kG8ks5dKtvmxRUUPjribX6mUoUNBbM5/3PhUyoelEWiKXGOz84c+w==
   dependencies:
-    "@bundled-es-modules/cookie" "^2.0.1"
-    "@bundled-es-modules/statuses" "^1.0.1"
     "@inquirer/confirm" "^5.0.0"
-    "@mswjs/interceptors" "^0.39.1"
+    "@mswjs/interceptors" "^0.40.0"
     "@open-draft/deferred-promise" "^2.2.0"
-    "@open-draft/until" "^2.1.0"
-    "@types/cookie" "^0.6.0"
     "@types/statuses" "^2.0.4"
+    cookie "^1.0.2"
     graphql "^16.8.1"
     headers-polyfill "^4.0.2"
     is-node-process "^1.2.0"
     outvariant "^1.4.3"
     path-to-regexp "^6.3.0"
     picocolors "^1.1.1"
+    rettime "^0.7.0"
+    statuses "^2.0.2"
     strict-event-emitter "^0.5.1"
     tough-cookie "^6.0.0"
     type-fest "^4.26.1"
+    until-async "^3.0.2"
     yargs "^17.7.2"
 
 multicast-dns@^7.2.5:
@@ -29607,6 +29593,11 @@ retry@^0.13.1:
   resolved "https://registry.yarnpkg.com/retry/-/retry-0.13.1.tgz#185b1587acf67919d63b357349e03537b2484658"
   integrity sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg==
 
+rettime@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/rettime/-/rettime-0.7.0.tgz#c040f1a65e396eaa4b8346dd96ed937edc79d96f"
+  integrity sha512-LPRKoHnLKd/r3dVxcwO7vhCW+orkOGj9ViueosEBK6ie89CijnfRlhaDhHq/3Hxu4CkWQtxwlBG0mzTQY6uQjw==
+
 reusify@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/reusify/-/reusify-1.0.4.tgz#90da382b1e126efc02146e90845a88db12925d76"
@@ -31000,7 +30991,7 @@ stats-lite@^2.2.0:
   dependencies:
     isnumber "~1.0.0"
 
-statuses@2.0.1, statuses@^2.0.1:
+statuses@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-2.0.1.tgz#55cb000ccf1d48728bd23c685a063998cf1a1b63"
   integrity sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==
@@ -31009,6 +31000,11 @@ statuses@2.0.1, statuses@^2.0.1:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha1-Fhx9rBd2Wf2YEfQ3cfqZOBR4Yow=
+
+statuses@^2.0.1, statuses@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/statuses/-/statuses-2.0.2.tgz#8f75eecef765b5e1cfcdc080da59409ed424e382"
+  integrity sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==
 
 stickyfill@^1.1.1:
   version "1.1.1"
@@ -32826,6 +32822,11 @@ unset-value@^1.0.0:
     has-value "^0.3.1"
     isobject "^3.0.0"
 
+until-async@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/until-async/-/until-async-3.0.2.tgz#447f1531fdd7bb2b4c7a98869bdb1a4c2a23865f"
+  integrity sha512-IiSk4HlzAMqTUseHHe3VhIGyuFmN90zMTpD3Z3y8jeQbzLIq500MVM7Jq2vUAnTKAFPJrqwkzr6PoTcPhGcOiw==
+
 untildify@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/untildify/-/untildify-4.0.0.tgz#2bc947b953652487e4600949fb091e3ae8cd919b"
@@ -33128,21 +33129,13 @@ vega-event-selector@^3.0.1, vega-event-selector@~3.0.1:
   resolved "https://registry.yarnpkg.com/vega-event-selector/-/vega-event-selector-3.0.1.tgz#b99e92147b338158f8079d81b28b2e7199c2e259"
   integrity sha512-K5zd7s5tjr1LiOOkjGpcVls8GsH/f2CWCrWcpKy74gTCp+llCdwz0Enqo013ZlGaRNjfgD/o1caJRt3GSaec4A==
 
-vega-expression@^5.2.0, vega-expression@~5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-5.2.0.tgz#a5dfa8dd79066082add1846618f3d7f0a364305f"
-  integrity sha512-WRMa4ny3iZIVAzDlBh3ipY2QUuLk2hnJJbfbncPgvTF7BUgbIbKq947z+JicWksYbokl8n1JHXJoqi3XvpG0Zw==
+vega-expression@5.2.1, vega-expression@^5.2.0, vega-expression@~5.1.1, vega-expression@~5.2.0:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-5.2.1.tgz#04de5967b8f0dd0d599e5c64cc90d11d1e1d6c14"
+  integrity sha512-9KKbI2q9qTI55NSjD/dVWg3aeCtw+gwyWCiLMM47ha6iXrAN9pQ+EKRJfxOHuoDfCTlJJTaUfnnXgbqm0HEszg==
   dependencies:
     "@types/estree" "^1.0.0"
-    vega-util "^1.17.3"
-
-vega-expression@~5.1.1:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-5.1.2.tgz#1ed0677787b8e5f4047c9b847ecc20da0a2a8d05"
-  integrity sha512-fFeDTh4UtOxlZWL54jf1ZqJHinyerWq/ROiqrQxqLkNJRJ86RmxYTgXwt65UoZ/l4VUv9eAd2qoJeDEf610Umw==
-  dependencies:
-    "@types/estree" "^1.0.0"
-    vega-util "^1.17.3"
+    vega-util "^1.17.4"
 
 vega-force@~4.2.2:
   version "4.2.2"
@@ -33204,10 +33197,12 @@ vega-hierarchy@~4.1.3:
     vega-dataflow "^5.7.7"
     vega-util "^1.17.3"
 
-vega-interpreter@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/vega-interpreter/-/vega-interpreter-1.0.4.tgz#291ebf85bc2d1c3550a3da22ff75b3ba0d326a39"
-  integrity sha512-6tpYIa/pJz0cZo5fSxDSkZkAA51pID2LjOtQkOQvbzn+sJiCaWKPFhur8MBqbcmYZ9bnap1OYNwlrvpd2qBLvg==
+vega-interpreter@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/vega-interpreter/-/vega-interpreter-1.2.1.tgz#54d6af77f45c0a8c0f0b3d11914a64b68a7f0dc9"
+  integrity sha512-EMHLGxJ+SWfh1K/fHDRlHEZtLA/2ZNAXItYb5e8CxuAIm/Ha/3DHX/8VlvbTGIciUpuwmcKx4tVhJWlKreQ/Yw==
+  dependencies:
+    vega-util "^1.17.4"
 
 vega-label@~1.3.1:
   version "1.3.1"
@@ -33367,10 +33362,10 @@ vega-typings@~1.5.0:
     vega-expression "^5.2.0"
     vega-util "^1.17.3"
 
-vega-util@^1.17.2, vega-util@^1.17.3, vega-util@~1.17.2:
-  version "1.17.3"
-  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.17.3.tgz#8f24d867daae69580874dcf75de10c65ac9ede5d"
-  integrity sha512-nSNpZLUrRvFo46M5OK4O6x6f08WD1yOcEzHNlqivF+sDLSsVpstaF6fdJYwrbf/debFi2L9Tkp4gZQtssup9iQ==
+vega-util@1.17.4, vega-util@^1.17.2, vega-util@^1.17.3, vega-util@^1.17.4, vega-util@~1.17.2:
+  version "1.17.4"
+  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.17.4.tgz#b35781fe8e8d030e6519746682843d7ef9ff6d27"
+  integrity sha512-+y3ZW7dEqM8Ck+KRsd+jkMfxfE7MrQxUyIpNjkfhIpGEreym+aTn7XUw1DKXqclr8mqTQvbilPo16B3lnBr0wA==
 
 vega-view-transforms@~4.6.1:
   version "4.6.1"

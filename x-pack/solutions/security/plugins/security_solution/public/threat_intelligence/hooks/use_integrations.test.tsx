@@ -20,7 +20,7 @@ const createWrapper = (): FC<PropsWithChildren<{}>> => {
 };
 
 const renderUseQuery = (result: { items: unknown[] }) =>
-  renderHook(() => useQuery(['integrations'], () => result), {
+  renderHook(() => useQuery(['integrations-threat-intel'], () => result), {
     wrapper: createWrapper(),
   });
 

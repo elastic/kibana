@@ -638,9 +638,15 @@
           },
           "value": {
             "type": "keyword"
+          },
+          "description": {
+            "type": "keyword"
           }
         },
         "type": "nested"
+      },
+      "total_observables": {
+        "type": "integer"
       },
       "owner": {
         "type": "keyword"

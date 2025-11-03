@@ -21,7 +21,8 @@ import { ContentWithResetCta } from './health_callout/content_with_reset_cta';
 import { ContentWithInspectCta } from './health_callout/content_with_inspect_cta';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
-  const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
+  const { isLoading, isError, data: resultData } = useFetchSloHealth({ list: [slo] });
+  const { data } = resultData ?? {};
 
   const {
     share: {
