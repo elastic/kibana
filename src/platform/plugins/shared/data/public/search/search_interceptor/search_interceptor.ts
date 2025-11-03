@@ -413,7 +413,9 @@ export class SearchInterceptor {
                 : response
             ),
             tap(async () => {
-              await sendCancelRequest();
+              if (!isSavedToBackground) {
+                await sendCancelRequest();
+              }
               this.handleSearchError(e, request?.params?.body ?? {}, options, true);
             })
           );

@@ -735,6 +735,35 @@ describe('SearchInterceptor', () => {
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
     });
 
+    test('should NOT DELETE a running SAVED async search on async timeout', async () => {
+      sessionService.isCurrentSession.mockReturnValue(true);
+      sessionService.isSaving.mockReturnValue(true);
+
+      mockCoreSetup.http.post.mockResolvedValue(
+        getMockSearchResponse({
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {},
+          id: '1',
+        })
+      );
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(mockCoreSetup.http.post).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+      // Long enough to reach the timeout
+      await timeTravel(2000);
+
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+    });
+
     describe('Search session', () => {
       const setup = (
         opts: {
