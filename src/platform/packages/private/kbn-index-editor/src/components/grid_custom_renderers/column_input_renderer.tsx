@@ -44,7 +44,6 @@ const options = [
         <span>Integer</span>
       </EuiFlexGroup>
     ),
-    'data-test-subj': 'option-warning',
   },
   {
     value: 'keyword',
@@ -54,7 +53,6 @@ const options = [
         <span>Keyword</span>
       </EuiFlexGroup>
     ),
-    'data-test-subj': 'option-minor',
   },
   {
     value: 'text',
@@ -64,7 +62,15 @@ const options = [
         <span>Text</span>
       </EuiFlexGroup>
     ),
-    'data-test-subj': 'option-critical',
+  },
+  {
+    value: 'boolean',
+    inputDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+        <FieldIcon type="boolean" label="Boolean" />
+        <span>Boolean</span>
+      </EuiFlexGroup>
+    ),
   },
 ];
 
@@ -103,7 +109,7 @@ export const getColumnInputRenderer = (
           label: (
             <FormattedMessage
               id="indexEditor.flyout.grid.columnHeader.editAction"
-              defaultMessage="Edit name"
+              defaultMessage="Edit column"
             />
           ),
           size: 'xs',

@@ -317,7 +317,11 @@ export class IndexUpdateService {
                 ...docUpdate.payload.value,
                 [action.payload.name]: docUpdate.payload.value[action.payload.previousName],
               };
-              delete newValue[action.payload.previousName];
+
+              if (action.payload.previousName !== action.payload.name) {
+                delete newValue[action.payload.previousName];
+              }
+
               return { ...docUpdate, payload: { ...docUpdate.payload, value: newValue } };
             }
             return docUpdate;
@@ -758,7 +762,6 @@ export class IndexUpdateService {
                 ...acc,
                 {
                   name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}`,
-                  fieldType: action.payload.fieldType,
                 },
               ];
             }
