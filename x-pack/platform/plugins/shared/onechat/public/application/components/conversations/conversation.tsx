@@ -25,7 +25,7 @@ import { EmbeddedConversationRounds } from './embedded/rounds_layout';
 import { EmbeddedConversationInput } from './embedded/input_layout';
 import { EmbeddedNewConversationPrompt } from './embedded/new_conversation_prompt';
 import { WelcomeText } from '../common/welcome_text';
-import { QuickNavigationCards } from './quick_navigation_cards';
+import { QuickNavigationCards } from './full_screen/quick_navigation_cards';
 
 const fullHeightStyles = css`
   height: 100%;

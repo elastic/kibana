@@ -13,7 +13,7 @@ import {
   ConversationRight,
 } from './conversation_grid';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
-import { ConversationActions } from '../conversation_actions';
+import { ConversationActions } from './conversation_actions';
 import { ConversationTitle } from '../conversation_title';
 import { ConversationSidebarToggle } from '../conversation_sidebar/conversation_sidebar_toggle';
 

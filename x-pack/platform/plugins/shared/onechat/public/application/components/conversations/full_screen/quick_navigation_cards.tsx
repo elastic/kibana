@@ -17,10 +17,10 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useNavigation } from '../../hooks/use_navigation';
-import { appPaths } from '../../utils/app_paths';
-import { docLinks } from '../../../../common/doc_links';
-import { useUiPrivileges } from '../../hooks/use_ui_privileges';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
+import { docLinks } from '../../../../../common/doc_links';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 interface QuickNavigationCard {
   key: string;
