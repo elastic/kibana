@@ -158,6 +158,8 @@
       "@kbn/cases-components/*": ["src/platform/packages/shared/kbn-cases-components/*"],
       "@kbn/cases-plugin": ["x-pack/platform/plugins/shared/cases"],
       "@kbn/cases-plugin/*": ["x-pack/platform/plugins/shared/cases/*"],
+      "@kbn/catchup-agent-plugin": ["x-pack/platform/plugins/shared/catchup_agent"],
+      "@kbn/catchup-agent-plugin/*": ["x-pack/platform/plugins/shared/catchup_agent/*"],
       "@kbn/cbor": ["src/platform/packages/shared/kbn-cbor"],
       "@kbn/cbor/*": ["src/platform/packages/shared/kbn-cbor/*"],
       "@kbn/cell-actions": ["src/platform/packages/shared/kbn-cell-actions"],

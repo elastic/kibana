@@ -9,13 +9,31 @@
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new tool.
  */
-export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [];
+export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
+  // Security CatchUp tools
+  'platform.catchup.security.attack_discoveries',
+  'platform.catchup.security.detections',
+  'platform.catchup.security.cases',
+  'platform.catchup.security.rule_changes',
+  'platform.catchup.security.summary',
+  // Observability CatchUp tools
+  'platform.catchup.observability.summary',
+  // Search CatchUp tools
+  'platform.catchup.search.summary',
+  // External CatchUp tools
+  'platform.catchup.external.slack',
+  'platform.catchup.external.github',
+  'platform.catchup.external.gmail',
+  // Correlation and Summary tools
+  'platform.catchup.correlation.engine',
+  'platform.catchup.summary.generator',
+];
 
 /**
  * This is a manually maintained list of all built-in agents registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
-export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [];
+export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = ['platform.catchup.agent'];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
   return AGENT_BUILDER_BUILTIN_TOOLS.includes(toolName);

@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/catchup-agent-plugin",
+  "owner": ["@elastic/kibana-core"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "catchupAgent",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["onechat", "actions"],
+    "optionalPlugins": [
+      "security",
+      "cases",
+      "ruleRegistry",
+      "observability",
+      "cloud",
+      "serverless",
+      "alerting",
+      "spaces"
+    ]
+  }
+}
