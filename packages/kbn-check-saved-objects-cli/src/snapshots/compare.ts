@@ -81,6 +81,9 @@ export function assertValidUpdates({
             );
         }
 
+        // check that existing modelVersions' hashes have not changed
+        // (modelVersionHash, schemas.forwardCompatibilityHash and schemas.createHash hashes should be the same)
+
         // check that existing model versions have not been mutated
         const mutatedModelVersions = getMutatedModelVersions(infoBefore, infoAfter);
         if (mutatedModelVersions.length > 0) {

@@ -11,12 +11,15 @@ import { compare as semverCompare } from 'semver';
 import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type {
+  SavedObjectsFullModelVersion,
   SavedObjectsFullModelVersionSchemaDefinitions,
+  SavedObjectsModelVersion,
   SavedObjectsModelVersionSchemaDefinitions,
   SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
 import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
+import { createHash } from 'crypto';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;
@@ -33,12 +36,13 @@ export interface SavedObjectTypeMigrationInfo {
 
 export interface ModelVersionSummary {
   version: string;
+  modelVersionHash: string;
   changeTypes: string[];
   hasTransformation: boolean;
   newMappings: string[];
   schemas: {
-    create: boolean | object;
-    forwardCompatibility: boolean | object;
+    create: false | string;
+    forwardCompatibility: false | string;
   };
 }
 
@@ -62,18 +66,25 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
       ? soType.modelVersions()
       : soType.modelVersions ?? {};
 
+  const getModelVersionHash = (
+    modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion
+  ) => {
+    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const modelVersionData = JSON.stringify(modelVersion);
+    return `${hash.update(modelVersionData).digest('hex')}`;
+  };
+
   const modelVersions: ModelVersionSummary[] = Object.entries(modelVersionMap).map(
     ([version, modelVersion]) => {
       const { changes, schemas } = modelVersion ?? { changes: [] };
       return {
         version,
+        modelVersionHash: getModelVersionHash(modelVersion),
+        // modelVersion hash, reuse getMigrationHash from src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts
         changeTypes: [...new Set(changes.map((change) => change.type))].sort(), // changes is an array of objects
         hasTransformation: hasTransformation(changes),
         newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(changes))),
-        schemas: {
-          forwardCompatibility: extractOrCastForwardCompatibility(schemas),
-          create: extractOrCastCreateSchema(schemas),
-        },
+        schemas: { ...getSchemaPropertiesHashes(schemas) },
       };
     }
   );
@@ -95,23 +106,32 @@ const hasTransformation = (changes: SavedObjectsModelChange[]): boolean => {
   return changes.some((change) => changesWithTransform.includes(change.type));
 };
 
-const extractOrCastForwardCompatibility = (
+const getSchemaPropertiesHashes = (
   schemas?:
     | SavedObjectsModelVersionSchemaDefinitions
     | SavedObjectsFullModelVersionSchemaDefinitions
-): boolean | object => {
-  if (!schemas?.forwardCompatibility) return false;
-  if (typeof schemas.forwardCompatibility === 'function') return true; // can't access args and cannot execute
-  if (typeof schemas.forwardCompatibility === 'object') return schemas.forwardCompatibility;
-  return !!schemas.forwardCompatibility;
+) => {
+  if (!schemas) {
+    return {
+      forwardCompatibility: false as const,
+      create: false as const,
+    };
+  }
+  const { forwardCompatibility, create } = schemas;
+  return {
+    forwardCompatibility: forwardCompatibility ? getHash(forwardCompatibility) : (false as const),
+    create: create ? getHash(create) : (false as const),
+  };
 };
 
-const extractOrCastCreateSchema = (
-  schemas?:
-    | SavedObjectsModelVersionSchemaDefinitions
-    | SavedObjectsFullModelVersionSchemaDefinitions
-): boolean | object => {
-  if (!schemas?.create) return false;
-  if (typeof schemas.create === 'object') return schemas.create;
-  return !!schemas.create;
+const getHash = (schemaProp: unknown) => {
+  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  if (typeof schemaProp === 'function') {
+    const funcString = schemaProp.toString();
+    return `${hash.update(funcString).digest('hex')}`;
+  } else if (typeof schemaProp === 'object' && schemaProp !== null) {
+    const schemaPropData = JSON.stringify(schemaProp);
+    return `${hash.update(schemaPropData).digest('hex')}`;
+  }
+  return false;
 };

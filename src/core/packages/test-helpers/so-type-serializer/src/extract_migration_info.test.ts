@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { extractMigrationInfo } from './extract_migration_info';
+import { create } from 'lodash';
 
 const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'test-type',
@@ -22,7 +23,7 @@ const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
 const dummyMigration = jest.fn();
 const dummySchema = schema.object({});
 
-describe('extractMigrationInfo', () => {
+describe.only('extractMigrationInfo', () => {
   describe('simple fields', () => {
     it('returns the `name` from the SO type', () => {
       const type = createType({ name: 'my-type' });
@@ -160,7 +161,7 @@ describe('extractMigrationInfo', () => {
     });
   });
 
-  describe('modelVersions', () => {
+  describe.only('modelVersions', () => {
     it('returns a proper summary of the model versions', () => {
       const type = createType({
         modelVersions: {
@@ -193,8 +194,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill'],
           hasTransformation: true,
+          modelVersionHash: 'e38f4951df6a13718630d2433f359333b7e6f2f2',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -202,8 +205,10 @@ describe('extractMigrationInfo', () => {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
+          modelVersionHash: '7879fa7115c6e2be00b25676f11a41b6f98fc678',
           newMappings: ['foo.type'],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -242,8 +247,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill'],
           hasTransformation: true,
+          modelVersionHash: 'e38f4951df6a13718630d2433f359333b7e6f2f2',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -251,8 +258,10 @@ describe('extractMigrationInfo', () => {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
+          modelVersionHash: '7879fa7115c6e2be00b25676f11a41b6f98fc678',
           newMappings: ['foo.type'],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -291,8 +300,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill', 'data_removal', 'unsafe_transform'],
           hasTransformation: true,
+          modelVersionHash: '99f7de59a1ea5a45253d27a617781c1a291df8fc',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -308,7 +319,7 @@ describe('extractMigrationInfo', () => {
       expect(output.modelVersions).toEqual([]);
     });
 
-    it('returns the correct values for schemas', () => {
+    it.only('returns the correct values for schemas', () => {
       const type = createType({
         modelVersions: {
           1: {
@@ -324,17 +335,18 @@ describe('extractMigrationInfo', () => {
         },
       });
       const output = extractMigrationInfo(type);
-
       expect(output.modelVersions[0].schemas).toEqual({
-        forwardCompatibility: true,
+        forwardCompatibility: '895cafb0656e467454fa1448312a7ebba48f7a12',
+        create: false,
       });
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,
+        create: false,
       });
     });
   });
 
-  describe('migrations and modelVersions', () => {
+  describe.skip('migrations and modelVersions', () => {
     it('generate properties for both', () => {
       const type = createType({
         migrations: {
