@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SetStateAction, Dispatch } from 'react';
 import React, { type ChangeEvent, useState, useEffect } from 'react';
 import {
   EuiBadge,
@@ -52,9 +51,8 @@ const selectOptions = [
 
 interface Props {
   onChangeAccessMode: (
-    value: SavedObjectAccessControl['accessMode'],
-    setTooltipContent: Dispatch<SetStateAction<string>>
-  ) => Promise<void> | void;
+    value: SavedObjectAccessControl['accessMode']
+  ) => Promise<string | void> | string | void;
   getActiveSpace?: () => Promise<Space>;
   getCurrentUser: () => Promise<GetUserProfileResponse<UserProfileData>>;
   accessControlClient: AccessControlClient;
@@ -121,11 +119,20 @@ export const AccessModeContainer = ({
   const handleSelectChange = async (e: ChangeEvent<HTMLSelectElement>) => {
     setTooltipContent('');
     setIsUpdatingPermissions(true);
-    await onChangeAccessMode(
-      e.target.value as SavedObjectAccessControl['accessMode'],
-      setTooltipContent
-    );
-    setIsUpdatingPermissions(false);
+
+    try {
+      const result = await onChangeAccessMode(
+        e.target.value as SavedObjectAccessControl['accessMode']
+      );
+
+      if (result?.length) {
+        setTooltipContent(result);
+      }
+    } catch (error) {
+      setTooltipContent('');
+    } finally {
+      setIsUpdatingPermissions(false);
+    }
   };
 
   if (!isAccessControlEnabled) {

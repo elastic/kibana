@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-import type { Dispatch, ReactElement, SetStateAction } from 'react';
+import type { ReactElement } from 'react';
 import React, { useState } from 'react';
 import { EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
@@ -78,17 +78,14 @@ export function ShowShareModal({
 }: ShowShareModalProps) {
   if (!shareService) return;
 
-  const handleChangeAccessMode = async (
-    accessMode: SavedObjectAccessControl['accessMode'],
-    setTooltipContent: Dispatch<SetStateAction<string>>
-  ) => {
+  const handleChangeAccessMode = async (accessMode: SavedObjectAccessControl['accessMode']) => {
     if (!savedObjectId) return;
 
     try {
       await changeAccessMode(accessMode);
-      setTooltipContent(shareModalStrings.accessModeUpdateSuccess);
+      return shareModalStrings.accessModeUpdateSuccess;
     } catch (error) {
-      setTooltipContent(shareModalStrings.accessModeUpdateError);
+      return shareModalStrings.accessModeUpdateError;
     }
   };
 
@@ -254,7 +251,7 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
-      accessModeContainer: (
+      accessModeContainer: savedObjectId ? (
         <AccessModeContainer
           accessControl={accessControl}
           createdBy={createdBy}
@@ -264,7 +261,7 @@ export function ShowShareModal({
           accessControlClient={accessControlClient}
           contentTypeId={CONTENT_ID}
         />
-      ),
+      ) : undefined,
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(

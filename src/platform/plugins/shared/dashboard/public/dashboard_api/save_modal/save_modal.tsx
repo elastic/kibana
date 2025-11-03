@@ -52,6 +52,7 @@ interface DashboardSaveModalProps {
   showStoreTimeOnSave?: boolean;
   customModalTitle?: string;
   accessControl?: Partial<SavedObjectAccessControl>;
+  isDuplicateAction?: boolean;
 }
 
 type SaveDashboardHandler = (args: {
@@ -73,6 +74,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   title,
   timeRestore,
   accessControl,
+  isDuplicateAction,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
@@ -148,20 +150,28 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
-        <>
-          <EuiSpacer size="l" />
-          <AccessModeContainer
-            accessControl={accessControl}
-            onChangeAccessMode={setSelectedAccessMode}
-            getActiveSpace={spacesService?.getActiveSpace}
-            getCurrentUser={coreServices.userProfile.getCurrent}
-            accessControlClient={getAccessControlClient()}
-            contentTypeId={CONTENT_ID}
-          />
-        </>
+        {!isDuplicateAction && (
+          <>
+            <EuiSpacer size="l" />
+            <AccessModeContainer
+              accessControl={accessControl}
+              onChangeAccessMode={setSelectedAccessMode}
+              getActiveSpace={spacesService?.getActiveSpace}
+              getCurrentUser={coreServices.userProfile.getCurrent}
+              accessControlClient={getAccessControlClient()}
+              contentTypeId={CONTENT_ID}
+            />
+          </>
+        )}
       </Fragment>
     );
-  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave, accessControl]);
+  }, [
+    persistSelectedTimeInterval,
+    selectedTags,
+    showStoreTimeOnSave,
+    accessControl,
+    isDuplicateAction,
+  ]);
 
   return (
     <SavedObjectSaveModalWithSaveResult

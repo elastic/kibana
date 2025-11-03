@@ -15,10 +15,9 @@ import type { TableListViewTableProps } from '@kbn/content-management-table-list
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
-
+import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import { CONTENT_ID } from '../../../common/content_management';
 import { getAccessControlClient } from '../../services/access_control_service';
-import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import type { DashboardSearchAPIResult } from '../../../server/content_management';
 import {
   DASHBOARD_CONTENT_ID,
@@ -50,7 +49,7 @@ const toTableListViewSavedObject = (
   hit: DashboardSearchAPIResult['hits'][number],
   canManageAccessControl: boolean
 ): DashboardSavedObjectUserContent => {
-  const { title, description, timeRestore } = hit.attributes;
+  const { title, description, timeRange } = hit.attributes;
   return {
     type: 'dashboard',
     id: hit.id,
@@ -63,7 +62,7 @@ const toTableListViewSavedObject = (
     attributes: {
       title,
       description,
-      timeRestore,
+      timeRestore: Boolean(timeRange),
     },
     canManageAccessControl,
     accessMode: hit?.accessControl?.accessMode,
@@ -117,11 +116,12 @@ export const useDashboardListingTable = ({
     () => getDashboardContentManagementService(),
     []
   );
-  const accessControlClient = useMemo(() => getAccessControlClient(), []);
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardBackupService.getDashboardIdsWithUnsavedChanges()
   );
+
+  const accessControlClient = getAccessControlClient();
 
   const listingLimit = coreServices.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = coreServices.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -203,7 +203,7 @@ export const useDashboardListingTable = ({
   );
 
   const findItems = useCallback(
-    async (
+    (
       searchTerm: string,
       {
         references,
@@ -214,52 +214,55 @@ export const useDashboardListingTable = ({
       } = {}
     ) => {
       const searchStartTime = window.performance.now();
-      const { total, hits } = await dashboardContentManagementService.findDashboards.search({
-        search: searchTerm,
-        size: listingLimit,
-        hasReference: references,
-        hasNoReference: referencesToExclude,
-        options: {
-          // include only tags references in the response to save bandwidth
-          includeReferences: ['tag'],
-          fields: ['title', 'description', 'timeRestore'],
-        },
-      });
 
-      const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
-        coreServices.userProfile.getCurrent(),
-        accessControlClient.checkGlobalPrivilege(CONTENT_ID),
-      ]);
-
-      const userId = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
-      const isGloballyAuthorized =
-        globalPrivilegeResponse.status === 'fulfilled'
-          ? globalPrivilegeResponse.value.isGloballyAuthorized
-          : false;
-
-      const searchEndTime = window.performance.now();
-      const searchDuration = searchEndTime - searchStartTime;
-      reportPerformanceMetricEvent(coreServices.analytics, {
-        eventName: SAVED_OBJECT_LOADED_TIME,
-        duration: searchDuration,
-        meta: {
-          saved_object_type: DASHBOARD_CONTENT_ID,
-        },
-      });
-
-      const results = hits.map((hit) => {
-        const canManageAccessControl =
-          isGloballyAuthorized ||
-          accessControlClient.checkUserAccessControl({
-            accessControl: hit?.accessControl,
-            createdBy: hit.createdBy,
-            userId,
+      return dashboardContentManagementService.findDashboards
+        .search({
+          search: searchTerm,
+          size: listingLimit,
+          hasReference: references,
+          hasNoReference: referencesToExclude,
+          options: {
+            // include only tags references in the response to save bandwidth
+            includeReferences: ['tag'],
+            fields: ['title', 'description', 'timeRange'],
+          },
+        })
+        .then(async ({ total, hits }) => {
+          const searchEndTime = window.performance.now();
+          const searchDuration = searchEndTime - searchStartTime;
+          reportPerformanceMetricEvent(coreServices.analytics, {
+            eventName: SAVED_OBJECT_LOADED_TIME,
+            duration: searchDuration,
+            meta: {
+              saved_object_type: DASHBOARD_CONTENT_ID,
+            },
           });
 
-        return toTableListViewSavedObject(hit, canManageAccessControl);
-      });
+          const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
+            coreServices.userProfile.getCurrent(),
+            accessControlClient.checkGlobalPrivilege(CONTENT_ID),
+          ]);
 
-      return { total, hits: results };
+          const userId = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
+          const isGloballyAuthorized =
+            globalPrivilegeResponse.status === 'fulfilled'
+              ? globalPrivilegeResponse.value.isGloballyAuthorized
+              : false;
+
+          return {
+            total,
+            hits: hits.map((hit) => {
+              const canManageAccessControl =
+                isGloballyAuthorized ||
+                accessControlClient.checkUserAccessControl({
+                  accessControl: hit?.accessControl,
+                  createdBy: hit.createdBy,
+                  userId,
+                });
+              return toTableListViewSavedObject(hit, canManageAccessControl);
+            }),
+          };
+        });
     },
     [listingLimit, dashboardContentManagementService, accessControlClient]
   );
@@ -297,9 +300,7 @@ export const useDashboardListingTable = ({
   );
 
   const editItem = useCallback(
-    ({ id }: { id: string | undefined }) => {
-      return goToDashboard(id, 'edit');
-    },
+    ({ id }: { id: string | undefined }) => goToDashboard(id, 'edit'),
     [goToDashboard]
   );
 

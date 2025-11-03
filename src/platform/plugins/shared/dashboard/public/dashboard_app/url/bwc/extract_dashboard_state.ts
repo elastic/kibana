@@ -32,10 +32,6 @@ export function extractDashboardState(
       dashboardState.tags = stateAsObject.tags;
     }
 
-    if (typeof stateAsObject.timeRestore === 'boolean') {
-      dashboardState.timeRestore = stateAsObject.timeRestore;
-    }
-
     if (typeof stateAsObject.title === 'string') {
       dashboardState.title = stateAsObject.title;
     }
