@@ -101,6 +101,8 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
+            // TODO: Remove hardcoded value once https://github.com/elastic/kibana/issues/232226 is implemented
+            isEngineMetadataExist: true,
           },
         });
       } else if (docMode === 'grouped-entities' && node.documentsData) {
