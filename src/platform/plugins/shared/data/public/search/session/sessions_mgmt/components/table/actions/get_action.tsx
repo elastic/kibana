@@ -21,12 +21,11 @@ export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: ACTION,
   uiSession: UISession,
-  core: CoreStart,
-  onInspectSession?: (session: UISession) => void
+  core: CoreStart
 ): IClickActionDescriptor | null => {
   switch (actionType) {
     case ACTION.INSPECT:
-      return createInspectActionDescriptor(api, uiSession, core, onInspectSession);
+      return createInspectActionDescriptor(api, uiSession, core);
     case ACTION.DELETE:
       return createDeleteActionDescriptor(api, uiSession, core);
     case ACTION.EXTEND:

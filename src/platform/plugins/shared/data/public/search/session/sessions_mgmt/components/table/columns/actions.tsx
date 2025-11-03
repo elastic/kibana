@@ -21,13 +21,11 @@ export const actionsColumn = ({
   api,
   core,
   onActionComplete,
-  onInspectSession,
   allowedActions,
 }: {
   core: CoreStart;
   api: SearchSessionsMgmtAPI;
   onActionComplete: OnActionComplete;
-  onInspectSession?: (session: UISession) => void;
   allowedActions?: UISession['actions'];
 }): EuiBasicTableColumn<UISession> => ({
   field: 'actions',
@@ -49,7 +47,6 @@ export const actionsColumn = ({
             core={core}
             allowedActions={allowedActions}
             onActionComplete={onActionComplete}
-            onInspectSession={onInspectSession}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -106,8 +106,7 @@ const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
 export const createInspectActionDescriptor = (
   api: SearchSessionsMgmtAPI,
   uiSession: UISession,
-  core: CoreStart,
-  onInspectSession?: (session: UISession) => void
+  core: CoreStart
 ): IClickActionDescriptor => ({
   iconType: 'document',
   label: (
@@ -118,22 +117,16 @@ export const createInspectActionDescriptor = (
     />
   ),
   onClick: async () => {
-    if (onInspectSession) {
-      // If we have a callback for opening child flyouts, use it
-      onInspectSession(uiSession);
-    } else {
-      // Otherwise, fall back to the original behavior
-      const flyoutWrapper = (
-        <InspectFlyoutWrapper
-          uiSettings={core.uiSettings}
-          settings={core.settings}
-          theme={core.theme}
-          searchSession={uiSession}
-        />
-      );
-      const overlay = core.overlays.openFlyout(toMountPoint(flyoutWrapper, core));
-      await overlay.onClose;
-    }
+    const flyoutWrapper = (
+      <InspectFlyoutWrapper
+        uiSettings={core.uiSettings}
+        settings={core.settings}
+        theme={core.theme}
+        searchSession={uiSession}
+      />
+    );
+    const overlay = core.overlays.openFlyout(toMountPoint(flyoutWrapper, core));
+    await overlay.onClose;
   },
 });
 
