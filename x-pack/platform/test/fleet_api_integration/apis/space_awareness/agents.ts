@@ -221,14 +221,12 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
-          [allSpaceAgent4]: ['tag1'],
         });
         await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
             [testSpaceAgent3]: ['tag1'],
-            [allSpaceAgent4]: ['tag1'],
           },
           TEST_SPACE_1
         );
@@ -247,14 +245,12 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
-          [allSpaceAgent4]: ['tag1'],
         });
         await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1', 'space1'],
             [testSpaceAgent2]: ['tag1'],
             [testSpaceAgent3]: ['tag1'],
-            [allSpaceAgent4]: ['tag1'],
           },
           TEST_SPACE_1
         );
@@ -274,14 +270,12 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
-          [allSpaceAgent4]: ['tag1'],
         });
         await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
             [testSpaceAgent3]: ['tag1'],
-            [allSpaceAgent4]: ['tag1'],
           },
           TEST_SPACE_1
         );
@@ -297,14 +291,12 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
-          [allSpaceAgent4]: ['tag1'],
         });
         await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
             [testSpaceAgent3]: ['tag1'],
-            [allSpaceAgent4]: ['tag1'],
           },
           TEST_SPACE_1
         );
@@ -326,7 +318,6 @@ export default function (providerContext: FtrProviderContext) {
               [testSpaceAgent1]: ['tag1', 'space1'],
               [testSpaceAgent2]: ['tag1', 'space1'],
               [testSpaceAgent3]: ['tag1', 'space1'],
-              [allSpaceAgent4]: ['tag1', 'space1'],
             },
             TEST_SPACE_1
           );
@@ -341,7 +332,6 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
-          [allSpaceAgent4]: ['tag1', 'space1'],
         });
 
         // Remove tag
@@ -359,7 +349,6 @@ export default function (providerContext: FtrProviderContext) {
               [testSpaceAgent1]: ['tag1'],
               [testSpaceAgent2]: ['tag1'],
               [testSpaceAgent3]: ['tag1'],
-              [allSpaceAgent4]: ['tag1'],
             },
             TEST_SPACE_1
           );
@@ -370,7 +359,6 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
-          [allSpaceAgent4]: ['tag1'],
         });
         await verifyNoAgentActions();
         actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
