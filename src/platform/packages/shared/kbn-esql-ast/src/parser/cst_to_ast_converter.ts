@@ -539,9 +539,17 @@ export class CstToAstConverter {
     const indexPatternOrSubqueryCtxs = indexPatternAndMetadataCtx.indexPatternOrSubquery_list();
     const sources = indexPatternOrSubqueryCtxs
       .map((indexPatternOrSubqueryCtx) => {
-        // ToDo: handle subqueries when implemented
         const indexPatternCtx = indexPatternOrSubqueryCtx.indexPattern();
-        return indexPatternCtx ? this.toSource(indexPatternCtx) : null;
+        if (indexPatternCtx) {
+          return this.toSource(indexPatternCtx);
+        }
+
+        const subqueryCtx = indexPatternOrSubqueryCtx.subquery();
+        if (subqueryCtx) {
+          return this.fromSubquery(subqueryCtx);
+        }
+
+        return null;
       })
       .filter((source): source is ast.ESQLSource => source !== null);
 
@@ -557,6 +565,49 @@ export class CstToAstConverter {
     }
 
     return command;
+  }
+
+  private fromSubquery(ctx: cst.SubqueryContext): ast.ESQLParens {
+    const fromCommandCtx = ctx.fromCommand();
+    const processingCommandCtxs = ctx.processingCommand_list();
+    const commands: ast.ESQLCommand[] = [];
+
+    if (fromCommandCtx) {
+      const fromCommand = this.fromFromCommand(fromCommandCtx);
+
+      if (fromCommand) {
+        commands.push(fromCommand);
+      }
+    }
+
+    for (const procCmdCtx of processingCommandCtxs) {
+      const procCommand = this.fromProcessingCommand(procCmdCtx);
+
+      if (procCommand) {
+        commands.push(procCommand);
+      }
+    }
+
+    const openParen = ctx.LP();
+    const closeParen = ctx.RP();
+
+    // ANTLR inserts tokens with text like "<missing ')'>" when they're missing
+    const closeParenText = closeParen?.getText() ?? '';
+    const hasCloseParen = closeParen && !/<missing /.test(closeParenText);
+    const incomplete = Boolean(ctx.exception) || !hasCloseParen;
+
+    const query = Builder.expression.query(commands, {
+      ...this.getParserFields(ctx),
+      incomplete,
+    });
+
+    return Builder.expression.parens(query, {
+      incomplete: incomplete || query.incomplete,
+      location: getPosition(
+        openParen?.symbol ?? ctx.start,
+        hasCloseParen ? closeParen.symbol : ctx.stop
+      ),
+    });
   }
 
   // ---------------------------------------------------------------------- ROW
