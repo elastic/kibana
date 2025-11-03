@@ -13,7 +13,7 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { clearLog, readLog, startElasticsearch } from '../kibana_migrator_test_kit';
+import { clearLog, readLog, startElasticsearch } from '@kbn/migrator-test-kit';
 import { delay } from '../test_utils';
 import { getFips } from 'crypto';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';

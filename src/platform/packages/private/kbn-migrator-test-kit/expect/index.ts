@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { baselineTypes } from './kibana_migrator_test_kit.fixtures';
+import { baselineTypes } from '../fixtures';
 
 export async function expectDocumentsMigratedToHighestVersion(
   client: ElasticsearchClient,

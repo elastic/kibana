@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-import '../jest_matchers';
-import { startElasticsearch } from '@kbn/migrator-test-kit';
-import { createStandardWorkflowTest } from '../shared_suites/zdt/standard_workflow';
-
-describe('ZDT upgrades - standard workflow', () => {
-  createStandardWorkflowTest({
-    startES: startElasticsearch,
-    logFilePath: Path.join(__dirname, 'standard_workflow.test.log'),
-  });
-});
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-migrator-test-kit'],
+};

@@ -14,7 +14,7 @@ import type {
   SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
-import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
+import type { ElasticsearchClientWrapperFactory } from '../src/elasticsearch_client_wrapper';
 import {
   currentVersion,
   defaultKibanaIndex,
@@ -22,7 +22,7 @@ import {
   defaultLogFilePath,
   getKibanaMigratorTestKit,
   nextMinor,
-} from './kibana_migrator_test_kit';
+} from '../src/kibana_migrator_test_kit';
 
 export const baselineIndexTypesMap: IndexTypesMap = {
   [defaultKibanaIndex]: ['basic', 'complex', 'server', 'deprecated'],
