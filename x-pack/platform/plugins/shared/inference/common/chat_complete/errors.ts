@@ -11,15 +11,30 @@ import type {
   ChatCompletionTokenLimitReachedError,
   ChatCompletionToolNotFoundError,
   ChatCompletionToolValidationError,
+  ChatCompletionContextLengthExceededError,
 } from '@kbn/inference-common/src/chat_complete/errors';
 import { ChatCompletionErrorCode } from '@kbn/inference-common/src/chat_complete/errors';
+
+export function createContextLengthExceededError({
+  message,
+}: {
+  message?: string;
+}): ChatCompletionContextLengthExceededError {
+  return new InferenceTaskError(
+    ChatCompletionErrorCode.ContextLengthExceededError,
+    message
+      ? `The request exceeded the model's maximum context length: ${message}`
+      : `The request exceeded the model's maximum context length.`,
+    {}
+  );
+}
 
 export function createTokenLimitReachedError(
   tokenLimit?: number,
   tokenCount?: number
 ): ChatCompletionTokenLimitReachedError {
   return new InferenceTaskError(
-    ChatCompletionErrorCode.TokenLimitReachedError,
+    ChatCompletionErrorCode.OutputTokenLimitReachedError,
     i18n.translate('xpack.inference.chatCompletionError.tokenLimitReachedError', {
       defaultMessage: `Token limit reached. Token limit is {tokenLimit}, but the current conversation has {tokenCount} tokens.`,
       values: { tokenLimit, tokenCount },

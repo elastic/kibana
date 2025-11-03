@@ -28,6 +28,7 @@ export {
   createToolCallMessage,
   generateFakeToolCallId,
   type ToolCall,
+  type ToolCallResult,
 } from './messages';
 export {
   toolsToLangchain,

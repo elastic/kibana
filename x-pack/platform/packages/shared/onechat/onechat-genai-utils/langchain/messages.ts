@@ -36,6 +36,12 @@ export interface ToolCall {
   args: Record<string, any>;
 }
 
+export interface ToolCallResult {
+  toolCallId: string;
+  content: string;
+  artifact?: any;
+}
+
 /**
  * Extracts the tool calls from a message.
  */

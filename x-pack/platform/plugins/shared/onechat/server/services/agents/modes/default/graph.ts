@@ -8,6 +8,7 @@
 import { StateGraph, START as _START_, END as _END_ } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
+import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
@@ -19,6 +20,12 @@ import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
+import {
+  processResearchResponse,
+  processToolNodeResponse,
+  processAnswerResponse,
+} from './action_utils';
+import { isToolCallAction, isHandoverAction, isAgentErrorAction, isAnswerAction } from './actions';
 
 export const createAgentGraph = ({
   chatModel,
@@ -35,43 +42,68 @@ export const createAgentGraph = ({
   logger: Logger;
   events: AgentEventEmitter;
 }) => {
-  const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
+  const toolNode = new ToolNode<BaseMessage[]>(tools);
 
   const researcherModel = chatModel.bindTools(tools).withConfig({
     tags: [tags.agent, tags.researchAgent],
   });
 
   const researchAgent = async (state: StateType) => {
-    if (state.addedMessages.length === 0) {
+    if (state.mainActions.length === 0) {
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
-    const response = await researcherModel.invoke(
-      getActPrompt({
-        customInstructions: configuration.research.instructions,
-        capabilities,
-        messages: [...state.initialMessages, ...state.addedMessages],
-      })
-    );
-    return {
-      currentCycle: state.currentCycle + 1,
-      nextMessage: response,
-    };
+    try {
+      const response = await researcherModel.invoke(
+        getActPrompt({
+          customInstructions: configuration.research.instructions,
+          capabilities,
+          messages: [...state.initialMessages, ...state.addedMessages],
+        })
+      );
+
+      const action = processResearchResponse(response);
+
+      return {
+        currentCycle: state.currentCycle + 1,
+        mainActions: [action],
+        // nextMessage: response,
+      };
+    } catch (error) {
+      // TODO: handle this and add an error action
+      console.log('********');
+      console.log(error.code);
+      console.log(error.status);
+      console.log(error.message);
+      console.log(error.meta);
+      console.log('******');
+      //
+      throw error;
+    }
   };
 
   const shouldContinue = async (state: StateType) => {
-    const hasToolCalls = state.nextMessage && (state.nextMessage.tool_calls ?? []).length > 0;
+    const lastAction = state.mainActions[state.mainActions.length - 1];
+
+    const isToolCall = isToolCallAction(lastAction);
+    const isHandover = isHandoverAction(lastAction);
+    const isAgentError = isAgentErrorAction(lastAction);
     const maxCycleReached = state.currentCycle > state.cycleLimit;
-    if (hasToolCalls && !maxCycleReached) {
+
+    // TODO: handle error actions
+
+    if (isToolCall && !maxCycleReached) {
       return steps.executeTool;
     } else {
       return steps.prepareToAnswer;
     }
+    //
   };
 
   const executeTool = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke([state.nextMessage], {});
+    const action = processToolNodeResponse(toolNodeResult);
     return {
-      addedMessages: [state.nextMessage, ...toolNodeResult],
+      mainActions: [action],
     };
   };
 
@@ -94,18 +126,45 @@ export const createAgentGraph = ({
 
   const answerAgent = async (state: StateType) => {
     events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
-    const response = await answeringModel.invoke(
-      getAnswerPrompt({
-        customInstructions: configuration.answer.instructions,
-        capabilities,
-        handoverNote: state.handoverNote,
-        searchInterrupted: state.maxCycleReached,
-        discussion: [...state.initialMessages, ...state.addedMessages],
-      })
-    );
-    return {
-      addedMessages: [response],
-    };
+    try {
+      const response = await answeringModel.invoke(
+        getAnswerPrompt({
+          customInstructions: configuration.answer.instructions,
+          capabilities,
+          handoverNote: state.handoverNote,
+          searchInterrupted: state.maxCycleReached,
+          discussion: [...state.initialMessages, ...state.addedMessages],
+        })
+      );
+
+      const action = processAnswerResponse(response);
+
+      return {
+        answerActions: [action],
+      };
+    } catch (error) {
+      console.log('********');
+      console.log(error.status);
+      console.log(error.message);
+      console.log(error.meta);
+      console.log('******');
+
+      throw error;
+    }
+  };
+
+  const finalize = async (state: StateType) => {
+    const answerAction = state.answerActions[state.answerActions.length - 1];
+    if (isAnswerAction(answerAction)) {
+      return {
+        finalAnswer: answerAction.message,
+      };
+    } else {
+      return {
+        // TODO: throw probably
+        finalAnswer: '',
+      };
+    }
   };
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
@@ -115,6 +174,7 @@ export const createAgentGraph = ({
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.prepareToAnswer, prepareToAnswer)
     .addNode(steps.answerAgent, answerAgent)
+    .addNode(steps.finalize, finalize)
     // edges
     .addEdge(_START_, steps.researchAgent)
     .addEdge(steps.executeTool, steps.researchAgent)
@@ -123,7 +183,8 @@ export const createAgentGraph = ({
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
-    .addEdge(steps.answerAgent, _END_)
+    .addEdge(steps.answerAgent, steps.finalize)
+    .addEdge(steps.finalize, _END_)
     .compile();
 
   return graph;
