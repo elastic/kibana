@@ -285,7 +285,7 @@ export const identifyFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<IdentifiedFeaturesEvent> => {
+  }): Promise<Observable<IdentifiedFeaturesEvent>> => {
     const {
       featureClient,
       scopedClusterClient,
@@ -315,20 +315,24 @@ export const identifyFeaturesRoute = createServerRoute({
       streamsClient.getStream(name),
     ]);
 
-    const { features } = await runFeatureIdentification({
-      start: start.getTime(),
-      end: end.getTime(),
-      esClient: scopedClusterClient.asCurrentUser,
-      inferenceClient: inferenceClient.bindTo({ connectorId }),
-      logger,
-      stream,
-      features: hits,
-    });
-
-    return {
-      type: 'identified_features',
-      features,
-    };
+    return from(
+      runFeatureIdentification({
+        start: start.getTime(),
+        end: end.getTime(),
+        esClient: scopedClusterClient.asCurrentUser,
+        inferenceClient: inferenceClient.bindTo({ connectorId }),
+        logger,
+        stream,
+        features: hits,
+      })
+    ).pipe(
+      map(({ features }) => {
+        return {
+          type: 'identified_features',
+          features,
+        };
+      })
+    );
   },
 });
 
