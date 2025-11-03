@@ -889,5 +889,50 @@ describe('custom assets', () => {
 
       expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
     });
+
+    it('should not create ingest pipeline if has enrich processor', async () => {
+      esClientMock = {
+        ingest: {
+          getPipeline: jest.fn().mockResolvedValue({}),
+          putPipeline: jest.fn().mockResolvedValue({}),
+        },
+      };
+
+      await expect(
+        installCustomAsset(
+          {
+            is_deleted: false,
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '0.1.0',
+            pipeline: {
+              processors: [
+                {
+                  enrich: {
+                    field: 'test_field',
+                    policy_name: 'test_enrich_policy',
+                    target_field: 'target',
+                  },
+                },
+              ],
+              version: 1,
+              description: 'description pipeline',
+              created_date: '2024-01-01T12:00:00.000Z',
+              created_date_millis: 1704110400000,
+              modified_date: '2025-01-01T12:00:00.000Z',
+              modified_date_millis: 1735732800000,
+            },
+            type: 'ingest_pipeline',
+          },
+          esClientMock,
+          new AbortController(),
+          { debug: jest.fn() } as any
+        )
+      ).rejects.toThrowError(
+        new Error(`Not supported to sync ingest pipelines referencing enrich policies`)
+      );
+
+      expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
+    });
   });
 });

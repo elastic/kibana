@@ -297,6 +297,10 @@ async function updateIngestPipeline(
     shouldUpdatePipeline = true;
   }
 
+  if (shouldUpdatePipeline && customAsset.pipeline.processors.some((p) => p.enrich)) {
+    throw new Error(`Not supported to sync ingest pipelines referencing enrich policies`);
+  }
+
   if (shouldUpdatePipeline) {
     logger.debug(`Updating ingest pipeline: ${customAsset.name}`);
 
