@@ -40,6 +40,7 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
   ) {
     return (
       <EuiCallOut
+        announceOnMount
         color="primary"
         title={
           <FormattedMessage

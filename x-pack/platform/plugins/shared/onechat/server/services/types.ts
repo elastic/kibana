@@ -18,15 +18,18 @@ import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
+import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
+  attachments: AttachmentServiceSetup;
 }
 
 export interface InternalStartServices {
   tools: ToolsServiceStart;
   agents: AgentsServiceStart;
+  attachments: AttachmentServiceStart;
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
