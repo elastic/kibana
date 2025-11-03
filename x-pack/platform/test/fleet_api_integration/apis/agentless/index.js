@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-// TODO check if we need that
-export * from '../../../common/types/models/package_policy_schema';
+export default function loadTests({ loadTestFile }) {
+  describe('Agentless', () => {
+    loadTestFile(require.resolve('./agentless_policies'));
+  });
+}

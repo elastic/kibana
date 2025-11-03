@@ -18,6 +18,7 @@ import type {
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
   UpdatePackagePolicyResponse,
+  CreateAgentlessPolicyRequest,
 } from '@kbn/fleet-plugin/common';
 import type {
   GetEnrollmentAPIKeysResponse,
@@ -106,6 +107,23 @@ export class SpaceTestApiClient {
 
     return res.body;
   }
+
+  async createAgentlessPolicy(
+    data: CreateAgentlessPolicyRequest['body'],
+    spaceId?: string
+  ): Promise<any> {
+    // TODO response type
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
   async createPackagePolicy(
     spaceId?: string,
     data: Partial<SimplifiedPackagePolicy & { package: { name: string; version: string } }> = {}
