@@ -147,7 +147,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
           ) : (
             <FormattedMessage
               id="xpack.ml.anomalyDetectionAlert.anomalyFilterDescription"
-              defaultMessage="Filter which anomalies trigger this alert based on field values."
+              defaultMessage="Use a KQL expression to limit which anomalies trigger alerts."
             />
           )
         }
