@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, spaceTest } from '@kbn/scout-security';
+import { expect, spaceTest, TIMEOUTS } from '@kbn/scout-security';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 import { RULE_MANAGEMENT_CONTEXT_DESCRIPTION } from '../../../../../public/detection_engine/common/translations';
 
