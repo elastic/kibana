@@ -32,7 +32,14 @@ export function createUrlInitializerActor({
     if (urlState.success) {
       // Always add default latest samples data source
       if (!hasDefaultLatestSamplesDataSource(urlState.data.dataSources)) {
-        urlState.data.dataSources.push(defaultLatestSamplesDataSource);
+        const isLatestSamplesDataSourceEnabled = urlState.data.dataSources.every(
+          (dataSource) => !dataSource.enabled
+        );
+
+        urlState.data.dataSources.push({
+          ...defaultLatestSamplesDataSource,
+          enabled: isLatestSamplesDataSourceEnabled,
+        });
       }
 
       sendBack({
