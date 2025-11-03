@@ -18,16 +18,12 @@ import { useConversationScrollActions } from '../../hooks/use_conversation_scrol
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import { useConversationContext } from '../../context/conversation/conversation_context';
-import {
-  FullScreenConversationRounds,
-  FullScreenConversationInput,
-  FullScreenNewConversationPrompt,
-} from './layouts/full_screen_conversation_layout';
-import {
-  EmbeddedConversationRounds,
-  EmbeddedConversationInput,
-  EmbeddedNewConversationPrompt,
-} from './layouts/embedded_conversation_layout';
+import { FullScreenConversationRounds } from './full_screen/rounds_layout';
+import { FullScreenConversationInput } from './full_screen/input_layout';
+import { FullScreenNewConversationPrompt } from './full_screen/new_conversation_prompt_layout';
+import { EmbeddedConversationRounds } from './embedded/rounds_layout';
+import { EmbeddedConversationInput } from './embedded/input_layout';
+import { EmbeddedNewConversationPrompt } from './embedded/new_conversation_prompt';
 import { WelcomeText } from '../common/welcome_text';
 import { QuickNavigationCards } from './quick_navigation_cards';
 

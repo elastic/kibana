@@ -6,22 +6,8 @@
  */
 
 import React from 'react';
-import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-export const EmbeddedConversationRounds: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
-  return <div>{children}</div>;
-};
-
-export const EmbeddedConversationInput: React.FC<{
-  children: React.ReactNode;
-  className?: string | SerializedStyles;
-}> = ({ children, className }) => {
-  return <div css={className}>{children}</div>;
-};
 
 const fullHeightStyles = css`
   height: 100%;

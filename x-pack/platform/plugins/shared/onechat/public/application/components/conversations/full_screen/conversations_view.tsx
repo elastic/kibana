@@ -10,11 +10,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
-import { Conversation } from './conversation';
-import { FullScreenConversationHeader } from './layouts/full_screen_conversation_layout';
-import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
-import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
-import { SendMessageProvider } from '../../context/send_message/send_message_context';
+import { Conversation } from '../conversation';
+import { FullScreenConversationHeader } from './header';
+import { ConversationSidebar } from '../conversation_sidebar/conversation_sidebar';
+import { RoutedConversationsProvider } from '../../../context/conversation/routed_conversations_provider';
+import { SendMessageProvider } from '../../../context/send_message/send_message_context';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

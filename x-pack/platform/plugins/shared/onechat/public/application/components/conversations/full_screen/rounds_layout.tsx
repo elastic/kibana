@@ -6,16 +6,22 @@
  */
 
 import React from 'react';
-import { ConversationContent } from '../conversation_grid';
+import { ConversationContent } from './conversation_grid';
 
 interface ConversationRoundsLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
 
-export const ConversationRoundsLayout: React.FC<ConversationRoundsLayoutProps> = ({
+const ConversationRoundsLayout: React.FC<ConversationRoundsLayoutProps> = ({
   children,
   className,
 }) => {
   return <ConversationContent className={className}>{children}</ConversationContent>;
+};
+
+export const FullScreenConversationRounds: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  return <ConversationRoundsLayout>{children}</ConversationRoundsLayout>;
 };

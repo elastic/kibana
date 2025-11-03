@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type { SerializedStyles } from '@emotion/react';
 import React from 'react';
-import { ConversationContent } from '../conversation_grid';
+import type { SerializedStyles } from '@emotion/react';
 
-interface ConversationInputLayoutProps {
+export const EmbeddedConversationInput: React.FC<{
   children: React.ReactNode;
   className?: string | SerializedStyles;
-}
-
-export const ConversationInputLayout: React.FC<ConversationInputLayoutProps> = ({
-  children,
-  className,
-}) => {
-  return <ConversationContent css={className}>{children}</ConversationContent>;
+}> = ({ children, className }) => {
+  return <div css={className}>{children}</div>;
 };

@@ -6,24 +6,21 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import React from 'react';
-import { ConversationContentWithMargins } from '../conversation_grid';
-import { useConversationGridCenterColumnWidth } from '../conversation_grid.styles';
+import { ConversationContentWithMargins } from './conversation_grid';
+import { useConversationGridCenterColumnWidth } from './conversation_grid.styles';
 
-interface NewConversationPromptLayoutProps {
+interface FullScreenNewConversationPromptProps {
   welcomeText: React.ReactNode;
   inputForm: React.ReactNode;
   navigationCards?: React.ReactNode;
-  className?: string | SerializedStyles;
 }
 
-export const NewConversationPromptLayout: React.FC<NewConversationPromptLayoutProps> = ({
+export const FullScreenNewConversationPrompt: React.FC<FullScreenNewConversationPromptProps> = ({
   welcomeText,
   inputForm,
   navigationCards,
-  className,
 }) => {
   const { euiTheme } = useEuiTheme();
   const centerColumnWidth = useConversationGridCenterColumnWidth();
@@ -44,8 +41,12 @@ export const NewConversationPromptLayout: React.FC<NewConversationPromptLayoutPr
     grid-column: 1 / 4;
   `;
 
+  const fullHeightStyles = css`
+    height: 100%;
+  `;
+
   return (
-    <ConversationContentWithMargins css={className}>
+    <ConversationContentWithMargins css={fullHeightStyles}>
       <div css={gridStyles} data-test-subj="agentBuilderWelcomePage">
         <div css={mainContainerStyles}>{welcomeText}</div>
         <div css={withMarginContainerStyles}>{inputForm}</div>

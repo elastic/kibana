@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { useHasActiveConversation } from '../../hooks/use_conversation';
-import { ConversationTitle } from './conversation_title';
+import { useHasActiveConversation } from '../../../hooks/use_conversation';
+import { ConversationTitle } from '../conversation_title';
 
 export const EmbeddedConversationHeader: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
