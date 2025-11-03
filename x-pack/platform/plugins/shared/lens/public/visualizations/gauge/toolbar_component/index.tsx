@@ -13,7 +13,7 @@ import type { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
 
 import { useDebouncedValue } from '@kbn/visualization-utils';
 
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { ToolbarPopover } from '../../../shared_components';
 import { type GaugeVisualizationState } from '../constants';
 import { AppearanceSettings } from './appearance_settings';

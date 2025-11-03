@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import {
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
+  isWorkflowConflictError,
   isWorkflowValidationError,
 } from '../../../common/lib/errors';
 
@@ -21,8 +23,11 @@ import {
  * @param options - Optional configuration for error handling
  * @returns Appropriate error response
  */
-export function handleRouteError(response: any, error: any, options?: { checkNotFound?: boolean }) {
-  // Check for specific error types that need special handling
+export function handleRouteError(
+  response: KibanaResponseFactory,
+  error: Error,
+  options?: { checkNotFound?: boolean }
+) {
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
     return response.notFound();
   }
@@ -41,7 +46,12 @@ export function handleRouteError(response: any, error: any, options?: { checkNot
     });
   }
 
-  // Generic error handler
+  if (isWorkflowConflictError(error)) {
+    return response.conflict({
+      body: error.toJSON(),
+    });
+  }
+
   return response.customError({
     statusCode: 500,
     body: {

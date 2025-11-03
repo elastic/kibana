@@ -52,9 +52,7 @@ describe('validateConfig', () => {
       mockGetESQLQueryVariables.mockReturnValue(['case_id']);
       await expect(validateConfig(config)).resolves.toBeUndefined();
 
-      expect(mockValidateQuery).toHaveBeenCalledWith(config.query, {
-        ignoreOnMissingCallbacks: true,
-      });
+      expect(mockValidateQuery).toHaveBeenCalledWith(config.query);
       expect(mockGetESQLQueryVariables).toHaveBeenCalledWith(config.query);
     });
 

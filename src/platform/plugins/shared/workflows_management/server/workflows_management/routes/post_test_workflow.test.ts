@@ -9,11 +9,11 @@
 
 import { registerPostTestWorkflowRoute } from './post_test_workflow';
 import {
-  mockLogger,
-  createMockRouterInstance,
-  createSpacesMock,
-  createMockWorkflowsApi,
   createMockResponse,
+  createMockRouterInstance,
+  createMockWorkflowsApi,
+  createSpacesMock,
+  mockLogger,
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
@@ -27,37 +27,6 @@ describe('POST /api/workflows/test', () => {
     workflowsApi = createMockWorkflowsApi();
     mockSpaces = createSpacesMock();
     jest.clearAllMocks();
-  });
-
-  describe('route definition', () => {
-    it('should define the test workflow route with correct configuration', () => {
-      registerPostTestWorkflowRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const postTestCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/test'
-      );
-
-      expect(postTestCall).toBeDefined();
-      expect(postTestCall[0]).toMatchObject({
-        path: '/api/workflows/test',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: ['all'],
-          },
-        },
-      });
-      expect(postTestCall[0].validate).toBeDefined();
-      expect(postTestCall[0].validate.body).toBeDefined();
-      expect(postTestCall[1]).toEqual(expect.any(Function));
-    });
   });
 
   describe('handler logic', () => {

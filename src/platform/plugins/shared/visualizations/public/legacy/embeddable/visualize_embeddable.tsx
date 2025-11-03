@@ -37,10 +37,14 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { css } from '@emotion/react';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizationError,
+  visContainerStyle,
+  visualizeClassName,
+} from '@kbn/visualizations-common';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
-import VisualizationError from '../../components/visualization_error';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../common/constants';
 import type { SerializedVis, Vis } from '../../vis';
 import { getApplication, getExpressions, getUiActions } from '../../services';
 import { VIS_EVENT_TO_TRIGGER } from '../../embeddable/events';
@@ -51,7 +55,6 @@ import type { AttributeService } from './attribute_service';
 import type { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
 import type { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
-import { visualizeClassName, visContainerStyle } from '../../vis.styles';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<

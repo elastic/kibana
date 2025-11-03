@@ -45,273 +45,268 @@ import {
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 
-// Failing: See https://github.com/elastic/kibana/issues/239356
-describe.skip(
-  'Related integrations',
-  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
-  () => {
-    const DATA_STREAM_NAME = 'logs-related-integrations-test';
-    const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
-    const RELATED_INTEGRATIONS: RelatedIntegration[] = [
-      {
-        package: 'auditd',
-        version: '1.16.0',
-      },
-      {
-        package: 'aws',
-        version: '1.17.0',
-        integration: 'cloudfront',
-      },
-      {
-        package: 'aws',
-        version: '1.17.0',
-        integration: 'cloudtrail',
-      },
-      {
-        package: 'aws',
-        version: '1.17.0',
-        integration: 'unknown',
-      },
-      { package: 'system', version: '1.17.0' },
-    ];
-    const PREBUILT_RULE = createRuleAssetSavedObject({
-      name: PREBUILT_RULE_NAME,
-      index: [DATA_STREAM_NAME],
-      query: '*:*',
-      rule_id: 'rule_1',
-      related_integrations: RELATED_INTEGRATIONS,
-    });
-    const EXPECTED_RELATED_INTEGRATIONS: ExpectedRelatedIntegration[] = [
-      {
-        title: 'Auditd Logs',
-        status: 'Not installed',
-      },
-      {
-        title: 'AWS Amazon cloudfront',
-        status: 'Enabled',
-      },
-      {
-        title: 'AWS Aws cloudtrail',
-        status: 'Disabled',
-      },
-      {
-        title: 'Aws Unknown',
-      },
-      {
-        title: 'System',
-        status: 'Enabled',
-      },
-    ];
-    const EXPECTED_KNOWN_RELATED_INTEGRATIONS = EXPECTED_RELATED_INTEGRATIONS.filter((x) =>
-      Boolean(x.status)
-    );
+describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  const DATA_STREAM_NAME = 'logs-related-integrations-test';
+  const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
+  const RELATED_INTEGRATIONS: RelatedIntegration[] = [
+    {
+      package: 'auditd',
+      version: '1.16.0',
+    },
+    {
+      package: 'aws',
+      version: '1.17.0',
+      integration: 'cloudfront',
+    },
+    {
+      package: 'aws',
+      version: '1.17.0',
+      integration: 'cloudtrail',
+    },
+    {
+      package: 'aws',
+      version: '1.17.0',
+      integration: 'unknown',
+    },
+    { package: 'system', version: '1.17.0' },
+  ];
+  const PREBUILT_RULE = createRuleAssetSavedObject({
+    name: PREBUILT_RULE_NAME,
+    index: [DATA_STREAM_NAME],
+    query: '*:*',
+    rule_id: 'rule_1',
+    related_integrations: RELATED_INTEGRATIONS,
+  });
+  const EXPECTED_RELATED_INTEGRATIONS: ExpectedRelatedIntegration[] = [
+    {
+      title: 'Auditd Logs',
+      status: 'Not installed',
+    },
+    {
+      title: 'AWS Amazon cloudfront',
+      status: 'Enabled',
+    },
+    {
+      title: 'AWS Aws cloudtrail',
+      status: 'Disabled',
+    },
+    {
+      title: 'Aws Unknown',
+    },
+    {
+      title: 'System',
+      status: 'Enabled',
+    },
+  ];
+  const EXPECTED_KNOWN_RELATED_INTEGRATIONS = EXPECTED_RELATED_INTEGRATIONS.filter((x) =>
+    Boolean(x.status)
+  );
 
-    beforeEach(() => {
-      login();
-      cleanFleet();
-      deleteAlertsAndRules();
-      addAndInstallPrebuiltRules([PREBUILT_RULE]);
-    });
+  beforeEach(() => {
+    login();
+    cleanFleet();
+    deleteAlertsAndRules();
+    addAndInstallPrebuiltRules([PREBUILT_RULE]);
+  });
 
-    describe('integrations not installed', () => {
-      describe('rules management table', () => {
-        beforeEach(() => {
-          visitRulesManagementTable();
-          disableAutoRefresh();
-        });
-
-        it('should display a badge with the installed integrations', () => {
-          cy.get(INTEGRATIONS_POPOVER).should(
-            'have.text',
-            `0/${EXPECTED_RELATED_INTEGRATIONS.length}`
-          );
-        });
-
-        it('should display a popover when clicking the badge with the installed integrations', () => {
-          openIntegrationsPopover();
-
-          cy.get(INTEGRATIONS_POPOVER_TITLE).should(
-            'have.text',
-            `[${EXPECTED_RELATED_INTEGRATIONS.length}] Related integrations available`
-          );
-          cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
-          cy.get(INTEGRATION_STATUS).should(
-            'have.length',
-            EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
-          );
-
-          EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
-            cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
-          });
-
-          EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
-            cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
-          });
-        });
-      });
-
-      describe('rule details', () => {
-        beforeEach(() => {
-          visitFirstInstalledPrebuiltRuleDetailsPage();
-        });
-
-        it('should display the integrations in the definition section', () => {
-          cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
-          cy.get(INTEGRATION_STATUS).should(
-            'have.length',
-            EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
-          );
-
-          EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
-            cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
-          });
-
-          EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
-            cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
-          });
-        });
-      });
-    });
-
-    describe('integrations installed (AWS CloudFront (enabled), AWS CloudTrail (disabled), System (enabled))', () => {
+  describe('integrations not installed', () => {
+    describe('rules management table', () => {
       beforeEach(() => {
-        installIntegrations({
-          packages: [
-            { name: 'aws', version: '1.17.0' },
-            { name: 'system', version: '1.17.0' },
-          ],
-          agentPolicy: {
-            name: 'Agent policy',
-            namespace: 'default',
-            monitoring_enabled: ['logs'],
-            inactivity_timeout: 1209600,
-          },
-          packagePolicy: AWS_PACKAGE_POLICY,
-        });
+        visitRulesManagementTable();
+        disableAutoRefresh();
       });
 
-      describe('rules management table', () => {
-        beforeEach(() => {
-          visitRulesManagementTable();
-          disableAutoRefresh();
-        });
-
-        it('should display a badge with the installed integrations', () => {
-          cy.get(INTEGRATIONS_POPOVER).should(
-            'have.text',
-            `2/${EXPECTED_RELATED_INTEGRATIONS.length}`
-          );
-        });
-
-        it('should display a popover when clicking the badge with the installed integrations', () => {
-          openIntegrationsPopover();
-
-          cy.get(INTEGRATIONS_POPOVER_TITLE).should(
-            'have.text',
-            `[${EXPECTED_RELATED_INTEGRATIONS.length}] Related integrations available`
-          );
-          cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
-          cy.get(INTEGRATION_STATUS).should(
-            'have.length',
-            EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
-          );
-
-          EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
-            cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
-          });
-
-          EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((expected, index) => {
-            cy.get(INTEGRATION_STATUS).eq(index).should('have.text', expected.status);
-          });
-        });
+      it('should display a badge with the installed integrations', () => {
+        cy.get(INTEGRATIONS_POPOVER).should(
+          'have.text',
+          `0/${EXPECTED_RELATED_INTEGRATIONS.length}`
+        );
       });
 
-      describe('rule details', () => {
-        beforeEach(() => {
-          visitFirstInstalledPrebuiltRuleDetailsPage();
-          waitForPageToBeLoaded(PREBUILT_RULE_NAME);
+      it('should display a popover when clicking the badge with the installed integrations', () => {
+        openIntegrationsPopover();
+
+        cy.get(INTEGRATIONS_POPOVER_TITLE).should(
+          'have.text',
+          `[${EXPECTED_RELATED_INTEGRATIONS.length}] Related integrations available`
+        );
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
+
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
         });
 
-        it('should display the integrations in the definition section', () => {
-          cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
-          cy.get(INTEGRATION_STATUS).should(
-            'have.length',
-            EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
-          );
-
-          EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
-            cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
-          });
-
-          EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((expected, index) => {
-            cy.get(INTEGRATION_STATUS).eq(index).should('have.text', expected.status);
-          });
-        });
-
-        const RELATED_INTEGRATION_FIELD = 'kibana.alert.rule.parameters.related_integrations';
-
-        it(`the alerts generated should have a "${RELATED_INTEGRATION_FIELD}" field containing the integrations`, () => {
-          deleteDataStream(DATA_STREAM_NAME);
-          createDocument(DATA_STREAM_NAME, generateEvent());
-
-          clickEnableRuleSwitch();
-          waitForAlertsToPopulate();
-
-          fetchRuleAlerts({
-            ruleId: 'rule_1',
-            fields: [RELATED_INTEGRATION_FIELD],
-            size: 1,
-          }).then((alertsResponse) => {
-            expect(alertsResponse.body.hits.hits[0].fields).to.deep.equal({
-              [RELATED_INTEGRATION_FIELD]: RELATED_INTEGRATIONS,
-            });
-          });
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
+          cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
         });
       });
     });
 
-    describe('related Integrations Advanced Setting is disabled', () => {
-      describe('rules management table', () => {
-        beforeEach(() => {
-          disableRelatedIntegrations();
-          visitRulesManagementTable();
-          disableAutoRefresh();
+    describe('rule details', () => {
+      beforeEach(() => {
+        visitFirstInstalledPrebuiltRuleDetailsPage();
+      });
+
+      it('should display the integrations in the definition section', () => {
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
+
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
         });
 
-        afterEach(() => {
-          enableRelatedIntegrations();
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
+          cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
+        });
+      });
+    });
+  });
+
+  describe('integrations installed (AWS CloudFront (enabled), AWS CloudTrail (disabled), System (enabled))', () => {
+    beforeEach(() => {
+      installIntegrations({
+        packages: [
+          { name: 'aws', version: '1.17.0' },
+          { name: 'system', version: '1.17.0' },
+        ],
+        agentPolicy: {
+          name: 'Agent policy',
+          namespace: 'default',
+          monitoring_enabled: ['logs'],
+          inactivity_timeout: 1209600,
+        },
+        packagePolicy: AWS_PACKAGE_POLICY,
+      });
+    });
+
+    describe('rules management table', () => {
+      beforeEach(() => {
+        visitRulesManagementTable();
+        disableAutoRefresh();
+      });
+
+      it('should display a badge with the installed integrations', () => {
+        cy.get(INTEGRATIONS_POPOVER).should(
+          'have.text',
+          `2/${EXPECTED_RELATED_INTEGRATIONS.length}`
+        );
+      });
+
+      it('should display a popover when clicking the badge with the installed integrations', () => {
+        openIntegrationsPopover();
+
+        cy.get(INTEGRATIONS_POPOVER_TITLE).should(
+          'have.text',
+          `[${EXPECTED_RELATED_INTEGRATIONS.length}] Related integrations available`
+        );
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
+
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
         });
 
-        it('should not display a badge with the installed integrations', () => {
-          cy.get(RULE_NAME).should('have.text', PREBUILT_RULE_NAME);
-          cy.get(INTEGRATION_LINK).should('not.exist');
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_STATUS).eq(index).should('have.text', expected.status);
+        });
+      });
+    });
+
+    describe('rule details', () => {
+      beforeEach(() => {
+        visitFirstInstalledPrebuiltRuleDetailsPage();
+        waitForPageToBeLoaded(PREBUILT_RULE_NAME);
+      });
+
+      it('should display the integrations in the definition section', () => {
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
+
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
+        });
+
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_STATUS).eq(index).should('have.text', expected.status);
         });
       });
 
-      describe('rule details', () => {
-        beforeEach(() => {
-          visitFirstInstalledPrebuiltRuleDetailsPage();
-        });
+      const RELATED_INTEGRATION_FIELD = 'kibana.alert.rule.parameters.related_integrations';
 
-        it('should display the integrations in the definition section', () => {
-          cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
-          cy.get(INTEGRATION_STATUS).should(
-            'have.length',
-            EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
-          );
+      it(`the alerts generated should have a "${RELATED_INTEGRATION_FIELD}" field containing the integrations`, () => {
+        deleteDataStream(DATA_STREAM_NAME);
+        createDocument(DATA_STREAM_NAME, generateEvent());
 
-          EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
-            cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
-          });
+        clickEnableRuleSwitch();
+        waitForAlertsToPopulate();
 
-          EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
-            cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
+        fetchRuleAlerts({
+          ruleId: 'rule_1',
+          fields: [RELATED_INTEGRATION_FIELD],
+          size: 1,
+        }).then((alertsResponse) => {
+          expect(alertsResponse.body.hits.hits[0].fields).to.deep.equal({
+            [RELATED_INTEGRATION_FIELD]: RELATED_INTEGRATIONS,
           });
         });
       });
     });
-  }
-);
+  });
+
+  describe('related Integrations Advanced Setting is disabled', () => {
+    describe('rules management table', () => {
+      beforeEach(() => {
+        disableRelatedIntegrations();
+        visitRulesManagementTable();
+        disableAutoRefresh();
+      });
+
+      afterEach(() => {
+        enableRelatedIntegrations();
+      });
+
+      it('should not display a badge with the installed integrations', () => {
+        cy.get(RULE_NAME).should('have.text', PREBUILT_RULE_NAME);
+        cy.get(INTEGRATION_LINK).should('not.exist');
+      });
+    });
+
+    describe('rule details', () => {
+      beforeEach(() => {
+        visitFirstInstalledPrebuiltRuleDetailsPage();
+      });
+
+      it('should display the integrations in the definition section', () => {
+        cy.get(INTEGRATION_LINK).should('have.length', EXPECTED_RELATED_INTEGRATIONS.length);
+        cy.get(INTEGRATION_STATUS).should(
+          'have.length',
+          EXPECTED_KNOWN_RELATED_INTEGRATIONS.length
+        );
+
+        EXPECTED_RELATED_INTEGRATIONS.forEach((expected, index) => {
+          cy.get(INTEGRATION_LINK).eq(index).contains(expected.title);
+        });
+
+        EXPECTED_KNOWN_RELATED_INTEGRATIONS.forEach((_, index) => {
+          cy.get(INTEGRATION_STATUS).eq(index).should('have.text', 'Not installed');
+        });
+      });
+    });
+  });
+});
 
 const INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS = 'prebuiltRules';
 

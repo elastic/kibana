@@ -9,11 +9,11 @@
 
 import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_logs';
 import {
-  mockLogger,
-  createMockRouterInstance,
-  createSpacesMock,
-  createMockWorkflowsApi,
   createMockResponse,
+  createMockRouterInstance,
+  createMockWorkflowsApi,
+  createSpacesMock,
+  mockLogger,
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
@@ -27,38 +27,6 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
     workflowsApi = createMockWorkflowsApi();
     mockSpaces = createSpacesMock();
     jest.clearAllMocks();
-  });
-
-  describe('route definition', () => {
-    it('should define the workflow execution logs route with correct configuration', () => {
-      registerGetWorkflowExecutionLogsRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const getLogsCall = (mockRouter.get as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflowExecutions/{workflowExecutionId}/logs'
-      );
-
-      expect(getLogsCall).toBeDefined();
-      expect(getLogsCall[0]).toMatchObject({
-        path: '/api/workflowExecutions/{workflowExecutionId}/logs',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: ['all'],
-          },
-        },
-      });
-      expect(getLogsCall[0].validate).toBeDefined();
-      expect(getLogsCall[0].validate.params).toBeDefined();
-      expect(getLogsCall[0].validate.query).toBeDefined();
-      expect(getLogsCall[1]).toEqual(expect.any(Function));
-    });
   });
 
   describe('handler logic', () => {

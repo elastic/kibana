@@ -169,6 +169,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
 
         {hasForbiddenNames && (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.apm.serviceMap.diagnosticFlyout.forbiddenServiceNamesTitle',
               {

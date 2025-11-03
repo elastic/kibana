@@ -27,9 +27,8 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import type { AnonymousAccessState } from '../../../../common';
 
-import type { IShareContext } from '../../context';
+import { useShareContext, type IShareContext } from '../../context';
 import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
-import type { DraftModeCalloutProps } from '../../common/draft_mode_callout';
 import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type EmbedProps = Pick<
@@ -51,12 +50,10 @@ interface UrlParams {
   };
 }
 
-const draftModeCalloutMessage = (
-  <FormattedMessage
-    id="share.embed.draftModeCallout.message"
-    defaultMessage="This code might not work properly. Save your changes to ensure it works as expected."
-  />
-);
+const draftModeCalloutMessage = i18n.translate('share.embed.draftModeCallout.message', {
+  defaultMessage:
+    'This code might not work properly. Save your changes to ensure it works as expected.',
+});
 
 export const EmbedContent = ({
   shareableUrlForSavedObject,
@@ -70,6 +67,7 @@ export const EmbedContent = ({
   anonymousAccess,
 }: EmbedProps) => {
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
+  const { onSave, isSaving } = useShareContext();
   const [isLoading, setIsLoading] = useState(false);
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
@@ -85,16 +83,7 @@ export const EmbedContent = ({
     computeAnonymousCapabilities,
     embedUrlParamExtensions: urlParamExtensions,
   } = objectConfig;
-  // TODO Remove node override logic https://github.com/elastic/kibana/issues/238877
-  const isValidCalloutOverride = React.isValidElement(draftModeCallOut);
-  const draftModeCalloutContent = isValidCalloutOverride
-    ? // Retro-compatible case
-      { node: draftModeCallOut }
-    : typeof draftModeCallOut === 'object'
-    ? // Custom content callout
-      (draftModeCallOut as DraftModeCalloutProps)
-    : // Default content callout
-      {};
+  const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   useEffect(() => {
     if (computeAnonymousCapabilities && anonymousAccess) {
@@ -330,7 +319,16 @@ export const EmbedContent = ({
         {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            <DraftModeCallout message={draftModeCalloutMessage} {...draftModeCalloutContent} />
+            <DraftModeCallout
+              message={draftModeCalloutMessage}
+              {...draftModeCalloutContent}
+              {...(onSave && {
+                saveButtonProps: {
+                  onSave,
+                  isSaving,
+                },
+              })}
+            />
           </>
         )}
         <EuiSpacer />

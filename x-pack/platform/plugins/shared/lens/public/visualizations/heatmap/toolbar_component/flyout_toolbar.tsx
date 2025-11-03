@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { HeatmapVisualizationState } from '../types';
@@ -18,17 +18,17 @@ import {
   HeatmapTitlesAndTextSettings,
   HeatmapVerticalAxisSettings,
 } from './style_settings';
+import { HeatmapLegendSettings } from './legend_settings';
 
 export function HeatmapFlyoutToolbar(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
   const datatableToolbarContentMap: ToolbarContentMap<HeatmapVisualizationState> = {
     style: HeatmapStyleSettings,
+    legend: HeatmapLegendSettings,
   };
   return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;
 }
 
-type HeatmapStyleSettingsProps = VisualizationToolbarProps<HeatmapVisualizationState>;
-
-function HeatmapStyleSettings(props: HeatmapStyleSettingsProps) {
+function HeatmapStyleSettings(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
   return (
     <>
       <EuiAccordion

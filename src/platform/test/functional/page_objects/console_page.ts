@@ -66,6 +66,20 @@ export class ConsolePageObject extends FtrService {
     await (await outputEditor.findByClassName('margin-view-overlays')).click();
   }
 
+  public async scrollOutputToTop() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const textArea = await outputEditor.findByTagName('textarea');
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await textArea.pressKeys([selectionKey, Key.HOME]);
+  }
+
+  public async selectAllOutputText() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const textArea = await outputEditor.findByTagName('textarea');
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await textArea.pressKeys([selectionKey, 'a']);
+  }
+
   public async getOutputText() {
     const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
     const outputViewDiv = await outputPanel.findByClassName('monaco-scrollable-element');
