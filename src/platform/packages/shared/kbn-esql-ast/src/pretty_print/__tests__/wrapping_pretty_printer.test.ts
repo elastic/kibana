@@ -1328,7 +1328,6 @@ describe('subqueries (parens)', () => {
     | LIMIT 10),
   index3,
   (FROM index4 | STATS COUNT(*))
-
   | WHERE d > 10
   | STATS max = MAX(*)
         BY e

@@ -926,17 +926,10 @@ export class WrappingPrettyPrinter {
       }
 
       let i = 0;
-      let prevOut: Output | undefined;
       let hasCommands = false;
 
       for (const out of ctx.visitCommands({ indent, remaining: remaining - indent.length })) {
         const isFirstCommand = i === 0;
-        const isSecondCommand = i === 1;
-
-        if (isSecondCommand) {
-          const firstCommandIsMultiline = prevOut?.lines && prevOut.lines > 1;
-          if (firstCommandIsMultiline) text += '\n' + indent;
-        }
 
         const commandIndent = isFirstCommand ? indent : pipedCommandIndent;
         const topDecorations = this.printTopDecorations(commandIndent, commands[i]);
@@ -961,7 +954,6 @@ export class WrappingPrettyPrinter {
 
         text += out.txt;
         i++;
-        prevOut = out;
         hasCommands = true;
       }
 

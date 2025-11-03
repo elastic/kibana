@@ -962,7 +962,6 @@ FROM index`;
     | LIMIT 10) /* after first subquery */,
   index3,
   (FROM index4 | STATS COUNT(*)) /* after second */
-
   | WHERE d > 10
   | STATS max = MAX(*)
         BY e
