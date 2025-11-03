@@ -23,9 +23,9 @@ import type {
 } from '@kbn/core-chrome-navigation/types';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
-import { isActiveFromUrl } from '@kbn/shared-ux-chrome-navigation/src/utils';
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 import type { PanelStateManager } from './panel_state_manager';
+import { isActiveFromUrl } from './utils/is_active_from_url';
 
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
