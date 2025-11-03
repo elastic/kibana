@@ -15,7 +15,7 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiFlyoutResizable,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
@@ -260,16 +260,14 @@ export function UnifiedDocViewerFlyout({
       });
   const currentFlyoutTitle = flyoutTitle ?? defaultFlyoutTitle;
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
+
   return (
     <EuiPortal>
-      <EuiFlyout
-        aria-label={currentFlyoutTitle}
+      <EuiFlyoutResizable
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
         type={flyoutType ?? 'push'}
         size={flyoutWidth}
-        resizable={true}
-        session="never"
         pushMinBreakpoint="xl"
         data-test-subj={dataTestSubj ?? 'docViewerFlyout'}
         onKeyDown={onKeyDown}
@@ -326,7 +324,7 @@ export function UnifiedDocViewerFlyout({
           )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
-      </EuiFlyout>
+      </EuiFlyoutResizable>
     </EuiPortal>
   );
 }
