@@ -37,7 +37,7 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '+', 'string')
       ).toBe(
         `from logstash-* // meow
-| WHERE \`dest\`=="tada!"`
+| WHERE \`dest\` == "tada!"`
       );
     });
     it('appends a filter out where clause in an existing query', () => {
@@ -45,7 +45,7 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-', 'string')
       ).toBe(
         `from logstash-* // meow
-| WHERE \`dest\`!="tada!"`
+| WHERE \`dest\` != "tada!"`
       );
     });
 
@@ -54,14 +54,14 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'ip_field', 'tada!', '-', 'ip')
       ).toBe(
         `from logstash-* // meow
-| WHERE \`ip_field\`!="tada!"`
+| WHERE \`ip_field\` != "tada!"`
       );
     });
 
     it('appends a where clause in an existing query with casting to string when the type is not given', () => {
       expect(appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-')).toBe(
         `from logstash-* // meow
-| WHERE \`dest\`::string!="tada!"`
+| WHERE \`dest\`::string != "tada!"`
       );
     });
 
@@ -106,7 +106,7 @@ describe('appendToQuery', () => {
         )
       ).toBe(
         `from logstash-* | where country == "GR"
-AND \`dest\`=="Crete"`
+AND \`dest\` == "Crete"`
       );
     });
 
@@ -169,7 +169,7 @@ AND \`dest\`=="Crete"`
         )
       ).toBe(
         `from logstash-* | where CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
-and \`ip\`!="127.0.0.2/32"`
+and \`ip\` != "127.0.0.2/32"`
       );
     });
 

@@ -16,6 +16,7 @@ Object {
   "instanceSizeMb": undefined,
   "isCloudEnabled": true,
   "isElasticStaffOwned": undefined,
+  "isInTrial": [Function],
   "isServerlessEnabled": false,
   "kibanaUrl": undefined,
   "onboarding": Object {
@@ -39,6 +40,7 @@ exports[`Cloud Plugin #start interface snapshot 1`] = `
 Object {
   "baseUrl": "https://cloud.elastic.co",
   "isCloudEnabled": true,
+  "isInTrial": [Function],
   "projectsUrl": "https://cloud.elastic.co/projects/",
 }
 `;
