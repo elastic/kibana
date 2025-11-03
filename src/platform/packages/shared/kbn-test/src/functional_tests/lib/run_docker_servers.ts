@@ -78,13 +78,10 @@ export async function runDockerServers(
 
   // Store running container info for DockerServersService to access
   (global as any).__kibanaDockerServers = servers;
-  (global as any).__kibanaDockerServerContainers = runningContainers.reduce(
-    (acc, container) => {
-      acc[container.name] = container.containerId;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
+  (global as any).__kibanaDockerServerContainers = runningContainers.reduce((acc, container) => {
+    acc[container.name] = container.containerId;
+    return acc;
+  }, {} as Record<string, string>);
 
   // Return cleanup function
   return async () => {
@@ -193,14 +190,7 @@ async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string>
   try {
     log.debug(`[docker:${name}] running image "${image}"`);
 
-    const dockerArgs = [
-      'run',
-      '-dit',
-      ...(args || []),
-      '-p',
-      `${port}:${portInContainer}`,
-      image,
-    ];
+    const dockerArgs = ['run', '-dit', ...(args || []), '-p', `${port}:${portInContainer}`, image];
     const res = await execa('docker', dockerArgs);
 
     return res.stdout.trim();
@@ -257,4 +247,3 @@ async function stopDockerContainer(container: RunningContainer, log: ToolingLog)
   // Wait for log cleanup to complete
   await container.cleanupPromise;
 }
-
