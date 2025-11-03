@@ -84,7 +84,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const [defaultStartDateValue] = useState<string>(moment().toISOString());
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { defaultTimezone, isBrowser } = useDefaultTimezone();
+  const { defaultTimezone } = useDefaultTimezone();
 
   const [isScopedQueryEnabled, setIsScopedQueryEnabled] = useState(!!initialValue?.scopedQuery);
   const [query, setQuery] = useState<string>(initialValue?.scopedQuery?.kql || '');
