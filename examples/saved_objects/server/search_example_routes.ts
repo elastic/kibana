@@ -49,12 +49,16 @@ export function registerSearchExampleRoutes(router: IRouter, log: Logger) {
                 type: 'date',
                 script: {
                   source: `
-                    if (doc.containsKey('${TYPE_A}.myDateField') && !doc['${TYPE_A}.myDateField'].empty) {
-                      emit(doc['${TYPE_A}.myDateField'].value.toInstant().toEpochMilli());
-                    } else if (doc.containsKey('${TYPE_B}.myOtherDateField') && !doc['${TYPE_B}.myOtherDateField'].empty) {
-                      emit(doc['${TYPE_B}.myOtherDateField'].value.toInstant().toEpochMilli());
-                    }
-                  `,
+                if (doc.containsKey(params.typeA + '.myDateField') && !doc[params.typeA + '.myDateField'].empty) {
+                  emit(doc[params.typeA + '.myDateField'].value.toInstant().toEpochMilli());
+                } else if (doc.containsKey(params.typeB + '.myOtherDateField') && !doc[params.typeB + '.myOtherDateField'].empty) {
+                  emit(doc[params.typeB + '.myOtherDateField'].value.toInstant().toEpochMilli());
+                }
+              `,
+                  params: {
+                    typeA: TYPE_A,
+                    typeB: TYPE_B,
+                  },
                 },
               },
             },
@@ -62,7 +66,7 @@ export function registerSearchExampleRoutes(router: IRouter, log: Logger) {
               {
                 merged_date: {
                   order: 'desc',
-                  unmapped_type: 'date', // In case one type doesn't have the date field
+                  unmapped_type: 'date',
                 },
               },
             ],
@@ -74,7 +78,7 @@ export function registerSearchExampleRoutes(router: IRouter, log: Logger) {
           });
         } catch (e) {
           if (isResponseError(e)) {
-            log.error(JSON.stringify(e.meta.body, null, 2)); // good error logging is essential for debugging...
+            log.error(JSON.stringify(e.meta.body, null, 2));
           }
           throw e;
         }
