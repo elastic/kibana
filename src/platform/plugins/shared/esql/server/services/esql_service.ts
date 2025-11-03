@@ -25,6 +25,12 @@ export interface EsqlServiceOptions {
 export class EsqlService {
   constructor(public readonly options: EsqlServiceOptions) {}
 
+  /**
+   * Get indices by their mode (lookup or time_series).
+   * @param mode The mode to filter indices by.
+   * @param remoteClusters Optional comma-separated list of remote clusters to include.
+   * @returns A promise that resolves to the indices autocomplete result.
+   */
   public async getIndicesByIndexMode(
     mode: 'lookup' | 'time_series',
     remoteClusters?: string
@@ -70,16 +76,23 @@ export class EsqlService {
     return result;
   }
 
+  /**
+   * Get all indices, aliases, and data streams for ES|QL sources autocomplete.
+   * @param scope The scope to retrieve indices for (local or all).
+   * @returns A promise that resolves to an array of ESQL source results.
+   */
   public async getAllIndices(scope: 'local' | 'all' = 'local'): Promise<ESQLSourceResult[]> {
     const { client } = this.options;
 
-    // Determine which sources to query based on scope
+    // All means local + remote indices (queried with <cluster>:*)
     const namesToQuery = scope === 'local' ? ['*'] : ['*', '*:*'];
 
     // hidden and not, important for finding timeseries mode
+    // mode is not returned for time_series datastreams, we need to find it from the indices
+    // which are usually hidden
     const allSources = (await client.indices.resolveIndex({
       name: namesToQuery,
-      expand_wildcards: 'all',
+      expand_wildcards: 'all', // this returns hidden indices too
     })) as ResolveIndexResponse;
 
     const availableSources = (await client.indices.resolveIndex({
@@ -159,6 +172,11 @@ export class EsqlService {
     );
   }
 
+  /**
+   * Get inference endpoints for a specific task type.
+   * @param taskType The type of inference task to retrieve endpoints for.
+   * @returns A promise that resolves to the inference endpoints autocomplete result.
+   */
   public async getInferenceEndpoints(
     taskType: InferenceTaskType
   ): Promise<InferenceEndpointsAutocompleteResult> {
