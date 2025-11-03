@@ -6,7 +6,7 @@
  */
 import { v4 as generateId } from 'uuid';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
   DEFAULT_CONTROLS_CHAINING,
