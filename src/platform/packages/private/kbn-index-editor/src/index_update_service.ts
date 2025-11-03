@@ -80,11 +80,13 @@ function isDocDelete(update: unknown): update is DeleteDocAction {
 
 interface ColumnAddition {
   name: string;
+  fieldType?: string;
 }
 
 interface ColumnUpdate {
   name: string;
   previousName?: string;
+  fieldType?: string;
 }
 
 interface DeleteDocAction {
@@ -404,7 +406,7 @@ export class IndexUpdateService {
         .map((column) => {
           return dataView.fields.create({
             name: column.name,
-            type: KBN_FIELD_TYPES.UNKNOWN,
+            type: column.fieldType ?? KBN_FIELD_TYPES.UNKNOWN,
             aggregatable: true,
             searchable: true,
           });
@@ -752,12 +754,18 @@ export class IndexUpdateService {
               return this.completeWithPlaceholders(0);
             }
             if (action.type === 'add-column') {
-              return [...acc, { name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}` }];
+              return [
+                ...acc,
+                {
+                  name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}`,
+                  fieldType: action.payload.fieldType,
+                },
+              ];
             }
             if (action.type === 'edit-column') {
               return acc.map((column) =>
                 column.name === action.payload.previousName
-                  ? { ...column, name: action.payload.name }
+                  ? { ...column, name: action.payload.name, fieldType: action.payload.fieldType }
                   : column
               );
             }
@@ -807,7 +815,7 @@ export class IndexUpdateService {
     return { newRowsCount, newColumnsCount, cellsEditedCount };
   }
 
-  private completeWithPlaceholders(currentColumnsCount: number) {
+  private completeWithPlaceholders(currentColumnsCount: number): ColumnAddition[] {
     const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - currentColumnsCount;
     return missingPlaceholders > 0
       ? times(missingPlaceholders, () => ({
@@ -953,8 +961,8 @@ export class IndexUpdateService {
     this.telemetry.trackEditInteraction({ actionType: 'add_column' });
   }
 
-  public editColumn(name: string, previousName: string) {
-    this.addAction('edit-column', { name, previousName });
+  public editColumn(name: string, previousName: string, fieldType: string) {
+    this.addAction('edit-column', { name, previousName, fieldType });
 
     this.telemetry.trackEditInteraction({ actionType: 'edit_column' });
   }

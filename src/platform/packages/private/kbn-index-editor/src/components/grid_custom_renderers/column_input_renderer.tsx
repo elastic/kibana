@@ -24,7 +24,7 @@ import {
   EuiPopoverFooter,
 } from '@elastic/eui';
 import type { HTMLAttributes } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -70,6 +70,7 @@ const options = [
 
 export const getColumnInputRenderer = (
   columnName: string,
+  columnType: string | undefined,
   columnIndex: number,
   isColumnInEditMode: boolean,
   setEditingColumnIndex: (columnIndex: number | null) => void,
@@ -83,6 +84,7 @@ export const getColumnInputRenderer = (
         isColumnInEditMode={isColumnInEditMode}
         setEditingColumnIndex={setEditingColumnIndex}
         initialColumnName={columnName}
+        initialColumnType={columnType}
         columnIndex={columnIndex}
         telemetryService={telemetryService}
       />
@@ -132,6 +134,7 @@ interface AddColumnHeaderProps {
   isColumnInEditMode: boolean;
   setEditingColumnIndex: (columnIndex: number | null) => void;
   initialColumnName: string;
+  initialColumnType: string | undefined;
   columnIndex: number;
   telemetryService: IndexEditorTelemetryService;
 }
@@ -140,17 +143,16 @@ export const AddColumnHeader = ({
   isColumnInEditMode,
   setEditingColumnIndex,
   initialColumnName,
+  initialColumnType,
   columnIndex,
   telemetryService,
 }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const [selectedType, setSelectedType] = useState<string | undefined>();
+  const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
+    useAddColumnName(initialColumnName, initialColumnType);
 
-  const { columnName, setColumnName, saveColumn, resetColumnName, validationError } =
-    useAddColumnName(initialColumnName);
-
-  const canSubmit = selectedType && columnName.length > 0 && !validationError;
+  const canSubmit = columnType && columnName.length > 0 && !validationError;
 
   const onSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -248,17 +250,17 @@ export const AddColumnHeader = ({
         >
           <EuiSuperSelect
             compressed
-            valueOfSelected={selectedType}
+            valueOfSelected={columnType}
             placeholder={i18n.translate('indexEditor.columnHeaderEdit.selectATypePlaceholder', {
               defaultMessage: 'Select option',
             })}
             id="typeSelect"
             data-test-subj="indexEditorindexEditorColumnTypeSelect"
-            onChange={(value) => setSelectedType(value)}
+            onChange={(value) => setColumnType(value)}
             options={options}
           />
         </EuiFormRow>
-        {selectedType && (
+        {columnType && (
           <EuiPopoverFooter>
             <EuiFormRow
               label={i18n.translate('indexEditor.columnHeaderEdit.columnNameLabel', {

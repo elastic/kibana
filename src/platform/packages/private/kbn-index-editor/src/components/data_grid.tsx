@@ -171,9 +171,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       (acc, columnName, columnIndex) => {
         if (!props.dataView.fields.getByName(columnName)) {
           const editMode = editingColumnIndex === columnIndex;
+          const columnType = columnsMeta[columnName]?.type;
           acc[columnName] = memoize(
             getColumnInputRenderer(
               columnName,
+              columnType,
               columnIndex,
               editMode,
               setEditingColumnIndex,
@@ -195,6 +197,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     renderedColumns,
     props.dataView.fields,
     editingColumnIndex,
+    columnsMeta,
     indexUpdateService,
     indexEditorTelemetryService,
   ]);
