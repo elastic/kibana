@@ -173,8 +173,7 @@
                 "docId": "kibKbnSecurityPluginTypesServerPluginApi",
                 "section": "def-server.SecurityPluginStart",
                 "text": "SecurityPluginStart"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
             "deprecated": false,
@@ -334,6 +333,26 @@
               "text": "SpacesPluginStart"
             },
             " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-server.AutomaticImportV2PluginStart.security",
+          "type": "Object",
+          "tags": [],
+          "label": "security",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "@kbn/security-plugin-types-server",
+              "scope": "server",
+              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+              "section": "def-server.SecurityPluginStart",
+              "text": "SecurityPluginStart"
+            }
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
           "deprecated": false,
