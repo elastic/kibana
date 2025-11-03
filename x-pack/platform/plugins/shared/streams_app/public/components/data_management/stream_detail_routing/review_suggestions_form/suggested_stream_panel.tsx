@@ -76,7 +76,7 @@ export function SuggestedStreamPanel({
       <EuiSpacer size="s" />
       <ConditionPanel condition={partition.condition} />
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType={isSelected ? 'eyeClosed' : 'eye'}
