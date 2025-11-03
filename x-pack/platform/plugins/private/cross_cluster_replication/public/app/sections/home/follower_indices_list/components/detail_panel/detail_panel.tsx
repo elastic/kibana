@@ -153,223 +153,225 @@ const FollowerIndexDetails = ({ followerIndex, isPollingStatus }: FollowerIndexD
 
         <EuiSpacer size="l" />
 
-        <section
-          aria-labelledby="ccrFollowerIndexDetailSettingsTitle"
-          data-test-subj="settingsSection"
-        >
-          <EuiTitle size="s">
-            <h3 id="ccrFollowerIndexDetailSettingsTitle">
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexDetailPanel.settingsTitle"
-                defaultMessage="Settings"
-              />
-            </h3>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
-          {isPaused ? (
-            <EuiCallOut
-              size="s"
-              title={
+        {!isPollingStatus && (
+          <section
+            aria-labelledby="ccrFollowerIndexDetailSettingsTitle"
+            data-test-subj="settingsSection"
+          >
+            <EuiTitle size="s">
+              <h3 id="ccrFollowerIndexDetailSettingsTitle">
                 <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedFollowerCalloutTitle"
-                  defaultMessage="A paused follower index does not have settings or shard statistics."
+                  id="xpack.crossClusterReplication.followerIndexDetailPanel.settingsTitle"
+                  defaultMessage="Settings"
                 />
-              }
-            />
-          ) : (
-            <>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle"
-                          defaultMessage="Max read request operation count"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+              </h3>
+            </EuiTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxReadReqOpCount">
-                      {maxReadRequestOperationCount}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
+            <EuiSpacer size="s" />
 
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle"
-                          defaultMessage="Max outstanding read requests"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+            {isPaused ? (
+              <EuiCallOut
+                size="s"
+                title={
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedFollowerCalloutTitle"
+                    defaultMessage="A paused follower index does not have settings or shard statistics."
+                  />
+                }
+              />
+            ) : (
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle"
+                            defaultMessage="Max read request operation count"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxOutstandingReadReq">
-                      {maxOutstandingReadRequests}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                      <EuiDescriptionListDescription data-test-subj="maxReadReqOpCount">
+                        {maxReadRequestOperationCount}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
 
-              <EuiSpacer size="s" />
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle"
+                            defaultMessage="Max outstanding read requests"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle"
-                          defaultMessage="Max read request size"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription data-test-subj="maxOutstandingReadReq">
+                        {maxOutstandingReadRequests}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-                    <EuiDescriptionListDescription data-test-subj="maxReadReqSize">
-                      {maxReadRequestSize}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
+                <EuiSpacer size="s" />
 
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle"
-                          defaultMessage="Max write request operation count"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle"
+                            defaultMessage="Max read request size"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxWriteReqOpCount">
-                      {maxWriteRequestOperationCount}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                      <EuiDescriptionListDescription data-test-subj="maxReadReqSize">
+                        {maxReadRequestSize}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
 
-              <EuiSpacer size="s" />
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle"
+                            defaultMessage="Max write request operation count"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle"
-                          defaultMessage="Max write request size"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription data-test-subj="maxWriteReqOpCount">
+                        {maxWriteRequestOperationCount}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-                    <EuiDescriptionListDescription data-test-subj="maxWriteReqSize">
-                      {maxWriteRequestSize}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
+                <EuiSpacer size="s" />
 
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle"
-                          defaultMessage="Max outstanding write requests"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle"
+                            defaultMessage="Max write request size"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxOutstandingWriteReq">
-                      {maxOutstandingWriteRequests}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                      <EuiDescriptionListDescription data-test-subj="maxWriteReqSize">
+                        {maxWriteRequestSize}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
 
-              <EuiSpacer size="s" />
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle"
+                            defaultMessage="Max outstanding write requests"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle"
-                          defaultMessage="Max write buffer count"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription data-test-subj="maxOutstandingWriteReq">
+                        {maxOutstandingWriteRequests}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-                    <EuiDescriptionListDescription data-test-subj="maxWriteBufferCount">
-                      {maxWriteBufferCount}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
+                <EuiSpacer size="s" />
 
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle"
-                          defaultMessage="Max write buffer size"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle"
+                            defaultMessage="Max write buffer count"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxWriteBufferSize">
-                      {maxWriteBufferSize}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                      <EuiDescriptionListDescription data-test-subj="maxWriteBufferCount">
+                        {maxWriteBufferCount}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
 
-              <EuiSpacer size="s" />
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle"
+                            defaultMessage="Max write buffer size"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle"
-                          defaultMessage="Max retry delay"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription data-test-subj="maxWriteBufferSize">
+                        {maxWriteBufferSize}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-                    <EuiDescriptionListDescription data-test-subj="maxRetryDelay">
-                      {maxRetryDelay}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
+                <EuiSpacer size="s" />
 
-                <EuiFlexItem>
-                  <EuiDescriptionList data-test-subj="settingsValues">
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle"
-                          defaultMessage="Read poll timeout"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle"
+                            defaultMessage="Max retry delay"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="readPollTimeout">
-                      {readPollTimeout}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          )}
-        </section>
+                      <EuiDescriptionListDescription data-test-subj="maxRetryDelay">
+                        {maxRetryDelay}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle"
+                            defaultMessage="Read poll timeout"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
+
+                      <EuiDescriptionListDescription data-test-subj="readPollTimeout">
+                        {readPollTimeout}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
+          </section>
+        )}
 
         <EuiSpacer size="l" />
 

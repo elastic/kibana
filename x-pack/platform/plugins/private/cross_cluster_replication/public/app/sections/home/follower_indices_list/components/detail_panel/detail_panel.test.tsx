@@ -693,7 +693,7 @@ describe('DetailPanel', () => {
       expect(getFollowerIndex).not.toHaveBeenCalled();
     });
 
-    it('should show checking status message and pass polling state to ContextMenu', async () => {
+    it('should show checking status message and hide settings section while polling', async () => {
       mockLocationSearch.mockReturnValue('?waitForActive=true');
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
@@ -717,6 +717,9 @@ describe('DetailPanel', () => {
       // Verify checking status message
       expect(screen.getByText('Checking status...')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
+
+      // Verify settings section is hidden during polling
+      expect(screen.queryByTestId('settingsSection')).not.toBeInTheDocument();
 
       // Verify isPollingStatus is passed to ContextMenu
       const manageButton = screen.getByTestId('manageButton');
