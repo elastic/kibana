@@ -100,6 +100,8 @@ const ALERT_WORKFLOW_TAGS = `${ALERT_NAMESPACE}.workflow_tags` as const;
 // kibana.alert.workflow_assignee_ids - user workflow alert assignees
 const ALERT_WORKFLOW_ASSIGNEE_IDS = `${ALERT_NAMESPACE}.workflow_assignee_ids` as const;
 
+const ALERT_ATTACK_IDS = 'attack_ids' as const;
+
 // kibana.alert.rule.category - rule type name for rule that generated this alert
 const ALERT_RULE_CATEGORY = `${ALERT_RULE_NAMESPACE}.category` as const;
 
@@ -196,6 +198,7 @@ export const fields = {
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_ATTACK_IDS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
@@ -251,6 +254,7 @@ export {
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_ATTACK_IDS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,

@@ -51,7 +51,7 @@ export const getGroupingQuery = ({
   statsAggregations,
   uniqueValue,
   timeRange,
-  multiValueFieldsToFlatten = [],
+  multiValueFieldsToFlatten = ['attack_ids_1'],
   countByKeyForMultiValueFields,
 }: GroupingQueryArgs): GroupingQuery => {
   const shouldFlattenMultiValueField = checkIsFlattenResults(

@@ -203,7 +203,10 @@ export const esqlExecutor = async ({
 
           return {
             _source: mergeEsqlResultInSource(source, esqlResult),
-            fields: sourceDocument?.fields,
+            fields: {
+              ...(sourceDocument?.fields ?? {}),
+              ...(esqlResult.attack_ids ? { attack_ids: esqlResult.attack_ids } : {}),
+            },
             _id: _id ?? '',
             _index: _index || sourceDocument?._index || '',
             _version: sourceDocument?._version,

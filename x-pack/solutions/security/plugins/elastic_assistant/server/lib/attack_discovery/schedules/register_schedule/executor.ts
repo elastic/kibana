@@ -30,6 +30,7 @@ import {
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
+import { AttackDiscoveryLookupDataClient } from '../../persistence/lookup_data_client';
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
@@ -137,6 +138,14 @@ export const attackDiscoveryScheduleExecutor = async ({
       spaceId,
     });
 
+    // Lookup data client
+    const lookupDataClient = new AttackDiscoveryLookupDataClient(
+      scopedClusterClient,
+      logger,
+      spaceId
+    );
+    await lookupDataClient.ensureIndexExists();
+
     await Promise.all(
       dedupedDiscoveries.map(async (attackDiscovery) => {
         const alertInstanceId = generateAttackDiscoveryAlertHash({
@@ -183,6 +192,11 @@ export const attackDiscoveryScheduleExecutor = async ({
           id: alertInstanceId,
           payload: baseAlertDocument,
           context,
+        });
+
+        attackDiscovery.alertIds.map(async (alertId) => {
+          await lookupDataClient.createOrUpdate(alertId, [alertDocId]);
+          logger.info(`Indexed alert ${alertId} with attack discovery ${alertDocId}`);
         });
       })
     );

@@ -39,6 +39,9 @@ import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import deepEqual from 'fast-deep-equal';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
+import { useEsqlQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_esql_query';
+import { esqlResultToPlainObjects } from '@kbn/traced-es-client/src/esql_result_to_plain_objects';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { applySetStateAction } from '../utils/apply_set_state_action';
 import { useAlertsTableQueryParams } from '../hooks/use_alerts_table_query_params';
 import { applyColumnsConfiguration } from '../utils/columns_configuration';
@@ -389,6 +392,29 @@ const AlertsTableContent = typedForwardRef(
       querySnapshot: alertsQuerySnapshot,
       error: alertsError,
     } = alertsData ?? {};
+
+    // ES|QL query example - using the query from the user's example
+    const { data: esqlQueryData, isLoading: isLoadingEsqlQuery } = useEsqlQuery(
+      {
+        data,
+        query: `
+        FROM .alerts-security.alerts-default metadata _id, _version, _index
+        | LOOKUP JOIN lookup-attack-default ON kibana.alert.uuid == alert_id
+        | WHERE attack_ids IS NOT NULL | LIMIT 10`,
+        filter: query,
+      },
+      {
+        context: AlertsQueryContext,
+        enabled: true, // Set to false to disable the query
+      }
+    );
+    const esqlAlerts = useMemo(() => {
+      if (isLoadingEsqlQuery || !esqlQueryData) {
+        return [];
+      }
+      return esqlResultToPlainObjects<Alert>(esqlQueryData).slice(0, alerts.length);
+    }, [esqlQueryData, isLoadingEsqlQuery, alerts.length]);
+    // console.log(`[TEST!!!] plainObjects: ${JSON.stringify(alerts)}`);
 
     useEffect(() => {
       if (onLoaded && !isLoadingAlerts && isSuccess) {

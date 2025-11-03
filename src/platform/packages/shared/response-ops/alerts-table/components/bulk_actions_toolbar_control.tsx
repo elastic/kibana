@@ -11,6 +11,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import {
+  ALERT_ATTACK_IDS,
   ALERT_CASE_IDS,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_TAGS,
@@ -46,6 +47,7 @@ const selectedIdsToTimelineItemMapper = (
       [ALERT_CASE_IDS]: null,
       [ALERT_WORKFLOW_TAGS]: null,
       [ALERT_WORKFLOW_ASSIGNEE_IDS]: null,
+      [ALERT_ATTACK_IDS]: null,
       ...alert,
     }).map(([key, value]) => ({
       field: key,

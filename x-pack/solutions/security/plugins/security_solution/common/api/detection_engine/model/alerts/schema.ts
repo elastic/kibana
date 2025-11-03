@@ -48,6 +48,7 @@ import type {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_ATTACK_IDS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
@@ -99,6 +100,7 @@ type Version8130 = '8.13.0';
 type Version8160 = '8.16.0';
 type Version8180 = '8.18.0';
 type Version8190 = '8.19.0';
+type Version930 = '9.3.0';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type AlertAncestorSchema = {
@@ -526,6 +528,10 @@ type DetectionAlertSchema = {
   [ALERT_WORKFLOW_ASSIGNEE_IDS]: {
     type: string[] | undefined;
     version: Version8120;
+  };
+  [ALERT_ATTACK_IDS]: {
+    type: string[] | undefined;
+    version: Version930;
   };
   [LEGACY_ALERT_HOST_CRITICALITY]: {
     type: string | undefined;
