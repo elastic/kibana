@@ -153,7 +153,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
     } catch (e) {
       notifications.toasts.addError(e, {
         title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.errorNotificationTitle', {
-          // defaultMessage: 'Failed to migrate agents',
           defaultMessage: 'Failed to migrate {agentCount, plural, one {agent} other {agents}}',
           values: {
             agentCount: filteredAgentCount,
@@ -191,7 +190,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
           <EuiSpacer />
           <EuiText>
             <FormattedMessage
-              id="xpack.fleet.agentList.migrateAgentFlyout.title"
+              id="xpack.fleet.agentList.migrateAgentFlyout.description"
               defaultMessage="Move {agentCount, plural, one {this agent} other {these agents}} to a different Fleet Server by specifying a new cluster URL and enrollment token."
               values={{
                 agentCount: filteredAgentCount,
@@ -218,10 +217,10 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 <EuiAccordion
                   id="migrateAgentFlyoutWarningAccordion"
                   buttonContent={
-                    <EuiButtonEmpty onClick={() => {}}>
+                    <EuiButtonEmpty onClick={() => {}} aria-label="View hosts">
                       <FormattedMessage
                         id="xpack.fleet.agentList.migrateAgentFlyout.warningAccordion"
-                        defaultMessage="View Hosts"
+                        defaultMessage="View hosts"
                       />
                     </EuiButtonEmpty>
                   }
@@ -309,7 +308,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             <EuiSpacer size="m" />
 
             {/* Additional Settings Section */}
-            <EuiFormRow fullWidth>
+            <EuiFormRow fullWidth aria-label="Additional options">
               <EuiAccordion
                 arrowDisplay="left"
                 id="migrateAgentFlyoutAdditionalOptions"
@@ -656,7 +655,11 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiButtonEmpty onClick={onClose} data-test-subj="migrateAgentFlyoutCancelButton">
+            <EuiButtonEmpty
+              onClick={onClose}
+              data-test-subj="migrateAgentFlyoutCancelButton"
+              aria-label="Cancel"
+            >
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"

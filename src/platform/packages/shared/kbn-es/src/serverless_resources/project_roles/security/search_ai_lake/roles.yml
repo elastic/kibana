@@ -6,18 +6,27 @@ _search_ai_lake_analyst:
     _public: true
     _reserved: true
   cluster:
-    - "monitor_ml"
+    - "manage_inference"
     - "monitor_connector"
+    - "monitor_inference"
+    - "monitor_ml"
   indices:
     - names:
         - ".alerts-security*"
+        - ".internal.alerts-security*"
+        - ".adhoc.alerts-security*"
+        - ".internal.adhoc.alerts-security*"
+      privileges:
+        - "index"
+        - "read"
+        - "write"
+        - "maintenance"
+        - "view_index_metadata"
+    - names:
         - ".siem-signals-*"
         - ".preview.alerts-security*"
         - ".internal.preview.alerts-security*"
-        - ".adhoc.alerts-security*"
-        - ".internal.adhoc.alerts-security*"
-        - ".internal.alerts-security*"
-        - "security_solution-alert-*"
+        - "logs-*"
       privileges:
         - "read"
         - "view_index_metadata"
@@ -30,26 +39,16 @@ _search_ai_lake_analyst:
         - ".entities.v1.latest.security_*"
         - ".ml-anomalies-*"
         - "security_solution-*.misconfiguration_latest*"
-        - ".elastic-connectors"
       privileges:
-        - "read"
-    - names:
-        - "synthetics-*-"
-        - "metrics-*-"
-        - "logs-*-"
-        - "traces-*-"
-        - "profiling-*"
-      privileges:
-        - "view_index_metadata"
         - "read"
   applications:
     - application: "kibana-.kibana"
       privileges:
         - "feature_ml.read"
-        - "feature_siemV3.all"
+        - "feature_siemV4.all"
         - "feature_securitySolutionCasesV2.all"
         - "feature_securitySolutionAssistant.all"
-        - "feature_securitySolutionAttackDiscovery.all"
+        - "feature_securitySolutionAttackDiscovery.minimal_all"
         - "feature_builtInAlerts.all"
         - "feature_actions.all"
         - "feature_discover_v2.read"
@@ -57,15 +56,16 @@ _search_ai_lake_analyst:
         - "feature_indexPatterns.read"
         - "feature_fleetv2.read"
       resources: "*"
-  run_as: []
 
 _search_ai_lake_soc_manager:
   metadata:
     _public: true
     _reserved: true
   cluster:
-    - "monitor_ml"
+    - "manage_inference"
     - "monitor_connector"
+    - "monitor_inference"
+    - "monitor_ml"
   indices:
     - names:
         - "apm-*-transaction*"
@@ -73,7 +73,6 @@ _search_ai_lake_soc_manager:
         - "auditbeat-*"
         - "endgame-*"
         - "filebeat-*"
-        - "logs-*"
         - "packetbeat-*"
         - "winlogbeat-*"
         - "logstash-*"
@@ -81,6 +80,12 @@ _search_ai_lake_soc_manager:
         - "security_solution-*.misconfiguration_latest*"
       privileges:
         - "read"
+        - "write"
+    - names:
+        - "logs-*"
+      privileges:
+        - "read"
+        - "view_index_metadata"
         - "write"
     - names:
         - ".alerts-security*"
@@ -114,9 +119,10 @@ _search_ai_lake_soc_manager:
   applications:
     - application: "kibana-.kibana"
       privileges:
-        - "feature_siemV3.all"
-        - "feature_siemV3.global_artifact_management_all"
-        - "feature_siemV3.workflow_insights_all"
+        - "feature_siemV4.all"
+        - "feature_siemV4.global_artifact_management_all"
+        - "feature_siemV4.workflow_insights_all"
+        - "feature_siemV4.soc_management_all"
         - "feature_securitySolutionCasesV2.all"
         - "feature_securitySolutionAssistant.all"
         - "feature_securitySolutionAttackDiscovery.all"
@@ -127,4 +133,5 @@ _search_ai_lake_soc_manager:
         - "feature_savedQueryManagement.all"
         - "feature_ml.all"
         - "feature_fleetv2.all"
+        - "feature_advancedSettings.all"
       resources: "*"

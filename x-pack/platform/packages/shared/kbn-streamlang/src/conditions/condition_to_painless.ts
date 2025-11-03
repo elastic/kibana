@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { isBoolean, isString } from 'lodash';
+import { isBoolean, isString, isNil } from 'lodash';
 import type {
   Condition,
   FilterCondition,
   RangeCondition,
   ShorthandBinaryFilterCondition,
   ShorthandUnaryFilterCondition,
+  StringOrNumberOrBoolean,
 } from '../../types/conditions';
 import { BINARY_OPERATORS } from '../../types/conditions';
 
@@ -23,13 +24,17 @@ function safePainlessField(conditionOrField: FilterCondition | string) {
   return `$('${conditionOrField.field}', null)`;
 }
 
-function encodeValue(value: string | number | boolean) {
+function encodeValue(value: StringOrNumberOrBoolean | null | undefined) {
   if (isString(value)) {
     return `"${value}"`;
   }
   if (isBoolean(value)) {
     return value ? 'true' : 'false';
   }
+  if (isNil(value)) {
+    return 'null';
+  }
+
   return value;
 }
 
@@ -53,53 +58,45 @@ function generateRangeComparisonClauses(
 
 // Convert a shorthand binary filter condition to painless
 function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
+  const safeFieldAccessor = safePainlessField(condition);
   // Find which operator is present
   const op = BINARY_OPERATORS.find((k) => condition[k] !== undefined);
-  const value = condition[op!];
+
+  if (!op) {
+    throw new Error('No valid binary operator found in condition');
+  }
+
+  const value = condition[op];
 
   switch (op) {
-    case 'neq':
-      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
-        condition
-      )}.toString() != ${encodeValue(String(value))}) || ${safePainlessField(
-        condition
-      )} != ${encodeValue(String(value))})`;
     case 'gt':
     case 'gte':
     case 'lt':
     case 'lte': {
-      const field = safePainlessField(condition);
       const { numberClause, stringClause } = generateRangeComparisonClauses(
-        field,
+        safeFieldAccessor,
         op as 'gt' | 'gte' | 'lt' | 'lte',
         Number(value)
       );
-      return `((${field} instanceof String && ${stringClause}) || ${numberClause})`;
+      return `((${safeFieldAccessor} instanceof String && ${stringClause}) || ${numberClause})`;
     }
     case 'startsWith':
-      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
-        condition
-      )}.toString().startsWith(${encodeValue(String(value))})) || ${safePainlessField(
-        condition
-      )}.startsWith(${encodeValue(String(value))}))`;
+      return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString().startsWith(${encodeValue(
+        String(value)
+      )})) || ${safeFieldAccessor}.startsWith(${encodeValue(String(value))}))`;
     case 'endsWith':
-      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
-        condition
-      )}.toString().endsWith(${encodeValue(String(value))})) || ${safePainlessField(
-        condition
-      )}.endsWith(${encodeValue(String(value))}))`;
+      return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString().endsWith(${encodeValue(
+        String(value)
+      )})) || ${safeFieldAccessor}.endsWith(${encodeValue(String(value))}))`;
     case 'contains':
       // Behaviour is "fuzzy"
-      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
-        condition
-      )}.toString().toLowerCase().contains(${encodeValue(
+      return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString().toLowerCase().contains(${encodeValue(
         String(value).toLowerCase()
-      )})) || ${safePainlessField(condition)}.toLowerCase().contains(${encodeValue(
+      )})) || ${safeFieldAccessor}.toLowerCase().contains(${encodeValue(
         String(value).toLowerCase()
       )}))`;
     case 'range': {
       const range = value as RangeCondition;
-      const field = safePainlessField(condition);
 
       // Build clauses for both Number and String types using generateComparisonClauses
       const numberClauses: string[] = [];
@@ -107,7 +104,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
 
       if (range.gte !== undefined) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
-          field,
+          safeFieldAccessor,
           'gte',
           Number(range.gte)
         );
@@ -116,7 +113,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
       }
       if (range.lte !== undefined) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
-          field,
+          safeFieldAccessor,
           'lte',
           Number(range.lte)
         );
@@ -125,7 +122,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
       }
       if (range.gt !== undefined) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
-          field,
+          safeFieldAccessor,
           'gt',
           Number(range.gt)
         );
@@ -134,7 +131,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
       }
       if (range.lt !== undefined) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
-          field,
+          safeFieldAccessor,
           'lt',
           Number(range.lt)
         );
@@ -145,14 +142,14 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
       const numberExpr = numberClauses.length > 0 ? numberClauses.join(' && ') : 'true';
       const stringExpr = stringClauses.length > 0 ? stringClauses.join(' && ') : 'true';
 
-      return `((${field} instanceof Number && ${numberExpr}) || (${field} instanceof String && ${stringExpr}))`;
+      return `((${safeFieldAccessor} instanceof Number && ${numberExpr}) || (${safeFieldAccessor} instanceof String && ${stringExpr}))`;
     }
+    case 'neq':
     default: // eq
-      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
-        condition
-      )}.toString() == ${encodeValue(String(value))}) || ${safePainlessField(
-        condition
-      )} == ${encodeValue(String(value))})`;
+      const operator = op === 'neq' ? '!=' : '==';
+      return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString() ${operator} ${encodeValue(
+        String(value)
+      )}) || ${safeFieldAccessor} ${operator} ${encodeValue(value as StringOrNumberOrBoolean)})`;
   }
 }
 

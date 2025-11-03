@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CronEditor is rendered with a DAY frequency 1`] = `
-Array [
+<div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
@@ -89,7 +89,7 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -617,12 +617,12 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
-]
+  </div>
+</div>
 `;
 
 exports[`CronEditor is rendered with a HOUR frequency 1`] = `
-Array [
+<div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
@@ -710,7 +710,7 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -1069,103 +1069,12 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
-]
-`;
-
-exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
-<div
-  class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
-  id="generated-id-row"
->
-  <div
-    class="euiFormRow__labelWrapper"
-  >
-    <label
-      class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-      for="generated-id"
-      id="generated-id-label"
-    >
-      Frequency
-    </label>
-  </div>
-  <div
-    class="euiFormRow__fieldWrapper"
-  >
-    <div
-      class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
-    >
-      <div
-        class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
-      >
-        <label
-          class="euiFormLabel emotion-euiFormLabel"
-          for="generated-id"
-        >
-          Every
-        </label>
-      </div>
-      <div
-        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
-        style="--euiFormControlRightIconsCount: 1;"
-      >
-        <select
-          class="euiSelect emotion-euiSelect-fullWidth-inGroup"
-          data-test-subj="cronFrequencySelect"
-          id="generated-id"
-        >
-          <option
-            value="MINUTE"
-          >
-            minute
-          </option>
-          <option
-            value="HOUR"
-          >
-            hour
-          </option>
-          <option
-            value="DAY"
-          >
-            day
-          </option>
-          <option
-            value="WEEK"
-          >
-            week
-          </option>
-          <option
-            value="MONTH"
-          >
-            month
-          </option>
-          <option
-            value="YEAR"
-          >
-            year
-          </option>
-        </select>
-        <div
-          class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
-        >
-          <span
-            class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
-          >
-            <span
-              aria-hidden="true"
-              class="euiFormControlLayoutCustomIcon__icon"
-              data-euiicon-type="arrowDown"
-            />
-          </span>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 `;
 
-exports[`CronEditor is rendered with a MONTH frequency 1`] = `
-Array [
+exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
+<div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
@@ -1253,7 +1162,100 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
+</div>
+`;
+
+exports[`CronEditor is rendered with a MONTH frequency 1`] = `
+<div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Frequency
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
+      >
+        <div
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            Every
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
+        >
+          <select
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
+            data-test-subj="cronFrequencySelect"
+            id="generated-id"
+          >
+            <option
+              value="MINUTE"
+            >
+              minute
+            </option>
+            <option
+              value="HOUR"
+            >
+              hour
+            </option>
+            <option
+              value="DAY"
+            >
+              day
+            </option>
+            <option
+              value="WEEK"
+            >
+              week
+            </option>
+            <option
+              value="MONTH"
+            >
+              month
+            </option>
+            <option
+              value="YEAR"
+            >
+              year
+            </option>
+          </select>
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+          >
+            <span
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+            >
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -1467,7 +1469,7 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -1995,12 +1997,12 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
-]
+  </div>
+</div>
 `;
 
 exports[`CronEditor is rendered with a WEEK frequency 1`] = `
-Array [
+<div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
@@ -2088,7 +2090,7 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -2182,7 +2184,7 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -2710,12 +2712,12 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
-]
+  </div>
+</div>
 `;
 
 exports[`CronEditor is rendered with a YEAR frequency 1`] = `
-Array [
+<div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
@@ -2803,7 +2805,7 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -2922,7 +2924,7 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -3136,7 +3138,7 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
@@ -3664,6 +3666,6 @@ Array [
         </div>
       </div>
     </div>
-  </div>,
-]
+  </div>
+</div>
 `;

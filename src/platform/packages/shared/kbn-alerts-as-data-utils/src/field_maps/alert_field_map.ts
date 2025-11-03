@@ -53,6 +53,11 @@ import {
   EVENT_ORIGINAL,
   TAGS,
   ALERT_INTENDED_TIMESTAMP,
+  ALERT_INDEX_PATTERN,
+  ALERT_SCHEDULED_ACTION_GROUP,
+  ALERT_SCHEDULED_ACTION_DATE,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
@@ -258,6 +263,20 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
+  [ALERT_SCHEDULED_ACTION_DATE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_SCHEDULED_ACTION_GROUP]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_SCHEDULED_ACTION_THROTTLING]: {
+    type: 'unmapped',
+    required: false,
+  },
   [EVENT_ACTION]: {
     type: 'keyword',
     array: false,
@@ -293,6 +312,16 @@ export const alertFieldMap = {
   },
   [VERSION]: {
     type: 'version',
+    array: false,
+    required: false,
+  },
+  [ALERT_INDEX_PATTERN]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_STATE_NAMESPACE]: {
+    type: 'unmapped',
     array: false,
     required: false,
   },

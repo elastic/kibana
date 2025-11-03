@@ -14,8 +14,8 @@ import type {
   RootProfileService,
 } from '../profiles';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
-import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
-import { createPatternDataSourceProfileProvider } from './common/patterns';
+import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs_data_source_profile';
+import { createPatternsDataSourceProfileProvider } from './common/patterns_data_source_profile';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
@@ -27,21 +27,24 @@ import { createObservabilityLogsDataSourceProfileProviders } from './observabili
 import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_providers';
 import { createObservabilityRootProfileProvider } from './observability/observability_root_profile/profile';
 import { createObservabilityTracesDataSourceProfileProviders } from './observability/traces_data_source_profile/create_profile_providers';
-import type { ProfileProviderServices } from './profile_provider_services';
-import { createProfileProviderServices } from './profile_provider_services';
+import type {
+  ProfileProviderServices,
+  ProfileProviderSharedServices,
+} from './profile_provider_services';
 import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
-import { createObservabilityMetricsDataSourceProfileProviders } from './metrics_data_source_profile';
+import { createMetricsDataSourceProfileProviders } from './common/metrics_data_source_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
  * @param options Register profile provider options
  */
-export const registerProfileProviders = async ({
+export const registerProfileProviders = ({
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
   enabledExperimentalProfileIds,
+  sharedServices,
   services,
 }: {
   /**
@@ -60,9 +63,16 @@ export const registerProfileProviders = async ({
    * Array of experimental profile IDs which are enabled in `kibana.yml`
    */
   enabledExperimentalProfileIds: string[];
+  /**
+   * Shared services for profile providers
+   */
+  sharedServices: ProfileProviderSharedServices;
+  /**
+   * The base Discover services
+   */
   services: DiscoverServices;
 }) => {
-  const providerServices = await createProfileProviderServices(services);
+  const providerServices: ProfileProviderServices = { ...sharedServices, ...services };
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
@@ -109,11 +119,11 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
  */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
-  createPatternDataSourceProfileProvider(providerServices),
+  createPatternsDataSourceProfileProvider(providerServices),
   createDeprecationLogsDataSourceProfileProvider(),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
-  ...createObservabilityMetricsDataSourceProfileProviders(providerServices),
+  ...createMetricsDataSourceProfileProviders(providerServices),
 ];
 
 /**

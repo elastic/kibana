@@ -16,6 +16,7 @@ import {
   ENTITY_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   SUMMARY_VIEW,
 } from '../../shared/translations';
+import type { AssetCriticalityLevel } from '../../../../../common/api/entity_analytics/asset_criticality';
 
 // Fallback implementation when assistant is not available
 const useAssistantNoop = () => ({
@@ -27,6 +28,7 @@ export interface UseAssetInventoryAssistantParams {
   entityId: EntityEcs['id'];
   entityFields: Record<string, string[]>;
   isPreviewMode: boolean;
+  assetCriticalityLevel?: AssetCriticalityLevel;
 }
 
 export interface UseAssetInventoryAssistantResult {
@@ -51,6 +53,7 @@ export const useAssetInventoryAssistant = ({
   entityId,
   entityFields,
   isPreviewMode,
+  assetCriticalityLevel,
 }: UseAssetInventoryAssistantParams): UseAssetInventoryAssistantResult => {
   const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
     useAssistantAvailability();
@@ -63,7 +66,19 @@ export const useAssetInventoryAssistant = ({
   );
   const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
 
-  const getPromptContext = useCallback(async () => entityFields || {}, [entityFields]);
+  const getPromptContext = useCallback(async () => {
+    const fields = entityFields || {};
+
+    // If we have fresh criticality data from the asset criticality indexes, add/update it in the context
+    if (assetCriticalityLevel) {
+      return {
+        ...fields,
+        'asset.criticality': [assetCriticalityLevel],
+      };
+    }
+
+    return fields;
+  }, [entityFields, assetCriticalityLevel]);
 
   const uniqueName = useMemo(() => {
     const entityName = entityId || ENTITY_SUMMARY_CONVERSATION_ID;

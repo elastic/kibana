@@ -24,7 +24,7 @@ import { BehaviorSubject, Subscription, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { SingleMetricViewerEmbeddableApi, SingleMetricViewerEmbeddableState } from '../types';
+import type { SingleMetricViewerEmbeddableApi } from '../types';
 import {
   initializeSingleMetricViewerControls,
   singleMetricViewerComparators,
@@ -34,6 +34,7 @@ import { getServices } from './get_services';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { getSingleMetricViewerComponent } from '../../shared_components/single_metric_viewer';
 import { EmbeddableSingleMetricViewerUserInput } from './single_metric_viewer_setup_flyout';
+import type { SingleMetricViewerEmbeddableState } from './types';
 
 export const getSingleMetricViewerEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>

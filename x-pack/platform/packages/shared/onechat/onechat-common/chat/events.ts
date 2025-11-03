@@ -73,7 +73,10 @@ export const isToolResultEvent = (event: OnechatEvent<string, any>): event is To
 // reasoning
 
 export interface ReasoningEventData {
+  /** plain text reasoning content */
   reasoning: string;
+  /** if true, will not be persisted or displaying in the thinking panel, only displayed as "current thinking" **/
+  transient?: boolean;
 }
 
 export type ReasoningEvent = ChatEventBase<ChatEventType.reasoning, ReasoningEventData>;

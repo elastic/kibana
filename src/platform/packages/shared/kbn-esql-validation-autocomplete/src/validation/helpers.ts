@@ -9,6 +9,7 @@
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import { type ESQLCommand, type FunctionDefinition, Walker, Builder } from '@kbn/esql-ast';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { expandEvals } from '../shared/expand_evals';
 
 /**
@@ -36,7 +37,7 @@ export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
  * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
  * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
  */
-export const getEnrichCommands = (commands: ESQLCommand[]): ESQLCommand[] =>
+export const getEnrichCommands = (commands: ESQLAstAllCommands[]): ESQLCommand[] =>
   Walker.matchAll(commands, { type: 'command', name: 'enrich' }) as ESQLCommand[];
 
 /**

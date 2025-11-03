@@ -171,7 +171,7 @@
               "instance_configuration_id": "gcp.kibana.n2.68x32x45",
               "zone_count": 1,
               "size": {
-                "value": 2048,
+                "value": null,
                 "resource": "memory"
               }
             }

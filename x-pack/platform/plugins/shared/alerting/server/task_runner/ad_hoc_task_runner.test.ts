@@ -287,6 +287,7 @@ describe('Ad Hoc Task Runner', () => {
         duration: '1h',
         enabled: true,
         end: '2024-03-01T05:00:00.000Z',
+        initiator: 'user',
         rule: {
           name: 'test',
           tags: [],
@@ -1709,6 +1710,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: expect.any(Number),
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     } else if (status === 'warning') {
@@ -1744,6 +1746,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: 0,
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     } else if (status === 'skip') {
@@ -1780,6 +1783,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: expect.any(Number),
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     }

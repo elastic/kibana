@@ -22,6 +22,7 @@ target
 .claude
 .cursor
 .windsurf
+claude.md
 *.iml
 *.log
 types.eslint.config.js
@@ -66,7 +67,7 @@ webpackstats.json
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
-!/config/serverless.chat.yml
+!/config/serverless.workplaceai.yml
 !/config/serverless.oblt.yml
 !/config/serverless.oblt.complete.yml
 !/config/serverless.oblt.logs_essentials.yml
@@ -180,5 +181,8 @@ x-pack/solutions/security/test/security_solution_playwright/.auth/
 x-pack/solutions/security/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+
+# Ignore the one-console translations build output folder
+src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache

@@ -10,34 +10,34 @@
 import { z } from '@kbn/zod';
 import {
   AtomicGraphNodeSchema,
-  HttpGraphNodeSchema,
-  WaitGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
+  HttpGraphNodeSchema,
   KibanaGraphNodeSchema,
+  WaitGraphNodeSchema,
 } from './base';
 import {
-  EnterIfNodeSchema,
-  ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
+  EnterIfNodeSchema,
   ExitConditionBranchNodeSchema,
+  ExitIfNodeSchema,
 } from './branching_nodes';
 import { EnterForeachNodeSchema, ExitForeachNodeSchema } from './loop_nodes';
 import {
-  EnterRetryNodeSchema,
-  ExitRetryNodeSchema,
   EnterContinueNodeSchema,
-  ExitContinueNodeSchema,
-  EnterTryBlockNodeSchema,
-  ExitTryBlockNodeSchema,
-  EnterNormalPathNodeSchema,
-  ExitNormalPathNodeSchema,
   EnterFallbackPathNodeSchema,
-  ExitFallbackPathNodeSchema,
+  EnterNormalPathNodeSchema,
+  EnterRetryNodeSchema,
   EnterTimeoutZoneNodeSchema,
+  EnterTryBlockNodeSchema,
+  ExitContinueNodeSchema,
+  ExitFallbackPathNodeSchema,
+  ExitNormalPathNodeSchema,
+  ExitRetryNodeSchema,
   ExitTimeoutZoneNodeSchema,
-  WorkflowLevelOnFailureNodeSchema,
-  StepLevelOnFailureNodeSchema,
+  ExitTryBlockNodeSchema,
   OnFailureNodeSchema,
+  StepLevelOnFailureNodeSchema,
+  WorkflowLevelOnFailureNodeSchema,
 } from './on_failure_nodes';
 
 const GraphNodeUnionSchema = z.discriminatedUnion('type', [

@@ -5,17 +5,34 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useQuery } from '@kbn/react-query';
+import { ToolType } from '@kbn/onechat-common';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
+import { useKibana } from '../use_kibana';
 
 export const useToolTypes = () => {
   const { toolsService } = useOnechatServices();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  const { data: toolTypes, isLoading } = useQuery({
+  const { data: serverToolTypes = [], isLoading } = useQuery({
     queryKey: queryKeys.tools.typeInfo,
     queryFn: () => toolsService.getToolTypes(),
   });
+
+  const workflowsEnabled = useMemo(
+    () => settings.client.get('workflows:ui:enabled', false),
+    [settings]
+  );
+
+  const toolTypes = useMemo(() => {
+    return serverToolTypes.filter(
+      (toolType) => workflowsEnabled || !(toolType.type === ToolType.workflow)
+    );
+  }, [serverToolTypes, workflowsEnabled]);
 
   return { toolTypes, isLoading };
 };

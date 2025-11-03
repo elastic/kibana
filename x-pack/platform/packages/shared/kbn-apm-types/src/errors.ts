@@ -19,6 +19,7 @@ export interface ErrorData {
 }
 
 export interface Error {
+  eventName?: string;
   error: ErrorData;
   timestamp?: TimestampUs | undefined;
 }

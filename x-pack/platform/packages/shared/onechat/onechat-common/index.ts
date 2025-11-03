@@ -82,10 +82,13 @@ export {
   type AgentConfiguration,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
+  type AgentAnswerStepConfiguration,
+  type AgentResearchStepConfiguration,
   agentIdRegexp,
 } from './agents';
 export {
   type RoundInput,
+  type RawRoundInput,
   type AssistantResponse,
   type ToolCallWithResult,
   type ConversationRound,

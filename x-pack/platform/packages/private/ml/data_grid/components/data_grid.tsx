@@ -161,6 +161,7 @@ export const DataGrid: FC<Props> = memo(
         <div data-test-subj={`${dataTestSubj} empty`}>
           {isWithHeader(props) && <DataGridTitle title={props.title} />}
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.ml.dataGrid.IndexNoDataCalloutTitle', {
               defaultMessage: 'Empty index query result.',
             })}
@@ -182,6 +183,7 @@ export const DataGrid: FC<Props> = memo(
         <div data-test-subj={`${dataTestSubj} empty`}>
           {isWithHeader(props) && <DataGridTitle title={props.title} />}
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.ml.dataGrid.dataGridNoDataCalloutTitle', {
               defaultMessage: 'Index preview not available',
             })}
@@ -200,6 +202,7 @@ export const DataGrid: FC<Props> = memo(
       if (errorMessage && !errorMessage.includes('failed to create query')) {
         errorCallout = (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.ml.dataframe.analytics.exploration.querySyntaxError', {
               defaultMessage:
                 'An error occurred loading the index data. Please ensure your query syntax is valid.',
@@ -213,6 +216,7 @@ export const DataGrid: FC<Props> = memo(
       } else {
         errorCallout = (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.ml.dataGrid.indexDataError', {
               defaultMessage: 'An error occurred loading the index data.',
             })}
@@ -275,6 +279,7 @@ export const DataGrid: FC<Props> = memo(
         {ccsWarning && (
           <div data-test-subj={`${dataTestSubj} ccsWarning`}>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutTitle', {
                 defaultMessage: 'Cross-cluster search returned no fields data.',
               })}

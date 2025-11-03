@@ -15,6 +15,7 @@ import { getAlerts } from '../../queries/get_alerts';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
 import {
   getInitialEventLogUsage,
+  getInitialRuleCustomizationStatus,
   getInitialRuleUpgradeStatus,
   getInitialRulesUsage,
   getInitialSpacesUsage,
@@ -30,6 +31,8 @@ import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
 import { calculateRuleUpgradeStatus } from './calculate_rules_upgrade_status';
+import type { ExternalRuleSourceInfo } from './get_rule_customization_status';
+import { getRuleCustomizationStatus } from './get_rule_customization_status';
 
 export interface GetRuleMetricsOptions {
   signalsIndex: string;
@@ -62,6 +65,7 @@ export const getRuleMetrics = async ({
         detection_rule_usage: getInitialRulesUsage(),
         detection_rule_status: getInitialEventLogUsage(),
         elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+        elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
         spaces_usage: getInitialSpacesUsage(),
       };
     }
@@ -145,6 +149,7 @@ export const getRuleMetrics = async ({
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
       elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
+      elastic_detection_rule_customization_status: prepareRuleCustomizationStatus(ruleResults),
       spaces_usage: getSpacesUsage(ruleResults),
     };
   } catch (e) {
@@ -157,7 +162,34 @@ export const getRuleMetrics = async ({
       detection_rule_usage: getInitialRulesUsage(),
       detection_rule_status: getInitialEventLogUsage(),
       elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+      elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
       spaces_usage: getInitialSpacesUsage(),
     };
   }
 };
+
+function prepareRuleCustomizationStatus(
+  ruleResults: Awaited<ReturnType<typeof getDetectionRules>>
+) {
+  const ruleSources = ruleResults.flatMap((ruleResult): ExternalRuleSourceInfo[] => {
+    const ruleSource = ruleResult.attributes?.params?.ruleSource;
+    if (
+      !ruleSource ||
+      ruleSource?.type !== 'external' ||
+      typeof ruleSource.isCustomized !== 'boolean'
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        is_customized: ruleSource.isCustomized,
+        customized_fields: ruleSource.customizedFields ?? [],
+      },
+    ];
+  });
+
+  return ruleSources.length === 0
+    ? getInitialRuleCustomizationStatus()
+    : getRuleCustomizationStatus(ruleSources);
+}

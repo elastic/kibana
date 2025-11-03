@@ -8,8 +8,10 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
@@ -84,8 +86,22 @@ describe('WorkflowsService', () => {
     mockLogger.error = jest.fn();
 
     const mockEsClientPromise = Promise.resolve(mockEsClient);
+    const mockGetActionsClient = jest.fn().mockResolvedValue({
+      getAll: jest.fn().mockResolvedValue([]),
+      execute: jest.fn(),
+      bulkEnqueueExecution: jest.fn(),
+    } as unknown as IUnsecuredActionsClient);
+    const mockGetActionsClientWithRequest = jest.fn().mockResolvedValue({
+      listTypes: jest.fn().mockResolvedValue([]),
+      getAll: jest.fn().mockResolvedValue({ data: [] }),
+    } as unknown as PublicMethodsOf<ActionsClient>);
 
-    service = new WorkflowsService(mockEsClientPromise, mockLogger, false);
+    const mockGetActionsStart = jest.fn().mockResolvedValue({
+      getUnsecuredActionsClient: mockGetActionsClient,
+      getActionsClientWithRequest: mockGetActionsClientWithRequest,
+    });
+
+    service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
 
     mockSecurity = {
       authc: {
@@ -121,8 +137,8 @@ describe('WorkflowsService', () => {
         createdBy: 'test-user',
         lastUpdatedBy: 'test-user',
         valid: true,
-        createdAt: new Date('2023-01-01T00:00:00.000Z'),
-        lastUpdatedAt: new Date('2023-01-01T00:00:00.000Z'),
+        createdAt: '2023-01-01T00:00:00.000Z',
+        lastUpdatedAt: '2023-01-01T00:00:00.000Z',
       });
 
       // The storage adapter uses search internally, not get directly
@@ -181,8 +197,8 @@ describe('WorkflowsService', () => {
             createdBy: 'test-user',
             lastUpdatedBy: 'test-user',
             valid: true,
-            createdAt: new Date('2023-01-01T00:00:00.000Z'),
-            lastUpdatedAt: new Date('2023-01-01T00:00:00.000Z'),
+            createdAt: '2023-01-01T00:00:00.000Z',
+            lastUpdatedAt: '2023-01-01T00:00:00.000Z',
             history: [],
           },
         ],

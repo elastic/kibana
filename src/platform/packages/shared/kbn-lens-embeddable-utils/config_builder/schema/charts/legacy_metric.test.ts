@@ -25,7 +25,7 @@ describe('Legacy Metric Schema', () => {
   };
 
   describe('metric configuration', () => {
-    it('validates default values are applied', () => {
+    it('validates base count metric operation', () => {
       const input = {
         ...baseLegacyMetricConfig,
         metric: {
@@ -36,11 +36,8 @@ describe('Legacy Metric Schema', () => {
       };
 
       const validated = legacyMetricStateSchema.validate(input);
-      expect(validated.metric.size).toBe('m');
-      expect(validated.metric.alignments).toEqual({
-        labels: 'top',
-        value: 'left',
-      });
+      expect(validated.metric.size).toBeUndefined();
+      expect(validated.metric.alignments).toBeUndefined();
       expect(validated.metric.apply_color_to).toBeUndefined();
       expect(validated.metric.color).toBeUndefined();
     });
@@ -65,29 +62,42 @@ describe('Legacy Metric Schema', () => {
     });
 
     it('validates metric with color configuration', () => {
-      const input = {
-        ...baseLegacyMetricConfig,
-        metric: {
-          operation: 'average',
-          field: 'temperature',
-          alignments: { labels: 'top', value: 'left' },
-          size: 'l',
-          apply_color_to: 'value',
-          color: {
-            type: 'dynamic',
-            min: 0,
-            max: 100,
-            range: 'absolute',
-            steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
-            ],
-          },
+      const colorByValueConfig = [
+        {
+          type: 'dynamic',
+          range: 'absolute',
+          steps: [
+            { type: 'from', from: 0, color: '#blue' },
+            { type: 'to', to: 100, color: '#red' },
+          ],
         },
-      };
+        {
+          type: 'dynamic',
+          range: 'percentage',
+          min: 0,
+          max: 100,
+          steps: [
+            { type: 'from', from: 0, color: '#blue' },
+            { type: 'to', to: 100, color: '#red' },
+          ],
+        },
+      ];
+      for (const color of colorByValueConfig) {
+        const input = {
+          ...baseLegacyMetricConfig,
+          metric: {
+            operation: 'average',
+            field: 'temperature',
+            alignments: { labels: 'top', value: 'left' },
+            size: 'l',
+            apply_color_to: 'value',
+            color,
+          },
+        };
 
-      const validated = legacyMetricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+        const validated = legacyMetricStateSchema.validate(input);
+        expect(validated).toEqual({ ...defaultValues, ...input });
+      }
     });
   });
 
@@ -173,12 +183,10 @@ describe('Legacy Metric Schema', () => {
           apply_color_to: 'background',
           color: {
             type: 'dynamic',
-            min: 0,
-            max: 1000,
             range: 'absolute',
             steps: [
-              { type: 'from', from: 0, color: '#red' },
-              { type: 'to', to: 1000, color: '#green' },
+              { type: 'from', from: 0, color: '#blue' },
+              { type: 'to', to: 100, color: '#red' },
             ],
           },
         },

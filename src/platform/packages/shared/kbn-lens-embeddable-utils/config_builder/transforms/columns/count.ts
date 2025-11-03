@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CountIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { CountIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiCountMetricOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';

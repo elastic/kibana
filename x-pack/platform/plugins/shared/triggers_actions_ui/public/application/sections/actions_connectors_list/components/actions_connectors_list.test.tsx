@@ -18,6 +18,7 @@ import type { ActionConnector, GenericValidationResult } from '../../../../types
 import { EditConnectorTabs } from '../../../../types';
 import { times } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -101,71 +102,44 @@ describe('actions_connectors_list', () => {
 
   describe('component with items', () => {
     const mockedActions: ActionConnector[] = [
-      {
+      createMockActionConnector({
         id: '1',
         actionTypeId: 'test',
         name: 'Test Connector 1',
-        secrets: {},
-        isSystemAction: false,
-        isPreconfigured: false,
-        isDeprecated: false,
         referencedByCount: 1,
-        config: {},
-      },
-      {
+      }),
+      createMockActionConnector({
         id: '2',
         actionTypeId: 'test2',
         name: 'Test Connector 2',
-        secrets: {},
-        isSystemAction: false,
         referencedByCount: 1,
-        isPreconfigured: false,
-        isDeprecated: false,
-        config: {},
-      },
-      {
+      }),
+      createMockActionConnector({
         id: '3',
         actionTypeId: 'test2',
         name: 'Test Connector 3',
-        isSystemAction: false,
         isMissingSecrets: true,
         referencedByCount: 1,
         isPreconfigured: true,
-        isDeprecated: false,
-      },
-      {
+      }),
+      createMockActionConnector({
         id: '4',
         actionTypeId: 'nonexistent',
         name: 'Test Connector 4',
-        secrets: {},
-        isSystemAction: false,
         referencedByCount: 1,
-        isPreconfigured: false,
-        isDeprecated: false,
-        config: {},
-      },
-      {
+      }),
+      createMockActionConnector({
         id: '5',
         actionTypeId: 'test3',
         name: 'Test Connector 5',
-        secrets: {},
-        isSystemAction: false,
         referencedByCount: 1,
-        isPreconfigured: false,
-        isDeprecated: false,
-        config: {},
-      },
-      {
+      }),
+      createMockActionConnector({
         id: '6',
         actionTypeId: 'test4',
         name: 'Test Connector 6',
-        secrets: {},
-        isSystemAction: false,
         referencedByCount: 1,
-        isPreconfigured: false,
-        isDeprecated: false,
-        config: {},
-      },
+      }),
     ];
     let mockedEditItem: jest.Mock;
 

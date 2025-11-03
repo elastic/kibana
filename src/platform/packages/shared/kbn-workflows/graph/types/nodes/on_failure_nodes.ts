@@ -8,8 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowRetrySchema } from '../../../spec/schema';
 import { GraphNodeSchema } from './base';
+import { WorkflowRetrySchema } from '../../../spec/schema';
 
 export const EnterContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

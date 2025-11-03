@@ -20,29 +20,25 @@ import { getEqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks
 import { getExportByObjectIds } from './get_export_by_object_ids';
 import { createDefaultExternalRuleSource } from '../detection_rules_client/mergers/rule_source/create_default_external_rule_source';
 import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const exceptionsClient = getExceptionListClientMock();
 const connectors = [
-  {
+  createMockConnectorFindResult({
     id: 'non-preconfigured-connector',
     actionTypeId: '.slack',
     name: 'slack',
     config: {},
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false,
     referencedByCount: 1,
-  },
-  {
+  }),
+  createMockConnectorFindResult({
     id: 'preconfigured-connector',
     actionTypeId: '.email',
     name: 'Email (preconfigured)',
     config: {},
     isPreconfigured: true,
-    isDeprecated: false,
-    isSystemAction: false,
     referencedByCount: 1,
-  },
+  }),
 ];
 
 describe('getExportByObjectIds', () => {

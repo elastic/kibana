@@ -58,7 +58,7 @@ export const dashboardVisualization: SavedObjectsType = {
 ```
 
 1. Since the name of a Saved Object type may form part of the URL path for the public Saved Objects HTTP API, these should follow our API URL path convention and always be written in snake case.
-2. This field determines "space behavior" — whether these objects can exist in one space, multiple spaces, or all spaces. This value means that objects of this type can only exist in a single space. See [Sharing Saved Objects](/extend/sharing-saved-objects.md) for more information.
+2. This field determines "space behavior", whether these objects can exist in one space, multiple spaces, or all spaces. This value means that objects of this type can only exist in a single space. See [Sharing Saved Objects](/extend/sharing-saved-objects.md) for more information.
 
 
 ```typescript

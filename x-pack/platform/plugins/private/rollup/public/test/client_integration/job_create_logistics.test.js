@@ -8,7 +8,7 @@
 import { mockHttpRequest, pageHelpers } from './helpers';
 
 import { act } from 'react-dom/test-utils';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { setHttp, init as initDocumentation } from '../../crud_app/services';
 
@@ -174,7 +174,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           );
         };
 
-        [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, ','].reduce((promise, char) => {
+        [...ILLEGAL_CHARACTERS_VISIBLE, ','].reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });

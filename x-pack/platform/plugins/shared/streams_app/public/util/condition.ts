@@ -44,8 +44,10 @@ export function emptyEqualsToAlways(condition: Condition) {
 }
 
 const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<Exclude<OperatorKeys, 'range'>, string[]> = {
-  eq: ['string'],
-  neq: ['string'],
+  // Allow both string and boolean for eq/neq so that boolean shorthand (e.g. "equals true") can rendered in UI
+  eq: ['string', 'boolean'],
+  neq: ['string', 'boolean'],
+
   gt: ['string'],
   gte: ['string'],
   lt: ['string'],
@@ -62,7 +64,7 @@ function isOperatorUiSupported(
   return operator in UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES;
 }
 
-export const isConditionRepresentableInUI = (
+export const isConditionEditableInUi = (
   condition: Condition
 ): condition is FilterCondition | AlwaysCondition => {
   if (isPlainObject(condition) && isFilterConditionObject(condition)) {
@@ -87,3 +89,23 @@ export const isConditionRepresentableInUI = (
   // an 'always' condition, which is representable in UI (empty condition)
   return isAlwaysCondition(condition);
 };
+
+// Determines whether a filter condition can be represented using the boolean shorthand
+// e.g. { field: 'foo', eq: true } can be represented by "equals true" operator in the UI
+export function isShorthandBooleanFilterCondition(
+  condition: FilterCondition
+): condition is ShorthandBinaryFilterCondition {
+  return (
+    (isPlainObject(condition) &&
+      isFilterConditionObject(condition) &&
+      'eq' in condition &&
+      typeof condition.eq === 'boolean') ||
+    ('neq' in condition && typeof condition.neq === 'boolean')
+  );
+}
+
+// Determines whether a value input should be displayed for a condition.
+// Shorthand binary operators e.g. "equals true" do not need a value field.
+export function conditionNeedsValueField(condition: FilterCondition): boolean {
+  return !isShorthandBooleanFilterCondition(condition);
+}

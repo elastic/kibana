@@ -313,7 +313,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         }}
         itemId="serviceName"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        data-test-subj="storageExplorerServicesTable"
+        data-test-subj={`storageExplorerServicesTable-${loading ? 'loading' : 'loaded'}`}
         error={
           status === FETCH_STATUS.FAILURE
             ? i18n.translate('xpack.apm.storageExplorer.table.errorMessage', {

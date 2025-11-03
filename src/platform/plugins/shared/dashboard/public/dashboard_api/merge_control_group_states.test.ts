@@ -70,7 +70,7 @@ describe('mergeControlGroupStates', () => {
         result!.controls.map(
           (c) => controlHasVariableName(c.controlConfig) && c.controlConfig?.variableName
         )
-      ).toEqual(['existingVar1', 'existingVar2', 'newVar1', 'newVar2']);
+      ).toEqual(['newVar1', 'newVar2', 'existingVar1', 'existingVar2']);
     });
 
     it('should not add duplicate controls with same variable names', () => {
@@ -94,7 +94,7 @@ describe('mergeControlGroupStates', () => {
         result!.controls.map(
           (c) => controlHasVariableName(c.controlConfig) && c.controlConfig?.variableName
         )
-      ).toEqual(['sharedVar', 'uniqueVar1', 'uniqueVar2']);
+      ).toEqual(['uniqueVar2', 'sharedVar', 'uniqueVar1']);
     });
 
     it('should handle controls without variable names', () => {
@@ -122,9 +122,9 @@ describe('mergeControlGroupStates', () => {
 
       expect(result!.controls).toHaveLength(3);
       expect(result!.controls.map((c) => c.id)).toEqual([
+        'control-newVar',
         'control-withVar',
         'control-no-var',
-        'control-newVar',
       ]);
     });
   });
