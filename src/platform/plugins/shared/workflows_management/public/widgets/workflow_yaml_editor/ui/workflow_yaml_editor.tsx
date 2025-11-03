@@ -113,7 +113,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     filterGraceful: true, // Better filtering
     localityBonus: true, // Prioritize matches near cursor
   },
-  wordBasedSuggestions: false,
+  wordBasedSuggestions: 'off',
   hover: {
     enabled: true,
     delay: 300,

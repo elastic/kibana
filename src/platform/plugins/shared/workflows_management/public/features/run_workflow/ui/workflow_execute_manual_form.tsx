@@ -210,7 +210,7 @@ export const WorkflowExecuteManualForm = ({
               formatOnType: true,
               quickSuggestions: false,
               suggestOnTriggerCharacters: false,
-              wordBasedSuggestions: false,
+              wordBasedSuggestions: 'off',
               parameterHints: {
                 enabled: false,
               },
