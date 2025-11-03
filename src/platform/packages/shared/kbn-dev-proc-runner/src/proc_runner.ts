@@ -200,7 +200,7 @@ export class ProcRunner {
     );
   }
 
-  private getProc(name: string) {
+  getProc(name: string) {
     return this.procs.find((proc) => {
       return proc.name === name;
     });

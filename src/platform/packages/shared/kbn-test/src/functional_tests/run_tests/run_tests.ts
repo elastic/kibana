@@ -107,25 +107,100 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
         let shutdownEs;
         try {
-          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
-            if (abortCtrl.signal.aborted) {
-              return;
-            }
-          }
+          log.info('🚀 Starting Elasticsearch and Kibana in parallel...');
 
-          await runKibanaServer({
-            procs,
-            config,
-            logsDir: options.logsDir,
-            installDir: options.installDir,
-            onEarlyExit,
-            extraKbnOpts: [
-              config.get('serverless')
-                ? '--server.versioned.versionResolution=newest'
-                : '--server.versioned.versionResolution=oldest',
-            ],
-          });
+          // Track ES readiness
+          let esReady = false;
+          let resumeKibana: (() => void) | null = null;
+
+          // Helper to pause Kibana when appropriate
+          const monitorAndControlKibana = async () => {
+            // Wait 15 seconds to allow:
+            // - ES to download/extract/start its server
+            // - Kibana to complete its initialization
+            // Before this point, both can work in parallel without interference
+            log.debug('Waiting 15 seconds before considering pausing Kibana...');
+            await setTimeout(15000);
+
+            if (esReady) {
+              log.debug('ES is ready, not pausing Kibana');
+              return; // ES already ready, no need to pause
+            }
+
+            // After 15 seconds, if ES isn't ready yet, pause Kibana
+            const kibanaProc = procs.getProc('kibana');
+            if (kibanaProc) {
+              const pid = kibanaProc.childProcess.pid;
+              if (pid) {
+                log.info(`⏸️  Pausing Kibana (pid: ${pid}) while waiting for Elasticsearch...`);
+                try {
+                  process.kill(pid, 'SIGSTOP');
+
+                  // Store resume function
+                  resumeKibana = () => {
+                    try {
+                      log.info(`▶️  Resuming Kibana (pid: ${pid}) now that ES is ready`);
+                      process.kill(pid, 'SIGCONT');
+                    } catch (err) {
+                      log.warning(`Failed to resume Kibana: ${err}`);
+                    }
+                  };
+                } catch (err) {
+                  log.warning(`Failed to pause Kibana: ${err}`);
+                }
+              }
+            }
+          };
+
+          // Start both ES and Kibana in parallel
+          const [esShutdown] = await Promise.all([
+            // Start Elasticsearch
+            process.env.TEST_ES_DISABLE_STARTUP !== 'true'
+              ? runElasticsearch({ ...options, log, config, onEarlyExit }).then((shutdown) => {
+                  esReady = true;
+                  log.info('✅ Elasticsearch is ready');
+
+                  // Resume Kibana if it was paused
+                  if (resumeKibana) {
+                    resumeKibana();
+                    resumeKibana = null;
+                  }
+
+                  return shutdown;
+                })
+              : Promise.resolve(undefined).then(() => {
+                  esReady = true;
+                  return undefined;
+                }),
+
+            // Start Kibana and monitor it
+            (async () => {
+              // Start monitoring in parallel (don't await)
+              monitorAndControlKibana();
+
+              // Start Kibana server
+              await runKibanaServer({
+                procs,
+                config,
+                logsDir: options.logsDir,
+                installDir: options.installDir,
+                onEarlyExit,
+                extraKbnOpts: [
+                  config.get('serverless')
+                    ? '--server.versioned.versionResolution=newest'
+                    : '--server.versioned.versionResolution=oldest',
+                ],
+              });
+
+              log.info('✅ Kibana is ready');
+            })(),
+          ]);
+
+          shutdownEs = esShutdown;
+
+          if (abortCtrl.signal.aborted) {
+            return;
+          }
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
