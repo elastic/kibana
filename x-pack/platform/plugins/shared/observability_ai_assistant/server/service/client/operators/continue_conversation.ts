@@ -23,7 +23,7 @@ import {
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { createToolNotFoundError } from '@kbn/onechat-common';
+import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_complete/errors';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
