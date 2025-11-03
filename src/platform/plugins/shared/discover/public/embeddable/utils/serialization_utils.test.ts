@@ -12,9 +12,11 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import type { SearchEmbeddableSerializedState } from '../types';
+import type {
+  SearchEmbeddableByValueState,
+  SearchEmbeddableState,
+} from '../../../common/embeddable/types';
 import { deserializeState, serializeState } from './serialization_utils';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/server';
 
@@ -38,7 +40,7 @@ describe('Serialization utils', () => {
       },
     },
   ];
-  const mockedSavedSearchAttributes: SearchEmbeddableSerializedState['attributes'] = {
+  const mockedSavedSearchAttributes: SearchEmbeddableByValueState['attributes'] = {
     kibanaSavedObjectMeta: {
       searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
     },
@@ -62,7 +64,7 @@ describe('Serialization utils', () => {
 
   describe('deserialize state', () => {
     test('by value', async () => {
-      const serializedState: SerializedPanelState<SearchEmbeddableSerializedState> = {
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
         rawState: {
           attributes: mockedSavedSearchAttributes,
           title: 'test panel title',
@@ -95,23 +97,18 @@ describe('Serialization utils', () => {
         ...(await discoverServiceMock.savedSearch.byValueToSavedSearch(
           {
             attributes: mockedSavedSearchAttributes,
-          } as unknown as SavedSearchUnwrapResult,
+          },
           true
         )),
       });
 
-      const serializedState: SerializedPanelState<SearchEmbeddableSerializedState> = {
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
         rawState: {
           title: 'test panel title',
           sort: [['order_date', 'asc']], // overwrite the saved object sort
+          savedObjectId: 'savedSearch',
         },
-        references: [
-          {
-            id: 'savedSearch',
-            name: 'savedObjectRef',
-            type: 'search',
-          },
-        ],
+        references: [],
       };
 
       const deserializedState = await deserializeState({
@@ -126,7 +123,7 @@ describe('Serialization utils', () => {
   });
 
   describe('serialize state', () => {
-    test('by value', async () => {
+    test('by value', () => {
       const searchSource = createSearchSourceMock({
         index: dataViewMock,
       });
@@ -136,7 +133,7 @@ describe('Serialization utils', () => {
         searchSource,
       };
 
-      const serializedState = await serializeState({
+      const serializedState = serializeState({
         uuid,
         initialState: {
           ...mockedSavedSearchAttributes,
@@ -155,7 +152,6 @@ describe('Serialization utils', () => {
 
       expect(serializedState).toEqual({
         rawState: {
-          type: 'search',
           attributes: {
             ...attributes,
             tabs: [
@@ -167,7 +163,7 @@ describe('Serialization utils', () => {
             references: mockedSavedSearchAttributes.references,
           },
         },
-        references: mockedSavedSearchAttributes.references,
+        references: [],
       });
     });
 
@@ -196,14 +192,10 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          rawState: {},
-          references: [
-            {
-              id: 'test-id',
-              name: 'savedObjectRef',
-              type: 'search',
-            },
-          ],
+          rawState: {
+            savedObjectId: 'test-id',
+          },
+          references: [],
         });
       });
 
@@ -224,14 +216,9 @@ describe('Serialization utils', () => {
           rawState: {
             sampleSize: 500,
             sort: [['order_date', 'asc']],
+            savedObjectId: 'test-id',
           },
-          references: [
-            {
-              id: 'test-id',
-              name: 'savedObjectRef',
-              type: 'search',
-            },
-          ],
+          references: [],
         });
       });
     });

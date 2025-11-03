@@ -6096,7 +6096,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "{ by: string; direction: \"desc\" | \"async\"; } | undefined"
+              "{ by: string; direction: \"async\" | \"desc\"; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/inventory_locator.ts",
             "deprecated": false,

@@ -9,7 +9,7 @@
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
-  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
+  elasticsearch: ['shardTimeout', 'requestTimeout'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes'] as const,
 };
