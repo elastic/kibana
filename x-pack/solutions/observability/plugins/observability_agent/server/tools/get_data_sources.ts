@@ -34,9 +34,9 @@ export async function createObservabilityGetDataSourcesTool({
     id: OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Retrieves information about where observability data (logs, metrics, traces, alerts) is stored in Elasticsearch. Use this tool to discover which indices or index patterns to query for different types of observability signals. Essential for understanding the data landscape before performing searches.',
+      'Retrieves information about where observability data (logs, metrics, traces, alerts) is stored in Elasticsearch. Use this tool to discover which indices or index patterns to query for different types of observability signals.',
     schema: getDataSourcesSchema,
-    tags: ['observability', 'indices', 'data-sources', 'discovery'],
+    tags: ['observability'],
     handler: async () => {
       try {
         const { apmIndices, logIndexPatterns, metricIndexPatterns, alertsIndexPattern } =
@@ -48,7 +48,7 @@ export async function createObservabilityGetDataSourcesTool({
               type: ToolResultType.other,
               data: {
                 apm: {
-                  indices: apmIndices,
+                  indexPatterns: apmIndices,
                 },
                 logs: {
                   indexPatterns: logIndexPatterns,
