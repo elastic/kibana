@@ -28,7 +28,7 @@ export function EventType({ eventTypeValue }: EventTypeProps) {
   return (
     <EuiBadge color={euiPaletteRed9[9]} data-test-subj={dataTestSubj} css={badgeCss(euiTheme)}>
       <EuiText
-        size="s"
+        size="xs"
         // Value returned from formatFieldValue is always sanitized
         dangerouslySetInnerHTML={{ __html: eventTypeValue ?? '' }}
       />
