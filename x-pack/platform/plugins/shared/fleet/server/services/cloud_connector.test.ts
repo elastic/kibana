@@ -195,7 +195,7 @@ describe('CloudConnectorService', () => {
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
-        /Package policy must contain role_arn and external_id/
+        /Package policy must contain role_arn variable/
       );
     });
 
@@ -212,7 +212,7 @@ describe('CloudConnectorService', () => {
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
-        /Package policy must contain role_arn and external_id/
+        /Package policy must contain valid external_id secret reference/
       );
     });
   });
@@ -621,7 +621,7 @@ describe('CloudConnectorService', () => {
         service.update(mockSoClient, 'cloud-connector-123', {
           vars: incompleteVars,
         })
-      ).rejects.toThrow('Package policy must contain role_arn and external_id');
+      ).rejects.toThrow('Package policy must contain valid external_id secret reference');
 
       expect(mockSoClient.update).not.toHaveBeenCalled();
     });
@@ -877,7 +877,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Package policy must contain role_arn and external_id'
+          'Package policy must contain role_arn variable'
         );
       });
 
@@ -918,7 +918,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Package policy must contain role_arn and external_id'
+          'Package policy must contain valid external_id secret reference'
         );
       });
 
@@ -1148,7 +1148,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Package policy must contain tenant_id, client_id, and azure_credentials_cloud_connector_id'
+          'tenant_id must be a valid secret reference'
         );
       });
 
@@ -1295,7 +1295,7 @@ describe('CloudConnectorService', () => {
         };
 
         await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
-          'Package policy must contain tenant_id, client_id, and azure_credentials_cloud_connector_id'
+          'tenant_id must be a valid secret reference'
         );
       });
 
@@ -1471,7 +1471,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidAzureRequest)).toThrow(
-          'Package policy must contain tenant_id, client_id, and azure_credentials_cloud_connector_id'
+          'client_id must be a valid secret reference'
         );
       });
 
@@ -1486,7 +1486,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidAzureRequest)).toThrow(
-          'Package policy must contain tenant_id, client_id, and azure_credentials_cloud_connector_id'
+          'azure_credentials_cloud_connector_id must be a valid string'
         );
       });
     });

@@ -12,6 +12,8 @@ import type {
   CloudConnector,
   CloudConnectorListOptions,
   CloudConnectorSecretReference,
+  AwsCloudConnectorVars,
+  AzureCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../../common/services';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
@@ -312,20 +314,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const vars = cloudConnector.vars;
 
     if (cloudConnector.cloudProvider === 'aws') {
-      if (!isAwsCloudConnectorVars(vars)) {
-        logger.error('Package policy must contain valid AWS cloud connector variables');
-        throw new CloudConnectorInvalidVarsError(
-          'Package policy must contain role_arn and external_id'
-        );
-      }
-
-      const roleArn = vars.role_arn.value;
+      // Type assertion is safe here because we perform runtime validation below
+      const awsVars = vars as AwsCloudConnectorVars;
+      const roleArn = awsVars.role_arn?.value;
       if (!roleArn) {
         logger.error('Package policy must contain role_arn variable');
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
       }
 
-      const externalId: CloudConnectorSecretReference = vars.external_id.value;
+      const externalId: CloudConnectorSecretReference = awsVars.external_id?.value;
       if (!externalId) {
         logger.error('Package policy must contain valid external_id secret reference');
         throw new CloudConnectorInvalidVarsError(
@@ -343,17 +340,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         throw new CloudConnectorInvalidVarsError('External ID secret reference is not valid');
       }
     } else if (cloudConnector.cloudProvider === 'azure') {
-      if (!isAzureCloudConnectorVars(vars)) {
-        logger.error('Package policy must contain valid Azure cloud connector variables');
-        throw new CloudConnectorInvalidVarsError(
-          `Package policy must contain ${TENANT_ID_VAR_NAME}, ${CLIENT_ID_VAR_NAME}, and ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID}`
-        );
-      }
-
+      // Type assertion is safe here because we perform runtime validation below
+      const azureVars = vars as AzureCloudConnectorVars;
       // Validate that all required Azure fields have valid secret references
-      const tenantId = vars.tenant_id;
-      const clientId = vars.client_id;
-      const azureCredentials = vars.azure_credentials_cloud_connector_id;
+      const tenantId = azureVars.tenant_id;
+      const clientId = azureVars.client_id;
+      const azureCredentials = azureVars.azure_credentials_cloud_connector_id;
 
       if (!tenantId?.value?.id || !tenantId?.value?.isSecretRef) {
         logger.error(`Package policy must contain valid ${TENANT_ID_VAR_NAME} secret reference`);
