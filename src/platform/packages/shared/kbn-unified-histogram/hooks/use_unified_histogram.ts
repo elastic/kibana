@@ -12,10 +12,13 @@ import type {
   LensEmbeddableInput,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { cloneDeep } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
   UnifiedHistogramExternalVisContextStatus,
@@ -107,10 +110,10 @@ export type UseUnifiedHistogramResult =
       layoutProps: UnifiedHistogramPartialLayoutProps;
     };
 
-const EMPTY_SUGGESTION_CONTEXT: UnifiedHistogramSuggestionContext = {
+const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = of({
   suggestion: undefined,
   type: UnifiedHistogramSuggestionType.unsupported,
-};
+});
 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [lensVisService, setLensVisService] = useState<LensVisService>();
@@ -126,13 +129,12 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   const { services, isChartLoading } = props;
   const latestGetModifiedVisAttributes = useLatest(props.getModifiedVisAttributes);
 
-  // useMemo allows to recalculate lensVisServiceState right after the fetchParams got updated in a sync way
-  const lensVisServiceState = useMemo(() => {
+  useLayoutEffect(() => {
     if (isChartLoading || !lensVisService || !fetchParams?.dataView) {
-      return lensVisService?.getStateValue();
+      return;
     }
 
-    return lensVisService.update({
+    lensVisService.update({
       externalVisContext: fetchParams.externalVisContext,
       queryParams: {
         dataView: fetchParams.dataView,
@@ -171,8 +173,9 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     stateProps.onVisContextChanged,
   ]);
 
-  const lensVisServiceCurrentSuggestionContext =
-    lensVisServiceState?.currentSuggestionContext ?? EMPTY_SUGGESTION_CONTEXT;
+  const lensVisServiceCurrentSuggestionContext = useObservable(
+    lensVisService?.currentSuggestionContext$ ?? EMPTY_SUGGESTION_CONTEXT
+  );
 
   const chart =
     !lensVisServiceCurrentSuggestionContext?.type ||
