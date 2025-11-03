@@ -9,7 +9,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+// import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import type {
   AggregateQuery,
@@ -562,7 +562,7 @@ export type LensParentApi = SearchApi &
 
 type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
   // Temporarily allow both old and new attributes until all are new types are supported and feature flag removed
-  attributes: LensApiSchemaType | LensByValueBase['attributes'];
+  attributes: any | LensByValueBase['attributes'];
 };
 
 export type LensByValueSerializedAPIConfig = Simplify<

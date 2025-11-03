@@ -63,7 +63,6 @@
     "@kbn/saved-objects-plugin",
     "@kbn/i18n",
     "@kbn/chart-icons",
-    "@kbn/alerts-ui-shared",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/alerts-ui-shared"
   ]
 }
