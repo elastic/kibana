@@ -9,11 +9,6 @@
 
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 
-export interface ValueFilter {
-  key: string;
-  scopes?: string[];
-}
-
 export interface MetricsExperienceService {
   client: MetricsExperienceClient;
 }

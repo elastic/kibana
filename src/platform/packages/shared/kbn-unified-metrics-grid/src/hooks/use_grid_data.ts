@@ -15,7 +15,6 @@ import { useFilterFieldsQuery } from './use_filter_fields_query';
 import { usePagination } from './use_pagination';
 import { useValueFilters } from './use_value_filters';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
-import type { ValueFilter } from '../types';
 
 export const useGridData = ({
   fields = [],
@@ -30,25 +29,17 @@ export const useGridData = ({
   searchTerm: string;
   dimensions: string[];
   pageSize: number;
-  valueFilters: ValueFilter[];
+  valueFilters: string[];
   currentPage: number;
   timeRange: TimeRange | undefined;
 }) => {
   const dimensionsSet = useMemo(() => new Set(dimensions), [dimensions]);
   const searchTermLower = useMemo(() => searchTerm.toLowerCase(), [searchTerm]);
-  const scopesSet = useMemo(() => {
-    if (valueFilters.length === 0) return null;
-    const scopes = new Set<string>();
-    valueFilters.forEach((v) => {
-      v.scopes?.forEach((ds) => scopes.add(ds));
-    });
-    return scopes;
-  }, [valueFilters]);
 
   // Convert valueFilters to KQL query string
   const kuery = useMemo(() => {
     const filtersMap = valueFilters.reduce((acc, filter) => {
-      const [field, value] = filter.key.split(FIELD_VALUE_SEPARATOR);
+      const [field, value] = filter.split(FIELD_VALUE_SEPARATOR);
       const arr = acc.get(field) || [];
 
       arr.push(`"${value}"`);
@@ -71,10 +62,6 @@ export const useGridData = ({
         return false;
       }
 
-      if (scopesSet && (!field.scope || !scopesSet.has(field.scope))) {
-        return false;
-      }
-
       if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
         return false;
       }
@@ -88,7 +75,7 @@ export const useGridData = ({
 
       return true;
     });
-  }, [fields, searchTermLower, dimensionsSet, scopesSet]);
+  }, [fields, searchTermLower, dimensionsSet]);
 
   // Prepare fields for API query
   const fieldsForQuery = useMemo(() => {

@@ -63,7 +63,6 @@ export const MetricsExperienceGrid = ({
     dimensions,
     isFullscreen,
     valueFilters,
-
     onPageChange,
     onSearchTermChange,
     onToggleFullscreen,

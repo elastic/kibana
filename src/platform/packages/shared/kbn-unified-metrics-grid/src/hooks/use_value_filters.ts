@@ -9,9 +9,8 @@
 
 import { useMemo } from 'react';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
-import type { ValueFilter } from '../types';
 
-export const useValueFilters = (valueFilters?: Array<ValueFilter>) => {
+export const useValueFilters = (valueFilters?: string[]) => {
   return useMemo(() => {
     if (!valueFilters?.length) {
       return [];
@@ -19,8 +18,8 @@ export const useValueFilters = (valueFilters?: Array<ValueFilter>) => {
 
     return valueFilters
       .map((selectedValue) => {
-        const [field, value] = selectedValue.key.split(FIELD_VALUE_SEPARATOR);
-        return { field, value, scopes: selectedValue.scopes };
+        const [field, value] = selectedValue.split(FIELD_VALUE_SEPARATOR);
+        return { field, value };
       })
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);

@@ -25,7 +25,6 @@ import { css } from '@emotion/react';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
-import type { ValueFilter } from '../../types';
 import {
   MAX_VALUES_SELECTIONS,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
@@ -33,11 +32,10 @@ import {
 
 export interface ValuesFilterProps {
   selectedDimensions: string[];
-  selectedValues: Array<ValueFilter>;
+  selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
   timeRange: TimeRange;
-
   fullWidth?: boolean;
   onChange: (values: string[]) => void;
   onClear: () => void;
@@ -64,10 +62,10 @@ export const ValuesSelector = ({
   });
 
   const groupedValues = useMemo(() => {
-    const result = new Map<string, Array<{ value: string; scopes: string[] }>>();
-    values.forEach(({ value, field, scopes }) => {
+    const result = new Map<string, Array<string>>();
+    values.forEach(({ value, field }) => {
       const arr = result.get(field) ?? [];
-      arr.push({ value, scopes });
+      arr.push(value);
       result.set(field, arr);
     });
 
@@ -76,12 +74,12 @@ export const ValuesSelector = ({
 
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
-    const selectedSet = new Set(selectedValues.map(({ key }) => key));
+    const selectedSet = new Set(selectedValues);
     const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
 
     return Array.from(groupedValues.entries()).flatMap<SelectableEntry>(([field, fieldValues]) => [
       { label: field, isGroupLabel: true, value: field },
-      ...fieldValues.map<SelectableEntry>(({ value, scopes }) => {
+      ...fieldValues.map<SelectableEntry>((value) => {
         const key = `${field}${FIELD_VALUE_SEPARATOR}${value}`;
         const isSelected = selectedSet.has(key);
         const isDisabledByLimit = !isSelected && isAtMaxLimit;
@@ -92,7 +90,6 @@ export const ValuesSelector = ({
           checked: isSelected ? 'on' : undefined,
           disabled: isDisabledByLimit,
           key,
-          'data-scopes': Array.isArray(scopes) ? scopes.join(',') : scopes,
         };
       }),
     ]);
@@ -102,10 +99,7 @@ export const ValuesSelector = ({
     (chosenOption?: SelectableEntry[]) => {
       const newSelectedValues = chosenOption
         ?.filter((option) => !option.isGroupLabel && option.key)
-        .map((option: SelectableEntry & { ['data-scopes']?: string }) => ({
-          key: option.key!,
-          scopes: option['data-scopes']?.split(','),
-        }));
+        .map((option: SelectableEntry) => option.key!);
 
       // Enforce the maximum limit
       const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);
