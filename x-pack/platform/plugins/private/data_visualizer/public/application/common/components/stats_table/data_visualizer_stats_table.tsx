@@ -390,7 +390,6 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   const $panelWidthS = `calc(max(20%, 225px))`;
   const $panelWidthM = `calc(max(30%, 300px))`;
   const $panelWidthL = `calc(max(35%, 400px))`;
-  const $panelWidthXL = `calc(max(40%, 600px))`;
 
   const dvTableCss = css({
     thead: {
@@ -443,7 +442,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       '& .dvTopValues__wrapper': {
         minWidth: $panelWidthM,
-        maxWidth: $panelWidthXL,
+        maxWidth: $panelWidthL,
       },
       '& .dvPanel__wrapper': {
         '&.dvPanel--compressed': {
