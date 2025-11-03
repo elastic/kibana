@@ -345,6 +345,7 @@ export class ChromeService {
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
       featureFlags,
+      uiSettings,
     });
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
@@ -551,7 +552,6 @@ export class ChromeService {
         docLinks={docLinks}
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
-        uiSettings={uiSettings}
       >
         <Router history={application.history}>
           <>

@@ -38,7 +38,6 @@ import type { Observable } from 'rxjs';
 import { debounceTime } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
@@ -129,7 +128,6 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
   isFixed?: boolean;
-  uiSettings: IUiSettingsClient;
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -139,7 +137,6 @@ type LogoProps = Pick<
   'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath' | 'customBranding$'
 > & {
   logoCss: HeaderCss['logo'];
-  uiSettings: IUiSettingsClient;
 };
 
 const Logo = ({
@@ -149,18 +146,15 @@ const Logo = ({
   application,
   logoCss,
   customBranding$,
-  uiSettings,
 }: LogoProps) => {
   const loadingCount = useObservable(loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)), 0);
   const homeHref = useObservable(homeHref$, '/app/home');
-  const homeRoute = uiSettings.get('defaultRoute') || homeHref;
-
   const customBranding = useObservable(customBranding$, {});
   const { logo } = customBranding;
 
   let fullHref: string | undefined;
-  if (homeRoute) {
-    fullHref = prependBasePath(homeRoute);
+  if (homeHref) {
+    fullHref = prependBasePath(homeHref);
   }
 
   const navigateHome = useCallback(
@@ -231,7 +225,6 @@ export const ProjectHeader = ({
   isServerless,
   breadcrumbsAppendExtensions$,
   isFixed = true,
-  uiSettings,
   ...observables
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -267,7 +260,6 @@ export const ProjectHeader = ({
                   loadingCount$={observables.loadingCount$}
                   customBranding$={customBranding$}
                   logoCss={logoCss}
-                  uiSettings={uiSettings}
                 />
               </EuiHeaderSectionItem>
 

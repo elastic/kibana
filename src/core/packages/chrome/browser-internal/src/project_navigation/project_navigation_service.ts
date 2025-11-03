@@ -19,6 +19,7 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   Subject,
   BehaviorSubject,
@@ -60,6 +61,7 @@ interface StartDeps {
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
   featureFlags: FeatureFlagsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export class ProjectNavigationService {
@@ -99,6 +101,7 @@ export class ProjectNavigationService {
   private featureFlags?: FeatureFlagsStart;
   private navLinksService?: ChromeNavLinks;
   private _http?: InternalHttpStart;
+  private uiSettings?: IUiSettingsClient;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
 
@@ -111,12 +114,15 @@ export class ProjectNavigationService {
     chromeBreadcrumbs$,
     logger,
     featureFlags,
+    uiSettings,
   }: StartDeps) {
     this.application = application;
     this.featureFlags = featureFlags;
     this.navLinksService = navLinksService;
     this._http = http;
     this.logger = logger;
+    this.uiSettings = uiSettings;
+
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
@@ -397,7 +403,7 @@ export class ProjectNavigationService {
   }
 
   private setProjectHome(homeHref: string) {
-    this.projectHome$.next(homeHref);
+    this.projectHome$.next(this.uiSettings?.get('defaultRoute') || homeHref);
   }
 
   private changeActiveSolutionNavigation(id: SolutionId | null) {

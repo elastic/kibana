@@ -15,7 +15,6 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import type { Props as ProjectHeaderProps } from './header';
 import { ProjectHeader } from './header';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const mockApplication = applicationServiceMock.createInternalStartContract();
 
@@ -40,12 +39,7 @@ describe('Header', () => {
     customBranding$: Rx.of({}),
     prependBasePath: (str) => `hello/world/${str}`,
     isServerless: false,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
 
   it('renders', async () => {
     render(
@@ -66,37 +60,5 @@ describe('Header', () => {
     );
 
     expect(queryByTestId(/customLogo/)).not.toBeNull();
-  });
-
-  it('creates home href based on "defaultRoute" uiSetting correctly', async () => {
-    (mockProps.uiSettings.get as jest.Mock).mockReturnValue('custom/route');
-
-    render(
-      <ProjectHeader {...mockProps}>
-        <EuiHeader>Hello, world!</EuiHeader>
-      </ProjectHeader>
-    );
-
-    const logo = screen.getByTestId('globalLoadingIndicator-hidden');
-    expect(logo).toBeInTheDocument();
-
-    const logoHref = logo.getAttribute('href');
-    expect(logoHref).toBe('hello/world/custom/route');
-  });
-
-  it('creates home href correctly when "defaultRoute" uiSetting is undefined', async () => {
-    (mockProps.uiSettings.get as jest.Mock).mockReturnValue(undefined);
-
-    render(
-      <ProjectHeader {...mockProps}>
-        <EuiHeader>Hello, world!</EuiHeader>
-      </ProjectHeader>
-    );
-
-    const logo = screen.getByTestId('globalLoadingIndicator-hidden');
-    expect(logo).toBeInTheDocument();
-
-    const logoHref = logo.getAttribute('href');
-    expect(logoHref).toBe('hello/world/app/home');
   });
 });
