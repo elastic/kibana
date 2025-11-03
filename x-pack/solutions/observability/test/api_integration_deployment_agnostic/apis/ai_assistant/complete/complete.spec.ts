@@ -626,7 +626,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           let messageAddedEvents: MessageAddEvent[];
           let fullConversation: Conversation;
           before(async () => {
-            proxy.interceptTitle('LLM-generated title');
+            void proxy.interceptTitle('LLM-generated title');
 
             void proxy.interceptWithFunctionRequest({
               name: 'unknown_tool',
@@ -637,7 +637,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               when: () => true,
             });
 
-            proxy.interceptWithResponse('Hello from LLM Proxy, again!');
+            void proxy.interceptWithResponse('Hello from LLM Proxy, again!');
 
             const { messageAddedEvents: messageAddedEventsResponse, conversationCreateEvent } =
               await chatComplete({
@@ -745,7 +745,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           let messageAddedEvents: MessageAddEvent[];
           let fullConversation: Conversation;
           before(async () => {
-            proxy.interceptTitle('LLM-generated title');
+            void proxy.interceptTitle('LLM-generated title');
 
             void proxy.interceptWithFunctionRequest({
               name: 'kibana',
@@ -756,8 +756,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               when: () => true,
             });
 
-            proxy.interceptWithResponse('I will not call the kibana function!');
-            proxy.interceptWithResponse('Hello from LLM Proxy, again!');
+            void proxy.interceptWithResponse('I will not call the kibana function!');
+            void proxy.interceptWithResponse('Hello from LLM Proxy, again!');
 
             const { messageAddedEvents: messageAddedEventsResponse, conversationCreateEvent } =
               await chatComplete({
