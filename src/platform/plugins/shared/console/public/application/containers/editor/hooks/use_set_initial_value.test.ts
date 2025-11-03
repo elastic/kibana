@@ -118,7 +118,11 @@ describe('useSetInitialValue', () => {
       await new Promise((resolve) => setTimeout(resolve, 250));
     });
 
-    expect(fetch).toHaveBeenCalledWith(new URL('https://www.elastic.co/docs/some-data'));
+    // Verify fetch was called with the correct URL
+    expect(fetch).toHaveBeenCalled();
+    const fetchCall = (fetch as jest.Mock).mock.calls[0];
+    expect(fetchCall[0].href).toBe('https://www.elastic.co/docs/some-data');
+
     // The initial value should still be set
     expect(setValueMock).toHaveBeenCalledWith('initial value');
     // The dispatch should be called with the remote data
