@@ -22,7 +22,12 @@ import {
   type Observable,
 } from 'rxjs';
 
-import { apiPublishesESQLVariables, type PublishesESQLVariables } from '@kbn/esql-types';
+import type { Filter } from '@kbn/es-query';
+import {
+  apiPublishesESQLVariables,
+  type ESQLControlVariable,
+  type PublishesESQLVariables,
+} from '@kbn/esql-types';
 import { apiHasSections } from '@kbn/presentation-containers';
 
 import { useStateFromPublishingSubject } from '../../publishing_subject';
@@ -42,6 +47,19 @@ import {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
+
+function filterByMetaData<FilterType extends ESQLControlVariable | Filter>(
+  api: unknown,
+  sectionId: string | undefined,
+  filters: FilterType[] | undefined
+): FilterType[] | undefined {
+  const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
+  return filters?.filter(
+    (current) =>
+      current.meta?.controlledBy !== uuid &&
+      (current.meta?.group ? sectionId === current.meta.group : true)
+  );
+}
 
 function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
@@ -66,14 +84,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
 
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
     observables.filters = combineLatest([api.parentApi.filters$, sectionId$]).pipe(
-      map(([allFilters, sectionId]) => {
-        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        return allFilters?.filter(
-          (currentFilter) =>
-            currentFilter.meta.controlledBy !== uuid &&
-            (currentFilter.meta.group ? sectionId === currentFilter.meta.group : true)
-        );
-      })
+      map(([allFilters, sectionId]) => filterByMetaData(api, sectionId, allFilters))
     );
     observables.query = api.parentApi.query$;
   }
@@ -100,14 +111,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
 
   if (apiHasParentApi(api) && apiPublishesESQLVariables(api.parentApi)) {
     observables.esqlVariables = combineLatest([api.parentApi.esqlVariables$, sectionId$]).pipe(
-      map(([allVariables, sectionId]) => {
-        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        return allVariables?.filter(
-          (currentVariable) =>
-            currentVariable.meta?.controlledBy !== uuid &&
-            (currentVariable.meta?.group ? sectionId === currentVariable.meta.group : true)
-        );
-      })
+      map(([allVariables, sectionId]) => filterByMetaData(api, sectionId, allVariables))
     );
   }
 
