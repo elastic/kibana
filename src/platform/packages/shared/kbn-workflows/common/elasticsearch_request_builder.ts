@@ -21,16 +21,18 @@ export function buildRequestFromConnector(
   path: string;
   body?: Record<string, unknown>;
   params?: Record<string, string>;
+  headers?: Record<string, string>;
 } {
   // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
 
   // Special case: elasticsearch.request type uses raw API format at top level
   if (stepType === 'elasticsearch.request') {
-    const { method = 'GET', path, body } = params;
+    const { method = 'GET', path, body, headers } = params;
     return {
       method: method as string,
       path: path as string,
       body: body as Record<string, unknown>,
+      headers: headers as Record<string, string> | undefined,
     };
   }
 

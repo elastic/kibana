@@ -209,6 +209,7 @@ export const DashboardUnsavedListing = ({
   return unsavedDashboardIds.length === 0 ? null : (
     <>
       <EuiCallOut
+        announceOnMount
         heading="h3"
         data-test-subj="unsavedDashboardsCallout"
         title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
