@@ -22,12 +22,19 @@ import {
   type ESQLAstItem,
   type ESQLCommandOption,
   type ESQLColumn,
+  isBinaryExpression,
 } from '@kbn/esql-ast';
 import type {
   StatsCommandSummary,
   StatsFieldSummary,
 } from '@kbn/esql-ast/src/mutate/commands/stats';
+import type {
+  BinaryExpressionComparisonOperator,
+  BinaryExpressionWhereOperator,
+  ESQLBinaryExpression,
+} from '@kbn/esql-ast/src/types';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
+import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query';
 
 type NodeType = 'group' | 'leaf';
 
@@ -51,8 +58,27 @@ export type SupportedStatsFunction = (typeof SUPPORTED_STATS_COMMAND_OPTION_FUNC
 const isSupportedStatsFunction = (fnName: string): fnName is SupportedStatsFunction =>
   SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS.includes(fnName as SupportedStatsFunction);
 
+export type SupportedFieldTypes = Exclude<
+  keyof typeof Builder.expression.literal,
+  'nil' | 'numeric' | 'timespan'
+>;
+
+export type FieldValue<T extends SupportedFieldTypes> =
+  | Parameters<(typeof Builder.expression.literal)[T]>[0]
+  | unknown;
+
 // helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
+
+/**
+ * constrains the field value type to be one of the supported field value types, else we process as a string literal when building the expression
+ */
+export const isSupportedFieldType = (fieldType: unknown): fieldType is SupportedFieldTypes => {
+  return (
+    PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(fieldType as SupportedFieldTypes) &&
+    Object.keys(Builder.expression.literal).includes(fieldType as SupportedFieldTypes)
+  );
+};
 
 function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary | null {
   if (esqlQuery.errors.length) {
@@ -497,3 +523,129 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]):
     esql: BasicPrettyPrinter.print(EditorESQLQuery.ast),
   };
 }
+
+/**
+ * Handles the computation and appending of a filtering where clause,
+ * for ES|QL query containing a stats command in the cascade layout experience
+ */
+export const appendFilteringWhereClauseForCascadeLayout = <
+  T extends SupportedFieldTypes | string = SupportedFieldTypes | string
+>(
+  query: string,
+  fieldName: string,
+  value: T extends SupportedFieldTypes ? FieldValue<T> : unknown,
+  operation: '+' | '-' | 'is_not_null' | 'is_null',
+  fieldType?: T extends SupportedFieldTypes ? T : string
+) => {
+  const ESQLQuery = EsqlQuery.fromSrc(query);
+
+  const { ast } = ESQLQuery;
+
+  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(ESQLQuery)).map(
+    (command) => command.newFields
+  );
+
+  const fieldDeclarationCommandIndex = queryRuntimeFields.findIndex((field) =>
+    field.has(fieldName)
+  );
+
+  const fieldIsRuntimeDeclared = fieldDeclarationCommandIndex >= 0;
+
+  let fieldDeclarationCommand: ESQLCommand<'stats'> | null = null;
+
+  // if the field that's being filtered on is a new field created by some stats command in the query,
+  // then we want to find the command that created it
+  if (fieldIsRuntimeDeclared) {
+    fieldDeclarationCommand = mutate.commands.stats.byIndex(
+      ast,
+      fieldDeclarationCommandIndex
+    ) as ESQLCommand<'stats'>;
+  }
+
+  const datasourceCommand = getESQLQueryDataSourceCommand(ESQLQuery);
+
+  const insertionAnchorCommand = fieldDeclarationCommand ?? datasourceCommand;
+
+  if (!insertionAnchorCommand) {
+    throw new Error('No insertion anchor command found, nothing to do');
+  }
+
+  const insertionAnchorCommandIndex = ast.commands.findIndex(
+    (cmd) => cmd.text === insertionAnchorCommand.text
+  );
+
+  // we would always want to insert our new query right after the insertion anchor command
+  const filterInsertionIndex = insertionAnchorCommandIndex + 1;
+
+  // since we can't anticipate the nature of the query we could be dealing with
+  // we simply select the commands that exist from start of the query including the insertion anchor command
+  const commandsBeforeInsertionAnchor = ast.commands.slice(0, filterInsertionIndex + 1);
+
+  const filteringWhereCommandIndex = commandsBeforeInsertionAnchor.findLastIndex(
+    (cmd) => cmd.name === 'where'
+  );
+
+  const { operator, expressionType } = getOperator(operation);
+
+  // This is the computed expression for the filter operation that has been requested by the user
+  const computedFilteringExpression =
+    expressionType === 'postfix-unary'
+      ? Builder.expression.func.postfix(operator, [Builder.identifier({ name: fieldName! })])
+      : Builder.expression.func.binary(operator as BinaryExpressionComparisonOperator, [
+          Builder.identifier({ name: fieldName! }),
+          fieldType && isSupportedFieldType(fieldType)
+            ? fieldType === 'boolean'
+              ? Builder.expression.literal.boolean(value as boolean)
+              : fieldType === 'string'
+              ? Builder.expression.literal.string(value as string)
+              : Builder.expression.literal[fieldType](value as number)
+            : // when fieldType is not provided or supported, we default to string
+              Builder.expression.literal.string(value as string),
+        ]);
+
+  if (filteringWhereCommandIndex < 0) {
+    const filteringWhereCommand = Builder.command({
+      name: 'where',
+      args: [computedFilteringExpression],
+    });
+
+    mutate.generic.commands.insert(ast, filteringWhereCommand, filterInsertionIndex);
+
+    return BasicPrettyPrinter.print(ast);
+  }
+
+  const filteringWhereCommand = commandsBeforeInsertionAnchor[filteringWhereCommandIndex];
+
+  let modifiedFilteringWhereCommand: ESQLCommand | null = null;
+
+  // the where command itself typically only accepts a single expression as its argument
+  // if it's not a named "and" binary expression, we'll treat it as a command that has only one expression,
+  // hence we only need to either replace it with a new one or append a new one
+  if (
+    isBinaryExpression(filteringWhereCommand.args[0]) &&
+    filteringWhereCommand.args[0].name !== 'and'
+  ) {
+    const binaryExpression = filteringWhereCommand
+      .args[0] as ESQLBinaryExpression<BinaryExpressionWhereOperator>;
+    const [left] = binaryExpression.args;
+
+    modifiedFilteringWhereCommand =
+      (left as ESQLColumn).name === fieldName
+        ? // when the expression's left hand's value matches the target field we're trying to filter on, we simply replace it with the new expression
+          synth.cmd`WHERE ${computedFilteringExpression}`
+        : synth.cmd`WHERE ${computedFilteringExpression} AND ${binaryExpression}`;
+  } else if (
+    isBinaryExpression(filteringWhereCommand.args[0]) &&
+    filteringWhereCommand.args[0].name === 'and'
+  ) {
+    modifiedFilteringWhereCommand = synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringWhereCommand.args[0]}`;
+  }
+
+  // if we where able to create a new filtering where command, we need to add it in and remove the old one
+  if (modifiedFilteringWhereCommand) {
+    mutate.generic.commands.insert(ast, modifiedFilteringWhereCommand, filteringWhereCommandIndex);
+    mutate.generic.commands.remove(ast, filteringWhereCommand);
+  }
+
+  return BasicPrettyPrinter.print(ast);
+};

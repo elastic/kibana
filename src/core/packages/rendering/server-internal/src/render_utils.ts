@@ -42,11 +42,7 @@ export const getScriptPaths = ({
   themeName: ThemeName;
 }) => {
   if (darkMode === 'system') {
-    return [
-      `${baseHref}/ui/bootstrap_system_theme_${
-        themeName === 'borealis' ? 'borealis' : 'amsterdam'
-      }.js`,
-    ];
+    return [`${baseHref}/ui/bootstrap_system_theme_borealis.js`];
   } else {
     return [];
   }

@@ -1294,6 +1294,25 @@ paths:
                   items:
                     type: string
                   type: array
+                filters:
+                  items:
+                    type: object
+                    properties:
+                      entity_types:
+                        items:
+                          enum:
+                            - host
+                            - user
+                            - service
+                          type: string
+                        type: array
+                      filter:
+                        description: KQL filter string
+                        type: string
+                    required:
+                      - entity_types
+                      - filter
+                  type: array
                 range:
                   type: object
                   properties:
