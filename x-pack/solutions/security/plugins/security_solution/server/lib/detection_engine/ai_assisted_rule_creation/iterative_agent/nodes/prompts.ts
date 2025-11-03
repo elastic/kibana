@@ -82,3 +82,47 @@ Respond with a JSON object containing only the "relevant_tags" array.`,
     </query>`,
   ],
 ]);
+
+export const SCHEDULE_RETRIEVAL_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful assistant and security expert that analyzes user query and determining the schedule for a detection rule.
+Analyze the user's request and determine the appropriate schedule for this detection rule, if user mentions frequency, use that.
+Based on user query determine whether user ask  lookback period for data analysis to minimize missed detections.
+
+For example, if you set a rule to run every 5 minutes with an additional look-back time of 1 minute, the rule runs every 5 minutes but analyzes the documents added to indices during the last 6 minutes.
+Important: It is recommended to set the Additional look-back time to at least 1 minute. This ensures there are no missing alerts when a rule does not run exactly at its scheduled time.
+
+
+INTERVAL Guidelines:
+- Use time units of seconds (s), minutes (m), hours (h), or days (d) only
+- Format of interval should be a number followed by a unit (e.g., 30s, 5m, 1h, 1d)
+- If user does not specify any interval, or frequency, return empty string for interval
+
+LOOKBACK Guidelines:
+- Typically 1-2 minutes buffer for data ingestion delays, or at least 10% more for longer intervals(more than 30m)
+- Use time units of seconds (s), minutes (m), hours (h), or days (d) only
+- Format of interval should be a number followed by a unit (e.g., 30s, 5m, 1h, 1d)
+
+Respond with ONLY a JSON object in this exact format:
+{{
+  "interval": "5m",
+  "lookback": "1m",
+}}
+Examples:
+User query: Run detection query every 10 minutes looking back at data from the last 12 minutes.
+
+Based on the above, provide the schedule in the following JSON format:
+{{
+  "interval": "10m",
+  "lookback": "2m",
+}}`,
+  ],
+  [
+    'human',
+    `
+    <query>
+      User request: {user_query}
+    </query>`,
+  ],
+]);

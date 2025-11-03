@@ -38,6 +38,8 @@ Index patterns context: {index_patterns_context}
 - You must respond only with the modified query only
 - If generated query does not have any aggregations(using STATS..BY command), make sure you add operator metadata _id, _index, _version after source index in FROM command
 - If you use KEEP command, after METADATA operator, make sure to include _id field. 
+- Do not use any date range filters in the query(like WHERE @timestamp > NOW() - 5 minutes), unless explicitly told to include them in query. 
+The system will handle time range filtering separately.
 - Use knowledge base context to enhance the query if it is available and relevant to the user query.
   Knowledge base context: {knowledge_base_insights}
 </guidelines>

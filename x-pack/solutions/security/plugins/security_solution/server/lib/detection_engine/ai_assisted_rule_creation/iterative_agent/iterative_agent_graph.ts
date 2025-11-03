@@ -24,6 +24,7 @@ import { getTagsNode } from './nodes/get_tags';
 import { getEsqlQueryGraph } from './sub_graphs/esql/esql_query_graph';
 import { getIndexPatternNode } from './nodes/get_index_patterns';
 import { createProcessKnowledgeBaseNode } from './nodes/process_knowledge_base';
+import { addScheduleNode } from './nodes/add_schedule';
 
 export interface GetRuleCreationAgentParams {
   model: InferenceChatModel;
@@ -74,12 +75,14 @@ export const getIterativeRuleCreationAgent = async ({
     .addNode('getTags', getTagsNode({ rulesClient, savedObjectsClient, model }))
     .addNode('createRuleNameAndDescription', createRuleNameAndDescriptionNode({ model }))
     .addNode('addDefaultFieldsToRules', addDefaultFieldsToRulesNode({ model }))
+    .addNode('addSchedule', addScheduleNode({ model, logger }))
     .addEdge(START, 'processKnowledgeBase')
     .addEdge('processKnowledgeBase', 'getIndexPattern')
     .addEdge('getIndexPattern', 'esqlQueryCreation')
     .addEdge('esqlQueryCreation', 'getTags')
     .addEdge('getTags', 'createRuleNameAndDescription')
-    .addConditionalEdges('createRuleNameAndDescription', shouldAddDefaultFieldsToRule, {
+    .addEdge('createRuleNameAndDescription', 'addSchedule')
+    .addConditionalEdges('addSchedule', shouldAddDefaultFieldsToRule, {
       addDefaultFieldsToRules: 'addDefaultFieldsToRules',
       end: END,
     })

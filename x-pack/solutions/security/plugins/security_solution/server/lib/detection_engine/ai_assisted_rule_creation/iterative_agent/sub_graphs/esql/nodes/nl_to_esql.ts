@@ -51,6 +51,8 @@ export const nlToEsqlQueryNode = async ({
 
               Guidelines:
               - If generated query does not have any aggregations(using STATS..BY command), make sure you add operator metadata _id, _index, _version after source index in FROM command
+              - Do not use any date range filters in the query(like WHERE @timestamp > NOW() - 5 minutes), unless explicitly told to include them in query. 
+              The system will handle time range filtering separately.
               - If you use KEEP command, after METADATA operator, make sure to include _id field. 
               - In command FROM use only listed indices: ${state.indices.shortlistedIndexPatterns.join(
                 ', '

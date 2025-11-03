@@ -81,7 +81,7 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
           };
 
           // mock branch for testing
-          if (userQuery.startsWith('_mock')) {
+          if (userQuery.startsWith('mock')) {
             const mockRule = {
               query:
                 'FROM packetbeat-8.14.2 METADATA _id,_index,_version\n| EVAL suspicious_score = (bytes_in + bytes_out) + CASE(destination.port >= 1024 AND destination.port NOT IN (80, 443), 5000, 0)\n| SORT suspicious_score DESC\n| KEEP @timestamp, source.ip, source.port, destination.ip, destination.port, bytes_in, _id, bytes_out, suspicious_score\n| LIMIT 10',
@@ -110,7 +110,9 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
               author: [],
               setup: '',
               max_signals: 100,
-              interval: '5m',
+              interval: '8m',
+              from: 'now-630s',
+              to: 'now',
               risk_score: 47,
               severity: 'medium',
             };
