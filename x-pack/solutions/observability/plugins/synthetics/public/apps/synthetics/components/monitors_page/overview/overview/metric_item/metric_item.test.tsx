@@ -8,10 +8,6 @@
 import { getMetricValueProps } from './metric_item';
 import type { OverviewTrend } from '../../../../../../../../common/types';
 
-jest.mock('./metric_item_extra', () => ({
-  MetricItemExtra: jest.fn(() => null),
-}));
-
 describe('getMetricValueProps', () => {
   it('returns loading state props when trendData is loading', () => {
     const result = getMetricValueProps('loading');
