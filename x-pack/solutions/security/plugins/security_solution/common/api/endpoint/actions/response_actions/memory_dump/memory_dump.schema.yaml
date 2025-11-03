@@ -51,6 +51,8 @@ components:
               oneOf:
                 - type: object
                   description: Dump the entire kernel memory.
+                  required:
+                    - type
                   properties:
                     type:
                       type: string
@@ -58,6 +60,9 @@ components:
                         - kernel
                 - type: object
                   description: Dump the entire memory of a process using the PID.
+                  required:
+                    - type
+                    - pid
                   properties:
                     type:
                       type: string
@@ -67,6 +72,9 @@ components:
                       type: number
                 - type: object
                   description: Dump the entire memory of a process using the entity ID.
+                  required:
+                    - type
+                    - entity_id
                   properties:
                     type:
                       type: string

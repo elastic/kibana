@@ -128,7 +128,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
 
       const memDumpType = actionRequest.parameters.type;
-      const unsuportedAgents: string[] = [];
+      const unsupportedAgents: string[] = [];
 
       for (const endpointMeta of endpointMetadata) {
         if (
@@ -137,15 +137,17 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           (memDumpType === 'process' &&
             !endpointMeta.Endpoint.capabilities?.includes('memdump_process'))
         ) {
-          unsuportedAgents.push(`${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`);
+          unsupportedAgents.push(
+            `${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`
+          );
         }
       }
 
-      if (unsuportedAgents.length > 0) {
+      if (unsupportedAgents.length > 0) {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
-            `The following agent IDs do not support memory dump: ${unsuportedAgents.join(', ')}`
+            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(', ')}`
           ),
         };
       }
