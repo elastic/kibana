@@ -836,6 +836,24 @@
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1009,6 +1027,24 @@
               "section": "def-public.CloudBasicUrls",
               "text": "CloudBasicUrls"
             }
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -1393,6 +1429,24 @@
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1455,6 +1509,24 @@
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudStart.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

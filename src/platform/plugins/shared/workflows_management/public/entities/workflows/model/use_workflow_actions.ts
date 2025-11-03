@@ -10,13 +10,9 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
-  CreateWorkflowCommand,
-  EsWorkflow,
   RunStepCommand,
   RunWorkflowCommand,
   RunWorkflowResponseDto,
-  TestWorkflowCommand,
-  TestWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
 } from '@kbn/workflows';
@@ -26,7 +22,7 @@ type HttpError = IHttpFetchError<ResponseErrorBody>;
 
 export interface UpdateWorkflowParams {
   id: string;
-  workflow: Partial<EsWorkflow>;
+  workflow: Partial<WorkflowDetailDto>;
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -40,19 +36,6 @@ interface OptimisticContext {
 export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const { http } = useKibana().services;
-
-  const createWorkflow = useMutation<WorkflowDetailDto, HttpError, CreateWorkflowCommand>({
-    networkMode: 'always',
-    mutationKey: ['POST', 'workflows'],
-    mutationFn: (workflow) => {
-      return http.post<WorkflowDetailDto>('/api/workflows', {
-        body: JSON.stringify(workflow),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflows'] });
-    },
-  });
 
   const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
     mutationKey: ['PUT', 'workflows', 'id'],
@@ -226,28 +209,11 @@ export function useWorkflowActions() {
     },
   });
 
-  const testWorkflow = useMutation<TestWorkflowResponseDto, HttpError, TestWorkflowCommand>({
-    mutationKey: ['POST', 'workflows', 'test'],
-    mutationFn: ({
-      workflowYaml,
-      inputs,
-    }: {
-      workflowYaml: string;
-      inputs: Record<string, unknown>;
-    }) => {
-      return http.post(`/api/workflows/test`, {
-        body: JSON.stringify({ workflowYaml, inputs }),
-      });
-    },
-  });
-
   return {
-    createWorkflow,
     updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,
     cloneWorkflow,
-    testWorkflow,
   };
 }

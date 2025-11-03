@@ -137,8 +137,8 @@ describe('WorkflowsService', () => {
         createdBy: 'test-user',
         lastUpdatedBy: 'test-user',
         valid: true,
-        createdAt: new Date('2023-01-01T00:00:00.000Z'),
-        lastUpdatedAt: new Date('2023-01-01T00:00:00.000Z'),
+        createdAt: '2023-01-01T00:00:00.000Z',
+        lastUpdatedAt: '2023-01-01T00:00:00.000Z',
       });
 
       // The storage adapter uses search internally, not get directly
@@ -197,8 +197,8 @@ describe('WorkflowsService', () => {
             createdBy: 'test-user',
             lastUpdatedBy: 'test-user',
             valid: true,
-            createdAt: new Date('2023-01-01T00:00:00.000Z'),
-            lastUpdatedAt: new Date('2023-01-01T00:00:00.000Z'),
+            createdAt: '2023-01-01T00:00:00.000Z',
+            lastUpdatedAt: '2023-01-01T00:00:00.000Z',
             history: [],
           },
         ],

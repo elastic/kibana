@@ -134,6 +134,11 @@ export class WorkflowContextManager {
     return this.templateEngine.render(obj, context);
   }
 
+  public evaluateExpressionInContext(template: string): unknown {
+    const context = this.getContext();
+    return this.templateEngine.evaluateExpression(template, context);
+  }
+
   public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
     const propertyPathSegments = parseJsPropertyAccess(propertyPath);
     let result: unknown = this.getContext();

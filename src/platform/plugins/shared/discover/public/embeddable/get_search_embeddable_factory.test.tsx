@@ -24,7 +24,7 @@ import { createDataViewDataSource } from '../../common/data_sources';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
-import type { SolutionId } from '@kbn/core-chrome-browser';
+import { SolutionType } from '../context_awareness';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -205,7 +205,7 @@ describe('saved search embeddable', () => {
     beforeAll(() => {
       jest
         .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
-        .mockReturnValue(new BehaviorSubject('test' as unknown as SolutionId));
+        .mockReturnValue(new BehaviorSubject(SolutionType.Search));
     });
 
     afterAll(() => {
@@ -226,7 +226,7 @@ describe('saved search embeddable', () => {
       });
       await waitOneTick(); // wait for build to complete
 
-      expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: 'test' });
+      expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: SolutionType.Search });
       resolveRootProfileSpy.mockClear();
       expect(resolveRootProfileSpy).not.toHaveBeenCalled();
     });

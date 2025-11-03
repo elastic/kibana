@@ -240,8 +240,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type config: [from]: expected value of type [string] but got [undefined]',
+            message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"from\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
           });
         });
     });
