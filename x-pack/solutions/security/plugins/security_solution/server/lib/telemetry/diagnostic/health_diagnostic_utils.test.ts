@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { generateKeyPairSync } from 'crypto';
 import { intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import { shouldExecute, applyFilterlist, fieldNames } from './health_diagnostic_utils';
 import { Action } from './health_diagnostic_service.types';
@@ -12,9 +13,24 @@ import { Action } from './health_diagnostic_service.types';
 describe('Security Solution - Health Diagnostic Queries - utils', () => {
   describe('applyFilterlist', () => {
     const mockSalt = 'test-salt';
+    let publicKey: string;
+
+    beforeAll(() => {
+      const keyPair = generateKeyPairSync('rsa', {
+        modulusLength: 4096,
+        publicKeyEncoding: {
+          type: 'spki',
+          format: 'pem',
+        },
+        privateKeyEncoding: {
+          type: 'pkcs8',
+          format: 'pem',
+        },
+      });
+      publicKey = keyPair.publicKey;
+    });
 
     beforeEach(() => {
-      // Mock crypto.subtle for consistent testing
       Object.defineProperty(global, 'crypto', {
         value: {
           subtle: {
@@ -317,6 +333,146 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result[0] as any).sensitiveId).not.toBe('12345');
+    });
+
+    test('should encrypt fields marked with ENCRYPT action', async () => {
+      const data = [{ user: { name: 'john', password: 'secret123' } }];
+      const rules = {
+        'user.name': Action.KEEP,
+        'user.password': Action.ENCRYPT,
+      };
+      const query = { encryptionKeyId: 'test-key-id' };
+      const encryptionPublicKeys = { 'test-key-id': publicKey };
+
+      const result = await applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        user: {
+          name: 'john',
+          password: expect.any(String),
+        },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const encryptedPassword = (result[0] as any).user.password;
+      expect(encryptedPassword).not.toBe('secret123');
+
+      expect(encryptedPassword).toMatch(/^v1:[^:]+:[^:]+:[^:]+:[^:]+:[^:]+$/);
+      const parts = encryptedPassword.split(':');
+      expect(parts[0]).toBe('v1');
+      expect(parts[1]).toBe('test-key-id');
+    });
+
+    test('should handle mixed KEEP, MASK, and ENCRYPT actions', async () => {
+      const data = [
+        {
+          user: { name: 'john', email: 'john@example.com', ssn: '123-45-6789' },
+          system: { ip: '192.168.1.1' },
+        },
+      ];
+      const rules = {
+        'user.name': Action.KEEP,
+        'user.email': Action.MASK,
+        'user.ssn': Action.ENCRYPT,
+        'system.ip': Action.KEEP,
+      };
+      const query = { encryptionKeyId: 'test-key-id' };
+      const encryptionPublicKeys = { 'test-key-id': publicKey };
+
+      const result = await applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys);
+
+      expect(result).toHaveLength(1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = result[0] as any;
+
+      expect(doc.user.name).toBe('john');
+      expect(doc.system.ip).toBe('192.168.1.1');
+
+      expect(doc.user.email).not.toBe('john@example.com');
+      expect(typeof doc.user.email).toBe('string');
+
+      expect(doc.user.ssn).not.toBe('123-45-6789');
+      expect(doc.user.ssn).toMatch(/^v1:[^:]+:[^:]+:[^:]+:[^:]+:[^:]+$/);
+    });
+
+    test('should throw error when ENCRYPT action used without encryptionKeyId', async () => {
+      const data = [{ user: { password: 'secret' } }];
+      const rules = {
+        'user.password': Action.ENCRYPT,
+      };
+
+      await expect(applyFilterlist(data, rules, mockSalt)).rejects.toThrow(
+        'encryptionKeyId is required when filterlist contains encrypt actions'
+      );
+    });
+
+    test('should throw error when public key not found for encryptionKeyId', async () => {
+      const data = [{ user: { password: 'secret' } }];
+      const rules = {
+        'user.password': Action.ENCRYPT,
+      };
+      const query = { encryptionKeyId: 'nonexistent-key' };
+      const encryptionPublicKeys = { 'other-key': publicKey };
+
+      await expect(
+        applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys)
+      ).rejects.toThrow('Public key not found for encryptionKeyId: nonexistent-key');
+    });
+
+    test('should encrypt nested fields', async () => {
+      const data = [
+        {
+          meta: {
+            host: {
+              name: 'server1',
+              credentials: { username: 'admin', token: 'abc123' },
+            },
+          },
+        },
+      ];
+      const rules = {
+        'meta.host.name': Action.KEEP,
+        'meta.host.credentials.username': Action.ENCRYPT,
+        'meta.host.credentials.token': Action.ENCRYPT,
+      };
+      const query = { encryptionKeyId: 'test-key-id' };
+      const encryptionPublicKeys = { 'test-key-id': publicKey };
+
+      const result = await applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys);
+
+      expect(result).toHaveLength(1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = result[0] as any;
+
+      expect(doc.meta.host.name).toBe('server1');
+      expect(doc.meta.host.credentials.username).toMatch(/^v1:/);
+      expect(doc.meta.host.credentials.token).toMatch(/^v1:/);
+      expect(doc.meta.host.credentials.username).not.toBe('admin');
+      expect(doc.meta.host.credentials.token).not.toBe('abc123');
+    });
+
+    test('should use same encrypted DEK for all fields in a query execution', async () => {
+      const data = [{ field1: 'value1', field2: 'value2', field3: 'value3' }];
+      const rules = {
+        field1: Action.ENCRYPT,
+        field2: Action.ENCRYPT,
+        field3: Action.ENCRYPT,
+      };
+      const query = { encryptionKeyId: 'test-key-id' };
+      const encryptionPublicKeys = { 'test-key-id': publicKey };
+
+      const result = await applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = result[0] as any;
+
+      const dek1 = doc.field1.split(':')[2];
+      const dek2 = doc.field2.split(':')[2];
+      const dek3 = doc.field3.split(':')[2];
+
+      expect(dek1).toBe(dek2);
+      expect(dek2).toBe(dek3);
     });
   });
 

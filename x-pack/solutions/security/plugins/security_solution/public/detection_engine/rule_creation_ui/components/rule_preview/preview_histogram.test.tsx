@@ -7,16 +7,13 @@
 
 import React from 'react';
 import moment from 'moment';
-
 import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { render, waitFor } from '@testing-library/react';
-
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
-
 import { PreviewHistogram } from './preview_histogram';
 import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -54,7 +51,6 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
-  useEnableExperimental: jest.fn(() => jest.fn()),
 }));
 const mockVisualizationEmbeddable = VisualizationEmbeddable as unknown as jest.Mock;
 const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;

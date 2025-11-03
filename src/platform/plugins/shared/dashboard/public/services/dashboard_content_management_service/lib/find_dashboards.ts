@@ -11,7 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
 import type {
-  DashboardAttributes,
+  DashboardState,
   DashboardGetIn,
   DashboardSearchIn,
   DashboardSearchOptions,
@@ -68,7 +68,7 @@ export async function searchDashboards({
 }
 
 export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: DashboardAttributes; references: Reference[] }
+  | { status: 'success'; attributes: DashboardState; references: Reference[] }
   | { status: 'error'; error: SavedObjectError }
 );
 

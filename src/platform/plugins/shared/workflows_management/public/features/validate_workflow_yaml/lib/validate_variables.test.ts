@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowYaml } from '@kbn/workflows';
-import type { VariableItem, YamlValidationResult } from '../model/types';
-import { validateVariables } from './validate_variables';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 
 // Mock the imports
 jest.mock('../../workflow_context/lib/get_context_for_path');
 jest.mock('./validate_variable');
 
-import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
 import { validateVariable } from './validate_variable';
+import { validateVariables } from './validate_variables';
+import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
+import type { VariableItem, YamlValidationResult } from '../model/types';
 
 const mockGetContextSchemaForPath = getContextSchemaForPath as jest.MockedFunction<
   typeof getContextSchemaForPath
@@ -45,7 +45,7 @@ describe('validateVariables', () => {
     name: 'Test Workflow',
     version: '1',
     enabled: true,
-    triggers: [{ type: 'manual', enabled: true }],
+    triggers: [{ type: 'manual' }],
     steps: [
       {
         name: 'Test Step',
@@ -95,6 +95,7 @@ describe('validateVariables', () => {
         startColumn: 1,
         endLineNumber: 1,
         endColumn: 10,
+        owner: 'variable-validation',
       }) // First variable is valid
       .mockReturnValueOnce({
         id: 'error-1',
@@ -106,6 +107,7 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         hoverMessage: null,
+        owner: 'variable-validation',
       })
       .mockReturnValueOnce({
         id: 'error-2',
@@ -117,6 +119,7 @@ describe('validateVariables', () => {
         endLineNumber: 2,
         endColumn: 10,
         hoverMessage: null,
+        owner: 'variable-validation',
       });
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
@@ -140,7 +143,7 @@ describe('validateVariables', () => {
     expect(result[0]).toMatchObject({
       message: 'Failed to get context schema for path',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
       key: 'var1',
     });
@@ -176,6 +179,7 @@ describe('validateVariables', () => {
         startColumn: 1,
         endLineNumber: 1,
         endColumn: 10,
+        owner: 'variable-validation',
       }) // valid1
       .mockReturnValueOnce({
         id: 'error-1',
@@ -187,6 +191,7 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         hoverMessage: null,
+        owner: 'variable-validation',
       })
       .mockReturnValueOnce({
         id: 'valid2',
@@ -198,6 +203,7 @@ describe('validateVariables', () => {
         startColumn: 1,
         endLineNumber: 1,
         endColumn: 10,
+        owner: 'variable-validation',
       }) // valid2
       .mockReturnValueOnce({
         id: 'error-2',
@@ -209,6 +215,7 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         hoverMessage: 'Type info',
+        owner: 'variable-validation',
       });
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
@@ -269,6 +276,7 @@ describe('validateVariables', () => {
       endLineNumber: 1,
       endColumn: 10,
       hoverMessage: '<pre>(property) items: array</pre>',
+      owner: 'variable-validation',
     });
 
     const result = validateVariables([foreachVariable], mockWorkflowGraph, mockWorkflowDefinition);
@@ -291,12 +299,12 @@ describe('validateVariables', () => {
       id: 'test-error',
       message: 'Test error message',
       severity: 'error',
-      source: 'variable-validation',
       startLineNumber: 5,
       startColumn: 10,
       endLineNumber: 5,
       endColumn: 20,
       hoverMessage: 'Hover info',
+      owner: 'variable-validation',
     });
 
     const result = validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition);
@@ -305,12 +313,12 @@ describe('validateVariables', () => {
       id: 'test-error',
       message: 'Test error message',
       severity: 'error',
-      source: 'variable-validation',
       startLineNumber: 5,
       startColumn: 10,
       endLineNumber: 5,
       endColumn: 20,
       hoverMessage: 'Hover info',
+      owner: 'variable-validation',
     });
   });
 });

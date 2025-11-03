@@ -101,7 +101,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Check that the tool call details are visible
         expect(responseText).to.contain('Calling tool platform.core.search');
-        expect(responseText).to.contain('Selecting the best target for this query');
       });
 
       // Click the "new" button

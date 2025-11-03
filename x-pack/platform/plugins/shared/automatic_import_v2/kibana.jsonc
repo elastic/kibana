@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/automatic-import-v2-plugin",
+  "owner": "@elastic/integration-experience",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Plugin implementing the Automatic Import V2 API and UI",
+  "plugin": {
+    "id": "automaticImportVTwo",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "automatic_import_v2"
+    ],
+    "requiredPlugins": [
+      "kibanaReact",
+      "licensing",
+      "triggersActionsUi",
+      "actions",
+      "stackConnectors",
+      "inference",
+      "security"
+    ],
+  }
+}

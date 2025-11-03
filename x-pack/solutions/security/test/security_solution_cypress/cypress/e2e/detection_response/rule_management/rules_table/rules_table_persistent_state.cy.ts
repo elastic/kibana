@@ -43,6 +43,7 @@ import {
   sortByTableColumn,
 } from '../../../../tasks/table_pagination';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { TIMELINE_BOTTOM_BAR } from '../../../../screens/alerts_detection_rules';
 
 function createTestRules(): void {
   createRule(getNewRule({ rule_id: '1', name: 'test 1', tags: ['tag-a'], enabled: false }));
@@ -70,6 +71,12 @@ function setStorageState(storageTableState: Record<string, unknown>): void {
 }
 
 function changeRulesTableState(): void {
+  /*
+    Wait for the timeline bar to fully load before setting table filters to avoid UI jumps and test flakiness.
+    More info in PR description: https://github.com/elastic/kibana/pull/237272
+  */
+  cy.get(TIMELINE_BOTTOM_BAR, { timeout: 60000 }).should('exist');
+
   filterBySearchTerm('rule');
   filterByTags(['tag-b']);
   filterByCustomRules();
@@ -97,14 +104,7 @@ function expectDefaultRulesTableState(): void {
   expectTablePage(1);
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/237238
-// Failing: See https://github.com/elastic/kibana/issues/237237
-// Failing: See https://github.com/elastic/kibana/issues/237236
-// Failing: See https://github.com/elastic/kibana/issues/237217
-// Failing: See https://github.com/elastic/kibana/issues/237214
-// Failing: See https://github.com/elastic/kibana/issues/237258
-// Failing: See https://github.com/elastic/kibana/issues/237215
-describe.skip(
+describe(
   'Rules table: persistent state',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

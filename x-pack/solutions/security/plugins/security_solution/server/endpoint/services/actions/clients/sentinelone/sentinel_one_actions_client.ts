@@ -541,23 +541,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const { actionDetails, actionEsDoc: actionRequestDoc } =
-      await this.handleResponseActionCreation(reqIndexOptions);
-
-    if (
-      !actionRequestDoc.error &&
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
-    ) {
-      await this.writeActionResponseToEndpointIndex({
-        actionId: actionRequestDoc.EndpointActions.action_id,
-        agentId: actionRequestDoc.agent.id,
-        data: {
-          command: actionRequestDoc.EndpointActions.data.command,
-        },
-      });
-
-      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
-    }
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
     return actionDetails;
   }
@@ -597,23 +581,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const { actionDetails, actionEsDoc: actionRequestDoc } =
-      await this.handleResponseActionCreation(reqIndexOptions);
-
-    if (
-      !actionRequestDoc.error &&
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
-    ) {
-      await this.writeActionResponseToEndpointIndex({
-        actionId: actionRequestDoc.EndpointActions.action_id,
-        agentId: actionRequestDoc.agent.id,
-        data: {
-          command: actionRequestDoc.EndpointActions.data.command,
-        },
-      });
-
-      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
-    }
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
     return actionDetails;
   }
@@ -715,15 +683,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     } = await this.fetchActionRequestEsDoc(actionId);
 
-    const {
-      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
-      responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
-    } = this.options.endpointService.experimentalFeatures;
+    const { responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled } =
+      this.options.endpointService.experimentalFeatures;
 
-    if (
-      (command === 'running-processes' && !isRunningProcessesEnabled) ||
-      (command === 'runscript' && !isRunScriptEnabled)
-    ) {
+    if (command === 'runscript' && !isRunScriptEnabled) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
@@ -826,15 +789,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     } = await this.fetchActionRequestEsDoc(actionId);
 
-    const {
-      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
-      responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
-    } = this.options.endpointService.experimentalFeatures;
+    const { responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled } =
+      this.options.endpointService.experimentalFeatures;
 
-    if (
-      (command === 'running-processes' && !isRunningProcessesEnabled) ||
-      (command === 'runscript' && !isRunScriptEnabled)
-    ) {
+    if (command === 'runscript' && !isRunScriptEnabled) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
@@ -936,16 +894,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
-    if (
-      !this.options.endpointService.experimentalFeatures
-        .responseActionsSentinelOneKillProcessEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `kill-process not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionParametersWithProcessName,
       KillProcessActionOutputContent,
@@ -1013,15 +961,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: GetProcessesRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
-    if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `processes not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       undefined,
       GetProcessesActionOutputContent,

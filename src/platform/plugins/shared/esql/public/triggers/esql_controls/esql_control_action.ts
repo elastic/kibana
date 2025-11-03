@@ -78,7 +78,6 @@ export class CreateESQLControlAction implements Action<Context> {
       throw new IncompatibleActionError();
     }
     const currentApp = await firstValueFrom(this.core.application.currentAppId$ ?? of(undefined));
-
     // Close all existing flyouts before opening the control flyout
     try {
       if (currentApp === 'discover') {
@@ -114,6 +113,10 @@ export class CreateESQLControlAction implements Action<Context> {
         isResizable: true,
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
+        // When queryString is present (i.e. flyout opened from the ES|QL editor),
+        // use onCancelControl as the onClose handler to ensure proper nested flyout closing behavior.
+        // In other scenarios (opened directly from the dashboard), we keep the default close behavior.
+        ...(queryString && { onClose: onCancelControl }),
       },
     });
   }

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { YamlValidationResult, StepNameInfo } from '../model/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { collectAllStepNames } from './collect_all_step_names';
+import type { StepNameInfo, YamlValidationResult } from '../model/types';
 
 export function validateStepNameUniqueness(yamlDocument: any): YamlValidationResult[] {
   const errors: YamlValidationResult[] = [];
@@ -33,7 +35,7 @@ export function validateStepNameUniqueness(yamlDocument: any): YamlValidationRes
       for (const occurrence of occurrences) {
         errors.push({
           id: `${stepName}-${occurrence.startLineNumber}-${occurrence.startColumn}-${occurrence.endLineNumber}-${occurrence.endColumn}`,
-          source: 'step-name-validation',
+          owner: 'step-name-validation',
           message: `Step name "${stepName}" is not unique. Found ${occurrences.length} steps with this name.`,
           startLineNumber: occurrence.startLineNumber,
           startColumn: occurrence.startColumn,

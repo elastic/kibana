@@ -12,7 +12,7 @@ import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import React from 'react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { Theme } from '@elastic/charts';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import type { UserProfileService } from '@kbn/core/public';

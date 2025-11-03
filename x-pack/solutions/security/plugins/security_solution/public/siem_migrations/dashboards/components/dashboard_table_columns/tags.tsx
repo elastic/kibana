@@ -21,7 +21,7 @@ export const createTagsColumn = (): TableColumn => {
       <TableHeader
         id={SIEM_DASHBOARDS_MIGRATIONS_TAGS_HEADER_ID}
         title={i18n.COLUMN_TAGS}
-        tooltipContent={i18n.COLUMN_TAGS}
+        tooltipContent={i18n.TAGS_COLUMN_TOOLTIP}
       />
     ),
     render: (value: DashboardMigrationDashboard['original_dashboard']['splunk_properties']) => {

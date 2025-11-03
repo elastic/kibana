@@ -8,30 +8,28 @@
  */
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
+import { debounce } from 'lodash';
+import { _clearComputedData, _setComputedDataInternal, setYamlString } from './slice';
 import type { RootState } from './types';
-import { setYamlString } from './slice';
 import { performComputation } from './utils/computation';
 
-// Debounced computation function
-let computationTimeoutId: NodeJS.Timeout | null = null;
 const COMPUTATION_DEBOUNCE_MS = 500; // 500ms debounce
 
-const debounceComputation = (
-  store: MiddlewareAPI<Dispatch<AnyAction>, any>,
-  yamlString: string | undefined
+const compute = (
+  yamlString: string | undefined,
+  store: MiddlewareAPI<Dispatch<AnyAction>, RootState>
 ) => {
-  // Clear any pending computation
-  if (computationTimeoutId) {
-    clearTimeout(computationTimeoutId);
-    computationTimeoutId = null;
+  // Get fresh state at execution time, not at scheduling time
+  const state = store.getState();
+  const computed = performComputation(yamlString, state.detail.schemaLoose);
+  if (computed) {
+    store.dispatch(_setComputedDataInternal(computed));
+  } else {
+    store.dispatch(_clearComputedData());
   }
-
-  // Debounce the computation
-  computationTimeoutId = setTimeout(() => {
-    performComputation(store, yamlString);
-    computationTimeoutId = null;
-  }, COMPUTATION_DEBOUNCE_MS);
 };
+
+const debouncedCompute = debounce(compute, COMPUTATION_DEBOUNCE_MS);
 
 // Side effects middleware - computes derived data when yamlString changes (debounced)
 export const workflowComputationMiddleware: Middleware =
@@ -39,23 +37,24 @@ export const workflowComputationMiddleware: Middleware =
     const result = next(action);
 
     // Only react to yamlString changes
-    if (action.type === setYamlString.type) {
-      const state = store.getState();
-      const { yamlString } = state.workflow;
+    if (setYamlString.match(action)) {
+      debouncedCompute.cancel();
 
-      // Do computation immediately if yaml string is defined and no previous workflow graph exists
-      if (yamlString && !state.workflow.computed) {
-        performComputation(store, yamlString);
-        return result;
+      const yamlString = action.payload;
+      const { computed } = store.getState().detail;
+
+      // If yamlString is empty/undefined, clear computed data and return
+      if (!yamlString) {
+        store.dispatch(_clearComputedData());
+        return;
       }
 
-      // Clear any pending computation
-      if (computationTimeoutId) {
-        clearTimeout(computationTimeoutId);
-        computationTimeoutId = null;
+      // Do computation immediately if not initialized yet, (computed is only undefined when never set)
+      if (!computed) {
+        compute(yamlString, store);
+      } else {
+        debouncedCompute(yamlString, store);
       }
-
-      debounceComputation(store, yamlString);
     }
 
     return result;

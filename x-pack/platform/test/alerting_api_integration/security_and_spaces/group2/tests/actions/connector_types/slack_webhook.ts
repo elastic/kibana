@@ -67,6 +67,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         name: 'A slack action',
         connector_type_id: '.slack',
         config: {},
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -84,6 +85,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         name: 'A slack action',
         connector_type_id: '.slack',
         config: {},
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -101,8 +103,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]',
+            message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"webhookUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
           });
         });
     });
@@ -208,7 +209,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error validating action params: \[message\]: /);
+      expect(result.message).to.eql(
+        `error validating action params: [\n  {\n    "code": "too_small",\n    "minimum": 1,\n    "type": "string",\n    "inclusive": true,\n    "exact": false,\n    "message": "String must contain at least 1 character(s)",\n    "path": [\n      "message"\n    ]\n  }\n]`
+      );
     });
 
     it('should handle a 40x slack error', async () => {

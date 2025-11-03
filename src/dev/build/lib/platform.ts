@@ -83,8 +83,8 @@ export const SERVERLESS_PLATFORMS = [
   new Platform('linux', 'x64', 'linux-x86_64', 'serverless', null),
   new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', null),
 
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'chat'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'chat'),
+  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'workplaceai'),
+  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'workplaceai'),
 
   new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'observability'),
   new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'observability'),

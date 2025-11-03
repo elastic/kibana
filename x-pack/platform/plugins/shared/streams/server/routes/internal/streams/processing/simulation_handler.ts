@@ -798,6 +798,7 @@ const prepareSimulationResponse = async (
     detected_fields: detectedFields,
     documents: docReports,
     processors_metrics: processorsMetrics,
+    definition_error: undefined,
     documents_metrics: {
       failed_rate: parseFloat(failureRate.toFixed(3)),
       partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(3)),
@@ -808,6 +809,7 @@ const prepareSimulationResponse = async (
 };
 
 const prepareSimulationFailureResponse = (error: SimulationError) => {
+  const failedBecauseNoSampleDocs = error.message.includes('must specify at least one document');
   return {
     detected_fields: [],
     documents: [],
@@ -823,6 +825,9 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
           },
         }),
     },
+    // failure to simulate is considered a definition error, which will be displayed prominently in the UI
+    // The simulate API returns a generic error when no documents are provided, which is not useful in this context
+    definition_error: !failedBecauseNoSampleDocs ? error : undefined,
     documents_metrics: {
       failed_rate: 1,
       partially_parsed_rate: 0,

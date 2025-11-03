@@ -579,7 +579,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 20
     retry:
       automatic:
@@ -594,7 +594,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 14
     retry:
       automatic:

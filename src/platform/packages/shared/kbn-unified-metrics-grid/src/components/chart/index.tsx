@@ -14,6 +14,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import React, { useRef } from 'react';
 import type { Observable } from 'rxjs';
+import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
@@ -32,6 +33,7 @@ export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestPar
     esqlQuery: string;
     title: string;
     chartLayers: LensSeriesLayer[];
+    yBounds?: LensYBoundsConfig;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -50,6 +52,7 @@ export const Chart = ({
   chartLayers,
   syncCursor,
   syncTooltips,
+  yBounds,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -67,6 +70,7 @@ export const Chart = ({
     getTimeRange,
     chartRef,
     chartLayers,
+    yBounds,
   });
 
   return (

@@ -48,7 +48,7 @@ list_stragglers() {
   done <<<"$(find x-pack/platform/test/fixtures/es_archives -name mappings.json)"
 
   # Also search in x-pack/solutions/{solution}/test/fixtures/es_archives for each solution
-  for solution in search security chat observability; do
+  for solution in search security workplaceai observability; do
     solution_dir="x-pack/solutions/${solution}/test/fixtures/es_archives"
     if [ -d "$solution_dir" ]; then
       while read -r y; do

@@ -9,7 +9,12 @@ import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
-import type { PackagePolicyConfigRecord } from '../../../../common/types';
+import type {
+  PackageInfo,
+  PackagePolicyConfigRecord,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+} from '../../../../common/types';
 import { PackagePolicyValidationError } from '../../../../common/errors';
 import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
@@ -22,9 +27,42 @@ import {
 
 const handlebars = Handlebars.create();
 
-export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
+export function getMetaVariables(
+  pkg: Pick<PackageInfo, 'name' | 'title' | 'version'>,
+  input: PackagePolicyInput,
+  stream?: PackagePolicyInputStream
+) {
+  return {
+    // Package variables
+    package: {
+      name: pkg.name,
+      title: pkg.title,
+      version: pkg.version,
+    },
+    // Stream meta variables
+    stream: {
+      id: stream?.id || '',
+      data_stream: {
+        dataset: stream?.data_stream.dataset || '',
+        type: stream?.data_stream.type || '',
+      },
+    },
+    // Input meta variables
+    input: {
+      id: input?.id || '',
+    },
+  };
+}
+
+export type MetaVariable = ReturnType<typeof getMetaVariables>;
+
+export function compileTemplate(
+  variables: PackagePolicyConfigRecord,
+  metaVariable: MetaVariable,
+  templateStr: string
+) {
   const logger = appContextService.getLogger();
-  const { vars, yamlValues } = buildTemplateVariables(logger, variables);
+  const { vars, yamlValues } = buildTemplateVariables(logger, variables, metaVariable);
   let compiledTemplate: string;
   try {
     let template = getHandlebarsCompiledTemplateCache(templateStr);
@@ -59,8 +97,27 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
 
     return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
   } catch (error) {
-    throw new PackagePolicyValidationError(error);
+    const errorMessage = handleYamlError(error, compiledTemplate);
+    throw new PackagePolicyValidationError(errorMessage, error);
   }
+}
+
+function handleYamlError(err: any, yaml: string): string {
+  if (err?.reason === 'duplicated mapping key') {
+    let position = err.mark?.position;
+    let key = 'unknown';
+    // Read key if position is available
+    if (position) {
+      key = '';
+      while (position < yaml.length && yaml.charAt(position) !== ':') {
+        key += yaml.charAt(position);
+        position++;
+      }
+    }
+    return `YAMLException: Duplicated key "${key}" found in agent policy yaml, please check your yaml variables.`;
+  }
+
+  return err.message;
 }
 
 function isValidKey(key: string) {
@@ -84,7 +141,11 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRecord) {
+function buildTemplateVariables(
+  logger: Logger,
+  variables: PackagePolicyConfigRecord,
+  metaVariable: MetaVariable
+) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
@@ -125,6 +186,8 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
     }
     return acc;
   }, {} as { [k: string]: any });
+
+  vars._meta = metaVariable;
 
   return { vars, yamlValues };
 }

@@ -353,7 +353,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return res.body;
   };
 
-  const disableScheduledReports = async (
+  const disableReportSchedules = async (
     ids: string[],
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme'
@@ -364,6 +364,37 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ ids })
       .expect(200);
+    return body;
+  };
+
+  const deleteReportSchedules = async (
+    ids: string[],
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .delete(INTERNAL_ROUTES.SCHEDULED.BULK_DELETE)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ids })
+      .expect(200);
+    return body;
+  };
+
+  const updateScheduledReport = async (
+    id: string,
+    title?: string,
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    status: number = 200
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .put(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/${id}`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ title, schedule })
+      .expect(status);
     return body;
   };
 
@@ -546,7 +577,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     getTask,
     deleteTasks,
     listScheduledReports,
-    disableScheduledReports,
+    disableReportSchedules,
+    deleteReportSchedules,
     runTelemetryTask,
+    updateScheduledReport,
   };
 }

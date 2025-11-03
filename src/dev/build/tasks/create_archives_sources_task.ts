@@ -80,7 +80,7 @@ export const CreateArchivesSources: Task = {
           );
 
           // Copy solution config.yml
-          const CHAT_CONFIGS = ['serverless.chat.yml'];
+          const WORKPLACE_AI_CONFIGS = ['serverless.workplaceai.yml'];
           const SEARCH_CONFIGS = ['serverless.es.yml'];
           const OBSERVABILITY_CONFIGS = [
             'serverless.oblt.yml',
@@ -92,8 +92,8 @@ export const CreateArchivesSources: Task = {
           ];
           const configFiles = ['serverless.yml'];
           switch (platform.getSolution()) {
-            case 'chat':
-              configFiles.push(...CHAT_CONFIGS);
+            case 'workplaceai':
+              configFiles.push(...WORKPLACE_AI_CONFIGS);
               break;
             case 'search':
               configFiles.push(...SEARCH_CONFIGS);
@@ -106,7 +106,7 @@ export const CreateArchivesSources: Task = {
               break;
             default:
               configFiles.push(
-                ...CHAT_CONFIGS,
+                ...WORKPLACE_AI_CONFIGS,
                 ...SEARCH_CONFIGS,
                 ...OBSERVABILITY_CONFIGS,
                 ...SECURITY_CONFIGS
@@ -128,9 +128,9 @@ export const CreateArchivesSources: Task = {
             await removeSolutions(solutionsToRemove, platform);
           }
         } else if (config.isRelease) {
-          // For stateful release builds, remove the chat solution.
+          // For stateful release builds, remove the workplaceai solution.
           // Snapshot builds support all solutions to faciliate functional testing
-          await removeSolutions(['chat'], platform);
+          await removeSolutions(['workplaceai'], platform);
         }
       })
     );

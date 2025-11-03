@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GeneralDatasourceStates } from '../../../state_management';
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
 import type { TagcloudState } from '../types';
 import { getRuntimeConverters } from './converters';
 

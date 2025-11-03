@@ -47,7 +47,7 @@ export class QueryColumns {
     private readonly originalQueryText: string,
     private readonly resourceRetriever?: ESQLCallbacks
   ) {
-    this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query);
+    this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query, { skipHeader: true });
   }
 
   /**

@@ -101,6 +101,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           config: {
             url: 'https://example.com',
           },
+          is_connector_type_deprecated: false,
         });
       });
     });
@@ -116,7 +117,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(res.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: 'error validating action type config: [foo]: definition for this key is missing',
+          message: `error validating action type config: [\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"foo\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key(s) in object: 'foo'\"\n  }\n]`,
         });
       });
 
@@ -130,8 +131,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(res.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message:
-            'error validating action type secrets: [foo]: definition for this key is missing',
+          message: `error validating action type secrets: [\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"foo\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key(s) in object: 'foo'\"\n  }\n]`,
         });
       });
     });
@@ -194,8 +194,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           retry: true,
           connector_id: res.body.id,
           errorSource: TaskErrorSource.USER,
-          service_message:
-            'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])',
+          service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"id\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"foo\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key(s) in object: 'foo'\"\n  }\n])`,
         });
       });
 

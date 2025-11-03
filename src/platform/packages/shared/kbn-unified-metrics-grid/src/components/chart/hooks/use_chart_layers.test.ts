@@ -44,7 +44,7 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].seriesColor).toBe('#000');
   });
 
-  it('should return a line chart configuration with a breakdown when dimensions are provided', () => {
+  it('should return a line chart configuration with a breakdown when single dimension is provided', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         metric: mockMetric,
@@ -55,7 +55,23 @@ describe('useChartLayers', () => {
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
-    expect(layer.breakdown).toBe(DIMENSIONS_COLUMN);
+    expect(layer.breakdown).toBe('service.name'); // Single dimension uses actual dimension name
+    expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
+    expect(layer.yAxis[0].seriesColor).toBe('#FFF');
+  });
+
+  it('should return a line chart configuration with DIMENSIONS_COLUMN when multiple dimensions are provided', () => {
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metric: mockMetric,
+        dimensions: ['service.name', 'host.name'],
+        color: '#FFF',
+      })
+    );
+
+    const [layer] = result.current;
+    expect(layer.seriesType).toBe('line');
+    expect(layer.breakdown).toBe(DIMENSIONS_COLUMN); // Multiple dimensions use DIMENSIONS_COLUMN
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');
   });

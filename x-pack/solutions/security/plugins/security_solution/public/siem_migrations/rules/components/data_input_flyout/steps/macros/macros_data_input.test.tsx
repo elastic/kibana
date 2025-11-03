@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MacrosDataInput } from './macros_data_input';
 import { DataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.mock';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -37,14 +39,22 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
     },
   }),
 }));
+jest.mock('../../../../../../common/hooks/use_app_toasts');
 
 describe('MacrosDataInput', () => {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
   const defaultProps = {
     onMissingResourcesFetched: jest.fn(),
     dataInputStep: DataInputStep.Macros,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     missingMacros: ['macro1', 'macro2'],
   };
+
+  beforeEach(() => {
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -57,7 +67,7 @@ describe('MacrosDataInput', () => {
       </TestProviders>
     );
     expect(getByTestId('macrosUploadStepNumber')).toBeInTheDocument();
-    expect(getByTestId('macrosUploadStepNumber')).toHaveTextContent('Current step is 22');
+    expect(getByTestId('macrosUploadStepNumber')).toHaveTextContent('Current step is 22'); // "Current step is 2" + "2"
   });
 
   it('renders title', () => {
@@ -104,5 +114,35 @@ describe('MacrosDataInput', () => {
       </TestProviders>
     );
     expect(getByTestId('migrationsSubSteps')).toBeInTheDocument();
+  });
+
+  it('shows a warning toast if uploaded file does not contain any of the missing macros', async () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <MacrosDataInput {...defaultProps} />
+      </TestProviders>
+    );
+
+    const fileContent =
+      '[{"result":{"name":"other_macro","definition":"`other_index`","iseval":"false"}}]';
+    const file = new File([fileContent], 'macros.json', { type: 'application/json' });
+
+    const filePicker = getByTestId('macrosFilePicker');
+    await act(async () => {
+      fireEvent.change(filePicker, { target: { files: [file] } });
+    });
+
+    const uploadButton = getByTestId('uploadFileButton');
+    expect(uploadButton).not.toBeDisabled();
+
+    await act(async () => {
+      if (uploadButton) {
+        fireEvent.click(uploadButton);
+      }
+    });
+
+    expect(appToastsMock.addWarning).toHaveBeenCalledWith({
+      title: 'No relevant macros found.',
+    });
   });
 });

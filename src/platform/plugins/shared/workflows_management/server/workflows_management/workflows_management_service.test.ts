@@ -8,8 +8,10 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
@@ -84,8 +86,22 @@ describe('WorkflowsService', () => {
     mockLogger.error = jest.fn();
 
     const mockEsClientPromise = Promise.resolve(mockEsClient);
+    const mockGetActionsClient = jest.fn().mockResolvedValue({
+      getAll: jest.fn().mockResolvedValue([]),
+      execute: jest.fn(),
+      bulkEnqueueExecution: jest.fn(),
+    } as unknown as IUnsecuredActionsClient);
+    const mockGetActionsClientWithRequest = jest.fn().mockResolvedValue({
+      listTypes: jest.fn().mockResolvedValue([]),
+      getAll: jest.fn().mockResolvedValue({ data: [] }),
+    } as unknown as PublicMethodsOf<ActionsClient>);
 
-    service = new WorkflowsService(mockEsClientPromise, mockLogger, false);
+    const mockGetActionsStart = jest.fn().mockResolvedValue({
+      getUnsecuredActionsClient: mockGetActionsClient,
+      getActionsClientWithRequest: mockGetActionsClientWithRequest,
+    });
+
+    service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
 
     mockSecurity = {
       authc: {
@@ -121,8 +137,8 @@ describe('WorkflowsService', () => {
         createdBy: 'test-user',
         lastUpdatedBy: 'test-user',
         valid: true,
-        createdAt: new Date('2023-01-01T00:00:00.000Z'),
-        lastUpdatedAt: new Date('2023-01-01T00:00:00.000Z'),
+        createdAt: '2023-01-01T00:00:00.000Z',
+        lastUpdatedAt: '2023-01-01T00:00:00.000Z',
       });
 
       // The storage adapter uses search internally, not get directly
@@ -181,8 +197,8 @@ describe('WorkflowsService', () => {
             createdBy: 'test-user',
             lastUpdatedBy: 'test-user',
             valid: true,
-            createdAt: new Date('2023-01-01T00:00:00.000Z'),
-            lastUpdatedAt: new Date('2023-01-01T00:00:00.000Z'),
+            createdAt: '2023-01-01T00:00:00.000Z',
+            lastUpdatedAt: '2023-01-01T00:00:00.000Z',
             history: [],
           },
         ],
@@ -657,6 +673,147 @@ describe('WorkflowsService', () => {
         })
       );
     });
+
+    it('should create workflow with custom ID when provided', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const customId = 'workflow-12345678-abcd-1234-abcd-123456789abc';
+      const workflowCommand = {
+        yaml: 'name: Custom ID Workflow\nenabled: true\ndefinition:\n  triggers: []',
+        id: customId,
+      };
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 0 },
+          hits: [],
+        },
+      } as any);
+      mockEsClient.index.mockResolvedValue({ _id: customId } as any);
+
+      const result = await service.createWorkflow(workflowCommand, 'default', mockRequest);
+
+      expect(result.id).toBe(customId);
+      expect(result.name).toBe('Custom ID Workflow');
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: customId,
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Custom ID Workflow',
+            enabled: true,
+            createdBy: 'test-user',
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should throw WorkflowConflictError when custom ID already exists', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const existingId = 'workflow-12345678-1234-1234-1234-123456789abc';
+      const workflowCommand = {
+        yaml: 'name: Duplicate Workflow\nenabled: true\ndefinition:\n  triggers: []',
+        id: existingId,
+      };
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _id: existingId,
+              _source: {
+                name: 'Existing Workflow',
+                enabled: true,
+                spaceId: 'default',
+                yaml: 'name: Existing Workflow',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      await expect(
+        service.createWorkflow(workflowCommand, 'default', mockRequest)
+      ).rejects.toMatchObject({
+        name: 'WorkflowConflictError',
+        message: `Workflow with id '${existingId}' already exists`,
+        statusCode: 409,
+        workflowId: existingId,
+      });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('should throw WorkflowValidationError for invalid ID format', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const invalidId = 'invalid-id-format';
+      const workflowCommand = {
+        yaml: 'name: Invalid ID Workflow\nenabled: true\ndefinition:\n  triggers: []',
+        id: invalidId,
+      };
+
+      await expect(
+        service.createWorkflow(workflowCommand, 'default', mockRequest)
+      ).rejects.toMatchObject({
+        name: 'WorkflowValidationError',
+        message: `Invalid workflow ID format. Expected format: workflow-{uuid}, received: ${invalidId}`,
+        statusCode: 400,
+      });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('should throw WorkflowValidationError for ID without workflow prefix', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const invalidId = '12345678-1234-1234-1234-123456789abc';
+      const workflowCommand = {
+        yaml: 'name: Missing Prefix Workflow\nenabled: true\ndefinition:\n  triggers: []',
+        id: invalidId,
+      };
+
+      await expect(
+        service.createWorkflow(workflowCommand, 'default', mockRequest)
+      ).rejects.toMatchObject({
+        name: 'WorkflowValidationError',
+        message: `Invalid workflow ID format. Expected format: workflow-{uuid}, received: ${invalidId}`,
+        statusCode: 400,
+      });
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
   });
 
   describe('updateWorkflow', () => {
@@ -1090,7 +1247,7 @@ describe('WorkflowsService', () => {
           },
         ],
         _pagination: {
-          limit: 1,
+          limit: 20,
           page: 1,
           total: 1,
         },
@@ -1115,7 +1272,10 @@ describe('WorkflowsService', () => {
             ]),
           },
         },
+        size: 20,
+        from: 0,
         sort: [{ createdAt: 'desc' }],
+        track_total_hits: true,
       });
     });
 
@@ -1235,7 +1395,7 @@ describe('WorkflowsService', () => {
       expect(result).toEqual({
         results: [],
         _pagination: {
-          limit: 0,
+          limit: 20,
           page: 1,
           total: 0,
         },

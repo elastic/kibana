@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AnyToolTypeDefinition } from './definitions';
 import { getEsqlToolType } from './esql';
 import { getIndexSearchToolType } from './index_search';
@@ -15,7 +15,7 @@ import { getBuiltinToolType } from './builtin';
 export const getToolTypeDefinitions = ({
   workflowsManagement,
 }: {
-  workflowsManagement?: WorkflowsPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }): AnyToolTypeDefinition[] => {
   const toolTypes: AnyToolTypeDefinition<any, any, any>[] = [
     getBuiltinToolType(),

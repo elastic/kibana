@@ -8,9 +8,9 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { StepExecutionTimeline } from './step_execution_timeline';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import type { WorkflowExecutionLogEntry } from '../../../entities/workflows/api/use_workflow_execution_logs';
-import { StepExecutionTimeline } from './step_execution_timeline';
 
 const meta: Meta<typeof StepExecutionTimeline> = {
   component: StepExecutionTimeline,
