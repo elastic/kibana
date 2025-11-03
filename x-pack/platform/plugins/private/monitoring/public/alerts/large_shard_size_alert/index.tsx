@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { type RuleTypeModel, type ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   RULE_DETAILS,

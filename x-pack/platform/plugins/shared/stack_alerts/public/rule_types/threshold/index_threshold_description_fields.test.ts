@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
 import { getDescriptionFields } from './index_threshold_description_fields';
@@ -14,7 +13,7 @@ import type { IndexThresholdRuleParams } from './types';
 describe('index_threshold getDescriptionFields', () => {
   const mockPrebuildField = jest.fn();
   const mockPrebuildFields = {
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: mockPrebuildField,
+    indexPattern: mockPrebuildField,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
@@ -34,9 +33,7 @@ describe('index_threshold getDescriptionFields', () => {
   it('should return empty array when prebuildFields is not provided', () => {
     const mockRule = {
       params: {
-        searchConfiguration: {
-          index: 'logs-*',
-        },
+        index: 'logs-*',
         threshold: [10],
         timeWindowSize: 5,
         timeWindowUnit: 'm',

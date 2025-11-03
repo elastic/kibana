@@ -6,13 +6,22 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiBadge, EuiCodeBlock, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';
 import type { PrebuildFieldsMap, RuleDefinitionProps } from '../../../../types';
+
+const MAX_INDEX_PATTERN_LENGTH = 60;
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { children: React.ReactNode }) {
@@ -80,9 +89,13 @@ const IndexPattern = ({ patterns }: { patterns: string[] }) => {
       data-test-subj="rule-description-index-patterns"
     >
       {patterns.map((pattern) => (
-        <EuiBadge key={pattern} color="hollow">
-          {pattern}
-        </EuiBadge>
+        <EuiFlexItem grow={false} key={pattern}>
+          <EuiBadge color="hollow">
+            {pattern.length > MAX_INDEX_PATTERN_LENGTH
+              ? pattern.slice(0, MAX_INDEX_PATTERN_LENGTH) + '...'
+              : pattern}
+          </EuiBadge>
+        </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );
