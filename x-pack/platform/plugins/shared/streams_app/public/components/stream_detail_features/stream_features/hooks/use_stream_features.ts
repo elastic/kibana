@@ -7,8 +7,8 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import { useMemo } from 'react';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
 export const useStreamFeatures = (definition: Streams.all.Definition) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
