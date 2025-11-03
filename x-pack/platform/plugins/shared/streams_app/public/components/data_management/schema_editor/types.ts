@@ -47,7 +47,10 @@ export interface UnmappedSchemaField extends BaseSchemaField {
 
 export type SchemaField = MappedSchemaField | UnmappedSchemaField;
 
-export type SchemaEditorField = SchemaField & { result?: 'new' | 'modified' | 'unchanged' };
+export type SchemaEditorField = SchemaField & {
+  result?: 'new' | 'modified' | 'unchanged';
+  uncommitted?: boolean;
+};
 
 export interface SchemaEditorProps {
   defaultColumns?: TableColumnName[];

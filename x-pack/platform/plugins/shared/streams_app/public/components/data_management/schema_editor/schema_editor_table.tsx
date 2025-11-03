@@ -175,7 +175,8 @@ const createCellRenderer =
     }
 
     if (columnId === 'status') {
-      return <FieldStatusBadge status={status} />;
+      const editorField = field as SchemaEditorField;
+      return <FieldStatusBadge status={status} uncommitted={editorField.uncommitted} />;
     }
 
     if (columnId === 'source') {

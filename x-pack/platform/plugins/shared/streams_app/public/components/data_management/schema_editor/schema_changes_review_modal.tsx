@@ -186,8 +186,8 @@ export function SchemaChangesReviewModal({
           defaultMessage: 'Status',
         }),
         width: '200px',
-        render: (status: string) => {
-          return <FieldStatusBadge status={status as any} />;
+        render: (status: string, field: SchemaEditorField) => {
+          return <FieldStatusBadge status={status as any} uncommitted={field.uncommitted} />;
         },
       },
     ];
@@ -200,11 +200,11 @@ export function SchemaChangesReviewModal({
           defaultMessage: 'Result',
         }),
         width: '150px',
-        render: (result: SchemaEditorField['result']) => {
+        render: (result: SchemaEditorField['result'], field: SchemaEditorField) => {
           if (!result) return null;
           return <FieldResultBadge result={result} />;
         },
-      });
+      } as any);
     }
 
     // Only add source column if any field has a source
@@ -240,7 +240,7 @@ export function SchemaChangesReviewModal({
             </EuiBadge>
           );
         },
-      });
+      } as any);
     }
 
     return columns;
@@ -339,4 +339,33 @@ export function getChanges(fields: SchemaEditorField[], storedFields: SchemaEdit
   });
 
   return [...addedFields, ...changedFields];
+}
+
+export function isFieldUncommitted(field: SchemaEditorField, storedFields: SchemaEditorField[]) {
+  const fieldDefaults = {
+    format: undefined,
+    additionalParameters: {},
+  };
+  // Check if field is new (not in stored fields)
+  const storedField = storedFields.find((stored) => stored.name === field.name);
+  if (!storedField) {
+    // If the field is not stored yet and is still unmapped, then we didn't touch
+    // it and it is not uncommitted, since it won't be saved to the stream definition.
+    return field.status !== 'unmapped';
+  }
+
+  // Create copies without SchemaEditorField-specific properties (result, uncommitted)
+  // to compare only the base SchemaField properties
+  const { result: _fieldResult, uncommitted: _fieldUncommitted, ...fieldToCompare } = field;
+  const {
+    result: _storedResult,
+    uncommitted: _storedUncommitted,
+    ...storedToCompare
+  } = storedField;
+
+  // Check if field has been modified (different from stored)
+  return !isEqual(
+    { ...fieldDefaults, ...storedToCompare },
+    { ...fieldDefaults, ...fieldToCompare }
+  );
 }

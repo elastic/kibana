@@ -35,7 +35,11 @@ import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
+import {
+  SchemaChangesReviewModal,
+  getChanges,
+  isFieldUncommitted,
+} from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import type { SchemaEditorField } from '../schema_editor/types';
@@ -99,8 +103,28 @@ export function StreamDetailEnrichmentContentImpl() {
   // Calculate schemaEditorFields with result property
   const schemaEditorFields = React.useMemo(() => {
     // Create lookup maps for efficient comparison
-    const definitionFieldsMap = new Map(definitionFields ? Object.entries(definitionFields) : []);
+    const definitionFieldsMap = new Map(definitionFields.map((field) => [field.name, field]));
     const inheritedFieldsMap = new Map(inheritedFields ? Object.entries(inheritedFields) : []);
+
+    // Convert definitionFields to SchemaEditorField[] for uncommitted comparison
+    const storedFields: SchemaEditorField[] = [];
+    definitionFieldsMap.forEach((field, name) => {
+      storedFields.push({
+        ...field,
+        name,
+        status: 'mapped',
+      } as SchemaEditorField);
+    });
+    inheritedFieldsMap.forEach((field, name) => {
+      if (!definitionFieldsMap.has(name) && field.type !== 'system') {
+        storedFields.push({
+          ...field,
+          name,
+          status: 'inherited',
+          parent: field.from,
+        } as SchemaEditorField);
+      }
+    });
 
     const result: SchemaEditorField[] = [];
 
@@ -122,27 +146,34 @@ export function StreamDetailEnrichmentContentImpl() {
         fieldResult = 'new';
       }
 
+      let editorField: SchemaEditorField;
+
       // If the detected field matches an inherited field, preserve the inherited properties
       if (inheritedField && !definitionField && inheritedField.type !== 'system') {
-        result.push({
+        editorField = {
           ...detectedField,
           status: 'inherited',
           parent: inheritedField.from,
           type: detectedField.type ?? inheritedField.type,
           result: fieldResult,
-        } as SchemaEditorField);
+        } as SchemaEditorField;
       } else if (definitionField) {
         // Merge with definition field to preserve any additional properties
-        result.push({
+        editorField = {
           ...detectedField,
           result: fieldResult,
-        });
+        };
       } else {
-        result.push({
+        editorField = {
           ...detectedField,
           result: fieldResult,
-        });
+        };
       }
+
+      // Mark field as uncommitted if it's new or modified from stored state
+      editorField.uncommitted = isFieldUncommitted(editorField, storedFields);
+
+      result.push(editorField);
     });
 
     return result;
@@ -224,7 +255,7 @@ export function StreamDetailEnrichmentContentImpl() {
                 paddingSize="l"
                 css={verticalFlexCss}
               >
-                <MemoSimulationPlayground />
+                <MemoSimulationPlayground schemaEditorFields={schemaEditorFields} />
               </EuiResizablePanel>
             </>
           )}

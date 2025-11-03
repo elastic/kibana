@@ -90,6 +90,15 @@ export const FIELD_STATUS_MAP = {
       defaultMessage: 'The mapping for this field is not managed by this stream or a parent.',
     }),
   },
+  pending: {
+    color: 'warning',
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorPendingStatusLabel', {
+      defaultMessage: 'Pending',
+    }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorPendingStatusTooltip', {
+      defaultMessage: 'This field has uncommitted changes.',
+    }),
+  },
 };
 
 export type FieldStatus = keyof typeof FIELD_STATUS_MAP;

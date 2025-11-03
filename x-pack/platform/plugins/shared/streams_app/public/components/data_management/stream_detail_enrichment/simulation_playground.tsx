@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -17,7 +17,6 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { Streams } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
@@ -26,10 +25,13 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
 import { DataSourcesList } from './data_sources_list';
-import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import type { SchemaEditorField } from '../schema_editor/types';
 
-export const SimulationPlayground = () => {
+export const SimulationPlayground = ({
+  schemaEditorFields,
+}: {
+  schemaEditorFields: SchemaEditorField[];
+}) => {
   const { refreshSimulation, viewSimulationPreviewData, viewSimulationDetectedFields } =
     useStreamEnrichmentEvents();
 
@@ -45,73 +47,6 @@ export const SimulationPlayground = () => {
   );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
-  const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
-  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
-  const definitionFields = useStreamEnrichmentSelector((state) => {
-    const def = state.context.definition;
-    if (Streams.WiredStream.GetResponse.is(def)) {
-      return def.stream.ingest.wired.fields;
-    }
-    return def.stream.ingest.classic.field_overrides;
-  });
-  const inheritedFields = useStreamEnrichmentSelector((state) => {
-    const def = state.context.definition;
-    if (Streams.WiredStream.GetResponse.is(def)) {
-      return def.inherited_fields;
-    }
-    return undefined;
-  });
-
-  const schemaEditorFields = useMemo(() => {
-    // Create lookup maps for efficient comparison
-    const definitionFieldsMap = new Map(definitionFields ? Object.entries(definitionFields) : []);
-    const inheritedFieldsMap = new Map(inheritedFields ? Object.entries(inheritedFields) : []);
-
-    const result: SchemaEditorField[] = [];
-
-    // Create a set of field names in samples for quick lookup
-    const fieldsInSamplesSet = new Set(fieldsInSamples);
-
-    // Process only detected fields
-    detectedFields.forEach((detectedField) => {
-      const definitionField = definitionFieldsMap.get(detectedField.name);
-      const inheritedField = inheritedFieldsMap.get(detectedField.name);
-      const isInSamples = fieldsInSamplesSet.has(detectedField.name);
-      let fieldResult: SchemaEditorField['result'];
-
-      if (isInSamples) {
-        // Field exists in samples AND in detected fields - modified by the simulated processing steps
-        fieldResult = 'modified';
-      } else {
-        // Field not in samples - it's new
-        fieldResult = 'new';
-      }
-
-      // If the detected field matches an inherited field, preserve the inherited properties
-      if (inheritedField && !definitionField && inheritedField.type !== 'system') {
-        result.push({
-          ...detectedField,
-          status: 'inherited',
-          parent: inheritedField.from,
-          type: detectedField.type ?? inheritedField.type,
-          result: fieldResult,
-        } as SchemaEditorField);
-      } else if (definitionField) {
-        // Merge with definition field to preserve any additional properties
-        result.push({
-          ...detectedField,
-          result: fieldResult,
-        });
-      } else {
-        result.push({
-          ...detectedField,
-          result: fieldResult,
-        });
-      }
-    });
-
-    return result;
-  }, [detectedFields, fieldsInSamples, definitionFields, inheritedFields]);
 
   return (
     <>
