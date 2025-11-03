@@ -37,7 +37,7 @@ export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEdito
           borderTopLeftRadius: '4px',
           borderTopRightRadius: '4px',
           position: 'relative', // Enable relative positioning for action buttons
-          width: 'calc(100% - 24px) !important',
+          width: 'calc(100% - 24px) !important', // To add a space between decoration and the scrollbar  
         },
         '.workflow-step-selected-middle': {
           backgroundColor: 'rgba(0, 120, 212, 0.02)',
