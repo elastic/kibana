@@ -35,9 +35,6 @@ describe(
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
         ],
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
-        ],
       },
     },
   },
@@ -101,6 +98,7 @@ describe(
         .should('deep.equal', [
           'Endpoint ListAll',
           'Automatic TroubleshootingNone',
+          'SOC ManagementNone',
           'Global Artifact ManagementNone',
           'Trusted ApplicationsNone',
           'Trusted DevicesNone',

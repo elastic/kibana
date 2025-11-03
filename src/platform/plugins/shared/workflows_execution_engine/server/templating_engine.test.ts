@@ -265,30 +265,66 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
-  describe('base64 filters', () => {
-    it('should encode and decode strings correctly', () => {
-      const template = '{{ "Hello World" | base64_encode }}';
-      const result = templatingEngine.render(template, {});
-      expect(result).toBe('SGVsbG8gV29ybGQ=');
+  describe('evaluateExpression', () => {
+    describe('invalid expression', () => {
+      it('should throw error for non-output template', () => {
+        const template = `{% if true %}foo{% endif %}`;
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+          'The provided expression is invalid. Got: {% if true %}foo{% endif %}'
+        );
+      });
+
+      it('should throw error for multi-node template', () => {
+        const template = `{{ "foo" }} {{ "bar" }}`;
+
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+          'The provided expression is invalid. Got: {{ "foo" }} {{ "bar" }}'
+        );
+      });
     });
 
-    it('should decode base64 strings', () => {
-      const template = '{{ "SGVsbG8gV29ybGQ=" | base64_decode }}';
-      const result = templatingEngine.render(template, {});
-      expect(result).toBe('Hello World');
+    describe('string manipulation', () => {
+      it('should evaluate split filter over string', () => {
+        const template = `{{ "foo,bar,dak" | split: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {});
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+
+      it('should evaluate split filter over variable', () => {
+        const template = `{{ my_string | split: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_string: 'foo,bar,dak',
+        });
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+
+      it('should evaluate split filter with variable separator', () => {
+        const template = `{{ my_string | split: separator }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_string: 'foo|bar|dak',
+          separator: '|',
+        });
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
     });
 
-    it('should handle round-trip encoding/decoding', () => {
-      const template = '{{ data | base64_encode | base64_decode }}';
-      const context = { data: 'Sensitive information' };
-      const result = templatingEngine.render(template, context);
-      expect(result).toBe('Sensitive information');
-    });
+    describe('array manipulation', () => {
+      it('should evaluate join filter over array', () => {
+        const template = `{{ my_array | join: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_array: ['foo', 'bar', 'dak'],
+        });
+        expect(actual).toEqual('foo,bar,dak');
+      });
 
-    it('should handle non-string input gracefully', () => {
-      const template = '{{ 123 | base64_encode }}';
-      const result = templatingEngine.render(template, {});
-      expect(result).toBe('');
+      it('should evaluate join filter with variable separator', () => {
+        const template = `{{ my_array | join: separator }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_array: ['foo', 'bar', 'dak'],
+          separator: '|',
+        });
+        expect(actual).toEqual('foo|bar|dak');
+      });
     });
   });
 });
