@@ -494,6 +494,33 @@ const ESQLEditorInternal = function ESQLEditor({
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
 
+  const { cache: historyStarredItemsCache, memoizedHistoryStarredItems } = useMemo(() => {
+    const fn = memoize(
+      (...args: [typeof getHistoryItems, typeof favoritesClient]) => ({
+        timestamp: Date.now(),
+        result: (async () => {
+          const [getHistoryItemsFn, favoritesClientInstance] = args;
+          const historyItems = getHistoryItemsFn('desc');
+          const items = historyItems.map((item) => item.queryString);
+
+          const { favoriteMetadata } = (await favoritesClientInstance?.getFavorites()) || {};
+
+          if (favoriteMetadata) {
+            Object.keys(favoriteMetadata).forEach((id) => {
+              const item = favoriteMetadata[id];
+              const { queryString } = item;
+              items.push(queryString);
+            });
+          }
+          return items;
+        })(),
+      }),
+      () => 'historyStarredItems'
+    );
+
+    return { cache: fn.cache, memoizedHistoryStarredItems: fn };
+  }, []);
+
   const canCreateLookupIndex = useCanCreateLookupIndex();
 
   const getJoinIndices = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
@@ -625,19 +652,8 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
       getHistoryStarredItems: async () => {
-        const historyItems = getHistoryItems('desc');
-        const items = historyItems.map((item) => item.queryString);
-
-        const { favoriteMetadata } = (await favoritesClient?.getFavorites()) || {};
-
-        if (favoriteMetadata) {
-          Object.keys(favoriteMetadata).forEach((id) => {
-            const item = favoriteMetadata[id];
-            const { queryString } = item;
-            items.push(queryString);
-          });
-        }
-        return items;
+        clearCacheWhenOld(historyStarredItemsCache, 'historyStarredItems');
+        return await memoizedHistoryStarredItems(getHistoryItems, favoritesClient).result;
       },
       canCreateLookupIndex,
       isServerless: Boolean(kibana.services?.esql?.isServerless),
@@ -663,6 +679,8 @@ const ESQLEditorInternal = function ESQLEditor({
     activeSolutionId,
     canCreateLookupIndex,
     getJoinIndices,
+    historyStarredItemsCache,
+    memoizedHistoryStarredItems,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {

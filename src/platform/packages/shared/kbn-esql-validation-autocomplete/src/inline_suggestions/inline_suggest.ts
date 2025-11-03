@@ -135,7 +135,7 @@ async function getHistorySuggestions(
 /**
  * Gets template-based suggestions with caching
  */
-function getRecommendedTemplateSuggestions(
+function getCachedRecommendedTemplateSuggestions(
   fromCommand: string,
   timeField: string,
   categorizationField: string | undefined,
@@ -177,7 +177,7 @@ async function fetchAllSuggestions(
     getHistorySuggestions(range, callbacks),
   ]);
 
-  const templateSuggestions = getRecommendedTemplateSuggestions(
+  const templateSuggestions = getCachedRecommendedTemplateSuggestions(
     fromCommand,
     timeField,
     categorizationField,
