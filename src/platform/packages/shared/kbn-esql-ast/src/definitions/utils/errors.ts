@@ -342,6 +342,13 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'forkNotAllowedInSubquery':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkNotAllowedInSubquery', {
+          defaultMessage: '[FORK] Command is not allowed inside subqueries.',
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -569,6 +576,9 @@ export const errors = {
 
   forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooFewBranches', command.location, {}),
+
+  forkNotAllowedInSubquery: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('forkNotAllowedInSubquery', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

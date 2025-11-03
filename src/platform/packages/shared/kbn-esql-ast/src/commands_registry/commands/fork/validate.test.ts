@@ -67,6 +67,12 @@ describe('FORK Validation', () => {
     );
   });
 
+  test('does not allow FORK inside subqueries', () => {
+    forkExpectErrors(`FROM index, (FROM index2 | FORK (EVAL a = 1) (EVAL b = 2))`, [
+      '[FORK] Command is not allowed inside subqueries.',
+    ]);
+  });
+
   describe('_fork field', () => {
     test('DOES recognize _fork field AFTER FORK', () => {
       forkExpectErrors(

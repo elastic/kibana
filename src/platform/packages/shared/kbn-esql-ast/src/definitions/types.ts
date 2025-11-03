@@ -399,6 +399,10 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  forkNotAllowedInSubquery: {
+    message: string;
+    type: {};
+  };
   joinOnSingleExpression: {
     message: string;
     type: {};

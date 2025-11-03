@@ -24,6 +24,13 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
+  // A FORK is inside a subquery if it's not in the root commands list
+  const isInsideSubquery = !ast.some((cmd) => cmd.location === command.location);
+
+  if (isInsideSubquery) {
+    messages.push(errors.forkNotAllowedInSubquery(command));
+  }
+
   if (command.args.length < MIN_BRANCHES) {
     messages.push(errors.forkTooFewBranches(command));
   }
