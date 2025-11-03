@@ -41,6 +41,7 @@ export interface AutomaticImportV2PluginStart {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface AutomaticImportV2PluginSetupDependencies {
@@ -52,7 +53,7 @@ export interface AutomaticImportV2PluginStartDependencies {
   actions: ActionsPluginStart;
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface AutomaticImportV2PluginApiRequestHandlerContext {
