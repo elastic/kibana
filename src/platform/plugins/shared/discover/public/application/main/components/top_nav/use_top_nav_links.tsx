@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import { ENABLE_ESQL, getInitialESQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   AppMenuRegistry,
   type AppMenuItemPrimary,
@@ -27,6 +27,10 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
+import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { esqlToStreamlangProcessors, esqlToStreamlangSteps } from '@kbn/streamlang';
+import type { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common';
+import type { EnrichmentUrlState } from '@kbn/streams-app-plugin/common/url_schema/enrichment_url_schema';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
@@ -229,12 +233,74 @@ export const useTopNavLinks = ({
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
   return useMemo(() => {
+    const getEsqlFromState = (): string | undefined => {
+      const q = state.appState.getState()?.query;
+      return q && typeof (q as any).esql === 'string' ? (q as { esql: string }).esql : undefined;
+    };
+    const esqlQuery: string | undefined = isEsqlMode ? getEsqlFromState() : undefined;
+    const indexPattern = esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) : '';
+    const isSingleTarget = Boolean(indexPattern) && !indexPattern.includes(',') && !indexPattern.includes('*') && !indexPattern.includes(' ');
+    const processors = esqlQuery ? esqlToStreamlangProcessors(esqlQuery) : [];
+    const stepsV3 = esqlQuery ? esqlToStreamlangSteps(esqlQuery) : [];
+    const hasMaterializable = stepsV3.length > 0 || processors.length > 0;
+    const isEligible = Boolean(isEsqlMode && isSingleTarget && hasMaterializable);
+
     const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
       convertAppMenuItemToTopNavItem({
         appMenuItem,
         services,
       })
     );
+
+    if (isEsqlMode) {
+      entries.push({
+        id: 'materialize-streams',
+        label: i18n.translate('discover.localMenu.materializeInStreams', {
+          defaultMessage: 'Materialize in Streams',
+        }),
+        description: i18n.translate('discover.localMenu.materializeInStreams.description', {
+          defaultMessage: 'Translate ES|QL to processors and conditions, then open Streams processing',
+        }),
+        testId: 'discoverMaterializeInStreamsButton',
+        iconType: 'indexEdit',
+        run: async () => {
+          if (!isEligible) return;
+
+          const locator = services.share?.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
+          if (!locator) return;
+
+          const pageState: EnrichmentUrlState =
+            stepsV3.length > 0
+              ? { v: 3, dataSources: [], stepsToAppend: stepsV3 }
+              : { v: 2, dataSources: [], processorsToAppend: processors };
+          if (stepsV3.length === 0 && processors.length > 0) {
+            services.notifications.toasts.addInfo({
+              title: i18n.translate('discover.materialize.debug.noStepsV3', {
+                defaultMessage: 'Materialize falling back to v2 processors',
+              }),
+              text: i18n.translate('discover.materialize.debug.noStepsV3.body', {
+                defaultMessage: 'ES|QL reverse produced {count} processors but no steps. URL schema v2 will be used.',
+                values: { count: processors.length },
+              }),
+            });
+          }
+          const params = {
+            name: indexPattern,
+            managementTab: 'processing',
+            pageState,
+          } as StreamsAppLocatorParams;
+          const url = await locator.getRedirectUrl(params);
+          services.application.navigateToUrl(url);
+        },
+        disableButton: !isEligible,
+        tooltip: !isEligible
+          ? i18n.translate('discover.localMenu.materializeInStreams.disabled', {
+              defaultMessage:
+                'Enabled when a single stream target is detected and the ES|QL query produces materializable steps',
+            })
+          : undefined,
+      });
+    }
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
       /**

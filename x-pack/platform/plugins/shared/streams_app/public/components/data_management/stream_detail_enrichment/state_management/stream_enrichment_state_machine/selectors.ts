@@ -9,11 +9,19 @@ import { createSelector } from 'reselect';
 import { isActionBlock } from '@kbn/streamlang';
 import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
+import { DraftGrokExpression } from '@kbn/grok-ui';
+import type { ProcessorResources } from '../steps_state_machine/types';
+import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 
 /**
  * Selects the processor marked as the draft processor.
  */
-export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
+export const selectDraftProcessor = (
+  context: StreamEnrichmentContextType
+): {
+  processor?: StreamlangProcessorDefinitionWithUIAttributes;
+  resources?: ProcessorResources;
+} => {
   const draft = context.stepRefs.find((stepRef) => {
     const snapshot = stepRef.getSnapshot();
     return (
@@ -23,15 +31,24 @@ export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
 
   const snapshot = draft?.getSnapshot();
 
-  return draft && isActionBlock(snapshot?.context.step)
-    ? {
-        processor: snapshot?.context.step,
-        resources: snapshot?.context.resources,
-      }
-    : {
-        processor: undefined,
-        resources: undefined,
+  if (draft && snapshot && isActionBlock(snapshot.context.step)) {
+    const step = snapshot.context.step;
+    let resources = snapshot.context.resources;
+
+    // Ensure GROK preview highlighting also works for URL-prepopulated processors
+    if (step.action === 'grok' && (!resources || !resources.grokExpressions)) {
+      const patterns: string[] = step.patterns ?? [];
+      resources = {
+        grokExpressions: patterns.map(
+          (p) => new DraftGrokExpression(context.grokCollection, p)
+        ),
       };
+    }
+
+    return { processor: step, resources };
+  }
+
+  return { processor: undefined, resources: undefined };
 };
 
 /**
