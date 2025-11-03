@@ -10981,7 +10981,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+            $ref: '#/components/schemas/Security_Detections_API_UUID'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -11024,7 +11024,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+            $ref: '#/components/schemas/Security_Detections_API_UUID'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -13569,7 +13569,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_RuleId'
+            $ref: '#/components/schemas/Security_Exceptions_API_UUID'
       requestBody:
         content:
           application/json:
@@ -14296,7 +14296,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -14358,7 +14358,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
                 type: array
           description: Successful response
         '400':
@@ -14441,7 +14441,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -14528,7 +14528,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -14580,7 +14580,7 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         - description: The page number to return
           in: query
           name: page
@@ -14619,7 +14619,7 @@ paths:
                 properties:
                   data:
                     items:
-                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
                     type: array
                   page:
                     minimum: 0
@@ -15066,29 +15066,6 @@ paths:
                 $ref: '#/components/schemas/Security_Endpoint_Management_API_KillProcessRouteResponse'
           description: OK
       summary: Terminate a process
-      tags:
-        - Security Endpoint Management API
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/endpoint/action/memory_dump:
-    post:
-      description: Generates memory dumps on the targeted host.
-      operationId: EndpointGenerateMemoryDump
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_MemoryDumpRouteRequestBody'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
-          description: Action request was successfully created
-      summary: Generate a memory dump from the host machine
       tags:
         - Security Endpoint Management API
       x-metaTags:
@@ -18367,7 +18344,7 @@ paths:
           schema:
             default: []
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_FindExceptionListItemsFilter'
+              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
             type: array
         - description: |
             Determines whether the returned containers are Kibana associated with a Kibana space
@@ -64763,7 +64740,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the Timeline was successfully updated.
         '405':
           content:
@@ -64829,7 +64806,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates the Timeline was successfully created.
         '405':
           content:
@@ -64875,7 +64852,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the timeline has been successfully copied.
       summary: Copies timeline or timeline template
       tags:
@@ -64898,7 +64875,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
@@ -64951,7 +64928,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '403':
           content:
@@ -73281,7 +73258,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -73385,7 +73362,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -73753,7 +73730,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -73882,7 +73859,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -74362,7 +74339,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -74482,7 +74459,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -74863,7 +74840,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -74992,7 +74969,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -75491,7 +75468,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -75614,7 +75591,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -75815,7 +75792,7 @@ components:
         execution_summary:
           $ref: '#/components/schemas/Security_Detections_API_RuleExecutionSummary'
         id:
-          $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+          $ref: '#/components/schemas/Security_Detections_API_UUID'
         immutable:
           $ref: '#/components/schemas/Security_Detections_API_IsRuleImmutable'
         required_fields:
@@ -76617,7 +76594,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -76740,7 +76717,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -77305,7 +77282,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -77437,7 +77414,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -77907,7 +77884,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -78033,7 +78010,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -78649,7 +78626,6 @@ components:
           get-file: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
           isolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
           kill-process: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
-          memory-dump: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
           running-processes: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
           runscript: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
           scan: '#/components/schemas/Security_Endpoint_Management_API_Scan'
@@ -78665,11 +78641,10 @@ components:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Upload'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Scan'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Isolate'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Unisolate'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
     Security_Endpoint_Management_API_ActionStateSuccessResponse:
       type: object
       properties:
@@ -79546,138 +79521,6 @@ components:
         - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
       type: object
-    Security_Endpoint_Management_API_MemoryDump:
-      allOf:
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
-        - type: object
-          properties:
-            outputs:
-              additionalProperties:
-                type: object
-                properties:
-                  content:
-                    properties:
-                      code:
-                        type: string
-                      disk_free_space:
-                        description: The free space on the host machine in bytes after the memory dump is written to disk
-                        type: number
-                      file_size:
-                        description: The size of the memory dump compressed file in bytes
-                        type: string
-                      path:
-                        description: The path to the memory dump compressed file on the host machine
-                        type: string
-                    title: Memory dump output
-                    type: object
-              type: object
-            parameters:
-              oneOf:
-                - properties:
-                    type:
-                      description: Kernel level memory dump
-                      enum:
-                        - kernel
-                      type: string
-                  required:
-                    - type
-                  title: Kernel memory dump
-                  type: object
-                - properties:
-                    pid:
-                      description: The process ID (PID)
-                      type: number
-                    type:
-                      description: Process level memory dump using a process ID
-                      enum:
-                        - process
-                      type: string
-                  required:
-                    - type
-                    - pid
-                  title: Process memory dump with PID
-                  type: object
-                - properties:
-                    entity_id:
-                      description: The process entity ID
-                      type: string
-                    type:
-                      description: Process level memory dump using an entity ID
-                      enum:
-                        - process
-                      type: string
-                  required:
-                    - type
-                    - entity_id
-                  title: Process memory dump with entity ID
-                  type: object
-          required:
-            - parameters
-    Security_Endpoint_Management_API_MemoryDumpRouteRequestBody:
-      allOf:
-        - type: object
-          properties:
-            agent_type:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
-            alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
-              example:
-                - alert-id-1
-                - alert-id-2
-              items:
-                minLength: 1
-                type: string
-              minItems: 1
-              type: array
-            case_ids:
-              description: The IDs of cases where the action taken will be logged.
-              example:
-                - case-id-1
-                - case-id-2
-              items:
-                minLength: 1
-                type: string
-              minItems: 1
-              type: array
-            comment:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
-          required:
-            - endpoint_ids
-        - type: object
-          properties:
-            parameters:
-              oneOf:
-                - description: Dump the entire kernel memory.
-                  type: object
-                  properties:
-                    type:
-                      enum:
-                        - kernel
-                      type: string
-                - description: Dump the entire memory of a process using the PID.
-                  type: object
-                  properties:
-                    pid:
-                      type: number
-                    type:
-                      enum:
-                        - process
-                      type: string
-                - description: Dump the entire memory of a process using the entity ID.
-                  type: object
-                  properties:
-                    entity_id:
-                      type: string
-                    type:
-                      enum:
-                        - process
-                      type: string
-          required:
-            - parameters
     Security_Endpoint_Management_API_MetadataListResponse:
       example:
         data:
@@ -80905,7 +80748,7 @@ components:
         installed:
           type: boolean
         metadata:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_Metadata'
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
         resource:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
       required:
@@ -82592,19 +82435,19 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_CreateLiveQueryRequestBody:
       example:
         agent_all: true
@@ -82643,7 +82486,7 @@ components:
             type: string
           type: array
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         event_ids:
           description: A list of event IDs associated with the live query.
           items:
@@ -82654,13 +82497,13 @@ components:
           nullable: true
           type: object
         pack_id:
-          $ref: '#/components/schemas/Security_Osquery_API_PackIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackId'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ArrayQueries'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
     Security_Osquery_API_CreateLiveQueryResponse:
       example:
         data:
@@ -82718,13 +82561,13 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
@@ -82772,23 +82615,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_CreateSavedQueryResponse:
       example:
         data: {}
@@ -83020,21 +82863,21 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_PackDescription:
       description: The pack description.
       example: Pack description
@@ -83145,13 +82988,13 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
@@ -83190,23 +83033,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_UpdateSavedQueryResponse:
       example:
         data: {}
