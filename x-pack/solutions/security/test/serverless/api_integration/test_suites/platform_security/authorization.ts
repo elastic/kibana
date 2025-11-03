@@ -3047,7 +3047,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:securitySolution-socManagement",
                 "ui:siem/socManagement",
-                "ui:siemV4/socManagement",
+                "ui:siemV5/socManagement",
               ],
               "trusted_applications_all": Array [
                 "login:",
@@ -5724,7 +5724,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:securitySolution-socManagement",
                 "ui:siemV2/socManagement",
-                "ui:siemV4/socManagement",
+                "ui:siemV5/socManagement",
               ],
               "trusted_applications_all": Array [
                 "login:",
@@ -8405,7 +8405,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:securitySolution-socManagement",
                 "ui:siemV3/socManagement",
-                "ui:siemV4/socManagement",
+                "ui:siemV5/socManagement",
               ],
               "trusted_applications_all": Array [
                 "login:",
@@ -11102,6 +11102,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV4/writeScanOperations",
                 "ui:siemV5/writeScanOperations",
               ],
+              "soc_management_all": Array [
+                "login:",
+                "api:securitySolution-socManagement",
+                "ui:siemV4/socManagement",
+                "ui:siemV5/socManagement",
+              ],
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",
@@ -12667,7 +12673,7 @@ export default function ({ getService }: FtrProviderContext) {
               "soc_management_all": Array [
                 "login:",
                 "api:securitySolution-socManagement",
-                "ui:siemV4/socManagement",
+                "ui:siemV5/socManagement",
               ],
               "trusted_applications_all": Array [
                 "login:",
