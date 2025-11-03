@@ -96,12 +96,30 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(result.queryByTestId('timezone-field')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
-    expect(result.queryByTestId('timezone-field')).not.toBeInTheDocument();
   });
 
   it('renders timezone field when the kibana setting is set to browser', async () => {
     useUiSetting.mockReturnValue('Browser');
+
+    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
+    expect(result.getByTestId('title-field')).toBeInTheDocument();
+    expect(result.getByTestId('date-field')).toBeInTheDocument();
+    expect(result.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
+    expect(result.getByTestId('timezone-field')).toBeInTheDocument();
+  });
+
+  it('renders the timezone field for any non-"Browser" kibana setting value', async () => {
+    useUiSetting.mockReturnValue('America/Los_Angeles');
 
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 

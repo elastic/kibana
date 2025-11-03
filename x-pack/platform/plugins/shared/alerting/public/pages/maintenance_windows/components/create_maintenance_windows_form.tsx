@@ -207,7 +207,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   });
 
   const isRecurring = recurring || false;
-  const showTimezone = isBrowser || initialValue?.timezone !== undefined;
 
   const closeModal = useCallback(() => setIsModalVisible(false), []);
   const showModal = useCallback(() => setIsModalVisible(true), []);
@@ -333,35 +332,31 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 )}
               </UseMultiFields>
             </EuiFlexItem>
-            {showTimezone ? (
-              <EuiFlexItem grow={1}>
-                <UseField
-                  path="timezone"
-                  config={{
-                    type: FIELD_TYPES.COMBO_BOX,
-                    validations: [],
-                    defaultValue: [defaultTimezone],
-                  }}
-                  componentProps={{
-                    'data-test-subj': 'timezone-field',
-                    id: 'timezone',
-                    euiFieldProps: {
-                      fullWidth: true,
-                      options: TIMEZONE_OPTIONS,
-                      singleSelection: { asPlainText: true },
-                      isClearable: false,
-                      noSuggestions: false,
-                      placeholder: '',
-                      prepend: (
-                        <EuiFormLabel htmlFor={'timezone'}>
-                          {i18n.CREATE_FORM_TIMEZONE}
-                        </EuiFormLabel>
-                      ),
-                    },
-                  }}
-                />
-              </EuiFlexItem>
-            ) : null}
+            <EuiFlexItem grow={1}>
+              <UseField
+                path="timezone"
+                config={{
+                  type: FIELD_TYPES.COMBO_BOX,
+                  validations: [],
+                  defaultValue: [defaultTimezone],
+                }}
+                componentProps={{
+                  'data-test-subj': 'timezone-field',
+                  id: 'timezone',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    options: TIMEZONE_OPTIONS,
+                    singleSelection: { asPlainText: true },
+                    isClearable: false,
+                    noSuggestions: false,
+                    placeholder: '',
+                    prepend: (
+                      <EuiFormLabel htmlFor={'timezone'}>{i18n.CREATE_FORM_TIMEZONE}</EuiFormLabel>
+                    ),
+                  },
+                }}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
