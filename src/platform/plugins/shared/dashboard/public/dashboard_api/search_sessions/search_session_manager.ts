@@ -25,7 +25,6 @@ export function initializeSearchSessionManager(
 
   let stopSearchSessionIntegration: (() => void) | undefined;
   let requestSearchSessionId: (() => Promise<string | undefined>) | undefined;
-
   if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
@@ -72,7 +71,6 @@ export function initializeSearchSessionManager(
       searchSessionGenerationInProgress$
     );
   }
-
   return {
     api: {
       searchSessionId$,

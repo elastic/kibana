@@ -90,6 +90,7 @@ export const useESQLVariables = ({
       }
     });
 
+    // update the ES|QL query with new variables, if necessary
     if (pendingQueryUpdate.current) {
       onUpdateESQLQuery(pendingQueryUpdate.current);
       pendingQueryUpdate.current = undefined;
@@ -140,8 +141,6 @@ export const useESQLVariables = ({
           },
         },
       });
-
-      console.log('ADD NEW CONTROL');
     },
     [controlGroupApi]
   );
