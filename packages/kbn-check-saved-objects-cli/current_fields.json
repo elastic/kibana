@@ -197,6 +197,7 @@
     "total_alerts",
     "total_comments",
     "total_events",
+    "total_observables",
     "updated_at",
     "updated_by",
     "updated_by.email",
