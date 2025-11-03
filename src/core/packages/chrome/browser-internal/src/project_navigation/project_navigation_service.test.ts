@@ -12,6 +12,7 @@ import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observab
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ChromeNavLinks,
@@ -90,6 +91,7 @@ const setup = ({
     chromeBreadcrumbs$,
     logger,
     featureFlags: coreFeatureFlagsMock.createStart(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
@@ -459,7 +461,7 @@ describe('initNavigation()', () => {
       isExternalLink: true,
       path: 'group1.node-0',
       sideNavStatus: 'visible',
-      title: 'Users and roles',
+      title: 'Members',
     });
 
     // performance
@@ -532,7 +534,7 @@ describe('initNavigation()', () => {
     expect(node?.children?.length).toBe(3); // Only 3 links without billing
 
     // Verify the links are userAndRoles, performance, deployment (no billing)
-    expect(node.children![0].title).toBe('Users and roles');
+    expect(node.children![0].title).toBe('Members');
     expect(node.children![1].title).toBe('Performance');
     expect(node.children![2].title).toBe('Project'); // deployment
 

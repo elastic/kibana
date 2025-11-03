@@ -181,6 +181,7 @@ export class MapContainer extends Component<Props, State> {
           data-description={this.props.description}
         >
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
               defaultMessage: 'Unable to initialize map',
             })}
