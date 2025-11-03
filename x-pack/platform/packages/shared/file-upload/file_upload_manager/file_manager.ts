@@ -267,6 +267,9 @@ export class FileUploadManager {
   }
 
   destroy() {
+    this.importAbortController?.abort();
+    this.getFiles().forEach((file) => file.destroy());
+
     this.files$.complete();
     this.analysisValid$.complete();
     this._settings$.complete();

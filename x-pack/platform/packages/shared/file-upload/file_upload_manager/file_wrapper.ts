@@ -129,9 +129,7 @@ export class FileWrapper {
   }
 
   public destroy() {
-    if (this.analysisAbortController) {
-      this.analysisAbortController.abort();
-    }
+    this.analysisAbortController?.abort();
 
     this.analyzedFile$.complete();
     this.pipeline$.complete();
@@ -255,11 +253,9 @@ export class FileWrapper {
   }
 
   public abortAnalysis() {
-    if (this.analysisAbortController) {
-      this.analysisAbortController.abort();
-    }
+    this.analysisAbortController?.abort();
     this.setStatus({
-      analysisStatus: STATUS.NOT_STARTED,
+      analysisStatus: STATUS.ABORTED,
     });
   }
 
