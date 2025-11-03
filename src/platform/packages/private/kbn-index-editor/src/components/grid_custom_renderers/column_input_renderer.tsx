@@ -87,9 +87,8 @@ export const getColumnInputRenderer = (
         initialColumnType={columnType}
         columnIndex={columnIndex}
         telemetryService={telemetryService}
-      >
-        {column.display}
-      </AddColumnHeader>
+        originalColumnDisplay={column.display}
+      />
     ),
     displayHeaderCellProps: { [COLUMN_INDEX_PROP]: columnIndex } as HTMLAttributes<HTMLDivElement>,
     actions: {
@@ -139,6 +138,7 @@ interface AddColumnHeaderProps {
   initialColumnType: string | undefined;
   columnIndex: number;
   telemetryService: IndexEditorTelemetryService;
+  originalColumnDisplay: React.ReactNode;
 }
 
 export const AddColumnHeader = ({
@@ -148,7 +148,7 @@ export const AddColumnHeader = ({
   initialColumnType,
   columnIndex,
   telemetryService,
-  children,
+  originalColumnDisplay,
 }: PropsWithChildren<AddColumnHeaderProps>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -181,7 +181,7 @@ export const AddColumnHeader = ({
       defaultMessage="Add a column…"
     />
   ) : (
-    children // The default column header display comming from UnifiedDataTable, the type icon + column name
+    originalColumnDisplay // The default column header display comming from UnifiedDataTable, the type icon + column name
   );
 
   const errorMessage = useMemo(() => {
