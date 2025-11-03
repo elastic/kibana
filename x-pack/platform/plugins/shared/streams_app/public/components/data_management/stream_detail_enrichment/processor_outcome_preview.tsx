@@ -21,8 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
+import useAsync from 'react-use/lib/useAsync';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getPercentageFormatter } from '../../../util/formatters';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
@@ -173,8 +175,34 @@ const PreviewDocumentsGroupBy = () => {
 };
 
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
+  const { dependencies } = useKibana();
+  const { data } = dependencies.start;
+
+  // Original logic - used for column determination
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
+
+  // Fetch the data view to get actual field mappings for icons
+  const { value: streamDataView } = useAsync(
+    () =>
+      data.dataViews.create({
+        title: streamName,
+        timeFieldName: '@timestamp',
+      }),
+    [streamName, data.dataViews]
+  );
+
+  // Create field type map from DataView fields for icons
+  const dataViewFieldTypes = useMemo(() => {
+    if (!streamDataView) {
+      return undefined;
+    }
+    return streamDataView.fields.map((field) => ({
+      name: field.name,
+      type: field.type,
+      esType: field.esTypes?.[0],
+    }));
+  }, [streamDataView]);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
     (state) => state.context.previewColumnsSorting
@@ -392,6 +420,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
+          dataViewFieldTypes={dataViewFieldTypes}
         />
       </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>
@@ -401,6 +430,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
           streamName={streamName}
+          streamDataView={streamDataView}
         />
       </DocViewerContext.Provider>
     </>
