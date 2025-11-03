@@ -189,6 +189,7 @@ export const Tabs: React.FC<TabsProps> = ({
     http,
     application,
     savedObjectsManagement,
+    savedObjectsTagging,
     dataViewMgmtService,
     ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
@@ -604,6 +605,7 @@ export const Tabs: React.FC<TabsProps> = ({
                 navigateToUrl={application.navigateToUrl}
                 getDefaultTitle={savedObjectsManagement.getDefaultTitle}
                 getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
+                savedObjectsTagging={savedObjectsTagging}
               />
             </Fragment>
           );
@@ -631,6 +633,7 @@ export const Tabs: React.FC<TabsProps> = ({
       http,
       application,
       savedObjectsManagement,
+      savedObjectsTagging,
       allowedTypes,
       relationships,
       dataViewMgmtService,

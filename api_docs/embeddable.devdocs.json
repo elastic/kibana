@@ -3380,7 +3380,7 @@
         "label": "EmbeddableTransforms",
         "description": [],
         "signature": [
-          "{ transformOut?: ((storedState: StoredEmbeddableState, references?: ",
+          "{ transformOutInjectsReferences?: boolean | undefined; transformOut?: ((storedState: StoredEmbeddableState, references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

@@ -188,7 +188,7 @@ describe('extractLiquidErrorPosition', () => {
     });
 
     it('should handle very long text', () => {
-      const longText = 'a'.repeat(1000) + '{{ error }}' + 'b'.repeat(1000);
+      const longText = `${'a'.repeat(1000)}{{ error }}${'b'.repeat(1000)}`;
       const errorMessage = 'undefined filter: error';
 
       const result = extractLiquidErrorPosition(longText, errorMessage);

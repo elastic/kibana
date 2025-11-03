@@ -13,7 +13,7 @@ import type {
   FramePublicAPI,
   DatasourcePublicAPI,
   VisualizationToolbarProps,
-} from '../../../types';
+} from '@kbn/lens-common';
 import type { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';

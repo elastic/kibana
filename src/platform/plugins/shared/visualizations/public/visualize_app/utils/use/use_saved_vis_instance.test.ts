@@ -15,11 +15,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { VisualizeConstants } from '../../../../common/constants';
 import { createVisEditorsRegistry } from '../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 import type { VisualizeServices } from '../../types';
 import type { TypesStart } from '../../../vis_types';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
 const mockEmbeddableHandlerDestroy = jest.fn();

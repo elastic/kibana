@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { capabilitiesProvider } from './capabilities_provider';
 import { VisualizationsStorage } from './content_management';
 
@@ -24,7 +25,6 @@ import type { VisualizationsServerSetup, VisualizationsServerStart } from './typ
 import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
 import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransforms } from '../common/embeddable/transforms/get_transforms';
 
 export class VisualizationsPlugin

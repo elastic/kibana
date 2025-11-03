@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import type { GetPackagePoliciesResponse } from '@kbn/fleet-plugin/common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMemo } from 'react';

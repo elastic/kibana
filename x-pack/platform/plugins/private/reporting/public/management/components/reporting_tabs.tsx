@@ -140,6 +140,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
                 size="s"
                 iconType="flask"
                 label={TECH_PREVIEW_LABEL}
+                aria-label={TECH_PREVIEW_LABEL}
                 tooltipContent={TECH_PREVIEW_DESCRIPTION}
               />
             </>

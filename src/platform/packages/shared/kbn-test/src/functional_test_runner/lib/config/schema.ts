@@ -355,5 +355,13 @@ export const schema = Joi.object()
       .default(),
 
     dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
+
+    // refresh_interval to be used on existing system indices (eg .kibana*), existing common indices (eg logs*)
+    // and all templates created during tests.
+    // defaults to 50ms if not overriden, otherwise accepts a duration (eg '50ms', '1s') or false to opt out the optimization.
+    indexRefreshInterval: Joi.alternatives()
+      .optional()
+      .try(Joi.string(), Joi.boolean().valid(false))
+      .default('50ms'),
   })
   .default();

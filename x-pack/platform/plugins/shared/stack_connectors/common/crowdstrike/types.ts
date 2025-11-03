@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   CrowdstrikeBaseApiResponseSchema,
   CrowdstrikeConfigSchema,
@@ -22,25 +22,25 @@ import type {
   CrowdstrikeGetScriptsResponseSchema,
 } from './schema';
 
-export type CrowdstrikeConfig = TypeOf<typeof CrowdstrikeConfigSchema>;
-export type CrowdstrikeSecrets = TypeOf<typeof CrowdstrikeSecretsSchema>;
+export type CrowdstrikeConfig = z.infer<typeof CrowdstrikeConfigSchema>;
+export type CrowdstrikeSecrets = z.infer<typeof CrowdstrikeSecretsSchema>;
 
-export type CrowdstrikeBaseApiResponse = TypeOf<typeof CrowdstrikeBaseApiResponseSchema>;
-export type RelaxedCrowdstrikeBaseApiResponse = TypeOf<
+export type CrowdstrikeBaseApiResponse = z.infer<typeof CrowdstrikeBaseApiResponseSchema>;
+export type RelaxedCrowdstrikeBaseApiResponse = z.infer<
   typeof RelaxedCrowdstrikeBaseApiResponseSchema
 >;
 
-export type CrowdstrikeGetAgentsParams = Partial<TypeOf<typeof CrowdstrikeGetAgentsParamsSchema>>;
-export type CrowdstrikeGetAgentsResponse = TypeOf<typeof CrowdstrikeGetAgentsResponseSchema>;
-export type CrowdstrikeGetAgentOnlineStatusResponse = TypeOf<
+export type CrowdstrikeGetAgentsParams = Partial<z.infer<typeof CrowdstrikeGetAgentsParamsSchema>>;
+export type CrowdstrikeGetAgentsResponse = z.infer<typeof CrowdstrikeGetAgentsResponseSchema>;
+export type CrowdstrikeGetAgentOnlineStatusResponse = z.infer<
   typeof CrowdstrikeGetAgentOnlineStatusResponseSchema
 >;
-export type CrowdstrikeGetTokenResponse = TypeOf<typeof CrowdstrikeGetTokenResponseSchema>;
+export type CrowdstrikeGetTokenResponse = z.infer<typeof CrowdstrikeGetTokenResponseSchema>;
 
-export type CrowdstrikeHostActionsParams = TypeOf<typeof CrowdstrikeHostActionsParamsSchema>;
+export type CrowdstrikeHostActionsParams = z.infer<typeof CrowdstrikeHostActionsParamsSchema>;
 
-export type CrowdstrikeActionParams = TypeOf<typeof CrowdstrikeActionParamsSchema>;
-export type CrowdstrikeInitRTRParams = TypeOf<typeof CrowdstrikeInitRTRParamsSchema>;
+export type CrowdstrikeActionParams = z.infer<typeof CrowdstrikeActionParamsSchema>;
+export type CrowdstrikeInitRTRParams = z.infer<typeof CrowdstrikeInitRTRParamsSchema>;
 
-export type CrowdStrikeExecuteRTRResponse = TypeOf<typeof CrowdstrikeExecuteRTRResponseSchema>;
-export type CrowdstrikeGetScriptsResponse = TypeOf<typeof CrowdstrikeGetScriptsResponseSchema>;
+export type CrowdStrikeExecuteRTRResponse = z.infer<typeof CrowdstrikeExecuteRTRResponseSchema>;
+export type CrowdstrikeGetScriptsResponse = z.infer<typeof CrowdstrikeGetScriptsResponseSchema>;
