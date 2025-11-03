@@ -128,13 +128,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   events$.subscribe({
     next: (event) => events.emit(event),
-    complete: () => {
-      advanceState(agentGraph, {
+    complete: async () => {
+      await advanceState(agentGraph, {
         threadId: conversationId,
       });
     },
-    error: () => {
-      revertToCheckpoint(); // if there are errors we need to revert to the checkpoint to maintain correct message state
+    error: async () => {
+    await revertToCheckpoint() // if there are errors we need to revert to the checkpoint to maintain correct message state
     },
   });
 

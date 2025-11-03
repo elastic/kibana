@@ -41,6 +41,7 @@ export const advanceState = async (
   if (isEmpty(oldState.values)) {
     // no state to advance
     return async () => {
+        // resets the state to the initial state
       const revertState = {
         initialMessages: [new RemoveMessage({ id: REMOVE_ALL_MESSAGES })],
         cycleLimit: 10,
@@ -51,7 +52,6 @@ export const advanceState = async (
         addedMessages: [new RemoveMessage({ id: REMOVE_ALL_MESSAGES })],
       } satisfies Partial<StateType>;
 
-      console.log('Reverting to empty state');
       await compiledGraph.updateState(
         {
           configurable: {
@@ -63,11 +63,13 @@ export const advanceState = async (
     };
   }
 
+  
   const oldValues = oldState.values;
+
+  // append the added messages to the initial messages to form the initial messages for the next graph invocation.
   const initialMessages = oldValues.initialMessages;
   const addedMessages = oldValues.addedMessages;
-
-  const newInitialMessages = [...initialMessages, ...addedMessages]; // append the added messages to the initial messages to form the initial messages for the next graph invocation.
+  const newInitialMessages = [...initialMessages, ...addedMessages];
 
   const newValues = {
     ...oldValues,
@@ -89,6 +91,7 @@ export const advanceState = async (
   );
 
   return async () => {
+    // resets the state to the previous state
     const revertState = {
       ...oldValues,
       addedMessages: [new RemoveMessage({ id: REMOVE_ALL_MESSAGES }), ...oldValues.addedMessages],
@@ -96,9 +99,8 @@ export const advanceState = async (
         new RemoveMessage({ id: REMOVE_ALL_MESSAGES }),
         ...oldValues.initialMessages,
       ],
-    } satisfies Partial<StateType>;
+    } satisfies StateType;
 
-    console.log('Reverting to previous state');
     await compiledGraph.updateState(
       {
         configurable: {
