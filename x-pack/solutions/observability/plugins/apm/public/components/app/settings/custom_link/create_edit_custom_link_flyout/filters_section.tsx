@@ -150,8 +150,7 @@ export function FiltersSection({
         onClick={handleAddFilter}
         // Disable button when user has already added all items available
         // or item is not properly setup (does not have key or value)
-        isDisabled={
-          filters.length === FILTER_SELECT_OPTIONS.length - 1 }
+        isDisabled={filters.length === FILTER_SELECT_OPTIONS.length - 1}
       />
     </>
   );

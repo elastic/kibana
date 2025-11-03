@@ -76,7 +76,7 @@ export function SuggestionsSelect({
 
   // Track previous shouldReset to only reset on transition from false to true
   const prevShouldResetRef = useRef(shouldReset);
-  
+
   // Reset when shouldReset transitions from false to true
   useEffect(() => {
     if (shouldReset && !prevShouldResetRef.current && selectedOptions.length > 0) {
