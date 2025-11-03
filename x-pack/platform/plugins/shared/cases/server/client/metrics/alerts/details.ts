@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AttachmentType } from '../../../../common';
 import type { SingleCaseMetricsResponse } from '../../../../common/types/api';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
@@ -34,6 +35,7 @@ export class AlertDetails extends SingleCaseAggregationHandler {
     try {
       const alerts = await casesClient.attachments.getAllDocumentsAttachedToCase({
         caseId: this.caseId,
+        attachmentTypes: [AttachmentType.alert],
       });
 
       if (alerts.length <= 0 || this.aggregationBuilders.length <= 0) {

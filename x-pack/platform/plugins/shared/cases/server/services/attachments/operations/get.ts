@@ -28,15 +28,10 @@ import {
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
 import type {
-  AlertAttachmentAttributes,
   AttachmentTotals,
   DocumentAttachmentAttributes,
 } from '../../../../common/types/domain';
-import {
-  AttachmentType,
-  AlertAttachmentAttributesRt,
-  DocumentAttachmentAttributesRt,
-} from '../../../../common/types/domain';
+import { AttachmentType, DocumentAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
@@ -52,7 +47,6 @@ import {
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import type { AttachmentSavedObject } from '../../../common/types';
 import { getCaseReferenceId } from '../../../common/references';
-import { inspect } from 'node:util';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -146,16 +140,17 @@ export class AttachmentGetter {
   }
 
   /**
-   * Retrieves all the alerts attached to a case.
+   * Retrieves all the documents attached to a case.
    */
   public async getAllDocumentsAttachedToCase({
     caseId,
     filter,
+    attachmentTypes = [AttachmentType.alert, AttachmentType.event],
   }: GetAllDocumentsAttachedToCaseArgs): Promise<Array<SavedObject<DocumentAttachmentAttributes>>> {
     try {
       this.context.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
       const documentsFilter = buildFilter({
-        filters: [AttachmentType.alert, AttachmentType.event],
+        filters: attachmentTypes,
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,

@@ -23,12 +23,7 @@ import {
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
-import type {
-  FindCommentsArgs,
-  GetAllAlertsAttachToCase as GetAllDocumentsAttachedToCase,
-  GetAllArgs,
-  GetArgs,
-} from './types';
+import type { FindCommentsArgs, GetAllDocumentsAttachedToCase, GetAllArgs, GetArgs } from './types';
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
@@ -69,7 +64,7 @@ const normalizeDocumentResponse = (
  * Retrieves all documents attached to a specific case.
  */
 export const getAllDocumentsAttachedToCase = async (
-  { caseId, filter }: GetAllDocumentsAttachedToCase,
+  { caseId, filter, attachmentTypes }: GetAllDocumentsAttachedToCase,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<AlertResponse> => {
@@ -93,6 +88,7 @@ export const getAllDocumentsAttachedToCase = async (
     if (filter) filterArray.push(filter);
 
     const documents = await attachmentService.getter.getAllDocumentsAttachedToCase({
+      attachmentTypes,
       caseId: theCase.id,
       filter: combineFilters(filterArray),
     });

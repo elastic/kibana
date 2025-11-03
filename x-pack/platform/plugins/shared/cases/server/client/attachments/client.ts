@@ -22,7 +22,7 @@ import type {
   DeleteAllArgs,
   DeleteArgs,
   FindCommentsArgs,
-  GetAllAlertsAttachToCase as GetAllDocumentsAttachedToCase,
+  GetAllDocumentsAttachedToCase,
   GetAllArgs,
   GetArgs,
   UpdateArgs,
