@@ -33,7 +33,7 @@ export const useSampleDataStatus = () => {
   useEffect(() => {
     if (prevStatus.current === 'installing' && data?.status === 'installed') {
       toasts.addSuccess(
-        i18n.translate('xpack.searchHomepage.sampleData.successNotification', {
+        i18n.translate('xpack.searchHomepage.sampleData.successInstallNotification', {
           defaultMessage: 'The Sample Data was successfully installed',
         })
       );
