@@ -25,7 +25,14 @@ export const MemoryDumpActionRequestSchema = {
       // Process memory dump using entity ID
       schema.object({
         type: schema.literal('process'),
-        entity_id: schema.string({ minLength: 1 }),
+        entity_id: schema.string({
+          minLength: 1,
+          validate: (value) => {
+            if (!value.trim().length) {
+              return `entity_id cannot be an empty string`;
+            }
+          },
+        }),
       }),
     ]),
   }),

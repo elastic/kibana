@@ -76,7 +76,7 @@ describe('When displaying Endpoint Response Actions', () => {
           command === 'runscript' ||
           command === 'cancel' ||
           (command === 'memory-dump' &&
-            !ExperimentalFeaturesService.get().microsoftDefenderEndpointRunScriptEnabled)
+            !ExperimentalFeaturesService.get().responseActionsEndpointMemoryDump)
         ) {
           return false;
         }

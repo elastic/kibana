@@ -1284,6 +1284,14 @@ describe('actions schemas', () => {
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 
+    it('should throw if entity id a string padded with only spaces', () => {
+      memDumpBody.parameters.type = 'process';
+      // @ts-expect-error
+      memDumpBody.parameters.entity_id = '       ';
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+    });
+
     it('should throw if type is process and no pid or entity ID', () => {
       memDumpBody.parameters.type = 'process';
 
