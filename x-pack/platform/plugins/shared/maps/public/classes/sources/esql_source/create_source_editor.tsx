@@ -25,7 +25,6 @@ interface Props {
 
 export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [adhocDataViewId, setAdhocDataViewId] = useState<string | undefined>();
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
   const [dateFields, setDateFields] = useState<string[]>([]);
@@ -85,7 +84,6 @@ export function CreateSourceEditor(props: Props) {
             const initialEsql = `from ${adhocDataView.getIndexPattern()} | keep ${
               initialGeoField.name
             } | limit 10000`;
-            setAdhocDataViewId(adhocDataView.id);
             setDateField(initialDateField);
             setDateFields(initialDateFields);
             setGeoField(initialGeoField.name);
@@ -115,9 +113,8 @@ export function CreateSourceEditor(props: Props) {
   useDebounce(
     () => {
       const sourceConfig =
-        esql && esql.length && adhocDataViewId
+        esql && esql.length
           ? ({
-              dataViewId: adhocDataViewId,
               dateField,
               geoField,
               esql,
@@ -130,7 +127,6 @@ export function CreateSourceEditor(props: Props) {
     },
     0,
     [
-      adhocDataViewId,
       dateField,
       geoField,
       esql,
@@ -146,7 +142,6 @@ export function CreateSourceEditor(props: Props) {
         <ESQLEditor
           esql={esql}
           onESQLChange={(change) => {
-            setAdhocDataViewId(change.adhocDataViewId);
             setEsql(change.esql);
             setDateFields(change.dateFields);
             setGeoFields(change.geoFields);
