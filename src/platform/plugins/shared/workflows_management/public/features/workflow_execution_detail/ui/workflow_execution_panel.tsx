@@ -88,6 +88,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
             <EuiFlexItem grow={false}>
               <WorkflowExecutionListItem
                 status={execution?.status ?? ExecutionStatus.PENDING}
+                isTestRun={execution?.isTestRun ?? false}
                 startedAt={execution?.startedAt ? new Date(execution.startedAt) : null}
                 duration={execution?.duration ?? null}
               />
