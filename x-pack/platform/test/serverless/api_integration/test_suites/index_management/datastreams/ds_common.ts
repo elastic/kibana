@@ -7,14 +7,8 @@
 
 import expect from '@kbn/expect';
 
-<<<<<<< HEAD:x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams.ts
-import { DataStream } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
-=======
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
->>>>>>> f8984ec6420 ([Index Management] Branch data streams api tests lifecycle validation (#241105)):x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams/ds_common.ts
 
 const API_BASE_PATH = '/api/index_management';
 
@@ -43,102 +37,6 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
-<<<<<<< HEAD:x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams.ts
-      it('returns an array of data streams', async () => {
-        const { body: dataStreams, status } = await supertestWithoutAuth
-          .get(`${API_BASE_PATH}/data_streams`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader);
-
-        svlCommonApi.assertResponseStatusCode(200, status, dataStreams);
-
-        expect(dataStreams).to.be.an('array');
-
-        // returned array can contain automatically created data streams
-        const testDataStream = dataStreams.find(
-          (dataStream: DataStream) => dataStream.name === testDataStreamName
-        );
-
-        expect(testDataStream).to.be.ok();
-
-        // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = testDataStream!.indices[0];
-
-        expect(testDataStream).to.eql({
-          name: testDataStreamName,
-          lifecycle: {
-            enabled: true,
-          },
-          privileges: {
-            delete_index: true,
-            manage_data_stream_lifecycle: true,
-            read_failure_store: true,
-          },
-          timeStampField: { name: '@timestamp' },
-          indices: [
-            {
-              name: indexName,
-              uuid,
-              preferILM: true,
-              managedBy: 'Data stream lifecycle',
-            },
-          ],
-          nextGenerationManagedBy: 'Data stream lifecycle',
-          generation: 1,
-          health: 'green',
-          indexTemplateName: testDataStreamName,
-          hidden: false,
-          failureStoreEnabled: false,
-          indexMode: 'standard',
-        });
-      });
-
-      it('returns a single data stream by ID', async () => {
-        const { body: dataStream, status } = await supertestWithoutAuth
-          .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader);
-
-        svlCommonApi.assertResponseStatusCode(200, status, dataStream);
-
-        // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = dataStream.indices[0];
-        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = dataStream;
-
-        expect(dataStreamWithoutStorageSize).to.eql({
-          name: testDataStreamName,
-          privileges: {
-            delete_index: true,
-            manage_data_stream_lifecycle: true,
-            read_failure_store: true,
-          },
-          timeStampField: { name: '@timestamp' },
-          indices: [
-            {
-              name: indexName,
-              managedBy: 'Data stream lifecycle',
-              preferILM: true,
-              uuid,
-            },
-          ],
-          generation: 1,
-          health: 'green',
-          indexTemplateName: testDataStreamName,
-          nextGenerationManagedBy: 'Data stream lifecycle',
-          hidden: false,
-          lifecycle: {
-            enabled: true,
-          },
-          meteringDocsCount: 0,
-          meteringStorageSize: '0b',
-          meteringStorageSizeBytes: 0,
-          failureStoreEnabled: false,
-          indexMode: 'standard',
-        });
-      });
-
-=======
->>>>>>> f8984ec6420 ([Index Management] Branch data streams api tests lifecycle validation (#241105)):x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams/ds_common.ts
       describe('index mode of logs-*-* data streams', () => {
         const logsdbDataStreamName = 'logs-test-ds';
 
