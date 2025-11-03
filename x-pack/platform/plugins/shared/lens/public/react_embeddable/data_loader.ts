@@ -266,10 +266,6 @@ export function loadEmbeddableData(
   }
 
   const mergedSubscriptions = merge(
-    // controlESQLVariables$.pipe(
-    //   waitUntilChanged(),
-    //   map(() => 'ESQLvariables' as ReloadReason)
-    // ),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
@@ -302,12 +298,6 @@ export function loadEmbeddableData(
     // on search context change, reload
     fetch$(api).subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
-    // In case of changes to the dashboard ES|QL controls, re-map them
-    // internalApi.esqlVariables$.subscribe((newVariables: ESQLControlVariable[]) => {
-    //   const query = internalApi.attributes$.getValue().state?.query;
-    //   const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
-    //   controlESQLVariables$.next(esqlVariables);
-    // }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
