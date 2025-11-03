@@ -63,23 +63,16 @@ export const SimulationPlayground = () => {
   });
 
   const schemaEditorFields = useMemo(() => {
-    const streamName = Streams.WiredStream.GetResponse.is(definition)
-      ? definition.stream.name
-      : Streams.ClassicStream.GetResponse.is(definition)
-      ? definition.stream.name
-      : '';
-
     // Create lookup maps for efficient comparison
     const definitionFieldsMap = new Map(definitionFields ? Object.entries(definitionFields) : []);
     const inheritedFieldsMap = new Map(inheritedFields ? Object.entries(inheritedFields) : []);
-    const processedFieldNames = new Set<string>();
 
     const result: SchemaEditorField[] = [];
 
     // Create a set of field names in samples for quick lookup
     const fieldsInSamplesSet = new Set(fieldsInSamples);
 
-    // Step 1: Process detected fields first
+    // Process only detected fields
     detectedFields.forEach((detectedField) => {
       const definitionField = definitionFieldsMap.get(detectedField.name);
       const inheritedField = inheritedFieldsMap.get(detectedField.name);
@@ -103,78 +96,22 @@ export const SimulationPlayground = () => {
           type: detectedField.type ?? inheritedField.type,
           result: fieldResult,
         } as SchemaEditorField);
+      } else if (definitionField) {
+        // Merge with definition field to preserve any additional properties
+        result.push({
+          ...detectedField,
+          result: fieldResult,
+        });
       } else {
         result.push({
           ...detectedField,
           result: fieldResult,
         });
       }
-      processedFieldNames.add(detectedField.name);
-    });
-
-    // Step 2: Add inherited fields that weren't in detected fields
-    inheritedFieldsMap.forEach((fieldConfig, fieldName) => {
-      if (!processedFieldNames.has(fieldName) && !fieldConfig.alias_for) {
-        // Create a SchemaField from the inherited field
-        const schemaField: SchemaEditorField = {
-          name: fieldName,
-          parent: fieldConfig.from,
-          status: 'inherited',
-          type: fieldConfig.type !== 'system' ? fieldConfig.type : undefined,
-          alias_for: fieldConfig.alias_for,
-          ...(fieldConfig.type !== 'system' && 'format' in fieldConfig && fieldConfig.format
-            ? { format: fieldConfig.format }
-            : {}),
-          result: 'unchanged',
-        } as SchemaEditorField;
-
-        result.push(schemaField);
-        processedFieldNames.add(fieldName);
-      }
-    });
-
-    // Step 3: Add definition fields that weren't in detected fields
-    definitionFieldsMap.forEach((fieldConfig, fieldName) => {
-      if (!processedFieldNames.has(fieldName)) {
-        // Create a SchemaField from the definition field
-        const schemaField: SchemaEditorField = {
-          name: fieldName,
-          parent: streamName,
-          status: 'mapped',
-          type: fieldConfig.type !== 'system' ? fieldConfig.type : undefined,
-          ...(fieldConfig.type !== 'system' && 'format' in fieldConfig && fieldConfig.format
-            ? { format: fieldConfig.format }
-            : {}),
-          result: 'unchanged',
-        } as SchemaEditorField;
-
-        result.push(schemaField);
-        processedFieldNames.add(fieldName);
-      }
-    });
-
-    // Step 4: Add fields from samples that are in neither definition nor detected
-    fieldsInSamples.forEach((fieldName) => {
-      if (!processedFieldNames.has(fieldName)) {
-        const unmappedField: SchemaEditorField = {
-          name: fieldName,
-          parent: streamName,
-          status: 'unmapped',
-          result: 'unchanged',
-        };
-
-        result.push(unmappedField);
-        processedFieldNames.add(fieldName);
-      }
     });
 
     return result;
-  }, [detectedFields, fieldsInSamples, definitionFields, inheritedFields, definition]);
-
-  // Only fields that come from detected fields should be editable (map/unmap)
-  const editableFields = useMemo(() => {
-    return detectedFields.map((field) => field.name);
-  }, [detectedFields]);
+  }, [detectedFields, fieldsInSamples, definitionFields, inheritedFields]);
 
   return (
     <>
@@ -212,7 +149,7 @@ export const SimulationPlayground = () => {
               >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-                  { defaultMessage: 'Fields' }
+                  { defaultMessage: 'Modified fields' }
                 )}
               </EuiTab>
             </EuiTabs>
@@ -225,12 +162,7 @@ export const SimulationPlayground = () => {
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && (
-        <DetectedFieldsEditor
-          schemaEditorFields={schemaEditorFields}
-          editableFields={editableFields}
-        />
-      )}
+      {isViewingDetectedFields && <DetectedFieldsEditor schemaEditorFields={schemaEditorFields} />}
     </>
   );
 };

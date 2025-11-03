@@ -44,7 +44,6 @@ export function FieldsTable({
   withToolbar,
   selectedFields,
   onFieldSelection,
-  editableFields,
 }: {
   isLoading: boolean;
   controls: TControls;
@@ -55,7 +54,6 @@ export function FieldsTable({
   withToolbar: boolean | EuiDataGridToolBarVisibilityOptions;
   selectedFields: string[];
   onFieldSelection: (names: string[], checked: boolean) => void;
-  editableFields?: string[];
 }) {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
@@ -75,18 +73,10 @@ export function FieldsTable({
         filteredFields,
         selectedFields,
         onFieldSelection,
-        stream.name,
-        editableFields
+        stream.name
       ),
     ];
-  }, [
-    withTableActions,
-    filteredFields,
-    selectedFields,
-    onFieldSelection,
-    stream.name,
-    editableFields,
-  ]);
+  }, [withTableActions, filteredFields, selectedFields, onFieldSelection, stream.name]);
 
   const trailingColumns = useMemo(() => {
     if (!withTableActions) return undefined;
@@ -231,15 +221,12 @@ const createFieldSelectionCellRenderer = (
   fields: SchemaField[],
   selectedFields: string[],
   onChange: (names: string[], checked: boolean) => void,
-  streamName: string,
-  editableFields?: string[]
+  streamName: string
 ): EuiDataGridControlColumn => ({
   id: 'field-selection',
   width: 40,
   headerCellRender: () => {
-    const selectableFields = fields.filter((field) =>
-      isSelectableField(streamName, field, editableFields)
-    );
+    const selectableFields = fields.filter((field) => isSelectableField(streamName, field));
     if (selectableFields.length === 0) {
       return;
     }
@@ -264,7 +251,7 @@ const createFieldSelectionCellRenderer = (
   rowCellRender: ({ rowIndex }) => {
     const field = fields[rowIndex];
 
-    if (!isSelectableField(streamName, field, editableFields)) return null;
+    if (!isSelectableField(streamName, field)) return null;
 
     return (
       <EuiCheckbox
@@ -295,17 +282,7 @@ const filterFieldsByControls = (fields: SchemaField[], controls: TControls) => {
   return filteredByGroupsFields;
 };
 
-export const isSelectableField = (
-  streamName: string,
-  field: SchemaField,
-  editableFields?: string[]
-) => {
-  // If editableFields is provided, use it to determine selectability
-  if (editableFields && !editableFields.includes(field.name)) {
-    return false;
-  }
-
-  // Otherwise, use the default logic
+export const isSelectableField = (streamName: string, field: SchemaField) => {
   return (
     field.status !== 'inherited' &&
     field.parent === streamName &&

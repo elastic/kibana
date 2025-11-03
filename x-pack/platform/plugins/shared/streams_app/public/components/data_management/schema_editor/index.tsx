@@ -35,7 +35,6 @@ export function SchemaEditor({
   onRefreshData,
   onFieldSelection,
   fieldSelection,
-  editableFields,
   stream,
   withControls = false,
   withFieldSimulation = false,
@@ -176,7 +175,6 @@ export function SchemaEditor({
       onFieldSelection={onFieldSelection}
       fieldSelection={fieldSelection}
       isLoading={isLoading}
-      editableFields={editableFields}
       onFieldUpdate={onFieldUpdate}
       stream={stream}
       withControls={withControls}
@@ -217,7 +215,6 @@ export function SchemaEditor({
           withTableActions={withTableActions}
           selectedFields={fieldSelection}
           onFieldSelection={onFieldSelection}
-          editableFields={editableFields}
         />
       </EuiFlexGroup>
     </SchemaEditorContextProvider>

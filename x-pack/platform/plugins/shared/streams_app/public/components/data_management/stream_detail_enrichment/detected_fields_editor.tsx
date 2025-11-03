@@ -22,13 +22,9 @@ import { isSelectableField } from '../schema_editor/schema_editor_table';
 
 interface DetectedFieldsEditorProps {
   schemaEditorFields: SchemaEditorField[];
-  editableFields?: string[];
 }
 
-export const DetectedFieldsEditor = ({
-  schemaEditorFields,
-  editableFields,
-}: DetectedFieldsEditorProps) => {
+export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEditorProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { mapField, unmapField } = useStreamEnrichmentEvents();
@@ -37,7 +33,7 @@ export const DetectedFieldsEditor = ({
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
   const [selectedFields, setSelectedFields] = React.useState<string[]>(
     schemaEditorFields
-      .filter((field) => isSelectableField(definition.stream.name, field, editableFields))
+      .filter((field) => isSelectableField(definition.stream.name, field))
       .map(({ name }) => name)
   );
 
@@ -85,7 +81,6 @@ export const DetectedFieldsEditor = ({
         defaultColumns={['name', 'type', 'format', 'status', 'source', 'result']}
         fields={schemaEditorFields}
         stream={definition.stream}
-        editableFields={editableFields}
         onFieldUpdate={(field) => {
           if (field.status === 'mapped') {
             mapField(field);
