@@ -140,4 +140,37 @@ export const registerLookupIndexRoutes = (
       }
     }
   );
+
+  router.put(
+    {
+      path: `/internal/esql/lookup_index/{indexName}/mapping`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: {
+        body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { indexName } = request.params;
+
+      try {
+        const responseBody = await client.asCurrentUser.indices.putMapping({
+          properties: request.body,
+          index: indexName,
+        });
+        return response.ok({ body: responseBody });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
 };

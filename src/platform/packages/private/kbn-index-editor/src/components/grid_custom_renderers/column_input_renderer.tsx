@@ -41,7 +41,7 @@ const options = [
     inputDisplay: (
       <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
         <FieldIcon type="number" label="Integer" />
-        <span>Integer</span>
+        <span>Number</span>
       </EuiFlexGroup>
     ),
   },

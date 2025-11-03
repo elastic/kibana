@@ -946,7 +946,7 @@ export class IndexUpdateService {
     });
 
     const bulkResponse = await this.http.post<BulkResponse>(
-      `/internal/esql/lookup_index/${this.getIndexName()}/update`,
+      `/internal/esql/lookup_index/${encodeURIComponent(this.getIndexName()!)}/update`,
       {
         body,
       }
@@ -956,6 +956,19 @@ export class IndexUpdateService {
       bulkResponse,
       bulkOperations: operations,
     };
+  }
+
+  private async updateIndexMapping(newFields: Record<string, string>) {
+    const body = JSON.stringify({
+      fields: newFields,
+    });
+
+    await this.http.put(
+      `/internal/esql/lookup_index/${encodeURIComponent(this.getIndexName()!)}/mappings`,
+      {
+        body,
+      }
+    );
   }
 
   public addNewColumn() {
