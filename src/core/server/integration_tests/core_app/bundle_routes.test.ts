@@ -34,7 +34,10 @@ describe('bundle routes', () => {
     fileHashCache = new FileHashCache();
 
     server = createInternalHttpService({ logger });
-    await server.preboot({ context: contextServiceMock.createPrebootContract(), docLinks: docLinksServiceMock.createSetupContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
   });
 
   afterEach(async () => {

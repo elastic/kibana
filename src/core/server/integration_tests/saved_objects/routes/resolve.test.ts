@@ -49,7 +49,10 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
     server = createInternalHttpService(coreContext);
-    await server.preboot({ context: contextServiceMock.createPrebootContract(), docLinks: docLinksServiceMock.createSetupContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
 
     const contextService = new ContextService(coreContext);
     httpSetup = await server.setup({

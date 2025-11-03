@@ -53,7 +53,10 @@ describe('GET /api/status', () => {
     const contextService = new ContextService(coreContext);
 
     server = createInternalHttpService(coreContext);
-    await server.preboot({ context: contextServiceMock.createPrebootContract(), docLinks: docLinksServiceMock.createSetupContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
       executionContext: executionContextServiceMock.createInternalSetupContract(),

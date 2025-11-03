@@ -42,7 +42,10 @@ describe('PricingService', () => {
   describe('preboot', () => {
     beforeAll(async () => {
       server = createInternalHttpService();
-      httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract(), docLinks: docLinksServiceMock.createSetupContract() });
+      httpPreboot = await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
+      });
       httpSetup = await server.setup({
         context: contextServiceMock.createSetupContract(),
         executionContext: executionContextServiceMock.createInternalSetupContract(),
@@ -77,7 +80,10 @@ describe('PricingService', () => {
   describe('after preboot', () => {
     beforeAll(async () => {
       server = createInternalHttpService();
-      httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract(), docLinks: docLinksServiceMock.createSetupContract() });
+      httpPreboot = await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
+      });
       httpSetup = await server.setup({
         context: contextServiceMock.createSetupContract(),
         executionContext: executionContextServiceMock.createInternalSetupContract(),

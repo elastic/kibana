@@ -35,7 +35,10 @@ describe('GET /api/_elu_load', () => {
       logger: loggingSystemMock.create(),
       configService: configServiceMock.create({ atPath: { interval: moment.duration('1s') } }),
     });
-    await server.preboot({ context: contextServiceMock.createPrebootContract(), docLinks: docLinksServiceMock.createSetupContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),

@@ -55,7 +55,10 @@ describe('APM HTTP API spans', () => {
         server: serverConfig,
       }),
     });
-    await server.preboot({ context: contextServiceMock.createPrebootContract(), docLinks: docLinksServiceMock.createSetupContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     router = createRouter('/');
     supertest = Supertest(innerServer.listener);
