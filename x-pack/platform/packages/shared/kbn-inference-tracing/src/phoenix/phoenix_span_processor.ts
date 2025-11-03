@@ -38,13 +38,15 @@ function getDirectoryBaseUrl(url: URL): URL {
  */
 function resolvePathWithinBasePrefix(base: URL, path: string): URL {
   const [pathPart, searchPart] = path.split('?');
-  const relative = pathPart.startsWith('/') ? pathPart.slice(1) : pathPart;
+  const relativePath = pathPart.startsWith('/') ? pathPart.slice(1) : pathPart;
   const result = new URL(base.origin);
   const basePath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
-  result.pathname = `${basePath}${relative}`;
+
+  result.pathname = `${basePath}${relativePath}`;
   if (searchPart) {
     result.search = `?${searchPart}`;
   }
+
   return result;
 }
 
