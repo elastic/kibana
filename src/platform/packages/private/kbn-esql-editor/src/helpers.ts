@@ -264,11 +264,11 @@ export const getESQLSources = async (
   const ls = await getLicense?.();
   const ccrFeature = ls?.getFeature('ccr');
   const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
-  const [localIndices, integrations] = await Promise.all([
+  const [allIndices, integrations] = await Promise.all([
     getIndicesList(core, areRemoteIndicesAvailable),
     getIntegrations(core),
   ]);
-  return [...localIndices, ...integrations];
+  return [...allIndices, ...integrations];
 };
 
 export const onMouseDownResizeHandler = (
