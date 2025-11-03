@@ -267,7 +267,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
             placeholder: finalConfig.placeholder,
           }}
           isPreFiltered={isSearching ? false : { highlightSearch: false }}
-          data-test-subj="workflowSelector"
+          data-test-subj="workflowIdSelect"
           emptyMessage={
             <WorkflowSelectorEmptyState onCreateWorkflow={handleOpenWorkflowManagementApp} />
           }

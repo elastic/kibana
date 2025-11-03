@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { WorkflowSelector } from '@kbn/workflows-ui';
+import { WorkflowSelectorWithProvider } from '@kbn/workflows-ui';
 import type { WorkflowsActionParams } from './types';
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
@@ -51,7 +51,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const validationError = typeof errorMessage === 'string' ? errorMessage : undefined;
 
   return (
-    <WorkflowSelector
+    <WorkflowSelectorWithProvider
       selectedWorkflowId={workflowId}
       onWorkflowChange={handleWorkflowChange}
       config={{
