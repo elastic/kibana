@@ -345,6 +345,7 @@ export class ChromeService {
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
       featureFlags,
+      uiSettings,
     });
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
