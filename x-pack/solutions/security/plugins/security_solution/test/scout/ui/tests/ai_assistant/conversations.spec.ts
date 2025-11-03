@@ -138,12 +138,16 @@ spaceTest.describe(
           enabled: true,
         };
 
-        await apiServices.detectionRule.createCustomQueryRule(rule);
+        const createdRule = await apiServices.detectionRule.createCustomQueryRule(rule);
+
+        // Wait for the rule to execute before checking for alerts
+        await apiServices.detectionRule.waitForRuleExecution(createdRule.rule_id);
 
         // Navigate to alerts page using page object
         await pageObjects.alertsTablePage.navigateAndDismissOnboarding();
 
-        // Wait for rule to execute and alert to be generated
+        // Wait for alerts table to load and then for the rule name to appear in alerts-by-rule table
+        await pageObjects.alertsTablePage.waitForAlertsToLoad();
         await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
         // Expand the first alert
@@ -160,10 +164,12 @@ spaceTest.describe(
 
     spaceTest(
       'Shows empty connector callout when a conversation that had a connector no longer does',
-      async ({ page, pageObjects, browserScopedApis, apiServices }) => {
+      async ({ page, pageObjects, browserScopedApis, apiServices, scoutSpace }) => {
         // Create conversation with connector reference using browser-scoped API
+        // Use unique title to avoid conflicts with other tests
+        const conversationTitle = `Spooky convo_${scoutSpace.id}_${Date.now()}`;
         const mockConvo = await browserScopedApis.assistant.createConversation({
-          title: 'Spooky convo',
+          title: conversationTitle,
           messages: [],
         });
 
@@ -249,12 +255,16 @@ spaceTest.describe.serial(
           enabled: true,
         };
 
-        await apiServices.detectionRule.createCustomQueryRule(rule);
+        const createdRule = await apiServices.detectionRule.createCustomQueryRule(rule);
+
+        // Wait for the rule to execute before checking for alerts
+        await apiServices.detectionRule.waitForRuleExecution(createdRule.rule_id);
 
         // Navigate to alerts page using page object
         await pageObjects.alertsTablePage.navigateAndDismissOnboarding();
 
-        // Wait for the rule to execute and alert to be generated
+        // Wait for alerts table to load and then for the rule name to appear in alerts-by-rule table
+        await pageObjects.alertsTablePage.waitForAlertsToLoad();
         await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
         // Expand alert
@@ -267,8 +277,9 @@ spaceTest.describe.serial(
         // Send a message to ensure conversation is created
         await pageObjects.assistantPage.submitMessage();
 
-        // Close assistant and navigate to different page
+        // Close assistant and alert flyout before navigating to different page
         await pageObjects.assistantPage.close();
+        await pageObjects.alertsTablePage.closeAlertFlyout();
         await page.gotoApp('security', { path: '/get_started' });
 
         // Open assistant again - should show last conversation

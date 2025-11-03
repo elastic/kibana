@@ -369,12 +369,16 @@ spaceTest.describe(
           'user.name': 'test-user',
         });
 
-        await apiServices.detectionRule.createCustomQueryRule(ruleConfig);
+        const createdRule = await apiServices.detectionRule.createCustomQueryRule(ruleConfig);
+
+        // Wait for the rule to execute before checking for alerts
+        await apiServices.detectionRule.waitForRuleExecution(createdRule.rule_id);
 
         // Navigate to alerts page using page object
         await pageObjects.alertsTablePage.navigateAndDismissOnboarding();
 
-        // Wait for rule to execute and alert to be generated
+        // Wait for alerts table to load and then for the rule name to appear in alerts-by-rule table
+        await pageObjects.alertsTablePage.waitForAlertsToLoad();
         await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
         // Expand first alert if available

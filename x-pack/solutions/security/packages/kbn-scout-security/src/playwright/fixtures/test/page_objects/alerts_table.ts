@@ -96,7 +96,9 @@ export class AlertsTablePage {
   async expandAlertDetailsFlyout(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
     // Filter alert by unique rule name
-    const row = this.alertRow.filter({ hasText: ruleName });
+    // Use .first() to handle cases where multiple alerts have the same rule name
+    // eslint-disable-next-line playwright/no-nth-methods
+    const row = this.alertRow.filter({ hasText: ruleName }).first();
     await expect(
       row,
       `Alert with rule '${ruleName}' is not displayed in the alerts table`
@@ -138,6 +140,21 @@ export class AlertsTablePage {
 
     // If a specific rule name is provided, wait for it to appear in the table
     if (ruleName) {
+      // First ensure alerts exist - wait for empty state to disappear or alert rows to appear
+      // This ensures we don't try to find a rule name in an empty table
+      try {
+        const emptyState = this.emptyAlertTable;
+        const isEmptyVisible = await emptyState.isVisible({ timeout: 1000 }).catch(() => false);
+
+        if (isEmptyVisible) {
+          // Wait for alerts to appear by checking that empty state disappears
+          await expect(emptyState).not.toBeVisible({ timeout: 20_000 });
+        }
+      } catch {
+        // Empty state check failed or not found, continue to check for rule name
+      }
+
+      // Now wait for the rule name to appear in the alerts-by-rule table
       await this.detectionsAlertsWrapper
         .getByText(ruleName)
         .waitFor({ state: 'visible', timeout: 20_000 });
