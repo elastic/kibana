@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import type { Agent } from 'supertest';
+import type { Agent, Response } from 'supertest';
 import type {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -50,6 +50,22 @@ import type {
 import type { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
 import { type FleetUsage } from '@kbn/fleet-plugin/server/collectors/register';
 import { testUsers } from '../test_users';
+
+function expectStatusCode200(res: Response) {
+  if (res.statusCode === 200) {
+    return;
+  }
+
+  if (res.statusCode === 404) {
+    throw new Error('404 "Not Found"');
+  } else {
+    throw new Error(
+      `${res.statusCode}${res.body?.error ? ` "${res.body?.error}"` : ''}${
+        res.body?.message ? ` ${res.body?.message}` : ''
+      }`
+    );
+  }
+}
 
 export class SpaceTestApiClient {
   constructor(
