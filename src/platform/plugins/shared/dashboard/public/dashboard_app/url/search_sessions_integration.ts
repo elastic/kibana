@@ -78,12 +78,11 @@ function getLocatorParams({
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
-  const panels = savedObjectId
-    ? (dashboardInternalApi.serializeLayout() as Pick<
-        DashboardLocatorParams,
-        'panels' | 'references'
-      >)
-    : undefined;
+
+  const panels = dashboardInternalApi.serializeLayout() as Pick<
+    DashboardLocatorParams,
+    'panels' | 'references'
+  >;
 
   const { controlGroupInput, controlGroupReferences } = dashboardInternalApi.serializeControls();
 
