@@ -895,16 +895,17 @@ export function alertingServiceProvider(
               range: {
                 timestamp: {
                   gte: `now-${lookBackTimeInterval}`,
+                  lte: 'now',
                 },
               },
             },
             ...(!anomalyAlertFieldUsage.hasInterimFilter && !includeInterimResults
-              ? []
-              : [
+              ? [
                   {
                     term: { is_interim: false },
                   },
-                ]),
+                ]
+              : []),
             ...(parsedCustomFilter ? [parsedCustomFilter] : []),
           ],
         },
