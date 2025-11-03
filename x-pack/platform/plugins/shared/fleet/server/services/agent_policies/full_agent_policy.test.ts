@@ -2139,7 +2139,7 @@ describe('getBinarySourceSettings', () => {
       });
     });
 
-    it('should use proxy SSL options also when SSL secrets are present in download source', () => {
+    it('should keep SSL secrets when present', () => {
       const downloadSourceSecrets = {
         ...downloadSource,
         secrets: {
@@ -2151,6 +2151,13 @@ describe('getBinarySourceSettings', () => {
       expect(getBinarySourceSettings(downloadSourceSecrets, proxy)).toEqual({
         proxy_url: 'http://proxy_uri.it',
         sourceURI: 'http://custom-registry-test',
+        secrets: {
+          ssl: {
+            key: {
+              id: 'keyid',
+            },
+          },
+        },
         proxy_headers: { ProxyHeader1: 'Test' },
         ssl: {
           certificate: 'proxy_cert',

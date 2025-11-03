@@ -7,7 +7,6 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlyout,
@@ -111,14 +110,6 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
     onToggleSecretStorage(secretEnabled);
   };
 
-  const onToggleSelectProxy = (options: EuiComboBoxOptionOption<string>[]) => {
-    inputs.proxyIdInput.setValue(options?.[0]?.value ?? '');
-    inputs.sslKeyInput.clear();
-    inputs.sslKeySecretInput.setValue('');
-    inputs.sslCertificateInput.clear();
-    inputs.sslCertificateAuthoritiesInput.setValue([]);
-  };
-
   const flyoutTitleId = useGeneratedHtmlId();
 
   return (
@@ -219,7 +210,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               fullWidth
               data-test-subj="settingsOutputsFlyout.proxyIdInput"
               {...inputs.proxyIdInput.props}
-              onChange={onToggleSelectProxy}
+              onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
               selectedOptions={
                 inputs.proxyIdInput.value !== ''
                   ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
@@ -254,7 +245,6 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
           </EuiFormRow>
           <EuiSpacer size="m" />
           <SSLFormSection
-            disabled={inputs.proxyIdInput.value !== ''}
             inputs={inputs}
             useSecretsStorage={enableSSLSecrets && useSecretsStorage}
             isConvertedToSecret={isConvertedToSecret.sslKey}

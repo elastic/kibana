@@ -843,27 +843,6 @@ export function getBinarySourceSettings(
   const config: FullAgentPolicyDownload = {
     sourceURI: downloadSource.host,
   };
-  if (downloadSourceProxy) {
-    if (downloadSourceProxy.url) {
-      config.proxy_url = downloadSourceProxy.url;
-    }
-    if (downloadSourceProxy.proxy_headers) {
-      config.proxy_headers = downloadSourceProxy.proxy_headers;
-    }
-    // if the proxy is configured, get the ssl settings from it
-    config.ssl = {
-      ...(downloadSourceProxy?.certificate_authorities && {
-        certificate_authorities: [downloadSourceProxy.certificate_authorities],
-      }),
-      ...(downloadSourceProxy?.certificate && {
-        certificate: downloadSourceProxy.certificate,
-      }),
-      ...(downloadSourceProxy?.certificate_key && {
-        key: downloadSourceProxy?.certificate_key,
-      }),
-    };
-    return config;
-  }
 
   if (downloadSource?.ssl) {
     config.ssl = {
@@ -887,6 +866,27 @@ export function getBinarySourceSettings(
           key: downloadSource.secrets.ssl.key,
         }),
       },
+    };
+  }
+
+  if (downloadSourceProxy) {
+    if (downloadSourceProxy.url) {
+      config.proxy_url = downloadSourceProxy.url;
+    }
+    if (downloadSourceProxy.proxy_headers) {
+      config.proxy_headers = downloadSourceProxy.proxy_headers;
+    }
+    // if the proxy is configured, get the ssl settings from it
+    config.ssl = {
+      ...(downloadSourceProxy?.certificate_authorities && {
+        certificate_authorities: [downloadSourceProxy.certificate_authorities],
+      }),
+      ...(downloadSourceProxy?.certificate && {
+        certificate: downloadSourceProxy.certificate,
+      }),
+      ...(downloadSourceProxy?.certificate_key && {
+        key: downloadSourceProxy?.certificate_key,
+      }),
     };
   }
 

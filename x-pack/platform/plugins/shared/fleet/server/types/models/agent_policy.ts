@@ -13,7 +13,7 @@ import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
 import { isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
-import { ProxyHeadersSchema } from '../rest_spec';
+import { ProxyHeadersSchema } from '../rest_spec/fleet_proxies';
 
 import { PackagePolicySchema, PackagePolicyResponseSchema } from './package_policy';
 
