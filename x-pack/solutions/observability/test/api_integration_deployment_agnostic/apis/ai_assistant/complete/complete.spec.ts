@@ -608,7 +608,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             events = getMessageAddedEvents(responseBody);
           });
 
-          it('return 2 message add events', () => {
+          it('returns 2 message add events', () => {
             expect(events.length).to.be(2);
           });
 
@@ -727,7 +727,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             events = getMessageAddedEvents(responseBody);
           });
 
-          it('return 2 message add events', () => {
+          it('returns 2 message add events', () => {
             expect(events.length).to.be(2);
           });
 
