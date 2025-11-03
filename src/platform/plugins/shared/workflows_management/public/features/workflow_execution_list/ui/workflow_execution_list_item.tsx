@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   euiFontSize,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiToolTip,
   useEuiTheme,
@@ -26,6 +27,7 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { i18n } from '@kbn/i18n';
 
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
@@ -114,10 +116,19 @@ export const WorkflowExecutionListItem = ({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                 {isTestRun && (
                   <EuiFlexItem>
-                    <EuiIcon type="flask" color={euiTheme.colors.backgroundFilledText} />
+                    <EuiIconTip
+                      type="flask"
+                      color={euiTheme.colors.backgroundFilledText}
+                      title={i18n.translate(
+                        'workflows.workflowExecutionListItem.testRunIconTitle',
+                        {
+                          defaultMessage: 'Test Run',
+                        }
+                      )}
+                    />
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem>
