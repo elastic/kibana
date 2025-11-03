@@ -6,8 +6,8 @@
  */
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { type FetchContext, fetch$ } from '@kbn/presentation-publishing';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type FetchContext, fetch$, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
   BehaviorSubject,
@@ -21,6 +21,7 @@ import {
   map,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import { pick } from 'lodash';
 import type {
   GetStateType,
   LensApi,
@@ -40,7 +41,6 @@ import { getRenderMode, getParentContext } from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getMergedSearchContext } from './expressions/merged_search_context';
-import { getEmbeddableVariables } from './initializers/utils';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
@@ -55,6 +55,27 @@ export type ReloadReason =
   | 'disableTriggers'
   | 'viewMode'
   | 'searchContext';
+
+function getSearchContext(parentApi: unknown) {
+  const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
+    ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
+    : {
+        filters$: new BehaviorSubject(undefined),
+        query$: new BehaviorSubject(undefined),
+        timeslice$: new BehaviorSubject(undefined),
+        timeRange$: new BehaviorSubject(undefined),
+      };
+
+  return {
+    filters: unifiedSearch$.filters$.getValue(),
+    query: unifiedSearch$.query$.getValue(),
+    timeRange: unifiedSearch$.timeRange$.getValue(),
+    timeslice: unifiedSearch$.timeslice$?.getValue(),
+    esqlVariables: apiPublishesESQLVariables(parentApi)
+      ? parentApi.esqlVariables$.getValue()
+      : undefined,
+  };
+}
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -180,7 +201,7 @@ export function loadEmbeddableData(
 
     const searchContext = getMergedSearchContext(
       currentState,
-      { ...fetchContext },
+      fetchContext ? fetchContext : getSearchContext(parentApi),
       api.timeRange$,
       parentApi,
       services
