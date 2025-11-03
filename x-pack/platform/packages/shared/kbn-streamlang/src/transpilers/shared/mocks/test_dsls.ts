@@ -14,10 +14,22 @@ import type {
   DissectProcessor,
   ManualIngestPipelineProcessor,
   AppendProcessor,
+  ConvertProcessor,
 } from '../../../../types/processors';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    // Convert a field to a different type
+    {
+      action: 'convert',
+      from: 'http.status_code',
+      type: 'string',
+      to: 'http.status_code_str',
+      where: {
+        field: 'http.error',
+        eq: 404,
+      },
+    } as ConvertProcessor,
     // Rename a field
     {
       action: 'rename',

@@ -36,7 +36,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
-  describe('Case View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/240911
+  describe.skip('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -68,7 +69,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('properties', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/239300
+    describe.skip('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('edits a case title from the case view page', async () => {

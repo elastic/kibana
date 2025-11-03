@@ -28,6 +28,7 @@ import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 
 const VERSION_CONFLICT_STATUS = 409;
+const NOT_FOUND_STATUS = 404;
 const BULK_ACTION_SIZE = 100;
 export interface TaskSchedulingOpts {
   logger: Logger;
@@ -300,7 +301,8 @@ export class TaskScheduling {
           const result = await this.bulkUpdateSchedules([taskInstance.id], taskInstance.schedule);
           if (
             result.errors.length &&
-            result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS
+            result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
+            result.errors[0].error.statusCode !== NOT_FOUND_STATUS
           ) {
             throw new Error(
               `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`

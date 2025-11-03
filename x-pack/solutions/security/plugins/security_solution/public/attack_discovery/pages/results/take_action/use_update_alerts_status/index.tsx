@@ -6,7 +6,7 @@
  */
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 
 import { updateAlertStatus } from '../../../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';

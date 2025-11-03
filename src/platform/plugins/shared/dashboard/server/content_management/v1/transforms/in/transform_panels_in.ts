@@ -17,10 +17,10 @@ import type {
   SavedDashboardPanel,
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../../kibana_services';
 
-export function transformPanelsIn(widgets: DashboardAttributes['panels'] | undefined): {
+export function transformPanelsIn(widgets: DashboardState['panels'] | undefined): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];

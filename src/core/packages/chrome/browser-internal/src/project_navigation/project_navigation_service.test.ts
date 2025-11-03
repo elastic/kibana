@@ -459,7 +459,7 @@ describe('initNavigation()', () => {
       isExternalLink: true,
       path: 'group1.node-0',
       sideNavStatus: 'visible',
-      title: 'Users and roles',
+      title: 'Members',
     });
 
     // performance
@@ -493,6 +493,71 @@ describe('initNavigation()', () => {
       path: 'group1.node-3',
       sideNavStatus: 'visible',
       title: 'Project',
+    });
+  });
+
+  test('should update the navigation tree when cloud URLs are updated after initialization', async () => {
+    const { projectNavigation } = setup();
+
+    // First: Set cloud URLs WITHOUT billingUrl
+    projectNavigation.setCloudUrls({
+      usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/',
+      performanceUrl: 'https://cloud.elastic.co/performance/',
+      deploymentUrl: 'https://cloud.elastic.co/deployment/',
+    });
+
+    projectNavigation.initNavigation<any>(
+      'es',
+      of({
+        body: [
+          {
+            id: 'group1',
+            type: 'navGroup',
+            children: [
+              { cloudLink: 'userAndRoles' },
+              { cloudLink: 'billingAndSub' }, // No URL for this yet
+              { cloudLink: 'performance' },
+              { cloudLink: 'deployment' },
+            ],
+          },
+        ],
+      })
+    );
+
+    // Verify that billingAndSub link is NOT in the tree (no URL available)
+    let treeDefinition = await lastValueFrom(
+      projectNavigation.getNavigationTreeUi$().pipe(take(1))
+    );
+    let [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+    expect(node?.children?.length).toBe(3); // Only 3 links without billing
+
+    // Verify the links are userAndRoles, performance, deployment (no billing)
+    expect(node.children![0].title).toBe('Members');
+    expect(node.children![1].title).toBe('Performance');
+    expect(node.children![2].title).toBe('Project'); // deployment
+
+    // Second: Update cloud URLs WITH billingUrl
+    projectNavigation.setCloudUrls({
+      usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/',
+      performanceUrl: 'https://cloud.elastic.co/performance/',
+      billingUrl: 'https://cloud.elastic.co/billing/', // NOW we add billing
+      deploymentUrl: 'https://cloud.elastic.co/deployment/',
+    });
+
+    // Verify that billingAndSub link IS now in the tree
+    treeDefinition = await lastValueFrom(projectNavigation.getNavigationTreeUi$().pipe(take(1)));
+    [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+    expect(node?.children?.length).toBe(4); // Now 4 links including billing
+
+    // Verify the billing link is present with correct properties
+    expect(node.children![1]).toEqual({
+      deepLink: undefined,
+      href: 'https://cloud.elastic.co/billing',
+      id: 'node-1',
+      isExternalLink: true,
+      path: 'group1.node-1',
+      sideNavStatus: 'visible',
+      title: 'Billing and subscription',
     });
   });
 });

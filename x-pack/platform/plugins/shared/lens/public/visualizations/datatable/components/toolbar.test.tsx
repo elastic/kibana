@@ -8,9 +8,12 @@
 import React from 'react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { DataTableToolbar } from './toolbar';
-import type { DatatableVisualizationState } from '../visualization';
-import type { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
-import type { PagingState } from '../../../../common/expressions';
+import type {
+  DatatableVisualizationState,
+  PagingState,
+  FramePublicAPI,
+  VisualizationToolbarProps,
+} from '@kbn/lens-common';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataGridDensity } from '@kbn/unified-data-table';

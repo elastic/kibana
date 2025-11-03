@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { VisParams } from '..';
+import type { VisParams } from '@kbn/visualizations-common';
 
 const isControlsVis = (visType: string) => visType === 'input_control_vis';
 

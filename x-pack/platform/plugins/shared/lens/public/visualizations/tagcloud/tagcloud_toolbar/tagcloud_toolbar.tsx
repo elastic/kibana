@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { ToolbarPopover } from '../../../shared_components';
 import type { TagcloudState } from '../types';
 import { TagcloudAppearanceSettings } from './appearance_settings';
