@@ -550,13 +550,13 @@ export const getPieVisualization = ({
   },
 
   FlyoutToolbarComponent(props) {
-    const { isDisabled: hasDisabledSytleSettings } =
+    const { isDisabled: hasDisabledStyleSettings } =
       PartitionChartsMeta[props.state.shape].toolbarPopover;
     return (
       <FlyoutToolbar
         {...props}
         contentMap={{
-          style: hasDisabledSytleSettings ? undefined : PartitionStyleSettings,
+          style: hasDisabledStyleSettings ? undefined : PartitionStyleSettings,
           legend: PartitionLegendSettings,
         }}
       />

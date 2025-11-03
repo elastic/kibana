@@ -167,7 +167,7 @@ export function DatatableAppearanceSettings({
   );
 }
 
-export interface DensitySettingsProps {
+interface DensitySettingsProps {
   dataGridDensity: DataGridDensity;
   onChange: (density: DataGridDensity) => void;
 }
