@@ -16,6 +16,7 @@ import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
+  ESQLAstExpression,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
@@ -28,6 +29,7 @@ import type {
   ESQLLocation,
   ESQLNamedParamLiteral,
   ESQLParam,
+  ESQLParens,
   ESQLPositionalParamLiteral,
   ESQLOrderExpression,
   ESQLSource,
@@ -184,6 +186,18 @@ export namespace Builder {
         );
       };
     }
+
+    export const parens = (
+      child: ESQLAstExpression,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLParens => {
+      return {
+        type: 'parens',
+        name: '',
+        child,
+        ...Builder.parserFields(fromParser),
+      };
+    };
 
     export type ColumnTemplate = Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>;
 
