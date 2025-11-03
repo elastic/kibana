@@ -7,9 +7,14 @@
 
 import expect from '@kbn/expect';
 
+<<<<<<< HEAD:x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams.ts
 import { DataStream } from '@kbn/index-management-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
+=======
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+>>>>>>> f8984ec6420 ([Index Management] Branch data streams api tests lifecycle validation (#241105)):x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams/ds_common.ts
 
 const API_BASE_PATH = '/api/index_management';
 
@@ -23,9 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('Data streams', function () {
-    // see details: https://github.com/elastic/kibana/issues/187372
-    this.tags(['failsOnMKI']);
+  describe('Data streams common', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -33,12 +36,14 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
+<<<<<<< HEAD:x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams.ts
       it('returns an array of data streams', async () => {
         const { body: dataStreams, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams`)
@@ -132,6 +137,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
+=======
+>>>>>>> f8984ec6420 ([Index Management] Branch data streams api tests lifecycle validation (#241105)):x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams/ds_common.ts
       describe('index mode of logs-*-* data streams', () => {
         const logsdbDataStreamName = 'logs-test-ds';
 
