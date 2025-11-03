@@ -12,9 +12,9 @@ import { tagcloudStateSchema } from './tagcloud';
 
 describe('Tagcloud Schema', () => {
   const baseTagcloudConfig = {
-    type: 'tagcloud' as const,
+    type: 'tagcloud',
     dataset: {
-      type: 'dataView' as const,
+      type: 'dataView',
       id: 'test-data-view',
     },
   };
@@ -44,7 +44,7 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'price',
           show_metric_label: true,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
@@ -64,13 +64,13 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'revenue',
           show_metric_label: false,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         tag_by: {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       };
@@ -87,16 +87,16 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'revenue',
           show_metric_label: false,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         tag_by: {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
           color: {
-            type: 'static' as const,
+            type: 'static',
             color: '#green',
           },
         },
@@ -116,12 +116,12 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           show_metric_label: false,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
-        orientation: 'horizontal' as const,
+        orientation: 'horizontal',
       };
 
       const validated = tagcloudStateSchema.validate(input);
@@ -132,12 +132,12 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'sales',
           show_metric_label: false,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
-        orientation: 'vertical' as const,
+        orientation: 'vertical',
       };
 
       const validated = tagcloudStateSchema.validate(input);
@@ -148,12 +148,12 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'sales',
           show_metric_label: false,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
-        orientation: 'right_angled' as const,
+        orientation: 'right_angled',
       };
 
       const validated = tagcloudStateSchema.validate(input);
@@ -166,7 +166,7 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           show_metric_label: false,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
@@ -185,7 +185,7 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           show_metric_label: false,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
@@ -218,11 +218,11 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           show_metric_label: false,
         },
-        orientation: 'invalid' as const,
+        orientation: 'invalid',
       };
 
       expect(() => tagcloudStateSchema.validate(input)).toThrow();
@@ -232,7 +232,7 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           show_metric_label: false,
         },
@@ -249,7 +249,7 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           show_metric_label: false,
         },
@@ -264,14 +264,14 @@ describe('Tagcloud Schema', () => {
 
     it('throw when missing DSL and esql operation in a configuration', () => {
       const input = {
-        type: 'tagcloud' as const,
+        type: 'tagcloud',
         dataset: {
-          type: 'esql' as const,
+          type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
           operation: 'value',
-          column: 'count' as const,
+          column: 'count',
         },
         tag_by: {
           operation: 'terms',
@@ -289,28 +289,26 @@ describe('Tagcloud Schema', () => {
         ...baseTagcloudConfig,
         title: 'Sales Tagcloud',
         description: 'Sales metrics visualization by category',
-        orientation: 'horizontal' as const,
+        orientation: 'horizontal',
         font_size: {
           min: 12,
           max: 60,
         },
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'sales',
           show_metric_label: true,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         tag_by: {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
           color: {
-            type: 'dynamic' as const,
-            min: 0,
-            max: 1000,
-            range: 'absolute' as const,
+            type: 'dynamic',
+            range: 'absolute',
             steps: [
-              { type: 'from' as const, from: 0, color: '#red' },
-              { type: 'to' as const, to: 1000, color: '#green' },
+              { type: 'from', from: 0, color: '#red' },
+              { type: 'to', to: 1000, color: '#green' },
             ],
           },
         },
@@ -326,14 +324,14 @@ describe('Tagcloud Schema', () => {
 
     it('validates esql configuration', () => {
       const input = {
-        type: 'tagcloud' as const,
+        type: 'tagcloud',
         dataset: {
-          type: 'esql' as const,
+          type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
           operation: 'value',
-          column: 'count' as const,
+          column: 'count',
           show_metric_label: false,
         },
       };
@@ -344,21 +342,21 @@ describe('Tagcloud Schema', () => {
 
     it('validates esql configuration with tag_by', () => {
       const input = {
-        type: 'tagcloud' as const,
+        type: 'tagcloud',
         dataset: {
-          type: 'esql' as const,
+          type: 'esql',
           query: 'FROM my-index | STATS count() BY category | LIMIT 100',
         },
         metric: {
           operation: 'value',
-          column: 'count' as const,
+          column: 'count',
           show_metric_label: false,
         },
         tag_by: {
           operation: 'value',
-          column: 'category' as const,
+          column: 'category',
         },
-        orientation: 'vertical' as const,
+        orientation: 'vertical',
         font_size: {
           min: 16,
           max: 48,
