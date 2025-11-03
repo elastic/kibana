@@ -25,6 +25,7 @@ import {
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
+import { css } from '@emotion/react';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
 import { useDataSourceSelector } from '../state_management/data_source_state_machine';
@@ -74,6 +75,11 @@ export const DataSourceCard = ({
   return (
     <EuiCheckableCard
       id={`dataSourceCard-${dataSourceRef.id}`}
+      css={css`
+        [class*='euiSplitPanel__inner']:has(> label.euiCheckableCard__label) {
+          overflow-block: auto;
+        }
+      `}
       label={
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m" wrap>
@@ -105,7 +111,6 @@ export const DataSourceCard = ({
           </EuiText>
         </EuiFlexGroup>
       }
-      checkableType="radio"
       onChange={handleSelection}
       checked={isEnabled}
     >
@@ -117,19 +122,19 @@ export const DataSourceCard = ({
       >
         <EuiSpacer size="s" />
         {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-        {isEmpty(previewDocs) ? (
-          <EuiEmptyPrompt
-            icon={<AssetImage type="noResults" size="s" />}
-            titleSize="xs"
-            title={<h4>{DATA_SOURCES_I18N.dataSourceCard.noDataPreview}</h4>}
-          />
-        ) : (
-          <PreviewTable
-            documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
-            height={150}
-          />
-        )}
       </EuiAccordion>
+      {isEmpty(previewDocs) ? (
+        <EuiEmptyPrompt
+          icon={<AssetImage type="noResults" size="s" />}
+          titleSize="xs"
+          title={<h4>{DATA_SOURCES_I18N.dataSourceCard.noDataPreview}</h4>}
+        />
+      ) : (
+        <PreviewTable
+          documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
+          height={150}
+        />
+      )}
     </EuiCheckableCard>
   );
 };
