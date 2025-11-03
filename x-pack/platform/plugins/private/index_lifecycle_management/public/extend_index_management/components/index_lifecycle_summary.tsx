@@ -30,23 +30,19 @@ import type { Index, IndexDetailsTab } from '@kbn/index-management-shared-types'
 import type { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
 import type { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
-import { getPhaseColors } from '../../application/lib';
+import { usePhaseColors } from '../../application/lib';
 interface Props {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   euiTheme: EuiThemeComputed;
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({
-  index,
-  getUrlForApp,
-  euiTheme,
-}) => {
+export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
   const { ilm: ilmData } = index;
   // only ILM managed indices render the ILM tab
   const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
 
-  const phaseColors = getPhaseColors(euiTheme);
+  const phaseColors = usePhaseColors();
   const phaseToBadgeMapping: Record<Phase, { color: EuiBadgeProps['color']; label: string }> = {
     hot: {
       color: phaseColors.hot,

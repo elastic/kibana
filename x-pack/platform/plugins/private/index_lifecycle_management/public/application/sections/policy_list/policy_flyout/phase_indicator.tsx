@@ -7,14 +7,11 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
 import type { Phase } from '../../../../../common/types';
-import { getPhaseColors } from '../../../lib';
+import { usePhaseColors } from '../../../lib';
 
 export const PhaseIndicator = ({ phase }: { phase: Phase }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const phaseToIndicatorColors = getPhaseColors(euiTheme);
+  const phaseToIndicatorColors = usePhaseColors();
 
   return (
     <div

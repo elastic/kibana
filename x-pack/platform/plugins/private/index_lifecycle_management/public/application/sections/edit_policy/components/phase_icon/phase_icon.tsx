@@ -10,12 +10,12 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { Phases } from '../../../../../../common/types';
-import { getPhaseColors } from '../../../../lib';
+import { usePhaseColors } from '../../../../lib';
 
 const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
   const { euiTheme } = useEuiTheme();
 
-  const phaseIconColors = getPhaseColors(euiTheme);
+  const phaseIconColors = usePhaseColors();
 
   return {
     container: css`

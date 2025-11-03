@@ -7,13 +7,13 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { getPhaseColors } from '../../../../lib';
+import { usePhaseColors } from '../../../../lib';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   const ilmTimelineBarHeight = euiTheme.size.s;
 
-  const timelineIconColors = getPhaseColors(euiTheme);
+  const timelineIconColors = usePhaseColors();
 
   return {
     container: css`
