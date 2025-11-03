@@ -87,7 +87,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
 
         await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
+        await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
         await find.clickByCssSelector(`button#observability`);
+
         await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
         await find.clickByCssSelector(`button#ruleTags`);
         await testSubjects.click('comboBoxToggleListButton');
@@ -150,7 +152,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
       await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
+      await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
       await find.clickByCssSelector(`button#observability`);
+
       await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
       await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
       const featureCells = await find.allByCssSelector(
