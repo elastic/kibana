@@ -55,6 +55,7 @@ export interface EmbeddableConversationProps {
   /**
    * Optional attachments with lazy content loading.
    * Content will be fetched when starting a new conversation round.
+   * It will be appended only if it has changed since previous conversation round.
    */
   attachments?: Array<{
     id: string;

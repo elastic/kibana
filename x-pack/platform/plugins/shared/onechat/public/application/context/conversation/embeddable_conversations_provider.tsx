@@ -15,6 +15,7 @@ import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
+import { AttachmentMapRebuilder } from './attachment_map_rebuilder';
 
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
@@ -29,7 +30,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
 
-  // Attachment content map for tracking attachment content changes
   const attachmentContentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
 
   const kibanaServices = useMemo(
@@ -148,7 +148,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         <QueryClientProvider client={queryClient}>
           <OnechatServicesContext.Provider value={services}>
             <ConversationContext.Provider value={conversationContextValue}>
-              <SendMessageProvider>{children}</SendMessageProvider>
+              <SendMessageProvider>
+                <AttachmentMapRebuilder attachmentContentMapRef={attachmentContentMapRef}>
+                  {children}
+                </AttachmentMapRebuilder>
+              </SendMessageProvider>
             </ConversationContext.Provider>
           </OnechatServicesContext.Provider>
         </QueryClientProvider>

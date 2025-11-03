@@ -52,25 +52,20 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       return Promise.reject(new Error('Abort signal not present'));
     }
 
-    // Fetch and process attachments if available
     let processedAttachments: AttachmentInput[] | undefined;
 
-    // Process attachments if we have any
     if (attachments && attachments.length > 0) {
       const attachmentContentMap = getAttachmentContentMap();
       const attachmentsToSend: AttachmentInput[] = [];
 
       for (const attachment of attachments) {
         try {
-          // Fetch current content
           const currentContent = await Promise.resolve(attachment.getContent());
           const previousContent = attachmentContentMap.get(attachment.id);
 
-          // Compare content (deep comparison)
           const contentChanged = !isEqual(currentContent, previousContent);
 
           if (contentChanged || !previousContent) {
-            // Content changed or first time - send attachment with hidden: true
             attachmentsToSend.push({
               id: attachment.id,
               type: attachment.type,
@@ -78,12 +73,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
               hidden: true,
             });
 
-            // Update the in-memory map
             updateAttachmentContent(attachment.id, currentContent);
           }
         } catch (attachmentError) {
-          // If attachment content fetch fails, skip this attachment
-          // but continue processing others
           // eslint-disable-next-line no-console
           console.warn(`Failed to fetch content for attachment ${attachment.id}:`, attachmentError);
         }
