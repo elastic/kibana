@@ -15,15 +15,19 @@ import { offsetRangeToMonacoRange } from '../shared/utils';
 function escapeForStringLiteral(str: string): string {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
-// Dynamic time range parameters:
-// We compute start as (now - 15 minutes) and end as now at suggestion generation time.
-// Using ISO strings (UTC) wrapped in quotes to align with existing parameter conventions.
-function getDynamicTstartParam(): string {
-  const d = new Date(Date.now() - 15 * 60 * 1000); // subtract 15 minutes
-  return `"${d.toISOString()}"`;
-}
-function getDynamicTendParam(): string {
-  return `"${new Date().toISOString()}"`;
+
+const TIME_WINDOW = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+// Dynamic time range parameters: Compute start as (now - 15 minutes) and end as now at suggestion generation time.
+function getTimeParamsValues(): { start: string; end: string } {
+  const now = Date.now();
+  const start = new Date(now - TIME_WINDOW);
+  const end = new Date(now);
+
+  return {
+    start: `"${start.toISOString()}"`,
+    end: `"${end.toISOString()}"`,
+  };
 }
 
 export function wrapAsMonacoSuggestions(
@@ -57,12 +61,9 @@ export function wrapAsMonacoSuggestions(
 
       if (replaceParamsWithDefaults) {
         // Replace ?_tstart and ?_tend parameters with default/dynamic values
-        // Note: dynamic end timestamp evaluated at suggestion generation time
-        // Precompute once per suggestion so multiple occurrences share identical timestamps
-        const dynamicStart = getDynamicTstartParam();
-        const dynamicEnd = getDynamicTendParam();
+        const { start, end } = getTimeParamsValues();
         insertText = insertText.replace(/\?_(tstart|tend)/g, (_match, p1) => {
-          return p1 === 'tstart' ? dynamicStart : dynamicEnd;
+          return p1 === 'tstart' ? start : end;
         });
       }
 
