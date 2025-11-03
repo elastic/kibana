@@ -95,7 +95,7 @@ export interface LogDocumentOverview
 
 export interface ApmErrorLogFields {
   'processor.event': string;
-  'error.log.level': string;
+  'error.log.level'?: string;
   'error.exception.message'?: string;
 }
 

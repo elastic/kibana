@@ -9,7 +9,7 @@
 
 import { fieldConstants } from '..';
 import type { LogDocumentOverview } from '../types';
-import { getFieldWithFallback } from './get_field_with_fallback';
+import { getLogFieldWithFallback } from './get_log_field_with_fallback';
 
 export const getLogLevelFieldWithFallback = (doc: LogDocumentOverview) => {
   const rankingOrder = [
@@ -17,5 +17,5 @@ export const getLogLevelFieldWithFallback = (doc: LogDocumentOverview) => {
     fieldConstants.ERROR_LOG_LEVEL_FIELD,
   ] as const;
 
-  return getFieldWithFallback(doc, rankingOrder);
+  return getLogFieldWithFallback(doc, rankingOrder);
 };

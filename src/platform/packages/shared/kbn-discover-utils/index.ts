@@ -45,7 +45,7 @@ export {
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getLogLevelFieldWithFallback,
-  getEventTypeFieldWithFallback,
+  getLogEventTypeFieldWithFallback,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,

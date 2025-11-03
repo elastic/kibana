@@ -10,7 +10,7 @@ import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   fieldConstants,
-  getEventTypeFieldWithFallback,
+  getLogEventTypeFieldWithFallback,
   getLogLevelFieldWithFallback,
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
@@ -31,7 +31,7 @@ interface BadgesProps {
 export const Badges = ({ formattedDoc, hit, renderFlyoutStreamProcessingLink }: BadgesProps) => {
   const { field: logLevelField, value: logLevelValue } = getLogLevelFieldWithFallback(formattedDoc);
   const { field: eventTypeField, value: eventTypeValue } =
-    getEventTypeFieldWithFallback(formattedDoc);
+    getLogEventTypeFieldWithFallback(formattedDoc);
 
   const hasLogLevel = Boolean(logLevelValue);
   const isErrorEventType =

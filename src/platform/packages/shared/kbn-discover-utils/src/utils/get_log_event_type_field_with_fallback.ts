@@ -9,9 +9,9 @@
 
 import { fieldConstants } from '..';
 import type { LogDocumentOverview } from '../types';
-import { getFieldWithFallback } from './get_field_with_fallback';
+import { getLogFieldWithFallback } from './get_log_field_with_fallback';
 
-export const getEventTypeFieldWithFallback = (doc: LogDocumentOverview) => {
+export const getLogEventTypeFieldWithFallback = (doc: LogDocumentOverview) => {
   // First check otel event_name field, then fallback to processor.event
   // OTEL exceptions with trace processor are stored as processor.event: error
   const rankingOrder = [
@@ -19,5 +19,5 @@ export const getEventTypeFieldWithFallback = (doc: LogDocumentOverview) => {
     fieldConstants.PROCESSOR_EVENT_FIELD,
   ] as const;
 
-  return getFieldWithFallback(doc, rankingOrder);
+  return getLogFieldWithFallback(doc, rankingOrder);
 };

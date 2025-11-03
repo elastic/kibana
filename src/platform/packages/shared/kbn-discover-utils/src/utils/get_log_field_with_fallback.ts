@@ -9,7 +9,7 @@
 
 import type { LogDocumentOverview } from '../types';
 
-export const getFieldWithFallback = <T extends keyof LogDocumentOverview>(
+export const getLogFieldWithFallback = <T extends keyof LogDocumentOverview>(
   doc: LogDocumentOverview,
   rankingOrder: readonly T[]
 ) => {
