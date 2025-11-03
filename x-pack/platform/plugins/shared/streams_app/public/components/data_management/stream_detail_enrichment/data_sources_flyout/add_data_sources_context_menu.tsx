@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
-import { i18n } from '@kbn/i18n';
 import { DATA_SOURCES_I18N } from './translations';
 import {
   defaultCustomSamplesDataSource,
@@ -56,34 +55,6 @@ export const AddDataSourcesContextMenu = () => {
                 'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
                 onClick: () => {
                   addDataSource(defaultCustomSamplesDataSource);
-                  closeMenu();
-                },
-              },
-              {
-                name: i18n.translate(
-                  'xpack.streams.dataSource.dataSourceCard.originalSamplesLabel',
-                  {
-                    defaultMessage: 'Original samples',
-                  }
-                ),
-                icon: 'document',
-                'data-test-subj': 'streamsAppProcessingAddOriginalDataSource',
-                onClick: () => {
-                  addDataSource({ type: 'original-samples' });
-                  closeMenu();
-                },
-              },
-              {
-                name: i18n.translate(
-                  'xpack.streams.dataSource.dataSourceCard.failureSamplesLabel',
-                  {
-                    defaultMessage: 'Failure store samples',
-                  }
-                ),
-                icon: 'document',
-                'data-test-subj': 'streamsAppProcessingAddFailureDataSource',
-                onClick: () => {
-                  addDataSource({ type: 'failure-samples' });
                   closeMenu();
                 },
               },

@@ -193,9 +193,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const shouldShowRowSourceAvatars = useStreamEnrichmentSelector(
-    (state) => state.context.dataSourcesRefs.length >= 2
-  );
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
     const currentProcessorRef = state.context.stepRefs.find(
       (stepRef) =>
@@ -384,8 +381,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
           documents={previewDocuments}
-          originalSamples={originalSamples}
-          showRowSourceAvatars={shouldShowRowSourceAvatars}
           displayColumns={previewColumns}
           rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
           toolbarVisibility

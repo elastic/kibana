@@ -11,14 +11,7 @@ import type {
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
 } from '@elastic/eui';
-import {
-  EuiAvatar,
-  EuiButtonIcon,
-  EuiDataGrid,
-  EuiFlexGroup,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
@@ -28,13 +21,7 @@ import type {
   DocumentWithIgnoredFields,
 } from '@kbn/streams-schema/src/shared/record_types';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
-import type {
-  SampleDocumentWithUIAttributes,
-  SimulationContext,
-} from '../stream_detail_enrichment/state_management/simulation_state_machine';
-import { DATA_SOURCES_I18N } from '../stream_detail_enrichment/data_sources_flyout/translations';
-import { useDataSourceSelectorById } from '../stream_detail_enrichment/state_management/data_source_state_machine';
-import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enrichment/types';
+import type { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 const emptyCell = <>&nbsp;</>;
 
@@ -89,9 +76,7 @@ export function PreviewTable({
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
-  showRowSourceAvatars = false,
   showLeadingControlColumns = true,
-  originalSamples,
   cellActions,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
@@ -108,9 +93,7 @@ export function PreviewTable({
   columnOrderHint?: string[];
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
-  showRowSourceAvatars?: boolean;
   showLeadingControlColumns?: boolean;
-  originalSamples?: SampleDocumentWithUIAttributes[];
   cellActions?: EuiDataGridColumnCellAction[];
 }) {
   const { euiTheme: theme } = useEuiTheme();
@@ -189,7 +172,7 @@ export function PreviewTable({
     () => [
       {
         id: 'selection',
-        width: showRowSourceAvatars ? 72 : 36,
+        width: 36,
         headerCellRender: () => null,
         rowCellRender: ({ rowIndex, setCellProps }) => {
           // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -206,19 +189,11 @@ export function PreviewTable({
               style: {},
             });
           }
-          const originalSample = originalSamples?.[rowIndex];
-          return (
-            <EuiFlexGroup gutterSize="s">
-              <RowSelectionButton rowIndex={rowIndex} />
-              {showRowSourceAvatars && originalSample && (
-                <RowSourceAvatar originalSample={originalSample} />
-              )}
-            </EuiFlexGroup>
-          );
+          return <RowSelectionButton rowIndex={rowIndex} />;
         },
       },
     ],
-    [showRowSourceAvatars, originalSamples, theme.colors.highlight]
+    [theme.colors.highlight]
   );
 
   // Derive visibleColumns from canonical order
@@ -340,38 +315,5 @@ export function PreviewTable({
         return String(value) || emptyCell;
       }}
     />
-  );
-}
-
-function dataSourceTypeToI18nKey(type: EnrichmentDataSourceWithUIAttributes['type']) {
-  switch (type) {
-    case 'latest-samples':
-      return 'latestSamples';
-    case 'kql-samples':
-      return 'kqlDataSource';
-    case 'custom-samples':
-      return 'customSamples';
-  }
-}
-
-function RowSourceAvatar({ originalSample }: { originalSample: SampleDocumentWithUIAttributes }) {
-  const dataSourceContext = useDataSourceSelectorById(
-    originalSample.dataSourceId,
-    (snapshot) => snapshot?.context
-  );
-  if (!dataSourceContext) {
-    // If the data source context is not available, we cannot render the avatar
-    return null;
-  }
-  const {
-    uiAttributes: { color },
-    dataSource: { type: dataSourceType, name: rawDataSourceName },
-  } = dataSourceContext;
-  const name =
-    rawDataSourceName || DATA_SOURCES_I18N[dataSourceTypeToI18nKey(dataSourceType)].placeholderName;
-  return (
-    <EuiToolTip content={name}>
-      <EuiAvatar size="s" color={color} initialsLength={1} name={name} />
-    </EuiToolTip>
   );
 }
