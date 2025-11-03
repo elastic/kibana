@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiProgress,
   EuiEmptyPrompt,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
@@ -57,6 +58,7 @@ export const DataSourceCard = ({
   const isLoading =
     dataSourceState.matches({ enabled: 'loadingData' }) ||
     dataSourceState.matches({ enabled: 'debouncingChanges' });
+  const isDeletableDataSource = dataSource.type !== 'latest-samples'; // We don't allow deleting the latest-samples source to always have a data source available
 
   const handleSelection = () => selectDataSource(dataSourceRef.id);
 
@@ -93,12 +95,22 @@ export const DataSourceCard = ({
               </EuiBadge>
             )}
             <EuiFlexItem grow />
-            {canDeleteDataSource && (
-              <EuiButtonIcon
-                iconType="trash"
-                onClick={deleteDataSource}
-                aria-label={DATA_SOURCES_I18N.dataSourceCard.deleteDataSourceLabel}
-              />
+            {isDeletableDataSource && (
+              <EuiToolTip
+                content={
+                  !canDeleteDataSource
+                    ? DATA_SOURCES_I18N.dataSourceCard.deleteDataSourceDisabledLabel
+                    : undefined
+                }
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="trash"
+                  disabled={!canDeleteDataSource}
+                  onClick={deleteDataSource}
+                  aria-label={DATA_SOURCES_I18N.dataSourceCard.deleteDataSourceLabel}
+                />
+              </EuiToolTip>
             )}
           </EuiFlexGroup>
           <EuiText component="p" color="subdued" size="xs">
