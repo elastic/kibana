@@ -214,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // 2 minutes ago (second data point for component1)
-      const twoMinutesAgo = new Date(now - 3 * 60 * 1000);
+      const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
       twoMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
 
       // eslint-disable-next-line no-console
