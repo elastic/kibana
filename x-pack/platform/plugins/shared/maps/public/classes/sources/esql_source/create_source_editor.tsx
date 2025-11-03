@@ -126,14 +126,7 @@ export function CreateSourceEditor(props: Props) {
       props.onSourceConfigChange(sourceConfig);
     },
     0,
-    [
-      dateField,
-      geoField,
-      esql,
-      narrowByGlobalSearch,
-      narrowByGlobalTime,
-      narrowByMapBounds,
-    ]
+    [dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]
   );
 
   return (
