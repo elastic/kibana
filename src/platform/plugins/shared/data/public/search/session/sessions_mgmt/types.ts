@@ -39,6 +39,7 @@ export interface UISession {
   appId: string;
   created: string;
   expires: string | null;
+  completed: string | undefined;
   status: UISearchSessionState;
   idMapping: SearchSessionSavedObjectAttributes['idMapping'];
   numSearches: number;

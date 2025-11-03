@@ -9,6 +9,7 @@
 
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchSessionRequestError } from '../../../common/search';
 import type { SearchSessionSavedObjectAttributes } from '../../../common';
 import { SearchSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
@@ -24,7 +25,11 @@ export async function getSessionStatus(
   deps: { esClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
   config: SearchSessionsConfigSchema
-): Promise<{ status: SearchSessionStatus; errors?: string[] }> {
+): Promise<{
+  status: SearchSessionStatus;
+  errors?: string[];
+  searchStatuses?: { id: string; status: SearchStatus }[];
+}> {
   if (session.isCanceled === true) {
     return { status: SearchSessionStatus.CANCELLED };
   }
@@ -33,6 +38,10 @@ export async function getSessionStatus(
 
   if (moment(session.expires).isBefore(now)) {
     return { status: SearchSessionStatus.EXPIRED };
+  }
+
+  if (session.completed) {
+    return { status: SearchSessionStatus.COMPLETE };
   }
 
   const searches = Object.values(session.idMapping);
@@ -57,16 +66,22 @@ export async function getSessionStatus(
     })
   );
 
-  if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
-    const erroredSearches = searchStatuses.filter((s) => s.status === SearchStatus.ERROR);
+  const hasErrors = searchStatuses.some((item) => item.status === SearchStatus.ERROR);
+  if (hasErrors) {
+    const erroredSearches = searchStatuses.filter(
+      (s) => s.status === SearchStatus.ERROR
+    ) as SearchSessionRequestError[];
     const errors = erroredSearches.map((s) => s.error).filter((error) => !!error) as string[];
-    return { status: SearchSessionStatus.ERROR, errors };
-  } else if (
-    searchStatuses.length > 0 &&
-    searchStatuses.every((item) => item.status === SearchStatus.COMPLETE)
-  ) {
-    return { status: SearchSessionStatus.COMPLETE };
-  } else {
-    return { status: SearchSessionStatus.IN_PROGRESS };
+    return { status: SearchSessionStatus.ERROR, errors, searchStatuses };
   }
+
+  const hasSearches = searchStatuses.length > 0;
+  const areAllSearchesComplete = searchStatuses.every(
+    (item) => item.status === SearchStatus.COMPLETE
+  );
+  if (hasSearches && areAllSearchesComplete) {
+    return { status: SearchSessionStatus.COMPLETE, searchStatuses };
+  }
+
+  return { status: SearchSessionStatus.IN_PROGRESS, searchStatuses };
 }

@@ -33,6 +33,13 @@ export interface SearchSessionSavedObjectAttributes {
   expires: string;
 
   /**
+   * Only present if all the searches in the session are complete.
+   * The first time the session is checked after all searches are complete, this field is set.
+   * We can't base the value on the latest search because ES|QL async searches don't return that information.
+   */
+  completed?: string;
+
+  /**
    * locatorId (see share.url.locators service)
    */
   locatorId?: string;
@@ -77,14 +84,26 @@ export interface SearchSessionRequestInfo {
    * Search strategy used to submit the search request
    */
   strategy: string;
+  /**
+   * Search status - used to avoid extra calls to ES when tracking search IDs
+   */
+  status: SearchStatus;
 }
 
-export interface SearchSessionRequestStatus {
-  status: SearchStatus;
-  /**
-   * An optional error. Set if status is set to error.
-   */
-  error?: string;
+export type SearchSessionRequestStatus =
+  | SearchSessionRequestInProgress
+  | SearchSessionRequestComplete
+  | SearchSessionRequestError;
+
+interface SearchSessionRequestInProgress {
+  status: SearchStatus.IN_PROGRESS;
+}
+export interface SearchSessionRequestComplete {
+  status: SearchStatus.COMPLETE;
+}
+export interface SearchSessionRequestError {
+  status: SearchStatus.ERROR;
+  error: string;
 }
 
 /**

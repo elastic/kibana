@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 const searchSessionRequestInfoSchema = schema.object({
   id: schema.string(),
   strategy: schema.string(),
+  status: schema.maybe(schema.string()),
 });
 
 const serializeableSchema = schema.mapOf(schema.string(), schema.any());
@@ -23,6 +24,7 @@ const searchSessionAttrSchema = () =>
     appId: schema.maybe(schema.string()),
     created: schema.string(),
     expires: schema.string(),
+    completed: schema.maybe(schema.string()),
     locatorId: schema.maybe(schema.string()),
     initialState: schema.maybe(serializeableSchema),
     restoreState: schema.maybe(serializeableSchema),
