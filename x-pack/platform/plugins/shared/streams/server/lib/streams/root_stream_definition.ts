@@ -13,7 +13,11 @@ import {
   logsSettings,
   otelEquivalentLookupMap,
 } from './component_templates/logs_layer';
-import { baseFields as alertsBaseFields } from './component_templates/alerts_layer';
+import {
+  baseFields as alertsBaseFields,
+  baseMappings as alertsBaseMappings,
+  otelEquivalentLookupMap as alertsOtelEquivalentLookupMap,
+} from './component_templates/alerts_layer';
 
 export const LOGS_ROOT_STREAM_NAME = 'logs';
 export const ALERTS_ROOT_STREAM_NAME = 'alerts';
@@ -41,7 +45,8 @@ export const alertsRootStreamDefinition: Streams.WiredStream.Definition = {
   name: ALERTS_ROOT_STREAM_NAME,
   description: 'Root stream for alerts',
   baseSettings: {},
-  baseMappings: {},
+  baseMappings: alertsBaseMappings,
+  otelEquivalentLookupMap: alertsOtelEquivalentLookupMap,
   ingest: {
     lifecycle: { dsl: {} },
     settings: {},

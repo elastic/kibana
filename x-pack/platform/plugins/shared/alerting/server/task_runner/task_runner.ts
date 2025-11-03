@@ -307,6 +307,7 @@ export class TaskRunner<
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
+      elasticsearch: this.context.elasticsearch,
       flappingSettings,
       logger: this.logger,
       maintenanceWindowsService: this.context.maintenanceWindowsService,
