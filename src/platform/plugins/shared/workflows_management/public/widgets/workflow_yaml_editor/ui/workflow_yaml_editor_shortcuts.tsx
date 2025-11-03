@@ -28,7 +28,7 @@ export function WorkflowYAMLEditorShortcuts({
 
   return (
     <div>
-      <EuiButtonEmpty onClick={() => onOpenActionsMenu(true)} color="text">
+      <EuiButtonEmpty onClick={() => onOpenActionsMenu(true)}>
         <EuiText css={{ display: 'flex', alignItems: 'center', gap: '6px' }} size="xs">
           <b>
             <FormattedMessage
