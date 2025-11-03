@@ -15,12 +15,14 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ResultFieldProps } from './result_types';
+import type { ResultFieldProps } from './result_types';
 import { PERMANENTLY_TRUNCATED_FIELDS } from './constants';
 import { ResultFieldValue } from './result_field_value';
+import * as Styles from './styles';
 
 const iconMap: Record<string, string> = {
   boolean: 'tokenBoolean',
@@ -68,6 +70,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   fieldType = 'object',
   isExpanded,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const shouldTruncate = !isExpanded || PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const fieldTypeLabel = i18n.translate('xpack.searchIndexDocuments.result.fieldTypeAriaLabel', {
@@ -76,7 +79,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   });
 
   return (
-    <EuiTableRow className="resultField">
+    <EuiTableRow css={Styles.resultField(euiTheme)}>
       <EuiTableRowCell className="resultFieldRowCell" valign="middle" truncateText={!isExpanded}>
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
           <EuiFlexItem grow={false}>

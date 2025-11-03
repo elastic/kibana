@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -14,25 +14,13 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
+import type { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
-import {
+import type {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
 import { ObservabilityOnboardingFlow } from './observability_onboarding_flow';
-
-export const onBoardingTitle = i18n.translate(
-  'xpack.observability_onboarding.breadcrumbs.onboarding',
-  {
-    defaultMessage: 'Onboarding',
-  }
-);
-
-export const breadcrumbsApp = {
-  id: 'observabilityOnboarding',
-  label: onBoardingTitle,
-};
 
 export function ObservabilityOnboardingAppRoot({
   appMountParameters,

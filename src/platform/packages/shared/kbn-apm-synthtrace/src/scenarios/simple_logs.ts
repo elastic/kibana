@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument, generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates simple, structured log documents with varying log levels.
+ */
+
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
+import { generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
 import {

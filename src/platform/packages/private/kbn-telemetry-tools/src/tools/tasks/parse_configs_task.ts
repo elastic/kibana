@@ -9,7 +9,7 @@
 
 import * as path from 'path';
 import { parseTelemetryRC } from '../config';
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 
 export function parseConfigsTask() {
   const kibanaRoot = process.cwd();

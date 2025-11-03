@@ -9,16 +9,15 @@ import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
 import nock from 'nock';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import type { LockId, LockDocument } from '@kbn/lock-manager/src/lock_manager_client';
 import {
-  LockId,
   LockManager,
-  LockDocument,
   withLock,
-  runSetupIndexAssetEveryTime,
+  rerunSetupIndexAsset,
 } from '@kbn/lock-manager/src/lock_manager_client';
 import {
   LOCKS_COMPONENT_TEMPLATE_NAME,
@@ -42,9 +41,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     before(async () => {
       // delete existing index mappings to ensure we start from a clean state
       await deleteLockIndexAssets(es, log);
+    });
 
+    beforeEach(async () => {
       // ensure that the index and templates are created
-      runSetupIndexAssetEveryTime();
+      rerunSetupIndexAsset();
     });
 
     after(async () => {
@@ -802,6 +803,38 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
           expect(indexExists).to.be(true);
         });
+      });
+    });
+
+    describe('setup robustness', () => {
+      it('should retry if setup fails the first time', async () => {
+        const brokenEsClient = {
+          ...es,
+          cluster: {
+            ...es.cluster,
+            putComponentTemplate: () => {
+              throw new Error('Simulated failure on first attempt');
+            },
+          },
+        } as unknown as Client;
+        const brokenLockManager = new LockManager('test', brokenEsClient, logger);
+        const workingLockManager = new LockManager('test', es, logger);
+        let error;
+        try {
+          await brokenLockManager.acquire();
+        } catch (e) {
+          error = e;
+        }
+        expect(error).to.be.an(Error);
+
+        // if the the second attempt succeeds, it means it didn't get stuck on the first failure
+        error = undefined;
+        try {
+          await workingLockManager.acquire();
+        } catch (e) {
+          error = e;
+        }
+        expect(error).to.be(undefined);
       });
     });
   });

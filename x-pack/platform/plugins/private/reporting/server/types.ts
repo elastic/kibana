@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { IRouter } from '@kbn/core-http-server';
+import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -31,11 +31,11 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
-import {
+import type {
   RawNotification,
   RawScheduledReport,
 } from './saved_objects/scheduled_report/schemas/latest';
@@ -137,6 +137,8 @@ export interface ListScheduledReportApiJSON {
   space_id: string;
   title: RawScheduledReport['title'];
 }
+
+export type ScheduledReportApiJson = ListScheduledReportApiJSON;
 
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];

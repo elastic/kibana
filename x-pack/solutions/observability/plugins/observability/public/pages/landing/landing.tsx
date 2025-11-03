@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE } from '../../../common';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';

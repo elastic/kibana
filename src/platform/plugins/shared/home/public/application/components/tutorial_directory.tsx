@@ -10,13 +10,15 @@
 import _ from 'lodash';
 import React from 'react';
 import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { SampleDataTab } from '@kbn/home-sample-data-tab';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TutorialsCategory } from '../../../common/constants';
 import { Synopsis } from './synopsis';
-import { HomeKibanaServices, getServices } from '../kibana_services';
+import type { HomeKibanaServices } from '../kibana_services';
+import { getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
 import type { TutorialType } from '../../services/tutorials/types';
 
@@ -152,6 +154,21 @@ class TutorialDirectoryUi extends React.Component<
     _prevProps: TutorialDirectoryUiProps,
     prevState: Readonly<TutorialDirectoryUiState>
   ) {
+    // Update selected tab when URL changes (e.g., browser back/forward)
+    if (_prevProps.openTab !== this.props.openTab) {
+      const newTab = this.props.openTab;
+      // Validate that the tab exists
+      const tabExists = this.tabs.some((tab) => tab.id === newTab);
+      if (!tabExists) {
+        // If the tab does not exist, redirect to the default tab
+        getServices().history.push(`#/tutorial_directory/${SAMPLE_DATA_TAB_ID}`);
+      } else if (newTab !== this.state.selectedTabId) {
+        this.setState({
+          selectedTabId: newTab,
+        });
+      }
+    }
+
     if (prevState.selectedTabId !== this.state.selectedTabId) {
       this.setBreadcrumbs();
     }
@@ -184,6 +201,8 @@ class TutorialDirectoryUi extends React.Component<
     this.setState({
       selectedTabId: id,
     });
+    // Update URL to reflect the selected tab
+    getServices().history.push(`#/tutorial_directory/${id}`);
   };
 
   getTabs = () => {

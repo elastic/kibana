@@ -9,7 +9,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ServerStart } from './server';
-import { Server } from './server';
+import type { Server } from './server';
 
 const createStartMock = (): jest.Mocked<ServerStart> => ({
   addRoute: jest.fn(),

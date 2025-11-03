@@ -7,7 +7,7 @@
 
 import { TimelineEventsQueries } from '../../../../../common/api/search_strategy';
 
-import { TimelineFactory } from '../types';
+import type { TimelineFactory } from '../types';
 import { timelineEventsAll } from './all';
 import { timelineEventsDetails } from './details';
 import { timelineKpi } from './kpi';

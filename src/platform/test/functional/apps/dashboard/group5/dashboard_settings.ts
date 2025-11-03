@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
-      await dashboard.loadSavedDashboard('few panels');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('few panels');
       originalTitles = await dashboard.getPanelTitles();
     });
 

@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import type { ESQLCommand, ESQLFunction, ESQLAstBaseItem } from '../../../types';
-import { isFunctionExpression } from '../../../ast/is';
-import type { ESQLFieldWithMetadata } from '../../types';
-import { ICommandContext } from '../../types';
+import { isColumn, isFunctionExpression } from '../../../ast/is';
+import type { ESQLAstBaseItem, ESQLCommand, ESQLFunction } from '../../../types';
+import type { ESQLColumnData } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
-  context?: ICommandContext
+  previousColumns: ESQLColumnData[],
+  query: string
 ) => {
   const asRenamePairs: ESQLFunction[] = [];
   const assignRenamePairs: ESQLFunction[] = [];
@@ -31,21 +30,31 @@ export const columnsAfter = (
   }
 
   // rename the columns with the user defined name
-  const newFields = previousColumns.map((oldColumn) => {
+  const newFields = previousColumns.map<ESQLColumnData>((oldColumn) => {
     const asRenamePair = asRenamePairs.find(
       (pair) => (pair?.args?.[0] as ESQLAstBaseItem)?.name === oldColumn.name
     );
 
-    if (asRenamePair?.args?.[1]) {
-      return { name: (asRenamePair.args[1] as ESQLAstBaseItem).name, type: oldColumn.type };
+    if (isColumn(asRenamePair?.args?.[1])) {
+      return {
+        name: asRenamePair.args[1].name,
+        type: oldColumn.type,
+        location: asRenamePair.args[1].location,
+        userDefined: true,
+      };
     }
 
     const assignRenamePair = assignRenamePairs.find(
       (pair) => (pair?.args?.[1] as ESQLAstBaseItem)?.name === oldColumn.name
     );
 
-    if (assignRenamePair?.args?.[0]) {
-      return { name: (assignRenamePair.args[0] as ESQLAstBaseItem).name, type: oldColumn.type };
+    if (isColumn(assignRenamePair?.args?.[0])) {
+      return {
+        name: assignRenamePair.args[0].name,
+        type: oldColumn.type,
+        location: assignRenamePair.args[0].location,
+        userDefined: true,
+      };
     }
 
     return oldColumn; // No rename found, keep the old name

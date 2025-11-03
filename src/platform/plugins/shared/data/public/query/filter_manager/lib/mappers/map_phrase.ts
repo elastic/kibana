@@ -16,7 +16,7 @@ import {
   isScriptedPhraseFilter,
   isPhraseFilter,
 } from '@kbn/es-query';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);

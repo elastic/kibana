@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { MapsEmsPluginServerSetup } from '@kbn/maps-ems-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import {
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { MapsEmsPluginServerSetup } from '@kbn/maps-ems-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 
 export interface SetupDeps {

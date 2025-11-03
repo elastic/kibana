@@ -11,10 +11,8 @@ import { act } from 'react-dom/test-utils';
 import type { Query } from '@kbn/es-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import {
-  dataViewPluginMocks,
-  Start as DataViewPublicStart,
-} from '@kbn/data-views-plugin/public/mocks';
+import type { Start as DataViewPublicStart } from '@kbn/data-views-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -23,11 +21,10 @@ import { screen, within } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
-import type { TextBasedPrivateState } from '../types';
+import type { TextBasedPrivateState, DataViewsState } from '@kbn/lens-common';
 
 import { createIndexPatternServiceMock } from '../../../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../../../mocks';
-import { DataViewsState } from '../../../../state_management';
 import { addColumnsToCache } from '../fieldlist_cache';
 
 const fieldsFromQuery = [

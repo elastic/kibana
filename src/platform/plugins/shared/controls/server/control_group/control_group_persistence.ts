@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import {
   DEFAULT_CONTROLS_CHAINING,
@@ -15,7 +15,7 @@ import {
   DEFAULT_IGNORE_PARENT_SETTINGS,
   DEFAULT_AUTO_APPLY_SELECTIONS,
 } from '@kbn/controls-constants';
-import { ControlGroupSavedObjectState, SerializableControlGroupState } from './types';
+import type { ControlGroupSavedObjectState, SerializableControlGroupState } from './types';
 
 export const getDefaultControlGroupState = (): SerializableControlGroupState => ({
   panels: {},

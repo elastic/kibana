@@ -4,35 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
-import { SyntheticsServerSetup } from '../../types';
-import { RouteContext } from '../../routes/types';
+import type { SyntheticsServerSetup } from '../../types';
+import type { RouteContext } from '../../routes/types';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
-import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
-import {
-  MonitorConfigUpdate,
-  syncEditedMonitorBulk,
-} from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
-import {
-  ConfigKey,
+import type { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
+import type { MonitorConfigUpdate } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import type {
   EncryptedSyntheticsMonitorAttributes,
   ServiceLocationErrors,
   ProjectMonitor,
   Locations,
   SyntheticsMonitor,
   MonitorFields,
-  type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
+import { ConfigKey, type SyntheticsPrivateLocations } from '../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
+import type { ValidationResult } from '../../routes/monitor_cruds/monitor_validation';
 import {
   validateProjectMonitor,
   validateMonitor,
-  ValidationResult,
   INVALID_CONFIGURATION_ERROR,
 } from '../../routes/monitor_cruds/monitor_validation';
 import { normalizeProjectMonitor } from './normalizers';

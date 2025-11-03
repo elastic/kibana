@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { ApplicationStart, HttpSetup, OverlayStart, ScopedHistory } from '@kbn/core/public';
-import { DocLinksStart } from '@kbn/core/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { ApplicationStart, HttpSetup, OverlayStart, ScopedHistory } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 
-import { BreadcrumbService } from './application/services/breadcrumbs';
+import type { BreadcrumbService } from './application/services/breadcrumbs';
 
 export interface SetupDependencies {
   usageCollection?: UsageCollectionSetup;

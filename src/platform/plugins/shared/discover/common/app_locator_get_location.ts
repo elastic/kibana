@@ -10,10 +10,14 @@
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { isFilterPinned, isOfAggregateQueryType } from '@kbn/es-query';
 import type { setStateToKbnUrl as setStateToKbnUrlCommon } from '@kbn/kibana-utils-plugin/common';
-import type { DiscoverAppLocatorGetLocation, MainHistoryLocationState } from './app_locator';
+import type {
+  DiscoverAppLocatorGetLocation,
+  DiscoverAppLocatorParams,
+  MainHistoryLocationState,
+} from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import { APP_STATE_URL_KEY } from './constants';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TAB_STATE_URL_KEY } from './constants';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -25,17 +29,55 @@ export const appLocatorGetLocationCommon = async (
   },
   ...[params]: Parameters<DiscoverAppLocatorGetLocation>
 ): ReturnType<DiscoverAppLocatorGetLocation> => {
+  const { useHash = useHashOriginal, savedSearchId, searchSessionId, tab } = params;
+  const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
+
+  let path = `#/${savedSearchPath}`;
+
+  if (searchSessionId) {
+    path = `${path}?searchSessionId=${searchSessionId}`;
+  }
+
+  const { appState, globalState, state } = parseAppLocatorParams(params);
+
+  if (Object.keys(globalState).length) {
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
+      GLOBAL_STATE_URL_KEY,
+      globalState,
+      { useHash },
+      path
+    );
+  }
+
+  if (Object.keys(appState).length) {
+    path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
+  }
+
+  if (tab?.id) {
+    path = setStateToKbnUrl(
+      TAB_STATE_URL_KEY,
+      { tabId: tab.id, tabLabel: 'label' in tab ? tab.label : undefined },
+      { useHash },
+      path
+    );
+  }
+
+  return {
+    app: 'discover',
+    path,
+    state,
+  };
+};
+
+export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
   const {
-    useHash = useHashOriginal,
     filters,
     dataViewId,
     indexPatternId,
     dataViewSpec,
     query,
     refreshInterval,
-    savedSearchId,
     timeRange,
-    searchSessionId,
     columns,
     grid,
     savedQuery,
@@ -44,11 +86,13 @@ export const appLocatorGetLocationCommon = async (
     viewMode,
     hideAggregatedPreview,
     breakdownField,
+    hideChart,
+    sampleSize,
     isAlertResults,
   } = params;
-  const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
+
   const appState: Partial<DiscoverAppState> = {};
-  const queryState: GlobalQueryStateFromUrl = {};
+  const globalState: GlobalQueryStateFromUrl = {};
 
   if (query) appState.query = query;
   if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
@@ -61,34 +105,19 @@ export const appLocatorGetLocationCommon = async (
   if (savedQuery) appState.savedQuery = savedQuery;
   if (sort) appState.sort = sort;
   if (interval) appState.interval = interval;
-  if (timeRange) queryState.time = timeRange;
-  if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
-  if (refreshInterval) queryState.refreshInterval = refreshInterval;
+  if (timeRange) globalState.time = timeRange;
+  if (filters && filters.length) globalState.filters = filters?.filter((f) => isFilterPinned(f));
+  if (refreshInterval) globalState.refreshInterval = refreshInterval;
   if (viewMode) appState.viewMode = viewMode;
   if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
   if (breakdownField) appState.breakdownField = breakdownField;
+  if (typeof hideChart === 'boolean') appState.hideChart = hideChart;
+  if (typeof sampleSize === 'number' && sampleSize > 0) appState.sampleSize = sampleSize;
 
   const state: MainHistoryLocationState = {};
+
   if (dataViewSpec) state.dataViewSpec = dataViewSpec;
   if (isAlertResults) state.isAlertResults = isAlertResults;
 
-  let path = `#/${savedSearchPath}`;
-
-  if (searchSessionId) {
-    path = `${path}?searchSessionId=${searchSessionId}`;
-  }
-
-  if (Object.keys(queryState).length) {
-    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-  }
-
-  if (Object.keys(appState).length) {
-    path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
-  }
-
-  return {
-    app: 'discover',
-    path,
-    state,
-  };
+  return { appState, globalState, state };
 };

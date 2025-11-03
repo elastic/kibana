@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 import {
   EuiLink,
@@ -26,11 +26,11 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '@kbn/index-management-plugin/common';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
-import { PolicyFromES } from '../../../common/types';
+import type { PolicyFromES } from '../../../common/types';
 
 interface Props {
   indexName: string;
@@ -117,6 +117,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
         <Fragment>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount={false}
             style={{ maxWidth: 400 }}
             title={
               <FormattedMessage
@@ -261,6 +262,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
 
           <EuiModalBody>
             <EuiCallOut
+              announceOnMount={false}
               style={{ maxWidth: 400 }}
               title={
                 <FormattedMessage

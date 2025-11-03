@@ -163,6 +163,7 @@ export class EndpointAppContextService {
       licenseService,
       telemetryConfigProvider,
       productFeaturesService,
+      experimentalFeatures,
     } = this.startDependencies;
     const logger = this.createLogger('endpointFleetExtension');
 
@@ -187,7 +188,8 @@ export class EndpointAppContextService {
         licenseService,
         this.setupDependencies.cloud,
         productFeaturesService,
-        telemetryConfigProvider
+        telemetryConfigProvider,
+        experimentalFeatures
       )
     );
 
@@ -195,7 +197,12 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyUpdate',
-      getPackagePolicyUpdateCallback(this, this.setupDependencies.cloud, productFeaturesService)
+      getPackagePolicyUpdateCallback(
+        this,
+        this.setupDependencies.cloud,
+        productFeaturesService,
+        experimentalFeatures
+      )
     );
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
@@ -270,20 +277,16 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    const spaceIdValue = this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-      ? spaceId
-      : DEFAULT_SPACE_ID;
-
     return new EndpointMetadataService(
       this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId: spaceIdValue }),
-      this.getInternalFleetServices(spaceIdValue),
+      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId }),
+      this.getInternalFleetServices(spaceId),
       this.createLogger('endpointMetadata')
     );
   }
 
   /**
-   * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
+   * SpaceId should be defined if wanting go get back an internal client that is scoped to a given space id
    * @param spaceId
    * @param unscoped
    */
@@ -295,10 +298,7 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.fleetServicesFactory.asInternalUser(
-      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined,
-      unscoped
-    );
+    return this.fleetServicesFactory.asInternalUser(spaceId, unscoped);
   }
 
   public getManifestManager(): ManifestManager | undefined {

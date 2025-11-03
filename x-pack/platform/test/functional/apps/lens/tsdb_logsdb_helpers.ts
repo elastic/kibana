@@ -5,9 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { ToolingLog } from '@kbn/tooling-log';
 import moment from 'moment';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

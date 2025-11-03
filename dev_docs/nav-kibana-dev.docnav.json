@@ -298,6 +298,10 @@
         {
           "id": "kibDevDocsChromeRecentlyAccessed",
           "label": "Recently Viewed"
+        },
+        {
+          "id": "kibDevDocsFeedbackSnippet",
+          "label": "Feedback Snippet"
         }
       ]
     },

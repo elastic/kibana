@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMaintenanceWindows } from './use_maintenance_windows';
 
@@ -29,11 +30,17 @@ export const MaintenanceWindowsField = ({
       label: option.title,
     })) ?? [];
 
+  const maintenanceWindowsPlaceholder = i18n.translate(
+    'xpack.synthetics.monitorConfig.maintenanceWindows.placeholder',
+    {
+      defaultMessage: 'Select maintenance windows',
+    }
+  );
+
   return (
     <EuiComboBox<string>
-      placeholder={i18n.translate('xpack.synthetics.monitorConfig.maintenanceWindows.placeholder', {
-        defaultMessage: 'Select maintenance windows',
-      })}
+      placeholder={maintenanceWindowsPlaceholder}
+      aria-label={maintenanceWindowsPlaceholder}
       options={options}
       onChange={(newValue) => {
         onChange(newValue.map((option) => option.value as string));

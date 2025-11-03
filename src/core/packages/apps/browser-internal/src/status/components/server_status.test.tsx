@@ -10,7 +10,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ServerStatus } from './server_status';
-import { StatusState } from '../lib';
+import type { StatusState } from '../lib';
 
 const getStatus = (parts: Partial<StatusState> = {}): StatusState => ({
   id: 'available',

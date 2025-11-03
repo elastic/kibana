@@ -8,25 +8,27 @@
 import type { Document } from '@langchain/core/documents';
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
 import type { AttackDiscovery, DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
-import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common';
+import { DEFEND_INSIGHTS_ID, DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import {
-  getDefaultAssistantGraph,
+import type {
   GetDefaultAssistantGraphParams,
   DefaultAssistantGraph,
 } from './default_assistant_graph/graph';
-import {
+import { getDefaultAssistantGraph } from './default_assistant_graph/graph';
+import type {
   DefaultAttackDiscoveryGraph,
   GetDefaultAttackDiscoveryGraphParams,
-  getDefaultAttackDiscoveryGraph,
 } from '../../attack_discovery/graphs/default_attack_discovery_graph';
-import {
+import { getDefaultAttackDiscoveryGraph } from '../../attack_discovery/graphs/default_attack_discovery_graph';
+import type {
   DefaultDefendInsightsGraph,
   GetDefaultDefendInsightsGraphParams,
-  getDefaultDefendInsightsGraph,
 } from '../../defend_insights/graphs/default_defend_insights_graph';
+import { getDefaultDefendInsightsGraph } from '../../defend_insights/graphs/default_defend_insights_graph';
 
-export type GetAssistantGraph = (params: GetDefaultAssistantGraphParams) => DefaultAssistantGraph;
+export type GetAssistantGraph = (
+  params: GetDefaultAssistantGraphParams
+) => Promise<DefaultAssistantGraph>;
 export type GetAttackDiscoveryGraph = (
   params: GetDefaultAttackDiscoveryGraphParams
 ) => DefaultAttackDiscoveryGraph;
@@ -47,6 +49,7 @@ export interface AttackDiscoveryGraphMetadata {
 export interface DefendInsightsGraphMetadata {
   getDefaultDefendInsightsGraph: GetDefendInsightsGraph;
   graphType: typeof DEFEND_INSIGHTS_ID;
+  insightType: DefendInsightType;
 }
 
 export type GraphMetadata =
@@ -66,9 +69,15 @@ export const ASSISTANT_GRAPH_MAP: Record<string, GraphMetadata> = {
     getDefaultAttackDiscoveryGraph,
     graphType: 'attack-discovery',
   },
-  DefaultDefendInsightsGraph: {
+  DefaultDefendInsightsIncompatibleAntivirusGraph: {
     getDefaultDefendInsightsGraph,
     graphType: DEFEND_INSIGHTS_ID,
+    insightType: DefendInsightType.Enum.incompatible_antivirus,
+  },
+  DefaultDefendInsightsPolicyResponseFailureGraphBar: {
+    getDefaultDefendInsightsGraph,
+    graphType: DEFEND_INSIGHTS_ID,
+    insightType: DefendInsightType.Enum.policy_response_failure,
   },
 };
 

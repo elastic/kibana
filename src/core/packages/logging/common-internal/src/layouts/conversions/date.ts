@@ -9,8 +9,8 @@
 
 import moment from 'moment-timezone';
 import { last } from 'lodash';
-import { LogRecord } from '@kbn/logging';
-import { Conversion } from './types';
+import type { LogRecord } from '@kbn/logging';
+import type { Conversion } from './types';
 
 const dateRegExp = /%date(?:\{(?<format>[^}]+)\})?(?:\{(?<timezone>[A-Za-z/_+-]+)\})?/g;
 

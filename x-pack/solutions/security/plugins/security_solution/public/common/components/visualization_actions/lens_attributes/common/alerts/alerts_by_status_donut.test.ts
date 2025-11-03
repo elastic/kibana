@@ -11,6 +11,8 @@ import { mockExtraFilter, wrapper } from '../../../mocks';
 import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getAlertsByStatusAttributes } from './alerts_by_status_donut';
+import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
@@ -34,6 +36,12 @@ jest.mock('../../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getAlertsByStatusAttributes', () => {
+  beforeAll(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['signal-index'], 'security-solution-my-test'));
+  });
+
   it('should render without extra options', () => {
     const { result } = renderHook(
       () =>

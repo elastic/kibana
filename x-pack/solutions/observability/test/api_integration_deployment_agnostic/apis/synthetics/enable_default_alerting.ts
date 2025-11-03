@@ -6,16 +6,18 @@
  */
 import expect from '@kbn/expect';
 import rawExpect from 'expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { omit } from 'lodash';
-import { HTTPFields, PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { HTTPFields, PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants/settings_defaults';
 
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+
+const TEST_INDEX_CONNECTOR_NAME = 'synthetics-default-alerting-test';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EnableDefaultAlerting', function () {
@@ -23,6 +25,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
     const samlAuth = getService('samlAuth');
+    const alerting = getService('alertingApi');
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
@@ -37,12 +40,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await alerting.deleteAllActionConnectors({ roleAuthc: editorUser });
     });
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       _httpMonitorJson = getFixtureJson('http_monitor');
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await alerting.createIndexConnector({
+        roleAuthc: editorUser,
+        name: TEST_INDEX_CONNECTOR_NAME,
+        indexName: 'synthetics-*',
+      });
     });
 
     beforeEach(async () => {
@@ -58,8 +67,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
+        .send({
+          ...DYNAMIC_SETTINGS_DEFAULTS,
+          defaultConnectors: [TEST_INDEX_CONNECTOR_NAME],
+        })
+        .expect(200);
+    });
+
+    it('does not create the rules when there are no connectors defined', async () => {
+      await supertest
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send(DYNAMIC_SETTINGS_DEFAULTS)
         .expect(200);
+
+      const apiResponse = await supertest
+        .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      expect(apiResponse.body.statusRule).to.be(null);
+      expect(apiResponse.body.tlsRule).to.be(null);
     });
 
     it('returns the created alerted when called', async () => {

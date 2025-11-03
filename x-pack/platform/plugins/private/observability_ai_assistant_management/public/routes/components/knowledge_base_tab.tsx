@@ -8,11 +8,10 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
-  Criteria,
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -31,17 +30,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import {
-  KnowledgeBaseEntry,
-  KnowledgeBaseState,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseInstallationStatusPanel } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_installation_status_panel';
 import { SettingUpKnowledgeBase } from '@kbn/ai-assistant/src/knowledge_base/setting_up_knowledge_base';
 import { InspectKnowledgeBasePopover } from '@kbn/ai-assistant/src/knowledge_base/inspect_knowlegde_base_popover';
 import { KnowledgeBaseReindexingCallout } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_reindexing_callout';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
-import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
+import type { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
+import { categorizeEntries } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
@@ -226,7 +224,7 @@ export function KnowledgeBaseTab() {
     query,
     sortBy,
     sortDirection,
-    kbState: knowledgeBase.status.value?.kbState,
+    inferenceModelState: knowledgeBase.status.value?.inferenceModelState,
   });
 
   const categorizedEntries = categorizeEntries({ entries });
@@ -253,7 +251,7 @@ export function KnowledgeBaseTab() {
     );
   }
 
-  if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
+  if (knowledgeBase.status.value?.inferenceModelState === InferenceModelState.READY) {
     return (
       <>
         <EuiFlexGroup direction="column">

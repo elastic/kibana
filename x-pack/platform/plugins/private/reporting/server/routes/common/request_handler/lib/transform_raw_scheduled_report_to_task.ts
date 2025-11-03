@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { ScheduledReportType } from '../../../../types';
-import { ScheduledReportTaskParamsWithoutSpaceId } from '../../../../lib/tasks';
+import type { SavedObject } from '@kbn/core/server';
+import type { ScheduledReportType } from '../../../../types';
+import type { ScheduledReportTaskParamsWithoutSpaceId } from '../../../../lib/tasks';
 
 export function transformRawScheduledReportToTaskParams(
   rawScheduledReport: SavedObject<ScheduledReportType>

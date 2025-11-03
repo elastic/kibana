@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { convertToLens } from '.';
 import { createPanel, createSeries } from '../lib/__mocks__';
-import { Panel } from '../../../common/types';
+import type { Panel } from '../../../common/types';
 
 const mockConvertToDateHistogramColumn = jest.fn();
 const mockGetMetricsColumns = jest.fn();

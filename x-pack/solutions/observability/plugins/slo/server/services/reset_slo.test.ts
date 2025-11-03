@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
-  ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -28,9 +28,9 @@ import {
   createTransformManagerMock,
 } from './mocks';
 import { ResetSLO } from './reset_slo';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
-import { SLODefinition } from '../domain/models';
+import type { SLORepository } from './slo_repository';
+import type { TransformManager } from './transform_manager';
+import type { SLODefinition } from '../domain/models';
 
 const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
 

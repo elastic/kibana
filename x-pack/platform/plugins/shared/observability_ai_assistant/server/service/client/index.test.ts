@@ -5,7 +5,13 @@
  * 2.0.
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import type { CoreSetup, ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceStart,
+  CoreSetup,
+  ElasticsearchClient,
+  IUiSettingsClient,
+  Logger,
+} from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { waitFor } from '@testing-library/react';
 import { isEmpty, last, merge, repeat, size } from 'lodash';
@@ -13,19 +19,16 @@ import { Subject, Observable } from 'rxjs';
 import { EventEmitter, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
-import { MessageRole, type Message } from '../../../common';
-import {
+import { MessageRole, type Message, CONTEXT_FUNCTION_NAME } from '../../../common';
+import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
-  StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
-import {
-  ChatCompletionEventType as InferenceChatCompletionEventType,
-  ChatCompleteResponse,
-} from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-common';
+import { StreamingChatResponseEventType } from '../../../common/conversation_complete';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-common';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
@@ -108,6 +111,7 @@ describe('Observability AI Assistant client', () => {
     search: jest.fn(),
     index: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
   } as any;
 
   const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
@@ -132,9 +136,11 @@ describe('Observability AI Assistant client', () => {
     getInstructions: jest.fn(),
   } as any;
 
+  const analyticsMock = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+
   let llmSimulator: LlmSimulator;
 
-  function createClient() {
+  function createClient(namespace: string = 'default') {
     jest.resetAllMocks();
 
     // uncomment this line for debugging
@@ -178,6 +184,16 @@ describe('Observability AI Assistant client', () => {
 
     functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
 
+    actionsClientMock.get.mockResolvedValue({
+      id: 'test-connector-id',
+      name: 'Test Connector',
+      actionTypeId: '.gen-ai',
+      config: { apiProvider: 'OpenAI' },
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false,
+    } as any);
+
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,
       core: {} as CoreSetup<ObservabilityAIAssistantPluginStartDependencies>,
@@ -195,6 +211,7 @@ describe('Observability AI Assistant client', () => {
         name: 'johndoe',
       },
       scopes: ['observability'],
+      analytics: analyticsMock,
     });
   }
 
@@ -256,15 +273,15 @@ describe('Observability AI Assistant client', () => {
           });
         });
 
-      stream = observableIntoStream(
-        client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
     });
 
     describe('when streaming the response from the LLM', () => {
@@ -287,9 +304,9 @@ describe('Observability AI Assistant client', () => {
             connectorId: 'foo',
             stream: false,
             system:
-              'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+              'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. DO NOT include any labels or prefixes like "Title:", "**Title:**", or similar. Only the actual title text should be returned. If the conversation content itself suggests a relevant prefix, that is acceptable, but do not add generic labels. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
             functionCalling: 'auto',
-            maxRetries: 0,
+            maxRetries: 1,
             temperature: 0.25,
             toolChoice: expect.objectContaining({
               function: 'title_conversation',
@@ -297,7 +314,7 @@ describe('Observability AI Assistant client', () => {
             tools: expect.objectContaining({
               title_conversation: {
                 description:
-                  'Use this function to title the conversation. Do not wrap the title in quotes',
+                  'Use this function to title the conversation. Return only the actual title text, without any generic labels, quotes, or prefixes like "Title:".',
                 schema: {
                   type: 'object',
                   properties: {
@@ -328,7 +345,7 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
-            maxRetries: 0,
+            maxRetries: 1,
             temperature: 0.25,
             toolChoice: undefined,
             tools: undefined,
@@ -540,16 +557,16 @@ describe('Observability AI Assistant client', () => {
         return {} as any;
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          conversationId: 'my-conversation-id',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        conversationId: 'my-conversation-id',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -632,16 +649,16 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          title: 'My predefined title',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -722,16 +739,16 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          title: 'My predefined title',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -856,7 +873,7 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
-            maxRetries: 0,
+            maxRetries: 1,
             temperature: 0.25,
             toolChoice: 'auto',
             tools: expect.any(Object),
@@ -1017,7 +1034,7 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
-            maxRetries: 0,
+            maxRetries: 1,
             temperature: 0.25,
             toolChoice: 'auto',
             tools: expect.any(Object),
@@ -1161,15 +1178,15 @@ describe('Observability AI Assistant client', () => {
         };
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          persist: false,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        persist: false,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1287,16 +1304,16 @@ describe('Observability AI Assistant client', () => {
         };
       });
 
-      stream = observableIntoStream(
-        client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          title: 'My predefined title',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1375,15 +1392,15 @@ describe('Observability AI Assistant client', () => {
         };
       });
 
-      const stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          persist: false,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        persist: false,
+      });
+
+      const stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1463,16 +1480,16 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      stream = observableIntoStream(
-        await client.complete({
-          connectorId: 'foo',
-          messages: [user('How many alerts do I have?')],
-          functionClient: functionClientMock,
-          signal: new AbortController().signal,
-          title: 'My predefined title',
-          persist: true,
-        })
-      );
+      const { response$ } = client.complete({
+        connectorId: 'foo',
+        messages: [user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      stream = observableIntoStream(response$);
 
       dataHandler = jest.fn();
 
@@ -1536,7 +1553,7 @@ describe('Observability AI Assistant client', () => {
         title: 'My predefined title',
         persist: false,
       })
-      .subscribe(() => {}); // To trigger call to chat
+      .response$.subscribe(() => {}); // To trigger call to chat
     await nextTick();
 
     expect(chatSpy.mock.calls[0][1].systemMessage).toEqual(EXPECTED_STORED_SYSTEM_MESSAGE);
@@ -1554,7 +1571,7 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      const complete$ = await client.complete({
+      const { response$ } = client.complete({
         connectorId: 'foo',
         messages: [user('Can you call the my_action function?')],
         functionClient: new ChatFunctionClient([
@@ -1584,7 +1601,7 @@ describe('Observability AI Assistant client', () => {
       const messages: Message[] = [];
 
       completePromise = new Promise<Message[]>((resolve, reject) => {
-        complete$.subscribe({
+        response$.subscribe({
           next: (event) => {
             if (event.type === StreamingChatResponseEventType.MessageAdd) {
               messages.push(event.message);
@@ -1647,6 +1664,127 @@ describe('Observability AI Assistant client', () => {
 
         expect(messages[2].message.content).toBe('Looks like the function call failed');
       });
+    });
+  });
+  describe('when deleting a conversation', () => {
+    beforeEach(async () => {
+      client = createClient();
+
+      internalUserEsClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'conversation-1',
+              _index: 'conversations',
+              _source: {
+                '@timestamp': new Date().toISOString(),
+                conversation: { id: 'conversation-1', title: 'Test' },
+                user: { name: 'johndoe' },
+                messages: [],
+              },
+            },
+          ],
+        },
+      } as any);
+
+      internalUserEsClientMock.delete.mockResolvedValue({} as any);
+
+      await client.delete('conversation-1');
+    });
+
+    it('reports analytics event', () => {
+      expect(analyticsMock.reportEvent).toHaveBeenCalledWith(
+        'observability_ai_assistant_conversation_delete',
+        expect.objectContaining({})
+      );
+    });
+  });
+  describe('when duplicating a conversation', () => {
+    beforeEach(async () => {
+      client = createClient();
+
+      internalUserEsClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'conversation-1',
+              _index: 'conversations',
+              _source: {
+                '@timestamp': new Date().toISOString(),
+                conversation: { id: 'conversation-1', title: 'Test Conversation' },
+                user: { name: 'johndoe' },
+                messages: [],
+                public: false,
+                archived: false,
+              },
+            },
+          ],
+        },
+      } as any);
+
+      internalUserEsClientMock.index.mockResolvedValue({ _id: 'new-conversation-id' } as any);
+
+      await client.duplicateConversation('conversation-1');
+    });
+
+    it('reports analytics event', () => {
+      expect(analyticsMock.reportEvent).toHaveBeenCalledWith(
+        'observability_ai_assistant_conversation_duplicate',
+        expect.objectContaining({})
+      );
+    });
+  });
+  describe('space-aware links', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      (functionClientMock as any).registerInstruction = jest.fn();
+      inferenceClientMock.chatComplete.mockImplementation(
+        () => new Observable((sub) => sub.complete())
+      );
+    });
+
+    const runWithNamespace = async (namespace: string) => {
+      // client = createClient(namespace);
+      client = createClient();
+      (client as any).dependencies.namespace = namespace;
+      client
+        .complete({
+          functionClient: functionClientMock,
+          connectorId: 'foo',
+          messages: [],
+          signal: new AbortController().signal,
+          persist: true,
+          kibanaPublicUrl: 'http://localhost:5601',
+          title: 'Generated title',
+        })
+        .response$.subscribe({});
+
+      await nextTick();
+    };
+
+    it('generates a link without space segment for default space', async () => {
+      await runWithNamespace('default');
+
+      expect(functionClientMock.registerInstruction).toHaveBeenCalled();
+      expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
+        expect.stringContaining('http://localhost:5601/app/observabilityAIAssistant/conversations/')
+      );
+      expect(functionClientMock.registerInstruction).not.toHaveBeenCalledWith(
+        expect.stringContaining('/s/')
+      );
+    });
+
+    it('generates a link with space segment for non-default space', async () => {
+      const space = 'myspace';
+      await runWithNamespace('myspace');
+
+      expect(functionClientMock.registerInstruction).toHaveBeenCalled();
+      expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `http://localhost:5601/s/${space}/app/observabilityAIAssistant/conversations/`
+        )
+      );
     });
   });
 });

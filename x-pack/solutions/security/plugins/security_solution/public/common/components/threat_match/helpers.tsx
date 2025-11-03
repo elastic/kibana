@@ -7,10 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import type { ThreatMap } from '@kbn/securitysolution-io-ts-alerting-types';
-
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
+
+import type {
+  ThreatMapping,
+  ThreatMappingEntry,
+} from '../../../../common/api/detection_engine/model/rule_schema';
+
+import type { FormattedEntry } from './types';
 
 /**
  * Formats the entry into one that is easily usable for the UI.
@@ -18,7 +22,7 @@ import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './type
 export const getFormattedEntry = (
   dataView: DataViewBase,
   threatDataView: DataViewBase,
-  item: Entry,
+  item: ThreatMappingEntry,
   itemIndex: number,
   uuidGen: () => string = uuidv4
 ): FormattedEntry => {
@@ -46,6 +50,7 @@ export const getFormattedEntry = (
       type: 'string',
     },
     entryIndex: itemIndex,
+    negate: item.negate ?? false, // Default to false if negate is not provided
   };
 };
 
@@ -58,7 +63,7 @@ export const getFormattedEntry = (
 export const getFormattedEntries = (
   indexPattern: DataViewBase,
   threatIndexPatterns: DataViewBase,
-  entries: Entry[]
+  entries: ThreatMappingEntry[]
 ): FormattedEntry[] => {
   return entries.reduce<FormattedEntry[]>((acc, item, index) => {
     const newItemEntry = getFormattedEntry(indexPattern, threatIndexPatterns, item, index);
@@ -74,9 +79,9 @@ export const getFormattedEntries = (
  *
  */
 export const getUpdatedEntriesOnDelete = (
-  item: ThreatMapEntries,
+  item: ThreatMapping[number],
   entryIndex: number
-): ThreatMapEntries => {
+): ThreatMapping[number] => {
   return {
     ...item,
     entries: [...item.entries.slice(0, entryIndex), ...item.entries.slice(entryIndex + 1)],
@@ -93,7 +98,7 @@ export const getUpdatedEntriesOnDelete = (
 export const getEntryOnFieldChange = (
   item: FormattedEntry,
   newField: DataViewFieldBase
-): { updatedEntry: Entry; index: number } => {
+): { updatedEntry: ThreatMappingEntry; index: number } => {
   const { entryIndex } = item;
   return {
     updatedEntry: {
@@ -101,7 +106,8 @@ export const getEntryOnFieldChange = (
       field: newField != null ? newField.name : '',
       type: 'mapping',
       value: item.value != null ? item.value.name : '',
-    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
+      negate: item.negate ?? false,
+    } as ThreatMappingEntry, // Cast to ThreatMappingEntry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
 };
@@ -116,7 +122,7 @@ export const getEntryOnFieldChange = (
 export const getEntryOnThreatFieldChange = (
   item: FormattedEntry,
   newField: DataViewFieldBase
-): { updatedEntry: Entry; index: number } => {
+): { updatedEntry: ThreatMappingEntry; index: number } => {
   const { entryIndex } = item;
   return {
     updatedEntry: {
@@ -124,26 +130,46 @@ export const getEntryOnThreatFieldChange = (
       field: item.field != null ? item.field.name : '',
       type: 'mapping',
       value: newField != null ? newField.name : '',
-    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
+      negate: item.negate ?? false,
+    } as ThreatMappingEntry, // Cast to ThreatMappingEntry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
 };
 
-export const createAndNewEntryItem = (): EmptyEntry => {
+export const getEntryOnMatchChange = (
+  item: FormattedEntry,
+  newNegate: boolean
+): { updatedEntry: ThreatMappingEntry & { id: string }; index: number } => {
+  const { entryIndex, field, value, id } = item;
+  return {
+    updatedEntry: {
+      id,
+      field: field?.name ?? '',
+      type: 'mapping',
+      value: value?.name ?? '',
+      negate: newNegate ?? false,
+    },
+    index: entryIndex,
+  };
+};
+
+export const createAndNewEntryItem = (): ThreatMappingEntry => {
   return addIdToItem({
     field: '',
     type: 'mapping',
     value: '',
+    negate: false,
   });
 };
 
-export const createOrNewEntryItem = (): ThreatMap => {
+export const createOrNewEntryItem = (): ThreatMapping[number] => {
   return addIdToItem({
     entries: [
       addIdToItem({
         field: '',
         type: 'mapping',
         value: '',
+        negate: false,
       }),
     ],
   });
@@ -154,7 +180,7 @@ export const createOrNewEntryItem = (): ThreatMap => {
  * or an empty value.
  * @param items The items to check if we have an empty entries.
  */
-export const containsInvalidItems = (items: ThreatMapEntries[]): boolean => {
+export const containsInvalidItems = (items: ThreatMapping): boolean => {
   return items.some((item) =>
     item.entries.some((subEntry) => subEntry.field === '' || subEntry.value === '')
   );
@@ -164,7 +190,7 @@ export const containsInvalidItems = (items: ThreatMapEntries[]): boolean => {
  * Given a list of items checks if we have a single empty entry and if we do returns true.
  * @param items The items to check if we have a single empty entry.
  */
-export const singleEntryThreat = (items: ThreatMapEntries[]): boolean => {
+export const singleEntryThreat = (items: ThreatMapping): boolean => {
   return (
     items.length === 1 &&
     items[0].entries.length === 1 &&

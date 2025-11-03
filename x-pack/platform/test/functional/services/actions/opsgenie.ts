@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { ActionsCommon } from './common';
 
 export interface ConnectorFormFields {
@@ -16,7 +16,7 @@ export interface ConnectorFormFields {
 }
 
 export function ActionsOpsgenieServiceProvider(
-  { getService, getPageObject }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { DataViewsServicePublicMethods } from './data_views';
-import { HasDataService } from '../common';
+import type { DataViewsServicePublicMethods } from './data_views';
+import type { HasDataService } from '../common';
 
 export enum INDEX_PATTERN_TYPE {
   ROLLUP = 'rollup',
@@ -150,6 +150,7 @@ export interface MatchedItem {
     aliases?: string[];
     attributes?: ResolveIndexResponseItemIndexAttrs[];
     data_stream?: string;
+    mode?: string;
   };
 }
 

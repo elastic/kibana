@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import agent, { Span } from 'elastic-apm-node';
+import type { Span } from 'elastic-apm-node';
+import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
-import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
-import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import type { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
+import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
-import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { AIMessageChunk } from '@langchain/core/messages';
-import { AgentFinish } from 'langchain/agents';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type {
+  ExecuteConnectorRequestBody,
+  InterruptValue,
+  TraceData,
+} from '@kbn/elastic-assistant-common';
+import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../telemetry/event_based_telemetry';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
-import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
-import { GraphInputs } from './types';
+import type { DefaultAssistantGraph } from './graph';
+import { DEFAULT_ASSISTANT_GRAPH_ID } from './graph';
+import type { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
-  inferenceChatModelDisabled?: boolean;
   isEnabledKnowledgeBase: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
@@ -54,7 +59,6 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
-  inferenceChatModelDisabled = false,
   isEnabledKnowledgeBase,
   logger,
   onLlmResponse,
@@ -74,144 +78,99 @@ export const streamGraph = async ({
   } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
 
   let didEnd = false;
-  const handleStreamEnd = (finalResponse: string, isError = false) => {
+
+  const closeStream = (args: { errorMessage: string; isError: true } | { isError: false }) => {
     if (didEnd) {
       return;
     }
-    if (isError) {
+
+    if (args.isError) {
       telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
         actionTypeId: request.body.actionTypeId,
         model: request.body.model,
-        errorMessage: finalResponse,
+        errorMessage: args.errorMessage,
         assistantStreamingEnabled: true,
         isEnabledKnowledgeBase,
         errorLocation: 'handleStreamEnd',
       });
     }
-    if (onLlmResponse) {
-      onLlmResponse(
-        finalResponse,
-        {
-          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
-          traceId: streamingSpan?.ids?.['trace.id'],
-        },
-        isError
-      ).catch(() => {});
-    }
+
     streamEnd();
     didEnd = true;
+
     if ((streamingSpan && !streamingSpan?.outcome) || streamingSpan?.outcome === 'unknown') {
-      streamingSpan.outcome = isError ? 'failure' : 'success';
+      streamingSpan.outcome = args.isError ? 'failure' : 'success';
     }
     streamingSpan?.end();
   };
 
-  // Stream is from tool calling agent or structured chat agent
-  if (
-    !inferenceChatModelDisabled ||
-    inputs.isOssModel ||
-    inputs?.llmType === 'bedrock' ||
-    inputs?.llmType === 'gemini'
-  ) {
-    const stream = await assistantGraph.streamEvents(
-      inputs,
-      {
-        callbacks: [
-          apmTracer,
-          ...(traceOptions?.tracers ?? []),
-          ...(telemetryTracer ? [telemetryTracer] : []),
-        ],
-        runName: DEFAULT_ASSISTANT_GRAPH_ID,
-        tags: traceOptions?.tags ?? [],
-        version: 'v2',
-        streamMode: 'values',
-        recursionLimit: inputs?.isOssModel ? 50 : 25,
-      },
-      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
-    );
+  const handleFinalContent = (args: {
+    finalResponse: string;
+    isError: boolean;
+    interruptValue?: InterruptValue;
+  }) => {
+    if (onLlmResponse) {
+      onLlmResponse({
+        content: args.finalResponse,
+        interruptValue: args.interruptValue,
+        traceData: {
+          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
+          traceId: streamingSpan?.ids?.['trace.id'],
+        },
+        isError: args.isError,
+      }).catch(() => {});
+    }
+  };
 
-    const pushStreamUpdate = async () => {
-      for await (const { event, data, tags } of stream) {
-        if ((tags || []).includes(AGENT_NODE_TAG)) {
-          if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
-            const msg = data.chunk as AIMessageChunk;
-            if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
-              push({ payload: msg.content as string, type: 'content' });
-            }
-          }
-
-          if (
-            event === 'on_chat_model_end' &&
-            !data.output.lc_kwargs?.tool_calls?.length &&
-            !didEnd
-          ) {
-            handleStreamEnd(data.output.content);
-          }
-        }
-      }
-    };
-
-    pushStreamUpdate().catch((err) => {
-      logger.error(`Error streaming graph: ${err}`);
-      handleStreamEnd(err.message, true);
-    });
-
-    return responseWithHeaders;
-  }
-
-  // Stream is from openai functions agent
-  let finalMessage = '';
-  const stream = assistantGraph.streamEvents(
-    inputs,
-    {
-      callbacks: [
-        apmTracer,
-        ...(traceOptions?.tracers ?? []),
-        ...(telemetryTracer ? [telemetryTracer] : []),
-      ],
-      runName: DEFAULT_ASSISTANT_GRAPH_ID,
-      streamMode: 'values',
-      tags: traceOptions?.tags ?? [],
-      version: 'v1',
+  const stream = await assistantGraph.streamEvents(inputs, {
+    callbacks: [
+      apmTracer,
+      ...(traceOptions?.tracers ?? []),
+      ...(telemetryTracer ? [telemetryTracer] : []),
+    ],
+    runName: DEFAULT_ASSISTANT_GRAPH_ID,
+    tags: traceOptions?.tags ?? [],
+    version: 'v2',
+    streamMode: ['values', 'debug'],
+    recursionLimit: inputs?.isOssModel ? 50 : 25,
+    configurable: {
+      thread_id: inputs.threadId,
     },
-    inputs?.provider === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
-  );
+  });
 
   const pushStreamUpdate = async () => {
     for await (const { event, data, tags } of stream) {
       if ((tags || []).includes(AGENT_NODE_TAG)) {
-        if (event === 'on_llm_stream') {
-          const chunk = data?.chunk;
-          const msg = chunk.message;
-          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-            /* empty */
-          } else if (!didEnd) {
-            push({ payload: msg.content, type: 'content' });
-            finalMessage += msg.content;
+        if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
+          const msg = data.chunk as AIMessageChunk;
+          if (!didEnd && !msg.tool_call_chunks?.length && msg.content && msg.content.length) {
+            push({ payload: msg.content as string, type: 'content' });
           }
-        }
-
-        if (event === 'on_llm_end' && !didEnd) {
-          const generation = data.output?.generations[0][0];
-          if (
-            // if generation is null, an error occurred - do nothing and let error handling complete the stream
-            generation != null &&
-            // no finish_reason means the stream was aborted
-            (!generation?.generationInfo?.finish_reason ||
-              generation?.generationInfo?.finish_reason === 'stop')
-          ) {
-            handleStreamEnd(
-              generation?.text && generation?.text.length ? generation?.text : finalMessage
-            );
-          }
+        } else if (
+          event === 'on_chat_model_end' &&
+          !data.output.lc_kwargs?.tool_calls?.length &&
+          !didEnd
+        ) {
+          handleFinalContent({ finalResponse: data.output.content, isError: false });
+        } else if (
+          // This is the end of one model invocation but more message will follow as there are tool calls. If this chunk contains text content, add a newline separator to the stream to visually separate the chunks.
+          event === 'on_chat_model_end' &&
+          data.output.lc_kwargs?.tool_calls?.length &&
+          (data.chunk?.content || data.output?.content) &&
+          !didEnd
+        ) {
+          push({ payload: '\n\n' as string, type: 'content' });
         }
       }
     }
+
+    closeStream({ isError: false });
   };
 
   pushStreamUpdate().catch((err) => {
     logger.error(`Error streaming graph: ${err}`);
-    handleStreamEnd(err.message, true);
+    handleFinalContent({ finalResponse: err.message, isError: true });
+    closeStream({ isError: true, errorMessage: err.message });
   });
 
   return responseWithHeaders;
@@ -268,11 +227,18 @@ export const invokeGraph = async ({
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
       recursionLimit: inputs?.isOssModel ? 50 : 25,
+      configurable: {
+        thread_id: inputs.threadId,
+      },
     });
-    const output = (result.agentOutcome as AgentFinish).returnValues.output;
-    const conversationId = result.conversation?.id;
+    const lastMessage = result.messages[result.messages.length - 1];
+    const output = lastMessage.text;
+    const conversationId = result.conversationId;
     if (onLlmResponse) {
-      await onLlmResponse(output, traceData);
+      await onLlmResponse({
+        content: output,
+        traceData,
+      });
     }
 
     return { output, traceData, conversationId };

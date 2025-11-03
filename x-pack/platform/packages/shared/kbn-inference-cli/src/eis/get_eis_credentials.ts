@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 import execa from 'execa';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { pickBy, mapKeys } from 'lodash';
 
 class VaultUnavailableError extends Error {

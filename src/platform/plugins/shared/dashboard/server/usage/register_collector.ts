@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { collectDashboardTelemetry, DashboardCollectorData } from './dashboard_telemetry';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { DashboardCollectorData } from './dashboard_telemetry';
+import { collectDashboardTelemetry } from './dashboard_telemetry';
 
 export function registerDashboardUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -108,6 +109,15 @@ export function registerDashboardUsageCollector(
               description:
                 'Collection of telemetry metrics that count the number of control groups which have their labels in this position',
             },
+          },
+        },
+      },
+      sections: {
+        total: {
+          type: 'long',
+          _meta: {
+            description:
+              'Collection of telemetry metrics that count the number of collapsible sections on all dashboards',
           },
         },
       },

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiCheckbox, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 
-import { PolicyFromES } from '../../../../../common/types';
+import type { PolicyFromES } from '../../../../../common/types';
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';
 import { deletePolicy } from '../../../services/api';
@@ -89,6 +89,7 @@ export class ConfirmDelete extends Component<Props> {
       >
         {isManagedPolicy ? (
           <EuiCallOut
+            announceOnMount={false}
             title={
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.deletePolicyModal.proceedWithCautionCallOutTitle"

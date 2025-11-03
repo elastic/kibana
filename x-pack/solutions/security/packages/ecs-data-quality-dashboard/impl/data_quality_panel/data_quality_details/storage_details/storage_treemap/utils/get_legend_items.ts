@@ -6,8 +6,8 @@
  */
 import { orderBy } from 'lodash/fp';
 
-import { PatternRollup } from '../../../../types';
-import { FlattenedBucket, LegendItem } from '../../types';
+import type { PatternRollup } from '../../../../types';
+import type { FlattenedBucket, LegendItem } from '../../types';
 import { getFillColor } from './get_fill_color';
 import { getPatternDocsCount, getPatternSizeInBytes } from './stats';
 

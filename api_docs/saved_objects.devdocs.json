@@ -51,15 +51,43 @@
         "parentPluginId": "savedObjects",
         "id": "def-public.SavedObjectSaveModal",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectSaveModal",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<Omit<Props, \"theme\"> & React.RefAttributes<Omit<Props, \"theme\">>>"
+          "React.ForwardRefExoticComponent<Omit<Props<void>, \"theme\"> & React.RefAttributes<Omit<Props<void>, \"theme\">>>"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "presentationUtil",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/save_modal.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/save_modal.tsx"
+          }
+        ],
         "returnComment": [],
         "children": [
           {
@@ -128,17 +156,187 @@
       },
       {
         "parentPluginId": "savedObjects",
+        "id": "def-public.SavedObjectSaveModalWithSaveResult",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "SavedObjectSaveModalWithSaveResult",
+        "description": [
+          "\nThis is a workaround for using this directly with the `showSaveModal` method.\n\nThe `showSaveModal` method wraps and calls these props from outside but this modal\ndoes not require the `SaveResult` to be returned from `onSave`.\n"
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<Omit<Props<",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SaveResult",
+            "text": "SaveResult"
+          },
+          ">, \"theme\"> & React.RefAttributes<Omit<Props<",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SaveResult",
+            "text": "SaveResult"
+          },
+          ">, \"theme\">>>"
+        ],
+        "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/save_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/save_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
+          }
+        ],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectSaveModalWithSaveResult.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
         "id": "def-public.showSaveModal",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "showSaveModal",
         "description": [],
         "signature": [
-          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
+          "(saveModal: React.ReactElement<",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.ShowSaveModalMinimalSaveModalProps",
+            "text": "ShowSaveModalMinimalSaveModalProps"
+          },
+          ", string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/utils/get_top_nav_config.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/utils/get_top_nav_config.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/top_nav_config.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/top_nav_config.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/open_save_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/open_save_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/services/save_modal.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/services/save_modal.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "savedObjects",
@@ -148,7 +346,15 @@
             "label": "saveModal",
             "description": [],
             "signature": [
-              "React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.ShowSaveModalMinimalSaveModalProps",
+                "text": "ShowSaveModalMinimalSaveModalProps"
+              },
+              ", string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,
@@ -414,7 +620,15 @@
                 "section": "def-public.OnSaveProps",
                 "text": "OnSaveProps"
               },
-              " & { returnToOrigin: boolean; }) => void"
+              " & { returnToOrigin: boolean; }) => Promise<",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SaveResult",
+                "text": "SaveResult"
+              },
+              ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
@@ -1389,10 +1603,10 @@
           },
           {
             "parentPluginId": "savedObjects",
-            "id": "def-public.SaveModalState.isLoading",
+            "id": "def-public.SaveModalState.isSaving",
             "type": "boolean",
             "tags": [],
-            "label": "isLoading",
+            "label": "isSaving",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
@@ -1419,6 +1633,78 @@
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-public.ShowSaveModalMinimalSaveModalProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ShowSaveModalMinimalSaveModalProps",
+        "description": [
+          "\nMinimum props expected for model components passed to `showSaveModal`"
+        ],
+        "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.ShowSaveModalMinimalSaveModalProps.onSave",
+            "type": "Function",
+            "tags": [],
+            "label": "onSave",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => Promise<",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SaveResult",
+                "text": "SaveResult"
+              },
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.ShowSaveModalMinimalSaveModalProps.onSave.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.ShowSaveModalMinimalSaveModalProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

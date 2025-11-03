@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { checkClusterSettings } from '.';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 
 describe('Elasticsearch Cluster Settings', () => {
   const makeResponse = (

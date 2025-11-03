@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
 import { EmbeddableConsole } from './application/containers/embeddable';
-import {
+import type {
   AppSetupUIPluginDependencies,
   AppStartUIPluginDependencies,
   ClientConfigType,

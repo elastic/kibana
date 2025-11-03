@@ -8,23 +8,20 @@
  */
 
 import { mapValues } from 'lodash';
-import { DatatableRow } from '@kbn/expressions-plugin/common';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { isDataLayer } from './visualization';
-import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
-import {
+import type { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
+import type {
   LayerAccessorsTitles,
   LayerFieldFormats,
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from './layers';
-import {
-  DatatablesWithFormatInfo,
-  DatatableWithFormatInfo,
-  hasMultipleLayersWithSplits,
-} from './data_layers';
+import type { DatatablesWithFormatInfo, DatatableWithFormatInfo } from './data_layers';
+import { hasMultipleLayersWithSplits } from './data_layers';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 

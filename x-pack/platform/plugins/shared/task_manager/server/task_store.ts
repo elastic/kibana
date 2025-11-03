@@ -37,6 +37,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
+import type { IBasePath } from '@kbn/core/server';
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
@@ -82,6 +83,7 @@ export interface StoreOpts {
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
+  basePath: IBasePath;
 }
 
 export interface SearchOpts {
@@ -114,6 +116,7 @@ export interface FetchResult {
 
 export interface BulkUpdateOpts {
   validate: boolean;
+  mergeAttributes?: boolean;
 }
 
 export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
@@ -142,7 +145,6 @@ export class TaskStore {
 
   private esClient: ElasticsearchClient;
   private esoClient?: EncryptedSavedObjectsClient;
-  private esClientWithoutRetries: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private savedObjectsService: SavedObjectsServiceStart;
@@ -153,6 +155,7 @@ export class TaskStore {
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
+  private basePath: IBasePath;
 
   /**
    * Constructs a new TaskStore.
@@ -178,16 +181,12 @@ export class TaskStore {
       definitions: opts.definitions,
       allowReadingInvalidState: opts.allowReadingInvalidState,
     });
-    this.esClientWithoutRetries = opts.esClient.child({
-      // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
-      // The poller doesn't need retry logic because it will try again at the next polling cycle
-      maxRetries: 0,
-    });
     this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
+    this.basePath = opts.basePath;
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -230,7 +229,12 @@ export class TaskStore {
 
     let userScopeAndApiKey;
     try {
-      userScopeAndApiKey = await getApiKeyAndUserScope(taskInstances, request, this.security);
+      userScopeAndApiKey = await getApiKeyAndUserScope(
+        taskInstances,
+        request,
+        this.security,
+        this.basePath
+      );
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -423,6 +427,7 @@ export class TaskStore {
     try {
       savedObjects = await soClient.bulkCreate<SerializedConcreteTaskInstance>(objects, {
         refresh: false,
+        overwrite: true,
       });
       this.adHocTaskCounter.increment(
         taskInstances.filter((task) => {
@@ -514,7 +519,7 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate }: BulkUpdateOpts
+    { validate, mergeAttributes = true }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
@@ -527,6 +532,7 @@ export class TaskStore {
             id: doc.id,
             version: doc.version,
             attributes: taskInstanceToAttributes(taskInstance, doc.id),
+            mergeAttributes,
           });
         } catch (e) {
           this.logger.error(
@@ -782,11 +788,14 @@ export class TaskStore {
   public async bulkGetVersions(ids: string[]): Promise<ConcreteTaskInstanceVersion[]> {
     let taskVersions: estypes.MgetResponse<never>;
     try {
-      taskVersions = await this.esClientWithoutRetries.mget<never>({
-        index: this.index,
-        _source: false,
-        ids,
-      });
+      taskVersions = await this.esClient.mget<never>(
+        {
+          index: this.index,
+          _source: false,
+          ids,
+        },
+        { retryOnTimeout: false }
+      );
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -845,11 +854,14 @@ export class TaskStore {
     );
     const searches = queries.flatMap((query) => [{}, query]);
 
-    const result = await this.esClientWithoutRetries.msearch<SavedObjectsRawDoc['_source']>({
-      index: this.index,
-      ignore_unavailable: true,
-      searches,
-    });
+    const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
+      {
+        index: this.index,
+        ignore_unavailable: true,
+        searches,
+      },
+      { retryOnTimeout: false }
+    );
     const { responses } = result;
 
     const versionMap = this.createVersionMap([]);
@@ -882,13 +894,16 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
-      const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
-        index: this.index,
-        ignore_unavailable: true,
-        ...opts,
-        query,
-        ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
-      });
+      const result = await this.esClient.search<SavedObjectsRawDoc['_source']>(
+        {
+          index: this.index,
+          ignore_unavailable: true,
+          ...opts,
+          query,
+          ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
+        },
+        { retryOnTimeout: false }
+      );
 
       const {
         hits: { hits: tasks },
@@ -982,7 +997,7 @@ export class TaskStore {
     const { sort, ...rest } = opts;
     try {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
+      const { total, updated, version_conflicts } = await this.esClient.updateByQuery(
         {
           index: this.index,
           ignore_unavailable: true,
@@ -995,7 +1010,7 @@ export class TaskStore {
           // However, this one is using a "body" format?
           body: { sort },
         },
-        { requestTimeout: this.requestTimeouts.update_by_query }
+        { requestTimeout: this.requestTimeouts.update_by_query, retryOnTimeout: false }
       );
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(

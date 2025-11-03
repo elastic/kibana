@@ -7,14 +7,12 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
+import type { AddUploadedLookups } from '../../../../../../../common/components/migration_steps/types';
+import { LookupsFileUpload } from '../../../../../../../common/components';
+import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
-import type {
-  RuleMigrationResourceData,
-  RuleMigrationTaskStats,
-} from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { AddUploadedLookups } from '../../lookups_data_input';
+import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import { LookupsFileUpload } from './lookups_file_upload';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
@@ -30,7 +28,7 @@ export const useLookupsFileUploadStep = ({
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
 
   const upsertMigrationResources = useCallback(
-    (lookupsFromFile: RuleMigrationResourceData[]) => {
+    (lookupsFromFile: SiemMigrationResourceData[]) => {
       if (lookupsFromFile.length === 0) {
         return; // No lookups provided
       }

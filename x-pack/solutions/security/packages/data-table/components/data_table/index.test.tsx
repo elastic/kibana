@@ -18,7 +18,7 @@ import { defaultHeaders } from '../../mock/header';
 import { mockGlobalState } from '../../mock/global_state';
 import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { TestProviders } from '../../mock/test_providers';
-import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
+import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
 import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 

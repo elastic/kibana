@@ -9,7 +9,7 @@ import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { reducer, initialState } from './common/api_request_reducer';
+import { reducer, initialState } from '../../../common/service';
 
 export const GET_INTEGRATIONS_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.getIntegrationsError',

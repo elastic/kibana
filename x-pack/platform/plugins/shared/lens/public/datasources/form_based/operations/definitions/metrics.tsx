@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   AVG_ID,
@@ -25,7 +24,17 @@ import {
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
+import type {
+  AvgIndexPatternColumn,
+  BaseIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MedianIndexPatternColumn,
+  MetricColumn,
+  MinIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
+  SumIndexPatternColumn,
+} from '@kbn/lens-common';
+import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -33,23 +42,10 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import {
-  FieldBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-  ValueFormatConfig,
-} from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
-
-type MetricColumn<T> = FieldBasedIndexPatternColumn & {
-  operationType: T;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
-};
 
 const typeToFn: Record<string, string> = {
   min: 'aggMin',
@@ -181,12 +177,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    getAdvancedOptions: ({
-      layer,
-      columnId,
-      currentColumn,
-      paramEditorUpdater,
-    }: ParamEditorProps<T>) => {
+    getAdvancedOptions: ({ layer, columnId, currentColumn, paramEditorUpdater, euiTheme }) => {
       if (!hideZeroOption) return [];
       return [
         {
@@ -202,7 +193,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
               }
               labelProps={{
                 style: {
-                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                  fontWeight: euiTheme.font.weight.medium,
                 },
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}
@@ -257,13 +248,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;
 }
-
-export type SumIndexPatternColumn = MetricColumn<'sum'>;
-export type AvgIndexPatternColumn = MetricColumn<'average'>;
-export type StandardDeviationIndexPatternColumn = MetricColumn<'standard_deviation'>;
-export type MinIndexPatternColumn = MetricColumn<'min'>;
-export type MaxIndexPatternColumn = MetricColumn<'max'>;
-export type MedianIndexPatternColumn = MetricColumn<'median'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   type: MIN_ID,

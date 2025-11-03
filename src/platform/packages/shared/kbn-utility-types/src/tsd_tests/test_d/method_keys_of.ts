@@ -8,7 +8,7 @@
  */
 
 import { expectType } from 'tsd';
-import { MethodKeysOf } from '../../..';
+import type { MethodKeysOf } from '../../..';
 
 class Test {
   public name: string = '';

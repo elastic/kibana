@@ -12,11 +12,11 @@ import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { TimeRange } from '@kbn/es-query';
-import { PanelPackage } from '@kbn/presentation-containers';
+import type { TimeRange } from '@kbn/es-query';
+import type { PanelPackage } from '@kbn/presentation-containers';
 
-import { ViewMode } from '@kbn/presentation-publishing';
-import {
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type {
   MockDashboardApi,
   MockSerializedDashboardState,
   MockedDashboardPanelMap,

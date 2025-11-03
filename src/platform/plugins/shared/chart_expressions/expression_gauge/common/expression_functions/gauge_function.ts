@@ -8,8 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { GaugeExpressionFunctionDefinition, GaugeRenderProps } from '../types';
+import { validateAccessor } from '@kbn/chart-expressions-common';
+
+import { prepareLogTable } from '@kbn/visualizations-common';
+import type { GaugeExpressionFunctionDefinition, GaugeRenderProps } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
   GaugeColorModes,

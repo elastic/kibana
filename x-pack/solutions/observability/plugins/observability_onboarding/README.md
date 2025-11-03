@@ -78,16 +78,16 @@ yarn test:ftr:runner --config ./x-pack/solutions/observability/test/observabilit
 
 ```sh
 # start server
-yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
 
 # run tests
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/onboarding/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/onboarding/index.ts
 ```
 
 ##### Running Individual Tests
 
 ```sh
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/onboarding/index.ts/$1
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/onboarding/index.ts/$1
 ```
 
 ### Playwright tests (Scout)

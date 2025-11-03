@@ -17,8 +17,8 @@ import type {
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { Required, ValuesType } from 'utility-types';
-import { DedotObject } from '@kbn/utility-types';
+import type { Required, ValuesType } from 'utility-types';
+import type { DedotObject } from '@kbn/utility-types';
 import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 

@@ -9,7 +9,7 @@
 
 import { layeredXyVisFunction } from '.';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import { sampleArgs, sampleExtendedLayer } from '../__mocks__';
+import { sampleArgs, sampleExtendedLayer } from '../test_utils';
 import { XY_VIS } from '../constants';
 
 describe('layeredXyVis', () => {

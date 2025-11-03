@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { DataViewField, DataView, RuntimeType } from '../shared_imports';
+import type { DataViewField, DataView, RuntimeType } from '../shared_imports';
 import type { Field, RuntimeFieldPainlessError } from '../types';
 
 export const deserializeField = (dataView: DataView, field?: DataViewField): Field | undefined => {

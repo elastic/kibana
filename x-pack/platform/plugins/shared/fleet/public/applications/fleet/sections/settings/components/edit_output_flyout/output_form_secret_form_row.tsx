@@ -13,11 +13,11 @@ import {
   EuiFormRow,
   type EuiFormRowProps,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -136,14 +136,13 @@ export const SecretFormRow: React.FC<{
       &nbsp;
       {title}
       &nbsp;
-      <EuiToolTip
+      <EuiIconTip
         content={i18n.translate('xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip', {
           defaultMessage:
             'This value will be stored as a secret, meaning once saved the value cannot be viewed again',
         })}
-      >
-        <EuiIcon type="question" />
-      </EuiToolTip>
+        type="question"
+      />
     </>
   );
 
@@ -151,7 +150,7 @@ export const SecretFormRow: React.FC<{
     if (disabled) return null;
     if (isConvertedToSecret)
       return (
-        <EuiCallOut size="s" color="warning">
+        <EuiCallOut announceOnMount size="s" color="warning">
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle"
             defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v8.12.0 and above."

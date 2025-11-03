@@ -15,7 +15,7 @@ import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { TagCloudVisParams } from './types';
 import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
-import { TagCloudVisDependencies } from './plugin';
+import type { TagCloudVisDependencies } from './plugin';
 
 export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependencies) => {
   return {

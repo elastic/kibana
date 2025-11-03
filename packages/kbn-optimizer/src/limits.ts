@@ -13,10 +13,10 @@ import Path from 'path';
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
-import { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
-import { OptimizerConfig, Limits } from './optimizer';
+import type { OptimizerConfig, Limits } from './optimizer';
 
 const DEFAULT_BUDGET_FRACTION = 0.1;
 

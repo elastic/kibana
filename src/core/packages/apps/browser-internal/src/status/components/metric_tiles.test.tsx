@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MetricTile } from './metric_tiles';
-import { Metric } from '../lib';
+import type { Metric } from '../lib';
 
 const untypedMetric: Metric = {
   name: 'A metric',

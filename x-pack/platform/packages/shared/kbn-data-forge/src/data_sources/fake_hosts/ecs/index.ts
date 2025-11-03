@@ -12,7 +12,7 @@ import metricset from './generated/elasticsearch/composable/component/metricset.
 import system from './generated/elasticsearch/composable/component/system.json';
 
 import template from './generated/elasticsearch/composable/template.json';
-import { IndexTemplateDef } from '../../../types';
+import type { IndexTemplateDef } from '../../../types';
 
 const ECS_VERSION = template._meta.ecs_version;
 

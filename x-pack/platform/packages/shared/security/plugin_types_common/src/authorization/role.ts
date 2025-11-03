@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { FeaturesPrivileges } from './features_privileges';
 
@@ -37,6 +37,17 @@ export interface RoleRemoteClusterPrivilege {
   privileges: RemoteClusterPrivilege[];
 }
 
+export interface RoleKibanaApplication {
+  application: string;
+  privileges: string[];
+  resources: string[];
+}
+
+export interface RoleTransformError {
+  reason: string;
+  state?: RoleKibanaApplication[];
+}
+
 export interface Role {
   name: string;
   description?: string;
@@ -54,7 +65,7 @@ export interface Role {
   transient_metadata?: {
     [anyKey: string]: any;
   };
-  _transform_error?: string[];
+  _transform_error?: RoleTransformError[];
   _unrecognized_applications?: string[];
 }
 

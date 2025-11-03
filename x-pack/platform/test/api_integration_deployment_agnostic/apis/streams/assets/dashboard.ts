@@ -6,11 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { disableStreams, enableStreams, indexDocument, linkDashboard } from '../helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from '../helpers/repository_client';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from '../helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from '../helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { loadDashboards, unloadDashboards } from '../helpers/dashboards';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -25,7 +23,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ARCHIVES = [
     'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
     'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
-    'x-pack/test/api_integration/fixtures/kbn_archiver/streams/tagged_dashboard.json',
+    'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/tagged_dashboard.json',
   ];
 
   const SEARCH_DASHBOARD_ID = 'b70c7ae0-3224-11e8-a572-ffca06da1357';
@@ -82,7 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     expect(response.status).to.be(200);
   }
 
-  describe('Asset links', function () {
+  describe('Dashboard asset linking', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);

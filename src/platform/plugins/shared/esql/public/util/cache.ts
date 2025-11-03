@@ -30,10 +30,10 @@ export const cacheNonParametrizedAsyncFunction = <T>(
   let lastCallTime = 0;
   let value: Promise<T> | undefined;
 
-  return () => {
+  return ({ forceRefresh = false }: { forceRefresh?: boolean } = {}) => {
     const time = now();
 
-    if (time - lastCallTime > maxCacheDuration) {
+    if (forceRefresh || time - lastCallTime > maxCacheDuration) {
       value = undefined;
     }
 
@@ -81,8 +81,22 @@ export const cacheParametrizedAsyncFunction = <Args extends any[], T>(
 ) => {
   const cache = new Map<string, CacheEntry<T>>();
 
-  return (...args: Args): Promise<T> => {
+  /**
+   * It's possible to force a refresh by calling the function with
+   * `{ forceRefresh: true }` as `this` context.
+   *
+   * @example fn.call({ forceRefresh: true }, ...args);
+   */
+  return function (this: { forceRefresh?: boolean } | undefined | void, ...args: Args): Promise<T> {
+    const forceRefresh = this?.forceRefresh ?? false;
     const key = getKey(...args);
+
+    if (forceRefresh) {
+      const newValue = fn(...args);
+      cache.set(key, { value: newValue, lastCallTime: now() });
+      return newValue;
+    }
+
     const time = now();
     let entry = cache.get(key);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ROWS_PER_PAGE_SELECTOR = 'tablePaginationPopoverButton';
 const PREV_BUTTON_SELECTOR = 'pagination-button-previous';

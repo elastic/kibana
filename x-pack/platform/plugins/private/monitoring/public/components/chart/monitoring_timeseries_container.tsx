@@ -8,6 +8,7 @@
 import React, { Fragment } from 'react';
 import { css } from '@emotion/react';
 import { get, first } from 'lodash';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiIconTip,
@@ -17,7 +18,6 @@ import {
   EuiScreenReaderOnly,
   EuiTextAlign,
   EuiButtonEmpty,
-  UseEuiTheme,
   logicalCSS,
 } from '@elastic/eui';
 
@@ -31,7 +31,7 @@ import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
 import { AlertsBadge } from '../../alerts/badge';
 import type { AlertsByName } from '../../alerts/types';
-import { Series } from './types';
+import type { Series } from './types';
 
 const zoomStyle = ({ euiTheme }: UseEuiTheme) => css`
   visibility: hidden;

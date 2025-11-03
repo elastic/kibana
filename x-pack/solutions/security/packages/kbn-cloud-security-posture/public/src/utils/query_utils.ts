@@ -7,9 +7,9 @@
 
 import { encode, decode } from '@kbn/rison';
 import type { LocationDescriptorObject } from 'history';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { SECURITY_DEFAULT_DATA_VIEW_ID } from '@kbn/cloud-security-posture-common';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 /**
  * Represents a negated value with a boolean flag

@@ -7,7 +7,10 @@
 
 import * as redux from 'react-redux';
 import { waitFor, renderHook } from '@testing-library/react';
-import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../../common/runtime_types';
+import type {
+  ScreenshotRefImageData,
+  ScreenshotBlockCache,
+} from '../../../../common/runtime_types';
 import { fetchBlocksAction } from '../state';
 import { shouldCompose, useComposeImageFromRef } from './use_composite_image';
 import * as compose from '../utils/monitor_test_result/compose_screenshot_images';

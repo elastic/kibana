@@ -6,16 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FlattenRecord } from '@kbn/streams-schema';
-import { fromPromise, ErrorActorEvent } from 'xstate5';
-import { errors as esErrors } from '@elastic/elasticsearch';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
+import type { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { convertUIStepsToDSL } from '@kbn/streamlang';
 import { getFormattedError } from '../../../../../util/errors';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { processorConverter } from '../../utils';
-import { Simulation, SimulationMachineDeps } from './types';
-import { SchemaField } from '../../../schema_editor/types';
+import type { Simulation, SimulationMachineDeps } from './types';
+import type { SchemaField } from '../../../schema_editor/types';
 import { getMappedSchemaFields } from './utils';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
@@ -23,7 +24,7 @@ export interface SimulationRunnerInput {
   streamName: string;
   detectedFields?: SchemaField[];
   documents: FlattenRecord[];
-  processors: ProcessorDefinitionWithUIAttributes[];
+  steps: StreamlangStepWithUIAttributes[];
 }
 
 export function createSimulationRunnerActor({
@@ -46,14 +47,16 @@ export const simulateProcessing = ({
   streamsRepositoryClient: StreamsRepositoryClient;
   input: SimulationRunnerInput;
   signal?: AbortSignal | null;
-}) =>
-  streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
+}) => {
+  const dsl = convertUIStepsToDSL(input.steps, false);
+
+  return streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
     signal,
     params: {
       path: { name: input.streamName },
       body: {
         documents: input.documents,
-        processing: input.processors.map(processorConverter.toSimulateDefinition),
+        processing: dsl,
         detected_fields:
           input.detectedFields && !isEmpty(input.detectedFields)
             ? getMappedSchemaFields(input.detectedFields).map((field) => ({
@@ -64,8 +67,9 @@ export const simulateProcessing = ({
       },
     },
   });
+};
 
-export function createSimulationRunFailureNofitier({
+export function createSimulationRunFailureNotifier({
   toasts,
 }: Pick<SimulationMachineDeps, 'toasts'>) {
   return (params: { event: unknown }) => {

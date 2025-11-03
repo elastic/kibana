@@ -4,23 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  DefaultItemAction,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
-import { RulesParams } from '@kbn/observability-plugin/public';
+import type { RulesParams } from '@kbn/observability-plugin/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useQueryClient } from '@tanstack/react-query';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { useQueryClient } from '@kbn/react-query';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
@@ -341,7 +335,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         );
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
-            <EuiText size="s">
+            <EuiText size="s" tabIndex={0}>
               <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
                 {slo.name}
               </a>

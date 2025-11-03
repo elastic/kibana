@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { DEFAULT_DOCS_PER_PAGE, Paginate } from '../types';
+import type { Paginate } from '../types';
+import { DEFAULT_DOCS_PER_PAGE } from '../types';
 import { escapeLuceneChars } from '../utils/escape_lucene_charts';
 import { fetchWithPagination } from '../utils/fetch_with_pagination';
 

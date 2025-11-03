@@ -15,6 +15,7 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
+  ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -23,21 +24,24 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SecurityPageName,
   SECURITY_FEATURE_ID,
+  SecurityPageName,
   TRUSTED_APPS_PATH,
+  TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
+  ENDPOINT_EXCEPTIONS,
   ENDPOINTS,
+  ENTITY_ANALYTICS_RISK_SCORE,
+  ENTITY_STORE,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
+  TRUSTED_DEVICES,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -53,6 +57,7 @@ import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
+import { IconDeviceControl } from '../common/icons/device_control';
 
 const categories = [
   {
@@ -71,7 +76,9 @@ const categories = [
     linkIds: [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
+      SecurityPageName.endpointExceptions,
       SecurityPageName.trustedApps,
+      SecurityPageName.trustedDevices,
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
@@ -125,6 +132,19 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
+      id: SecurityPageName.endpointExceptions,
+      title: ENDPOINT_EXCEPTIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
+        defaultMessage: 'Add exceptions to your hosts.',
+      }),
+      landingIcon: IconTool,
+      path: ENDPOINT_EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+
+      experimentalKey: 'endpointExceptionsMovedUnderManagement',
+    },
+    {
       id: SecurityPageName.trustedApps,
       title: TRUSTED_APPLICATIONS,
       description: i18n.translate(
@@ -138,6 +158,21 @@ export const links: LinkItem = {
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
       hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.trustedDevices,
+      title: TRUSTED_DEVICES,
+      description: i18n.translate('xpack.securitySolution.appLinks.trustedDevicesDescription', {
+        defaultMessage:
+          'Specify which external devices can connect to your endpoints even when Device Control is enabled.',
+      }),
+      landingIcon: IconDeviceControl,
+      path: TRUSTED_DEVICES_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      experimentalKey: 'trustedDevices',
+      capabilities: [`${SECURITY_FEATURE_ID}.readTrustedDevices`],
+      licenseType: 'enterprise',
     },
     {
       id: SecurityPageName.eventFilters,
@@ -183,7 +218,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
-      experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
     {
@@ -229,7 +263,9 @@ export const getManagementFilteredLinks = async (
     canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canReadEndpointList,
+    canReadEndpointExceptions,
     canReadTrustedApplications,
+    canReadTrustedDevices,
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
@@ -255,6 +291,10 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.policies);
   }
 
+  if (!canReadEndpointExceptions) {
+    linksToExclude.push(SecurityPageName.endpointExceptions);
+  }
+
   if (!canReadActionsLogManagement) {
     linksToExclude.push(SecurityPageName.responseActionsHistory);
   }
@@ -265,6 +305,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadTrustedApplications) {
     linksToExclude.push(SecurityPageName.trustedApps);
+  }
+
+  if (!canReadTrustedDevices) {
+    linksToExclude.push(SecurityPageName.trustedDevices);
   }
 
   if (!canReadEventFilters) {

@@ -14,6 +14,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 import { setFindRequestFilterScopeToActiveSpace } from '../utils';
 
@@ -31,6 +32,13 @@ export const getExceptionsPreMultiListFindHandler = (
       // validate Trusted application
       isEndpointArtifact = true;
       await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind();
+    } else if (data.listId.some((id) => TrustedDeviceValidator.isTrustedDevice({ listId: id }))) {
+      // validate Trusted Devices
+      isEndpointArtifact = true;
+      await new TrustedDeviceValidator(
+        endpointAppContextService,
+        request
+      ).validatePreMultiListFind();
     } else if (
       data.listId.some((listId) =>
         HostIsolationExceptionsValidator.isHostIsolationException({ listId })

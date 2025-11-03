@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server, ServerOptions } from '@hapi/hapi';
+import type { ServerOptions } from '@hapi/hapi';
+import { Server } from '@hapi/hapi';
 
 export function createServer(serverOptions: ServerOptions) {
   return new Server(serverOptions);

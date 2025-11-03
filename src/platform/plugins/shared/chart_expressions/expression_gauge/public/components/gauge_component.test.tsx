@@ -8,29 +8,22 @@
  */
 
 import React from 'react';
-import { ColorStop } from '@kbn/coloring';
+import type { ColorStop } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { DatatableColumn, DatatableColumnMeta, DatatableRow } from '@kbn/expressions-plugin/common';
+import type {
+  DatatableColumn,
+  DatatableColumnMeta,
+  DatatableRow,
+} from '@kbn/expressions-plugin/common';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import {
-  GaugeRenderProps,
-  GaugeArguments,
-  GaugeLabelMajorModes,
-  GaugeTicksPositions,
-  GaugeColorModes,
-} from '../../common';
+import type { GaugeRenderProps, GaugeArguments } from '../../common';
+import { GaugeLabelMajorModes, GaugeTicksPositions, GaugeColorModes } from '../../common';
 import GaugeComponent from './gauge_component';
-import {
-  Chart,
-  Bullet,
-  Settings,
-  BulletProps,
-  ColorBandSimpleConfig,
-  Color,
-} from '@elastic/charts';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { BulletProps, ColorBandSimpleConfig, Color } from '@elastic/charts';
+import { Chart, Bullet, Settings } from '@elastic/charts';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 
 const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
   id,

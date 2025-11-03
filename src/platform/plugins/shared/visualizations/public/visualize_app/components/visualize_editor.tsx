@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import {
   useChromeVisibility,
   useSavedVisInstance,
@@ -20,10 +21,9 @@ import {
   useLinkedSearchUpdates,
   useDataViewUpdates,
 } from '../utils';
-import { VisualizeServices } from '../types';
+import type { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../../../common/constants';
+import type { VisualizeAppProps } from '../app';
 import type { VisualizeInput } from '../..';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {

@@ -13,7 +13,7 @@ import {
   packetbeatWithSomeErrors,
 } from '../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 import { mockStats } from '../../../mock/stats/mock_stats';
-import { DataQualityCheckResult, PatternRollup } from '../../../types';
+import type { DataQualityCheckResult, PatternRollup } from '../../../types';
 import {
   getIndexDocsCountFromRollup,
   getIndexId,

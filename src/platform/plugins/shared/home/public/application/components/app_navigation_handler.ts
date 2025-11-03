@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { getServices } from '../kibana_services';
 
 export const createAppNavigationHandler = (targetUrl: string) => (event: MouseEvent) => {

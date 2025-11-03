@@ -82,7 +82,7 @@ export type InputCaptureProps = PropsWithChildren<{
     /** Keyboard control keys from the keyboard event */
     eventDetails: Pick<
       KeyboardEvent,
-      'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey'
+      'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey' | 'code'
     >;
   }) => void;
   /** Sets an interface that allows interactions with this component's focus/blur states */
@@ -128,8 +128,25 @@ export const InputCapture = memo<InputCaptureProps>(
       return '';
     }, []);
 
+    const isEventFromInputCapture = useCallback((ev: Pick<React.UIEvent, 'target'>) => {
+      if (focusEleRef.current) {
+        const { target: evTarget } = ev;
+
+        return (
+          evTarget === focusEleRef.current ||
+          (evTarget instanceof Node && focusEleRef.current.contains(evTarget))
+        );
+      }
+
+      return false;
+    }, []);
+
     const handleOnKeyDown = useCallback<KeyboardEventHandler>(
       (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
         // handles the ctrl + a select and allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
           if (ev.key === 'a') {
@@ -164,6 +181,7 @@ export const InputCapture = memo<InputCaptureProps>(
           'metaKey',
           'repeat',
           'shiftKey',
+          'code',
         ]);
 
         onCapture({
@@ -176,11 +194,15 @@ export const InputCapture = memo<InputCaptureProps>(
           deSelectTextOnPage();
         }
       },
-      [getTextSelection, onCapture]
+      [getTextSelection, isEventFromInputCapture, onCapture]
     );
 
     const handleOnPaste = useCallback<ClipboardEventHandler>(
       (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
         ev.preventDefault();
         ev.stopPropagation();
 
@@ -198,6 +220,7 @@ export const InputCapture = memo<InputCaptureProps>(
           metaKey: true,
           repeat: false,
           shiftKey: false,
+          code: 'MetaLeft',
         };
 
         onCapture({
@@ -210,14 +233,21 @@ export const InputCapture = memo<InputCaptureProps>(
           deSelectTextOnPage();
         }
       },
-      [getTextSelection, onCapture]
+      [getTextSelection, isEventFromInputCapture, onCapture]
     );
 
-    const handleOnFocus = useCallback(() => {
-      if (onChangeFocus) {
-        onChangeFocus(true);
-      }
-    }, [onChangeFocus]);
+    const handleOnFocus = useCallback<React.FocusEventHandler<HTMLDivElement>>(
+      (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
+        if (onChangeFocus) {
+          onChangeFocus(true);
+        }
+      },
+      [isEventFromInputCapture, onChangeFocus]
+    );
 
     const handleOnBlur = useCallback(() => {
       if (onChangeFocus) {

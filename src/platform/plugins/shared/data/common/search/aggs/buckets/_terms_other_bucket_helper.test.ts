@@ -15,12 +15,14 @@ import {
   constructSingleTermOtherFilter,
 } from './_terms_other_bucket_helper';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
+import type { CreateAggConfigParams } from '../agg_configs';
+import { AggConfigs } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { IBucketAggConfig } from './bucket_agg_type';
+import type { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
 import type { estypes } from '@elastic/elasticsearch';
 import { isSamplingEnabled } from '../utils/sampler';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 
 const indexPattern = {
   id: '1234',
@@ -116,7 +118,7 @@ const singleTermResponse = wrapResponse({
     buckets: [
       { key: 'ios', doc_count: 2850 },
       { key: 'win xp', doc_count: 2830 },
-      { key: '__missing__', doc_count: 1430 },
+      { key: MISSING_TOKEN, doc_count: 1430 },
     ],
   },
 });
@@ -133,7 +135,7 @@ const nestedTermResponse = wrapResponse({
           buckets: [
             { key: 'ios', doc_count: 2850 },
             { key: 'win xp', doc_count: 2830 },
-            { key: '__missing__', doc_count: 1430 },
+            { key: MISSING_TOKEN, doc_count: 1430 },
           ],
         },
         key: 'US-with-dash',
@@ -146,7 +148,7 @@ const nestedTermResponse = wrapResponse({
           buckets: [
             { key: 'ios', doc_count: 1850 },
             { key: 'win xp', doc_count: 1830 },
-            { key: '__missing__', doc_count: 130 },
+            { key: MISSING_TOKEN, doc_count: 130 },
           ],
         },
         key: 'IN-with-dash',
@@ -168,7 +170,7 @@ const exhaustiveNestedTermResponse = wrapResponse({
           buckets: [
             { key: 'ios', doc_count: 2850 },
             { key: 'win xp', doc_count: 2830 },
-            { key: '__missing__', doc_count: 1430 },
+            { key: MISSING_TOKEN, doc_count: 1430 },
           ],
         },
         key: 'US-with-dash',
@@ -181,7 +183,7 @@ const exhaustiveNestedTermResponse = wrapResponse({
           buckets: [
             { key: 'ios', doc_count: 1850 },
             { key: 'win xp', doc_count: 1830 },
-            { key: '__missing__', doc_count: 130 },
+            { key: MISSING_TOKEN, doc_count: 130 },
           ],
         },
         key: 'IN-with-dash',
@@ -580,7 +582,7 @@ describe('Terms Agg Other bucket helper', () => {
                         buckets: [
                           { key: 'ios', doc_count: 2850 },
                           { key: 'win xp', doc_count: 2830 },
-                          { key: '__missing__', doc_count: 1430 },
+                          { key: MISSING_TOKEN, doc_count: 1430 },
                         ],
                       },
                       key: 'US-with-dash',
@@ -593,7 +595,7 @@ describe('Terms Agg Other bucket helper', () => {
                         buckets: [
                           { key: 'ios', doc_count: 1850 },
                           { key: 'win xp', doc_count: 1830 },
-                          { key: '__missing__', doc_count: 130 },
+                          { key: MISSING_TOKEN, doc_count: 130 },
                         ],
                       },
                       key: 'IN-with-dash',
@@ -726,7 +728,7 @@ describe('Terms Agg Other bucket helper', () => {
                     buckets: [
                       { key: 'ios', doc_count: 1850 },
                       { key: 'win xp', doc_count: 1830 },
-                      { key: '__missing__', doc_count: 130 },
+                      { key: MISSING_TOKEN, doc_count: 130 },
                     ],
                   },
                   key: '',
@@ -909,7 +911,7 @@ describe('Terms Agg Other bucket helper', () => {
                   buckets: [
                     { key: 'ios', doc_count: 1850 },
                     { key: 'win xp', doc_count: 1830 },
-                    { key: '__missing__', doc_count: 130 },
+                    { key: MISSING_TOKEN, doc_count: 130 },
                     { key: '', doc_count: 130 },
                   ],
                 },
@@ -1045,7 +1047,7 @@ describe('Terms Agg Other bucket helper', () => {
         const topAgg = getTopAggregations(updatedResponse);
         expect(
           (topAgg['1'] as any).buckets.find(
-            (bucket: Record<string, any>) => bucket.key === '__missing__'
+            (bucket: Record<string, any>) => bucket.key === MISSING_TOKEN
           )
         ).toBeDefined();
       });

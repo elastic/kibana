@@ -507,4 +507,83 @@ describe('TaskValidator', () => {
       );
     });
   });
+
+  describe('validateRrule()', () => {
+    const rrule = {
+      freq: 1,
+      interval: 1,
+      tzid: 'UTC',
+      byweekday: ['MO', 'FR'],
+      byhour: [10],
+      byminute: [0],
+    };
+
+    it(`should validate when specifying a valid rrule field`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask({
+        schedule: {
+          rrule,
+        },
+        state: { foo: 'foo' },
+      });
+      expect(taskValidator.validateRrule(task)).toEqual(task);
+    });
+
+    it(`should fail to validate the rrule schema when freq field is wrong`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask({
+        schedule: {
+          rrule: {
+            ...rrule,
+            // @ts-ignore deliberate error for testing
+            freq: 'foobar',
+          },
+        },
+        state: { foo: 'foo' },
+      });
+      expect(() => taskValidator.validateRrule(task)).toThrowErrorMatchingInlineSnapshot(`
+        "[TaskValidator] Invalid rrule \\"[object Object]\\". Value does not match the schema: types that failed validation:
+        - [0.freq]: expected value to equal [1]
+        - [1.freq]: expected value to equal [2]
+        - [2.freq]: expected value to equal [3]
+        - [3.freq]: expected value to equal [4]."
+      `);
+    });
+
+    it(`should fail to validate the rrule schema when byweekday field is wrong`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask({
+        schedule: {
+          rrule: {
+            ...rrule,
+            // @ts-ignore deliberate error for testing
+            byweekday: [0, 1, 2, 3],
+          },
+        },
+        state: { foo: 'foo' },
+      });
+      expect(() => taskValidator.validateRrule(task)).toThrowErrorMatchingInlineSnapshot(`
+        "[TaskValidator] Invalid rrule \\"[object Object]\\". Value does not match the schema: types that failed validation:
+        - [0.byweekday.0]: expected value of type [string] but got [number]
+        - [1.freq]: expected value to equal [2]
+        - [2.freq]: expected value to equal [3]
+        - [3.freq]: expected value to equal [4]."
+      `);
+    });
+  });
 });

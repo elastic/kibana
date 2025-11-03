@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 import {
   removeDropCommandsFromESQLQuery,
   appendToESQLQuery,
   isESQLColumnSortable,
   hasTransformationalCommand,
+  getCategorizeField,
+  convertTimeseriesCommandToFrom,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -34,17 +37,13 @@ import {
   mapVisToChartType,
   computeInterval,
 } from '@kbn/visualization-utils';
-import type { LegendSize } from '@kbn/visualizations-plugin/public';
-import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
+import type { LegendSize } from '@kbn/chart-expressions-common';
+import type { XYState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import {
-  UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramSuggestionContext,
-  UnifiedHistogramSuggestionType,
-  UnifiedHistogramVisContext,
-} from '../types';
+import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
 import {
   isSuggestionShapeAndVisContextCompatible,
   deriveLensSuggestionFromLensAttributes,
@@ -242,7 +241,26 @@ export class LensVisService {
 
     if (queryParams.isPlainRecord) {
       if (isOfAggregateQueryType(queryParams.query)) {
-        if (hasTransformationalCommand(queryParams.query.esql)) {
+        if (getCategorizeField(queryParams.query.esql).length) {
+          // query uses categorize, override the chart to be a simple doc count histogram
+          const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
+            queryParams: {
+              ...queryParams,
+              query: {
+                esql: `FROM ${queryParams.dataView.getIndexPattern()}`,
+              },
+            },
+            breakdownField,
+            preferredVisAttributes: externalVisContext?.attributes,
+          });
+
+          if (histogramSuggestionForESQL) {
+            availableSuggestionsWithType.push({
+              suggestion: histogramSuggestionForESQL,
+              type: UnifiedHistogramSuggestionType.histogramForESQL,
+            });
+          }
+        } else if (hasTransformationalCommand(queryParams.query.esql)) {
           // appends the first lens suggestion if available
           const allSuggestions = this.getAllSuggestions({
             queryParams,
@@ -600,7 +618,8 @@ export class LensVisService {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
-    const breakdown = breakdownColumn ? `, \`${breakdownColumn.name}\`` : '';
+    const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);
+    const breakdown = breakdownColumn ? `\`${breakdownColumn.name}\`, ` : '';
 
     // sort by breakdown column if it's sortable
     const sortBy =
@@ -608,9 +627,10 @@ export class LensVisService {
         ? ` | sort \`${breakdownColumn.name}\` asc`
         : '';
 
+    const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${dataView.timeFieldName}, ${queryInterval})`;
     return appendToESQLQuery(
-      safeQuery,
-      `| EVAL ${TIMESTAMP_COLUMN}=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by ${TIMESTAMP_COLUMN}${breakdown}${sortBy}`
+      normalizedQuery,
+      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${sortBy}`
     );
   };
 

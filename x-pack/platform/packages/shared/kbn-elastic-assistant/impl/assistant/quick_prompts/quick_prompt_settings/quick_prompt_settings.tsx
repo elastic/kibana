@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
+import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import * as i18n from './translations';
 import { QuickPromptSettingsEditor } from './quick_prompt_editor';
-import { PromptContextTemplate } from '../../../..';
+import type { PromptContextTemplate } from '../../../..';
 
 interface Props {
   onPromptContentChange: (newValue: string) => void;

@@ -8,14 +8,15 @@
  */
 
 import { css } from '@emotion/react';
-import { EmotionFn } from '../types';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
+import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
   grid-area: banner;
   position: sticky;
-  width: var(--kbn-layout--banner-width);
-  height: var(--kbn-layout--banner-height);
-  z-index: var(--kbn-layout--aboveFlyoutLevel);
+  width: ${layoutVar('banner.width')};
+  height: ${layoutVar('banner.height')};
+  z-index: ${layoutLevels.banner};
 `;
 
 export const styles = {

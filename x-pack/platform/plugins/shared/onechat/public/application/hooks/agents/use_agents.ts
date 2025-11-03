@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useOnechatServices } from '../use_onechat_service';
 import { queryKeys } from '../../query_keys';
 
 export const useOnechatAgents = () => {
   const { agentService } = useOnechatServices();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, isFetched } = useQuery({
     queryKey: queryKeys.agentProfiles.all,
     queryFn: () => agentService.list(),
   });
 
-  return { agents: data ?? [], isLoading, error };
+  return { agents: data ?? [], isLoading, error, isFetched };
 };

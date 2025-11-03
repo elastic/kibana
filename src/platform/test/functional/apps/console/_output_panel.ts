@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -48,6 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await sendRequest('GET /_search?pretty');
 
       await PageObjects.console.focusOutputEditor();
+      await PageObjects.console.scrollOutputToTop();
+      await PageObjects.console.selectAllOutputText();
       await PageObjects.console.clickCopyOutput();
 
       const resultToast = await toasts.getElementByIndex(1);

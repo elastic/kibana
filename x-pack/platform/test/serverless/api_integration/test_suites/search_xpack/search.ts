@@ -11,7 +11,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { omit } from 'lodash';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { verifyErrorResponse } from '../search_oss/verify_error';
-import { RoleCredentials } from '../../../shared/services';
+import type { RoleCredentials } from '../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
-  // TODO: `supertestWithoutAuth` is typed as `any` in `x-pack/test/api_integration/apis/search/search.ts`,
+  // TODO: `supertestWithoutAuth` is typed as `any` in `x-pack/platform/test/api_integration/apis/search/search.ts`,
   // but within Serverless tests it's typed as `supertest.SuperTest<supertest.Test>`. This causes TS errors
   // when accessing `loginResponse.headers`, so we cast it as `any` here to match the original tests.
   const supertestNoAuth = getService('supertestWithoutAuth') as any;

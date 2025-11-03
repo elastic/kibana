@@ -494,7 +494,7 @@
             "label": "architecture",
             "description": [],
             "signature": [
-              "\"x64\" | \"arm64\""
+              "\"arm64\" | \"x64\""
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
             "deprecated": false,

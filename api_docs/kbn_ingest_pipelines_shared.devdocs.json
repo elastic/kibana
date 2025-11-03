@@ -29,31 +29,32 @@
           "\nA component for a Pipeline structure tree.\nChildren pipeline nodes represent Pipeline processors that run the\ncorresponding pipelines from the children node.\nSee more at https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor"
         ],
         "signature": [
-          "({ pipelineTree, isExtension, }: ",
+          "React.NamedExoticComponent<",
           "PipelineStructureTreeProps",
-          ") => React.JSX.Element"
+          "> & { readonly type: ({ pipelineTree, selectedPipeline, isExtension, clickTreeNode, clickMorePipelines, goBack, }: ",
+          "PipelineStructureTreeProps",
+          ") => React.JSX.Element; }"
         ],
         "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/pipeline_structure_tree.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/ingest-pipelines-shared",
             "id": "def-common.PipelineStructureTree.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  pipelineTree,\n  isExtension,\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "PipelineStructureTreeProps"
+              "P"
             ],
-            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/pipeline_structure_tree.tsx",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       }
     ],

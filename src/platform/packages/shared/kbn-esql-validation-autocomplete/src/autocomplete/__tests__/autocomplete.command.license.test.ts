@@ -25,6 +25,7 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           ...getCallbackMocks(),
           getLicense: async () => getLicenseMock('platinum'),
+          getActiveProduct: () => ({ type: 'observability', tier: 'complete' }),
         },
       });
 
@@ -39,6 +40,7 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           ...getCallbackMocks(),
           getLicense: async () => getLicenseMock('basic'),
+          getActiveProduct: () => ({ type: 'observability', tier: 'complete' }),
         },
       });
 

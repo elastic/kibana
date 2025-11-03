@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema, Type, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import {
   KIBANA_PRODUCT_TIERS,
   KIBANA_SOLUTIONS,
@@ -100,6 +101,7 @@ const configSchema = schema.object({
         ),
         product_tier: schema.maybe(createProductTiersSchema()),
         orchestrator_target: schema.maybe(schema.string()),
+        in_trial: schema.maybe(schema.boolean()),
       },
       // avoid future chicken-and-egg situation with the component populating the config
       { unknowns: 'ignore' }
@@ -132,6 +134,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
       project_type: true,
       product_tier: true,
       orchestrator_target: true,
+      in_trial: true,
     },
     onboarding: {
       default_solution: true,

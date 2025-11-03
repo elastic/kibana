@@ -15,7 +15,8 @@ export async function getRelationships(
   http: HttpStart,
   type: string,
   id: string,
-  savedObjectTypes: string[]
+  savedObjectTypes: string[],
+  size?: number
 ): Promise<v1.RelationshipsResponseHTTP> {
   const url = `/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
     type
@@ -24,6 +25,7 @@ export async function getRelationships(
     return await http.get(url, {
       query: {
         savedObjectTypes,
+        ...(size ? { size } : {}),
       },
     });
   } catch (respError) {

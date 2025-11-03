@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Targets } from '../../types';
+import type { Targets } from '../../types';
 
 export interface Props {
   activeTab: Targets | null;

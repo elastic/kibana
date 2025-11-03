@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, useMemo } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import {
-  UseField,
-  ValidationConfig,
-  FieldConfig,
-  getFieldValidityAndErrorMessage,
-} from '../../shared_imports';
-import { IndexPatternConfig } from '../../types';
+import type { ValidationConfig, FieldConfig } from '../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports';
+import type { IndexPatternConfig } from '../../types';
 import { schema } from '../form_schema';
 
 interface NameFieldProps {
   namesNotAllowed: string[];
+  disabled?: boolean;
 }
 
 interface GetNameConfigArgs {
@@ -52,7 +50,7 @@ const getNameConfig = ({ namesNotAllowed }: GetNameConfigArgs): FieldConfig<stri
   };
 };
 
-export const NameField = ({ namesNotAllowed }: NameFieldProps) => {
+export const NameField = ({ namesNotAllowed, disabled }: NameFieldProps) => {
   const config = useMemo(
     () =>
       getNameConfig({
@@ -79,6 +77,7 @@ export const NameField = ({ namesNotAllowed }: NameFieldProps) => {
           <EuiFormRow label={field.label} fullWidth error={errorMessage} isInvalid={isInvalid}>
             <EuiFieldText
               isInvalid={isInvalid}
+              disabled={disabled}
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 field.setValue(e.target.value);

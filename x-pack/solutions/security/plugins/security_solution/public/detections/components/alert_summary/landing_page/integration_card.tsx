@@ -25,7 +25,7 @@ const INTEGRATION_DETAILS_PAGE = 'integration_details_overview';
 
 export interface IntegrationCardProps {
   /**
-   * AI for SOC integration available to install
+   * EASE integration available to install
    */
   integration: PackageListItem;
   /**

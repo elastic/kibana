@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { dump } from 'js-yaml';
 import { writeTempfile } from '../util/file_utils';
 import { generateCertificates } from './generate_certificate';
 import { getServiceConfigurationFromYaml } from './get_service_configuration';
-import { EisCredentials } from './get_eis_credentials';
+import type { EisCredentials } from './get_eis_credentials';
 
 export interface EisGatewayConfig {
   image: string;

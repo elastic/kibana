@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PromiseType } from 'utility-types';
-import { CertResult, GetCertsParams, Ping } from '../../common/runtime_types';
+import type { PromiseType } from 'utility-types';
+import type { CertResult, GetCertsParams, Ping } from '../../common/runtime_types';
 import {
   getCertsRequestBody,
   processCertsResult,

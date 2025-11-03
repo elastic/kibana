@@ -7,6 +7,7 @@
 
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { RiskScoresPreviewResponse } from '../../../common/api/entity_analytics';
 import type { EntityType } from '../../../common/search_strategy';
 import type {
   AfterKeys,
@@ -15,15 +16,15 @@ import type {
 } from '../../../common/api/entity_analytics/common';
 import type { Range } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
-import type { StartPlugins } from '../../plugin';
+import type { SetupPlugins, StartPlugins } from '../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../types';
 export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
-
 export interface EntityAnalyticsRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
   config: ConfigType;
   getStartServices: StartServicesAccessor<StartPlugins>;
+  ml: SetupPlugins['ml'];
 }
 
 export interface CalculateRiskScoreAggregations {
@@ -83,6 +84,11 @@ export interface RiskEngineConfiguration {
   };
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
+  enableResetToZero: boolean;
+  filters?: Array<{
+    entity_types: string[];
+    filter: string;
+  }>;
 }
 
 export interface CalculateScoresParams {
@@ -98,6 +104,7 @@ export interface CalculateScoresParams {
   alertSampleSizePerShard?: number;
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
+  filters?: Array<{ entity_types: string[]; filter: string }>;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -115,4 +122,28 @@ export interface CalculateAndPersistScoresParams {
   excludeAlertTags?: string[];
   returnScores?: boolean;
   refresh?: 'wait_for';
+}
+
+export type CalculateResults = RiskScoresPreviewResponse & {
+  entities: Record<EntityType, string[]>;
+};
+
+export interface RiskScoreCompositeBuckets {
+  user: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+  host: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+  service: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+}
+
+export interface RiskScoreCompositeBucket {
+  key: { [identifierField: string]: string };
+  doc_count: number;
 }

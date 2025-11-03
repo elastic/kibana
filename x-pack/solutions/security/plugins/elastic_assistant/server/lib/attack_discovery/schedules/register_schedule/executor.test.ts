@@ -8,7 +8,8 @@
 import { EcsVersion } from '@elastic/ecs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 
@@ -26,6 +27,7 @@ import {
 import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_discoveries';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
+import * as transforms from '../../persistence/transforms/transform_to_alert_documents';
 
 jest.mock('../../../../ai_assistant_data_clients/find', () => ({
   ...jest.requireActual('../../../../ai_assistant_data_clients/find'),
@@ -501,5 +503,43 @@ describe('attackDiscoveryScheduleExecutor', () => {
         context: { attack: expect.objectContaining({ alertIds, timestamp, mitreAttackTactics }) },
       });
     }
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { withReplacements?: boolean };
+    };
+    expect(firstCallArg.alertsParams.withReplacements).toBe(false);
+
+    spy.mockRestore();
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { enableFieldRendering?: boolean };
+    };
+    expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
+
+    spy.mockRestore();
   });
 });

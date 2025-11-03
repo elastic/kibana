@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { IndexName } from '@elastic/elasticsearch/lib/api/types';
+import { useQuery } from '@kbn/react-query';
+import type { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpSetup } from '@kbn/core/public';
 import { SearchPlaygroundQueryKeys } from '../../common';
 import { APIRoutes } from '../types';

@@ -4,19 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ApplicationStart,
-  IUiSettingsClient,
-  NotificationsStart,
-  type CoreStart,
-} from '@kbn/core/public';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import {
+import type { ApplicationStart, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
+import { type CoreStart } from '@kbn/core/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type {
   PublishesTitle,
   PublishesWritableTitle,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 
 export interface EmbeddableProps {
   sloId: string;

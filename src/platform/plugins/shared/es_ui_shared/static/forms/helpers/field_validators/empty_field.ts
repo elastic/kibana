@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValidationFunc } from '../../hook_form_lib';
+import type { ValidationFunc } from '../../hook_form_lib';
 import { isEmptyString } from '../../../validators/string';
 import { isEmptyArray } from '../../../validators/array';
-import { ERROR_CODE } from './types';
+import type { ERROR_CODE } from './types';
 
 export const emptyField =
   (message: string, trimString: boolean = true) =>

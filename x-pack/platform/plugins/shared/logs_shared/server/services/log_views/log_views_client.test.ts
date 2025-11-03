@@ -6,16 +6,13 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/stubs';
 import { dataViewsService as dataViewsServiceMock } from '@kbn/data-views-plugin/server/mocks';
-import {
-  defaultLogViewId,
-  LogView,
-  LogViewAttributes,
-  LogViewsStaticConfig,
-} from '../../../common/log_views';
+import type { LogView, LogViewAttributes, LogViewsStaticConfig } from '../../../common/log_views';
+import { defaultLogViewId } from '../../../common/log_views';
 import { createLogViewMock } from '../../../common/log_views/log_view.mock';
 import {
   extractLogViewSavedObjectReferences,
@@ -288,6 +285,7 @@ describe('LogViewsClient class', () => {
           "getTimeField": [Function],
           "id": "LOG_DATA_VIEW",
           "isTimeBased": [Function],
+          "managed": false,
           "matchedIndices": Array [],
           "metaFields": Array [
             "_id",

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { default as React, useMemo, useState } from 'react';
-import { KNOWN_TYPES } from '../../../common/constants';
 import { createAlertText, datasetQualityAppTitle } from '../../../common/translations';
 import { AlertFlyout } from '../../alerts/alert_flyout';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
@@ -29,10 +28,11 @@ export default function Header() {
   const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
 
   const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
-  const { isDatasetQualityAllSignalsAvailable } = useDatasetQualityFilters();
+  const { isDatasetQualityAllSignalsAvailable, authorizedDatasetTypes } =
+    useDatasetQualityFilters();
   const validTypes = useMemo(
-    () => (isDatasetQualityAllSignalsAvailable ? KNOWN_TYPES : [DEFAULT_DATASET_TYPE]),
-    [isDatasetQualityAllSignalsAvailable]
+    () => (isDatasetQualityAllSignalsAvailable ? authorizedDatasetTypes : [DEFAULT_DATASET_TYPE]),
+    [isDatasetQualityAllSignalsAvailable, authorizedDatasetTypes]
   );
 
   return (
@@ -79,7 +79,7 @@ export default function Header() {
         />
       }
       rightSideItems={
-        isAlertingAvailable
+        isAlertingAvailable && validTypes.length
           ? [
               <>
                 <EuiButton
@@ -91,14 +91,9 @@ export default function Header() {
                 >
                   {createAlertText}
                 </EuiButton>
-                <AlertFlyout
-                  addFlyoutVisible={!!ruleType}
-                  setAddFlyoutVisibility={(visible) => {
-                    if (!visible) {
-                      setRuleType(null);
-                    }
-                  }}
-                />
+                {ruleType === DEGRADED_DOCS_RULE_TYPE_ID && (
+                  <AlertFlyout closeFlyout={() => setRuleType(null)} />
+                )}
               </>,
             ]
           : undefined

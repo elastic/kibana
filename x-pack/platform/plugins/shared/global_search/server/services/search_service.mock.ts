@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchServiceSetup, SearchServiceStart } from './search_service';
+import type { SearchServiceSetup, SearchServiceStart } from './search_service';
 import { of } from 'rxjs';
 
 const createSetupMock = () => {

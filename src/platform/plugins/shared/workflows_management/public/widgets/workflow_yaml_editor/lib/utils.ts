@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Node } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import {
-  WorkflowYAMLEditorDiffProps,
-  WorkflowYAMLEditorProps,
-  YamlValidationErrorSeverity,
-} from '../model/types';
+import type { YamlValidationErrorSeverity } from '../../../features/validate_workflow_yaml/model/types';
 
 // Copied from monaco-editor/esm/vs/editor/editor.api.d.ts because we can't import with turbopack
 export enum MarkerSeverity {
@@ -35,12 +32,6 @@ export function getSeverityString(severity: MarkerSeverity): YamlValidationError
   }
 }
 
-export function isDiffEditorProps(
-  props: WorkflowYAMLEditorProps
-): props is WorkflowYAMLEditorDiffProps {
-  return 'original' in props && 'modified' in props;
-}
-
 export function navigateToErrorPosition(
   editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor,
   lineNumber: number,
@@ -52,4 +43,26 @@ export function navigateToErrorPosition(
   });
   editor.focus();
   editor.revealLineInCenter(lineNumber);
+}
+
+export function getMonacoRangeFromYamlNode(
+  model: monaco.editor.ITextModel,
+  node: Node
+): monaco.Range | null {
+  const [startOffset, _, endOffset] = node.range ?? [];
+  if (!startOffset || !endOffset) {
+    return null;
+  }
+  const startPos = model.getPositionAt(startOffset);
+  const endPos = model.getPositionAt(endOffset);
+  if (!startPos || !endPos) {
+    return null;
+  }
+  const range = new monaco.Range(
+    startPos.lineNumber,
+    startPos.column,
+    endPos.lineNumber,
+    endPos.column
+  );
+  return range;
 }

@@ -60,6 +60,7 @@ export enum FieldsGroupNames {
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
   UnmappedFields = 'UnmappedFields',
+  RecommendedFields = 'RecommendedFields',
 }
 
 export interface FieldsGroupDetails {
@@ -83,6 +84,10 @@ export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails
 export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
+
+export interface AdditionalFieldGroups {
+  recommendedFields?: Array<DataViewField['name']>;
+}
 
 export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;
 
@@ -155,6 +160,11 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
    * Pass `true` to have non-draggable field list items (like in the mobile flyout)
    */
   disableFieldListItemDragAndDrop?: boolean;
+
+  /**
+   * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
+   */
+  shouldKeepAdHocDataViewImmutable?: boolean;
 
   /**
    * This button will be shown in mobile view

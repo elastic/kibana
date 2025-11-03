@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import type {
   ISearchSource,
   RefreshInterval,
@@ -18,7 +19,7 @@ import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/discover-utils';
-import type { DiscoverSessionTab } from '../server';
+import type { DiscoverSessionTab as DiscoverSessionTabSchema } from '../server';
 import type { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings extends SerializableRecord {
@@ -70,9 +71,13 @@ export interface SavedSearchAttributes {
   breakdownField?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-
-  tabs?: DiscoverSessionTab[];
+  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
+  tabs: DiscoverSessionTabSchema[];
 }
+
+export type SavedSearchByValueAttributes = SavedSearchAttributes & {
+  references: Reference[];
+};
 
 /** @internal **/
 export type { SortOrder } from '@kbn/discover-utils';
@@ -98,3 +103,44 @@ export type SavedSearch = Partial<SavedSearchAttributes> & {
 export type SerializableSavedSearch = Omit<SavedSearch, 'searchSource'> & {
   serializedSearchSource?: SerializedSearchSourceFields;
 };
+
+export interface DiscoverSessionTab {
+  id: string;
+  label: string;
+  sort: SortOrder[];
+  columns: string[];
+  grid: DiscoverGridSettings;
+  hideChart: boolean;
+  isTextBasedQuery: boolean;
+  usesAdHocDataView?: boolean;
+  serializedSearchSource: SerializedSearchSourceFields;
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
+  rowHeight?: number;
+  headerRowHeight?: number;
+  timeRestore?: boolean;
+  timeRange?: Pick<TimeRange, 'from' | 'to'>;
+  refreshInterval?: RefreshInterval;
+  rowsPerPage?: number;
+  sampleSize?: number;
+  breakdownField?: string;
+  density?: DataGridDensity;
+  visContext?: VisContextUnmapped;
+  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
+}
+
+export interface DiscoverSession {
+  id: string;
+  title: string;
+  description: string;
+  tabs: DiscoverSessionTab[];
+  managed: boolean;
+  tags?: string[] | undefined;
+  references?: SavedObjectReference[];
+  sharingSavedObjectProps?: {
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+    errorJSON?: string;
+  };
+}

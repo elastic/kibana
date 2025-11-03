@@ -15,15 +15,15 @@ import {
   EuiPageBody,
   EuiPageSection,
   EuiText,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
@@ -78,7 +78,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     }
 
     return (
-      <EuiToolTip
+      <EuiIconTip
         position="right"
         content={
           <FormattedMessage
@@ -90,9 +90,9 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             }}
           />
         }
-      >
-        <EuiIcon type="info" size="s" />
-      </EuiToolTip>
+        type="info"
+        size="s"
+      />
     );
   };
 

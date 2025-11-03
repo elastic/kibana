@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { getQueryStringFilter } from './get_query_string_filter';
-import { QueryContext } from './query_context';
+import type { QueryContext } from './query_context';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,

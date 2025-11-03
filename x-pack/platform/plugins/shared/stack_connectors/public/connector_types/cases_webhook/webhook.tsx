@@ -11,7 +11,8 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { CasesWebhookActionParams, CasesWebhookConfig, CasesWebhookSecrets } from './types';
+import type { CasesWebhookActionParams, CasesWebhookConfig, CasesWebhookSecrets } from './types';
+import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 export function getConnectorType(): ConnectorTypeModel<
   CasesWebhookConfig,
@@ -52,5 +53,9 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./webhook_connectors')),
     actionParamsFields: lazy(() => import('./webhook_params')),
+    connectorForm: {
+      serializer: formSerializer,
+      deserializer: formDeserializer,
+    },
   };
 }

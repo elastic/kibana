@@ -11,8 +11,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditInferenceFlyout } from './edit_inference_flyout';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_inference_endpoints');

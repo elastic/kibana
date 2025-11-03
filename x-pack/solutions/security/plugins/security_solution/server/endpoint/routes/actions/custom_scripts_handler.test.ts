@@ -11,6 +11,8 @@ import { createHttpApiTestSetupMock } from '../../mocks';
 import { registerCustomScriptsRoute } from './custom_scripts_handler';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
 import { getResponseActionsClient } from '../../services';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { EndpointAuthorizationError } from '../../errors';
 
 jest.mock('../../services', () => {
   const actual = jest.requireActual('../../services');
@@ -58,6 +60,22 @@ describe('custom_scripts_handler', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('should error if user has no Authz to API', async () => {
+    (
+      (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+    ).mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canWriteExecuteOperations: false,
+      })
+    );
+
+    await callHandler();
+
+    expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
+      body: expect.any(EndpointAuthorizationError),
+    });
   });
 
   it('returns custom scripts from the response actions client', async () => {

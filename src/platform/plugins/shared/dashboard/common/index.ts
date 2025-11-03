@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  DashboardCapabilities,
-  DashboardLocatorParams,
-  DashboardSettings,
-  DashboardState,
-} from './types';
+export type { DashboardCapabilities, DashboardLocatorParams, DashboardState } from './types';
 
 export {
   getReferencesForPanelId,
@@ -23,3 +18,4 @@ export {
 export { migrateLegacyQuery } from './migrate_legacy_query';
 export { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 export { isDashboardSection } from './is_dashboard_section';
+export { isDashboardPanel } from './is_dashboard_panel';

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { ErrorLike } from '@kbn/expressions-plugin/common';
+import type { Observable } from 'rxjs';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Adapters } from '@kbn/inspector-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 export type EmbeddableError = ErrorLike;
 

@@ -13,6 +13,7 @@ import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
 import { SourceSelection } from '../analytics_management/components/source_selection';
+import { PageTitle } from '../../../components/page_title';
 
 export const Page: FC = () => {
   const {
@@ -23,9 +24,13 @@ export const Page: FC = () => {
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.dataframe.analyticsSourceSelection.title"
-          defaultMessage="New analytics job / Choose a source data view"
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsSourceSelection.title"
+              defaultMessage="New analytics job / Choose a source data view"
+            />
+          }
         />
       </MlPageHeader>
 

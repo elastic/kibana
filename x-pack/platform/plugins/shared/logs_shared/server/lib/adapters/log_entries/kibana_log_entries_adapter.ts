@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { JsonArray } from '@kbn/utility-types';
+import type { JsonArray } from '@kbn/utility-types';
 import { compact } from 'lodash';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
-import {
+import type {
   LogEntriesAdapter,
   LogEntriesParams,
   LogEntryDocument,
   LogEntryQuery,
-  LOG_ENTRIES_PAGE_SIZE,
 } from '../../domains/log_entries_domain';
-import { SortedSearchHit } from '../framework';
-import { KibanaFramework } from '../framework/kibana_framework_adapter';
-import { ResolvedLogView } from '../../../../common/log_views';
+import { LOG_ENTRIES_PAGE_SIZE } from '../../domains/log_entries_domain';
+import type { SortedSearchHit } from '../framework';
+import type { KibanaFramework } from '../framework/kibana_framework_adapter';
+import type { ResolvedLogView } from '../../../../common/log_views';
 import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';

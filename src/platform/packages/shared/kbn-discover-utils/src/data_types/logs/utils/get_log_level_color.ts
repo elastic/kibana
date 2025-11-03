@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiThemeComputed,
-  euiPaletteForTemperature,
-  euiPaletteForStatus,
-  euiPaletteRed,
-} from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { euiPaletteForTemperature, euiPaletteForStatus, euiPaletteRed } from '@elastic/eui';
 import { LogLevelCoalescedValue } from './get_log_level_coalesed_value';
 
 export const getLogLevelColor = (

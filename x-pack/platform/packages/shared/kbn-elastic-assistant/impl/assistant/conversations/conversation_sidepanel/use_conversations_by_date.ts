@@ -7,10 +7,10 @@
 
 import { useMemo } from 'react';
 import { orderBy } from 'lodash';
-import { Conversation } from '../../../..';
+import type { ConversationWithOwner } from '../../api';
 import { getAbsoluteTime, isValidDateMath } from './date_utils';
 
-export function useConversationsByDate(conversations: Conversation[] = []) {
+export function useConversationsByDate(conversations: ConversationWithOwner[] = []) {
   return useMemo(() => {
     const now = new Date();
 
@@ -22,7 +22,7 @@ export function useConversationsByDate(conversations: Conversation[] = []) {
     const startOfLastMonth = getAbsoluteTime('now-1M/M', { forceNow: now }) ?? 0;
     const startOfThisYear = getAbsoluteTime('now/y', { forceNow: now }) ?? 0;
 
-    const categorizedConversations: Record<string, Conversation[]> = {
+    const categorizedConversations: Record<string, ConversationWithOwner[]> = {
       TODAY: [],
       YESTERDAY: [],
       THIS_WEEK: [],

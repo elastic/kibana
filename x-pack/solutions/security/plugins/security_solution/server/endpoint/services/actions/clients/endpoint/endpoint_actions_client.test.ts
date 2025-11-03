@@ -395,7 +395,12 @@ describe('EndpointActionsClient', () => {
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'runscript' | 'getCustomScripts'
+    | 'processPendingActions'
+    | 'getFileDownload'
+    | 'getFileInfo'
+    | 'runscript'
+    | 'getCustomScripts'
+    | 'cancel'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -576,10 +581,6 @@ describe('EndpointActionsClient', () => {
 
   describe('and Space Awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assign to readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 

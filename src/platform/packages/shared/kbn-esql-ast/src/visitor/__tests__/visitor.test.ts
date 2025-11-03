@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstQueryExpression } from '../../types';
 import { CommandVisitorContext, WhereCommandVisitorContext } from '../contexts';
 import { Visitor } from '../visitor';
 
@@ -133,4 +133,195 @@ test('specific commands receive specific visitor contexts', () => {
     })
     .on('visitQuery', (ctx) => [...ctx.visitCommands()])
     .visitQuery(root);
+});
+
+describe('header commands', () => {
+  test('can visit header commands', () => {
+    const { root } = parse('SET timeout = "30s"; FROM index | LIMIT 10');
+    const headerNames: string[] = [];
+
+    new Visitor()
+      .on('visitHeaderCommand', (ctx) => {
+        headerNames.push(ctx.node.name);
+      })
+      .on('visitQuery', (ctx) => {
+        for (const _headerResult of ctx.visitHeaderCommands()) {
+          // Visit header commands
+        }
+      })
+      .visitQuery(root);
+
+    expect(headerNames).toEqual(['set']);
+  });
+
+  test('can visit multiple header commands', () => {
+    const { root } = parse('SET a = 1; SET b = 2; SET c = 3; FROM index');
+    const headerNames: string[] = [];
+
+    new Visitor()
+      .on('visitHeaderCommand', (ctx) => {
+        headerNames.push(ctx.name());
+      })
+      .on('visitQuery', (ctx) => {
+        for (const _headerResult of ctx.visitHeaderCommands()) {
+          // Visit header commands
+        }
+      })
+      .visitQuery(root);
+
+    expect(headerNames).toEqual(['SET', 'SET', 'SET']);
+  });
+
+  test('can visit header command arguments', () => {
+    const { root } = parse('SET timeout = "30s"; FROM index');
+    const identifiers: string[] = [];
+    const literals: string[] = [];
+
+    new Visitor()
+      .on('visitExpression', (ctx) => {
+        // Default expression visitor
+      })
+      .on('visitFunctionCallExpression', (ctx) => {
+        // Visit function arguments recursively
+        for (const _arg of ctx.visitArguments(undefined)) {
+          // Process arguments
+        }
+      })
+      .on('visitHeaderCommand', (ctx) => {
+        for (const _argResult of ctx.visitArgs(undefined)) {
+          // Visit arguments
+        }
+      })
+      .on('visitIdentifierExpression', (ctx) => {
+        if (ctx.node.name !== '=') {
+          identifiers.push(ctx.node.name);
+        }
+      })
+      .on('visitLiteralExpression', (ctx) => {
+        if (ctx.node.literalType === 'keyword') {
+          literals.push(ctx.node.valueUnquoted || '');
+        }
+      })
+      .on('visitQuery', (ctx) => {
+        for (const _headerResult of ctx.visitHeaderCommands()) {
+          // Visit header commands
+        }
+      })
+      .visitQuery(root);
+
+    expect(identifiers).toEqual(['timeout']);
+    expect(literals).toEqual(['30s']);
+  });
+
+  test('header commands are visited before regular commands', () => {
+    const { root } = parse('SET a = 1; FROM index | LIMIT 10');
+    const visitOrder: string[] = [];
+
+    new Visitor()
+      .on('visitHeaderCommand', (ctx) => {
+        visitOrder.push(`header:${ctx.node.name}`);
+      })
+      .on('visitCommand', (ctx) => {
+        visitOrder.push(`command:${ctx.node.name}`);
+      })
+      .on('visitQuery', (ctx) => {
+        for (const _headerResult of ctx.visitHeaderCommands()) {
+          // Visit header commands first
+        }
+        for (const _cmdResult of ctx.visitCommands()) {
+          // Then visit regular commands
+        }
+      })
+      .visitQuery(root);
+
+    expect(visitOrder).toEqual(['header:set', 'command:from', 'command:limit']);
+  });
+
+  test('can iterate through header commands', () => {
+    const { root } = parse('SET a = 1; SET b = 2; FROM index');
+    const headerCommandCount = [
+      ...new Visitor().on('visitQuery', (ctx) => ctx.headerCommands()).visitQuery(root),
+    ].length;
+
+    expect(headerCommandCount).toBe(2);
+  });
+
+  test('header command context has correct parent', () => {
+    const { root } = parse('SET timeout = "30s"; FROM index');
+
+    new Visitor()
+      .on('visitHeaderCommand', (ctx) => {
+        if (ctx.parent!.node !== root) {
+          throw new Error('Expected parent to be query node');
+        }
+      })
+      .on('visitQuery', (ctx) => {
+        for (const _headerResult of ctx.visitHeaderCommands()) {
+          // Visit header commands
+        }
+      })
+      .visitQuery(root);
+  });
+
+  test('can visit header command directly', () => {
+    const { root } = parse('SET timeout = "30s"; FROM index');
+    const headerCommand = root.header![0];
+
+    const result = new Visitor()
+      .on('visitHeaderCommand', (ctx) => {
+        return `visited:${ctx.node.name}`;
+      })
+      .visitHeaderCommand(headerCommand);
+
+    expect(result).toBe('visited:set');
+  });
+
+  test('header commands with various value types', () => {
+    const { root } = parse('SET a = 1; SET b = "value"; SET c = true; FROM index');
+    const literals: any[] = [];
+
+    new Visitor()
+      .on('visitExpression', (ctx) => {
+        // Default expression visitor
+      })
+      .on('visitFunctionCallExpression', (ctx) => {
+        // Visit function arguments recursively
+        for (const _arg of ctx.visitArguments(undefined)) {
+          // Process arguments
+        }
+      })
+      .on('visitHeaderCommand', (ctx) => {
+        for (const _argResult of ctx.visitArgs(undefined)) {
+          // Visit arguments
+        }
+      })
+      .on('visitLiteralExpression', (ctx) => {
+        literals.push(ctx.node.value);
+      })
+      .on('visitQuery', (ctx) => {
+        for (const _headerResult of ctx.visitHeaderCommands()) {
+          // Visit header commands
+        }
+      })
+      .visitQuery(root);
+
+    expect(literals).toContain(1);
+    expect(literals).toContain('"value"');
+    expect(literals).toContain('true');
+  });
+
+  test('can return values from header command visitor', () => {
+    const { root } = parse('SET a = 1; SET b = 2; FROM index');
+
+    const results = new Visitor()
+      .on('visitHeaderCommand', (ctx) => {
+        return `header-${ctx.node.name}`;
+      })
+      .on('visitQuery', (ctx) => {
+        return [...ctx.visitHeaderCommands()];
+      })
+      .visitQuery(root);
+
+    expect(results).toEqual(['header-set', 'header-set']);
+  });
 });

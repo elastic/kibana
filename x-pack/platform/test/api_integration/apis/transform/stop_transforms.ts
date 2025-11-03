@@ -15,7 +15,7 @@ import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import { getCommonRequestHeader } from '../../services/ml/common_api';
 import { USER } from '../../services/transform/security_common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { asyncForEach, generateDestIndex, generateTransformConfig } from './common';
 

@@ -8,16 +8,18 @@
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
+import { unflattenKnownApmEventFields as unflattenKnownFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api';
 import type { InfraSource } from '../../../sources';
-import { createRequest } from './create_request';
+import { ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX, createRequest } from './create_request';
 import type { AdditionalContext } from '../../common/utils';
 import { doFieldsExist, KUBERNETES_POD_UID, termsAggField } from '../../common/utils';
 
@@ -76,21 +78,64 @@ const createContainerList = (containerContext: ContainerContext) => {
   return containerList;
 };
 
-export const getData = async (
-  esClient: ElasticsearchClient,
-  nodeType: InventoryItemType,
-  metric: SnapshotMetricType,
-  timerange: InfraTimerangeInput,
-  source: InfraSource,
-  logQueryFields: LogQueryFields | undefined,
-  compositeSize: number,
-  condition: InventoryMetricConditions,
-  logger: Logger,
-  filterQuery?: string,
-  customMetric?: SnapshotCustomMetricInput,
-  afterKey?: BucketKey,
-  previousNodes: Response = {}
-): Promise<Response> => {
+const getMetadata = (
+  bucket: NodeBucket,
+  schema?: DataSchemaFormat
+): AdditionalContext | undefined => {
+  const bucketHits = bucket.additionalContext?.hits?.hits;
+
+  if (!bucketHits || bucketHits.length === 0) {
+    return undefined;
+  }
+
+  if (schema === 'semconv') {
+    const metadata = bucketHits[0].fields;
+
+    if (!metadata) {
+      return undefined;
+    }
+
+    const filteredMetadata = Object.fromEntries(
+      Object.entries(metadata).filter(([key]) => !ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test(key))
+    );
+
+    return unflattenKnownFields(filteredMetadata);
+  }
+
+  return bucketHits[0]._source;
+};
+
+export const getData = async ({
+  esClient,
+  nodeType,
+  metric,
+  timerange,
+  source,
+  logQueryFields,
+  compositeSize,
+  condition,
+  logger,
+  filterQuery,
+  customMetric,
+  afterKey,
+  previousNodes = {},
+  schema,
+}: {
+  esClient: ElasticsearchClient;
+  nodeType: InventoryItemType;
+  metric: SnapshotMetricType;
+  timerange: InfraTimerangeInput;
+  source: InfraSource;
+  logQueryFields: LogQueryFields | undefined;
+  compositeSize: number;
+  condition: InventoryMetricConditions;
+  logger: Logger;
+  filterQuery?: string;
+  customMetric?: SnapshotCustomMetricInput;
+  afterKey?: BucketKey;
+  previousNodes?: Response;
+  schema?: DataSchemaFormat;
+}): Promise<Response> => {
   const handleResponse = (aggs: ResponseAggregations, previous: Response) => {
     const { nodes } = aggs;
     const nextAfterKey = nodes.after_key;
@@ -101,9 +146,7 @@ export const getData = async (
         ? createContainerList(bucket.containerContext)
         : undefined;
 
-      const bucketHits = bucket.additionalContext?.hits?.hits;
-      const additionalContextSource =
-        bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+      const additionalContextSource = getMetadata(bucket, schema);
 
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,
@@ -114,7 +157,7 @@ export const getData = async (
       };
     }
     if (nextAfterKey) {
-      return getData(
+      return getData({
         esClient,
         nodeType,
         metric,
@@ -126,9 +169,10 @@ export const getData = async (
         logger,
         filterQuery,
         customMetric,
-        nextAfterKey,
-        previous
-      );
+        afterKey: nextAfterKey,
+        previousNodes: previous,
+        schema,
+      });
     }
     return previous;
   };
@@ -153,7 +197,8 @@ export const getData = async (
     condition,
     filterQuery,
     customMetric,
-    fieldsExisted
+    fieldsExisted,
+    schema
   );
   logger.trace(() => `Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);

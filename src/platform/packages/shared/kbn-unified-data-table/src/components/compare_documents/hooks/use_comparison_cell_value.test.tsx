@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen, renderHook } from '@testing-library/react';
 import React from 'react';
-import { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { useComparisonCellValue, UseComparisonCellValueProps } from './use_comparison_cell_value';
+import type { UseComparisonCellValueProps } from './use_comparison_cell_value';
+import { useComparisonCellValue } from './use_comparison_cell_value';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import {
   ADDED_SEGMENT_CLASS,

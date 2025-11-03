@@ -8,21 +8,24 @@
  */
 
 import React, { useEffect, useMemo, useRef, useCallback } from 'react';
-import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
+import type { EuiResizeObserverProps } from '@elastic/eui';
+import { EuiResizeObserver } from '@elastic/eui';
 import { debounce } from 'lodash';
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { VislibRenderValue } from './vis_type_vislib_vis_fn';
-import { createVislibVisController, VislibVisController } from './vis_controller';
-import { VisTypeVislibCoreSetup } from './plugin';
+import { css } from '@emotion/react';
+import type { VislibRenderValue } from './vis_type_vislib_vis_fn';
+import type { VislibVisController } from './vis_controller';
+import { createVislibVisController } from './vis_controller';
+import type { VisTypeVislibCoreSetup } from './plugin';
 
-import './index.scss';
 import { getUsageCollectionStart } from './services';
+import { GlobalVislibWrapperStyles } from './vis_wrapper.styles';
 
 type VislibWrapperProps = VislibRenderValue & {
   core: VisTypeVislibCoreSetup;
@@ -42,6 +45,25 @@ const extractContainerType = (context?: KibanaExecutionContext): string | undefi
     };
     return recursiveGet(context)?.type;
   }
+};
+
+const visWrapperStyles = {
+  base: css({
+    display: 'flex',
+    flex: '1 1 auto',
+    minHeight: 0,
+    minWidth: 0,
+  }),
+  wrapper: css({
+    position: 'relative',
+  }),
+  container: css({
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  }),
 };
 
 const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWrapperProps) => {
@@ -110,13 +132,24 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
   }, [handlers.uiState, renderChart]);
 
   return (
-    <EuiResizeObserver onResize={onResize}>
-      {(resizeRef) => (
-        <div className="vislib__wrapper" ref={resizeRef}>
-          <div className="vislib__container" ref={chartDiv} />
-        </div>
-      )}
-    </EuiResizeObserver>
+    <>
+      <GlobalVislibWrapperStyles />
+      <EuiResizeObserver onResize={onResize}>
+        {(resizeRef) => (
+          <div
+            className="vislib__wrapper"
+            ref={resizeRef}
+            css={[visWrapperStyles.base, visWrapperStyles.wrapper]}
+          >
+            <div
+              className="vislib__container"
+              ref={chartDiv}
+              css={[visWrapperStyles.base, visWrapperStyles.container]}
+            />
+          </div>
+        )}
+      </EuiResizeObserver>
+    </>
   );
 };
 

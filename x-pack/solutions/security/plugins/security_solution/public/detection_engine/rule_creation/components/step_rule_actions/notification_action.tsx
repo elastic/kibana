@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiToolTip, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiIconTip, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type {
@@ -120,9 +120,12 @@ export function NotificationAction({
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" gutterSize="s" component="span" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={connectorTypeName} anchorClassName="eui-textTruncate">
-            <EuiIcon size="m" type={iconType} />
-          </EuiToolTip>
+          <EuiIconTip
+            content={connectorTypeName}
+            anchorClassName="eui-textTruncate"
+            type={iconType}
+            size="m"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">{connectorName}</EuiText>

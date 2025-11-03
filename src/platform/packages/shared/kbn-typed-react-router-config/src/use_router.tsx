@@ -8,9 +8,9 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { RouteMap, Router } from './types';
+import type { RouteMap, Router } from './types';
 
-const RouterContext = createContext<Router<RouteMap> | undefined>(undefined);
+const RouterContext = createContext<Router<any> | undefined>(undefined);
 
 export const RouterContextProvider = ({
   router,
@@ -27,5 +27,5 @@ export function useRouter<TRouteMap extends RouteMap = RouteMap>(): Router<TRout
     throw new Error('Router not found in context');
   }
 
-  return router;
+  return router as Router<TRouteMap>;
 }

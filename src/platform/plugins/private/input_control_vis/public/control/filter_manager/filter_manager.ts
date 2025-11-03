@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import _ from 'lodash';
 
-import { FilterManager as QueryFilterManager, DataViewsContract } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 
 export abstract class FilterManager {
   protected indexPattern: DataView | undefined;

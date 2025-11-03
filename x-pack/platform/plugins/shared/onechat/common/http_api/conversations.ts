@@ -10,3 +10,7 @@ import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 export interface ListConversationsResponse {
   results: ConversationWithoutRounds[];
 }
+
+export interface DeleteConversationResponse {
+  success: boolean;
+}

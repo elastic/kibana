@@ -77,7 +77,6 @@ interface UpgradeTargetForVersion {
 export class AutomaticAgentUpgradeTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
   private taskInterval: string;
   private retryDelays: string[];
 
@@ -91,14 +90,18 @@ export class AutomaticAgentUpgradeTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              this.abortController.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -134,7 +137,11 @@ export class AutomaticAgentUpgradeTask {
     return `${TYPE}:${VERSION}`;
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     if (!appContextService.getExperimentalFeatures().enableAutomaticAgentUpgrades) {
       this.logger.debug(
         '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature is disabled'
@@ -167,7 +174,7 @@ export class AutomaticAgentUpgradeTask {
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient);
+      await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient, abortController);
       this.endRun('success');
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
@@ -184,15 +191,16 @@ export class AutomaticAgentUpgradeTask {
     this.logger.info(`[AutomaticAgentUpgradeTask] runTask() ended${msg ? ': ' + msg : ''}`);
   }
 
-  private throwIfAborted() {
-    if (this.abortController.signal.aborted) {
+  private throwIfAborted(abortController: AbortController) {
+    if (abortController.signal.aborted) {
       throw new Error('Task was aborted');
     }
   }
 
   private async checkAgentPoliciesForAutomaticUpgrades(
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract
+    soClient: SavedObjectsClientContract,
+    abortController: AbortController
   ) {
     // Fetch custom agent policies with set required_versions in batches.
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
@@ -210,8 +218,13 @@ export class AutomaticAgentUpgradeTask {
         return;
       }
       for (const agentPolicy of agentPolicyPageResults) {
-        this.throwIfAborted();
-        await this.checkAgentPolicyForAutomaticUpgrades(esClient, soClient, agentPolicy);
+        this.throwIfAborted(abortController);
+        await this.checkAgentPolicyForAutomaticUpgrades(
+          esClient,
+          soClient,
+          agentPolicy,
+          abortController
+        );
       }
     }
   }
@@ -219,7 +232,8 @@ export class AutomaticAgentUpgradeTask {
   private async checkAgentPolicyForAutomaticUpgrades(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    agentPolicy: AgentPolicy
+    agentPolicy: AgentPolicy,
+    abortController: AbortController
   ) {
     this.logger.debug(
       `[AutomaticAgentUpgradeTask] Processing agent policy ${
@@ -254,7 +268,8 @@ export class AutomaticAgentUpgradeTask {
         soClient,
         agentPolicy,
         requiredVersion,
-        versionAndCounts
+        versionAndCounts,
+        abortController
       );
     }
   }
@@ -357,7 +372,8 @@ export class AutomaticAgentUpgradeTask {
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
     requiredVersion: AgentTargetVersion,
-    versionAndCounts: UpgradeTargetForVersion[]
+    versionAndCounts: UpgradeTargetForVersion[],
+    abortController: AbortController
   ) {
     this.logger.debug(
       `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: checking candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
@@ -378,7 +394,8 @@ export class AutomaticAgentUpgradeTask {
       esClient,
       soClient,
       agentPolicy,
-      requiredVersion.version
+      requiredVersion.version,
+      abortController
     );
 
     numberOfAgentsForUpgrade -= numberOfRetriedAgents;
@@ -414,7 +431,7 @@ export class AutomaticAgentUpgradeTask {
     let shouldProcessAgents = true;
 
     while (shouldProcessAgents) {
-      this.throwIfAborted();
+      this.throwIfAborted(abortController);
       numberOfAgentsForUpgrade = await this.findAndUpgradeCandidateAgents(
         esClient,
         soClient,
@@ -444,7 +461,8 @@ export class AutomaticAgentUpgradeTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
-    version: string
+    version: string,
+    abortController: AbortController
   ) {
     let retriedAgentsCounter = 0;
 
@@ -456,7 +474,7 @@ export class AutomaticAgentUpgradeTask {
     });
 
     for await (const retryingAgentsPageResults of retryingAgentsFetcher) {
-      this.throwIfAborted();
+      this.throwIfAborted(abortController);
       // This function will return the total number of agents marked for retry so they're included in the count of agents for upgrade.
       retriedAgentsCounter += retryingAgentsPageResults.length;
 

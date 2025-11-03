@@ -11,13 +11,15 @@ export const createDashboardMigrationClient = () => ({
   data: createDashboardMigrationsDataClientMock(),
 });
 
-const mockSetup = jest.fn();
-const mockStop = jest.fn();
+export const mockSetup = jest.fn();
+export const mockStop = jest.fn();
 
-const mockCreateClient = jest.fn().mockImplementation(() => createDashboardMigrationClient());
+export const mockCreateClient = jest
+  .fn()
+  .mockImplementation(() => createDashboardMigrationClient());
 
-export const MockSiemDashboardMigrationsService = {
+export const MockSiemDashboardMigrationsService = jest.fn().mockImplementation(() => ({
   setup: mockSetup,
   createClient: mockCreateClient,
   stop: mockStop,
-};
+}));

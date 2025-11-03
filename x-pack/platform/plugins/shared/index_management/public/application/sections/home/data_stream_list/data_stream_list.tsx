@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,12 +20,12 @@ import {
   EuiButton,
   EuiLink,
 } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
+import type { Error } from '../../../../shared_imports';
 import {
   PageLoading,
   PageError,
-  Error,
   reactRouterNavigate,
   extractQueryParams,
   attemptToURIDecode,
@@ -40,7 +40,7 @@ import { documentationService } from '../../../services/documentation';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
-import { Filters } from '../components';
+import type { Filters } from '../components';
 import { useStateWithLocalStorage } from '../../../hooks/use_state_with_localstorage';
 
 const SHOW_PROJECT_LEVEL_RETENTION = 'showProjectLevelRetention';
@@ -263,6 +263,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         {enableProjectLevelRetentionChecks && projectLevelRetentionCallout && (
           <>
             <EuiCallOut
+              announceOnMount
               onDismiss={() => setprojectLevelRetentionCallout(false)}
               data-test-subj="projectLevelRetentionCallout"
               title={i18n.translate(

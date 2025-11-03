@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEV_TOOLS_APP_ID } from './constants';
+import type { DEV_TOOLS_APP_ID } from './constants';
 
 export type AppId = typeof DEV_TOOLS_APP_ID;
 

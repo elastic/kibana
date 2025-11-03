@@ -10,7 +10,8 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
-import { TextInput, TextInputProps } from './text_input';
+import type { TextInputProps } from './text_input';
+import { TextInput } from './text_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 const name = 'Some text field';

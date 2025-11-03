@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -115,6 +115,29 @@ describe('useAlertsDataView', () => {
         useAlertsDataView({
           ...mockServices,
           ruleTypeIds: ['siem.esqlRule', 'apm', 'logs'],
+        }),
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        dataView: undefined,
+      })
+    );
+    expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(0);
+    expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
+  });
+
+  it('does not fetch anything if fetchUnifiedAlertsFields is true', async () => {
+    const { result } = renderHook(
+      () =>
+        useAlertsDataView({
+          ...mockServices,
+          ruleTypeIds: ['apm', 'logs'],
+          fetchUnifiedAlertsFields: true,
         }),
       {
         wrapper,

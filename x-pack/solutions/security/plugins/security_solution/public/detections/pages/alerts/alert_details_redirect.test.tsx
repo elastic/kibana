@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { AlertDetailsRedirect } from './alert_details_redirect';
 import { TestProviders } from '../../../common/mock';
-import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
+import { ALERT_DETAILS_REDIRECT_PATH, ALERTS_PATH } from '../../../../common/constants';
 import { mockHistory } from '../../../common/utils/route/mocks';
 
 jest.mock('../../../common/lib/kibana');

@@ -6,7 +6,7 @@
  */
 
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
-import { ContextEditorRow } from '../types';
+import type { ContextEditorRow } from '../types';
 import type { FindAnonymizationFieldsClientResponse } from '../selection/types';
 
 export const getRows = ({

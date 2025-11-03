@@ -11,11 +11,12 @@ import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { TooltipSelector } from '../../../components/tooltip_selector';
-import { MVTField } from '../../fields/mvt_field';
-import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
-import { MVTSettings, MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
-import { OnSourceChangeArgs } from '../source';
-import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
+import type { MVTField } from '../../fields/mvt_field';
+import type { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
+import type { MVTSettings } from './mvt_single_layer_source_settings';
+import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
+import type { OnSourceChangeArgs } from '../source';
+import type { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
 interface Props {
   tooltipFields: MVTField[];

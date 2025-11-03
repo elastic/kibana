@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchSynonymsSet } from './fetch_synonyms_set';
 
 describe('fetch synonyms set lib function', () => {

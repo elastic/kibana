@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Task } from '../../lib';
+import type { Solution, Task } from '../../lib';
 import { runFpm } from './run_fpm';
 import { runDockerGenerator } from './docker_generator';
 import { createOSPackageKibanaYML } from './create_os_package_kibana_yml';
@@ -112,35 +112,26 @@ export const CreateDockerWolfiARM64: Task = {
   },
 };
 
-const dockerServerlessDesc = 'Creating Docker Serverless image';
-export const CreateDockerServerlessX64: Task = {
-  description: `${dockerServerlessDesc} ${X64}`,
+export const CreateDockerServerless = function (
+  architecture: 'x64' | 'aarch64',
+  solution: Solution
+): Task {
+  const architectureDesc = architecture === 'x64' ? X64 : ARM64;
+  return {
+    description: `Creating Docker Serverless ${solution} solution image ${architectureDesc}`,
 
-  async run(config, log, build) {
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      baseImage: 'wolfi',
-      context: false,
-      serverless: true,
-      image: true,
-      dockerBuildDate,
-    });
-  },
-};
-
-export const CreateDockerServerlessARM64: Task = {
-  description: `${dockerServerlessDesc} ${ARM64}`,
-
-  async run(config, log, build) {
-    await runDockerGenerator(config, log, build, {
-      architecture: 'aarch64',
-      baseImage: 'wolfi',
-      context: false,
-      serverless: true,
-      image: true,
-      dockerBuildDate,
-    });
-  },
+    async run(config, log, build) {
+      await runDockerGenerator(config, log, build, {
+        architecture,
+        solution,
+        baseImage: 'wolfi',
+        context: false,
+        serverless: true,
+        image: true,
+        dockerBuildDate,
+      });
+    },
+  };
 };
 
 const dockerUbiDesc = 'Creating Docker UBI image';

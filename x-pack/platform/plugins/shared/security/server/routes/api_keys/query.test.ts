@@ -227,4 +227,42 @@ describe('Query API Keys route', () => {
       );
     });
   });
+
+  describe('validate API Key names', () => {
+    it('should substitute an empty string for keys with `null` names', async () => {
+      esClientMock.asCurrentUser.security.queryApiKeys.mockRestore();
+      esClientMock.asCurrentUser.security.queryApiKeys.mockResponse({
+        api_keys: [
+          { id: 'with_name', name: 'foo', invalidated: false },
+          { id: 'undefined_name', invalidated: false },
+          { id: 'null_name', name: null, invalidated: false },
+        ],
+      } as any);
+
+      const response = await routeHandler(
+        mockContext,
+        httpServerMock.createKibanaRequest(),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload.apiKeys).toEqual([
+        {
+          id: 'with_name',
+          name: 'foo',
+          invalidated: false,
+        },
+        {
+          id: 'undefined_name',
+          name: 'undefined_name',
+          invalidated: false,
+        },
+        {
+          id: 'null_name',
+          name: 'null_name',
+          invalidated: false,
+        },
+      ]);
+    });
+  });
 });

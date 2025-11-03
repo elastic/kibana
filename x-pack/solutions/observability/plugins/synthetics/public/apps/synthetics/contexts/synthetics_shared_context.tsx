@@ -10,13 +10,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Subject } from 'rxjs';
-import { Store } from 'redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import type { Subject } from 'rxjs';
+import type { Store } from 'redux';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
-import { SyntheticsAppProps } from './synthetics_settings_context';
+import type { SyntheticsAppProps } from './synthetics_settings_context';
 import { storage, store } from '../state';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -39,6 +39,7 @@ export const SyntheticsSharedContext: React.FC<
         ...coreStart,
         ...setupPlugins,
         storage,
+        contentManagement: startPlugins.contentManagement,
         data: startPlugins.data,
         inspector: startPlugins.inspector,
         triggersActionsUi: startPlugins.triggersActionsUi,
@@ -55,7 +56,6 @@ export const SyntheticsSharedContext: React.FC<
         slo: startPlugins.slo,
         serverless: startPlugins.serverless,
         charts: startPlugins.charts,
-        security: startPlugins.security,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>

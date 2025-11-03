@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,
@@ -90,7 +91,12 @@ export const PageSimpleStringStream: FC = () => {
         <p data-test-subj="responseStreamString">{data}</p>
       </EuiText>
       {errors.length > 0 && (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
+        <EuiCallOut
+          announceOnMount
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="warning"
+        >
           {errors.length === 1 ? (
             <p>{errors[0]}</p>
           ) : (

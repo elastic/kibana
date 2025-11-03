@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { DegradedFieldResponse } from '../../../../common/api_types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { INDEX, TIMESTAMP, _IGNORED } from '../../../../common/es_fields';
 import { createDatasetQualityESClient } from '../../../utils';

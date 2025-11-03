@@ -1,0 +1,130 @@
+{
+  "id": "@kbn/search-code-examples",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/search-code-examples",
+        "id": "def-common.consoleTutorials",
+        "type": "Object",
+        "tags": [],
+        "label": "consoleTutorials",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.basics",
+            "type": "string",
+            "tags": [],
+            "label": "basics",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.queryDSL",
+            "type": "string",
+            "tags": [],
+            "label": "queryDSL",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.esql",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.aggregations",
+            "type": "string",
+            "tags": [],
+            "label": "aggregations",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.semanticSearch",
+            "type": "string",
+            "tags": [],
+            "label": "semanticSearch",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.timeSeriesDataStreams",
+            "type": "string",
+            "tags": [],
+            "label": "timeSeriesDataStreams",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.hybridSearch",
+            "type": "string",
+            "tags": [],
+            "label": "hybridSearch",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.vectorSearch",
+            "type": "string",
+            "tags": [],
+            "label": "vectorSearch",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

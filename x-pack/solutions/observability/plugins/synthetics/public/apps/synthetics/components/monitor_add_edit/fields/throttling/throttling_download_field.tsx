@@ -8,13 +8,15 @@
 import { EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Validation } from '../../../../../../../common/types';
+import type { Validation } from '../../../../../../../common/types';
+import type {
+  ThrottlingConfig,
+  ThrottlingConfigValue,
+} from '../../../../../../../common/runtime_types';
 import {
   BandwidthLimitKey,
   ConfigKey,
   DEFAULT_BANDWIDTH_LIMIT,
-  ThrottlingConfig,
-  ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
 import { ThrottlingExceededMessage } from './throttling_exceeded_callout';
 import { OptionalLabel } from '../optional_label';

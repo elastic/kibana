@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../../common/constants';
 import { requestContextMock } from '../__mocks__/request_context';

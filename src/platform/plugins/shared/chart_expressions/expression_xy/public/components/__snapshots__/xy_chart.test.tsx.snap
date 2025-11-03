@@ -41,7 +41,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#f04e98",
+        "stroke": "#BC1E70",
         "strokeWidth": 1,
       },
     }
@@ -58,9 +58,9 @@ Array [
     id="__endzones__"
     style={
       Object {
-        "fill": "#69707d",
+        "fill": "#5A6D8C",
         "opacity": 0.2,
-        "stroke": "#69707d",
+        "stroke": "#5A6D8C",
         "strokeWidth": 0,
       }
     }
@@ -166,7 +166,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
     <Marker
       config={
         Object {
-          "color": "#f04e98",
+          "color": "#BC1E70",
           "customTooltip": [Function],
           "icon": "2",
           "id": "event1",
@@ -192,7 +192,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#f04e98",
+        "stroke": "#BC1E70",
         "strokeWidth": 1,
       },
     }
@@ -221,7 +221,7 @@ exports[`XYChart component annotations should render simplified annotations when
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#f04e98",
+        "stroke": "#BC1E70",
         "strokeWidth": 1,
       },
     }
@@ -238,9 +238,9 @@ Array [
     id="__endzones__"
     style={
       Object {
-        "fill": "#69707d",
+        "fill": "#5A6D8C",
         "opacity": 0.2,
-        "stroke": "#69707d",
+        "stroke": "#5A6D8C",
         "strokeWidth": 0,
       }
     }
@@ -376,7 +376,7 @@ exports[`XYChart component it renders area 1`] = `
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -389,26 +389,8 @@ exports[`XYChart component it renders area 1`] = `
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -436,16 +418,16 @@ exports[`XYChart component it renders area 1`] = `
           "formattedDatatables": Object {
             "first": Object {
               "formattedColumns": Object {
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {},
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -564,7 +546,7 @@ exports[`XYChart component it renders area 1`] = `
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -742,6 +724,12 @@ exports[`XYChart component it renders area 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -804,7 +792,7 @@ exports[`XYChart component it renders area 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -813,7 +801,7 @@ exports[`XYChart component it renders area 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -1028,15 +1016,22 @@ exports[`XYChart component it renders area 1`] = `
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -1176,8 +1171,22 @@ exports[`XYChart component it renders area 1`] = `
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -1245,12 +1254,26 @@ exports[`XYChart component it renders area 1`] = `
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={false}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -1262,26 +1285,8 @@ exports[`XYChart component it renders area 1`] = `
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -1367,200 +1372,64 @@ exports[`XYChart component it renders area 1`] = `
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -1571,16 +1440,16 @@ exports[`XYChart component it renders area 1`] = `
             Object {
               "first": Object {
                 "formattedColumns": Object {
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {},
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -1750,7 +1619,7 @@ exports[`XYChart component it renders area 1`] = `
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -1812,25 +1681,9 @@ exports[`XYChart component it renders area 1`] = `
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -1964,7 +1817,7 @@ exports[`XYChart component it renders bar 1`] = `
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -1977,26 +1830,8 @@ exports[`XYChart component it renders bar 1`] = `
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -2024,16 +1859,16 @@ exports[`XYChart component it renders bar 1`] = `
           "formattedDatatables": Object {
             "first": Object {
               "formattedColumns": Object {
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {},
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -2152,7 +1987,7 @@ exports[`XYChart component it renders bar 1`] = `
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -2330,6 +2165,12 @@ exports[`XYChart component it renders bar 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -2392,7 +2233,7 @@ exports[`XYChart component it renders bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -2401,7 +2242,7 @@ exports[`XYChart component it renders bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -2616,15 +2457,22 @@ exports[`XYChart component it renders bar 1`] = `
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -2764,8 +2612,22 @@ exports[`XYChart component it renders bar 1`] = `
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -2833,12 +2695,26 @@ exports[`XYChart component it renders bar 1`] = `
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={true}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -2850,26 +2726,8 @@ exports[`XYChart component it renders bar 1`] = `
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -2955,200 +2813,64 @@ exports[`XYChart component it renders bar 1`] = `
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -3159,16 +2881,16 @@ exports[`XYChart component it renders bar 1`] = `
             Object {
               "first": Object {
                 "formattedColumns": Object {
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {},
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -3338,7 +3060,7 @@ exports[`XYChart component it renders bar 1`] = `
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -3400,25 +3122,9 @@ exports[`XYChart component it renders bar 1`] = `
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -3552,7 +3258,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -3565,26 +3271,8 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -3612,16 +3300,16 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           "formattedDatatables": Object {
             "first": Object {
               "formattedColumns": Object {
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {},
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -3740,7 +3428,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -3918,6 +3606,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -3980,7 +3674,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -3989,7 +3683,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -4204,15 +3898,22 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -4352,8 +4053,22 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -4421,12 +4136,26 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={true}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -4438,26 +4167,8 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -4543,200 +4254,64 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -4747,16 +4322,16 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             Object {
               "first": Object {
                 "formattedColumns": Object {
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {},
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -4926,7 +4501,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -4988,25 +4563,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -5140,7 +4699,7 @@ exports[`XYChart component it renders line 1`] = `
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -5153,26 +4712,8 @@ exports[`XYChart component it renders line 1`] = `
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -5200,16 +4741,16 @@ exports[`XYChart component it renders line 1`] = `
           "formattedDatatables": Object {
             "first": Object {
               "formattedColumns": Object {
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {},
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -5328,7 +4869,7 @@ exports[`XYChart component it renders line 1`] = `
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -5506,6 +5047,12 @@ exports[`XYChart component it renders line 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -5568,7 +5115,7 @@ exports[`XYChart component it renders line 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -5577,7 +5124,7 @@ exports[`XYChart component it renders line 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -5792,15 +5339,22 @@ exports[`XYChart component it renders line 1`] = `
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -5940,8 +5494,22 @@ exports[`XYChart component it renders line 1`] = `
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -6009,12 +5577,26 @@ exports[`XYChart component it renders line 1`] = `
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={false}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -6026,26 +5608,8 @@ exports[`XYChart component it renders line 1`] = `
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -6131,200 +5695,64 @@ exports[`XYChart component it renders line 1`] = `
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -6335,16 +5763,16 @@ exports[`XYChart component it renders line 1`] = `
             Object {
               "first": Object {
                 "formattedColumns": Object {
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {},
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -6514,7 +5942,7 @@ exports[`XYChart component it renders line 1`] = `
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -6576,25 +6004,9 @@ exports[`XYChart component it renders line 1`] = `
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -6728,7 +6140,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -6741,26 +6153,8 @@ exports[`XYChart component it renders stacked area 1`] = `
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -6788,16 +6182,16 @@ exports[`XYChart component it renders stacked area 1`] = `
           "formattedDatatables": Object {
             "first": Object {
               "formattedColumns": Object {
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {},
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -6916,7 +6310,7 @@ exports[`XYChart component it renders stacked area 1`] = `
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -7094,6 +6488,12 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -7156,7 +6556,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -7165,7 +6565,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -7380,15 +6780,22 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -7528,8 +6935,22 @@ exports[`XYChart component it renders stacked area 1`] = `
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -7597,12 +7018,26 @@ exports[`XYChart component it renders stacked area 1`] = `
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={false}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -7614,26 +7049,8 @@ exports[`XYChart component it renders stacked area 1`] = `
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -7719,200 +7136,64 @@ exports[`XYChart component it renders stacked area 1`] = `
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -7923,16 +7204,16 @@ exports[`XYChart component it renders stacked area 1`] = `
             Object {
               "first": Object {
                 "formattedColumns": Object {
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {},
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -8102,7 +7383,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -8164,25 +7445,9 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -8316,7 +7581,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -8329,26 +7594,8 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -8376,16 +7623,16 @@ exports[`XYChart component it renders stacked bar 1`] = `
           "formattedDatatables": Object {
             "first": Object {
               "formattedColumns": Object {
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {},
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -8504,7 +7751,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -8682,6 +7929,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -8744,7 +7997,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -8753,7 +8006,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -8968,15 +8221,22 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -9116,8 +8376,22 @@ exports[`XYChart component it renders stacked bar 1`] = `
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -9185,12 +8459,26 @@ exports[`XYChart component it renders stacked bar 1`] = `
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={true}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -9202,26 +8490,8 @@ exports[`XYChart component it renders stacked bar 1`] = `
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -9307,200 +8577,64 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -9511,16 +8645,16 @@ exports[`XYChart component it renders stacked bar 1`] = `
             Object {
               "first": Object {
                 "formattedColumns": Object {
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {},
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -9690,7 +8824,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -9752,25 +8886,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -9904,7 +9022,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -9917,26 +9035,8 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -9964,16 +9064,16 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           "formattedDatatables": Object {
             "first": Object {
               "formattedColumns": Object {
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {},
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -10092,7 +9192,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -10270,6 +9370,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -10332,7 +9438,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -10341,7 +9447,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -10556,15 +9662,22 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -10704,8 +9817,22 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -10773,12 +9900,26 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={true}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -10790,26 +9931,8 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -10895,200 +10018,64 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -11099,16 +10086,16 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             Object {
               "first": Object {
                 "formattedColumns": Object {
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {},
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -11278,7 +10265,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -11340,25 +10327,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -11492,7 +10463,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -11516,40 +10487,8 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -11578,19 +10517,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
             "first": Object {
               "formattedColumns": Object {
                 "b": true,
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {
-                  2 => 2,
-                  5 => 5,
+                  "2" => 2,
+                  "5" => 5,
                 },
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -11648,13 +10587,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "rows": Array [
                   Object {
                     "a": 1,
-                    "b": 2,
+                    "b": "2",
                     "c": 1652034840000,
                     "d": "Foo",
                   },
                   Object {
                     "a": 1,
-                    "b": 5,
+                    "b": "5",
                     "c": 1652122440000,
                     "d": "Bar",
                   },
@@ -11713,7 +10652,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -11891,6 +10830,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -11953,7 +10898,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -11962,7 +10907,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -12177,15 +11122,22 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -12325,8 +11277,22 @@ exports[`XYChart component split chart should render split chart if both, splitR
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -12452,12 +11418,26 @@ exports[`XYChart component split chart should render split chart if both, splitR
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={true}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -12480,40 +11460,8 @@ exports[`XYChart component split chart should render split chart if both, splitR
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            2,
-                          ],
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            5,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 2,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 5,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -12599,312 +11547,64 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -12916,19 +11616,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "first": Object {
                 "formattedColumns": Object {
                   "b": true,
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {
-                    2 => 2,
-                    5 => 5,
+                    "2" => 2,
+                    "5" => 5,
                   },
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -12986,13 +11686,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "rows": Array [
                     Object {
                       "a": 1,
-                      "b": 2,
+                      "b": "2",
                       "c": 1652034840000,
                       "d": "Foo",
                     },
                     Object {
                       "a": 1,
-                      "b": 5,
+                      "b": "5",
                       "c": 1652122440000,
                       "d": "Bar",
                     },
@@ -13098,7 +11798,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -13164,39 +11864,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        2,
-                      ],
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        5,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 2,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 5,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -13330,7 +12000,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -13350,40 +12020,8 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -13412,19 +12050,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             "first": Object {
               "formattedColumns": Object {
                 "b": true,
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {
-                  2 => 2,
-                  5 => 5,
+                  "2" => 2,
+                  "5" => 5,
                 },
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -13482,13 +12120,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "rows": Array [
                   Object {
                     "a": 1,
-                    "b": 2,
+                    "b": "2",
                     "c": 1652034840000,
                     "d": "Foo",
                   },
                   Object {
                     "a": 1,
-                    "b": 5,
+                    "b": "5",
                     "c": 1652122440000,
                     "d": "Bar",
                   },
@@ -13545,7 +12183,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -13723,6 +12361,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -13785,7 +12429,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -13794,7 +12438,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -14009,15 +12653,22 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -14157,8 +12808,22 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -14283,12 +12948,26 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={true}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -14307,40 +12986,8 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            2,
-                          ],
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            5,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 2,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 5,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -14426,312 +13073,64 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -14743,19 +13142,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "first": Object {
                 "formattedColumns": Object {
                   "b": true,
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {
-                    2 => 2,
-                    5 => 5,
+                    "2" => 2,
+                    "5" => 5,
                   },
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -14813,13 +13212,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "rows": Array [
                     Object {
                       "a": 1,
-                      "b": 2,
+                      "b": "2",
                       "c": 1652034840000,
                       "d": "Foo",
                     },
                     Object {
                       "a": 1,
-                      "b": 5,
+                      "b": "5",
                       "c": 1652122440000,
                       "d": "Bar",
                     },
@@ -14925,7 +13324,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -14989,39 +13388,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        2,
-                      ],
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        5,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 2,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 5,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",
@@ -15155,7 +13524,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
               "type": "dataLayer",
               "xAccessor": "c",
-              "xScaleType": "ordinal",
+              "xScaleType": "time",
             },
           ],
           "fieldFormats": Object {
@@ -15175,40 +13544,8 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "id": "string",
                   },
                   "formatter": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
+                    "id": "string",
+                    "params": undefined,
                   },
                 },
               },
@@ -15237,19 +13574,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             "first": Object {
               "formattedColumns": Object {
                 "b": true,
-                "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
                 "b" => Map {
-                  2 => 2,
-                  5 => 5,
+                  "2" => 2,
+                  "5" => 5,
                 },
-                "c" => Map {
-                  1652034840000 => 1652034840000,
-                  1652122440000 => 1652122440000,
+                "c" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
                 },
-                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -15307,13 +13644,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "rows": Array [
                   Object {
                     "a": 1,
-                    "b": 2,
+                    "b": "2",
                     "c": 1652034840000,
                     "d": "Foo",
                   },
                   Object {
                     "a": 1,
-                    "b": 5,
+                    "b": "5",
                     "c": 1652122440000,
                     "d": "Bar",
                   },
@@ -15370,7 +13707,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           type="vertical"
         />
         <Settings
-          allowBrushingLastHistogramBin={false}
+          allowBrushingLastHistogramBin={true}
           ariaUseDefaultSummary={true}
           baseTheme={
             Object {
@@ -15548,6 +13885,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -15610,7 +13953,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -15619,7 +13962,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -15834,15 +14177,22 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "barBackground": "#ECF1F9",
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
+                "extraTextAlign": "right",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "textDarkColor": "#111C2C",
+                "textExtraDarkColor": "#1D2A3E",
+                "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
+                "textSubtitleDarkColor": "#1D2A3E",
+                "textSubtitleLightColor": "#CAD3E2",
+                "titleWeight": "bold",
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
-                "valuesTextAlign": "right",
+                "valuePosition": "bottom",
+                "valueTextAlign": "right",
               },
               "partition": Object {
                 "circlePadding": 4,
@@ -15982,8 +14332,22 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               Object {},
             ]
           }
+          xDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
         />
         <XYCurrentTime
+          domain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           enabled={false}
           isDarkMode={false}
         />
@@ -16108,12 +14472,26 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           title="a"
         />
         <XyEndzones
+          baseDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           darkMode={false}
+          extendedDomain={
+            Object {
+              "max": NaN,
+              "min": NaN,
+              "minInterval": 50,
+            }
+          }
           histogramMode={false}
         />
         <DataLayers
           chartHasMoreThanOneBarSeries={true}
-          defaultXScaleType="ordinal"
+          defaultXScaleType="time"
           fieldFormats={
             Object {
               "first": Object {
@@ -16132,40 +14510,8 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                       "id": "string",
                     },
                     "formatter": Object {
-                      "convert": [MockFunction] {
-                        "calls": Array [
-                          Array [
-                            2,
-                          ],
-                          Array [
-                            1652034840000,
-                          ],
-                          Array [
-                            5,
-                          ],
-                          Array [
-                            1652122440000,
-                          ],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": 2,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652034840000,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 5,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": 1652122440000,
-                          },
-                        ],
-                      },
+                      "id": "string",
+                      "params": undefined,
                     },
                   },
                 },
@@ -16251,312 +14597,64 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "string",
+                    "params": undefined,
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
                 Object {
                   "type": "return",
                   "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
                     },
                   },
                 },
@@ -16568,19 +14666,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "first": Object {
                 "formattedColumns": Object {
                   "b": true,
-                  "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
                   "b" => Map {
-                    2 => 2,
-                    5 => 5,
+                    "2" => 2,
+                    "5" => 5,
                   },
-                  "c" => Map {
-                    1652034840000 => 1652034840000,
-                    1652122440000 => 1652122440000,
+                  "c" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
                   },
-                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -16638,13 +14736,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "rows": Array [
                     Object {
                       "a": 1,
-                      "b": 2,
+                      "b": "2",
                       "c": 1652034840000,
                       "d": "Foo",
                     },
                     Object {
                       "a": 1,
-                      "b": 5,
+                      "b": "5",
                       "c": 1652122440000,
                       "d": "Bar",
                     },
@@ -16750,7 +14848,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 },
                 "type": "dataLayer",
                 "xAccessor": "c",
-                "xScaleType": "ordinal",
+                "xScaleType": "time",
               },
             ]
           }
@@ -16814,39 +14912,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "type": "axisExtentConfig",
                 },
                 "formatter": Object {
-                  "convert": [MockFunction] {
-                    "calls": Array [
-                      Array [
-                        2,
-                      ],
-                      Array [
-                        1652034840000,
-                      ],
-                      Array [
-                        5,
-                      ],
-                      Array [
-                        1652122440000,
-                      ],
-                    ],
-                    "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": 2,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652034840000,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 5,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": 1652122440000,
-                      },
-                    ],
+                  "id": "number",
+                  "params": Object {
+                    "pattern": "0,0.000",
                   },
                 },
                 "groupId": "left",

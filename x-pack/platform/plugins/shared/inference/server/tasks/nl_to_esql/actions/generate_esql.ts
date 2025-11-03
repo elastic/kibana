@@ -5,31 +5,65 @@
  * 2.0.
  */
 
-import { Observable, map, merge, of, switchMap } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { map, merge, of, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import {
+import type {
   ToolCall,
   ToolOptions,
-  withoutTokenCountEvents,
-  isChatCompletionMessageEvent,
   Message,
-  MessageRole,
   OutputCompleteEvent,
-  OutputEventType,
   ChatCompleteMetadata,
   ChatCompleteOptions,
   ChatCompleteAPI,
 } from '@kbn/inference-common';
+import {
+  withoutTokenCountEvents,
+  isChatCompletionMessageEvent,
+  MessageRole,
+  OutputEventType,
+  ToolChoiceType,
+} from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
-import { EsqlDocumentBase } from '../doc_base';
+import type { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
+import { generateEsqlPrompt } from './prompts';
 
-export const generateEsqlTask = <TToolOptions extends ToolOptions>({
+const MAX_CALLS = 8;
+
+interface LlmEsqlTaskOptions {
+  documentationRequest: { commands?: string[]; functions?: string[] };
+  callCount?: number;
+}
+
+type LlmEsqlTask<TToolOptions extends ToolOptions = ToolOptions> = (
+  options: LlmEsqlTaskOptions
+) => Observable<NlToEsqlTaskEvent<TToolOptions>>;
+
+interface GenerateEsqlTaskOptions
+  extends Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'> {
+  connectorId: string;
+  messages: Message[];
+  chatCompleteApi: ChatCompleteAPI;
+  docBase: EsqlDocumentBase;
+  logger: Pick<Logger, 'debug'>;
+  metadata?: ChatCompleteMetadata;
+  maxCallsAllowed?: number;
+  additionalSystemInstructions?: string;
+}
+
+export function generateEsqlTask<TToolOptions extends ToolOptions>(
+  options: GenerateEsqlTaskOptions & {
+    toolOptions: TToolOptions;
+  }
+): LlmEsqlTask<TToolOptions>;
+
+export function generateEsqlTask({
   chatCompleteApi,
   connectorId,
-  systemMessage,
+  additionalSystemInstructions,
   messages,
   toolOptions: { tools, toolChoice },
   docBase,
@@ -37,29 +71,23 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   maxRetries,
   retryConfiguration,
   logger,
-  system,
   metadata,
-}: {
-  connectorId: string;
-  systemMessage: string;
-  messages: Message[];
+  maxCallsAllowed = MAX_CALLS,
+}: GenerateEsqlTaskOptions & {
   toolOptions: ToolOptions;
-  chatCompleteApi: ChatCompleteAPI;
-  docBase: EsqlDocumentBase;
-  logger: Pick<Logger, 'debug'>;
-  metadata?: ChatCompleteMetadata;
-  system?: string;
-} & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
+}): LlmEsqlTask {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
-  }: {
-    documentationRequest: { commands?: string[]; functions?: string[] };
-  }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
+    callCount = 0,
+  }: LlmEsqlTaskOptions): Observable<NlToEsqlTaskEvent<ToolOptions>> {
+    const functionLimitReached = callCount >= maxCallsAllowed;
     const keywords = [...(commands ?? []), ...(functions ?? [])];
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
 
-    return merge(
+    const availableTools = Object.keys(tools ?? {});
+
+    const next$ = merge(
       of<
         OutputCompleteEvent<
           'request_documentation',
@@ -81,32 +109,12 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         retryConfiguration,
         metadata,
         stream: true,
-        system: `${systemMessage}
-
-          # Current task
-
-          Your current task is to respond to the user's question. If there is a tool
-          suitable for answering the user's question, use that tool, preferably
-          with a natural language reply included.
-
-          Format any ES|QL query as follows:
-          \`\`\`esql
-          <query>
-          \`\`\`
-
-          When generating ES|QL, it is VERY important that you only use commands and functions present in the
-          requested documentation, and follow the syntax as described in the documentation and its examples.
-          Assume that ONLY the set of capabilities described in the provided ES|QL documentation is valid, and
-          do not try to guess parameters or syntax based on other query languages.
-
-          If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
-          the user. DO NOT invent capabilities not described in the documentation just to provide
-          a positive answer to the user. E.g. Pagination is not supported by the language, do not try to invent
-          workarounds based on other languages.
-
-          When converting queries from one language to ES|QL, make sure that the functions are available
-          and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-          ${system ? `## Additional instructions\n\n${system}` : ''}`,
+        system: generateEsqlPrompt({
+          esqlPrompts: docBase.getPrompts(),
+          additionalSystemInstructions,
+          availableTools,
+          hasTools: !functionLimitReached && Object.keys(tools ?? {}).length > 0,
+        }),
         messages: [
           ...messages,
           {
@@ -123,14 +131,16 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
             toolCallId: fakeRequestDocsToolCall.toolCallId,
           },
         ],
-        toolChoice,
-        tools: {
-          ...tools,
-          request_documentation: {
-            description: 'Request additional ES|QL documentation if needed',
-            schema: requestDocumentationSchema,
-          },
-        },
+        toolChoice: !functionLimitReached ? toolChoice : ToolChoiceType.none,
+        tools: functionLimitReached
+          ? undefined
+          : {
+              ...tools,
+              request_documentation: {
+                description: 'Request additional ES|QL documentation if needed',
+                schema: requestDocumentationSchema,
+              },
+            },
       }).pipe(
         withoutTokenCountEvents(),
         map((generateEvent) => {
@@ -147,18 +157,32 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         }),
         switchMap((generateEvent) => {
           if (isChatCompletionMessageEvent(generateEvent)) {
-            const onlyToolCall =
-              generateEvent.toolCalls.length === 1 ? generateEvent.toolCalls[0] : undefined;
+            const toolCalls = generateEvent.toolCalls;
+            const onlyToolCall = toolCalls.length === 1 ? toolCalls[0] : undefined;
 
-            if (onlyToolCall?.function.name === 'request_documentation') {
-              const args = onlyToolCall.function.arguments;
+            if (onlyToolCall && onlyToolCall.function.name === 'request_documentation') {
+              if (functionLimitReached) {
+                return of({
+                  ...generateEvent,
+                  content: `You have reached the maximum number of documentation requests. Do not try to request documentation again for commands ${commands?.join(
+                    ', '
+                  )} and functions ${functions?.join(
+                    ', '
+                  )}. Try to answer the user's question using currently available information.`,
+                });
+              }
 
-              return askLlmToRespond({
-                documentationRequest: {
-                  commands: args.commands,
-                  functions: args.functions,
-                },
-              });
+              const args =
+                'arguments' in onlyToolCall.function ? onlyToolCall.function.arguments : undefined;
+              if (args && (args.commands?.length || args.functions?.length)) {
+                return askLlmToRespond({
+                  documentationRequest: {
+                    commands: args.commands ?? [],
+                    functions: args.functions ?? [],
+                  },
+                  callCount: callCount + 1,
+                });
+              }
             }
           }
 
@@ -166,8 +190,10 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         })
       )
     );
+
+    return next$;
   };
-};
+}
 
 const correctEsqlMistakes = ({
   content,

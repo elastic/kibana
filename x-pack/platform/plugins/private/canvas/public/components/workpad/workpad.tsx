@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useContext, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import useObservable from 'react-use/lib/useObservable';
 // @ts-expect-error
@@ -24,8 +25,9 @@ import { useZoomHandlers } from '../../lib/app_handler_creators';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { WorkpadRoutingContext } from '../../routes/workpad';
-import { Workpad as WorkpadComponent, Props } from './workpad.component';
-import { State } from '../../../types';
+import type { Props } from './workpad.component';
+import { Workpad as WorkpadComponent } from './workpad.component';
+import type { State } from '../../../types';
 import { useIncomingEmbeddable } from '../hooks';
 import { coreServices } from '../../services/kibana_services';
 

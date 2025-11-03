@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewsContract, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   ensureIndexPattern,
   loadIndexPatternRefs,

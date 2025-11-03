@@ -41,6 +41,7 @@ const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleId = 'some-rule-id';
 const getGap = (id: string) =>
   new Gap({
+    ruleId,
     range: {
       gte: '2024-01-01T00:00:00.000Z',
       lte: '2024-01-01T01:00:00.000Z',

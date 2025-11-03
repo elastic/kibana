@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import {
-  PublishesUnifiedSearch,
-  StateComparators,
-  initializeTimeRangeManager,
-  timeRangeComparators,
-} from '@kbn/presentation-publishing';
-import {
-  PublishesSearchSession,
-  apiPublishesSearchSession,
-} from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { BehaviorSubject, Observable, merge, map, distinctUntilChanged } from 'rxjs';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import type { PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
+import { initializeTimeRangeManager, timeRangeComparators } from '@kbn/presentation-publishing';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
-import {
-  LensEmbeddableStartServices,
+import type {
   LensInternalApi,
   LensRuntimeState,
   LensSerializedState,
   LensUnifiedSearchContext,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensEmbeddableStartServices } from '../types';
 
 export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
   ...timeRangeComparators,

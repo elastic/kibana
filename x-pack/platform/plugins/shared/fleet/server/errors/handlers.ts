@@ -15,7 +15,10 @@ import type {
 } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 
-import { UninstallTokenError } from '../../common/errors';
+import {
+  AgentlessAgentCreateFleetUnreachableError,
+  UninstallTokenError,
+} from '../../common/errors';
 
 import { appContextService } from '../services';
 
@@ -23,6 +26,8 @@ import {
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
   FleetError,
+  FleetElasticsearchError,
+  isESClientError,
   PackageUnsupportedMediaTypeError,
   RegistryConnectionError,
   RegistryError,
@@ -174,6 +179,8 @@ function shouldRespondWithErrorType(error: FleetError) {
     return true;
   } else if (error instanceof AgentlessAgentCreateOverProvisionnedError) {
     return true;
+  } else if (error instanceof AgentlessAgentCreateFleetUnreachableError) {
+    return true;
   }
   return false;
 }
@@ -226,6 +233,12 @@ export const defaultFleetErrorHandler: IngestErrorHandler = async ({
   error,
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
-  const options = fleetErrorToResponseOptions(error);
+  // Convert ALL Elasticsearch errors to Fleet errors (preserving original status codes)
+  let processedError = error;
+  if (isESClientError(error)) {
+    processedError = new FleetElasticsearchError(error);
+  }
+
+  const options = fleetErrorToResponseOptions(processedError);
   return response.customError(options);
 };

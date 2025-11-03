@@ -11,7 +11,8 @@ import React, { useEffect, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
-import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
+import type { CertSort } from '../components/certificates';
+import { CertificateList, CertificateSearch } from '../components/certificates';
 import { useCertSearch } from '../components/certificates/use_cert_search';
 import { setCertificatesTotalAction } from '../state/certificates/certificates';
 

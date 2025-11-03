@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -39,10 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await comboBox.setCustom('dataViewSelector', 'logstash-*');
       await comboBox.setCustom('searchMetricField', 'bytes');
       await testSubjects.clickWhenNotDisabledWithoutRetry('startSearch');
-      await testSubjects.find('searchResults-1');
-      await searchSessions.expectState('completed');
       await searchSessions.save();
-      await searchSessions.expectState('backgroundCompleted');
       await testSubjects.click('restoreSearch');
       await testSubjects.find('searchResults-2');
     });

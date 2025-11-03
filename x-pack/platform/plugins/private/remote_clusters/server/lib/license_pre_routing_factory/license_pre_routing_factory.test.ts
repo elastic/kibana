@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { licensePreRoutingFactory } from '.';
-import { LicenseStatus } from '../../types';
+import type { LicenseStatus } from '../../types';
 
 describe('licensePreRoutingFactory()', () => {
   let mockDeps: any;

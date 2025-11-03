@@ -15,25 +15,33 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
-import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type {
+  Visualization,
+  FramePublicAPI,
+  Suggestion,
+  UserMessage,
+  AnnotationGroups,
+  FormBasedPersistedState,
+} from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -44,7 +52,9 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar, updateLayer } from './xy_config_panel';
+import { XyToolbar } from './toolbar';
+import { XyFlyoutToolbar } from './toolbar/flyout_toolbar';
+import { updateLayer } from './toolbar';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
@@ -54,14 +64,6 @@ import {
   AnnotationsLayerHeader,
   LayerHeaderContent,
 } from './xy_config_panel/layer_header';
-import type {
-  Visualization,
-  FramePublicAPI,
-  Suggestion,
-  UserMessage,
-  AnnotationGroups,
-} from '../../types';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
   type State,
   type XYLayerConfig,
@@ -125,8 +127,9 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import { XYPersistedState, convertPersistedState, convertToPersistable } from './persistence';
-import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
+import type { XYPersistedState } from './persistence';
+import { convertPersistedState, convertToPersistable } from './persistence';
+import { shouldDisplayTable } from '../../shared_components/legend/legend_settings';
 import {
   ANNOTATION_MISSING_DATE_HISTOGRAM,
   LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
@@ -743,6 +746,10 @@ export const getXyVisualization = ({
 
   ToolbarComponent(props) {
     return <XyToolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <XyFlyoutToolbar {...props} />;
   },
 
   DimensionEditorComponent(props) {

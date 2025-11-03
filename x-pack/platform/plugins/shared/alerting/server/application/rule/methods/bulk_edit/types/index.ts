@@ -15,6 +15,4 @@ export type {
   BulkActionSkipResult,
   BulkEditOptionsCommon,
   BulkOperationError,
-  ParamsModifier,
-  ShouldIncrementRevision,
 } from './bulk_edit_rules_options';

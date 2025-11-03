@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
+import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
 import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
 import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
@@ -18,7 +20,7 @@ import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
-import { SyntheticsRestApiRouteFactory } from './types';
+import type { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
 import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
@@ -103,6 +105,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
   syntheticsInspectTLSRuleRoute,
+  getSyntheticsTriggerTaskRun,
+  cleanupPrivateLocationRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

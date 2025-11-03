@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+import type { EuiFieldTextProps } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { DATA_SOURCES_I18N } from './translations';
 
 export const NameField = (props: Omit<EuiFieldTextProps, 'name'>) => {

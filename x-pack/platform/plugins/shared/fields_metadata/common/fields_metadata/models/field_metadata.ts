@@ -8,7 +8,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { pick } from 'lodash';
-import { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
+import type { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
+import { getOtelFieldName } from '../../helpers/convert_ecs_fields_to_otel';
 
 // Use class/interface merging to define instance properties from FieldMetadataPlain.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -33,6 +34,7 @@ export class FieldMetadata {
     const short = fieldMetadata.short ?? fieldMetadata.description;
     const source = fieldMetadata.source ?? 'unknown';
     const type = fieldMetadata.type ?? 'unknown';
+    const otel_equivalent = fieldMetadata.otel ? getOtelFieldName(fieldMetadata) : undefined;
 
     const fieldMetadataProps = {
       ...fieldMetadata,
@@ -42,6 +44,7 @@ export class FieldMetadata {
       short,
       source,
       type,
+      otel_equivalent,
     };
 
     return new FieldMetadata(fieldMetadataProps);

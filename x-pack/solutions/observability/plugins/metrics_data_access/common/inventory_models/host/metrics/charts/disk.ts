@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LegendValue } from '@elastic/charts';
 import type { LensConfigWithId } from '../../../types';
 import type { HostFormulas } from '../formulas';
 import {
@@ -18,7 +19,7 @@ import {
   DISK_THROUGHPUT_LABEL,
   DISK_USAGE_BY_MOUNT_POINT_LABEL,
 } from '../../../shared/charts/constants';
-import type { FormulasCatalog } from '../../../shared/metrics/types';
+import { type FormulasCatalog } from '../../../shared/metrics/types';
 
 export const init = (formulas: FormulasCatalog<HostFormulas>) => {
   const diskIOReadWrite: LensConfigWithId = {
@@ -68,8 +69,9 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
         xAxis: '@timestamp',
         breakdown: {
           type: 'topValues',
-          field: 'system.filesystem.mount_point',
-          size: 5,
+          field:
+            formulas.schema === 'ecs' ? 'system.filesystem.mount_point' : 'attributes.mountpoint',
+          size: 15,
         },
         yAxis: [
           {
@@ -85,7 +87,15 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: [
+        LegendValue.Average,
+        LegendValue.Min,
+        LegendValue.Max,
+        LegendValue.LastNonNullValue,
+      ],
+    },
     ...DEFAULT_XY_YBOUNDS,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };

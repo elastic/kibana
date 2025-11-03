@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 
 export class InvalidEsCalendarIntervalError extends Error {

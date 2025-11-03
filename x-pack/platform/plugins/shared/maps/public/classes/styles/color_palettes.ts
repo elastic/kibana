@@ -5,6 +5,7 @@
  * 2.0.
  */
 import chroma from 'chroma-js';
+import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import {
   colorPalette as colorPaletteGenerator,
   euiPaletteForStatus,
@@ -15,9 +16,8 @@ import {
   euiPaletteGreen,
   euiPaletteGray,
   euiPaletteColorBlind,
-  EuiColorPalettePickerPaletteProps,
 } from '@elastic/eui';
-import { PercentilesFieldMeta } from '../../../common/descriptor_types';
+import type { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 

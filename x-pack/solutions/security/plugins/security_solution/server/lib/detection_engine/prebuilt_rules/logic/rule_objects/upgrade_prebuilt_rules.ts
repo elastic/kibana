@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -17,12 +18,17 @@ import type { IDetectionRulesClient } from '../../../rule_management/logic/detec
  * avoid being a "noisy neighbor".
  * @param detectionRulesClient IDetectionRulesClient
  * @param rules The rules to apply the update for
+ * @param logger Logger to log debug messages
  */
 export const upgradePrebuiltRules = async (
   detectionRulesClient: IDetectionRulesClient,
-  rules: PrebuiltRuleAsset[]
+  rules: PrebuiltRuleAsset[],
+  logger: Logger
 ) =>
   withSecuritySpan('upgradePrebuiltRules', async () => {
+    logger.debug(
+      `upgradePrebuiltRules: Upgrading prebuilt rules - started. Rules to upgrade: ${rules.length}`
+    );
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: rules,
@@ -30,6 +36,9 @@ export const upgradePrebuiltRules = async (
         return detectionRulesClient.upgradePrebuiltRule({ ruleAsset: rule });
       },
     });
+    logger.debug(
+      `upgradePrebuiltRules: Upgrading prebuilt rules - done. Upgraded: ${result.results.length}. Failed to upgrade: ${result.errors.length}.`
+    );
 
     return result;
   });

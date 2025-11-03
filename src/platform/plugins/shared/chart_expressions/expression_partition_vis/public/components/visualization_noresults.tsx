@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { ChartTypes } from '../../common/types';
+import type { ChartTypes } from '../../common/types';
 import { getIcon } from '../utils';
 
 interface Props {

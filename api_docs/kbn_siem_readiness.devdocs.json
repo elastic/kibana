@@ -1,0 +1,329 @@
+{
+  "id": "@kbn/siem-readiness",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.useReadinessTasks",
+        "type": "Function",
+        "tags": [],
+        "label": "useReadinessTasks",
+        "description": [],
+        "signature": [
+          "() => { logReadinessTask: ",
+          "UseMutateFunction",
+          "<void, unknown, ",
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.SiemReadinessTask",
+            "text": "SiemReadinessTask"
+          },
+          ", unknown>; getLatestTasks: ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.TaskSource",
+            "text": "TaskSource"
+          },
+          "[], unknown>; }"
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/use_readiness_tasks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.ReadinessTaskConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReadinessTaskConfig",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.ReadinessTaskConfig.id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"lets-get-started\" | \"enable-endpoint-visibility\" | \"ingest-cloud-audit-logs\" | \"ingest-asset-inventory\" | \"enable-kubernetes-container-logs\" | \"ingest-all-cloud-logs-inventory\" | \"enable-mitre-aligned-detection-rules\" | \"view-detection-coverage-mitre\" | \"add-threat-intel-feeds\" | \"customize-create-rules\" | \"use-attack-discovery\" | \"maintain-rule-coverage\" | \"enable-cspm-on-all-clouds\" | \"investigate-alert-using-timeline\" | \"use-ai-assistant-for-alert-root-cause\" | \"add-external-connectors\" | \"automate-response-rules-case-creation\" | \"create-manage-case-workflows\" | \"complete-automated-cases\""
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.ReadinessTaskConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.ReadinessTaskConfig.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.ReadinessTaskConfig.pillar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pillar",
+            "description": [],
+            "signature": [
+              "\"response\" | \"visibility\" | \"detection\""
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.ReadinessTaskConfig.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.ReadinessTaskConfig.taskNumber",
+            "type": "string",
+            "tags": [],
+            "label": "taskNumber",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.ReadinessTaskConfig.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.SiemReadinessTask",
+        "type": "Interface",
+        "tags": [],
+        "label": "SiemReadinessTask",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.SiemReadinessTask.task_id",
+            "type": "string",
+            "tags": [],
+            "label": "task_id",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.SiemReadinessTask.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"completed\" | \"incomplete\""
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.SiemReadinessTask.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.TaskSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "TaskSource",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.TaskSource",
+            "text": "TaskSource"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.SiemReadinessTask",
+            "text": "SiemReadinessTask"
+          }
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.TaskSource.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "'@timestamp'",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.GET_LATEST_SIEM_READINESS_TASKS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "GET_LATEST_SIEM_READINESS_TASKS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/siem_readiness/get_latest_tasks\""
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.POST_SIEM_READINESS_TASK_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "POST_SIEM_READINESS_TASK_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/siem_readiness/post_task\""
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.READINESS_TASKS",
+        "type": "Array",
+        "tags": [],
+        "label": "READINESS_TASKS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.ReadinessTaskConfig",
+            "text": "ReadinessTaskConfig"
+          },
+          "[]"
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.ReadinessTaskId",
+        "type": "Type",
+        "tags": [],
+        "label": "ReadinessTaskId",
+        "description": [],
+        "signature": [
+          "\"lets-get-started\" | \"enable-endpoint-visibility\" | \"ingest-cloud-audit-logs\" | \"ingest-asset-inventory\" | \"enable-kubernetes-container-logs\" | \"ingest-all-cloud-logs-inventory\" | \"enable-mitre-aligned-detection-rules\" | \"view-detection-coverage-mitre\" | \"add-threat-intel-feeds\" | \"customize-create-rules\" | \"use-attack-discovery\" | \"maintain-rule-coverage\" | \"enable-cspm-on-all-clouds\" | \"investigate-alert-using-timeline\" | \"use-ai-assistant-for-alert-root-cause\" | \"add-external-connectors\" | \"automate-response-rules-case-creation\" | \"create-manage-case-workflows\" | \"complete-automated-cases\""
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

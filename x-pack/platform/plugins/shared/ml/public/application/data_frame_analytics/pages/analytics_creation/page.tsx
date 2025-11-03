@@ -32,6 +32,7 @@ import {
   ValidationStepWrapper,
 } from './components';
 import { MlPageHeader } from '../../../components/page_header';
+import { PageTitle } from '../../../components/page_title';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
@@ -169,21 +170,25 @@ export const Page: FC<Props> = ({ jobId }) => {
   return (
     <div data-test-subj="mlAnalyticsCreationContainer">
       <MlPageHeader>
-        <span data-test-subj="mlDataFrameAnalyticsWizardHeaderTitle">
-          {jobId === undefined && (
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.creationPageTitle"
-              defaultMessage="Create job"
-            />
-          )}
-          {jobId !== undefined && (
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
-              defaultMessage="Clone job from {jobId}"
-              values={{ jobId }}
-            />
-          )}
-        </span>
+        <PageTitle
+          title={
+            <span data-test-subj="mlDataFrameAnalyticsWizardHeaderTitle">
+              {jobId === undefined && (
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.creationPageTitle"
+                  defaultMessage="Create job"
+                />
+              )}
+              {jobId !== undefined && (
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
+                  defaultMessage="Clone job from {jobId}"
+                  values={{ jobId }}
+                />
+              )}
+            </span>
+          }
+        />
       </MlPageHeader>
       <EuiPageBody restrictWidth={1200}>
         <EuiFlexGroup>

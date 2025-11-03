@@ -25,7 +25,9 @@ const patternListNoSignals = sortWithExcludesAtEnd(
   mockGlobalState.sourcerer.defaultDataView.patternList.filter((p) => p !== signalIndexName)
 );
 
-describe('sourcerer store helpers', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('sourcerer store helpers', () => {
   describe('getScopePatternListSelection', () => {
     it('is not a default data view, returns patternList sorted', () => {
       const result = getScopePatternListSelection(
@@ -283,7 +285,9 @@ describe('sourcerer store helpers', () => {
   });
 });
 
-describe('checkIfIndicesExist', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('checkIfIndicesExist', () => {
   it('should return true when scopeId is "detections" and patternList includes signalIndexName', () => {
     const result = checkIfIndicesExist({
       patternList: ['index1', 'index2', 'signalIndex'],

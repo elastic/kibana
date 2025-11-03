@@ -21,6 +21,6 @@
     "@kbn/i18n",
     "@kbn/task-manager-plugin",
     "@kbn/deeplinks-analytics",
-    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
   ]
 }

@@ -8,11 +8,12 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../shared_imports';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
+import type { MockRouter } from './__mocks__/routes.mock';
+import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
-jest.mock('../lib/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: (a: any) => a,
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
+  versionCheckHandlerWrapper: () => (a: any) => a,
 }));
 
 // Need to require to get mock on named export to work.
@@ -44,6 +45,8 @@ describe('ES deprecations API', () => {
       router: mockRouter,
       lib: { handleEsError },
       log: { error: jest.fn() },
+      current: { major: 8 },
+      cleanupReindexOperations: jest.fn(),
     };
     registerESDeprecationRoutes(routeDependencies);
   });

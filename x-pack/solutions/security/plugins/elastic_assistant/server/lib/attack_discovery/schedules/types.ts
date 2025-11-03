@@ -6,16 +6,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   AlertInstanceContext,
   RuleExecutorOptions,
   RuleType,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
-import { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
-import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
-import { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
-import {
+import type { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
+import type { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
+import type { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
+import type {
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_USERS,

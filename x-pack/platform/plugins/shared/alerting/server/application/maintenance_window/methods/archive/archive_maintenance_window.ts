@@ -67,14 +67,18 @@ async function archiveWithOCC(
       savedObjectsClient,
     });
 
-    const events = mergeEvents({
-      newEvents: generateMaintenanceWindowEvents({
-        rRule: attributes.rRule,
-        duration: attributes.duration,
-        expirationDate,
-      }),
-      oldEvents: attributes.events,
-    });
+    let events: MaintenanceWindow['events'] = [];
+
+    if (!shouldArchive) {
+      events = mergeEvents({
+        oldEvents: attributes.events,
+        newEvents: generateMaintenanceWindowEvents({
+          rRule: attributes.rRule,
+          duration: attributes.duration,
+          expirationDate,
+        }),
+      });
+    }
 
     const updatedMaintenanceWindowAttributes =
       transformMaintenanceWindowToMaintenanceWindowAttributes({

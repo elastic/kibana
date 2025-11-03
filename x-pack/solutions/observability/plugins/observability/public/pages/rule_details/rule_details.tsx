@@ -30,7 +30,7 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { RuleDetailsLocatorParams } from '../../locators/rule_details';
+import type { RuleDetailsLocatorParams } from '../../locators/rule_details';
 import { getControlIndex } from '../../utils/alert_controls/get_control_index';
 import { setStatusOnControlConfigs } from '../../utils/alert_controls/set_status_on_control_configs';
 import { updateSelectedOptions } from '../../utils/alert_controls/update_selected_options';

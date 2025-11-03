@@ -21,7 +21,7 @@ export const OriginalRuleQuery: React.FC<OriginalRuleQueryProps> = React.memo(
     return (
       <>
         <QueryHeader title={i18n.SPLUNK_QUERY_TITLE} tooltip={i18n.SPLUNK_QUERY_TOOLTIP} />
-        <EuiHorizontalRule margin="xs" />
+        <EuiHorizontalRule data-test-subj="queryHorizontalRule" margin="xs" />
         <QueryViewer
           ruleName={migrationRule.original_rule.title}
           query={migrationRule.original_rule.query}

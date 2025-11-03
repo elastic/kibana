@@ -1,0 +1,14 @@
+responses:
+  405:
+    description: "Indicates a Method Not Allowed response"
+    content:
+      application/json:
+        examples:
+          mcpMethodNotAllowedExample:
+            description: "Example response showing that the method to list MCP tools is not allowed"
+            value:
+              statusCode: 405
+              error: "Method Not Allowed"
+              message: "Method not allowed"
+              attributes:
+                code: -32000

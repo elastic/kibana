@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ClusterDetailsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ClusterDetailsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { CLUSTER_STAT_TIMEOUT } from './constants';
 
 /**

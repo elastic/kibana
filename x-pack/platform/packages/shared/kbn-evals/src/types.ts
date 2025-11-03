@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import {
-  EvaluationResult,
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type {
+  EvaluationResult as PhoenixEvaluationResult,
   Evaluator as PhoenixEvaluator,
   TaskOutput,
 } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { EvaluationCriterion } from './evaluators/criteria';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { HttpHandler } from '@kbn/core/public';
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { ScoutWorkerFixtures } from '@kbn/scout';
+import type { KibanaPhoenixClient } from './kibana_phoenix_client/client';
+import type { EvaluationCriterion } from './evaluators/criteria';
+import type { EvaluationAnalysisService } from './utils/analysis';
+import { type EvaluationReporter } from './utils/report_model_score';
 
 export interface EvaluationDataset {
   name: string;
@@ -31,6 +38,8 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
   metadata: TExample['metadata'];
 }
 
+export type EvaluationResult = PhoenixEvaluationResult;
+
 type EvaluatorCallback<TExample extends Example, TTaskOutput extends TaskOutput> = (
   params: EvaluatorParams<TExample, TTaskOutput>
 ) => Promise<EvaluationResult>;
@@ -44,6 +53,8 @@ export interface Evaluator<
 
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
+  correctnessAnalysis: () => Evaluator;
+  groundednessAnalysis: () => Evaluator;
 }
 
 export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOutput> = (
@@ -52,3 +63,26 @@ export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOut
 
 // simple version of Phoenix's ExampleWithId
 export type ExampleWithId = Example & { id: string };
+
+export interface EvaluationSpecificWorkerFixtures {
+  inferenceClient: BoundInferenceClient;
+  phoenixClient: KibanaPhoenixClient;
+  evaluators: DefaultEvaluators;
+  fetch: HttpHandler;
+  connector: AvailableConnectorWithId;
+  evaluationConnector: AvailableConnectorWithId;
+  repetitions: number;
+  evaluationAnalysisService: EvaluationAnalysisService;
+  reportModelScore: EvaluationReporter;
+}
+
+export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
+  inferenceClient: BoundInferenceClient;
+  phoenixClient: KibanaPhoenixClient;
+  evaluators: DefaultEvaluators;
+  fetch: HttpHandler;
+  connector: AvailableConnectorWithId;
+  evaluationConnector: AvailableConnectorWithId;
+  repetitions: number;
+  evaluationAnalysisService: EvaluationAnalysisService;
+}

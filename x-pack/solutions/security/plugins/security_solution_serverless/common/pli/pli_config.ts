@@ -22,6 +22,8 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.configurations,
       ProductFeatureKey.externalDetections,
       ProductFeatureKey.externalRuleActions,
+      ProductFeatureKey.casesConnectors,
+      ProductFeatureKey.aiValueReport,
     ],
     // neither of these tiers are available in ai_soc product line
     essentials: [],
@@ -55,6 +57,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.automaticImport,
       ProductFeatureKey.prebuiltRuleCustomization,
       ProductFeatureKey.siemMigrations,
+      ProductFeatureKey.aiValueReport,
     ],
   },
   [ProductLine.endpoint]: {
@@ -68,6 +71,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointPolicyProtections,
       ProductFeatureKey.endpointArtifactManagement,
       ProductFeatureKey.endpointExceptions,
+      ProductFeatureKey.endpointTrustedDevices,
       ProductFeatureKey.endpointHostIsolationExceptions,
       ProductFeatureKey.endpointResponseActions,
       ProductFeatureKey.osqueryAutomatedResponseActions,

@@ -12,7 +12,8 @@ import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/a
 import type { State } from '../../../../types';
 
 import { useImportWorkpad } from '../hooks';
-import { WorkpadImport as Component, Props as ComponentProps } from './workpad_import.component';
+import type { Props as ComponentProps } from './workpad_import.component';
+import { WorkpadImport as Component } from './workpad_import.component';
 
 type Props = Omit<ComponentProps, 'canUserWrite' | 'onImportWorkpad'>;
 

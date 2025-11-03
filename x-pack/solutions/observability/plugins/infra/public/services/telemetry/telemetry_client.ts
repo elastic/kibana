@@ -22,6 +22,7 @@ import type {
   HostsViewQuerySubmittedParams,
   ITelemetryClient,
   PerformanceMetricInnerEvents,
+  SchemaSelectorParams,
 } from './types';
 import { InfraTelemetryEventTypes } from './types';
 
@@ -148,5 +149,9 @@ export class TelemetryClient implements ITelemetryClient {
       InfraTelemetryEventTypes.ANOMALY_DETECTION_FILTER_FIELD_CHANGE,
       params
     );
+  };
+
+  public reportSchemaSelectorInteraction = (params: SchemaSelectorParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.SCHEMA_SELECTOR_INTERACTION, params);
   };
 }

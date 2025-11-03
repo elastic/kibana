@@ -10,7 +10,7 @@
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DataViewSavedObjectConflictError } from '../common/errors';
-import {
+import type {
   DataViewAttributes,
   SavedObject,
   PersistenceAPI,
@@ -58,7 +58,12 @@ export class ContentMagementWrapper implements PersistenceAPI {
       });
     } catch (e) {
       if (e.body?.statusCode === 404) {
-        throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
+        throw new SavedObjectNotFound({
+          type: DataViewSOType,
+          typeDisplayName: 'data view',
+          id,
+          link: '/app/management/kibana/dataViews',
+        });
       } else {
         throw e;
       }

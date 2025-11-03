@@ -5,30 +5,39 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import { useQuery } from '@tanstack/react-query';
-import type { UseQueryOptions } from '@tanstack/react-query';
+import { renderHook, waitFor } from '@testing-library/react';
+import { useQuery } from '@kbn/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
 import { useGetCustomScripts } from './use_get_custom_scripts';
 import { useHttp } from '../../../common/lib/kibana';
 import type { HttpSetup } from '@kbn/core/public';
 
-jest.mock('@tanstack/react-query');
+jest.mock('@kbn/react-query');
 jest.mock('../../../common/lib/kibana');
 
 describe('useGetCustomScripts', () => {
   const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>;
   const mockUseHttp = useHttp as jest.MockedFunction<typeof useHttp>;
-  const mockHttpGet = jest.fn();
+  let mockHttpGet = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Mock HTTP get to return successful response
+    mockHttpGet = jest.fn(async () => {
+      return {
+        data: [{ id: 'script1', name: 'Script 1', description: 'Test script 1' }],
+      };
+    });
+
     // Mock the useHttp hook
+    mockUseHttp.mockReset();
     mockUseHttp.mockReturnValue({
       get: mockHttpGet,
     } as unknown as HttpSetup);
 
     // Mock the useQuery hook to return successful response
+    mockUseQuery.mockReset();
     mockUseQuery.mockReturnValue({
       data: [{ id: 'script1', name: 'Script 1', description: 'Test script 1' }],
       isLoading: false,
@@ -42,11 +51,6 @@ describe('useGetCustomScripts', () => {
       fetchStatus: 'idle',
       refetch: jest.fn(),
     } as unknown as ReturnType<typeof useQuery>);
-
-    // Mock HTTP get to return successful response
-    mockHttpGet.mockResolvedValue({
-      data: [{ id: 'script1', name: 'Script 1', description: 'Test script 1' }],
-    });
   });
 
   test('calls useQuery with correct parameters for endpoint agent type', () => {
@@ -89,6 +93,33 @@ describe('useGetCustomScripts', () => {
       query: {
         agentType: 'endpoint',
       },
+    });
+  });
+
+  it('should include additional query params in API call', async () => {
+    renderHook(() => useGetCustomScripts('sentinel_one', { osType: 'linux' }));
+    const queryOptions = mockUseQuery.mock.calls[0][0] as UseQueryOptions<unknown, unknown>;
+    const queryFn = queryOptions.queryFn as () => Promise<unknown>;
+    await queryFn();
+
+    await waitFor(() => {
+      expect(mockHttpGet).toHaveBeenCalledWith('/internal/api/endpoint/action/custom_scripts', {
+        version: '1',
+        query: {
+          agentType: 'sentinel_one',
+          osType: 'linux',
+        },
+      });
+    });
+  });
+
+  it('should use custom options', async () => {
+    renderHook(() => useGetCustomScripts('sentinel_one', undefined, { cacheTime: 1 }));
+
+    expect(mockUseQuery).toHaveBeenCalledWith({
+      queryKey: ['get-custom-scripts', 'sentinel_one'],
+      queryFn: expect.any(Function),
+      cacheTime: 1,
     });
   });
 });

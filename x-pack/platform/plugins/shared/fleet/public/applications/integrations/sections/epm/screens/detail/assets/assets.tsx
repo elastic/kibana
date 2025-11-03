@@ -37,7 +37,7 @@ import {
 import { sendGetBulkAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
-import { DeferredAssetsSection } from './deferred_assets_accordion';
+import { DeferredAssetsSection } from './deferred_assets_section';
 import { AssetsAccordion } from './assets_accordion';
 import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
 
@@ -95,14 +95,17 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const pkgAssetsByType = useMemo(
     () =>
       pkgAssets.reduce((acc, asset) => {
-        if (!acc[asset.type] && displayedAssetTypes.includes(asset.type)) {
-          acc[asset.type] = [];
+        if (displayedAssetTypes.includes(asset.type)) {
+          if (!acc[asset.type]) {
+            acc[asset.type] = [];
+          }
+          acc[asset.type].push(asset);
         }
-        acc[asset.type].push(asset);
         return acc;
       }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
     [pkgAssets]
   );
+
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -175,6 +178,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   } else if (!canReadPackageSettings) {
     content = (
       <EuiCallOut
+        announceOnMount
         color="warning"
         title={
           <FormattedMessage
@@ -217,6 +221,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       !assetsInstalledInCurrentSpace ? (
         <>
           <EuiCallOut
+            announceOnMount
             heading="h2"
             title={
               <FormattedMessage

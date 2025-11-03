@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UrlObject } from './types';
+import type { UrlObject } from './types';
 
 /**
  * This class processes all Vega spec customizations,

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FILE_FORMATS } from '@kbn/file-upload-common';
@@ -18,11 +18,13 @@ interface Props {
 }
 
 export const SemanticTextInfo: FC<Props> = ({ results }) => {
+  // TBD: this may be needed after review of UX
   return results.format === FILE_FORMATS.TIKA ? (
     <>
       <EuiSpacer size="m" />
 
       <EuiCallOut
+        announceOnMount={true}
         title={
           <FormattedMessage
             id="xpack.dataVisualizer.semanticTextInfo.title"

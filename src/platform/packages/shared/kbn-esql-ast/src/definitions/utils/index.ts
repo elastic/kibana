@@ -8,23 +8,28 @@
  */
 
 export {
-  getFieldsOrFunctionsSuggestions,
+  getFieldsSuggestions,
+  getFunctionsSuggestions,
+  getLiteralsSuggestions,
   getControlSuggestionIfSupported,
   getControlSuggestion,
   getSafeInsertText,
   pushItUpInTheList,
 } from './autocomplete/helpers';
-export { getSuggestionsToRightOfOperatorExpression } from './operators';
 export {
-  buildFieldsDefinitionsWithMetadata,
-  getFunctionSuggestions,
+  suggestForExpression,
+  buildExpressionFunctionParameterContext,
+} from './autocomplete/expressions';
+export {
+  buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,
   getFunctionSignatures,
   getFunctionDefinition,
 } from './functions';
-export { getDateLiterals, getCompatibleLiterals, compareTypesWithLiterals } from './literals';
+export { getDateLiterals, getCompatibleLiterals } from './literals';
 export { getColumnForASTNode, pipePrecedesCurrentWord } from './shared';
 export { getExpressionType } from './expressions';
 export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';
 export { getColumnExists } from './columns';
 export { getValidSignaturesAndTypesToSuggestNext } from './autocomplete/helpers';
+export { getFormattedFunctionSignature } from './hover/functions';

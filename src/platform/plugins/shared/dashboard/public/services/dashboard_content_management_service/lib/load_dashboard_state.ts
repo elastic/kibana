@@ -13,7 +13,7 @@ import { getDashboardContentManagementCache } from '..';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
+import { contentManagementService } from '../../kibana_services';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 
 export const loadDashboardState = async ({
@@ -57,7 +57,7 @@ export const loadDashboardState = async ({
       })
       .catch((e) => {
         if (e.response?.status === 404) {
-          throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+          throw new SavedObjectNotFound({ type: DASHBOARD_CONTENT_ID, id });
         }
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);
@@ -83,49 +83,13 @@ export const loadDashboardState = async ({
     };
   }
 
-  const { references, attributes, managed } = rawDashboardContent;
-
-  const {
-    refreshInterval,
-    description,
-    timeRestore,
-    options,
-    panels,
-    kibanaSavedObjectMeta: { searchSource },
-    timeFrom,
-    timeTo,
-    title,
-  } = attributes;
-
-  const timeRange =
-    timeRestore && timeFrom && timeTo
-      ? {
-          from: timeFrom,
-          to: timeTo,
-        }
-      : undefined;
-
-  const { filters, query } = searchSource || {};
+  const { references, attributes, managed, version } = rawDashboardContent;
 
   return {
     managed,
     references,
-    resolveMeta,
-    dashboardInput: {
-      ...options,
-      refreshInterval,
-      timeRestore,
-      description,
-      timeRange,
-      filters,
-      panels,
-      query,
-      title,
-      tags:
-        savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
-
-      controlGroupInput: attributes.controlGroupInput,
-    },
+    resolveMeta: { ...resolveMeta, version },
+    dashboardInput: attributes,
     dashboardFound: true,
     dashboardId: savedObjectId,
   };

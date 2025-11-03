@@ -7,7 +7,7 @@
 
 import { Frequency } from '@kbn/rrule';
 import { transformScheduledReport } from './utils';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
 
 const baseReport = {
@@ -54,6 +54,20 @@ describe('transformScheduledReport', () => {
       expect.objectContaining({
         frequency: 'CUSTOM',
         customFrequency: Frequency.DAILY,
+        interval: 2,
+      })
+    );
+  });
+
+  it('marks as custom when freq=HOURLY and interval > 1', () => {
+    const report = {
+      ...baseReport,
+      schedule: { rrule: { freq: Frequency.HOURLY, tzid: 'UTC', interval: 2 } },
+    } as ScheduledReportApiJSON;
+    expect(transformScheduledReport(report).recurringSchedule).toEqual(
+      expect.objectContaining({
+        frequency: 'CUSTOM',
+        customFrequency: Frequency.HOURLY,
         interval: 2,
       })
     );

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { v5 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
 import { isAxiosError } from 'axios';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export async function createConnectorFixture({
   predefinedConnector,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
+import type { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
 
 export interface DashboardEmbedSettings {
   forceHideFilterBar?: boolean;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import { ALL_RECOMMENDED_FIELDS_FOR_ESQL } from '@kbn/discover-utils';
+import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
 const TRACES_INDEX_PATTERN = 'traces-*';
 const METRICS_INDEX_PATTERN = 'metrics-*';
@@ -109,8 +110,13 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
 
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
   const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
+
+  // Register recommended queries
   esqlExtensionsRegistry.setRecommendedQueries(
     [...TRACES_ESQL_RECOMMENDED_QUERIES, ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES],
     'oblt'
   );
+
+  // Register recommended fields
+  esqlExtensionsRegistry.setRecommendedFields(ALL_RECOMMENDED_FIELDS_FOR_ESQL, 'oblt');
 }

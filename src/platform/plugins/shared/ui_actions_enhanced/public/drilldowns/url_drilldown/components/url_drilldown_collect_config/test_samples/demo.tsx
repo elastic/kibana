@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { UrlDrilldownConfig } from '../../../types';
+import type { UrlDrilldownConfig } from '../../../types';
 import { UrlDrilldownCollectConfig } from '../url_drilldown_collect_config';
 
 export const Demo = () => {

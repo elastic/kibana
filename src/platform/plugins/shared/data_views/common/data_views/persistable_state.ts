@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import { DataViewSpec } from '../types';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { DataViewSpec } from '../types';
 
 export const DataViewPersistableStateService: PersistableStateService<DataViewSpec> = {
   inject: (state, references) => {

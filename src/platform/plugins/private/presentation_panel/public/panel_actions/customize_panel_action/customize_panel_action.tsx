@@ -8,15 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TracksOverlays } from '@kbn/presentation-util';
-import {
-  apiCanAccessViewMode,
-  apiPublishesDataViews,
-  apiPublishesUnifiedSearch,
-  apiPublishesTitle,
+import type { TracksOverlays } from '@kbn/presentation-util';
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
   HasParentApi,
   PublishesDataViews,
   PublishesWritableUnifiedSearch,
@@ -24,7 +19,15 @@ import {
   PublishesWritableTitle,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import {
+  apiCanAccessViewMode,
+  apiPublishesDataViews,
+  apiPublishesUnifiedSearch,
+  apiPublishesTitle,
+  getInheritedViewMode,
+} from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';
 import { ACTION_CUSTOMIZE_PANEL } from './constants';
 

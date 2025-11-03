@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ErrorType, extractErrorProperties, MLRequestFailure } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import { extractErrorProperties, MLRequestFailure } from '@kbn/ml-error-utils';
 import { useComponentTemplatesContext } from '../application/components/component_templates/component_templates_context';
 
 export function useMLModelNotificationToasts() {

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
 import { RootCauseAnalysisPanel } from '../rca_panel';

@@ -9,10 +9,10 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiComboBox,
   EuiFieldSearch,
@@ -41,7 +41,8 @@ import { indexHealthToHealthColor } from '../../../../shared/constants/health_co
 
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
-import { convertResultToFieldsAndIndex, ConvertedResult, FieldValue } from './convert_results';
+import type { ConvertedResult, FieldValue } from './convert_results';
+import { convertResultToFieldsAndIndex } from './convert_results';
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
 
@@ -170,8 +171,8 @@ export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, tota
       values={{
         end,
         start,
+        strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
         totalResults,
-        strong: (chunks) => `<strong>${chunks}</strong>`,
       }}
     />
   </EuiText>

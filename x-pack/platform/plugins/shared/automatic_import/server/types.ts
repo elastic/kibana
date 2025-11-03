@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import {
-  ActionsClientBedrockChatModel,
-  ActionsClientChatOpenAI,
-  ActionsClientGeminiChatModel,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server/plugin';
-import { ESProcessorItem, SamplesFormat, CelAuthType } from '../common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { ESProcessorItem, SamplesFormat, CelAuthType } from '../common';
 
 export interface AutomaticImportPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AutomaticImportPluginStart {}
+
+export interface AutomaticImportPluginStart {
+  inference: InferenceServerStart;
+}
 
 export interface AutomaticImportPluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -31,6 +29,7 @@ export interface AutomaticImportPluginSetupDependencies {
 export interface AutomaticImportPluginStartDependencies {
   licensing: LicensingPluginStart;
   actions: ActionsPluginStart;
+  inference: InferenceServerStart;
 }
 
 export interface SimplifiedProcessor {
@@ -195,8 +194,4 @@ export interface RelatedState {
   samplesFormat: SamplesFormat;
 }
 
-export type ChatModels =
-  | ActionsClientChatOpenAI
-  | ActionsClientBedrockChatModel
-  | ActionsClientSimpleChatModel
-  | ActionsClientGeminiChatModel;
+export type ChatModels = InferenceChatModel;

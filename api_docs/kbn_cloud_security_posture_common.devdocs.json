@@ -85,7 +85,7 @@
             "signature": [
               "(metricType: string, eventName: ",
               "CloudSecurityUiCounters",
-              ") => void"
+              ", appName?: string | undefined) => void"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/utils/ui_metrics.ts",
             "deprecated": false,
@@ -120,6 +120,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture-common",
+                "id": "def-common.UiMetricService.trackUiMetric.$3",
+                "type": "string",
+                "tags": [],
+                "label": "appName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/utils/ui_metrics.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1611,6 +1626,261 @@
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.ADVANCED_OPTION_ACCORDION_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "ADVANCED_OPTION_ACCORDION_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"advancedOptionsAccordion\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"launchAwsCloudFormationAccordianInstructions\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"aws-credentials-type-selector\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"launchCloudFormationAgentlessButton\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_ORGANIZATION_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_ORGANIZATION_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"organization-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"awsOrganizationTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_PROVIDER_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_PROVIDER_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"cloudSetupAwsTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_SINGLE_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_SINGLE_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"single-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_SINGLE_ACCOUNT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AWS_SINGLE_ACCOUNT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"awsSingleTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"launchCloudConnectorArmAccordianInstructions\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"azureCredentialsTypeSelector\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"azureLaunchCloudConnectorArmTemplate\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_ORGANIZATION_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_ORGANIZATION_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"organization-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"azureOrganizationAccountTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_PROVIDER_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_PROVIDER_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"cloudSetupAzureTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_SINGLE_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_SINGLE_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"single-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_SINGLE_ACCOUNT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "AZURE_SINGLE_ACCOUNT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"azureSingleAccountTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.BenchmarkId",
         "type": "Type",
         "tags": [],
@@ -1737,7 +2007,37 @@
         "label": "CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX",
         "description": [],
         "signature": [
-          "\"security_solution_cdr_latest_misconfigurations\""
+          "\"security_solution_cdr_latest_misconfigurations_v2\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS",
+        "description": [],
+        "signature": [
+          "string[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,
@@ -1776,11 +2076,86 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX",
+        "description": [],
+        "signature": [
+          "\"security_solution_cdr_latest_vulnerabilities_v2\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_VULNERABILITIES_DATA_VIEW_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CDR_VULNERABILITIES_DATA_VIEW_NAME",
+        "description": [],
+        "signature": [
+          "\"Latest Cloud Security Vulnerabilities\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.CDR_VULNERABILITIES_INDEX_PATTERN",
         "type": "string",
         "tags": [],
         "label": "CDR_VULNERABILITIES_INDEX_PATTERN",
         "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CLOUD_SECURITY_PLUGIN_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_SECURITY_PLUGIN_VERSION",
+        "description": [],
+        "signature": [
+          "\"1.9.0\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1991,6 +2366,96 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GCP_ORGANIZATION_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "GCP_ORGANIZATION_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"organization-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"gcpOrganizationAccountTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GCP_PROVIDER_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "GCP_PROVIDER_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"cloudSetupGcpTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GCP_SINGLE_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "GCP_SINGLE_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"single-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GCP_SINGLE_ACCOUNT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "GCP_SINGLE_ACCOUNT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"gcpSingleAccountTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GENERIC_ENTITY_INDEX_ENRICH_POLICY",
+        "type": "string",
+        "tags": [],
+        "label": "GENERIC_ENTITY_INDEX_ENRICH_POLICY",
+        "description": [],
+        "signature": [
+          "\"entity_store_field_retention_generic_<space>_v1.0.0\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.IndexStatus",
         "type": "Type",
         "tags": [],
@@ -2081,6 +2546,36 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.NAMESPACE_INPUT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "NAMESPACE_INPUT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"namespaceInputTestId\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.ORGANIZATION_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "ORGANIZATION_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"organization-account\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.SECURITY_DEFAULT_DATA_VIEW_ID",
         "type": "string",
         "tags": [],
@@ -2088,6 +2583,21 @@
         "description": [],
         "signature": [
           "\"security-solution-default\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.SINGLE_ACCOUNT",
+        "type": "string",
+        "tags": [],
+        "label": "SINGLE_ACCOUNT",
+        "description": [],
+        "signature": [
+          "\"single-account\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,
@@ -2141,6 +2651,420 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS",
+        "type": "Object",
+        "tags": [],
+        "label": "AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUDFORMATION",
+            "type": "string",
+            "tags": [],
+            "label": "CLOUDFORMATION",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL",
+            "type": "string",
+            "tags": [],
+            "label": "MANUAL",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AWS_INPUT_TEST_SUBJECTS",
+        "type": "Object",
+        "tags": [],
+        "label": "AWS_INPUT_TEST_SUBJECTS",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.ROLE_ARN",
+            "type": "string",
+            "tags": [],
+            "label": "ROLE_ARN",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID",
+            "type": "string",
+            "tags": [],
+            "label": "DIRECT_ACCESS_KEY_ID",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_SECRET_KEY",
+            "type": "string",
+            "tags": [],
+            "label": "DIRECT_ACCESS_SECRET_KEY",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_KEY_ID",
+            "type": "string",
+            "tags": [],
+            "label": "TEMP_ACCESS_KEY_ID",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SECRET_KEY",
+            "type": "string",
+            "tags": [],
+            "label": "TEMP_ACCESS_SECRET_KEY",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SESSION_TOKEN",
+            "type": "string",
+            "tags": [],
+            "label": "TEMP_ACCESS_SESSION_TOKEN",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_FILE",
+            "type": "string",
+            "tags": [],
+            "label": "SHARED_CREDENTIALS_FILE",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.SHARED_CREDENTIALS_PROFILE_NAME",
+            "type": "string",
+            "tags": [],
+            "label": "SHARED_CREDENTIALS_PROFILE_NAME",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AWS_INPUT_TEST_SUBJECTS.EXTERNAL_ID",
+            "type": "string",
+            "tags": [],
+            "label": "EXTERNAL_ID",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS",
+        "type": "Object",
+        "tags": [],
+        "label": "AZURE_INPUT_FIELDS_TEST_SUBJECTS",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID",
+            "type": "string",
+            "tags": [],
+            "label": "TENANT_ID",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID",
+            "type": "string",
+            "tags": [],
+            "label": "CLIENT_ID",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET",
+            "type": "string",
+            "tags": [],
+            "label": "CLIENT_SECRET",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH",
+            "type": "string",
+            "tags": [],
+            "label": "CLIENT_CERTIFICATE_PATH",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD",
+            "type": "string",
+            "tags": [],
+            "label": "CLIENT_CERTIFICATE_PASSWORD",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME",
+            "type": "string",
+            "tags": [],
+            "label": "CLIENT_USERNAME",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD",
+            "type": "string",
+            "tags": [],
+            "label": "CLIENT_PASSWORD",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID",
+            "type": "string",
+            "tags": [],
+            "label": "CLOUD_CONNECTOR_ID",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.AZURE_SETUP_FORMAT_TEST_SUBJECTS",
+        "type": "Object",
+        "tags": [],
+        "label": "AZURE_SETUP_FORMAT_TEST_SUBJECTS",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE",
+            "type": "string",
+            "tags": [],
+            "label": "ARM_TEMPLATE",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL",
+            "type": "string",
+            "tags": [],
+            "label": "MANUAL",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS",
+        "type": "Object",
+        "tags": [],
+        "label": "GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUD_SHELL",
+            "type": "string",
+            "tags": [],
+            "label": "CLOUD_SHELL",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL",
+            "type": "string",
+            "tags": [],
+            "label": "MANUAL",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GCP_INPUT_FIELDS_TEST_SUBJECTS",
+        "type": "Object",
+        "tags": [],
+        "label": "GCP_INPUT_FIELDS_TEST_SUBJECTS",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP",
+            "type": "string",
+            "tags": [],
+            "label": "GOOGLE_CLOUD_SHELL_SETUP",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID",
+            "type": "string",
+            "tags": [],
+            "label": "PROJECT_ID",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID",
+            "type": "string",
+            "tags": [],
+            "label": "ORGANIZATION_ID",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE",
+            "type": "string",
+            "tags": [],
+            "label": "CREDENTIALS_TYPE",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE",
+            "type": "string",
+            "tags": [],
+            "label": "CREDENTIALS_FILE",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON",
+            "type": "string",
+            "tags": [],
+            "label": "CREDENTIALS_JSON",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL",
+            "type": "string",
+            "tags": [],
+            "label": "CREDENTIALS_JSON_SECRET_PANEL",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.INTERNAL_FEATURE_FLAGS",

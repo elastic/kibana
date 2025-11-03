@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -17,7 +18,6 @@ import type {
   ISavedObjectsRepository,
   IScopedClusterClient,
 } from '@kbn/core/server';
-import type { AnySchema } from 'joi';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -63,7 +63,7 @@ export interface HookServices {
 
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
-  listTypes: ActionTypeRegistry['list'];
+  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
@@ -92,6 +92,7 @@ export interface ActionTypeExecutorOptions<
   source?: ActionExecutionSource<unknown>;
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
+  connectorTokenClient?: ConnectorTokenClientContract;
 }
 
 export type ActionResult = Connector;
@@ -117,11 +118,9 @@ export type ExecutorType<
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
+type Validator<T> = Pick<z.ZodType<T>, 'parse'>;
 export interface ValidatorType<T> {
-  schema: {
-    validate(value: unknown): T;
-    getSchema?: () => AnySchema;
-  };
+  schema: Validator<T>;
   customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
@@ -199,6 +198,7 @@ export interface ActionType<
   };
   isSystemActionType?: boolean;
   subFeature?: SubFeature;
+  isDeprecated?: boolean;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.

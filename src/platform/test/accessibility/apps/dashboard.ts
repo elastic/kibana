@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, dashboard } = getPageObjects(['common', 'dashboard']);
@@ -43,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Open add panel', async () => {
-      await dashboardAddPanel.clickOpenAddPanel();
+    it('Open Add from library flyout', async () => {
+      await dashboardAddPanel.clickAddFromLibrary();
       await a11y.testAppSnapshot();
     });
 
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Open add panel again', async () => {
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await a11y.testAppSnapshot();
     });
 

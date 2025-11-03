@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { MESSAGE_PROCESSOR } from '../../../common/constants';
 
 export function createBaseEvent(

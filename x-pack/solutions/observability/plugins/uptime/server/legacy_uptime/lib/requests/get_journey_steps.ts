@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
+import type { UMElasticsearchQueryFn } from '../adapters/framework';
+import type { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;

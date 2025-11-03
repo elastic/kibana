@@ -18,18 +18,16 @@ import type {
   RuleMigrationAdapters,
   RuleMigrationIndexNameProviders,
 } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 import {
   getIntegrationsFieldMap,
   getPrebuiltRulesFieldMap,
   migrationsFieldMaps,
   ruleMigrationResourcesFieldMap,
   ruleMigrationsFieldMap,
-} from './rule_migrations_field_maps';
+} from './field_maps';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
 import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
-
-export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
 interface CreateClientParams {
   spaceId: string;
@@ -47,6 +45,8 @@ export interface SetupParams extends Omit<InstallParams, 'logger'> {
 }
 
 export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
+  protected readonly baseIndexName = '.kibana-siem-rule-migrations';
+
   private readonly adapters: RuleMigrationAdapters;
 
   constructor(private logger: Logger, protected kibanaVersion: string, elserInferenceId?: string) {
@@ -73,10 +73,6 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
         fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
       }),
     };
-  }
-
-  private getAdapterIndexName(adapterId: RuleMigrationAdapterId) {
-    return `${INDEX_PATTERN}-${adapterId}`;
   }
 
   private createRuleIndexPatternAdapter({ adapterId, fieldMap }: CreateRuleAdapterParams) {

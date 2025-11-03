@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Configurable } from '@kbn/kibana-utils-plugin/public';
-import { LicenseType } from '@kbn/licensing-plugin/public';
-import {
+import type { Configurable } from '@kbn/kibana-utils-plugin/public';
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '@kbn/ui-actions-plugin/public';
-import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import {
+import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type {
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedAction,

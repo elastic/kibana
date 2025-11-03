@@ -8,15 +8,15 @@
  */
 
 import { DynamicActionManager } from './dynamic_action_manager';
-import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
-import { UiActionsService } from '@kbn/ui-actions-plugin/public';
-import { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';
+import type { ActionStorage } from './dynamic_action_storage';
+import { MemoryActionStorage } from './dynamic_action_storage';
 import { of } from '@kbn/kibana-utils-plugin/common';
 import { UiActionsServiceEnhancements } from '../services';
-import { ActionFactoryDefinition } from './action_factory_definition';
-import { SerializedAction, SerializedEvent } from './types';
+import type { ActionFactoryDefinition } from './action_factory_definition';
+import type { SerializedAction, SerializedEvent } from './types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { dynamicActionGrouping } from './dynamic_action_grouping';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -86,10 +86,7 @@ const setup = (
 ) => {
   const isCompatible = async () => true;
   const storage: ActionStorage = new MemoryActionStorage(events);
-  const actions: ActionRegistry = new Map();
-  const uiActions = new UiActionsService({
-    actions,
-  });
+  const uiActions = uiActionsPluginMock.createStartContract();
   const uiActionsEnhancements = new UiActionsServiceEnhancements({
     getLicense: getLicenseInfo,
     featureUsageSetup: licensingMock.createSetup().featureUsage,
@@ -101,13 +98,9 @@ const setup = (
     uiActions: { ...uiActions, ...uiActionsEnhancements },
   });
 
-  uiActions.registerTrigger({
-    id: 'VALUE_CLICK_TRIGGER',
-  });
+  uiActions.hasAction.mockReturnValue(true);
 
   return {
-    isCompatible,
-    actions,
     storage,
     uiActions: { ...uiActions, ...uiActionsEnhancements },
     manager,
@@ -125,7 +118,7 @@ describe('DynamicActionManager', () => {
 
   describe('.start()', () => {
     test('instantiates stored events', async () => {
-      const { manager, actions, uiActions } = setup([event1]);
+      const { manager, uiActions } = setup([event1]);
       const create1 = jest.spyOn(actionFactoryDefinition1, 'create');
       const create2 = jest.spyOn(actionFactoryDefinition2, 'create');
 
@@ -134,17 +127,31 @@ describe('DynamicActionManager', () => {
 
       expect(create1).toHaveBeenCalledTimes(0);
       expect(create2).toHaveBeenCalledTimes(0);
-      expect(actions.size).toBe(0);
+      expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
+      expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
 
       await manager.start();
 
       expect(create1).toHaveBeenCalledTimes(1);
       expect(create2).toHaveBeenCalledTimes(0);
-      expect(actions.size).toBe(1);
+      expect(uiActions.registerAction).toHaveBeenCalledTimes(1);
+      expect(uiActions.registerAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          getDisplayName: expect.any(Function),
+          execute: expect.any(Function),
+          id: expect.stringContaining('EVENT_ID_1'),
+          grouping: dynamicActionGrouping,
+        })
+      );
+      expect(uiActions.attachAction).toHaveBeenCalledTimes(1);
+      expect(uiActions.attachAction).toHaveBeenCalledWith(
+        'VALUE_CLICK_TRIGGER',
+        expect.stringContaining('EVENT_ID_1')
+      );
     });
 
     test('does nothing when no events stored', async () => {
-      const { manager, actions, uiActions } = setup();
+      const { manager, uiActions } = setup();
       const create1 = jest.spyOn(actionFactoryDefinition1, 'create');
       const create2 = jest.spyOn(actionFactoryDefinition2, 'create');
 
@@ -153,13 +160,15 @@ describe('DynamicActionManager', () => {
 
       expect(create1).toHaveBeenCalledTimes(0);
       expect(create2).toHaveBeenCalledTimes(0);
-      expect(actions.size).toBe(0);
+      expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
+      expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
 
       await manager.start();
 
       expect(create1).toHaveBeenCalledTimes(0);
       expect(create2).toHaveBeenCalledTimes(0);
-      expect(actions.size).toBe(0);
+      expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
+      expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
     });
 
     test('UI state is empty before manager starts', async () => {
@@ -229,20 +238,23 @@ describe('DynamicActionManager', () => {
 
   describe('.stop()', () => {
     test('removes events from UI actions registry', async () => {
-      const { manager, actions, uiActions } = setup([event1, event2]);
+      const { manager, uiActions } = setup([event1, event2]);
 
       uiActions.registerActionFactory(actionFactoryDefinition1);
       uiActions.registerActionFactory(actionFactoryDefinition2);
 
-      expect(actions.size).toBe(0);
+      expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
+      expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
 
       await manager.start();
 
-      expect(actions.size).toBe(2);
+      expect(uiActions.registerAction).toHaveBeenCalledTimes(2);
+      expect(uiActions.attachAction).toHaveBeenCalledTimes(2);
 
       await manager.stop();
 
-      expect(actions.size).toBe(0);
+      expect(uiActions.unregisterAction).toHaveBeenCalledTimes(2);
+      expect(uiActions.detachAction).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -298,8 +310,8 @@ describe('DynamicActionManager', () => {
         expect(manager.state.get().events.length).toBe(1);
       });
 
-      test('adds revived actiosn to "dynamic action" grouping', async () => {
-        const { manager, uiActions, actions } = setup([]);
+      test('adds revived actions to "dynamic action" grouping', async () => {
+        const { manager, uiActions } = setup([]);
         const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
@@ -313,10 +325,11 @@ describe('DynamicActionManager', () => {
         expect(manager.state.get().events.length).toBe(0);
 
         await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
-
-        const createdAction = await actions.values().next().value();
-
-        expect(createdAction.grouping).toBe(dynamicActionGrouping);
+        expect(uiActions.registerAction).toHaveBeenCalledWith(
+          expect.objectContaining({
+            grouping: dynamicActionGrouping,
+          })
+        );
       });
 
       test('optimistically adds event to UI state', async () => {
@@ -343,7 +356,7 @@ describe('DynamicActionManager', () => {
       });
 
       test('instantiates event in actions service', async () => {
-        const { manager, uiActions, actions } = setup([]);
+        const { manager, uiActions } = setup([]);
         const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
@@ -354,11 +367,13 @@ describe('DynamicActionManager', () => {
 
         await manager.start();
 
-        expect(actions.size).toBe(0);
+        expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
+        expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
 
         await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
 
-        expect(actions.size).toBe(1);
+        expect(uiActions.registerAction).toHaveBeenCalledTimes(1);
+        expect(uiActions.attachAction).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -430,7 +445,7 @@ describe('DynamicActionManager', () => {
       });
 
       test('does not instantiate event in actions service', async () => {
-        const { manager, storage, uiActions, actions } = setup([]);
+        const { manager, storage, uiActions } = setup([]);
         const action: SerializedAction = {
           factoryId: actionFactoryDefinition1.id,
           name: 'foo',
@@ -444,11 +459,13 @@ describe('DynamicActionManager', () => {
 
         await manager.start();
 
-        expect(actions.size).toBe(0);
+        expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
+        expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
 
         await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
 
-        expect(actions.size).toBe(0);
+        expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
+        expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
       });
 
       test('throws when trigger is unknown', async () => {
@@ -470,16 +487,17 @@ describe('DynamicActionManager', () => {
   describe('.updateEvent()', () => {
     describe('when storage succeeds', () => {
       test('un-registers old event from ui actions service and registers the new one', async () => {
-        const { manager, actions, uiActions } = setup([event3]);
+        const { manager, uiActions } = setup([event3]);
 
         uiActions.registerActionFactory(actionFactoryDefinition2);
         await manager.start();
 
-        expect(actions.size).toBe(1);
+        expect(uiActions.registerAction).toHaveBeenCalledTimes(1);
+        expect(uiActions.attachAction).toHaveBeenCalledTimes(1);
 
-        const registeredAction1 = await actions.values().next().value();
+        const registeredAction1 = uiActions.registerAction.mock.calls[0][0];
 
-        expect(registeredAction1.getDisplayName()).toBe('Action 3');
+        expect(registeredAction1?.getDisplayName?.({})).toBe('Action 3');
 
         const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
@@ -489,11 +507,17 @@ describe('DynamicActionManager', () => {
 
         await manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']);
 
-        expect(actions.size).toBe(1);
+        expect(uiActions.detachAction).toHaveBeenCalledWith(
+          'VALUE_CLICK_TRIGGER',
+          expect.stringContaining('EVENT_ID_3')
+        );
+        expect(uiActions.unregisterAction).toHaveBeenCalledWith(
+          expect.stringContaining('EVENT_ID_3')
+        );
 
-        const registeredAction2 = await actions.values().next().value();
+        const registeredAction2 = uiActions.registerAction.mock.calls[1][0];
 
-        expect(registeredAction2.getDisplayName()).toBe('foo');
+        expect(registeredAction2?.getDisplayName?.({})).toBe('foo');
       });
 
       test('updates event in storage', async () => {
@@ -590,7 +614,7 @@ describe('DynamicActionManager', () => {
       });
 
       test('keeps the old action in actions registry', async () => {
-        const { manager, storage, actions, uiActions } = setup([event3]);
+        const { manager, storage, uiActions } = setup([event3]);
 
         storage.update = () => {
           throw new Error('bar');
@@ -598,11 +622,12 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition2);
         await manager.start();
 
-        expect(actions.size).toBe(1);
+        expect(uiActions.registerAction).toHaveBeenCalledTimes(1);
+        expect(uiActions.attachAction).toHaveBeenCalledTimes(1);
 
-        const registeredAction1 = await actions.values().next().value();
+        const registeredAction1 = uiActions.registerAction.mock.calls[0][0];
 
-        expect(registeredAction1.getDisplayName()).toBe('Action 3');
+        expect(registeredAction1?.getDisplayName?.({})).toBe('Action 3');
 
         const action: SerializedAction = {
           factoryId: actionFactoryDefinition2.id,
@@ -612,11 +637,16 @@ describe('DynamicActionManager', () => {
 
         await of(manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']));
 
-        expect(actions.size).toBe(1);
+        expect(uiActions.detachAction).toHaveBeenCalledWith(
+          'VALUE_CLICK_TRIGGER',
+          expect.stringContaining('EVENT_ID_3')
+        );
+        expect(uiActions.unregisterAction).toHaveBeenCalledWith(
+          expect.stringContaining('_EVENT_ID_3')
+        );
 
-        const registeredAction2 = await actions.values().next().value();
-
-        expect(registeredAction2.getDisplayName()).toBe('Action 3');
+        const registeredAction2 = uiActions.registerAction.mock.calls[1][0];
+        expect(registeredAction2?.getDisplayName?.({})).toBe('foo');
       });
 
       test('keeps old event in UI state', async () => {
@@ -646,17 +676,18 @@ describe('DynamicActionManager', () => {
   describe('.deleteEvents()', () => {
     describe('when storage succeeds', () => {
       test('removes all actions from uiActions service', async () => {
-        const { manager, actions, uiActions } = setup([event2, event1]);
+        const { manager, uiActions } = setup([event2, event1]);
 
         uiActions.registerActionFactory(actionFactoryDefinition1);
 
         await manager.start();
 
-        expect(actions.size).toBe(2);
+        expect(uiActions.registerAction).toHaveBeenCalledTimes(2);
 
         await manager.deleteEvents([event1.eventId, event2.eventId]);
 
-        expect(actions.size).toBe(0);
+        expect(uiActions.detachAction).toHaveBeenCalledTimes(2);
+        expect(uiActions.unregisterAction).toHaveBeenCalledTimes(2);
       });
 
       test('removes all events from storage', async () => {
@@ -711,32 +742,42 @@ describe('DynamicActionManager', () => {
 
     await manager.start();
 
-    const basicActions = await uiActions.getTriggerCompatibleActions('VALUE_CLICK_TRIGGER', {});
-    expect(basicActions).toHaveLength(1);
+    const basicFactory = uiActions.getActionFactory(actionFactoryDefinition1.id);
+    const goldFactory = uiActions.getActionFactory(actionFactoryDefinition2.id);
+
+    expect(basicFactory?.isCompatibleLicense()).toBe(true);
+    expect(goldFactory?.isCompatibleLicense()).toBe(false);
 
     getLicenseInfo.mockImplementation(() =>
       licensingMock.createLicense({ license: { type: 'gold' } })
     );
 
-    const basicAndGoldActions = await uiActions.getTriggerCompatibleActions(
-      'VALUE_CLICK_TRIGGER',
-      {}
-    );
-
-    expect(basicAndGoldActions).toHaveLength(2);
+    expect(basicFactory?.isCompatibleLicense()).toBe(true);
+    expect(goldFactory?.isCompatibleLicense()).toBe(true);
   });
 
   test("failing to revive/kill an action doesn't fail action manager", async () => {
     const { manager, uiActions, storage } = setup([event1, event3, event2]);
-
     uiActions.registerActionFactory(actionFactoryDefinition1);
 
     await manager.start();
 
-    expect(await uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(2);
+    // since event3's factory is not registered, it will skip registering that action
+    expect(uiActions.registerAction).toHaveBeenCalledTimes(2);
+    const registeredAction1 = uiActions.registerAction.mock.calls[0][0];
+    expect(registeredAction1?.getDisplayName?.({})).toBe('Action 1');
+    const registeredAction2 = uiActions.registerAction.mock.calls[1][0];
+    expect(registeredAction2?.getDisplayName?.({})).toBe('Action 2');
+
     expect(await storage.list()).toEqual([event1, event3, event2]);
 
+    uiActions.hasAction.mockImplementation((actionId: string) =>
+      [registeredAction1.id, registeredAction2.id].includes(actionId)
+    );
     await manager.stop();
-    expect(await uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(0);
+    // since event3's action is not registered, it will skip unregistering that action
+    expect(uiActions.unregisterAction).toHaveBeenCalledTimes(2);
+    expect(uiActions.unregisterAction).toHaveBeenCalledWith(expect.stringContaining('EVENT_ID_1'));
+    expect(uiActions.unregisterAction).toHaveBeenCalledWith(expect.stringContaining('EVENT_ID_2'));
   });
 });

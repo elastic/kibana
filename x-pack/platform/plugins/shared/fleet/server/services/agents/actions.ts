@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import apm from 'elastic-apm-node';
 import pMap from 'p-map';
 
-import { partition, uniq } from 'lodash';
+import { merge, partition, uniq } from 'lodash';
 
 import { appContextService } from '../app_context';
 import type {
@@ -19,6 +19,7 @@ import type {
   AgentActionType,
   NewAgentAction,
   FleetServerAgentAction,
+  SecretReference,
 } from '../../../common/types/models';
 import {
   AGENT_ACTIONS_INDEX,
@@ -36,6 +37,12 @@ import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filteri
 
 import { MAX_CONCURRENT_CREATE_ACTIONS } from '../../constants';
 
+import {
+  extractAndWriteActionSecrets,
+  isActionSecretStorageEnabled,
+  toCompiledSecretRef,
+} from '../secrets';
+
 import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
@@ -44,13 +51,38 @@ export const NO_EXPIRATION = 'NONE';
 
 const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE', 'MIGRATE']);
 
+/**
+ * Indexes a new action to the .fleet-actions index.
+ * Takes any secret data stored within the secrets field, stores it in saved objects,
+ * and replaces them in the action data with a reference to the saved objects.
+ */
 export async function createAgentAction(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
   const actionId = newAgentAction.id ?? uuidv4();
   const now = Date.now();
   const timestamp = new Date(now).toISOString();
+
+  let data;
+  let secretReferences: SecretReference[] | undefined;
+  // Store secret values if enabled, otherwise store them as plain text.
+  if (await isActionSecretStorageEnabled(esClient, soClient)) {
+    const secretsRes = await extractAndWriteActionSecrets({
+      action: newAgentAction,
+      esClient,
+    });
+    const mergedData = merge(
+      secretsRes.actionWithSecrets.data,
+      secretsRes.actionWithSecrets.secrets
+    );
+    data = transformDataSecrets(mergedData);
+    secretReferences = secretsRes.secretReferences;
+  } else {
+    data = merge(newAgentAction.data, newAgentAction.secrets);
+  }
+
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
     expiration:
@@ -60,7 +92,7 @@ export async function createAgentAction(
     agents: newAgentAction.agents,
     namespaces: newAgentAction.namespaces,
     action_id: actionId,
-    data: newAgentAction.data,
+    data,
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
     minimum_execution_duration: newAgentAction.minimum_execution_duration,
@@ -69,6 +101,7 @@ export async function createAgentAction(
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
     policyId: newAgentAction.policyId,
+    ...(secretReferences?.length && { secret_references: secretReferences }),
   };
 
   const messageSigningService = appContextService.getMessageSigningService();
@@ -97,6 +130,34 @@ export async function createAgentAction(
     ...newAgentAction,
     created_at: timestamp,
   };
+}
+
+/**
+ * Recursively transforms all occurrences of { id: string } objects
+ * into `$co.elastic.secret{${id}}`, for any level of nesting.
+ */
+export function transformDataSecrets<T>(mergedData: T): any {
+  if (Array.isArray(mergedData)) {
+    return mergedData.map(transformDataSecrets);
+  } else if (mergedData && typeof mergedData === 'object') {
+    const newMergedData: any = {}; // NewAgentAction.data has any type
+    for (const [key, value] of Object.entries(mergedData)) {
+      if (
+        value &&
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        Object.keys(value).length === 1 &&
+        Object.prototype.hasOwnProperty.call(value, 'id') &&
+        typeof value.id === 'string'
+      ) {
+        newMergedData[key] = toCompiledSecretRef(value.id);
+      } else {
+        newMergedData[key] = transformDataSecrets(value);
+      }
+    }
+    return newMergedData;
+  }
+  return mergedData;
 }
 
 export async function bulkCreateAgentActions(
@@ -371,7 +432,7 @@ export async function cancelAgentAction(
   const cancelledActions: Array<{ agents: string[] }> = [];
 
   const createAction = async (action: FleetServerAgentAction) => {
-    await createAgentAction(esClient, {
+    await createAgentAction(esClient, soClient, {
       id: cancelActionId,
       type: 'CANCEL',
       namespaces: [currentSpaceId],
@@ -579,6 +640,7 @@ export interface ActionsService {
 
   createAgentAction: (
     esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
     newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
   getAgentActions: (esClient: ElasticsearchClient, actionId: string) => Promise<any[]>;

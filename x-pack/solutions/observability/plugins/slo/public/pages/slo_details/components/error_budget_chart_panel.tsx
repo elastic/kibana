@@ -7,17 +7,17 @@
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useState } from 'react';
 import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ChartData } from '../../../typings/slo';
-import { TimeBounds } from '../types';
+import type { ChartData } from '../../../typings/slo';
+import type { TimeBounds } from '../types';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
 
@@ -43,7 +43,7 @@ export function ErrorBudgetChartPanel({
   const { embeddable } = useKibana().services;
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
       const embeddableInput = {
         title: newTitle,
@@ -59,8 +59,8 @@ export function ErrorBudgetChartPanel({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },

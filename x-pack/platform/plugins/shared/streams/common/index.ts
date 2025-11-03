@@ -6,6 +6,11 @@
  */
 
 export type { Asset, AssetType } from './assets';
+export type {
+  ProcessorSuggestion,
+  ProcessorPropertySuggestion,
+  ProcessorSuggestionsResponse,
+} from './ingest_processor_suggestions';
 
 export {
   STREAMS_TIERED_FEATURES,

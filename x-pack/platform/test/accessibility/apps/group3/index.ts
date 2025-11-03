@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('X-Pack Accessibility Tests - Group 3', function () {
@@ -21,10 +21,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./snapshot_and_restore'));
     loadTestFile(require.resolve('./cross_cluster_replication'));
     loadTestFile(require.resolve('./reporting'));
+    loadTestFile(require.resolve('./search_sessions'));
 
     // loadTestFile(require.resolve('./license_management'));
     // loadTestFile(require.resolve('./tags'));
-    // loadTestFile(require.resolve('./search_sessions'));
     // loadTestFile(require.resolve('./stack_monitoring'));
     // loadTestFile(require.resolve('./watcher'));
     // loadTestFile(require.resolve('./rollup_jobs'));

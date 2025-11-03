@@ -8,7 +8,8 @@
  */
 
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';

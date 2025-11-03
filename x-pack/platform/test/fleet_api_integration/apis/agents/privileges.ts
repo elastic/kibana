@@ -15,7 +15,7 @@ import {
   FILE_STORAGE_METADATA_AGENT_INDEX,
 } from '@kbn/fleet-plugin/server/constants';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { generateAgent } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { testUsers } from '../test_users';
@@ -316,7 +316,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         method: 'POST',
-        path: '/api/fleet/agents/agent1/migrate',
+        path: '/api/fleet/agents/agent2/migrate',
         scenarios: ALL_SCENARIOS,
         send: {
           enrollment_token: '1234',

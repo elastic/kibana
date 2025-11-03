@@ -10,7 +10,8 @@ import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
-import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
+import type { KibanaTestBed } from '../kibana_deprecations.helpers';
+import { setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecation details flyout', () => {
   let testBed: KibanaTestBed;

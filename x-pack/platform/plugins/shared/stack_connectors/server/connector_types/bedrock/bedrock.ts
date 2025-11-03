@@ -280,10 +280,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { body, model: reqModel, signal, timeout, raw }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', body);
     // set model on per request basis
     // Application Inference Profile IDs need to be encoded when using the API
     // Decode first to ensure an existing encoded value is not double encoded
-    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
+    const model = reqModel ?? this.model;
+    if (!model) {
+      throw new Error('No model specified. Please configure a default model.');
+    }
+    const currentModel = encodeURIComponent(decodeURIComponent(model));
     const path = `/model/${currentModel}/invoke`;
     const signed = this.signRequest(body, path, false);
     const requestArgs = {
@@ -327,10 +333,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { body, model: reqModel, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', body);
     // set model on per request basis
     // Application Inference Profile IDs need to be encoded when using the API
     // Decode first to ensure an existing encoded value is not double encoded
-    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
+    const model = reqModel ?? this.model;
+    if (!model) {
+      throw new Error('No model specified. Please configure a default model.');
+    }
+    const currentModel = encodeURIComponent(decodeURIComponent(model));
     const path = `/model/${currentModel}/invoke-with-response-stream`;
     const signed = this.signRequest(body, path, true);
 
@@ -523,6 +535,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
     const modelId = reqModel ?? this.model;
+    if (!modelId) {
+      throw new Error('No model specified. Please configure a default model.');
+    }
     const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse`;
 
@@ -570,6 +585,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     connectorUsageCollector,
   }: ConverseStreamParams): Promise<ConverseActionResponse> {
     const modelId = reqModel ?? this.model;
+    if (!modelId) {
+      throw new Error('No model specified. Please configure a default model.');
+    }
     const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse-stream`;
 

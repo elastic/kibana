@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
-import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../../../types';
+import type { Filter } from '@kbn/es-query';
+import type { UnifiedHistogramInput$ } from '../../../types';
+import { UnifiedHistogramFetchStatus } from '../../../types';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { useTotalHits } from './use_total_hits';
 import { useEffect as mockUseEffect } from 'react';
@@ -17,7 +18,8 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { of, Subject, throwError } from 'rxjs';
 import { waitFor, renderHook } from '@testing-library/react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
+import type { SearchSourceSearchOptions } from '@kbn/data-plugin/common';
+import { DataViewType } from '@kbn/data-plugin/common';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
 jest.mock('react-use/lib/useDebounce', () => {
@@ -55,6 +57,7 @@ describe('useTotalHits', () => {
     query: { query: '', language: 'kuery' },
     getTimeRange: () => timeRange,
     fetch$,
+    abortController: new AbortController(),
     onTotalHitsChange: jest.fn(),
   });
 

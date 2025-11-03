@@ -8,12 +8,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   ShareRegistry,
   ShareMenuRegistrySetup,
   ShareMenuRegistryStart,
 } from './share_menu_registry';
-import { ShareContext, ShareConfigs, ShareActionIntents } from '../types';
+import type { ShareContext, ShareConfigs, ShareActionIntents } from '../types';
 
 const createSetupMock = (): jest.Mocked<ShareMenuRegistrySetup> => {
   const setup = {
@@ -29,7 +29,7 @@ const createStartMock = (): jest.Mocked<ShareMenuRegistryStart> => {
       (_objectType: string, _groupId?: string) => [] as ShareActionIntents[]
     ),
     resolveShareItemsForShareContext: jest.fn(
-      (_props: ShareContext & { isServerless: boolean }) => [] as ShareConfigs[]
+      async (_props: ShareContext & { isServerless: boolean }) => [] as ShareConfigs[]
     ),
   };
   return start;

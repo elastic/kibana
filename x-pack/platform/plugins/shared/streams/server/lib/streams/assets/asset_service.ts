@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import { StreamsPluginStartDependencies } from '../../../types';
-import { AssetClient, StoredAssetLink } from './asset_client';
-import { AssetStorageSettings, assetStorageSettings } from './storage_settings';
+import type { StreamsPluginStartDependencies } from '../../../types';
+import type { StoredAssetLink } from './asset_client';
+import { AssetClient } from './asset_client';
+import type { AssetStorageSettings } from './storage_settings';
+import { assetStorageSettings } from './storage_settings';
 
 export class AssetService {
   constructor(

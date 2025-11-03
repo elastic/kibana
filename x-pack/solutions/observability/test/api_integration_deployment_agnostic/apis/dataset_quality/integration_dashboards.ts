@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { CustomIntegration } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/package_api';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
+import type { CustomIntegration } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/package_api';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');

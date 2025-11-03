@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -69,6 +69,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
     describe('when there are only v2 jobs', () => {
       before(async () => {
+        await ml.cleanMlIndices();
         await createV2Jobs(['production', 'development']);
       });
       it('creates a new job for each environment that has a v2 job', async () => {
@@ -91,6 +92,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
     describe('when there are both v2 and v3 jobs', () => {
       before(async () => {
+        await ml.cleanMlIndices();
         await createV2Jobs(['production', 'development']);
         await createV3Jobs(['production']);
       });

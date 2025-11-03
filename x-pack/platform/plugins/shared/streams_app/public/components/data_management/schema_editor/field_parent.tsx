@@ -24,7 +24,7 @@ export const FieldParent = ({
         href={router.link('/{key}/management/{tab}', {
           path: {
             key: parent,
-            tab: 'schemaEditor',
+            tab: 'schema',
           },
         })}
         target="_blank"

@@ -70,6 +70,10 @@ GET /api/my_domain/my_resource_bs?page=1
   We categorize HTTP APIs as either **internal** or **public** to further reinforce the different purposes they serve. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
 </DocCallOut>
 
+<DocCallOut title="Unit, Integration and E2E tests">
+  All HTTP APIs must have <DocLink id="kibDevTutorialTestingPlugins" section="integration-tests" text="E2E or integration test coverage" /> giving confidence the basic functionality works as intended.
+</DocCallOut>
+
 ### Commitment
 
 Exposing a public HTTP API is a long-term commitment to users and is not easily reversible. We must carefully design and plan APIs before they are made public, and then maintain them and ensure they work as expected.
@@ -158,6 +162,15 @@ DELETE /api/my_domain/my_resources/{id}         # Delete - remove an existing re
 GET    /api/my_domain/my_resources              # List - retrieve all resources (with pagination)
 ```
 
+You can optionally create a search endpoint like the following:
+
+```
+POST   /api/my_domain/my_resources/_search              # Search across resources
+{
+  <search inputs>
+}
+```
+
 ### Path
 
 **Use snake case**
@@ -189,6 +202,30 @@ See the section on [versioning](#versioning) for more details.
 `/roles` ❌
 `/internal/roles` ❌
 
+**Choosing a `<domain>` name**
+
+Domain name pluralisation is case dependent, but the most common pattern in Kibana is to pluralize.
+
+Additionally, domains are strongly encouraged because of Kibana's size, but not a hard requirement. For example:
+
+❌ Do not choose a domain name that is the same as the resource. For example:
+
+```
+/api/files/files
+```
+
+✅ Rather choose another domain name
+
+```
+/api/storage/files
+```
+
+...or consider not using a domain name in certain cases:
+
+```
+/api/status
+```
+
 **Pluralize collection names**
 
 `PUT /api/my_domain/my_resources/{id}` ✅
@@ -197,13 +234,34 @@ See the section on [versioning](#versioning) for more details.
 
 **Prefix actions against resource collections with `_`**
 
-Sometimes we want to designate a variation or action against a resource:
+Sometimes we want to designate `POST` action against a resource:
 
 ```
 POST /api/my_domain/my_resources/_bulk_delete
 ```
 
-Carefully consider cases where this pattern may make sense as it is more user-friendly to expose simple paths and actions.
+Some common actions include:
+
+- `_search`
+- `_bulk_create`
+- `_bulk_delete`
+- `_bulk_update`
+
+The fewer `_<action>` style APIs, the more user-friendly your APIs will be.
+
+**Use `{id}` in the path when...**
+
+```
+GET    /api/my_resource/{id}
+PUT    /api/my_resource/{id}
+PATCH  /api/my_resource/{id}
+DELETE /api/my_resource/{id}
+POST   /api/my_resource
+```
+
+Typically `POST` does not contain a resource ID because it should always result in a new resource. Optionally, API users can specify an ID for a resource using `PUT` that will do an upsert.
+
+For other path parameters it is recommended to take a conservative approach: do not put too much in the path, it is a character limited input!
 
 ### Methods
 
@@ -240,10 +298,10 @@ However...
 
 Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. In this case, `POST` may be both side-effect free and idempotent! In most cases it will not be because your request will open a PIT: see [pagination and sorting](#pagination-and-sorting).
 
-If you expect you need to support a lot of input for searching or listing resources reserving `POST` for this purpose:
+If you expect you need to support a lot of input for searching or listing resources you can use `POST` and `_search` for this purpose:
 
 ```
-POST /api/my_domain/my_resources
+POST /api/my_domain/my_resources/_search
 {
   search_after: "<a_really_long_id>",
   size: 10000
@@ -337,6 +395,11 @@ Choose sensible defaults. When uncertain, ask API callers to make informed decis
 **Should not be changed lightly**
 
 Changing the value of a default may, in some cases, have a devastating result similar to a breaking change.
+
+**Should be returned in the response (most of the time)**
+
+Public API configurable defaults should be returned in the response. Internal defaults do not need to be returned.
+Refer to <DocLink id="kibHttpApiTfGuidelines" section="return-as-much-as-you-can-and-handle-defaults-carefully" text="Terraform's guidelines on defaults" /> to learn more.
 
 ### Validation
 

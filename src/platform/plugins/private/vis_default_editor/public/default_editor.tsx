@@ -8,11 +8,11 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import { EuiResizableContainer, type UseEuiTheme, euiBreakpoint } from '@elastic/eui';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import {
+import type {
   Vis,
   VisualizeEmbeddableContract,
   EditorRenderProps,

@@ -8,27 +8,25 @@
  */
 
 import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
-import {
-  SeriesTypes,
-  Column,
-  XYConfiguration,
+import type { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type {
+  XYState as XYConfiguration,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { Layer } from '..';
-import { ChartType } from '../../../common';
-import {
+} from '@kbn/lens-common';
+import { SeriesTypes } from '@kbn/lens-common';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { Layer } from '..';
+import type { ChartType } from '../../../common';
+import type {
   CategoryAxis,
   ChartMode,
-  InterpolationMode,
   Scale,
-  ScaleType,
   SeriesParam,
-  ThresholdLineStyle,
   ValueAxis,
   VisParams,
 } from '../../types';
+import { InterpolationMode, ScaleType, ThresholdLineStyle } from '../../types';
 import { getCurveType, getMode, getYAxisPosition } from '../../utils/common';
 
 function getYScaleType(scale?: Scale): XYConfiguration['yLeftScale'] | undefined {
@@ -281,5 +279,6 @@ export const getConfiguration = (
         ? InterpolationMode.Linear
         : series[0]?.interpolate
     ),
+    preferredSeriesType: 'bar',
   };
 };

@@ -8,25 +8,25 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { DisableMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/disable.gen';
+import type { DisableMonitoringEngineResponse } from '../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_ENGINE_DISABLE_URL,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { createEngineStatusService } from '../engine/status_service';
 
 export const disablePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  logger: Logger
 ) => {
   router.versioned
     .post({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/engine/disable',
+      path: MONITORING_ENGINE_DISABLE_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -59,7 +59,10 @@ export const disablePrivilegeMonitoringEngineRoute = (
         );
 
         try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().disable();
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = dataClient.getScopedSoClient(request);
+          const statusService = createEngineStatusService(dataClient, soClient);
+          const body = await statusService.disable();
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

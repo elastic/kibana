@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
-import { CSSObject, css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
+import { css } from '@emotion/react';
 
 export const optionCss = css({
   overflow: 'hidden',

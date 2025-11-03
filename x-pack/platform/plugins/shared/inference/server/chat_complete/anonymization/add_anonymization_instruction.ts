@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
+import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
 import dedent from 'dedent';
 
 /**

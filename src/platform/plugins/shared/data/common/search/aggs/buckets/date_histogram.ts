@@ -10,21 +10,24 @@
 import { get, noop, find, every, omitBy, isNil } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { DataViewFieldBase, TimeRange } from '@kbn/es-query';
+import type { DataViewFieldBase, TimeRange } from '@kbn/es-query';
 
-import { AggTypesDependencies, KBN_FIELD_TYPES, TimeRangeBounds, UI_SETTINGS } from '../../..';
+import type { AggTypesDependencies, TimeRangeBounds } from '../../..';
+import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../..';
 
-import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
+import type { ExtendedBounds } from '../../expressions';
+import { extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
-import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
+import type { IBucketAggConfig } from './bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggDateHistogramFnName } from './date_histogram_fn';
 import { TimeBuckets } from './lib/time_buckets';
 
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 import { dateHistogramInterval } from '../utils';
 import { inferTimeZone } from '../utils';
 

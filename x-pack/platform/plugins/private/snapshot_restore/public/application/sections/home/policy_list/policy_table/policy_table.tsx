@@ -20,10 +20,11 @@ import {
   EuiIcon,
   EuiIconTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { SlmPolicy } from '../../../../../../common/types';
-import { UseRequestResponse } from '../../../../../shared_imports';
+import type { SlmPolicy } from '../../../../../../common/types';
+import type { UseRequestResponse } from '../../../../../shared_imports';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import {
@@ -32,6 +33,18 @@ import {
   PolicyDeleteProvider,
 } from '../../../../components';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
+
+const styles = {
+  /*
+   * 1. Make in progress snapshot loading indicator be centered vertically
+   *    when it is inside tooltip wrapper
+   */
+  policyTable: css`
+    .euiToolTipAnchor {
+      display: flex;
+    }
+  `,
+};
 
 interface Props {
   policies: SlmPolicy[];
@@ -118,7 +131,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiToolTip
+                <EuiIconTip
                   position="top"
                   content={i18n.translate(
                     'xpack.snapshotRestore.policyList.table.lastSnapshotFailedTooltip',
@@ -126,9 +139,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                       defaultMessage: 'Last snapshot failed',
                     }
                   )}
-                >
-                  <EuiIcon type="warning" color="danger" />
-                </EuiToolTip>
+                  type="warning"
+                  color="danger"
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 <EuiText size="s">{snapshotName}</EuiText>
@@ -410,7 +423,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 
   return (
     <EuiInMemoryTable
-      className="snapshotRestore__policyTable"
+      css={styles.policyTable}
       items={policies}
       itemId="name"
       columns={columns}

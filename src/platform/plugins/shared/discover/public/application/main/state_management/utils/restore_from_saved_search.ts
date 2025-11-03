@@ -7,35 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../utils/validate_time';
+import type { TabStateGlobalState } from '../redux';
 
-export const restoreStateFromSavedSearch = ({
-  savedSearch,
-  timefilter,
-}: {
-  savedSearch: SavedSearch;
-  timefilter: TimefilterContract;
-}) => {
+export const restoreStateFromSavedSearch = ({ savedSearch }: { savedSearch: SavedSearch }) => {
   if (!savedSearch) {
-    return;
+    return {};
   }
 
   const isTimeBased = savedSearch.searchSource.getField('index')?.isTimeBased();
 
   if (!isTimeBased) {
-    return;
+    return {};
   }
 
+  const globalStateUpdate: Partial<TabStateGlobalState> = {};
+
   if (savedSearch.timeRestore && savedSearch.timeRange && isTimeRangeValid(savedSearch.timeRange)) {
-    timefilter.setTime(savedSearch.timeRange);
+    globalStateUpdate.timeRange = savedSearch.timeRange;
   }
   if (
     savedSearch.timeRestore &&
     savedSearch.refreshInterval &&
     isRefreshIntervalValid(savedSearch.refreshInterval)
   ) {
-    timefilter.setRefreshInterval(savedSearch.refreshInterval);
+    globalStateUpdate.refreshInterval = savedSearch.refreshInterval;
   }
+
+  return globalStateUpdate;
 };

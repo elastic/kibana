@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { FieldIcon as KbnFieldIcon, FieldIconProps as KbnFieldIconProps } from '@kbn/react-field';
+import type { FieldIconProps as KbnFieldIconProps } from '@kbn/react-field';
+import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
 import { getFieldTypeName } from '../../utils/get_field_type_name';
 
 export type FieldIconProps = KbnFieldIconProps;

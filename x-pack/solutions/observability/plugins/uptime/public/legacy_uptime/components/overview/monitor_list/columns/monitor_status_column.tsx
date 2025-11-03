@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import {
@@ -19,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { parseTimestamp } from '../parse_timestamp';
-import { Ping, PingError } from '../../../../../../common/runtime_types';
+import type { Ping, PingError } from '../../../../../../common/runtime_types';
 import {
   STATUS,
   SHORT_TIMESPAN_LOCALE,
@@ -180,7 +181,7 @@ export const MonitorListStatusColumn = ({
             </EuiText>
           }
         >
-          <PaddedText size="xs" color="subdued" className="eui-textNoWrap">
+          <PaddedText tabIndex={0} size="xs" color="subdued" className="eui-textNoWrap">
             {statusMessage},
           </PaddedText>
         </EuiToolTip>
@@ -197,7 +198,7 @@ export const MonitorListStatusColumn = ({
             </>
           }
         >
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+          <EuiText tabIndex={0} size="xs" color="subdued" className="eui-textNoWrap">
             {getCheckedLabel(timestamp)}
           </EuiText>
         </EuiToolTip>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   TransformLatestConfig,
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';

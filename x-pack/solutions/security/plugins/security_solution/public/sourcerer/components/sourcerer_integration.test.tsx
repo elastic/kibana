@@ -75,7 +75,9 @@ const sourcererDataView = {
   sourcererDataView: {},
 };
 
-describe('Sourcerer integration tests', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Sourcerer integration tests', () => {
   const state = {
     ...mockGlobalState,
     sourcerer: {

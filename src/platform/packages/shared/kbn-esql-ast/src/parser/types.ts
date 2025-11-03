@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as esql_parser from '../antlr/esql_parser';
+import type * as esql_parser from '../antlr/esql_parser';
 import type { CstToAstConverter } from './cst_to_ast_converter';
 import type { ESQLAstComment } from '../types';
 

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { StreamQueryKql } from '@kbn/streams-schema';
-import { useMemo } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
+import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
+import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
+import { NO_FEATURE } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
 
 interface SignificantEventsApiBulkOperationCreate {
   index: StreamQueryKql;
@@ -22,12 +23,22 @@ type SignificantEventsApiBulkOperation =
   | SignificantEventsApiBulkOperationDelete;
 
 interface SignificantEventsApi {
-  addQuery: (query: StreamQueryKql) => Promise<void>;
+  upsertQuery: (query: StreamQueryKql) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
+  generate: (connectorId: string, feature?: Feature) => SignificantEventsGenerateResponse;
+  abort: () => void;
 }
 
-export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
+export function useSignificantEventsApi({
+  name,
+  start,
+  end,
+}: {
+  name: string;
+  start: number;
+  end: number;
+}): SignificantEventsApi {
   const {
     dependencies: {
       start: {
@@ -36,55 +47,77 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     },
   } = useKibana();
 
-  const { signal } = useAbortController();
+  const { signal, abort, refresh } = useAbortController();
 
-  return useMemo(() => {
-    return {
-      addQuery: async ({ kql, title, id }) => {
-        await streamsRepositoryClient.fetch(
-          'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
-          {
-            signal,
-            params: {
-              path: {
-                name,
-                queryId: id,
-              },
-              body: {
-                kql,
-                title,
-              },
+  return {
+    upsertQuery: async ({ feature, kql, title, id }) => {
+      const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
+      await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+        signal,
+        params: {
+          path: {
+            name,
+            queryId: id,
+          },
+          body: {
+            kql,
+            title,
+            feature: effectiveFeature,
+          },
+        },
+      });
+    },
+    removeQuery: async (id) => {
+      await streamsRepositoryClient.fetch(
+        'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
+        {
+          signal,
+          params: {
+            path: {
+              name,
+              queryId: id,
             },
-          }
-        );
-      },
-      removeQuery: async (id) => {
-        await streamsRepositoryClient.fetch(
-          'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
-          {
-            signal,
-            params: {
-              path: {
-                name,
-                queryId: id,
-              },
-            },
-          }
-        );
-      },
-      bulk: async (operations) => {
-        await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+          },
+        }
+      );
+    },
+    bulk: async (operations) => {
+      await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+        signal,
+        params: {
+          path: {
+            name,
+          },
+          body: {
+            operations,
+          },
+        },
+      });
+    },
+    generate: (connectorId: string, feature?: Feature) => {
+      return streamsRepositoryClient.stream(
+        `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
+        {
           signal,
           params: {
             path: {
               name,
             },
+            query: {
+              connectorId,
+              from: new Date(start).toString(),
+              to: new Date(end).toString(),
+            },
             body: {
-              operations,
+              feature,
             },
           },
-        });
-      },
-    };
-  }, [name, signal, streamsRepositoryClient]);
+        }
+      );
+    },
+    abort: () => {
+      abort();
+      refresh();
+    },
+  };
 }

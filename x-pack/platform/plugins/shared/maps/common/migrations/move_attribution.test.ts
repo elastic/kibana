@@ -6,7 +6,7 @@
  */
 
 import { moveAttribution } from './move_attribution';
-import { LayerDescriptor } from '../descriptor_types';
+import type { LayerDescriptor } from '../descriptor_types';
 
 test('Should handle missing layerListJSON attribute', () => {
   const attributes = {

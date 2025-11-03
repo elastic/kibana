@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { ShapeRendererConfig } from '..';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { ShapeRendererConfig } from '..';
 
 export interface ShapeComponentProps extends ShapeRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];

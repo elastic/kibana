@@ -12,7 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { DashboardApi } from '../../../../dashboard_api/types';
+import type { DashboardApi } from '../../../../dashboard_api/types';
 
 jest.mock('../get_menu_item_groups', () => ({}));
 

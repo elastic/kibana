@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 
 export interface PurgePolicyData {
   purgeType: string;
@@ -98,7 +99,7 @@ export function SloPurgeConfirmationModal({
           onChange={(val: string) => {
             setPurgeType(val);
           }}
-          name="radio group"
+          name="purgeType"
         />
       </EuiFormRow>
       {purgeType === 'fixed_age' ? (
@@ -127,6 +128,7 @@ export function SloPurgeConfirmationModal({
             ]}
             idSelected={age}
             onChange={setAge}
+            name="purgeAge"
           />
         </EuiFormRow>
       ) : (
@@ -150,6 +152,7 @@ export function SloPurgeConfirmationModal({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             title={i18n.translate('xpack.slo.purgeConfirmationModal.forceWarning', {

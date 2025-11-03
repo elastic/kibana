@@ -11,8 +11,8 @@ import {
   deserializeComponentTemplate,
   deserializeComponentTemplateList,
 } from '../../../../common/lib';
-import { ComponentTemplateFromEs } from '../../../../common';
-import { RouteDependencies } from '../../../types';
+import type { ComponentTemplateFromEs } from '../../../../common';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const paramsSchema = schema.object({

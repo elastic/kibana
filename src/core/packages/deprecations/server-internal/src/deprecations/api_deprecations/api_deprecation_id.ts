@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
+import type { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 
 export const buildApiDeprecationId = ({
   routePath,

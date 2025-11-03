@@ -13,7 +13,7 @@ import type {
   VersionedRouteValidation,
   RouteSecurity,
 } from '@kbn/core-http-server';
-import { InternalRouteHandler, Router } from '../router';
+import type { InternalRouteHandler, Router } from '../router';
 import { createFooValidation } from '../router.test.util';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter, unwrapVersionedResponseBodyValidation } from '.';

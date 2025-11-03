@@ -6,6 +6,7 @@
  */
 
 import { validateThresholdBase } from '../../../../../utils/request_validation/threshold';
+import { validateThreatMapping } from '../../../../../utils/request_validation/indicator_match';
 import type { RuleUpdateProps } from '../../../model';
 
 /**
@@ -17,6 +18,7 @@ export const validateUpdateRuleProps = (props: RuleUpdateProps): string[] => {
     ...validateTimelineId(props),
     ...validateTimelineTitle(props),
     ...validateThreshold(props),
+    ...validateThreatMapping(props),
   ];
 };
 

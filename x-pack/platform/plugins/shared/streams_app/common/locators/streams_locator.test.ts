@@ -56,13 +56,13 @@ describe('StreamsAppLocatorDefinition', () => {
       it('should generate correct path for management tabs', async () => {
         const params = {
           name: 'test-stream',
-          managementTab: 'lifecycle',
+          managementTab: 'retention',
         };
         const result = await locator.getLocation(params);
 
         expect(result).toEqual({
           app: 'streams',
-          path: '/test-stream/management/lifecycle',
+          path: '/test-stream/management/retention',
           state: {},
         });
       });

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { CheckpointPendingWrite } from '@langchain/langgraph-checkpoint';
 import {
   BaseCheckpointSaver,
   type Checkpoint,
@@ -16,11 +17,10 @@ import {
   type SerializerProtocol,
   type PendingWrite,
   type CheckpointMetadata,
-  CheckpointPendingWrite,
 } from '@langchain/langgraph-checkpoint';
 
 interface CheckpointDocument {
-  created_at: string;
+  '@timestamp': string;
   thread_id: string;
   checkpoint_ns: string;
   checkpoint_id: string;
@@ -31,7 +31,7 @@ interface CheckpointDocument {
 }
 
 interface WritesDocument {
-  created_at: string;
+  '@timestamp': string;
   thread_id: string;
   checkpoint_ns: string;
   checkpoint_id: string;
@@ -58,27 +58,41 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
   static defaultCheckpointWritesIndex = 'checkpoint_writes';
 
-  static readonly checkpointIndexMapping = {
-    created_at: { type: 'date' },
-    thread_id: { type: 'keyword' },
-    checkpoint_ns: { type: 'keyword' },
-    checkpoint_id: { type: 'keyword' },
-    parent_checkpoint_id: { type: 'keyword' },
-    type: { type: 'keyword' },
-    checkpoint: { type: 'binary' },
-    metadata: { type: 'binary' },
+  /**
+   * When modifying the field maps, ensure you perform upgrade testing for all graphs depending on this saver.
+   */
+  static readonly checkpointsFieldMap = {
+    '@timestamp': {
+      type: 'date',
+      required: true,
+      array: false,
+    },
+    thread_id: { type: 'keyword', required: true, array: false },
+    checkpoint_ns: { type: 'keyword', required: true, array: false },
+    checkpoint_id: { type: 'keyword', required: false, array: false },
+    parent_checkpoint_id: { type: 'keyword', required: true, array: false },
+    type: { type: 'keyword', required: true, array: false },
+    checkpoint: { type: 'binary', required: true, array: false },
+    metadata: { type: 'binary', required: true, array: false },
   } as const;
 
-  static readonly checkpointWritesIndexMapping = {
-    created_at: { type: 'date' },
-    thread_id: { type: 'keyword' },
-    checkpoint_ns: { type: 'keyword' },
-    checkpoint_id: { type: 'keyword' },
-    task_id: { type: 'keyword' },
-    idx: { type: 'unsigned_long' },
-    channel: { type: 'keyword' },
-    type: { type: 'keyword' },
-    value: { type: 'binary' },
+  /**
+   * When modifying the field maps, ensure you perform upgrade testing for all graphs depending on this saver.
+   */
+  static readonly checkpointWritesFieldMap = {
+    '@timestamp': {
+      type: 'date',
+      required: true,
+      array: false,
+    },
+    thread_id: { type: 'keyword', required: true, array: false },
+    checkpoint_ns: { type: 'keyword', required: true, array: false },
+    checkpoint_id: { type: 'keyword', required: true, array: false },
+    task_id: { type: 'keyword', required: true, array: false },
+    idx: { type: 'unsigned_long', required: true, array: false },
+    channel: { type: 'keyword', required: true, array: false },
+    type: { type: 'keyword', required: true, array: false },
+    value: { type: 'binary', required: true, array: false },
   } as const;
 
   protected client: ElasticsearchClient;
@@ -149,9 +163,34 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       query: {
         bool: {
           must: [
-            { term: { thread_id: threadId } },
-            { term: { checkpoint_ns: checkpointNs } },
-            { term: { checkpoint_id: doc.checkpoint_id } },
+            // todo(@KDKHD): fix this query to remove the duplicate should clauses. Ensure both tests and the elastic assistant work.
+            {
+              bool: {
+                should: [
+                  { term: { thread_id: threadId } },
+                  { term: { 'thread_id.keyword': threadId } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  { term: { checkpoint_ns: checkpointNs } },
+                  { term: { 'checkpoint_ns.keyword': checkpointNs } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  { term: { checkpoint_id: doc.checkpoint_id } },
+                  { term: { 'checkpoint_id.keyword': doc.checkpoint_id } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
           ],
         },
       },
@@ -212,7 +251,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     config: RunnableConfig,
     options?: CheckpointListOptions
   ): AsyncGenerator<CheckpointTuple> {
-    const { limit, before, filter } = options ?? {};
+    const { limit, before } = options ?? {};
     const mustClauses = [];
 
     if (config?.configurable?.thread_id) {
@@ -234,16 +273,10 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       });
     }
 
-    if (filter) {
-      Object.entries(filter).forEach(([key, value]) => {
-        mustClauses.push({ term: { [`metadata.${key}`]: value } });
-      });
-    }
-
     const result = await this.client.search<CheckpointDocument>({
       index: this.checkpointIndex,
       ...(limit ? { size: limit } : {}),
-      sort: [{ checkpoint_id: { order: 'desc' } }],
+      sort: [{ checkpoint_id: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       query: {
         bool: {
           must: mustClauses,
@@ -296,6 +329,10 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     checkpoint: Checkpoint,
     metadata: CheckpointMetadata
   ): Promise<RunnableConfig> {
+    this.logger.debug(
+      `Putting checkpoint ${checkpoint.id} for thread ${config.configurable?.thread_id}`
+    );
+
     const threadId = config.configurable?.thread_id;
 
     const checkpointNs = config.configurable?.checkpoint_ns ?? '';
@@ -306,14 +343,14 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       );
     }
 
-    const [checkpointType, serializedCheckpoint] = this.serde.dumpsTyped(checkpoint);
-    const [metadataType, serializedMetadata] = this.serde.dumpsTyped(metadata);
+    const [checkpointType, serializedCheckpoint] = await this.serde.dumpsTyped(checkpoint);
+    const [metadataType, serializedMetadata] = await this.serde.dumpsTyped(metadata);
     if (checkpointType !== metadataType) {
       throw new Error('Mismatched checkpoint and metadata types.');
     }
 
     const doc: CheckpointDocument = {
-      created_at: new Date().toISOString(),
+      '@timestamp': new Date().toISOString(),
       thread_id: threadId,
       checkpoint_ns: checkpointNs,
       checkpoint_id: checkpointId,
@@ -326,10 +363,11 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
     const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}`;
 
-    await this.client.index({
+    await this.client.update({
       index: this.checkpointIndex,
       id: compositeId,
-      document: doc,
+      doc,
+      doc_as_upsert: true,
       refresh: this.refreshPolicy,
     });
 
@@ -346,6 +384,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
    * Saves intermediate writes associated with a checkpoint to Elastic Search.
    */
   async putWrites(config: RunnableConfig, writes: PendingWrite[], taskId: string): Promise<void> {
+    this.logger.debug(`Putting writes for checkpoint ${config.configurable?.checkpoint_id}`);
     const threadId = config.configurable?.thread_id;
 
     const checkpointNs = config.configurable?.checkpoint_ns;
@@ -357,38 +396,54 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       );
     }
 
-    const operations = writes.flatMap((write, idx) => {
-      const [channel, value] = write;
+    const operations = (
+      await Promise.all(
+        writes.map(async (write, idx) => {
+          const [channel, value] = write;
 
-      const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}|task_id:${taskId}|idx:${idx}`;
-      const [type, serializedValue] = this.serde.dumpsTyped(value);
+          const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}|task_id:${taskId}|idx:${idx}`;
+          const [type, serializedValue] = await this.serde.dumpsTyped(value);
 
-      const doc: WritesDocument = {
-        created_at: new Date().toISOString(),
-        thread_id: threadId,
-        checkpoint_ns: checkpointNs,
-        checkpoint_id: checkpointId,
-        task_id: taskId,
-        idx,
-        channel,
-        value: Buffer.from(serializedValue).toString('base64'),
-        type,
-      };
+          const doc: WritesDocument = {
+            '@timestamp': new Date().toISOString(),
+            thread_id: threadId,
+            checkpoint_ns: checkpointNs,
+            checkpoint_id: checkpointId,
+            task_id: taskId,
+            idx,
+            channel,
+            value: Buffer.from(serializedValue).toString('base64'),
+            type,
+          };
 
-      return [
-        {
-          index: {
-            _index: this.checkpointWritesIndex,
-            _id: compositeId,
-          },
-        },
-        doc,
-      ];
-    });
+          this.logger.debug(`Indexing write operation for checkpoint ${checkpointId}`);
 
-    await this.client.bulk({
+          return [
+            {
+              update: {
+                _index: this.checkpointWritesIndex,
+                _id: compositeId,
+              },
+            },
+            { doc, doc_as_upsert: true },
+          ];
+        })
+      )
+    ).flat();
+
+    const result = await this.client.bulk({
       operations,
       refresh: this.refreshPolicy,
+      error_trace: true,
     });
+
+    if (result.errors) {
+      this.logger.error(`Failed to index writes for checkpoint ${checkpointId}`);
+
+      throw new Error(`Failed to index writes for checkpoint ${checkpointId}`);
+    }
   }
+
+  // TODO: Implement this
+  async deleteThread() {}
 }

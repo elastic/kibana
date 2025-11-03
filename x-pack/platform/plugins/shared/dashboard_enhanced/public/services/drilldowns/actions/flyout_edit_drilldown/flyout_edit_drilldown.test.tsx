@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
-import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
+import type { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
@@ -15,7 +15,7 @@ import {
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { flyoutEditDrilldownAction } from './flyout_edit_drilldown';
-import { ActionDefinitionContext } from '@kbn/ui-actions-plugin/public/actions';
+import type { ActionDefinitionContext } from '@kbn/ui-actions-plugin/public/actions';
 
 jest.mock('../../../kibana_services', () => {
   return {

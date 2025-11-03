@@ -21,10 +21,6 @@ export { suggest } from './src/autocomplete/autocomplete';
  * Some utility functions that can be useful to build more feature
  * for the ES|QL language
  */
-export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
-
-export {
-  getFieldsByTypeHelper,
-  getPolicyHelper,
-  getSourcesHelper,
-} from './src/shared/resources_helpers';
+export { getPolicyHelper, getSourcesHelper } from './src/shared/resources_helpers';
+// Hover function
+export { getHoverItem } from './src/hover';

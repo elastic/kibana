@@ -20,11 +20,12 @@ import type {
   MetricWNumber,
   MetricWText,
   SettingsProps,
+  SecondaryMetricProps,
 } from '@elastic/charts';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type {
   Datatable,
   DatatableColumn,
@@ -36,7 +37,7 @@ import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
-import { SecondaryMetric } from './secondary_metric';
+import { getSecondaryMetricInfo } from './secondary_metric_info';
 import type { TrendConfig } from './secondary_metric_info';
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
@@ -86,6 +87,8 @@ function buildTrendConfig(
   };
 }
 
+const DEFAULT_TILE_SIDE_LENGTH = 310;
+
 export const MetricVis = ({
   data,
   config,
@@ -97,6 +100,7 @@ export const MetricVis = ({
   const grid = useRef<MetricSpec['data']>([[]]);
   const {
     euiTheme: { colors },
+    highContrastMode,
   } = useEuiTheme();
   const defaultColor = colors.emptyShade;
 
@@ -110,7 +114,8 @@ export const MetricVis = ({
   );
 
   const onWillRender = useCallback(() => {
-    const maxTileSideLength = grid.current.length * grid.current[0]?.length > 1 ? 200 : 300;
+    const maxTileSideLength =
+      grid.current.length * grid.current[0]?.length > 1 ? 200 : DEFAULT_TILE_SIDE_LENGTH;
     const event: ChartSizeEvent = {
       name: 'chartSize',
       data: {
@@ -154,6 +159,7 @@ export const MetricVis = ({
     data.rows.length ? data.rows : [{ [primaryMetricColumn.id]: null }]
   ).slice(0, 1);
 
+  // TODO: optimize this so it doesn't run many times
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
@@ -164,7 +170,6 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
-    const hasDynamicColoring = config.metric.palette?.params && value != null;
     const tileColor =
       config.metric.palette?.params && typeof value === 'number'
         ? getColor(
@@ -180,27 +185,36 @@ export const MetricVis = ({
           ) ?? defaultColor
         : config.metric.color ?? defaultColor;
 
-    const trendConfig = buildTrendConfig(config.metric.secondaryTrend, value);
+    let secondaryMetricProps: SecondaryMetricProps | undefined;
+    const { secondaryMetric } = config.dimensions;
+    if (secondaryMetric) {
+      // Do not call getSecondaryMetricInfo if there is no Secondary Metric
+      const secondaryMetricInfo = getSecondaryMetricInfo({
+        row,
+        columns: data.columns,
+        secondaryMetric,
+        secondaryLabel: config.metric.secondaryLabel,
+        trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
+        staticColor: config.metric.secondaryColor,
+      });
+
+      secondaryMetricProps = {
+        value: secondaryMetricInfo.value,
+        label: secondaryMetricInfo.label,
+        badgeColor: secondaryMetricInfo.badgeColor,
+        ariaDescription: secondaryMetricInfo.description,
+        icon: secondaryMetricInfo.icon,
+        labelPosition: config.metric.secondaryLabelPosition,
+        badgeBorderColor: highContrastMode ? { mode: 'auto' } : { mode: 'none' },
+      };
+    }
 
     if (typeof value !== 'number') {
       const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: ({ color }) => (
-          <SecondaryMetric
-            row={row}
-            config={config}
-            columns={data.columns}
-            getMetricFormatter={getMetricFormatter}
-            staticColor={config.metric.secondaryColor}
-            trendConfig={
-              hasDynamicColoring && trendConfig
-                ? { ...trendConfig, borderColor: color }
-                : trendConfig
-            }
-          />
-        ),
+        extra: secondaryMetricProps,
         color: config.metric.color ?? defaultColor,
       };
       return Array.isArray(value)
@@ -214,18 +228,7 @@ export const MetricVis = ({
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: ({ color }) => (
-        <SecondaryMetric
-          row={row}
-          config={config}
-          columns={data.columns}
-          getMetricFormatter={getMetricFormatter}
-          staticColor={config.metric.secondaryColor}
-          trendConfig={
-            hasDynamicColoring && trendConfig ? { ...trendConfig, borderColor: color } : trendConfig
-          }
-        />
-      ),
+      extra: secondaryMetricProps,
       color: tileColor,
     };
 
@@ -259,7 +262,14 @@ export const MetricVis = ({
       return metricWProgress;
     }
 
-    return baseMetric;
+    // Metric with number, without trend line and without progress bar
+    return {
+      ...baseMetric,
+      // Override the background and main value color when the color is applied to the value
+      ...(config.metric.applyColorTo === 'value'
+        ? { color: defaultColor, valueColor: tileColor }
+        : { color: tileColor, valueColor: undefined }),
+    };
   });
 
   if (config.metric.minTiles) {
@@ -324,13 +334,16 @@ export const MetricVis = ({
               {
                 background: { color: defaultColor },
                 metric: {
-                  barBackground: colors.lightShade,
+                  barBackground: colors.lightestShade,
                   emptyBackground: colors.emptyShade,
                   blendingBackground: colors.emptyShade,
                   titlesTextAlign: config.metric.titlesTextAlign,
-                  valuesTextAlign: config.metric.valuesTextAlign,
+                  valueTextAlign: config.metric.primaryAlign,
+                  extraTextAlign: config.metric.secondaryAlign,
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
+                  valuePosition: config.metric.primaryPosition,
+                  titleWeight: config.metric.titleWeight,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

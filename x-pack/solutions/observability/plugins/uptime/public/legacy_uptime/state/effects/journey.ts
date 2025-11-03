@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
+import type { Action } from 'redux-actions';
 import { call, put, takeEvery } from 'redux-saga/effects';
-import {
-  getJourneySteps,
-  getJourneyStepsSuccess,
-  getJourneyStepsFail,
-  FetchJourneyStepsParams,
-} from '../actions/journey';
+import type { FetchJourneyStepsParams } from '../actions/journey';
+import { getJourneySteps, getJourneyStepsSuccess, getJourneyStepsFail } from '../actions/journey';
 import { fetchJourneySteps } from '../api/journey';
 import type { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
 

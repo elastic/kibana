@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { USERS, User } from '../../../common/lib';
-import { FtrProviderContext } from '../services';
+import type { User } from '../../../common/lib';
+import { USERS } from '../../../common/lib';
+import type { FtrProviderContext } from '../services';
 import { createTestSpaces, deleteTestSpaces, createTags, deleteTags } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -41,6 +42,7 @@ export default function (ftrContext: FtrProviderContext) {
         'osquery-pack',
         'osquery-pack-asset',
         'osquery-saved-query',
+        'alerting_rule_template',
       ],
       [USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER.username]: [],
       [USERS.DEFAULT_SPACE_READ_USER.username]: [],

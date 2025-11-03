@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import { mockEncryptedSO } from '../synthetics_service/utils/mocks';
 
 export const getServerMock = () => {

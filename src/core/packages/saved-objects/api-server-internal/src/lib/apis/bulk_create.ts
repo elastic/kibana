@@ -8,23 +8,25 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObject,
-  type SavedObjectSanitizedDoc,
+import type {
   DecoratedError,
   AuthorizeCreateObject,
   SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
+  SavedObjectsErrorHelpers,
+  type SavedObject,
+  type SavedObjectSanitizedDoc,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type {
   SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
+import type { Either } from './utils';
 import {
-  Either,
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
@@ -37,8 +39,8 @@ import {
   errorContent,
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
-import { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
-import { ApiExecutionContext } from './types';
+import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
+import type { ApiExecutionContext } from './types';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;

@@ -12,10 +12,29 @@ import { fromSavedSearchAttributes, toSavedSearchAttributes } from './saved_sear
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 import type { SavedSearch, SavedSearchAttributes } from '../types';
+import type { DiscoverSessionTab } from '../../server';
 
 describe('saved_searches_utils', () => {
   describe('fromSavedSearchAttributes', () => {
     test('should convert attributes into SavedSearch', () => {
+      const tabs: DiscoverSessionTab[] = [
+        {
+          id: 'tab-1',
+          label: 'Tab 1',
+          attributes: {
+            kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+            sort: [],
+            columns: ['a', 'b'],
+            grid: {},
+            hideChart: true,
+            isTextBasedQuery: false,
+            usesAdHocDataView: false,
+            rowsPerPage: 250,
+            sampleSize: 1000,
+            breakdownField: 'extension.keyword',
+          },
+        },
+      ];
       const attributes: SavedSearchAttributes = {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         title: 'saved search',
@@ -29,6 +48,8 @@ describe('saved_searches_utils', () => {
         rowsPerPage: 250,
         sampleSize: 1000,
         breakdownField: 'extension.keyword',
+        controlGroupJson: undefined,
+        tabs,
       };
 
       expect(
@@ -48,6 +69,7 @@ describe('saved_searches_utils', () => {
             "a",
             "b",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "description": "foo",
           "grid": Object {},
@@ -88,7 +110,29 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": Object {},
           "sort": Array [],
-          "tabs": undefined,
+          "tabs": Array [
+            Object {
+              "attributes": Object {
+                "breakdownField": "extension.keyword",
+                "columns": Array [
+                  "a",
+                  "b",
+                ],
+                "grid": Object {},
+                "hideChart": true,
+                "isTextBasedQuery": false,
+                "kibanaSavedObjectMeta": Object {
+                  "searchSourceJSON": "{}",
+                },
+                "rowsPerPage": 250,
+                "sampleSize": 1000,
+                "sort": Array [],
+                "usesAdHocDataView": false,
+              },
+              "id": "tab-1",
+              "label": "Tab 1",
+            },
+          ],
           "tags": Array [
             "tags-1",
             "tags-2",

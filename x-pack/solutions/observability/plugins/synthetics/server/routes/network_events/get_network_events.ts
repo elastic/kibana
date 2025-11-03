@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { getNetworkEvents } from '../../queries/get_network_events';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({

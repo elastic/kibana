@@ -304,6 +304,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   revision: schema.number(),
   agents: schema.maybe(schema.number()),
   unprivileged_agents: schema.maybe(schema.number()),
+  fips_agents: schema.maybe(schema.number()),
   is_protected: schema.boolean({
     meta: {
       description:
@@ -336,10 +337,41 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
       version: schema.string(),
       agents: schema.number(),
       failedUpgradeAgents: schema.number(),
+      failedUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
   totalAgents: schema.number(),
 });
+
+export const OTelCollectorPipelineIDSchema = schema.oneOf([
+  schema.literal('logs'),
+  schema.literal('metrics'),
+  schema.literal('traces'),
+  schema.string(),
+]);
+
+export const OTelCollectorPipelineSchema = schema.maybe(
+  schema.object({
+    receivers: schema.maybe(schema.arrayOf(schema.string())),
+    processors: schema.maybe(schema.arrayOf(schema.string())),
+    exporters: schema.maybe(schema.arrayOf(schema.string())),
+  })
+);
+export const OtelCollectorConfigSchema = {
+  extensions: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  receivers: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  processors: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  connectors: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  exporters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  service: schema.maybe(
+    schema.object({
+      extensions: schema.maybe(schema.arrayOf(schema.string())),
+      pipelines: schema.maybe(
+        schema.recordOf(OTelCollectorPipelineIDSchema, OTelCollectorPipelineSchema)
+      ),
+    })
+  ),
+};
 
 export const FullAgentPolicyResponseSchema = schema.object({
   id: schema.string(),
@@ -449,11 +481,14 @@ export const FullAgentPolicyResponseSchema = schema.object({
         logs: schema.boolean(),
         traces: schema.boolean(),
         apm: schema.maybe(schema.any()),
+        _runtime_experimental: schema.maybe(schema.string()),
       }),
       download: schema.object({
         sourceURI: schema.string(),
         ssl: schema.maybe(BaseSSLSchema),
         secrets: schema.maybe(BaseSecretsSchema),
+        timeout: schema.maybe(schema.string()),
+        target_directory: schema.maybe(schema.string()),
       }),
       features: schema.recordOf(
         schema.string(),
@@ -479,6 +514,11 @@ export const FullAgentPolicyResponseSchema = schema.object({
               interval: schema.maybe(schema.string()),
             })
           ),
+          metrics: schema.maybe(
+            schema.object({
+              period: schema.maybe(schema.string()),
+            })
+          ),
         })
       ),
       limits: schema.maybe(
@@ -501,6 +541,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       signature: schema.string(),
     })
   ),
+  ...OtelCollectorConfigSchema,
 });
 const MinimalOutputSchema = schema.object({
   id: schema.string(),

@@ -19,10 +19,8 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiDataGridColumn,
-  EuiDataGridRowHeightsOptions,
-} from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { CellActions } from './cell_actions';
 import { cellPopoverRendererFactory } from './cell_popover_renderer';
 import { cellRendererFactory } from './cell_renderer';
@@ -39,9 +37,9 @@ import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { getFieldSchema } from '../../utils/get_field_schema';
 import type { Pagination } from '../../services/fetch_indicators';
 import { TABLE_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
-import { useSecurityContext } from '../../../../hooks/use_security_context';
+import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
 
-const actionsColumnIconWidth = 28;
+const actionsColumnIconWidth = 32;
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -59,7 +57,7 @@ export interface IndicatorsTableProps {
 }
 
 const gridStyle = {
-  border: 'horizontal',
+  border: 'none',
   header: 'underline',
   cellPadding: 'm',
   fontSize: 's',
@@ -76,7 +74,11 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
   browserFields,
   columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
 }) => {
-  const securitySolutionContext = useSecurityContext();
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
 
   const [expanded, setExpanded] = useState<Indicator>();
 
@@ -104,9 +106,7 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
     () => [
       {
         id: 'Actions',
-        width: securitySolutionContext?.hasAccessToTimeline
-          ? 3 * actionsColumnIconWidth
-          : 2 * actionsColumnIconWidth,
+        width: hasAccessToTimeline ? 3 * actionsColumnIconWidth : 2 * actionsColumnIconWidth,
         headerCellRender: () => (
           <FormattedMessage
             id="xpack.securitySolution.threatIntelligence.indicator.table.actionColumnLabel"
@@ -116,7 +116,7 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
         rowCellRender: renderCellValue,
       },
     ],
-    [renderCellValue, securitySolutionContext?.hasAccessToTimeline]
+    [renderCellValue, hasAccessToTimeline]
   );
 
   const mappedColumns = useMemo(
@@ -173,10 +173,6 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
       );
     }
 
-    const rowHeightsOptions: EuiDataGridRowHeightsOptions = {
-      lineHeight: '30px',
-    };
-
     if (!indicatorCount) {
       return <EmptyState />;
     }
@@ -210,7 +206,6 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
           sorting={sorting}
           columnVisibility={columnVisibility}
           columns={mappedColumns}
-          rowHeightsOptions={rowHeightsOptions}
         />
       </>
     );

@@ -14,9 +14,10 @@ import { createHash } from 'crypto';
 import { pipeline, Transform } from 'stream';
 import { setTimeout } from 'timers/promises';
 
-import fetch, { Headers } from 'node-fetch';
+import type { Headers } from 'node-fetch';
+import fetch from 'node-fetch';
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { cache } from './utils/cache';
 import { resolveCustomSnapshotUrl } from './custom_snapshots';

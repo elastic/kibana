@@ -18,6 +18,7 @@ import type {
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import type { Stream } from 'openai/streaming';
+import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
@@ -236,12 +237,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     { body, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+
     const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
       body,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
+
+    parentSpan?.setAttribute('openai.raw_request', sanitizedBody);
+
     const axiosOptions = getAxiosOptions(this.provider, this.key, false);
 
     try {
@@ -287,6 +293,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     { body, stream, signal, timeout }: StreamActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
@@ -294,6 +302,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       stream,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
+
+    parentSpan?.setAttribute('openai.raw_request', executeBody);
 
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
     try {
@@ -407,13 +417,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
+      let model: string = DEFAULT_OPENAI_MODEL;
+      if (rest.model) {
+        model = rest.model;
+      } else if ('defaultModel' in this.config && this.config.defaultModel) {
+        model = this.config.defaultModel;
+      }
       const requestBody: ChatCompletionCreateParamsStreaming = {
         ...rest,
         stream: true,
         messages,
-        model:
-          rest.model ??
-          ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+        model,
       };
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);

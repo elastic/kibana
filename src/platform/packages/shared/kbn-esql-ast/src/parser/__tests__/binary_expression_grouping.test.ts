@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstQueryExpression } from '../../types';
 import { singleItems } from '../../visitor/utils';
 import { Walker } from '../../walker';
 

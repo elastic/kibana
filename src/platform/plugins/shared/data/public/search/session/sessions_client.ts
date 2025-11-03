@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup } from '@kbn/core/public';
+import type { PublicContract } from '@kbn/utility-types';
+import type { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
   SavedObjectsUpdateResponse,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ping } from '../../../../../common/runtime_types';
+import type { Ping } from '../../../../../common/runtime_types';
 
 /**
  * Checks if the loaded/cached pings are of the current selected monitors

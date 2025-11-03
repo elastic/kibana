@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   StatusRuleInspect,
   TLSRuleInspect,
 } from '../../../../../common/runtime_types/alert_rules/common';
-import { StatusRuleParamsProps } from '../../components/alerts/status_rule_ui';
-import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
+import type { StatusRuleParamsProps } from '../../components/alerts/status_rule_ui';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { createAsyncAction } from '../utils/actions';
-import { TLSRuleParamsProps } from '../../components/alerts/tls_rule_ui';
+import type { TLSRuleParamsProps } from '../../components/alerts/tls_rule_ui';
 
 export const getDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
   'getDefaultAlertingAction'

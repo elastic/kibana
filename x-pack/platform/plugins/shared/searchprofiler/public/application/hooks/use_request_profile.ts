@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useAppContext } from '../contexts/app_context';
 import { checkForParseErrors } from '../lib';
-import { ShardSerialized } from '../types';
+import type { ShardSerialized } from '../types';
 
 interface Args {
   query: string;
@@ -55,10 +55,12 @@ export const useRequestProfile = () => {
     }
     const { error, parsed } = checkForParseErrors(query);
     if (error) {
-      notifications.addError(error, {
+      notifications.addDanger({
+        'data-test-subj': 'jsonParseErrorToast',
         title: i18n.translate('xpack.searchProfiler.errorToastTitle', {
           defaultMessage: 'JSON parse error',
         }),
+        text: error.body?.message || error.message,
       });
       return { data: null };
     }

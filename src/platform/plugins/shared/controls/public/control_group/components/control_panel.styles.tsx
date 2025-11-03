@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UseEuiTheme, euiBreakpoint } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiBreakpoint } from '@elastic/eui';
 
 export const controlWidthStyles = (euiThemeContext: UseEuiTheme) => ({
   '&.controlFrameWrapper--small': {

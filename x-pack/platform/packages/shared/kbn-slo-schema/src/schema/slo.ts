@@ -6,11 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
+import { healthStatusSchema, stateSchema, transformHealthSchema } from './health';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
@@ -77,29 +78,53 @@ function isValidId(id: string): boolean {
   return validLength && /^[a-z0-9-_]+$/.test(id);
 }
 
-const sloDefinitionSchema = t.intersection([
-  t.type({
-    id: sloIdSchema,
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    timeWindow: timeWindowSchema,
-    budgetingMethod: budgetingMethodSchema,
-    objective: objectiveSchema,
-    settings: settingsSchema,
-    revision: t.number,
-    enabled: t.boolean,
-    tags: tagsSchema,
-    createdAt: dateType,
-    updatedAt: dateType,
-    groupBy: groupBySchema,
-    version: t.number,
-  }),
+const requiredSloFields = t.type({
+  id: sloIdSchema,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  timeWindow: timeWindowSchema,
+  budgetingMethod: budgetingMethodSchema,
+  objective: objectiveSchema,
+  settings: settingsSchema,
+  revision: t.number,
+  enabled: t.boolean,
+  tags: tagsSchema,
+  createdAt: dateType,
+  updatedAt: dateType,
+  groupBy: groupBySchema,
+  version: t.number,
+});
+
+const optionalSloFields = t.partial({
+  createdBy: t.string,
+  updatedBy: t.string,
+});
+
+const baseSloSchema = t.intersection([requiredSloFields, optionalSloFields]);
+
+const dashboardsWithIdSchema = t.partial({ dashboards: t.array(t.type({ id: t.string })) });
+const dashboardsWithRefIdSchema = t.partial({ dashboards: t.array(t.type({ refId: t.string })) });
+
+const artifactsWithIdSchema = t.partial({ artifacts: dashboardsWithIdSchema });
+const artifactsWithRefIdSchema = t.partial({ artifacts: dashboardsWithRefIdSchema });
+
+const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema]);
+
+const sloDefinitionAndHealthSchema = t.intersection([
+  baseSloSchema,
+  artifactsWithIdSchema,
   t.partial({
-    createdBy: t.string,
-    updatedBy: t.string,
+    state: stateSchema,
+    health: t.type({
+      overall: transformHealthSchema,
+      rollup: healthStatusSchema,
+      summary: healthStatusSchema,
+    }),
   }),
 ]);
+
+const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
 
 export {
   budgetingMethodSchema,
@@ -109,6 +134,8 @@ export {
   optionalSettingsSchema,
   settingsSchema,
   sloDefinitionSchema,
+  sloDefinitionAndHealthSchema,
+  storedSloDefinitionSchema,
   sloIdSchema,
   tagsSchema,
   targetSchema,

@@ -14,14 +14,13 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   SEARCH_HOMEPAGE,
   SEARCH_INDICES,
-  SEARCH_INDICES_START,
   SEARCH_INDEX_MANAGEMENT,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
-import { ProductFeatures } from './types';
+import type { ProductFeatures } from './types';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
   defaultMessage: 'Elasticsearch',
@@ -30,7 +29,7 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
   defaultMessage: 'Enterprise Search',
 });
 
-export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT, SEARCH_HOMEPAGE };
+export { SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT, SEARCH_HOMEPAGE };
 
 export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
@@ -75,26 +74,6 @@ export const ANALYTICS_PLUGIN = {
   }),
   URL: '/app/elasticsearch/analytics',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-};
-
-export const SEARCH_EXPERIENCES_PLUGIN = {
-  ID: 'searchExperiences',
-  NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
-    defaultMessage: 'Search Experiences',
-  }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.searchExperiences.navTitle', {
-    defaultMessage: 'Search Experiences',
-  }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
-    defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',
-  }),
-  URL: '/app/enterprise_search/search_experiences',
-  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-  GITHUB_URL: 'https://github.com/elastic/search-ui/',
-  DOCUMENTATION_URL: 'https://docs.elastic.co/search-ui/',
-  ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
-  APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
-  WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
 };
 
 export const APPLICATIONS_PLUGIN = {
@@ -194,9 +173,9 @@ export const CRAWLER = {
 // TODO remove this once the connector service types are no longer in "example" state
 export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];
 
-export const SEARCH_APPS_BREADCRUMB = i18n.translate(
-  'xpack.enterpriseSearch.searchApplications.breadcrumb',
+export const SEARCH_APPS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.titles.searchApplications',
   {
-    defaultMessage: 'Search Applications',
+    defaultMessage: 'Search applications',
   }
 );

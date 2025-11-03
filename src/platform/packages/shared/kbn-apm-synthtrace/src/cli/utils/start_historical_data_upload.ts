@@ -12,12 +12,12 @@ import moment from 'moment';
 import { cpus } from 'os';
 import Path from 'path';
 import { bootstrap } from './bootstrap';
-import { RunOptions } from './parse_run_cli_flags';
+import type { RunOptions } from './parse_run_cli_flags';
 import { getScenario } from './get_scenario';
 import { StreamManager } from './stream_manager';
 import { indexData } from './index_data';
 import { runWorker } from './workers/run_worker';
-import { WorkerData } from './workers/historical_data/synthtrace_historical_data_worker';
+import type { WorkerData } from './workers/historical_data/synthtrace_historical_data_worker';
 
 export async function startHistoricalDataUpload({
   runOptions,

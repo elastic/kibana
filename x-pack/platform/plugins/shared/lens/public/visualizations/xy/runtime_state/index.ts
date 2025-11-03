@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GeneralDatasourceStates } from '../../../state_management';
-import { XYState } from '../types';
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type { XYState } from '../types';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(

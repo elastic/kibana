@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
+import { isFilterable, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { flatten } from 'lodash';
 import { escapeKuery } from '@kbn/es-query';
 import { sortPrefixFirst } from './sort_prefix_first';
-import { QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
-import { KqlQuerySuggestionProvider } from './types';
+import type { QuerySuggestionField } from '../query_suggestion_provider';
+import { QuerySuggestionTypes } from '../query_suggestion_provider';
+import type { KqlQuerySuggestionProvider } from './types';
 
 const keywordComparator = (first: DataViewField, second: DataViewField) => {
   const extensions = ['raw', 'keyword'];
@@ -35,13 +36,13 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
   ) => {
     const allFields = flatten(
       indexPatterns.map((indexPattern) => {
-        return indexPattern.fields.filter(indexPatternsUtils.isFilterable);
+        return indexPattern.fields.filter(isFilterable);
       })
       // temp until IIndexPattern => DataView
     ) as DataViewField[];
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter((field) => {
-      const subTypeNested = indexPatternsUtils.getFieldSubtypeNested(field);
+      const subTypeNested = getFieldSubtypeNested(field);
       if (suggestionsAbstraction?.fields?.[field.name]) {
         return (
           (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&

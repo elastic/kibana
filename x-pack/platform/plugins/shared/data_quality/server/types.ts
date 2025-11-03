@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ManagementSetup } from '@kbn/management-plugin/public/types';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 
 export interface Dependencies {
   features: FeaturesPluginSetup;

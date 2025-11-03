@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { EsLegacyConfigService } from '../services/es_legacy_config_service';
+import type { CoreSetup } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { EsLegacyConfigService } from '../services/es_legacy_config_service';
 
 export function getKibanaUrl(coreSetup: CoreSetup, cloudSetup?: CloudSetup) {
   return (

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
-import { Range } from '@kbn/expressions-plugin/public';
-import { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
+import type { $Values } from '@kbn/utility-types';
+import type { Range } from '@kbn/expressions-plugin/public';
+import type { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeGaugePluginSetup {}

@@ -8,9 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Logger } from '@kbn/core/server';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import { ReportedUsage } from './register';
+import type { Logger } from '@kbn/core/server';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { ReportedUsage } from './register';
 import { SEARCH_SESSION_TYPE } from '../../../../common';
 
 interface SessionPersistedTermsBucket {

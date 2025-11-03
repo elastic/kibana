@@ -6,15 +6,26 @@
  */
 
 import * as React from 'react';
-import { shallow } from 'enzyme';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ThresholdExpression } from './threshold';
 
+const renderWithIntl = (ui: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {ui}
+    </IntlProvider>
+  );
+};
+
 describe('threshold expression', () => {
-  it('renders of builtin comparators', () => {
+  it('renders of builtin comparators', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedThreshold = jest.fn();
     const onChangeSelectedThresholdComparator = jest.fn();
-    const wrapper = shallow(
+
+    renderWithIntl(
       <ThresholdExpression
         thresholdComparator={'between'}
         errors={{ threshold0: [], threshold1: [] }}
@@ -22,47 +33,21 @@ describe('threshold expression', () => {
         onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
       />
     );
-    expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]')).toMatchInlineSnapshot(`
-      <EuiSelect
-        data-test-subj="comparatorOptionsComboBox"
-        onChange={[Function]}
-        options={
-          Array [
-            Object {
-              "text": "Is above",
-              "value": ">",
-            },
-            Object {
-              "text": "Is above or equals",
-              "value": ">=",
-            },
-            Object {
-              "text": "Is below",
-              "value": "<",
-            },
-            Object {
-              "text": "Is below or equals",
-              "value": "<=",
-            },
-            Object {
-              "text": "Is between",
-              "value": "between",
-            },
-            Object {
-              "text": "Is not between",
-              "value": "notBetween",
-            },
-          ]
-        }
-        value="between"
-      />
-    `);
+
+    const button = screen.getByTestId('thresholdPopover');
+
+    expect(button).toHaveTextContent('Is between');
+
+    await user.click(button);
+
+    expect(await screen.findByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
   });
 
   it('renders with threshold title', () => {
     const onChangeSelectedThreshold = jest.fn();
     const onChangeSelectedThresholdComparator = jest.fn();
-    const wrapper = shallow(
+
+    renderWithIntl(
       <ThresholdExpression
         thresholdComparator={'between'}
         errors={{ threshold0: [], threshold1: [] }}
@@ -70,14 +55,16 @@ describe('threshold expression', () => {
         onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
       />
     );
-    expect(wrapper.contains('Is between')).toBeTruthy();
+
+    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent('Is between');
   });
 
   it('fires onChangeSelectedThreshold only when threshold actually changed', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedThreshold = jest.fn();
     const onChangeSelectedThresholdComparator = jest.fn();
 
-    const wrapper = mountWithIntl(
+    renderWithIntl(
       <ThresholdExpression
         thresholdComparator={'>'}
         threshold={[10]}
@@ -87,36 +74,39 @@ describe('threshold expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="thresholdPopover"]').last().simulate('click');
-    expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="alertThresholdInput0"]').exists()).toBeTruthy();
+    await user.click(screen.getByTestId('thresholdPopover'));
 
-    wrapper
-      .find('[data-test-subj="alertThresholdInput0"]')
-      .last()
-      .simulate('change', { target: { value: 1000 } });
-    expect(onChangeSelectedThreshold).toHaveBeenCalled();
+    expect(await screen.findByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
+
+    const thresholdInput = screen.getByTestId('alertThresholdInput0');
+
+    // Use a single change event instead of per-character typing to avoid multiple handler calls
+    fireEvent.change(thresholdInput, { target: { value: '1000' } });
+
+    await waitFor(() => {
+      expect(onChangeSelectedThreshold).toHaveBeenCalledTimes(1);
+    });
     expect(onChangeSelectedThresholdComparator).not.toHaveBeenCalled();
 
     jest.clearAllMocks();
-    wrapper
-      .find('[data-test-subj="comparatorOptionsComboBox"]')
-      .last()
-      .simulate('change', { target: { value: '<' } });
+
+    const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox');
+    await user.selectOptions(comparatorSelect, '<');
+
     expect(onChangeSelectedThreshold).not.toHaveBeenCalled();
     expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
 
     jest.clearAllMocks();
-    wrapper
-      .find('[data-test-subj="comparatorOptionsComboBox"]')
-      .last()
-      .simulate('change', { target: { value: 'between' } });
+
+    await user.selectOptions(comparatorSelect, 'between');
+
     expect(onChangeSelectedThreshold).toHaveBeenCalled();
     expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
   });
 
   it('renders threshold unit correctly', async () => {
-    const wrapper = mountWithIntl(
+    renderWithIntl(
       <ThresholdExpression
         thresholdComparator={'>'}
         threshold={[10]}
@@ -127,13 +117,12 @@ describe('threshold expression', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="thresholdPopover"]').last().text()).toMatchInlineSnapshot(
-      `"Is above 10%"`
-    );
+    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent('Is above 10%');
   });
 
   it('renders the correct number of threshold inputs', async () => {
-    const wrapper = mountWithIntl(
+    const user = userEvent.setup();
+    renderWithIntl(
       <ThresholdExpression
         thresholdComparator={'>'}
         threshold={[10]}
@@ -143,30 +132,32 @@ describe('threshold expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="thresholdPopover"]').last().simulate('click');
-    expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('input[data-test-subj="alertThresholdInput0"]').length).toEqual(1);
+    await user.click(screen.getByTestId('thresholdPopover'));
 
-    wrapper
-      .find('[data-test-subj="comparatorOptionsComboBox"]')
-      .last()
-      .simulate('change', { target: { value: 'between' } });
-    wrapper.update();
-    expect(wrapper.find('input[data-test-subj="alertThresholdInput0"]').length).toEqual(1);
-    expect(wrapper.find('input[data-test-subj="alertThresholdInput1"]').length).toEqual(1);
+    expect(await screen.findByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
 
-    wrapper
-      .find('[data-test-subj="comparatorOptionsComboBox"]')
-      .last()
-      .simulate('change', { target: { value: '<' } });
-    wrapper.update();
-    expect(wrapper.find('input[data-test-subj="alertThresholdInput0"]').length).toEqual(1);
+    const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox');
+    await user.selectOptions(comparatorSelect, 'between');
+
+    expect(await screen.findByTestId('alertThresholdInput1')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertThresholdInput0')).toBeInTheDocument();
+
+    await user.selectOptions(comparatorSelect, '<');
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('alertThresholdInput1')).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
   });
 
-  it('is valid when the threshold value is 0', () => {
+  it('is valid when the threshold value is 0', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedThreshold = jest.fn();
     const onChangeSelectedThresholdComparator = jest.fn();
-    const wrapper = shallow(
+
+    renderWithIntl(
       <ThresholdExpression
         thresholdComparator={'>'}
         threshold={[0]}
@@ -175,14 +166,12 @@ describe('threshold expression', () => {
         onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
       />
     );
-    expect(wrapper.find('[data-test-subj="alertThresholdInput0"]')).toMatchInlineSnapshot(`
-          <EuiFieldNumber
-            data-test-subj="alertThresholdInput0"
-            isInvalid={false}
-            min={0}
-            onChange={[Function]}
-            value={0}
-          />
-        `);
+
+    await user.click(screen.getByTestId('thresholdPopover'));
+
+    const thresholdInput = screen.getByTestId('alertThresholdInput0') as HTMLInputElement;
+
+    expect(thresholdInput.value).toBe('0');
+    expect(thresholdInput).not.toBeInvalid();
   });
 });

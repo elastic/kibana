@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback, RefObject } from 'react';
+import type { RefObject } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanel,
   EuiPopover,
   useGeneratedHtmlId,
-  EuiButtonIconProps,
   EuiToolTip,
 } from '@elastic/eui';
-import {
+import type {
   EuiContextMenuClass,
   EuiContextMenuPanelId,
 } from '@elastic/eui/src/components/context_menu/context_menu';
@@ -26,18 +27,12 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import {
-  useQueryBarMenuPanels,
-  QueryBarMenuPanelsProps,
-  QueryBarMenuPanel,
-  AdditionalQueryBarMenuItems,
-} from './query_bar_menu_panels';
+import type { QueryBarMenuPanelsProps, AdditionalQueryBarMenuItems } from './query_bar_menu_panels';
+import { useQueryBarMenuPanels, QueryBarMenuPanel } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
-import {
-  withCloseFilterEditorConfirmModal,
-  WithCloseFilterEditorConfirmModalProps,
-} from '../filter_bar/filter_editor';
-import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import type { WithCloseFilterEditorConfirmModalProps } from '../filter_bar/filter_editor';
+import { withCloseFilterEditorConfirmModal } from '../filter_bar/filter_editor';
+import type { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getFilterSetButtonLabel: () =>
@@ -153,13 +148,17 @@ function QueryBarMenuComponent({
   };
 
   const button = (
-    <EuiToolTip delay="long" content={strings.getFilterSetButtonLabel()} disableScreenReaderOutput>
+    <EuiToolTip
+      delay="regular"
+      content={strings.getFilterSetButtonLabel()}
+      disableScreenReaderOutput
+    >
       <EuiButtonIcon
-        size="m"
+        {...buttonProps}
+        size="s"
         display="empty"
         onClick={onButtonClick}
         isDisabled={isDisabled}
-        {...buttonProps}
         css={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         iconType="filter"
         aria-label={strings.getFilterSetButtonLabel()}

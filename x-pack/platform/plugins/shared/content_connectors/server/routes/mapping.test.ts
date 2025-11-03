@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 
 jest.mock('../lib/fetch_mapping', () => ({
   fetchMapping: jest.fn(),

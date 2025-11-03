@@ -1,0 +1,13 @@
+steps:
+  - command: .buildkite/scripts/steps/otel_semconv_sync.sh
+    label: OpenTelemetry Semantic Conventions Sync
+    timeout_in_minutes: 15
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    env:
+      # Docker is available on these agents
+      DOCKER_REQUIRED: 'true'

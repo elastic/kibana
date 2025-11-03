@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Replacements, transformRawData } from '@kbn/elastic-assistant-common';
+import type { Replacements, User } from '@kbn/elastic-assistant-common';
+import { transformRawData } from '@kbn/elastic-assistant-common';
 import type { ClientMessage } from '../../assistant_context/types';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
 import type { SelectedPromptContext } from '../prompt_context/types';
@@ -19,6 +20,7 @@ export function getCombinedMessage({
   getAnonymizedValue = defaultGetAnonymizedValue,
   promptText,
   selectedPromptContexts,
+  user,
 }: {
   currentReplacements: Replacements | undefined;
   getAnonymizedValue?: ({
@@ -30,6 +32,7 @@ export function getCombinedMessage({
   }) => string;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
+  user?: User;
 }): ClientMessageWithReplacements {
   let replacements: Replacements = currentReplacements ?? {};
   const onNewReplacements = (newReplacements: Replacements) => {
@@ -60,5 +63,6 @@ export function getCombinedMessage({
     role: 'user', // we are combining the system and user messages into one message
     timestamp: new Date().toISOString(),
     replacements,
+    user,
   };
 }

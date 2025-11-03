@@ -6,7 +6,7 @@
  */
 
 // a11y tests for spaces, space selection and space creation and feature controls
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'infraHome']);

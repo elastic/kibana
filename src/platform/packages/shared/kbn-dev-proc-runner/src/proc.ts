@@ -17,7 +17,7 @@ import * as Rx from 'rxjs';
 import { tap, share, take, mergeMap, map, ignoreElements, filter } from 'rxjs';
 import chalk from 'chalk';
 import treeKill from 'tree-kill';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createFailError } from '@kbn/dev-cli-errors';
 

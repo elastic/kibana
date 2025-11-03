@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { TemplateDeserialized } from '../../../../common';
-import { RouteDependencies } from '../../../types';
+import type { TemplateDeserialized } from '../../../../common';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 import { templateSchema } from './validate_schemas';
 import { saveTemplate, doesTemplateExist, getTemplateDataStreamOptions } from './lib';

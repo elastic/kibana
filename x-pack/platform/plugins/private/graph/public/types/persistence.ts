@@ -6,8 +6,8 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
-import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
+import type { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
+import type { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 

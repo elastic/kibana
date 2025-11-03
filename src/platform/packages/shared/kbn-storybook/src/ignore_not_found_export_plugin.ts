@@ -11,7 +11,7 @@
 //
 // This plugin suppresses the irritating TS-related warnings in Storybook HMR.
 
-import { Compiler, Stats } from 'webpack';
+import type { Compiler, Stats } from 'webpack';
 
 export class IgnoreNotFoundExportPlugin {
   apply(compiler: Compiler) {

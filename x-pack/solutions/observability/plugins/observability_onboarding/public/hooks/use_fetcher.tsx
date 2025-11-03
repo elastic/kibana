@@ -11,10 +11,8 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from './use_kibana';
-import {
-  AutoAbortedObservabilityClient,
-  callObservabilityOnboardingApi,
-} from '../services/rest/create_call_api';
+import type { AutoAbortedObservabilityClient } from '../services/rest/create_call_api';
+import { callObservabilityOnboardingApi } from '../services/rest/create_call_api';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',

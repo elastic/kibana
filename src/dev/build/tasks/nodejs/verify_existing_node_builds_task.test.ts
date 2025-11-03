@@ -14,7 +14,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createAnyInstanceSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
-import { Config, Platform } from '../../lib';
+import type { Platform } from '../../lib';
+import { Config } from '../../lib';
 import { VerifyExistingNodeBuilds } from './verify_existing_node_builds_task';
 
 jest.mock('./node_shasums');
@@ -147,8 +148,152 @@ it('checks shasums for each downloaded node build', async () => {
           "<node version>",
           undefined,
         ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
         Object {
           "type": "return",
           "value": Object {
@@ -265,6 +410,7 @@ it('checks shasums for each downloaded node build', async () => {
             "architecture": "x64",
             "buildName": "linux-x86_64",
             "name": "linux",
+            "solution": null,
             "variant": null,
           },
         ],
@@ -274,6 +420,7 @@ it('checks shasums for each downloaded node build', async () => {
             "architecture": "arm64",
             "buildName": "linux-aarch64",
             "name": "linux",
+            "solution": null,
             "variant": null,
           },
         ],
@@ -283,6 +430,7 @@ it('checks shasums for each downloaded node build', async () => {
             "architecture": "x64",
             "buildName": "darwin-x86_64",
             "name": "darwin",
+            "solution": null,
             "variant": null,
           },
         ],
@@ -292,6 +440,7 @@ it('checks shasums for each downloaded node build', async () => {
             "architecture": "arm64",
             "buildName": "darwin-aarch64",
             "name": "darwin",
+            "solution": null,
             "variant": null,
           },
         ],
@@ -301,6 +450,7 @@ it('checks shasums for each downloaded node build', async () => {
             "architecture": "x64",
             "buildName": "windows-x86_64",
             "name": "win32",
+            "solution": null,
             "variant": null,
           },
         ],
@@ -310,6 +460,7 @@ it('checks shasums for each downloaded node build', async () => {
             "architecture": "arm64",
             "buildName": "windows-arm64",
             "name": "win32",
+            "solution": null,
             "variant": null,
           },
         ],
@@ -319,6 +470,7 @@ it('checks shasums for each downloaded node build', async () => {
             "architecture": "x64",
             "buildName": "linux-x86_64",
             "name": "linux",
+            "solution": null,
             "variant": "serverless",
           },
         ],
@@ -328,6 +480,87 @@ it('checks shasums for each downloaded node build', async () => {
             "architecture": "arm64",
             "buildName": "linux-aarch64",
             "name": "linux",
+            "solution": null,
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "x64",
+            "buildName": "linux-x86_64",
+            "name": "linux",
+            "solution": "workplaceai",
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "arm64",
+            "buildName": "linux-aarch64",
+            "name": "linux",
+            "solution": "workplaceai",
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "x64",
+            "buildName": "linux-x86_64",
+            "name": "linux",
+            "solution": "observability",
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "arm64",
+            "buildName": "linux-aarch64",
+            "name": "linux",
+            "solution": "observability",
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "x64",
+            "buildName": "linux-x86_64",
+            "name": "linux",
+            "solution": "search",
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "arm64",
+            "buildName": "linux-aarch64",
+            "name": "linux",
+            "solution": "search",
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "x64",
+            "buildName": "linux-x86_64",
+            "name": "linux",
+            "solution": "security",
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "arm64",
+            "buildName": "linux-aarch64",
+            "name": "linux",
+            "solution": "security",
             "variant": "serverless",
           },
         ],
@@ -405,6 +638,78 @@ it('checks shasums for each downloaded node build', async () => {
             },
           ],
         },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-x64:downloadName",
+              "downloadPath": "linux:serverless:linux-x64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-arm64:downloadName",
+              "downloadPath": "linux:serverless:linux-arm64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-x64:downloadName",
+              "downloadPath": "linux:serverless:linux-x64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-arm64:downloadName",
+              "downloadPath": "linux:serverless:linux-arm64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-x64:downloadName",
+              "downloadPath": "linux:serverless:linux-x64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-arm64:downloadName",
+              "downloadPath": "linux:serverless:linux-arm64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-x64:downloadName",
+              "downloadPath": "linux:serverless:linux-x64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-arm64:downloadName",
+              "downloadPath": "linux:serverless:linux-arm64:downloadPath",
+            },
+          ],
+        },
       ],
     }
   `);
@@ -443,8 +748,72 @@ it('checks shasums for each downloaded node build', async () => {
           "linux:serverless:linux-arm64:downloadPath",
           "sha256",
         ],
+        Array [
+          "linux:serverless:linux-x64:downloadPath",
+          "sha256",
+        ],
+        Array [
+          "linux:serverless:linux-arm64:downloadPath",
+          "sha256",
+        ],
+        Array [
+          "linux:serverless:linux-x64:downloadPath",
+          "sha256",
+        ],
+        Array [
+          "linux:serverless:linux-arm64:downloadPath",
+          "sha256",
+        ],
+        Array [
+          "linux:serverless:linux-x64:downloadPath",
+          "sha256",
+        ],
+        Array [
+          "linux:serverless:linux-arm64:downloadPath",
+          "sha256",
+        ],
+        Array [
+          "linux:serverless:linux-x64:downloadPath",
+          "sha256",
+        ],
+        Array [
+          "linux:serverless:linux-arm64:downloadPath",
+          "sha256",
+        ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
         Object {
           "type": "return",
           "value": "valid shasum",

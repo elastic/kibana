@@ -5,11 +5,59 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { Filter } from '@kbn/es-query';
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatListDoc, ThreatListItem, ThreatMappingEntries } from './types';
 
-import type { ThreatListDoc, ThreatListItem } from './types';
+export const getThreatMappingEntriesMock = (): ThreatMappingEntries => {
+  return [
+    {
+      field: 'host.name',
+      type: 'mapping',
+      value: 'host.name',
+    },
+    {
+      field: 'host.ip',
+      type: 'mapping',
+      value: 'source.ip',
+    },
+  ];
+};
+
+export const getThreatMappingEntriesMockWithNegate = (): ThreatMappingEntries => {
+  return [
+    {
+      field: 'host.name',
+      type: 'mapping',
+      value: 'host.name',
+    },
+    {
+      field: 'host.ip',
+      type: 'mapping',
+      value: 'source.ip',
+    },
+    {
+      field: 'source.ip',
+      type: 'mapping',
+      value: 'destination.ip',
+      negate: true,
+    },
+  ];
+};
+
+export const getAndClauseMock = (threatMappingIndex: number = 0) => {
+  return {
+    bool: {
+      _name: `123__SEP__threat_index__SEP__${threatMappingIndex}__SEP__mq`,
+      filter: [
+        { match: { 'host.name': { query: 'host-1' } } },
+        { match: { 'host.ip': { query: '127.0.0.1' } } },
+        { bool: { must_not: { match: { 'source.ip': { query: '127.0.0.1' } } } } },
+      ],
+    },
+  };
+};
 
 export const getThreatMappingMock = (): ThreatMapping => {
   return [
@@ -111,55 +159,6 @@ export const getThreatListItemFieldsMock = () => ({
   'destination.port': [1],
 });
 
-export const getFilterThreatMapping = (): ThreatMapping => [
-  {
-    entries: [
-      {
-        field: 'host.name',
-        type: 'mapping',
-        value: 'host.name',
-      },
-      {
-        field: 'host.ip',
-        type: 'mapping',
-        value: 'host.ip',
-      },
-    ],
-  },
-  {
-    entries: [
-      {
-        field: 'destination.ip',
-        type: 'mapping',
-        value: 'destination.ip',
-      },
-      {
-        field: 'destination.port',
-        type: 'mapping',
-        value: 'destination.port',
-      },
-    ],
-  },
-  {
-    entries: [
-      {
-        field: 'source.port',
-        type: 'mapping',
-        value: 'source.port',
-      },
-    ],
-  },
-  {
-    entries: [
-      {
-        field: 'source.ip',
-        type: 'mapping',
-        value: 'source.ip',
-      },
-    ],
-  },
-];
-
 export const getThreatMappingFilterMock = (): Filter => ({
   meta: {
     alias: null,
@@ -178,30 +177,34 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
     should: [
       {
         bool: {
+          _name: '123__SEP__threat_index__SEP__0__SEP__mq',
           filter: [
-            { match: { 'host.name': { query: 'host-1', _name: expect.any(String) } } },
-            { match: { 'host.ip': { query: '192.168.0.0.1', _name: expect.any(String) } } },
+            { match: { 'host.name': { query: 'host-1' } } },
+            { match: { 'host.ip': { query: '192.168.0.0.1' } } },
           ],
         },
       },
       {
         bool: {
+          _name: '123__SEP__threat_index__SEP__1__SEP__mq',
           filter: [
             {
-              match: { 'destination.ip': { query: '127.0.0.1', _name: expect.any(String) } },
+              match: { 'destination.ip': { query: '127.0.0.1' } },
             },
-            { match: { 'destination.port': { query: port, _name: expect.any(String) } } },
+            { match: { 'destination.port': { query: port } } },
           ],
         },
       },
       {
         bool: {
-          filter: [{ match: { 'source.port': { query: port, _name: expect.any(String) } } }],
+          _name: '123__SEP__threat_index__SEP__2__SEP__mq',
+          filter: [{ match: { 'source.port': { query: port } } }],
         },
       },
       {
         bool: {
-          filter: [{ match: { 'source.ip': { query: '127.0.0.1', _name: expect.any(String) } } }],
+          _name: '123__SEP__threat_index__SEP__3__SEP__mq',
+          filter: [{ match: { 'source.ip': { query: '127.0.0.1' } } }],
         },
       },
     ],

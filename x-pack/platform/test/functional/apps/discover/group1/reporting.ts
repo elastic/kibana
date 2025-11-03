@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import moment, { DurationInputArg2 } from 'moment';
+import type { DurationInputArg2 } from 'moment';
+import moment from 'moment';
 import { Key } from 'selenium-webdriver';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reporting');
@@ -18,14 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const { reporting, common, discover, timePicker, header, exports } = getPageObjects([
+  const { reporting, common, discover, timePicker, exports } = getPageObjects([
     'reporting',
     'common',
     'discover',
     'timePicker',
     'share',
     'exports',
-    'header',
   ]);
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
@@ -103,7 +103,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await toasts.dismissAll();
 
     await exports.clickExportTopNavButton();
+    await retry.waitFor('the popover to be opened', async () => {
+      return await exports.isExportPopoverOpen();
+    });
     await reporting.selectExportItem('CSV');
+    await retry.waitFor('the flyout to be opened', async () => {
+      return await exports.isExportFlyoutOpen();
+    });
     await reporting.clickGenerateReportButton();
     await exports.closeExportFlyout();
     await exports.clickExportTopNavButton();
@@ -119,7 +125,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReportPostUrl = async () => {
     // click 'Copy POST URL'
     await exports.clickExportTopNavButton();
+    await retry.waitFor('the popover to be opened', async () => {
+      return await exports.isExportPopoverOpen();
+    });
     await reporting.selectExportItem('CSV');
+    await retry.waitFor('the flyout to be opened', async () => {
+      return await exports.isExportFlyoutOpen();
+    });
     await reporting.clickGenerateReportButton();
     await reporting.copyReportingPOSTURLValueToClipboard();
 
@@ -136,7 +148,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
         await reportingAPI.initEcommerce();
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
+        await discover.waitUntilTabIsLoaded();
       });
 
       after(async () => {
@@ -146,13 +160,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await reporting.openExportPopover();
+        await retry.waitFor('the popover to be opened', async () => {
+          return await exports.isExportPopoverOpen();
+        });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
         await reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
         await discover.saveSearch('my search - expectEnabledGenerateReportButton');
+        await discover.waitUntilTabIsLoaded();
         await reporting.openExportPopover();
+        await retry.waitFor('the popover to be opened', async () => {
+          return await exports.isExportPopoverOpen();
+        });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
         await reporting.openExportPopover();
       });
@@ -179,13 +200,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('generates a report with single timefilter', async () => {
         await discover.clickNewSearchButton();
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setCommonlyUsedTime('Last_24 hours');
+        await discover.waitUntilTabIsLoaded();
         await discover.saveSearch('single-timefilter-search');
+        await discover.waitUntilTabIsLoaded();
 
         // get shared URL value
         const sharedURL = await browser.getCurrentUrl();
@@ -215,9 +241,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a report from a new search with data: default', async () => {
         await discover.clickNewSearchButton();
+        await discover.waitUntilTabIsLoaded();
         await reporting.setTimepickerInEcommerceDataRange();
+        await discover.waitUntilTabIsLoaded();
 
         await discover.saveSearch('my search - with data - expectReportCanBeCreated');
+        await discover.waitUntilTabIsLoaded();
 
         const res = await getReport();
         expect(res.status).to.equal(200);
@@ -229,7 +258,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a report with no data', async () => {
         await reporting.setTimepickerInEcommerceNoDataRange();
+        await discover.waitUntilTabIsLoaded();
         await discover.saveSearch('my search - no data - expectReportCanBeCreated');
+        await discover.waitUntilTabIsLoaded();
 
         const res = await getReport();
         expect(res.text).to.be(`\n`);
@@ -239,12 +270,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await timePicker.setAbsoluteRange(fromTime, toTime);
+        await discover.waitUntilTabIsLoaded();
         await discover.clickNewSearchButton();
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await discover.getHitCount()).to.equal('4,675');
         });
         await discover.saveSearch('large export');
-
+        await discover.waitUntilTabIsLoaded();
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
         expect(csvFile.length).to.be(4845684);
@@ -254,11 +287,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generate a report using ES|QL', async () => {
         await discover.selectTextBaseLang();
-        const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
+        await discover.waitUntilTabIsLoaded();
 
+        const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const res = await getReport();
         expect(res.status).to.equal(200);
@@ -285,15 +319,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await timePicker.setCommonlyUsedTime('Last_15 minutes');
+        await discover.waitUntilTabIsLoaded();
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery = `from ${RECENT_DATA_INDEX_NAME} | sort timestamp | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | KEEP name, numberValue`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const reportPostUrl = await getReportPostUrl();
         expect(reportPostUrl).to.contain(`timeRange:(from:'2`); // not `from:now-15m`
@@ -326,7 +359,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await reportingAPI.initLogs();
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await discover.loadSavedSearch('Sparse Columns');
+        await discover.waitUntilTabIsLoaded();
       });
 
       after(async () => {
@@ -338,6 +373,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
         const toTime = 'Dec 23, 2006 @ 00:00:00.000';
         await timePicker.setAbsoluteRange(fromTime, toTime);
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await discover.getHitCount()).to.equal(TEST_DOC_COUNT.toString());
         });
@@ -358,12 +394,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Jun 22, 2019 @ 00:00:00.000';
         const toTime = 'Jun 26, 2019 @ 23:30:00.000';
         await timePicker.setAbsoluteRange(fromTime, toTime);
+        await discover.waitUntilTabIsLoaded();
       };
 
       before(async () => {
         await reportingAPI.initEcommerce();
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
+        await discover.waitUntilTabIsLoaded();
       });
 
       after(async () => {
@@ -380,6 +419,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a report with data', async () => {
         await discover.loadSavedSearch('Ecommerce Data');
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await discover.getHitCount()).to.equal('740');
         });
@@ -390,12 +430,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a report with filtered data', async () => {
         await discover.loadSavedSearch('Ecommerce Data');
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await discover.getHitCount()).to.equal('740');
         });
 
         // filter
         await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await discover.getHitCount()).to.equal('154');
         });

@@ -10,6 +10,7 @@
 import type { EventEmitter } from 'events';
 import type { History } from 'history';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { VisParams } from '@kbn/visualizations-common';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
@@ -43,14 +44,8 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type {
-  Vis,
-  VisualizeEmbeddableContract,
-  VisSavedObject,
-  PersistedState,
-  VisParams,
-} from '..';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { Vis, VisualizeEmbeddableContract, VisSavedObject, PersistedState } from '..';
 
 import type { ListingViewRegistry, SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../legacy/embeddable';

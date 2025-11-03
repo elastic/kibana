@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { replaceParams } from '@kbn/openapi-common/shared';
+import { useQuery, useQueryClient } from '@kbn/react-query';
+import { useCallback } from 'react';
+import type { GetAllTranslationStatsDashboardMigrationResponse } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import { SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH } from '../../../../common/siem_migrations/dashboards/constants';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
+import { getDashboardMigrationTranslationStats } from '../api';
+import { DEFAULT_QUERY_OPTIONS } from './constants';
+
+export const useGetMigrationTranslationStats = (migrationId: string) => {
+  const { addError } = useAppToasts();
+
+  const SPECIFIC_MIGRATION_TRANSLATION_PATH = replaceParams(
+    SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH,
+    {
+      migration_id: migrationId,
+    }
+  );
+  return useQuery<GetAllTranslationStatsDashboardMigrationResponse>(
+    ['GET', SPECIFIC_MIGRATION_TRANSLATION_PATH],
+    async ({ signal }) => {
+      return getDashboardMigrationTranslationStats({ migrationId, signal });
+    },
+    {
+      ...DEFAULT_QUERY_OPTIONS,
+      onError: (error) => {
+        addError(error, { title: i18n.GET_MIGRATION_TRANSLATION_STATS_FAILURE });
+      },
+      cacheTime: 2 * 1000,
+    }
+  );
+};
+
+/**
+ * We should use this hook to invalidate the translation stats cache. For
+ * example, dashboard migrations mutations, like installing a dashboard, should lead to cache invalidation.
+ *
+ * @returns A translation stats cache invalidation callback
+ */
+export const useInvalidateGetMigrationTranslationStats = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(
+    (migrationId: string) => {
+      const SPECIFIC_MIGRATION_TRANSLATION_PATH = replaceParams(
+        SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH,
+        {
+          migration_id: migrationId,
+        }
+      );
+
+      queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATION_TRANSLATION_PATH], {
+        refetchType: 'active',
+      });
+    },
+    [queryClient]
+  );
+};

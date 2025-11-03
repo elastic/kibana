@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useRef,
-  useEffect,
-  useLayoutEffect,
-  useState,
-  ComponentType,
-  useMemo,
-  CSSProperties,
-} from 'react';
+import type { ComponentType, CSSProperties } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useState, useMemo } from 'react';
 import { throttle } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 import { autoScaleWrapperStyle } from './with_auto_scale.styles';

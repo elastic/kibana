@@ -7,14 +7,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiCallOut, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { Repository, EmptyRepository } from '../../../../common/types';
+import type { Repository, EmptyRepository } from '../../../../common/types';
 
-import { PageError, SectionError, Error } from '../../../shared_imports';
+import type { Error } from '../../../shared_imports';
+import { PageError, SectionError } from '../../../shared_imports';
 import { RepositoryForm, PageLoading } from '../../components';
-import { BASE_PATH, Section } from '../../constants';
+import type { Section } from '../../constants';
+import { BASE_PATH } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editRepository, useLoadRepository } from '../../services/http';
@@ -164,6 +166,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
       {isManagedRepository ? (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             iconType="info"

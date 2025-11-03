@@ -6,7 +6,7 @@
  */
 
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
-import { Group } from './types';
+import type { Group } from './types';
 
 const getEcsValue = (field: string, value: unknown): string | string[] | undefined => {
   if (typeof value !== 'string') return;

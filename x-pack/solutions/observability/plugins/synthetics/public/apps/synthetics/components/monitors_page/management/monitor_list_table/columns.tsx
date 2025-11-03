@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FETCH_STATUS, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { getMonitorSpaceToAppend, useEnablement } from '../../../../hooks';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
@@ -28,13 +29,13 @@ import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enabl
 import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
 
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   ServiceLocations,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';

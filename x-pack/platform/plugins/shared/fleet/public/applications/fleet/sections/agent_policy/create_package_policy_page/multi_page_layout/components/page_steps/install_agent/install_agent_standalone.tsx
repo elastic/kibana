@@ -26,6 +26,8 @@ import { StandaloneInstructions } from '../../../../../../../../../components/en
 
 import { useFetchFullPolicy } from '../../../../../../../../../components/agent_enrollment_flyout/hooks';
 
+import { getAgentPoliciesWithNonFipsIntegrations } from '../../../../../../../hooks/use_agent_policies_with_fips';
+
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPageProps> = (props) => {
@@ -71,6 +73,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
+      nonFipsIntegrations: getAgentPoliciesWithNonFipsIntegrations(agentPolicy),
     }),
   ];
 

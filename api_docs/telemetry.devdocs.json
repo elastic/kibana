@@ -103,7 +103,7 @@
               "Specify if telemetry should send usage to the prod or staging remote telemetry service"
             ],
             "signature": [
-              "\"prod\" | \"staging\""
+              "\"staging\" | \"prod\""
             ],
             "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
             "deprecated": false,
@@ -326,7 +326,7 @@
               "\nOverwrite the opt-in status.\nIt will send a final request to the remote telemetry cluster to report about the opt-in/out change."
             ],
             "signature": [
-              "(optedIn: boolean) => Promise<boolean>"
+              "(optedIn: boolean, signal?: AbortSignal | undefined) => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
             "deprecated": false,
@@ -348,6 +348,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "telemetry",
+                "id": "def-public.TelemetryServicePublicApis.setOptIn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [
+                  "An AbortSignal to cancel any ongoing requests if the caller decides to"
+                ],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -643,7 +660,7 @@
               "When the data comes from a matching index-pattern, the name of the pattern"
             ],
             "signature": [
-              "\"search\" | \"logstash\" | \"alerts\" | \"apm\" | \"metricbeat\" | \"suricata\" | \"zeek\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"generic-filebeat\" | \"generic-metricbeat\" | \"functionbeat\" | \"generic-functionbeat\" | \"heartbeat\" | \"generic-heartbeat\" | \"generic-logstash\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"nginx\" | \"apache\" | \"dsns-logs\" | \"generic-logs\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"sigma_doc\" | \"ecs-corelight\" | \"wazuh\" | \"meow\" | undefined"
+              "\"search\" | \"logstash\" | \"alerts\" | \"apm\" | \"nginx\" | \"metricbeat\" | \"suricata\" | \"zeek\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"generic-filebeat\" | \"generic-metricbeat\" | \"functionbeat\" | \"generic-functionbeat\" | \"heartbeat\" | \"generic-heartbeat\" | \"generic-logstash\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"apache\" | \"dsns-logs\" | \"generic-logs\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"sigma_doc\" | \"ecs-corelight\" | \"wazuh\" | \"meow\" | undefined"
             ],
             "path": "src/platform/plugins/shared/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false,
@@ -833,16 +850,16 @@
               "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.test.ts"
             },
             {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/telemetry/sender.ts"
+            },
+            {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender.ts"
             },
             {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/solutions/observability/plugins/synthetics/server/telemetry/sender.ts"
             },
             {
               "plugin": "synthetics",

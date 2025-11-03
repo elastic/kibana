@@ -9,11 +9,12 @@
 
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { Assign } from '@kbn/utility-types';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
-import { QueryFilterOutput } from '../../expressions';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
+import type { QueryFilterOutput } from '../../expressions';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { BUCKET_TYPES } from '..';
 
 export const aggFiltersFnName = 'aggFilters';
 

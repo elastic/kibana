@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnalyticsCollection } from '../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../common/types/analytics';
 import { KibanaLogic } from '../../shared/kibana/kibana_logic';
 
 export const findOrCreateDataView = async (collection: AnalyticsCollection) => {

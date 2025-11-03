@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useLayoutEffect, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { useLayoutEffect } from 'react';
 
 interface RenderCounterProps {
   postponeExecution?: boolean;

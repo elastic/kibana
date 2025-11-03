@@ -11,7 +11,8 @@ import type { DeprecationsServiceStart } from '@kbn/core/public';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
-import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
+import type { KibanaTestBed } from '../kibana_deprecations.helpers';
+import { setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecations table', () => {
   let testBed: KibanaTestBed;

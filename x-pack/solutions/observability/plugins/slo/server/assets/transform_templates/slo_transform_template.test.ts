@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformSource } from '@elastic/elasticsearch/lib/api/types';
+import type { TransformSource } from '@elastic/elasticsearch/lib/api/types';
 import { getSLOTransformTemplate } from './slo_transform_template';
 import { createKQLCustomIndicator, createSLO } from '../../services/fixtures/slo';
 

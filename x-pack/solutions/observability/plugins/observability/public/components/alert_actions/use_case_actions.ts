@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { Alert } from '@kbn/alerting-types';
-import { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../common/typings';
 
 export const useCaseActions = ({
   alerts,
-  refresh,
+  onAddToCase,
   services,
 }: {
   alerts: Alert[];
-  refresh?: () => void;
+  onAddToCase?: ({ isNewCase }: { isNewCase: boolean }) => void;
   services: {
     /**
      * The cases service is optional: cases features will be disabled if not provided
@@ -29,11 +29,17 @@ export const useCaseActions = ({
   const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const onSuccess = useCallback(() => {
-    refresh?.();
-  }, [refresh]);
+  const onAddToExistingCase = useCallback(() => {
+    onAddToCase?.({ isNewCase: false });
+  }, [onAddToCase]);
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({ onSuccess });
+  const onAddToNewCase = useCallback(() => {
+    onAddToCase?.({ isNewCase: true });
+  }, [onAddToCase]);
+
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    onSuccess: onAddToExistingCase,
+  });
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
     return alerts.map((alert) => ({
@@ -53,7 +59,7 @@ export const useCaseActions = ({
       }) ?? { id: '', name: '' },
     }));
   }
-  const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
+  const createCaseFlyout = cases?.hooks.useCasesAddToNewCaseFlyout({ onSuccess: onAddToNewCase });
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
   };

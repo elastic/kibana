@@ -10,15 +10,15 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
+import type { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
 import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');
@@ -310,6 +310,15 @@ describe('action_form', () => {
         supportedFeatureIds: ['alerting'],
       },
       {
+        id: 'hidden-in-ui',
+        name: 'Hidden in UI',
+        enabled: false,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
         id: 'disabled-by-license',
         name: 'Disabled by license',
         enabled: false,
@@ -447,6 +456,14 @@ describe('action_form', () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-config-alerting-ActionTypeSelectOption"]'
+      );
+      expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it('does not render action types hidden in ui', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        '[data-test-subj="hidden-in-ui-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });

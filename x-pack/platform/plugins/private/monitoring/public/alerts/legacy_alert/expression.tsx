@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useDerivedIndexPattern } from '../components/param_details_form/use_derived_index_pattern';
 import { convertKueryToElasticSearchQuery } from '../../lib/kuery';
 import { KueryBar } from '../../components/kuery_bar';
-import { Props } from '../components/param_details_form/expression';
+import type { Props } from '../components/param_details_form/expression';
 import { AlertParamDuration } from '../flyout_expressions/alert_param_duration';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;

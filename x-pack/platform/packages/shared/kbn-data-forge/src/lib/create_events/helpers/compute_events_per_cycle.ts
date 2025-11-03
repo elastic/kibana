@@ -6,8 +6,8 @@
  */
 import moment from 'moment';
 import { random } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Config, ParsedSchedule } from '../../../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Config, ParsedSchedule } from '../../../types';
 import { isWeekendTraffic } from '../../is_weekend';
 
 export function computeEventsPerCycle(

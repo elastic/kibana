@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { ReactNode, createContext, useContext, useState } from 'react';
-import { AddToCaseAction } from '../components/slo/add_to_case_action/add_to_case_action';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { SloBulkDeleteConfirmationModal } from '../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
 import { SloDeleteConfirmationModal } from '../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
-import { BulkPurgeConfirmationContainer } from '../components/slo/purge_confirmation_modal/bulk_purge_modal_container';
-import { PurgeConfirmationContainer } from '../components/slo/purge_confirmation_modal/purge_modal_container';
 import { SloResetConfirmationModal } from '../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCloneSlo } from '../hooks/use_clone_slo';
+import { BulkPurgeConfirmationContainer } from '../components/slo/purge_confirmation_modal/bulk_purge_modal_container';
+import { PurgeConfirmationContainer } from '../components/slo/purge_confirmation_modal/purge_modal_container';
 
 type Action = SingleAction | BulkAction;
 
@@ -25,7 +25,7 @@ interface BaseAction {
 }
 
 interface SingleAction extends BaseAction {
-  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable' | 'purge' | 'add_to_case';
+  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable' | 'purge';
   item: SLODefinitionResponse | SLOWithSummaryResponse;
 }
 
@@ -113,14 +113,6 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
         return (
           <BulkPurgeConfirmationContainer
             items={action.items}
-            onCancel={handleOnCancel}
-            onConfirm={handleOnConfirm}
-          />
-        );
-      case 'add_to_case':
-        return (
-          <AddToCaseAction
-            slo={action.item}
             onCancel={handleOnCancel}
             onConfirm={handleOnConfirm}
           />

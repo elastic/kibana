@@ -8,29 +8,23 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  DragDropIdentifier,
-  useDragDropContext,
-  DropType,
-  DropTargetSwapDuplicateCombine,
-  Droppable,
-  DroppableProps,
-} from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier, DropType, DroppableProps } from '@kbn/dom-drag-drop';
+import { useDragDropContext, DropTargetSwapDuplicateCombine, Droppable } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { isDraggedField } from '../../../../utils';
-import { generateId } from '../../../../id_generator';
-
-import {
+import { useEuiTheme } from '@elastic/eui';
+import type {
   Datasource,
   VisualizationDimensionGroupConfig,
   DatasourceLayers,
-  isOperation,
   IndexPatternMap,
   DragDropOperation,
   Visualization,
-} from '../../../../types';
+} from '@kbn/lens-common';
+import { isDraggedField } from '../../../../utils';
+import { generateId } from '../../../../id_generator';
+
+import { isOperation } from '../../../../types_guards';
 
 interface EmptyButtonProps {
   isInlineEditing: boolean;
@@ -132,6 +126,7 @@ export function EmptyDimensionButton({
   };
   isInlineEditing: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [{ dragging }] = useDragDropContext();
 
   let getDropProps;
@@ -209,7 +204,7 @@ export function EmptyDimensionButton({
       >
         <div
           css={css`
-            border-radius: ${euiThemeVars.euiBorderRadius};
+            border-radius: ${euiTheme.border.radius.medium};
           `}
         >
           {typeof group.suggestedValue?.() === 'number' ? (

@@ -17,10 +17,10 @@ cmd="node scripts/capture_oas_snapshot \
   --include-path /api/spaces \
   --include-path /api/streams \
   --include-path /api/fleet \
-  --include-path /api/dashboards \
   --include-path /api/saved_objects/_import \
   --include-path /api/saved_objects/_export \
-  --include-path /api/maintenance_window"
+  --include-path /api/maintenance_window \
+  --include-path /api/agent_builder"
 if is_pr && ! is_auto_commit_disabled; then
   cmd="$cmd --update"
 fi
@@ -34,6 +34,8 @@ run_check() {
 }
 
 retry 5 15 run_check
+
+node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 
 check_for_changed_files "$cmd" true
 

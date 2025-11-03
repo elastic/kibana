@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { Status } from '../../../../../common/types/api';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
-import {
-  FetchAnalyticsCollectionAPILogic,
-  FetchAnalyticsCollectionApiLogicResponse,
-} from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import type { FetchAnalyticsCollectionApiLogicResponse } from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
+import { FetchAnalyticsCollectionAPILogic } from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
 
 export interface FetchAnalyticsCollectionActions {
   apiSuccess: Actions<{}, FetchAnalyticsCollectionApiLogicResponse>['apiSuccess'];

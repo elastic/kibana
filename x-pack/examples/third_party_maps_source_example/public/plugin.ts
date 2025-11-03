@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { MapsCustomRasterSourcePluginSetup, MapsCustomRasterSourcePluginStart } from './types';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { MapsCustomRasterSourcePluginSetup, MapsCustomRasterSourcePluginStart } from './types';
 import { CustomRasterSource } from './classes/custom_raster_source';
 import { customRasterLayerWizard } from './classes/custom_raster_layer_wizard';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';

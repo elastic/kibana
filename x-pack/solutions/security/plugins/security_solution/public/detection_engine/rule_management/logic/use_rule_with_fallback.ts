@@ -15,7 +15,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { transformInput } from '../../../detections/containers/detection_engine/rules/transforms';
+import { transformInput } from '../../common/transforms';
 import * as i18n from './translations';
 import { useRule } from './use_rule';
 

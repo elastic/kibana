@@ -7,16 +7,20 @@
 
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-common';
+
 import { pageObjects } from '../page_objects';
+import { services } from '../services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   return {
     ...xpackFunctionalConfig.getAll(),
     pageObjects,
+    services,
     testFiles: [resolve(__dirname, './data_views')],
     junit: {
       reportName: 'X-Pack Cloud Security Posture Functional Tests',
@@ -37,6 +41,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   1. release a new package to EPR
          *   2. merge the updated version number change to kibana
          */
+        `--xpack.fleet.packages.0.name=cloud_security_posture`,
+        `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
         `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
       ],

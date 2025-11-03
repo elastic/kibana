@@ -12,6 +12,7 @@ import type {
   ESQLAstChangePointCommand,
   ESQLAstCommand,
   ESQLAstCompletionCommand,
+  ESQLAstHeaderCommand,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRerankCommand,
@@ -24,8 +25,8 @@ import type {
   ESQLMap,
   ESQLMapEntry,
   ESQLOrderExpression,
+  ESQLParens,
   ESQLSource,
-  ESQLTimeInterval,
 } from '../types';
 import type * as types from './types';
 
@@ -133,7 +134,7 @@ export class GlobalVisitorContext<
         if (!this.methods.visitStatsCommand) break;
         return this.visitStatsCommand(parent, commandNode, input as any);
       }
-      case 'inline_stats': {
+      case 'inline stats': {
         if (!this.methods.visitInlineStatsCommand) break;
         return this.visitInlineStatsCommand(parent, commandNode, input as any);
       }
@@ -215,6 +216,19 @@ export class GlobalVisitorContext<
       }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
+  }
+
+  public visitHeaderCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstHeaderCommand,
+    input: types.VisitorInput<Methods, 'visitHeaderCommand'>
+  ): types.VisitorOutput<Methods, 'visitHeaderCommand'> {
+    this.assertMethodExists('visitHeaderCommand');
+
+    const context = new contexts.HeaderCommandVisitorContext(this, node, parent);
+    const output = this.methods.visitHeaderCommand!(context, input);
+
+    return output;
   }
 
   public visitFromCommand(
@@ -506,10 +520,6 @@ export class GlobalVisitorContext<
         if (!this.methods.visitListLiteralExpression) break;
         return this.visitListLiteralExpression(parent, expressionNode, input as any);
       }
-      case 'timeInterval': {
-        if (!this.methods.visitTimeIntervalLiteralExpression) break;
-        return this.visitTimeIntervalLiteralExpression(parent, expressionNode, input as any);
-      }
       case 'inlineCast': {
         if (!this.methods.visitInlineCastExpression) break;
         return this.visitInlineCastExpression(parent, expressionNode, input as any);
@@ -533,6 +543,10 @@ export class GlobalVisitorContext<
       case 'query': {
         if (!this.methods.visitQuery || expressionNode.type !== 'query') break;
         return this.visitQuery(parent, expressionNode, input as any);
+      }
+      case 'parens': {
+        if (!this.methods.visitParensExpression) break;
+        return this.visitParensExpression(parent, expressionNode, input as any);
       }
     }
     return this.visitExpressionGeneric(parent, expressionNode, input as any);
@@ -592,15 +606,6 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitListLiteralExpression', context, input);
   }
 
-  public visitTimeIntervalLiteralExpression(
-    parent: contexts.VisitorContext | null,
-    node: ESQLTimeInterval,
-    input: types.VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'>
-  ): types.VisitorOutput<Methods, 'visitTimeIntervalLiteralExpression'> {
-    const context = new contexts.TimeIntervalLiteralExpressionVisitorContext(this, node, parent);
-    return this.visitWithSpecificContext('visitTimeIntervalLiteralExpression', context, input);
-  }
-
   public visitInlineCastExpression(
     parent: contexts.VisitorContext | null,
     node: ESQLInlineCast,
@@ -644,6 +649,15 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitMapEntryExpression'> {
     const context = new contexts.MapEntryExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitMapEntryExpression', context, input);
+  }
+
+  public visitParensExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLParens,
+    input: types.VisitorInput<Methods, 'visitParensExpression'>
+  ): types.VisitorOutput<Methods, 'visitParensExpression'> {
+    const context = new contexts.ParensExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitParensExpression', context, input);
   }
 }
 

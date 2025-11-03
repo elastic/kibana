@@ -211,69 +211,10 @@ export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   }
 );
 
-export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.closedAlertSuccessToastMessage', {
-    values: { totalAlerts },
-    defaultMessage:
-      'Successfully closed {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
-  });
-
-export const ALERT_DURATION = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.alertDurationTitle',
-  {
-    defaultMessage: 'Alert duration',
-  }
-);
-
-export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage', {
-    values: { totalAlerts },
-    defaultMessage:
-      'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
-  });
-
-export const ACKNOWLEDGED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertSuccessToastMessage',
-    {
-      values: { totalAlerts },
-      defaultMessage:
-        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as acknowledged.',
-    }
-  );
-
-export const CLOSED_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.closedAlertFailedToastMessage',
-  {
-    defaultMessage: 'Failed to close alert(s).',
-  }
-);
-
-export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.openedAlertFailedToastMessage',
-  {
-    defaultMessage: 'Failed to open alert(s)',
-  }
-);
-
-export const ACKNOWLEDGED_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertFailedToastMessage',
-  {
-    defaultMessage: 'Failed to mark alert(s) as acknowledged',
-  }
-);
-
 export const MORE_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.moreActionsAriaLabel',
   {
     defaultMessage: 'More actions',
-  }
-);
-
-export const STATUS = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.statusTitle',
-  {
-    defaultMessage: 'Status',
   }
 );
 
@@ -288,13 +229,6 @@ export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.overview.clickToChangeAlertStatus',
   {
     defaultMessage: 'Click to change alert status',
-  }
-);
-
-export const TRIGGERED = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
-  {
-    defaultMessage: 'Triggered',
   }
 );
 

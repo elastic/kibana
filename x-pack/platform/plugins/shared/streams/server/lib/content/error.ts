@@ -22,3 +22,10 @@ export class ContentPackConflictError extends StatusError {
     this.name = 'ContentPackConflictError';
   }
 }
+
+export class ContentPackIncludeError extends StatusError {
+  constructor(message: string) {
+    super(message, 400);
+    this.name = 'ContentPackIncludeError';
+  }
+}

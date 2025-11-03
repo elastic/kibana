@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PartitionedFieldMetadata } from '../../types';
+import type { PartitionedFieldMetadata } from '../../types';
 
 /** This mock `PartitionedFieldMetadata` has a sameFamily[] field */
 export const mockPartitionedFieldMetadataWithSameFamily: PartitionedFieldMetadata = {

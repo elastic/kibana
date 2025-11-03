@@ -9,11 +9,11 @@
 
 import { isObject } from 'lodash';
 import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
-import {
+import type {
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { ApiExecutionContext } from './types';
+import type { ApiExecutionContext } from './types';
 import { incrementCounterInternal } from './internals';
 
 export interface PerformIncrementCounterParams<T = unknown> {

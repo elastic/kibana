@@ -13,7 +13,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ArrayInput } from './array_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
-import { InputProps } from '../types';
+import type { InputProps } from '../types';
 
 const name = 'Some array field';
 const id = 'some:array:field';

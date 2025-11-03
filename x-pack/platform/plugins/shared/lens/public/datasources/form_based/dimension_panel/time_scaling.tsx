@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiToolTip,
-  EuiIcon,
-  EuiFormRow,
-  EuiSelect,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiIconTip, EuiFormRow, EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  adjustTimeScaleLabelSuffix,
-  GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '../operations';
-import type { TimeScaleUnit } from '../../../../common/expressions';
+import type { GenericIndexPatternColumn, TimeScaleUnit, FormBasedLayer } from '@kbn/lens-common';
+import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
 import { unitSuffixesLong } from '../../../../common/suffix_formatter';
-import type { FormBasedLayer } from '../types';
 
 export function setTimeScaling(
   columnId: string,
@@ -73,19 +61,21 @@ export function TimeScaling({ selectedColumn, columnId, layer, updateLayer }: Ti
       display="rowCompressed"
       fullWidth
       label={
-        <EuiToolTip
-          content={i18n.translate('xpack.lens.indexPattern.timeScale.tooltip', {
-            defaultMessage:
-              'Normalize values to be always shown as rate per specified time unit, regardless of the underlying date interval.',
-          })}
-        >
-          <span>
-            {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
-              defaultMessage: 'Normalize by unit',
-            })}{' '}
-            <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <span>
+          {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
+            defaultMessage: 'Normalize by unit',
+          })}{' '}
+          <EuiIconTip
+            type="question"
+            color="subdued"
+            size="s"
+            className="eui-alignTop"
+            content={i18n.translate('xpack.lens.indexPattern.timeScale.tooltip', {
+              defaultMessage:
+                'Normalize values to be always shown as rate per specified time unit, regardless of the underlying date interval.',
+            })}
+          />
+        </span>
       }
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">

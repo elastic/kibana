@@ -84,18 +84,26 @@ const nonAggregatableWarningDescription = (nonAggregatableDatasets: string[]) =>
 // eslint-disable-next-line import/no-default-export
 export default function Warnings() {
   const { loading, nonAggregatableDatasets } = useDatasetQualityWarnings();
-  const { statsLoading, canUserReadFailureStore } = useDatasetQualityState();
+  const { statsLoading, canUserReadFailureStore, canUserReadAnyDataset, canUserMonitorAnyDataset } =
+    useDatasetQualityState();
+
+  const canAccessAnyDataset = canUserReadAnyDataset || canUserMonitorAnyDataset;
 
   return (
     <EuiFlexGroup data-test-subj="datasetQualityWarningsContainer" gutterSize="s" wrap>
       {!loading && nonAggregatableDatasets.length > 0 && (
         <EuiFlexItem>
-          <EuiCallOut title={nonAggregatableWarningTitle} color="warning" iconType="warning">
+          <EuiCallOut
+            announceOnMount={false}
+            title={nonAggregatableWarningTitle}
+            color="warning"
+            iconType="warning"
+          >
             <p>{nonAggregatableWarningDescription(nonAggregatableDatasets)}</p>
           </EuiCallOut>
         </EuiFlexItem>
       )}
-      {!statsLoading && !canUserReadFailureStore && (
+      {!statsLoading && !canUserReadFailureStore && canAccessAnyDataset && (
         <EuiFlexItem>
           <FailureStoreWarning />
         </EuiFlexItem>

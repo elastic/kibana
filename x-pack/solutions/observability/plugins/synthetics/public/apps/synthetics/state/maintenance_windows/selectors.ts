@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { AppState } from '..';
+import type { AppState } from '..';
 
 export const selectMaintenanceWindowsState = (state: AppState) => state.maintenanceWindows;

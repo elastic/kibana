@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { RegionMapVisParams } from './types';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { RegionMapVisParams } from './types';
 import { title } from './region_map_vis_type';
 
 function getEmsLayerId(id: string | number, layerId: string) {

@@ -19,20 +19,9 @@ describe('Generate Metadata Aggregations for history and latest', () => {
 
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.host.name': {
-          filter: {
-            range: {
-              '@timestamp': {
-                gte: 'now-10m',
-              },
-            },
-          },
-          aggs: {
-            data: {
-              terms: {
-                field: 'host.name',
-                size: 10,
-              },
-            },
+          terms: {
+            field: 'host.name',
+            size: 10,
           },
         },
       });
@@ -45,20 +34,9 @@ describe('Generate Metadata Aggregations for history and latest', () => {
       });
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.host.name': {
-          filter: {
-            range: {
-              '@timestamp': {
-                gte: 'now-10m',
-              },
-            },
-          },
-          aggs: {
-            data: {
-              terms: {
-                field: 'host.name',
-                size: 10,
-              },
-            },
+          terms: {
+            field: 'host.name',
+            size: 10,
           },
         },
       });
@@ -73,20 +51,9 @@ describe('Generate Metadata Aggregations for history and latest', () => {
       });
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.host.name': {
-          filter: {
-            range: {
-              '@timestamp': {
-                gte: 'now-1h',
-              },
-            },
-          },
-          aggs: {
-            data: {
-              terms: {
-                field: 'host.name',
-                size: 10,
-              },
-            },
+          terms: {
+            field: 'host.name',
+            size: 10,
           },
         },
       });
@@ -105,20 +72,9 @@ describe('Generate Metadata Aggregations for history and latest', () => {
       });
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.hostName': {
-          filter: {
-            range: {
-              '@timestamp': {
-                gte: 'now-10m',
-              },
-            },
-          },
-          aggs: {
-            data: {
-              terms: {
-                field: 'host.name',
-                size: 10,
-              },
-            },
+          terms: {
+            field: 'host.name',
+            size: 10,
           },
         },
       });
@@ -142,39 +98,15 @@ describe('Generate Metadata Aggregations for history and latest', () => {
       });
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.hostName': {
-          filter: {
-            range: {
-              '@timestamp': {
-                gte: 'now-10m',
-              },
-            },
-          },
-          aggs: {
-            data: {
-              terms: {
-                field: 'host.name',
-                size: 10,
-              },
-            },
+          terms: {
+            field: 'host.name',
+            size: 10,
           },
         },
         'entity.metadata.agentName': {
           filter: {
-            bool: {
-              must: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: 'now-10m',
-                    },
-                  },
-                },
-                {
-                  exists: {
-                    field: 'agent.name',
-                  },
-                },
-              ],
+            exists: {
+              field: 'agent.name',
             },
           },
           aggs: {

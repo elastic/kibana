@@ -50,7 +50,7 @@ export const registerCustomScriptsRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canReadSecuritySolution'] },
+        { all: ['canWriteExecuteOperations'] },
         endpointContext.logFactory.get('customScriptsRoute'),
         getCustomScriptsRouteHandler(endpointContext)
       )

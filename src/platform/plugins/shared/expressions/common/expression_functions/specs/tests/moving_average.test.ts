@@ -8,9 +8,10 @@
  */
 
 import { functionWrapper } from './utils';
-import { movingAverage, MovingAverageArgs } from '../moving_average';
-import { ExecutionContext } from '../../../execution/types';
-import { Datatable } from '../../../expression_types/specs/datatable';
+import type { MovingAverageArgs } from '../moving_average';
+import { movingAverage } from '../moving_average';
+import type { ExecutionContext } from '../../../execution/types';
+import type { Datatable } from '../../../expression_types/specs/datatable';
 
 const defaultArgs = { window: 5, inputColumnId: 'val', outputColumnId: 'output' };
 

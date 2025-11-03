@@ -17,8 +17,9 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../mock/test_providers/test_providers';
-import { PatternRollup } from '../../types';
-import { Props, StorageDetails } from '.';
+import type { PatternRollup } from '../../types';
+import type { Props } from '.';
+import { StorageDetails } from '.';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

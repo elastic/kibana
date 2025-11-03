@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasSmokeTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -16,8 +16,8 @@ export default function canvasSmokeTest({ getService, getPageObjects }: FtrProvi
   const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const archive = {
-    local: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default',
-    ccs: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/ccs/default',
+    local: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default',
+    ccs: 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/ccs/default',
   };
 
   describe('smoke test', function () {

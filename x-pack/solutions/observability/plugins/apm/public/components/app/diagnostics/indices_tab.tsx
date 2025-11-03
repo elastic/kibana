@@ -10,11 +10,11 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiIcon,
+  EuiIconTip,
   EuiLoadingElastic,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { type IndiciesItem } from '../../../../server/routes/diagnostics/route';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -41,11 +41,10 @@ export function DiagnosticsIndices() {
       render: (_, { dataStream }) => {
         if (!dataStream) {
           return (
-            <EuiToolTip
+            <EuiIconTip
               content={`This index does not belong to a data stream. This will most likely cause mapping issues. Consider deleting the index and re-install the APM integration to ensure you have index templates and data streams correctly installed`}
-            >
-              <EuiIcon type="warning" />
-            </EuiToolTip>
+              type="warning"
+            />
           );
         }
 
@@ -58,11 +57,7 @@ export function DiagnosticsIndices() {
       truncateText: true,
       render: (_, { ingestPipeline }) => {
         if (ingestPipeline.id === undefined) {
-          return (
-            <EuiToolTip content={`Pipeline is missing`}>
-              <EuiIcon type="warning" />
-            </EuiToolTip>
-          );
+          return <EuiIconTip content={`Pipeline is missing`} type="warning" />;
         }
 
         return (
@@ -70,11 +65,10 @@ export function DiagnosticsIndices() {
             {ingestPipeline.isValid ? (
               ingestPipeline.id
             ) : (
-              <EuiToolTip
+              <EuiIconTip
                 content={`The expected processor for "observer.version" was not found in "${ingestPipeline.id}"`}
-              >
-                <EuiIcon type="warning" />
-              </EuiToolTip>
+                type="warning"
+              />
             )}
           </>
         );
@@ -91,11 +85,10 @@ export function DiagnosticsIndices() {
             {fieldMappings.isValid ? (
               <EuiIcon type="check" />
             ) : (
-              <EuiToolTip
+              <EuiIconTip
                 content={`The field "service.name" should be mapped as keyword but is mapped as "${fieldMappings.invalidType}"`}
-              >
-                <EuiIcon type="warning" />
-              </EuiToolTip>
+                type="warning"
+              />
             )}
           </>
         );

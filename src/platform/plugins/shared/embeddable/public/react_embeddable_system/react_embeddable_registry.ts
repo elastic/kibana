@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DefaultEmbeddableApi, EmbeddableFactory } from './types';
+import type { DefaultEmbeddableApi, EmbeddableFactory } from './types';
 
 const registry: { [key: string]: () => Promise<EmbeddableFactory<any, any>> } = {};
 

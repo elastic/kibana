@@ -11,9 +11,12 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
-import { AnalyticsNoDataPageFlavor, Services } from '@kbn/shared-ux-page-analytics-no-data-types';
+import type {
+  AnalyticsNoDataPageFlavor,
+  Services,
+} from '@kbn/shared-ux-page-analytics-no-data-types';
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
-import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
+import type { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
 import { getHasApiKeys$ } from '../lib/get_has_api_keys';
 
 /**
@@ -42,14 +45,7 @@ const flavors: {
     prependBasePath: (path: string) => string;
   }) => KibanaNoDataPageProps['noDataConfig'];
 } = {
-  kibana: ({ kibanaGuideDocLink }) => ({
-    solution: i18n.translate('sharedUXPackages.noDataConfig.analytics', {
-      defaultMessage: 'Analytics',
-    }),
-    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.analyticsPageTitle', {
-      defaultMessage: 'Welcome to Analytics!',
-    }),
-    logo: 'logoKibana',
+  kibana: ({ kibanaGuideDocLink, prependBasePath }) => ({
     action: {
       elasticAgent: {
         title: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsTitle', {
@@ -59,18 +55,11 @@ const flavors: {
           defaultMessage: 'Use Elastic Agent to collect data and build out Analytics solutions.',
         }),
         'data-test-subj': 'kbnOverviewAddIntegrations',
+        docsLink: kibanaGuideDocLink,
       },
     },
-    docsLink: kibanaGuideDocLink,
   }),
   serverless_search: ({ hasApiKeys, prependBasePath }) => ({
-    solution: i18n.translate('sharedUXPackages.noDataConfig.elasticsearch', {
-      defaultMessage: 'Elasticsearch',
-    }),
-    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchPageTitle', {
-      defaultMessage: 'Welcome to Elasticsearch!',
-    }),
-    logo: 'logoElasticsearch',
     action: {
       elasticsearch: {
         title: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchTitle', {
@@ -90,17 +79,6 @@ const flavors: {
     },
   }),
   serverless_observability: ({ prependBasePath }) => ({
-    solution: i18n.translate('sharedUXPackages.noDataConfig.observability', {
-      defaultMessage: 'Observability',
-    }),
-    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.observabilityPageTitle', {
-      defaultMessage: 'Welcome to Elastic Observability!',
-    }),
-    pageDescription: i18n.translate('sharedUXPackages.noDataConfig.observabilityPageDescription', {
-      defaultMessage:
-        'Converge metrics, logs, and traces to monitor the health of your applications.',
-    }),
-    logo: 'logoObservability',
     action: {
       observability: {
         title: i18n.translate('sharedUXPackages.noDataConfig.observabilityTitle', {

@@ -19,7 +19,6 @@
       "usageCollection",
       "customIntegrations",
       "cloud",
-      "guidedOnboarding"
     ],
     "requiredBundles": [
       "kibanaReact"

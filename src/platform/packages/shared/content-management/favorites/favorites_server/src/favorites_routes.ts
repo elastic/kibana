@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  CoreRequestHandlerContext,
-  CoreSetup,
-  Logger,
-  SECURITY_EXTENSION_ID,
-} from '@kbn/core/server';
+import type { CoreRequestHandlerContext, CoreSetup, Logger } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { FavoritesService, FavoritesLimitExceededError } from './favorites_service';
 import { favoritesSavedObjectType } from './favorites_saved_object';
-import { FavoritesRegistry } from './favorites_registry';
+import type { FavoritesRegistry } from './favorites_registry';
 
 /**
  * @public

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Cloud Integrations', function () {
     loadTestFile(require.resolve('./cloud_links'));
+    loadTestFile(require.resolve('./cloud_links_unprivileged'));
   });
 }

@@ -8,14 +8,18 @@
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, ColorMapping } from '@kbn/coloring';
-import { ColorPicker, FormatFactory } from '@kbn/visualization-ui-components';
+import type { PaletteRegistry, ColorMapping } from '@kbn/coloring';
+import type { FormatFactory } from '@kbn/visualization-ui-components';
+import { ColorPicker } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
 
-import { PieVisualizationState } from '../../../common/types';
-import { VisualizationDimensionEditorProps } from '../../types';
+import type {
+  LensPartitionVisualizationState,
+  VisualizationDimensionEditorProps,
+} from '@kbn/lens-common';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { getSortedAccessorsForGroup } from './to_expression';
@@ -26,16 +30,17 @@ import {
   isCollapsed,
 } from './visualization';
 
-export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
-  formatFactory: FormatFactory;
-  paletteService: PaletteRegistry;
-  palettes: KbnPalettes;
-  isDarkMode: boolean;
-};
+export type DimensionEditorProps =
+  VisualizationDimensionEditorProps<LensPartitionVisualizationState> & {
+    formatFactory: FormatFactory;
+    paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
+    isDarkMode: boolean;
+  };
 
 export function DimensionEditor(props: DimensionEditorProps) {
   const { inputValue: localState, handleInputChange: setLocalState } =
-    useDebouncedValue<PieVisualizationState>({
+    useDebouncedValue<LensPartitionVisualizationState>({
       value: props.state,
       onChange: props.setState,
     });
@@ -162,7 +167,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 }
 
 export function DimensionDataExtraEditor(
-  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
+  props: VisualizationDimensionEditorProps<LensPartitionVisualizationState> & {
     paletteService: PaletteRegistry;
   }
 ) {

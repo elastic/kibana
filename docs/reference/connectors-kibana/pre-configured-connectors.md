@@ -64,7 +64,7 @@ Sensitive properties, such as passwords, can also be stored in the [{{kib}} keys
 
 ## View preconfigured connectors [managing-preconfigured-connectors]
 
-go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search). Preconfigured connectors appear regardless of which space you are in. They are tagged as “preconfigured”, and you cannot delete them.
+go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Preconfigured connectors appear regardless of which space you are in. They are tagged as “preconfigured”, and you cannot delete them.
 
 % TO DO: Use `:class: screenshot`
 ![Connectors managing tab with pre-configured](../images/preconfigured-connectors-managing.png)
@@ -140,7 +140,7 @@ xpack.actions.preconfigured:
     actionTypeId: .bedrock
     config:
       apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <1>
-      defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0 <2>
+      defaultModel: us.anthropic.claude-sonnet-4-5-20250929-v1:0 <2>
     secrets:
       accessKey: key-value <3>
       secret: secret-value <4>

@@ -41,7 +41,7 @@ describe('ConfigurationFormItems', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute(
       'href',
-      'https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html#default-enpoints'
+      'https://www.elastic.co/docs/explore-analyze/elastic-inference/inference-api#default-enpoints'
     );
 
     expect(screen.getByTestId('model_id-input')).toBeInTheDocument();

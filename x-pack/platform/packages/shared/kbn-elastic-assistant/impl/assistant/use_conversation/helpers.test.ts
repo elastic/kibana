@@ -12,9 +12,10 @@ import {
   getDefaultNewSystemPrompt,
   getDefaultSystemPrompt,
 } from './helpers';
-import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation } from '../../..';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { AIConnector } from '../../connectorland/connector_selector';
+import type { Conversation } from '../../..';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import { MOCK_CURRENT_USER } from './sample_conversations';
 
 const tilde = '`';
 const codeDelimiter = '```';
@@ -145,6 +146,9 @@ describe('useConversation helpers', () => {
       messages: [],
       replacements: {},
       title: '1',
+      createdAt: '2025-02-19T23:28:54.962Z',
+      createdBy: MOCK_CURRENT_USER,
+      users: [MOCK_CURRENT_USER],
     };
     test('should return the conversation system prompt', () => {
       const result = getDefaultSystemPrompt({ allSystemPrompts, conversation });
@@ -217,6 +221,9 @@ describe('useConversation helpers', () => {
       messages: [],
       replacements: {},
       title: 'Test Conversation',
+      createdAt: '2025-02-19T23:28:54.962Z',
+      createdBy: MOCK_CURRENT_USER,
+      users: [MOCK_CURRENT_USER],
     };
 
     const connectors: AIConnector[] = [
@@ -337,6 +344,56 @@ describe('useConversation helpers', () => {
           provider: OpenAiProviderType.AzureAi,
           defaultSystemPromptId: '2',
           model: 'gpt-3',
+        },
+      });
+    });
+
+    test('should prioritize connector defaultModel over stored conversation model', () => {
+      const connectorsWithModel: AIConnector[] = [
+        {
+          id: '123',
+          actionTypeId: '.gen-ai',
+          apiProvider: OpenAiProviderType.OpenAi,
+          config: {
+            provider: OpenAiProviderType.OpenAi,
+            defaultModel: 'gpt-4-turbo',
+          },
+        },
+      ] as unknown as AIConnector[];
+
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation, // has stored model: 'gpt-3'
+        connectors: connectorsWithModel,
+        defaultConnector,
+      });
+
+      expect(result).toEqual({
+        apiConfig: {
+          connectorId: '123',
+          actionTypeId: '.gen-ai',
+          provider: OpenAiProviderType.OpenAi,
+          defaultSystemPromptId: '2',
+          model: 'gpt-4-turbo', // Should use connector's defaultModel, not conversation's stored 'gpt-3'
+        },
+      });
+    });
+
+    test('should fall back to stored conversation model when connector has no defaultModel', () => {
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation, // has stored model: 'gpt-3'
+        connectors, // connectors have no defaultModel set
+        defaultConnector,
+      });
+
+      expect(result).toEqual({
+        apiConfig: {
+          connectorId: '123',
+          actionTypeId: '.gen-ai',
+          provider: OpenAiProviderType.OpenAi,
+          defaultSystemPromptId: '2',
+          model: 'gpt-3', // Should fall back to conversation's stored model
         },
       });
     });

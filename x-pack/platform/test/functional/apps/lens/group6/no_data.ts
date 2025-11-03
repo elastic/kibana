@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('when no data opens integrations', async () => {
       await header.waitUntilLoadingHasFinished();
 
-      const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
+      const addIntegrations = await testSubjects.find('noDataDefaultActionButton');
       await addIntegrations.click();
       await common.waitUntilUrlIncludes('integrations/browse');
     });

@@ -9,7 +9,8 @@
 
 import { values } from 'lodash';
 import { format as formatUrl } from 'url';
-import { Agent as HttpsAgent, AgentOptions } from 'https';
+import type { AgentOptions } from 'https';
+import { Agent as HttpsAgent } from 'https';
 
 import { WildcardMatcher } from './wildcard_matcher';
 

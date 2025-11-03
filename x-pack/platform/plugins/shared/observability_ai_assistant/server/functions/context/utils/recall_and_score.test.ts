@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { RecalledSuggestion, recallAndScore } from './recall_and_score';
+import type { RecalledSuggestion } from './recall_and_score';
+import { recallAndScore } from './recall_and_score';
 import { scoreSuggestions } from './score_suggestions';
 import { MessageRole, type Message } from '../../../../common';
 import type { FunctionCallChatFunction } from '../../../service/types';
-import { AnalyticsServiceStart } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { recallRankingEventType } from '../../../analytics/recall_ranking';
 
 jest.mock('./score_suggestions', () => ({
@@ -83,6 +84,8 @@ describe('recallAndScore', () => {
         messages: normalConversationMessages,
         logger: mockLogger,
         signal,
+        scopes: [],
+        connector: undefined,
       });
     });
 
@@ -113,6 +116,8 @@ describe('recallAndScore', () => {
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -139,6 +144,8 @@ describe('recallAndScore', () => {
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(scoreSuggestions).toHaveBeenCalledWith({
@@ -169,6 +176,8 @@ describe('recallAndScore', () => {
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(result.relevantDocuments).toEqual([
@@ -197,6 +206,8 @@ describe('recallAndScore', () => {
       messages: contextualInsightsMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(result.relevantDocuments).toEqual([
@@ -222,11 +233,15 @@ describe('recallAndScore', () => {
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
       recallRankingEventType,
-      expect.objectContaining({ scoredDocuments: [{ esScore: 0.8, llmScore: 7 }] })
+      expect.objectContaining({
+        scoredDocuments: [{ esScore: 0.8, llmScore: 7, connector: undefined, scopes: [] }],
+      })
     );
   });
 });

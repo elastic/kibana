@@ -45,6 +45,14 @@ export {
   extractCategorizeTokens,
   getArgsFromRenameFunction,
   getCategorizeField,
+  getKqlSearchQueries,
+  getRemoteClustersFromESQLQuery,
+  getLookupIndicesFromQuery,
+  convertTimeseriesCommandToFrom,
+  getESQLStatsQueryMeta,
+  constructCascadeQuery,
+  mutateQueryStatsGrouping,
+  appendFilteringWhereClauseForCascadeLayout,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

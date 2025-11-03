@@ -44,6 +44,7 @@ describe('getInitialMultiConsumer', () => {
     enabledInLicense: true,
     category: 'test',
     isExportable: true,
+    isInternallyManaged: false,
   } as RuleTypeWithDescription;
 
   const ruleTypes = [

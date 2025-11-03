@@ -9,7 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { getVulnerabilitiesTrends } from './get_vulnerabilities_trend';
 import type { CnvmDashboardData } from '../../../common/types_old';
 import { VULNERABILITIES_DASHBOARD_ROUTE_PATH } from '../../../common/constants';
-import { CspRouter } from '../../types';
+import type { CspRouter } from '../../types';
 import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';
 import { getTopVulnerableResources } from './get_top_vulnerable_resources';
 import { getTopPatchableVulnerabilities } from './get_top_patchable_vulnerabilities';

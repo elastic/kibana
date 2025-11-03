@@ -10,7 +10,7 @@ import { mockLogger } from '../../__mocks__';
 import { collectConnectorStats } from '@kbn/search-connectors';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { ConnectorStats } from '../../../common/types';
+import type { ConnectorStats } from '../../../common/types';
 
 import { registerTelemetryUsageCollector } from './telemetry';
 

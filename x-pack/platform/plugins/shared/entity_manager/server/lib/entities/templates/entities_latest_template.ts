@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import {
   ENTITY_LATEST,
   ENTITY_SCHEMA_VERSION_V1,
-  EntityDefinition,
   entitiesIndexPattern,
   entitiesAliasPattern,
 } from '@kbn/entities-schema';
@@ -31,7 +31,7 @@ export const generateEntitiesLatestIndexTemplateConfig = (
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
     ecs_version: '8.0.0',
     managed: true,
-    managed_by: 'elastic_entity_model',
+    managed_by: 'security_context_core_analysis',
   },
   ignore_missing_component_templates: getCustomLatestTemplateComponents(definition),
   composed_of: [

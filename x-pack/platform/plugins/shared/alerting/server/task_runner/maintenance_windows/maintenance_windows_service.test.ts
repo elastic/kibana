@@ -56,7 +56,7 @@ const fakeRequest = {
 
 describe('MaintenanceWindowsService', () => {
   beforeAll(() => {
-    fakeTimer = sinon.useFakeTimers(new Date('2023-02-27T08:15:00.000Z'));
+    fakeTimer = sinon.useFakeTimers(new Date('2023-02-26T00:15:00.000Z'));
   });
 
   beforeEach(() => {
@@ -85,7 +85,7 @@ describe('MaintenanceWindowsService', () => {
 
     // @ts-ignore - accessing private variable
     expect(maintenanceWindowsService.windows.get('default')).toEqual({
-      lastUpdated: 1677485700000,
+      lastUpdated: 1677370500000,
       activeMaintenanceWindows: maintenanceWindows,
     });
 
@@ -163,12 +163,12 @@ describe('MaintenanceWindowsService', () => {
 
     // @ts-ignore - accessing private variable
     expect(maintenanceWindowsService.windows.get('default')).toEqual({
-      lastUpdated: 1677485700000,
+      lastUpdated: 1677370500000,
       activeMaintenanceWindows: maintenanceWindows,
     });
     // @ts-ignore - accessing private variable
     expect(maintenanceWindowsService.windows.get('new-space')).toEqual({
-      lastUpdated: 1677485700000,
+      lastUpdated: 1677370500000,
       activeMaintenanceWindows: newSpaceMW,
     });
 
@@ -377,7 +377,7 @@ describe('MaintenanceWindowsService', () => {
         ...getMockMaintenanceWindow(),
         events: [
           {
-            gte: '2023-02-27T00:00:00.000Z',
+            gte: '2023-02-26T00:00:00.000Z',
             lte: '2023-02-28T00:00:00.000Z',
           },
           {

@@ -127,7 +127,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
       expect(unarchived.status).eql('running');
     });
 
-    it('archiving a finished maintenance window does not change the events', async () => {
+    it('archiving a finished maintenance window deletes the events', async () => {
       const space1 = UserAtSpaceScenarios[1].space.id;
       const { body: createdMaintenanceWindow } = await supertest
         .post(`${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window`)
@@ -167,7 +167,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
       expect(finish.events[2].lte).eql(createdMaintenanceWindow.events[2].lte);
       expect(finish.events[3].lte).eql(createdMaintenanceWindow.events[3].lte);
 
-      const { body: archive } = await supertest
+      const { body: archived } = await supertest
         .post(
           `${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${
             createdMaintenanceWindow.id
@@ -177,9 +177,61 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         .send({ archive: true })
         .expect(200);
 
-      // Archiving should not change the events
-      expect(finish.events[0].lte).eql(archive.events[0].lte);
-      expect(finish.events[1].lte).eql(archive.events[1].lte);
+      // Archiving should empty the events
+      expect(archived.events.length).eql(0);
+    });
+
+    it('unarchiving a maintenance window recreates the events', async () => {
+      const space1 = UserAtSpaceScenarios[1].space.id;
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          r_rule: {
+            ...createParams.r_rule,
+            dtstart: moment.utc().subtract(1, 'day').toISOString(),
+            freq: 3, // daily
+            count: 4,
+          },
+        })
+        .expect(200);
+
+      objectRemover.add(
+        space1,
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
+      const { body: archived } = await supertest
+        .post(
+          `${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }/_archive`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ archive: true })
+        .expect(200);
+
+      // Archiving should have emptied the events
+      expect(archived.events.length).eql(0);
+
+      const { body: unarchived } = await supertest
+        .post(
+          `${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }/_archive`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ archive: false })
+        .expect(200);
+
+      expect(unarchived.events[0].lte).eql(createdMaintenanceWindow.events[0].lte);
+      expect(unarchived.events[1].lte).eql(createdMaintenanceWindow.events[1].lte);
+      expect(unarchived.events[2].lte).eql(createdMaintenanceWindow.events[2].lte);
+      expect(unarchived.events[3].lte).eql(createdMaintenanceWindow.events[3].lte);
     });
   });
 }

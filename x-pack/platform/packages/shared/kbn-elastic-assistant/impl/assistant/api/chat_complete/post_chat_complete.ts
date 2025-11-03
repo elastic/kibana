@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { HttpFetchQuery, HttpSetup } from '@kbn/core-http-browser';
-import {
-  API_VERSIONS,
-  MessageMetadata,
-  PromptIds,
-  Replacements,
-} from '@kbn/elastic-assistant-common';
-import { TraceOptions } from '../../types';
+import type { HttpFetchQuery, HttpSetup } from '@kbn/core-http-browser';
+import type { MessageMetadata, PromptIds, Replacements } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import type { TraceOptions } from '../../types';
 import { API_ERROR } from '../../translations';
 
 export interface PostChatCompleteParams {

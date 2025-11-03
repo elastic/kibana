@@ -8,7 +8,8 @@
  */
 
 import { defaultsDeep } from 'lodash';
-import { UiSettingsClientCommon, UiSettingsClientParams } from './ui_settings_client_common';
+import type { UiSettingsClientParams } from './ui_settings_client_common';
+import { UiSettingsClientCommon } from './ui_settings_client_common';
 
 export class UiSettingsClient extends UiSettingsClientCommon {
   constructor(params: UiSettingsClientParams) {
@@ -32,7 +33,10 @@ export class UiSettingsClient extends UiSettingsClientCommon {
     this.setLocally(key, newVal);
 
     try {
-      const { settings } = await this.api.batchSet(key, newVal);
+      const { settings } = await this.api.batchSet(
+        key,
+        newVal === this.cache[key].value ? null : newVal
+      );
       this.cache = defaultsDeep({}, defaults, settings);
       return true;
     } catch (error) {

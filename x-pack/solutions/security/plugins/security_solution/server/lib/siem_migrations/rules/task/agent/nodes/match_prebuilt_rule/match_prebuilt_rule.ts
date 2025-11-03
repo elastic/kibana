@@ -7,11 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
+import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
-import type { SiemMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
-import type { ChatModel } from '../../../util/actions_client_chat';
-import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
+import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
 import {
@@ -22,7 +22,7 @@ import {
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
   logger: Logger;
-  telemetryClient: SiemMigrationTelemetryClient;
+  telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
@@ -103,7 +103,7 @@ export const getMatchPrebuiltRuleNode = ({
             severity: matchedRule.target?.severity ?? DEFAULT_TRANSLATION_SEVERITY,
             risk_score: matchedRule.target?.risk_score ?? DEFAULT_TRANSLATION_RISK_SCORE,
           },
-          translation_result: RuleTranslationResult.FULL,
+          translation_result: MigrationTranslationResult.FULL,
         };
       }
     }

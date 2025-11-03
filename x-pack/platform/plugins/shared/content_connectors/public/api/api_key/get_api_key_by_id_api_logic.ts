@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { APIKeyResponse } from '../../../common/types/api';
+import type { HttpSetup } from '@kbn/core/public';
+import type { APIKeyResponse } from '../../../common/types/api';
 import { createApiLogic } from '../api_logic/create_api_logic';
 
 export const getApiKeyById = async ({ id, http }: { id: string; http?: HttpSetup }) => {

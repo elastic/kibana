@@ -26,4 +26,14 @@ describe('getFindAttackDiscoveryAlertsAggregation', () => {
       },
     });
   });
+
+  it('returns the expected all_attack_alert_ids cardinality aggregation when includeUniqueAlertIds is true', () => {
+    const result = getFindAttackDiscoveryAlertsAggregation(true);
+    expect(result.all_attack_alert_ids).toEqual({
+      terms: {
+        field: 'kibana.alert.attack_discovery.alert_ids',
+        size: 10000,
+      },
+    });
+  });
 });

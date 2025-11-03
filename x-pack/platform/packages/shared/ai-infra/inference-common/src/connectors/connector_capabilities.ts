@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceConnector } from './connectors';
+import type { InferenceConnector } from './connectors';
 import { getModelDefinition } from './known_models';
 import { getConnectorDefaultModel } from './connector_config';
 import { elasticModelDictionary } from '../const';
@@ -17,8 +17,8 @@ export const getContextWindowSize = (connector: InferenceConnector): number | un
   if (!connector.config) {
     return undefined;
   }
-  if (connector.config?.contextWindowSize) {
-    return connector.config.contextWindowSize;
+  if (connector.config?.contextWindowLength) {
+    return connector.config.contextWindowLength;
   }
 
   const defaultModel = getConnectorDefaultModel(connector);

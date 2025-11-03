@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import type { SortDirection } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
-import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -40,27 +40,29 @@ export default function ({ getService }: FtrProviderContext) {
   const archives: Record<string, { data: string; savedObjects: string }> = {
     ecommerce: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce',
-      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
+      savedObjects: 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce',
     },
     unmappedFields: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/unmapped_fields',
-      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json',
+      savedObjects:
+        'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/unmapped_fields.json',
     },
     logs: {
       data: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     nanos: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/nanos',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     sales: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/sales',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     bigIntIdField: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/big_int_id_field',
-      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field',
+      savedObjects:
+        'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/big_int_id_field',
     },
   };
 

@@ -8,9 +8,12 @@
  */
 
 import fs from 'node:fs';
+import { Readable } from 'node:stream';
 
-import { uploadAllEventsFromPath } from './upload_events';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { EventUploadOptions } from './upload_events';
+import { uploadAllEventsFromPath, nonThrowingUploadAllEventsFromPath } from './upload_events';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ScoutReportDataStream } from '../reporting';
 
 jest.mock('node:fs');
 
@@ -35,6 +38,12 @@ jest.mock('../reporting/report/events', () => ({
 describe('uploadAllEventsFromPath', () => {
   let log: jest.Mocked<ToolingLog>;
 
+  const spies = {
+    existsSync: jest.spyOn(fs, 'existsSync'),
+    statSync: jest.spyOn(fs, 'statSync'),
+    readdirSync: jest.spyOn(fs, 'readdirSync'),
+  };
+
   beforeEach(() => {
     log = {
       info: jest.fn(),
@@ -45,10 +54,11 @@ describe('uploadAllEventsFromPath', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    Object.values(spies).forEach((spy) => spy.mockRestore());
   });
 
   it('should throw an error if the provided eventLogPath does not exist', async () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+    spies.existsSync.mockReturnValue(false);
 
     await expect(
       uploadAllEventsFromPath('non_existent_path', {
@@ -63,8 +73,8 @@ describe('uploadAllEventsFromPath', () => {
   });
 
   it('should throw an error if the provided eventLogPath is a file and it does not end with .ndjson', async () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-    jest.spyOn(fs, 'statSync').mockReturnValue({
+    spies.existsSync.mockReturnValue(true);
+    spies.statSync.mockReturnValue({
       isDirectory: () => false,
     } as unknown as fs.Stats);
 
@@ -81,7 +91,7 @@ describe('uploadAllEventsFromPath', () => {
   });
 
   it('should log a warning if the provided eventLogPath is a directory and it does not contain any .ndjson file', async () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    spies.existsSync.mockReturnValue(true);
 
     // Simulate directory contents: 1 .txt file
     (fs.readdirSync as jest.Mock).mockImplementation((directoryPath: string) => {
@@ -111,16 +121,16 @@ describe('uploadAllEventsFromPath', () => {
   });
 
   it('should upload the event log file if the provided eventLogPath if a file and ends with .ndjson', async () => {
-    jest.spyOn(fs, 'statSync').mockReturnValue({
+    spies.statSync.mockReturnValue({
       isDirectory: () => true,
     } as unknown as fs.Stats);
-    jest.spyOn(fs, 'readdirSync').mockReturnValue(['file.txt' as unknown as fs.Dirent]);
+    spies.readdirSync.mockReturnValue(['file.txt' as unknown as fs.Dirent]);
 
     // assume the provided event log path exists
-    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    spies.existsSync.mockReturnValue(true);
 
     // the provided event log path is not a directory
-    jest.spyOn(fs, 'statSync').mockReturnValue({
+    spies.statSync.mockReturnValue({
       isDirectory: () => false,
     } as unknown as fs.Stats);
 
@@ -135,7 +145,7 @@ describe('uploadAllEventsFromPath', () => {
   });
 
   it('should find event log files recursively', async () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    spies.existsSync.mockReturnValue(true);
 
     (fs.readdirSync as jest.Mock).mockImplementation((directoryPath: string) => {
       if (directoryPath === 'mocked_directory') {
@@ -177,7 +187,7 @@ describe('uploadAllEventsFromPath', () => {
   });
 
   it('should upload multiple event log files if the provided eventLogPath is a directory and contains .ndjson files', async () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    spies.existsSync.mockReturnValue(true);
 
     // Simulate directory contents: 2 .ndjson files, 1 .txt file
     (fs.readdirSync as jest.Mock).mockImplementation((directoryPath: string) => {
@@ -201,13 +211,101 @@ describe('uploadAllEventsFromPath', () => {
       log,
     });
 
-    expect(mockAddEventsFromFile).toHaveBeenCalledWith('mocked_directory/file1.ndjson');
-    expect(mockAddEventsFromFile).toHaveBeenCalledWith('mocked_directory/file2.ndjson');
-    expect(mockAddEventsFromFile).not.toHaveBeenCalledWith('mocked_directory/not_events.txt');
+    // addEventsFromFile should be called once with all .ndjson files, in order
+    expect(mockAddEventsFromFile).toHaveBeenCalledTimes(1);
+    expect(mockAddEventsFromFile).toHaveBeenCalledWith(
+      'mocked_directory/file1.ndjson',
+      'mocked_directory/file2.ndjson'
+    );
 
     expect(log.info.mock.calls).toEqual([
       ['Connecting to Elasticsearch at esURL'],
       ["Recursively found 2 .ndjson event log files in directory 'mocked_directory'."],
+    ]);
+  });
+
+  it('addEventsFromFile should concatenate lines from multiple files in order and pass a single datasource to bulk helper', async () => {
+    // Use the real implementation of ScoutReportDataStream for this test
+    const { ScoutReportDataStream: RealScoutReportDataStream } = jest.requireActual(
+      '../reporting/report/events'
+    ) as { ScoutReportDataStream: typeof ScoutReportDataStream };
+
+    // Mock file contents for two .ndjson files
+    const fileContents: Record<string, string> = {
+      'file1.ndjson': 'a1\na2\n',
+      'file2.ndjson': 'b1\n',
+    };
+
+    const createReadStreamMock = jest
+      .spyOn(fs, 'createReadStream')
+      .mockImplementation((filePath) => {
+        const filePathStr = String(filePath);
+        const key = filePathStr.endsWith('file1.ndjson')
+          ? 'file1.ndjson'
+          : filePathStr.endsWith('file2.ndjson')
+          ? 'file2.ndjson'
+          : '';
+        const content = fileContents[key] ?? '';
+        return Readable.from([content]) as fs.ReadStream;
+      });
+
+    // Mock ES client bulk helper and assert datasource yields concatenated lines in order
+    const bulkMock = jest.fn(async (opts: any) => {
+      const lines: string[] = [];
+      for await (const line of opts.datasource as AsyncIterable<string>) {
+        lines.push(line);
+      }
+
+      expect(lines).toEqual(['a1', 'a2', 'b1']);
+      // Return minimal stats object expected by the implementation
+      return { total: lines.length, time: 1000, failed: 0 };
+    });
+
+    const es: any = { helpers: { bulk: bulkMock } };
+    const localLog = {
+      info: jest.fn(),
+      warning: jest.fn(),
+      error: jest.fn(),
+    } as Partial<jest.Mock<ToolingLog>> as ToolingLog;
+
+    const dataStream = new RealScoutReportDataStream(es, localLog);
+
+    await dataStream.addEventsFromFile('file1.ndjson', 'file2.ndjson');
+
+    expect(bulkMock).toHaveBeenCalledTimes(1);
+
+    expect(bulkMock.mock.results[0].value).resolves.toEqual({
+      total: 3,
+      time: 1000,
+      failed: 0,
+    });
+
+    createReadStreamMock.mockRestore();
+  });
+});
+
+describe('nonThrowingUploadAllEventsFromPath', () => {
+  it('should not throw and only log a warning', async () => {
+    const log: jest.Mocked<ToolingLog> = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warning: jest.fn(),
+    } as any;
+
+    const eventLogPath = '/some/path/that/does/not/exist';
+    const eventUploadOptions: EventUploadOptions = {
+      esURL: 'esURL',
+      esAPIKey: 'esAPIKey',
+      verifyTLSCerts: true,
+      log,
+    };
+
+    await expect(
+      nonThrowingUploadAllEventsFromPath(eventLogPath, eventUploadOptions)
+    ).resolves.toBeUndefined();
+
+    expect(log.warning.mock.calls).toEqual([
+      [`An error was suppressed: The provided event log path '${eventLogPath}' does not exist.`],
     ]);
   });
 });

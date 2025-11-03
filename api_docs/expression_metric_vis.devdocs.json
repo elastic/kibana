@@ -213,9 +213,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               }
@@ -234,9 +234,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -256,9 +256,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -278,9 +278,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -314,9 +314,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               }
@@ -335,9 +335,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -357,9 +357,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -379,9 +379,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -422,10 +422,10 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
-            "id": "def-common.MetricArguments.secondaryPrefix",
+            "id": "def-common.MetricArguments.secondaryLabel",
             "type": "string",
             "tags": [],
-            "label": "secondaryPrefix",
+            "label": "secondaryLabel",
             "description": [],
             "signature": [
               "string | undefined"
@@ -521,10 +521,24 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
-            "id": "def-common.MetricArguments.valuesTextAlign",
+            "id": "def-common.MetricArguments.primaryAlign",
             "type": "CompoundType",
             "tags": [],
-            "label": "valuesTextAlign",
+            "label": "primaryAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"center\" | \"left\""
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryAlign",
             "description": [],
             "signature": [
               "\"right\" | \"center\" | \"left\""
@@ -556,6 +570,34 @@
             "description": [],
             "signature": [
               "number | \"default\" | \"fit\""
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.titleWeight",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titleWeight",
+            "description": [],
+            "signature": [
+              "\"bold\" | \"normal\""
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.primaryPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "primaryPosition",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
@@ -650,6 +692,34 @@
             "tags": [],
             "label": "inspectorTableId",
             "description": [],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryLabelPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryLabelPosition",
+            "description": [],
+            "signature": [
+              "\"after\" | \"before\" | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.applyColorTo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "applyColorTo",
+            "description": [],
+            "signature": [
+              "\"value\" | \"background\""
+            ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -781,10 +851,10 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
-            "id": "def-common.MetricVisParam.secondaryPrefix",
+            "id": "def-common.MetricVisParam.secondaryLabel",
             "type": "string",
             "tags": [],
-            "label": "secondaryPrefix",
+            "label": "secondaryLabel",
             "description": [],
             "signature": [
               "string | undefined"
@@ -909,10 +979,24 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
-            "id": "def-common.MetricVisParam.valuesTextAlign",
+            "id": "def-common.MetricVisParam.primaryAlign",
             "type": "CompoundType",
             "tags": [],
-            "label": "valuesTextAlign",
+            "label": "primaryAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"center\" | \"left\""
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.secondaryAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryAlign",
             "description": [],
             "signature": [
               "\"right\" | \"center\" | \"left\""
@@ -944,6 +1028,34 @@
             "description": [],
             "signature": [
               "number | \"default\" | \"fit\""
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.titleWeight",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titleWeight",
+            "description": [],
+            "signature": [
+              "\"bold\" | \"normal\""
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.primaryPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "primaryPosition",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -983,6 +1095,36 @@
             "description": [],
             "signature": [
               "Record<string, { x: number; y: number; }[]> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.secondaryLabelPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryLabelPosition",
+            "description": [],
+            "signature": [
+              "\"after\" | \"before\" | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.applyColorTo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "applyColorTo",
+            "description": [
+              "\nDetermines where the metric color should be applied.\nOnly applies when the supporting visualization is a panel.\n- 'background': Applies the color to the metric's background area.\n- 'value': Applies the color to the Primary Metric's value."
+            ],
+            "signature": [
+              "\"value\" | \"background\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -1110,7 +1252,7 @@
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
               "LegendStrategy",
               " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined"
             ],

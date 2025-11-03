@@ -12,9 +12,9 @@ import * as ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { useDarkMode } from './use_dark_mode';
 import { createKibanaReactContext } from '../context';
-import { KibanaServices } from '../context/types';
+import type { KibanaServices } from '../context/types';
 import { BehaviorSubject } from 'rxjs';
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('useDarkMode', () => {

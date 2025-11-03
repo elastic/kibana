@@ -16,8 +16,8 @@ import {
   getRange,
   getValidatedModels,
 } from './utils';
-import { NumberListRange } from './range';
-import { NumberRowModel } from './number_row';
+import type { NumberListRange } from './range';
+import type { NumberRowModel } from './number_row';
 
 describe('NumberList utils', () => {
   let modelList: NumberRowModel[];

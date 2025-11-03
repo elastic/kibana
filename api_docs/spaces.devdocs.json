@@ -2884,6 +2884,23 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
+        "id": "def-public.TourManagerContract",
+        "type": "Type",
+        "tags": [],
+        "label": "TourManagerContract",
+        "description": [],
+        "signature": [
+          "{ showTour$: ",
+          "Observable",
+          "<boolean>; startTour: () => Promise<{ result: \"started\" | \"not_available\"; }>; finishTour: () => Promise<void>; waitForTourEnd: () => Promise<void>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/spaces/public/nav_control/solution_view_tour/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -3015,6 +3032,24 @@
           "label": "isSolutionViewEnabled",
           "description": [
             "\nIndicates whether the solution view is enabled."
+          ],
+          "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "spaces",
+          "id": "def-public.SpacesApi.solutionViewTourManager",
+          "type": "Object",
+          "tags": [],
+          "label": "solutionViewTourManager",
+          "description": [
+            "\nManages the state of the solution view tour."
+          ],
+          "signature": [
+            "{ showTour$: ",
+            "Observable",
+            "<boolean>; startTour: () => Promise<{ result: \"started\" | \"not_available\"; }>; finishTour: () => Promise<void>; waitForTourEnd: () => Promise<void>; }"
           ],
           "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
           "deprecated": false,
@@ -4328,6 +4363,60 @@
       },
       {
         "parentPluginId": "spaces",
+        "id": "def-common.getRouteUrlForSpace",
+        "type": "Function",
+        "tags": [],
+        "label": "getRouteUrlForSpace",
+        "description": [
+          "\nWraps the provided Kibana route URL with the Kibana space ID.\n\"default\" space is equivalent to an empty value and doesn't lead to adding any space aware path.\n"
+        ],
+        "signature": [
+          "(routeUrl: string, spaceId: string | undefined) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/spaces/common/get_spaced_route_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.getRouteUrlForSpace.$1",
+            "type": "string",
+            "tags": [],
+            "label": "routeUrl",
+            "description": [
+              "the route url string"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/spaces/common/get_spaced_route_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-common.getRouteUrlForSpace.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "[optional] the Kibana space to account for in the route url\n\nExamples:\n- `getRouteUrlForSpace('/api/some_endpoint')` returns `/api/some_endpoint`\n- `getRouteUrlForSpace('/api/some_endpoint', 'default')` returns `/api/some_endpoint`\n- `getRouteUrlForSpace('/api/some_endpoint', 'my_space') returns `/s/my_space/api/some_endpoint`"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/spaces/common/get_spaced_route_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
         "id": "def-common.isReservedSpace",
         "type": "Function",
         "tags": [],
@@ -4721,7 +4810,7 @@
         "label": "SolutionView",
         "description": [],
         "signature": [
-          "\"security\" | \"oblt\" | \"es\" | \"chat\" | \"classic\""
+          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | \"classic\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
         "deprecated": false,

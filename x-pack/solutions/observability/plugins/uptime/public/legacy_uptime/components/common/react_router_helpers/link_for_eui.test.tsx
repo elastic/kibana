@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
-import { EuiLink, EuiButton } from '@elastic/eui';
+import { render, fireEvent } from '@testing-library/react';
 
 import '../../../lib/__mocks__/ut_router_history.mock';
 
-import { ReactRouterEuiLink, ReactRouterEuiButton } from './link_for_eui';
+import { ReactRouterEuiLink } from './link_for_eui';
 import { mockHistory } from '../../../lib/__mocks__/ut_router_history.mock';
 
 describe('EUI & React Router Component Helpers', () => {
@@ -20,58 +19,65 @@ describe('EUI & React Router Component Helpers', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<ReactRouterEuiLink to="/" />);
-
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
-  });
-
-  it('renders an EuiButton', () => {
-    const wrapper = shallow(<ReactRouterEuiButton to="/" />);
-
-    expect(wrapper.find(EuiButton)).toHaveLength(1);
+    const { getByRole } = render(<ReactRouterEuiLink to="/" />);
+    expect(getByRole('link')).toBeInTheDocument();
   });
 
   it('passes down all ...rest props', () => {
-    const wrapper = shallow(<ReactRouterEuiLink to="/" data-test-subj="foo" external={true} />);
-    const link = wrapper.find(EuiLink);
+    const { getByRole } = render(
+      <ReactRouterEuiLink to="/" data-test-subj="foo" external={true} />
+    );
+    const link = getByRole('link');
 
-    expect(link.prop('external')).toEqual(true);
-    expect(link.prop('data-test-subj')).toEqual('foo');
+    expect(link.getAttribute('rel')).toContain('noreferrer');
+    expect(link.getAttribute('data-test-subj')).toBe('foo');
+
+    const popoutElement = getByRole('presentation');
+    expect(popoutElement.getAttribute('data-euiicon-type')).toBe('popout');
   });
 
   it('renders with the correct href and onClick props', () => {
-    const wrapper = mount(<ReactRouterEuiLink to="/foo/bar" />);
-    const link = wrapper.find(EuiLink);
+    const { getByRole } = render(<ReactRouterEuiLink to="/foo/bar" />);
+    const link = getByRole('link');
 
-    expect(link.prop('onClick')).toBeInstanceOf(Function);
-    expect(link.prop('href')).toEqual('/enterprise_search/foo/bar');
+    expect(link.onclick).toBeInstanceOf(Function);
+    expect(link.getAttribute('href')).toBe('/enterprise_search/foo/bar');
     expect(mockHistory.createHref).toHaveBeenCalled();
   });
 
   describe('onClick', () => {
     it('prevents default navigation and uses React Router history', () => {
-      const wrapper = mount(<ReactRouterEuiLink to="/bar/baz" />);
+      const { getByRole } = render(<ReactRouterEuiLink to="/bar/baz" />);
+      const link = getByRole('link');
 
-      const simulatedEvent = {
-        button: 0,
-        target: { getAttribute: () => '_self' },
-        preventDefault: jest.fn(),
-      };
-      wrapper.find(EuiLink).find('a').simulate('click', simulatedEvent);
+      // Fire a simulated click
+      // Spy on the real preventDefault method
+      const preventDefaultSpy = jest.spyOn(Event.prototype, 'preventDefault');
 
-      expect(simulatedEvent.preventDefault).toHaveBeenCalled();
-      expect(mockHistory.push).toHaveBeenCalled();
+      fireEvent.click(link);
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(mockHistory.push).toHaveBeenCalledWith('/bar/baz');
+
+      // Clean up spy
+      preventDefaultSpy.mockRestore();
     });
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
-      const wrapper = mount(<ReactRouterEuiLink to="/bar/baz" />);
+      const { getByRole } = render(<ReactRouterEuiLink to="/bar/baz" />);
+      const link = getByRole('link');
 
-      const simulatedEvent = {
+      // Case 1: Test shift-click (opens in new window)
+      fireEvent.click(link, {
         shiftKey: true,
-        target: { getAttribute: () => '_blank' },
-      };
-      wrapper.find(EuiLink).find('a').simulate('click', simulatedEvent);
+      });
 
+      // Case 2: Test clicking a link with target="_blank"
+      // First, modify the link to have target="_blank"
+      link.setAttribute('target', '_blank');
+      fireEvent.click(link);
+
+      // Verify history.push was not called in either case
       expect(mockHistory.push).not.toHaveBeenCalled();
     });
   });

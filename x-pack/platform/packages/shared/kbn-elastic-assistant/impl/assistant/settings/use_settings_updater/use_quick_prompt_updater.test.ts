@@ -6,11 +6,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { useQuickPromptUpdater } from './use_quick_prompt_updater';
-import { FindPromptsResponse, PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import type { FindPromptsResponse, PromptResponse } from '@kbn/elastic-assistant-common';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import { bulkUpdatePrompts } from '../../../..';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 const mockHttp = {} as HttpSetup;
 jest.mock('../../../..');
 jest.mock('../../quick_prompts/quick_prompt_settings/helpers', () => {

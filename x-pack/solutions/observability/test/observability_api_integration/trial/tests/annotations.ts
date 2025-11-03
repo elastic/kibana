@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from '@kbn/utility-types';
-import { Annotation } from '@kbn/observability-plugin/common/annotations';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { JsonObject } from '@kbn/utility-types';
+import type { Annotation } from '@kbn/observability-plugin/common/annotations';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 

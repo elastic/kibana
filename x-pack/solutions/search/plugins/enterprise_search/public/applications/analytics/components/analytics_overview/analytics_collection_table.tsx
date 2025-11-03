@@ -7,12 +7,12 @@
 
 import React, { useMemo, useState } from 'react';
 
+import type { EuiSuperDatePickerCommonRange } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
   EuiSuperDatePicker,
-  EuiSuperDatePickerCommonRange,
   EuiFlexGroup,
   EuiSpacer,
   EuiButtonGroup,
@@ -21,11 +21,11 @@ import {
   EuiFieldSearch,
 } from '@elastic/eui';
 
-import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
+import type { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { FilterBy } from '../../utils/get_formula_by_filter';
 import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 

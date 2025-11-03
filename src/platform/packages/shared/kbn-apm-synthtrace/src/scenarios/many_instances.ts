@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates APM data for a single service with a very high number of instances (2000).
+ */
+
+import type { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
+import { apm } from '@kbn/apm-synthtrace-client';
 import { random, times } from 'lodash';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { getRandomNameForIndex } from './helpers/random_names';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ColorMappingInputData, PaletteOutput, getFallbackDataBounds } from '@kbn/coloring';
+import type { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
+import { getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -17,17 +18,17 @@ import React, {
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import {
-  EuiButtonIcon,
-  EuiDataGrid,
+import type {
   EuiDataGridRefProps,
   EuiDataGridControlColumn,
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { EuiButtonIcon, EuiDataGrid } from '@elastic/eui';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { useKbnPalettes } from '@kbn/palettes';
@@ -37,18 +38,21 @@ import { css } from '@emotion/react';
 import { DATA_GRID_DENSITY_STYLE_MAP } from '@kbn/unified-data-table/src/hooks/use_data_grid_density';
 import { DATA_GRID_STYLE_NORMAL } from '@kbn/unified-data-table/src/constants';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
-import type { LensTableRowContextMenuEvent } from '../../../types';
-import { RowHeightMode } from '../../../../common/types';
-import { LensGridDirection } from '../../../../common/expressions';
-import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
+import {
+  LENS_ROW_HEIGHT_MODE as RowHeightMode,
+  DEFAULT_HEADER_ROW_HEIGHT,
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+} from '@kbn/lens-common';
 import type {
-  DataContextType,
-  DatatableRenderProps,
+  LensTableRowContextMenuEvent,
   LensSortAction,
   LensResizeAction,
   LensToggleAction,
   LensPagesizeAction,
-} from './types';
+} from '@kbn/lens-common';
+import type { LensGridDirection } from '../../../../common/expressions';
+import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
+import type { DataContextType, DatatableRenderProps } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
 import {
@@ -60,12 +64,12 @@ import {
   createTransposeColumnFilterHandler,
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/impl/datatable/summary';
-import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import {
   getDatatableColumn,
   isNumericField,
 } from '../../../../common/expressions/impl/datatable/utils';
-import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
@@ -244,10 +248,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [firstTableRef, columnConfig, getType]
   );
 
-  const isEmpty =
-    firstLocalTable.rows.length === 0 ||
-    (bucketedColumns.length > 0 &&
-      props.data.rows.every((row) => bucketedColumns.every((col) => row[col] == null)));
+  const isEmpty = firstLocalTable.rows.length === 0;
 
   const visibleColumns = useMemo(
     () =>

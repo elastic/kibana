@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -23,13 +24,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
+import type { ReportingAPIClient } from '@kbn/reporting-public';
+import { useKibana } from '@kbn/reporting-public';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   FIELD_TYPES,
   Form,
-  FormSchema,
   getUseField,
   useForm,
   useFormData,
@@ -53,7 +55,7 @@ import { getScheduledReportFormSchema } from '../schemas/scheduled_report_form_s
 import { useDefaultTimezone } from '../hooks/use_default_timezone';
 import { useScheduleReport } from '../hooks/use_schedule_report';
 import { useGetReportingHealthQuery } from '../hooks/use_get_reporting_health_query';
-import { ReportTypeData, ScheduledReport } from '../../types';
+import type { ReportTypeData, ScheduledReport } from '../../types';
 import * as i18n from '../translations';
 import { SCHEDULED_REPORT_FORM_ID } from '../constants';
 import { getStartDateValidator } from '../validators/start_date_validator';
@@ -251,6 +253,7 @@ export const ScheduledReportFlyoutContent = ({
           <EuiLoadingSpinner size="l" />
         ) : isReportingHealthError ? (
           <EuiCallOut
+            announceOnMount
             title={i18n.CANNOT_LOAD_REPORTING_HEALTH_TITLE}
             iconType="error"
             color="danger"
@@ -259,6 +262,7 @@ export const ScheduledReportFlyoutContent = ({
           </EuiCallOut>
         ) : hasUnmetPrerequisites ? (
           <EuiCallOut
+            announceOnMount
             title={i18n.UNMET_REPORTING_PREREQUISITES_TITLE}
             iconType="error"
             color="danger"
@@ -444,6 +448,7 @@ export const ScheduledReportFlyoutContent = ({
                       />
                       {!readOnly && (
                         <EuiCallOut
+                          announceOnMount
                           title={i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE}
                           iconType="info"
                           size="s"
@@ -458,6 +463,7 @@ export const ScheduledReportFlyoutContent = ({
                 <>
                   <EuiSpacer size="m" />
                   <EuiCallOut
+                    announceOnMount
                     title={i18n.SCHEDULED_REPORT_FORM_MISSING_EMAIL_CONNECTOR_TITLE}
                     iconType="info"
                     size="s"

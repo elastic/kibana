@@ -9,13 +9,13 @@
 
 import React from 'react';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import { OptionsListComponentApi } from '../types';
+import type { OptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';
-import { OptionsListDisplaySettings } from '../../../../../common/options_list';
+import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 
 describe('Options list control', () => {
   const mountComponent = ({
@@ -73,7 +73,7 @@ describe('Options list control', () => {
       } as DataViewField);
       const control = mountComponent(contextMock);
       const selections = control.getByTestId('optionsListSelections');
-      expect(selections.textContent).toBe('woof,  bark ');
+      expect(selections.textContent).toBe('woof, bark');
     });
   });
 
@@ -92,7 +92,7 @@ describe('Options list control', () => {
     } as DataViewField);
     const control = mountComponent(contextMock);
     const selections = control.getByTestId('optionsListSelections');
-    expect(selections.textContent).toBe('1;   2 ');
+    expect(selections.textContent).toBe('1;  2');
   });
 
   test('should display invalid state', async () => {

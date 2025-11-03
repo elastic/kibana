@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { Ensure } from '@kbn/utility-types';
-import { FC, ComponentType } from 'react';
+import type { Observable } from 'rxjs';
+import type { Ensure } from '@kbn/utility-types';
+import type { FC, ComponentType } from 'react';
 
 /**
  * Base {@link StateContainer} state shape

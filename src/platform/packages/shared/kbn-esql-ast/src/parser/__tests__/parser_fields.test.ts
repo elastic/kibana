@@ -9,7 +9,7 @@
 
 import { EsqlQuery } from '../../query';
 import * as fixtures from '../../__tests__/fixtures';
-import { ESQLProperNode } from '../../types';
+import type { ESQLProperNode } from '../../types';
 import { Walker } from '../../walker';
 
 /**

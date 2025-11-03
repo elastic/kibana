@@ -17,7 +17,7 @@ import {
   LineStyles,
 } from '../constants';
 import { strings } from '../i18n';
-import { ReferenceLineDecorationConfigFn } from '../types';
+import type { ReferenceLineDecorationConfigFn } from '../types';
 import { commonDecorationConfigArgs } from './common_y_config_args';
 
 export const referenceLineDecorationConfigFunction: ReferenceLineDecorationConfigFn = {

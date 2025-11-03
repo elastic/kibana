@@ -8,18 +8,20 @@
 import React, { Fragment, Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/public';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
+import type { GRID_RESOLUTION } from '../../../../common/constants';
+import { AGG_TYPE, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { isMetricCountable } from '../../util/is_metric_countable';
 import { RenderAsSelect } from './render_as_select';
-import { AggDescriptor } from '../../../../common/descriptor_types';
-import { OnSourceChangeArgs } from '../source';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { OnSourceChangeArgs } from '../source';
 import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 import { isMvt } from './is_mvt';
 
@@ -74,7 +76,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     }
 
     this.setState({
-      fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      fields: indexPattern.fields.filter((field) => !isNestedField(field)),
     });
   }
 

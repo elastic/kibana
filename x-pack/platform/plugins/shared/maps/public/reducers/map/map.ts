@@ -47,6 +47,7 @@ import {
   UPDATE_MAP_SETTING,
   UPDATE_EDIT_STATE,
   SET_EXECUTION_CONTEXT,
+  SET_PAUSE_SYNC_DATA,
 } from '../../actions/map_action_constants';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -61,7 +62,7 @@ import {
   updateLayerSourceDescriptorProp,
 } from './layer_utils';
 import { startDataRequest, stopDataRequest, updateSourceDataRequest } from './data_request_utils';
-import { MapState } from './types';
+import type { MapState } from './types';
 
 export const DEFAULT_MAP_STATE: MapState = {
   executionContext: { name: APP_ID },
@@ -86,6 +87,7 @@ export const DEFAULT_MAP_STATE: MapState = {
   waitingForMapReadyLayerList: [],
   settings: getDefaultMapSettings(),
   __rollbackSettings: null,
+  __pauseSyncData: false,
 };
 
 export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, any>) {
@@ -228,6 +230,11 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
     case SET_SELECTED_LAYER:
       const selectedMatch = state.layerList.find((layer) => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
+    case SET_PAUSE_SYNC_DATA:
+      return {
+        ...state,
+        __pauseSyncData: action.pauseSyncData,
+      };
     case UPDATE_LAYER_ORDER:
       return {
         ...state,

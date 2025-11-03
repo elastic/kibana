@@ -16,11 +16,12 @@ import type {
   MappingProperty,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { last, mapValues, padStart } from 'lodash';
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
-import {
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type {
   IndexStorageSettings,
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
@@ -38,17 +39,18 @@ import {
   InternalIStorageClient,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
-import { StorageMappingProperty } from '../../types';
+import type { StorageMappingProperty } from '../../types';
 
 function getAliasName(name: string) {
   return name;
 }
 
-function getBackingIndexPattern(name: string) {
+function getIndexPattern(name: string) {
   return `${name}-*`;
 }
 
-function getBackingIndexName(name: string, count: number) {
+/** Creates names like: .my-index-0000001 */
+function getIndexName(name: string, count: number) {
   const countId = padStart(count.toString(), 6, '0');
   return `${name}-${countId}`;
 }
@@ -102,7 +104,6 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
  * using plain indices.
  *
  * TODO:
- * - Index Lifecycle Management
  * - Schema upgrades w/ fallbacks
  */
 export class StorageIndexAdapter<
@@ -152,7 +153,7 @@ export class StorageIndexAdapter<
         name: getIndexTemplateName(this.storage.name),
         create: false,
         allow_auto_create: false,
-        index_patterns: getBackingIndexPattern(this.storage.name),
+        index_patterns: getIndexPattern(this.storage.name),
         _meta: {
           version,
         },
@@ -190,7 +191,7 @@ export class StorageIndexAdapter<
   private async getExistingIndices() {
     return wrapEsCall(
       this.esClient.indices.get({
-        index: getBackingIndexPattern(this.storage.name),
+        index: getIndexPattern(this.storage.name),
         allow_no_indices: true,
       })
     );
@@ -224,32 +225,25 @@ export class StorageIndexAdapter<
     return writeIndex?.name;
   }
 
-  private async createNextBackingIndex(): Promise<void> {
+  private async createIndex(): Promise<void> {
     const writeIndex = await this.getCurrentWriteIndexName();
 
-    const nextIndexName = getBackingIndexName(
+    const indexName = getIndexName(
       this.storage.name,
       writeIndex ? parseInt(last(writeIndex.split('-'))!, 10) : 1
     );
 
     await wrapEsCall(
       this.esClient.indices.create({
-        index: nextIndexName,
+        index: indexName,
       })
     ).catch(catchConflictError);
   }
 
   private async updateMappingsOfExistingIndex({ name }: { name: string }) {
     const simulateIndexTemplateResponse = await this.esClient.indices.simulateIndexTemplate({
-      name: getBackingIndexName(this.storage.name, 999999),
+      name: getIndexName(this.storage.name, 999999),
     });
-
-    if (simulateIndexTemplateResponse.template.settings) {
-      await this.esClient.indices.putSettings({
-        index: name,
-        settings: simulateIndexTemplateResponse.template.settings,
-      });
-    }
 
     if (simulateIndexTemplateResponse.template.mappings) {
       await this.esClient.indices.putMapping({
@@ -263,72 +257,25 @@ export class StorageIndexAdapter<
    * Validates whether:
    * - an index template exists
    * - the index template has the right version (if not, update it)
-   * - a write index exists (if it doesn't, create it)
-   * - the write index has the right version (if not, update it)
+   * - the index exists (if it doesn't, create it)
+   * - the index has the right version (if not, update it)
    */
   private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
-    const [writeIndex, existingIndexTemplate] = await Promise.all([
-      this.getCurrentWriteIndex(),
-      this.getExistingIndexTemplate(),
-    ]);
-
     const expectedSchemaVersion = getSchemaVersion(this.storage);
+    await this.createOrUpdateIndexTemplate();
 
-    if (!existingIndexTemplate) {
-      this.logger.info(`Creating index template as it does not exist`);
-      await this.createOrUpdateIndexTemplate();
-    } else if (existingIndexTemplate._meta?.version !== expectedSchemaVersion) {
-      this.logger.info(`Updating existing index template`);
-      await this.createOrUpdateIndexTemplate();
-    }
-
+    const writeIndex = await this.getCurrentWriteIndex();
     if (!writeIndex) {
-      this.logger.info(`Creating first backing index`);
-      await this.createNextBackingIndex();
+      this.logger.debug(`Creating index`);
+      await this.createIndex();
     } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
-      this.logger.info(`Updating mappings of existing write index due to schema version mismatch`);
+      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
       await this.updateMappingsOfExistingIndex({
         name: writeIndex.name,
       });
     }
 
     return await cb();
-  }
-
-  /**
-   * Get items from all non-write indices for the specified ids.
-   */
-  private async getDanglingItems({ ids }: { ids: string[] }) {
-    if (!ids.length) {
-      return [];
-    }
-
-    const writeIndex = await this.getCurrentWriteIndexName();
-
-    if (writeIndex) {
-      const danglingItemsResponse = await this.search({
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [{ terms: { _id: ids } }],
-            must_not: [
-              {
-                term: {
-                  _index: writeIndex,
-                },
-              },
-            ],
-          },
-        },
-        size: 10_000,
-      });
-
-      return danglingItemsResponse.hits.hits.map((hit) => ({
-        id: hit._id!,
-        index: hit._index,
-      }));
-    }
-    return [];
   }
 
   private search: StorageClientSearch<TApplicationType> = async (request) => {
@@ -381,28 +328,15 @@ export class StorageIndexAdapter<
     ...request
   }): Promise<StorageClientIndexResponse> => {
     const attemptIndex = async (): Promise<IndexResponse> => {
-      const [danglingItem] = id ? await this.getDanglingItems({ ids: [id] }) : [undefined];
-
-      const [indexResponse] = await Promise.all([
-        wrapEsCall(
-          this.esClient.index({
-            ...request,
-            id,
-            refresh,
-            index: this.getWriteTarget(),
-            require_alias: true,
-          })
-        ),
-        danglingItem
-          ? wrapEsCall(
-              this.esClient.delete({
-                id: danglingItem.id,
-                index: danglingItem.index,
-                refresh,
-              })
-            )
-          : Promise.resolve(),
-      ]);
+      const indexResponse = await wrapEsCall(
+        this.esClient.index({
+          ...request,
+          id,
+          refresh,
+          index: this.getWriteTarget(),
+          require_alias: true,
+        })
+      );
 
       return indexResponse;
     };
@@ -447,33 +381,11 @@ export class StorageIndexAdapter<
     });
 
     const attemptBulk = async () => {
-      const indexedIds =
-        bulkOperations.flatMap((operation) => {
-          if (
-            'index' in operation &&
-            operation.index &&
-            typeof operation.index === 'object' &&
-            '_id' in operation.index &&
-            typeof operation.index._id === 'string'
-          ) {
-            return operation.index._id ?? [];
-          }
-          return [];
-        }) ?? [];
-
-      const danglingItems = await this.getDanglingItems({ ids: indexedIds });
-
-      if (danglingItems.length) {
-        this.logger.debug(`Deleting ${danglingItems.length} dangling items`);
-      }
-
       return wrapEsCall(
         this.esClient.bulk({
           ...request,
           refresh,
-          operations: bulkOperations.concat(
-            danglingItems.map((item) => ({ delete: { _index: item.index, _id: item.id } }))
-          ),
+          operations: bulkOperations,
           index: this.getWriteTarget(),
           require_alias: true,
         })

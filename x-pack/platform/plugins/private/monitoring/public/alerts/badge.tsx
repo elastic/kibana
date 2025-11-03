@@ -8,8 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiPopover, EuiBadge, EuiSwitch } from '@elastic/eui';
-import { AlertState } from '../../common/types/alerts';
-import { AlertSeverity } from '../../common/enums';
+import type { AlertState } from '../../common/types/alerts';
+import type { AlertSeverity } from '../../common/enums';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';

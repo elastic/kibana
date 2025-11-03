@@ -9,7 +9,8 @@
 
 import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { PureComponent, ReactText } from 'react';
+import type { ReactText } from 'react';
+import React, { PureComponent } from 'react';
 import type { Sample, SampleInput } from '../../types';
 import type { FormatEditorProps } from '../types';
 import { formatId } from './constants';

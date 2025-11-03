@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { ILayer } from '../../../classes/layers/layer';
-import { ISource } from '../../../classes/sources/source';
+import type { LayerDescriptor } from '../../../../common/descriptor_types';
+import type { ILayer } from '../../../classes/layers/layer';
+import type { ISource } from '../../../classes/sources/source';
 import { AttributionFormRow } from './attribution_form_row';
 
 const defaultProps = {

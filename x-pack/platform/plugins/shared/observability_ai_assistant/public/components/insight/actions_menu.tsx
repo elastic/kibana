@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
-import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import { useKibana } from '../../hooks/use_kibana';
 import { navigateToConnectorsManagementApp } from '../../utils/navigate_to_connectors';

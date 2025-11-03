@@ -16,8 +16,8 @@ import {
 import path from 'path';
 import { once } from 'lodash';
 import type { SyncExpectationResult } from 'expect';
-import { Lifecycle } from '../lifecycle';
-import { Suite, Test } from '../../fake_mocha_types';
+import type { Lifecycle } from '../lifecycle';
+import type { Suite, Test } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 

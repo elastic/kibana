@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
-import { DatatableRow, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type {
+  DatatableRow,
+  DatatableColumn,
+  DatatableColumnType,
+} from '@kbn/expressions-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES, MultiFieldKey } from '@kbn/data-plugin/common';
-import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
 import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
 import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';

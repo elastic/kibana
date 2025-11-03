@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsService } from '../common';
+import type { DataViewsService } from '../common';
 
 export function createIndexPatternsStartMock() {
   const dataViewsServiceFactory = jest.fn().mockResolvedValue({ get: jest.fn() });

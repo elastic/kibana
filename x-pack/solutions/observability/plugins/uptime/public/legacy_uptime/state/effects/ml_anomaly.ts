@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
+import type { Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 import {
   getMLCapabilitiesAction,

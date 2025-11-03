@@ -11,7 +11,7 @@ import React from 'react';
 import * as uuid from 'uuid';
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
+import { AlertsTable } from '../../../../detections/components/alerts_table';
 
 interface Props {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -26,13 +26,13 @@ const AlertsPreviewComponent: React.FC<Props> = ({ query, size }) => {
       `}
       data-test-subj="alertsPreview"
     >
-      <DetectionEngineAlertsTable
+      <AlertsTable
         // Show the same row-actions as in the case view
         tableType={TableId.alertsOnRuleDetailsPage}
         id={`attack-discovery-alerts-preview-${uuid.v4()}`}
         showAlertStatusWithFlapping={false}
         query={query}
-        initialPageSize={size}
+        pageSize={size}
       />
     </div>
   );

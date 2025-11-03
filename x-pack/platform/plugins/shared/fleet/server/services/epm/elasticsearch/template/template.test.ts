@@ -17,6 +17,15 @@ import { errors } from '@elastic/elasticsearch';
 import {
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_LOGS_CUSTOM_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_METRICS_CUSTOM_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_SETTINGS,
+  OTEL_COMPONENT_TEMPLATE_TRACES_CUSTOM_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
 
@@ -55,380 +64,455 @@ describe('EPM template', () => {
     appContextService.start(createAppContextStartContractMock());
   });
 
-  it('get template', () => {
-    const templateIndexPattern = 'logs-nginx.access-abcd-*';
+  describe('getTemplate', () => {
+    it('gets index patterns for the template', () => {
+      const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
-    const template = getTemplate({
-      templateIndexPattern,
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates: [],
-      templatePriority: 200,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
+      const template = getTemplate({
+        templateIndexPattern,
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+      expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
     });
-    expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
-  });
-  it('tests processing keyword field attributes in a dynamic template', () => {
-    const textFieldLiteralYml = `
+    it('tests processing keyword field attributes in a dynamic template', () => {
+      const textFieldLiteralYml = `
 - name: labels.*
   type: keyword
   ignore_above: 4096
 `;
-    const fieldMapping = {
-      properties: {
-        labels: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
-          'labels.*': {
-            match_mapping_type: 'string',
-            path_match: 'labels.*',
-            mapping: {
-              type: 'keyword',
-              ignore_above: 4096,
-            },
+      const fieldMapping = {
+        properties: {
+          labels: {
+            type: 'object',
+            dynamic: true,
           },
         },
-      ],
-    };
-    const fields: Field[] = load(textFieldLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(fieldMapping);
-  });
-
-  it('adds composed_of correctly', () => {
-    const composedOfTemplates = ['component1', 'component2'];
-
-    const template = getTemplate({
-      templateIndexPattern: 'logs-*',
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates,
-      templatePriority: 200,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
+        dynamic_templates: [
+          {
+            'labels.*': {
+              match_mapping_type: 'string',
+              path_match: 'labels.*',
+              mapping: {
+                type: 'keyword',
+                ignore_above: 4096,
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textFieldLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(fieldMapping);
     });
-    expect(template.composed_of).toStrictEqual([
-      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
-      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
-      ...composedOfTemplates,
-      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-    ]);
-  });
 
-  it('supplies metrics@tsdb-settings for time series', () => {
-    const composedOfTemplates = ['component1', 'component2'];
+    it('adds composed_of correctly', () => {
+      const composedOfTemplates = ['component1', 'component2'];
 
-    const template = getTemplate({
-      templateIndexPattern: 'metrics-*',
-      type: 'metrics',
-      packageName: 'nginx',
-      composedOfTemplates,
-      templatePriority: 200,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: true,
+      const template = getTemplate({
+        templateIndexPattern: 'logs-*',
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates,
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+      expect(template.composed_of).toStrictEqual([
+        STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+        STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+        ...composedOfTemplates,
+        STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+        FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+      ]);
     });
-    expect(template.composed_of).toStrictEqual([
-      'metrics@tsdb-settings',
-      ...composedOfTemplates,
-      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-    ]);
-  });
 
-  it('does not create fleet agent id verification component template if agentIdVerification is disabled', () => {
-    appContextService.start(
-      createAppContextStartContractMock({
-        agentIdVerificationEnabled: false,
-      })
-    );
-    const composedOfTemplates = ['component1', 'component2'];
+    it('supplies metrics@tsdb-settings for time series', () => {
+      const composedOfTemplates = ['component1', 'component2'];
 
-    const template = getTemplate({
-      templateIndexPattern: 'logs-*',
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates,
-      templatePriority: 200,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
+      const template = getTemplate({
+        templateIndexPattern: 'metrics-*',
+        type: 'metrics',
+        packageName: 'nginx',
+        composedOfTemplates,
+        templatePriority: 200,
+        isIndexModeTimeSeries: true,
+      });
+      expect(template.composed_of).toStrictEqual([
+        'metrics@tsdb-settings',
+        ...composedOfTemplates,
+        STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+        FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+      ]);
     });
-    expect(template.composed_of).toStrictEqual([
-      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
-      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
-      ...composedOfTemplates,
-      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-    ]);
-  });
 
-  it('creates fleet event ingested component template if event ingested flag is enabled', () => {
-    appContextService.start(
-      createAppContextStartContractMock({
-        agentIdVerificationEnabled: false,
-        eventIngestedEnabled: true,
-      })
-    );
-    const composedOfTemplates = ['component1', 'component2'];
+    it('does not create fleet agent id verification component template if agentIdVerification is disabled', () => {
+      appContextService.start(
+        createAppContextStartContractMock({
+          agentIdVerificationEnabled: false,
+        })
+      );
+      const composedOfTemplates = ['component1', 'component2'];
 
-    const template = getTemplate({
-      templateIndexPattern: 'logs-*',
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates,
-      templatePriority: 200,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
+      const template = getTemplate({
+        templateIndexPattern: 'logs-*',
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates,
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+      expect(template.composed_of).toStrictEqual([
+        STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+        STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+        ...composedOfTemplates,
+        STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+        FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      ]);
     });
-    expect(template.composed_of).toStrictEqual([
-      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
-      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
-      ...composedOfTemplates,
-      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-      FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
-    ]);
-  });
 
-  it('adds empty composed_of correctly', () => {
-    const composedOfTemplates: string[] = [];
+    it('creates fleet event ingested component template if event ingested flag is enabled', () => {
+      appContextService.start(
+        createAppContextStartContractMock({
+          agentIdVerificationEnabled: false,
+          eventIngestedEnabled: true,
+        })
+      );
+      const composedOfTemplates = ['component1', 'component2'];
 
-    const template = getTemplate({
-      templateIndexPattern: 'logs-*',
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates,
-      templatePriority: 200,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
+      const template = getTemplate({
+        templateIndexPattern: 'logs-*',
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates,
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+      expect(template.composed_of).toStrictEqual([
+        STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+        STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+        ...composedOfTemplates,
+        STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+        FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+      ]);
     });
-    expect(template.composed_of).toStrictEqual([
-      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
-      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
-      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-    ]);
-  });
 
-  it('adds hidden field correctly', () => {
-    const templateIndexPattern = 'logs-nginx.access-abcd-*';
+    it('adds empty composed_of correctly', () => {
+      const composedOfTemplates: string[] = [];
 
-    const templateWithHidden = getTemplate({
-      templateIndexPattern,
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates: [],
-      templatePriority: 200,
-      hidden: true,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
+      const template = getTemplate({
+        templateIndexPattern: 'logs-*',
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates,
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+      expect(template.composed_of).toStrictEqual([
+        STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+        STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+        STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+        FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+      ]);
     });
-    expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
-    const templateWithoutHidden = getTemplate({
-      templateIndexPattern,
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates: [],
-      templatePriority: 200,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
+    it('adds hidden field correctly', () => {
+      const templateIndexPattern = 'logs-nginx.access-abcd-*';
+
+      const templateWithHidden = getTemplate({
+        templateIndexPattern,
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        hidden: true,
+        isIndexModeTimeSeries: false,
+      });
+      expect(templateWithHidden.data_stream.hidden).toEqual(true);
+
+      const templateWithoutHidden = getTemplate({
+        templateIndexPattern,
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+      expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
     });
-    expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
-  });
 
-  it('adds index_template.data_stream.hidden field correctly', () => {
-    const templateIndexPattern = 'logs-nginx.access-abcd-*';
+    it('adds index_template.data_stream.hidden field correctly', () => {
+      const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
-    const templateWithGlobalAndDataStreamHidden = getTemplate({
-      templateIndexPattern,
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates: [],
-      templatePriority: 200,
-      hidden: false,
-      mappings: { properties: [] },
-      registryElasticsearch: {
-        'index_template.data_stream': {
-          hidden: true,
+      const templateWithGlobalAndDataStreamHidden = getTemplate({
+        templateIndexPattern,
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        hidden: false,
+        registryElasticsearch: {
+          'index_template.data_stream': {
+            hidden: true,
+          },
         },
-      },
-      isIndexModeTimeSeries: false,
-    });
-    expect(templateWithGlobalAndDataStreamHidden.data_stream.hidden).toEqual(true);
+        isIndexModeTimeSeries: false,
+      });
+      expect(templateWithGlobalAndDataStreamHidden.data_stream.hidden).toEqual(true);
 
-    const templateWithDataStreamHidden = getTemplate({
-      templateIndexPattern,
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates: [],
-      templatePriority: 200,
-      mappings: { properties: [] },
-      registryElasticsearch: {
-        'index_template.data_stream': {
-          hidden: true,
+      const templateWithDataStreamHidden = getTemplate({
+        templateIndexPattern,
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        registryElasticsearch: {
+          'index_template.data_stream': {
+            hidden: true,
+          },
         },
-      },
-      isIndexModeTimeSeries: false,
-    });
-    expect(templateWithDataStreamHidden.data_stream.hidden).toEqual(true);
+        isIndexModeTimeSeries: false,
+      });
+      expect(templateWithDataStreamHidden.data_stream.hidden).toEqual(true);
 
-    const templateWithoutDataStreamHidden = getTemplate({
-      templateIndexPattern,
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates: [],
-      templatePriority: 200,
-      hidden: true,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
-    });
-    expect(templateWithoutDataStreamHidden.data_stream.hidden).toEqual(true);
+      const templateWithoutDataStreamHidden = getTemplate({
+        templateIndexPattern,
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        hidden: true,
+        isIndexModeTimeSeries: false,
+      });
+      expect(templateWithoutDataStreamHidden.data_stream.hidden).toEqual(true);
 
-    const templateWithGlobalHiddenTrueAndDataStreamHiddenFalse = getTemplate({
-      templateIndexPattern,
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates: [],
-      templatePriority: 200,
-      hidden: true,
-      mappings: { properties: [] },
-      registryElasticsearch: {
-        'index_template.data_stream': {
-          hidden: false,
+      const templateWithGlobalHiddenTrueAndDataStreamHiddenFalse = getTemplate({
+        templateIndexPattern,
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        hidden: true,
+        registryElasticsearch: {
+          'index_template.data_stream': {
+            hidden: false,
+          },
         },
-      },
-      isIndexModeTimeSeries: false,
+        isIndexModeTimeSeries: false,
+      });
+      expect(templateWithGlobalHiddenTrueAndDataStreamHiddenFalse.data_stream.hidden).toEqual(true);
+
+      const templateWithoutHidden = getTemplate({
+        templateIndexPattern,
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+      expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
     });
-    expect(templateWithGlobalHiddenTrueAndDataStreamHiddenFalse.data_stream.hidden).toEqual(true);
 
-    const templateWithoutHidden = getTemplate({
-      templateIndexPattern,
-      type: 'logs',
-      packageName: 'nginx',
-      composedOfTemplates: [],
-      templatePriority: 200,
-      mappings: { properties: [] },
-      isIndexModeTimeSeries: false,
+    it('adds composed_of correctly for otel input packages of type logs', () => {
+      const composedOfTemplates = [
+        'logs-check@package',
+        'logs@custom',
+        OTEL_COMPONENT_TEMPLATE_LOGS_CUSTOM_MAPPINGS,
+        'httpcheck@custom',
+        'logs-check@custom',
+      ];
+
+      const template = getTemplate({
+        templateIndexPattern: 'logs.otel-*',
+        type: 'logs',
+        packageName: 'otel-test',
+        composedOfTemplates,
+        templatePriority: 200,
+        isOtelInputType: true,
+      });
+
+      expect(template.composed_of).toStrictEqual([
+        OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+        OTEL_COMPONENT_TEMPLATE_SETTINGS,
+        OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+        OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+        ...composedOfTemplates,
+        FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+      ]);
     });
-    expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
+
+    it('adds composed_of correctly for otel input packages of type metrics', () => {
+      const composedOfTemplates = [
+        'metrics-check@package',
+        'metrics@custom',
+        OTEL_COMPONENT_TEMPLATE_METRICS_CUSTOM_MAPPINGS,
+        'httpcheck@custom',
+        'metrics-check@custom',
+      ];
+
+      const template = getTemplate({
+        templateIndexPattern: 'metrics.otel-*',
+        type: 'metrics',
+        packageName: 'otel-test',
+        composedOfTemplates,
+        templatePriority: 200,
+        isOtelInputType: true,
+      });
+      expect(template.composed_of).toStrictEqual([
+        OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+        OTEL_COMPONENT_TEMPLATE_SETTINGS,
+        OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS,
+        OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+        ...composedOfTemplates,
+        FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+      ]);
+    });
+
+    it('adds composed_of correctly for otel input packages of type traces', () => {
+      const composedOfTemplates = [
+        'traces-check@package',
+        'traces@custom',
+        OTEL_COMPONENT_TEMPLATE_TRACES_CUSTOM_MAPPINGS,
+        'httpcheck@custom',
+        'traces-check@custom',
+      ];
+
+      const template = getTemplate({
+        templateIndexPattern: 'traces.otel-*',
+        type: 'traces',
+        packageName: 'otel-test',
+        composedOfTemplates,
+        templatePriority: 200,
+        isOtelInputType: true,
+      });
+      expect(template.composed_of).toStrictEqual([
+        OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+        OTEL_COMPONENT_TEMPLATE_SETTINGS,
+        OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+        OTEL_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
+        ...composedOfTemplates,
+        FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+      ]);
+    });
   });
 
-  it('tests loading base.yml', () => {
-    const ymlPath = path.join(__dirname, '../../fields/tests/base.yml');
-    const fieldsYML = readFileSync(ymlPath, 'utf-8');
-    const fields: Field[] = load(fieldsYML);
+  describe('generateMappings', () => {
+    it('tests loading base.yml', () => {
+      const ymlPath = path.join(__dirname, '../../fields/tests/base.yml');
+      const fieldsYML = readFileSync(ymlPath, 'utf-8');
+      const fields: Field[] = load(fieldsYML);
 
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
 
-    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
-  });
+      expect(mappings).toMatchSnapshot(path.basename(ymlPath));
+    });
 
-  it('tests loading coredns.logs.yml', () => {
-    const ymlPath = path.join(__dirname, '../../fields/tests/coredns.logs.yml');
-    const fieldsYML = readFileSync(ymlPath, 'utf-8');
-    const fields: Field[] = load(fieldsYML);
+    it('tests loading coredns.logs.yml', () => {
+      const ymlPath = path.join(__dirname, '../../fields/tests/coredns.logs.yml');
+      const fieldsYML = readFileSync(ymlPath, 'utf-8');
+      const fields: Field[] = load(fieldsYML);
 
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
 
-    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
-  });
+      expect(mappings).toMatchSnapshot(path.basename(ymlPath));
+    });
 
-  it('tests loading system.yml', () => {
-    const ymlPath = path.join(__dirname, '../../fields/tests/system.yml');
-    const fieldsYML = readFileSync(ymlPath, 'utf-8');
-    const fields: Field[] = load(fieldsYML);
-    const processedFields = processFields(fields);
+    it('tests loading system.yml', () => {
+      const ymlPath = path.join(__dirname, '../../fields/tests/system.yml');
+      const fieldsYML = readFileSync(ymlPath, 'utf-8');
+      const fields: Field[] = load(fieldsYML);
+      const processedFields = processFields(fields);
 
-    const mappings = generateMappings(processedFields);
+      const mappings = generateMappings(processedFields);
 
-    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
-  });
+      expect(mappings).toMatchSnapshot(path.basename(ymlPath));
+    });
 
-  it('tests loading cockroachdb_dynamic_templates.yml', () => {
-    const ymlPath = path.join(__dirname, '../../fields/tests/cockroachdb_dynamic_templates.yml');
-    const fieldsYML = readFileSync(ymlPath, 'utf-8');
-    const fields: Field[] = load(fieldsYML);
-    const processedFields = processFields(fields);
+    it('tests loading cockroachdb_dynamic_templates.yml', () => {
+      const ymlPath = path.join(__dirname, '../../fields/tests/cockroachdb_dynamic_templates.yml');
+      const fieldsYML = readFileSync(ymlPath, 'utf-8');
+      const fields: Field[] = load(fieldsYML);
+      const processedFields = processFields(fields);
 
-    const mappings = generateMappings(processedFields);
+      const mappings = generateMappings(processedFields);
 
-    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
-  });
+      expect(mappings).toMatchSnapshot(path.basename(ymlPath));
+    });
 
-  it('tests processing long field with index false', () => {
-    const longWithIndexFalseYml = `
+    it('tests processing long field with index false', () => {
+      const longWithIndexFalseYml = `
 - name: longIndexFalse
   type: long
   index: false
 `;
-    const longWithIndexFalseMapping = {
-      properties: {
-        longIndexFalse: {
-          type: 'long',
-          index: false,
+      const longWithIndexFalseMapping = {
+        properties: {
+          longIndexFalse: {
+            type: 'long',
+            index: false,
+          },
         },
-      },
-    };
-    const fields: Field[] = load(longWithIndexFalseYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(longWithIndexFalseMapping);
-  });
+      };
+      const fields: Field[] = load(longWithIndexFalseYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(longWithIndexFalseMapping);
+    });
 
-  it('tests processing keyword field with doc_values false', () => {
-    const keywordWithIndexFalseYml = `
+    it('tests processing keyword field with doc_values false', () => {
+      const keywordWithIndexFalseYml = `
 - name: keywordIndexFalse
   type: keyword
   doc_values: false
 `;
-    const keywordWithIndexFalseMapping = {
-      properties: {
-        keywordIndexFalse: {
-          type: 'keyword',
-          doc_values: false,
+      const keywordWithIndexFalseMapping = {
+        properties: {
+          keywordIndexFalse: {
+            type: 'keyword',
+            doc_values: false,
+          },
         },
-      },
-    };
-    const fields: Field[] = load(keywordWithIndexFalseYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(keywordWithIndexFalseMapping);
-  });
+      };
+      const fields: Field[] = load(keywordWithIndexFalseYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(keywordWithIndexFalseMapping);
+    });
 
-  it('tests processing text field with store true', () => {
-    const textWithStoreTrueYml = `
+    it('tests processing text field with store true', () => {
+      const textWithStoreTrueYml = `
 - name: someTextId
   type: text
   store: true
 `;
-    const textWithStoreTrueMapping = {
-      properties: {
-        someTextId: {
-          type: 'text',
-          store: true,
+      const textWithStoreTrueMapping = {
+        properties: {
+          someTextId: {
+            type: 'text',
+            store: true,
+          },
         },
-      },
-    };
-    const fields: Field[] = load(textWithStoreTrueYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(textWithStoreTrueMapping);
-  });
+      };
+      const fields: Field[] = load(textWithStoreTrueYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(textWithStoreTrueMapping);
+    });
 
-  it('tests processing text field with multi fields', () => {
-    const textWithMultiFieldsLiteralYml = `
+    it('tests processing text field with multi fields', () => {
+      const textWithMultiFieldsLiteralYml = `
 - name: textWithMultiFields
   type: text
   multi_fields:
@@ -437,30 +521,30 @@ describe('EPM template', () => {
     - name: indexed
       type: text
 `;
-    const textWithMultiFieldsMapping = {
-      properties: {
-        textWithMultiFields: {
-          type: 'text',
-          fields: {
-            raw: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-            indexed: {
-              type: 'text',
+      const textWithMultiFieldsMapping = {
+        properties: {
+          textWithMultiFields: {
+            type: 'text',
+            fields: {
+              raw: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+              indexed: {
+                type: 'text',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(textWithMultiFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(textWithMultiFieldsMapping);
-  });
+      };
+      const fields: Field[] = load(textWithMultiFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(textWithMultiFieldsMapping);
+    });
 
-  it('tests processing keyword field with multi fields', () => {
-    const keywordWithMultiFieldsLiteralYml = `
+    it('tests processing keyword field with multi fields', () => {
+      const keywordWithMultiFieldsLiteralYml = `
 - name: keywordWithMultiFields
   type: keyword
   multi_fields:
@@ -470,31 +554,31 @@ describe('EPM template', () => {
       type: text
 `;
 
-    const keywordWithMultiFieldsMapping = {
-      properties: {
-        keywordWithMultiFields: {
-          ignore_above: 1024,
-          type: 'keyword',
-          fields: {
-            raw: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-            indexed: {
-              type: 'text',
+      const keywordWithMultiFieldsMapping = {
+        properties: {
+          keywordWithMultiFields: {
+            ignore_above: 1024,
+            type: 'keyword',
+            fields: {
+              raw: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+              indexed: {
+                type: 'text',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
-  });
+      };
+      const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+    });
 
-  it('tests processing keyword field with multi fields with analyzed text field', () => {
-    const keywordWithAnalyzedMultiFieldsLiteralYml = `
+    it('tests processing keyword field with multi fields with analyzed text field', () => {
+      const keywordWithAnalyzedMultiFieldsLiteralYml = `
   - name: keywordWithAnalyzedMultiField
     type: keyword
     multi_fields:
@@ -504,29 +588,29 @@ describe('EPM template', () => {
         search_analyzer: standard
   `;
 
-    const keywordWithAnalyzedMultiFieldsMapping = {
-      properties: {
-        keywordWithAnalyzedMultiField: {
-          ignore_above: 1024,
-          type: 'keyword',
-          fields: {
-            analyzed: {
-              analyzer: 'autocomplete',
-              search_analyzer: 'standard',
-              type: 'text',
+      const keywordWithAnalyzedMultiFieldsMapping = {
+        properties: {
+          keywordWithAnalyzedMultiField: {
+            ignore_above: 1024,
+            type: 'keyword',
+            fields: {
+              analyzed: {
+                analyzer: 'autocomplete',
+                search_analyzer: 'standard',
+                type: 'text',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(keywordWithAnalyzedMultiFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(keywordWithAnalyzedMultiFieldsMapping);
-  });
+      };
+      const fields: Field[] = load(keywordWithAnalyzedMultiFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(keywordWithAnalyzedMultiFieldsMapping);
+    });
 
-  it('tests processing keyword field with multi fields with normalized keyword field', () => {
-    const keywordWithNormalizedMultiFieldsLiteralYml = `
+    it('tests processing keyword field with multi fields with normalized keyword field', () => {
+      const keywordWithNormalizedMultiFieldsLiteralYml = `
   - name: keywordWithNormalizedMultiField
     type: keyword
     multi_fields:
@@ -535,29 +619,29 @@ describe('EPM template', () => {
         normalizer: lowercase
   `;
 
-    const keywordWithNormalizedMultiFieldsMapping = {
-      properties: {
-        keywordWithNormalizedMultiField: {
-          ignore_above: 1024,
-          type: 'keyword',
-          fields: {
-            normalized: {
-              type: 'keyword',
-              ignore_above: 1024,
-              normalizer: 'lowercase',
+      const keywordWithNormalizedMultiFieldsMapping = {
+        properties: {
+          keywordWithNormalizedMultiField: {
+            ignore_above: 1024,
+            type: 'keyword',
+            fields: {
+              normalized: {
+                type: 'keyword',
+                ignore_above: 1024,
+                normalizer: 'lowercase',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(keywordWithNormalizedMultiFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(keywordWithNormalizedMultiFieldsMapping);
-  });
+      };
+      const fields: Field[] = load(keywordWithNormalizedMultiFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(keywordWithNormalizedMultiFieldsMapping);
+    });
 
-  it('tests processing keyword field with multi fields with long field', () => {
-    const keywordWithMultiFieldsLiteralYml = `
+    it('tests processing keyword field with multi fields with long field', () => {
+      const keywordWithMultiFieldsLiteralYml = `
       - name: keywordWithMultiFields
         type: keyword
         multi_fields:
@@ -566,27 +650,27 @@ describe('EPM template', () => {
             normalizer: lowercase
       `;
 
-    const keywordWithMultiFieldsMapping = {
-      properties: {
-        keywordWithMultiFields: {
-          ignore_above: 1024,
-          type: 'keyword',
-          fields: {
-            number_memory_devices: {
-              type: 'long',
+      const keywordWithMultiFieldsMapping = {
+        properties: {
+          keywordWithMultiFields: {
+            ignore_above: 1024,
+            type: 'keyword',
+            fields: {
+              number_memory_devices: {
+                type: 'long',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
-  });
+      };
+      const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+    });
 
-  it('tests processing keyword field with multi fields with double field', () => {
-    const keywordWithMultiFieldsLiteralYml = `
+    it('tests processing keyword field with multi fields with double field', () => {
+      const keywordWithMultiFieldsLiteralYml = `
       - name: keywordWithMultiFields
         type: keyword
         multi_fields:
@@ -595,48 +679,48 @@ describe('EPM template', () => {
             normalizer: lowercase
       `;
 
-    const keywordWithMultiFieldsMapping = {
-      properties: {
-        keywordWithMultiFields: {
-          ignore_above: 1024,
-          type: 'keyword',
-          fields: {
-            number: {
-              type: 'double',
+      const keywordWithMultiFieldsMapping = {
+        properties: {
+          keywordWithMultiFields: {
+            ignore_above: 1024,
+            type: 'keyword',
+            fields: {
+              number: {
+                type: 'double',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
-  });
+      };
+      const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+    });
 
-  it('tests processing date field with format', () => {
-    const dateWithFormatYml = `
+    it('tests processing date field with format', () => {
+      const dateWithFormatYml = `
 - name: dateWithFormat
   type: date
   date_format: yyyy-MM-dd
 `;
 
-    const dateWithMapping = {
-      properties: {
-        dateWithFormat: {
-          type: 'date',
-          format: 'yyyy-MM-dd',
+      const dateWithMapping = {
+        properties: {
+          dateWithFormat: {
+            type: 'date',
+            format: 'yyyy-MM-dd',
+          },
         },
-      },
-    };
-    const fields: Field[] = load(dateWithFormatYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(dateWithMapping);
-  });
+      };
+      const fields: Field[] = load(dateWithFormatYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(dateWithMapping);
+    });
 
-  it('tests processing wildcard field with multi fields', () => {
-    const keywordWithMultiFieldsLiteralYml = `
+    it('tests processing wildcard field with multi fields', () => {
+      const keywordWithMultiFieldsLiteralYml = `
 - name: keywordWithMultiFields
   type: wildcard
   multi_fields:
@@ -646,31 +730,31 @@ describe('EPM template', () => {
       type: text
 `;
 
-    const keywordWithMultiFieldsMapping = {
-      properties: {
-        keywordWithMultiFields: {
-          ignore_above: 1024,
-          type: 'wildcard',
-          fields: {
-            raw: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-            indexed: {
-              type: 'text',
+      const keywordWithMultiFieldsMapping = {
+        properties: {
+          keywordWithMultiFields: {
+            ignore_above: 1024,
+            type: 'wildcard',
+            fields: {
+              raw: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+              indexed: {
+                type: 'text',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
-  });
+      };
+      const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+    });
 
-  it('tests processing wildcard field with multi fields with match_only_text type', () => {
-    const wildcardWithMultiFieldsLiteralYml = `
+    it('tests processing wildcard field with multi fields with match_only_text type', () => {
+      const wildcardWithMultiFieldsLiteralYml = `
 - name: wildcardWithMultiFields
   type: wildcard
   multi_fields:
@@ -678,177 +762,177 @@ describe('EPM template', () => {
       type: match_only_text
 `;
 
-    const wildcardWithMultiFieldsMapping = {
-      properties: {
-        wildcardWithMultiFields: {
-          ignore_above: 1024,
-          type: 'wildcard',
-          fields: {
-            text: {
-              type: 'match_only_text',
+      const wildcardWithMultiFieldsMapping = {
+        properties: {
+          wildcardWithMultiFields: {
+            ignore_above: 1024,
+            type: 'wildcard',
+            fields: {
+              text: {
+                type: 'match_only_text',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(wildcardWithMultiFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(wildcardWithMultiFieldsMapping);
-  });
+      };
+      const fields: Field[] = load(wildcardWithMultiFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(wildcardWithMultiFieldsMapping);
+    });
 
-  it('tests processing object field with no other attributes', () => {
-    const objectFieldLiteralYml = `
+    it('tests processing object field with no other attributes', () => {
+      const objectFieldLiteralYml = `
 - name: objectField
   type: object
 `;
-    const objectFieldMapping = {
-      properties: {
-        objectField: {
-          type: 'object',
+      const objectFieldMapping = {
+        properties: {
+          objectField: {
+            type: 'object',
+          },
         },
-      },
-    };
-    const fields: Field[] = load(objectFieldLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldMapping);
+    });
 
-  it('tests processing object field with enabled set to false', () => {
-    const objectFieldEnabledFalseLiteralYml = `
+    it('tests processing object field with enabled set to false', () => {
+      const objectFieldEnabledFalseLiteralYml = `
 - name: objectField
   type: object
   enabled: false
 `;
-    const objectFieldEnabledFalseMapping = {
-      properties: {
-        objectField: {
-          type: 'object',
-          enabled: false,
+      const objectFieldEnabledFalseMapping = {
+        properties: {
+          objectField: {
+            type: 'object',
+            enabled: false,
+          },
         },
-      },
-    };
-    const fields: Field[] = load(objectFieldEnabledFalseLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldEnabledFalseMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldEnabledFalseLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldEnabledFalseMapping);
+    });
 
-  it('tests processing object field with dynamic set to false', () => {
-    const objectFieldDynamicFalseLiteralYml = `
+    it('tests processing object field with dynamic set to false', () => {
+      const objectFieldDynamicFalseLiteralYml = `
 - name: objectField
   type: object
   dynamic: false
 `;
-    const objectFieldDynamicFalseMapping = {
-      properties: {
-        objectField: {
-          type: 'object',
-          dynamic: false,
+      const objectFieldDynamicFalseMapping = {
+        properties: {
+          objectField: {
+            type: 'object',
+            dynamic: false,
+          },
         },
-      },
-    };
-    const fields: Field[] = load(objectFieldDynamicFalseLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldDynamicFalseMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldDynamicFalseLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldDynamicFalseMapping);
+    });
 
-  it('tests processing object field with dynamic set to true', () => {
-    const objectFieldDynamicTrueLiteralYml = `
+    it('tests processing object field with dynamic set to true', () => {
+      const objectFieldDynamicTrueLiteralYml = `
 - name: objectField
   type: object
   dynamic: true
 `;
-    const objectFieldDynamicTrueMapping = {
-      properties: {
-        objectField: {
-          type: 'object',
-          dynamic: true,
+      const objectFieldDynamicTrueMapping = {
+        properties: {
+          objectField: {
+            type: 'object',
+            dynamic: true,
+          },
         },
-      },
-    };
-    const fields: Field[] = load(objectFieldDynamicTrueLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldDynamicTrueMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldDynamicTrueLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldDynamicTrueMapping);
+    });
 
-  it('tests processing object field with dynamic set to strict', () => {
-    const objectFieldDynamicStrictLiteralYml = `
+    it('tests processing object field with dynamic set to strict', () => {
+      const objectFieldDynamicStrictLiteralYml = `
 - name: objectField
   type: object
   dynamic: strict
 `;
-    const objectFieldDynamicStrictMapping = {
-      properties: {
-        objectField: {
-          type: 'object',
-          dynamic: 'strict',
+      const objectFieldDynamicStrictMapping = {
+        properties: {
+          objectField: {
+            type: 'object',
+            dynamic: 'strict',
+          },
         },
-      },
-    };
-    const fields: Field[] = load(objectFieldDynamicStrictLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldDynamicStrictMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldDynamicStrictLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldDynamicStrictMapping);
+    });
 
-  it('tests processing object field with property', () => {
-    const objectFieldWithPropertyLiteralYml = `
+    it('tests processing object field with property', () => {
+      const objectFieldWithPropertyLiteralYml = `
 - name: a
   type: object
 - name: a.b
   type: keyword
   `;
-    const objectFieldWithPropertyMapping = {
-      properties: {
-        a: {
-          properties: {
-            b: {
-              ignore_above: 1024,
-              type: 'keyword',
+      const objectFieldWithPropertyMapping = {
+        properties: {
+          a: {
+            properties: {
+              b: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(objectFieldWithPropertyLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldWithPropertyMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldWithPropertyLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldWithPropertyMapping);
+    });
 
-  it('tests processing object field with property, reverse order', () => {
-    const objectFieldWithPropertyReversedLiteralYml = `
+    it('tests processing object field with property, reverse order', () => {
+      const objectFieldWithPropertyReversedLiteralYml = `
 - name: a.b
   type: keyword
 - name: a
   type: object
   dynamic: false
   `;
-    const objectFieldWithPropertyReversedMapping = {
-      properties: {
-        a: {
-          dynamic: false,
-          properties: {
-            b: {
-              ignore_above: 1024,
-              type: 'keyword',
+      const objectFieldWithPropertyReversedMapping = {
+        properties: {
+          a: {
+            dynamic: false,
+            properties: {
+              b: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+    });
 
-  it('tests processing object field with more specific properties without wildcard', () => {
-    const objectFieldWithPropertyReversedLiteralYml = `
+    it('tests processing object field with more specific properties without wildcard', () => {
+      const objectFieldWithPropertyReversedLiteralYml = `
 - name: labels
   type: object
   object_type: keyword
@@ -856,38 +940,38 @@ describe('EPM template', () => {
 - name: labels.count
   type: long
 `;
-    const objectFieldWithPropertyReversedMapping = {
-      dynamic_templates: [
-        {
+      const objectFieldWithPropertyReversedMapping = {
+        dynamic_templates: [
+          {
+            labels: {
+              path_match: 'labels.*',
+              match_mapping_type: '*',
+              mapping: {
+                type: 'keyword',
+              },
+            },
+          },
+        ],
+        properties: {
           labels: {
-            path_match: 'labels.*',
-            match_mapping_type: '*',
-            mapping: {
-              type: 'keyword',
+            dynamic: true,
+            type: 'object',
+            properties: {
+              count: {
+                type: 'long',
+              },
             },
           },
         },
-      ],
-      properties: {
-        labels: {
-          dynamic: true,
-          type: 'object',
-          properties: {
-            count: {
-              type: 'long',
-            },
-          },
-        },
-      },
-    };
-    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+    });
 
-  it('tests processing object field with more specific properties with wildcard', () => {
-    const objectFieldWithPropertyReversedLiteralYml = `
+    it('tests processing object field with more specific properties with wildcard', () => {
+      const objectFieldWithPropertyReversedLiteralYml = `
 - name: labels.*
   type: object
   object_type: keyword
@@ -895,172 +979,172 @@ describe('EPM template', () => {
 - name: labels.count
   type: long
 `;
-    const objectFieldWithPropertyReversedMapping = {
-      dynamic_templates: [
-        {
-          'labels.*': {
-            path_match: 'labels.*',
-            match_mapping_type: '*',
-            mapping: {
-              type: 'keyword',
+      const objectFieldWithPropertyReversedMapping = {
+        dynamic_templates: [
+          {
+            'labels.*': {
+              path_match: 'labels.*',
+              match_mapping_type: '*',
+              mapping: {
+                type: 'keyword',
+              },
+            },
+          },
+        ],
+        properties: {
+          labels: {
+            dynamic: true,
+            type: 'object',
+            properties: {
+              count: {
+                type: 'long',
+              },
             },
           },
         },
-      ],
-      properties: {
-        labels: {
-          dynamic: true,
-          type: 'object',
-          properties: {
-            count: {
-              type: 'long',
-            },
-          },
-        },
-      },
-    };
-    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+    });
 
-  it('tests processing object field with subobjects set to false (case B)', () => {
-    const objectFieldWithPropertyReversedLiteralYml = `
+    it('tests processing object field with subobjects set to false (case B)', () => {
+      const objectFieldWithPropertyReversedLiteralYml = `
 - name: b.labels.*
   type: object
   object_type: keyword
   subobjects: false
   `;
-    const objectFieldWithPropertyReversedMapping = {
-      dynamic_templates: [
-        {
-          'b.labels.*': {
-            path_match: 'b.labels.*',
-            match_mapping_type: 'string',
-            mapping: {
-              type: 'keyword',
+      const objectFieldWithPropertyReversedMapping = {
+        dynamic_templates: [
+          {
+            'b.labels.*': {
+              path_match: 'b.labels.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword',
+              },
+            },
+          },
+        ],
+        properties: {
+          b: {
+            type: 'object',
+            dynamic: true,
+            properties: {
+              labels: {
+                dynamic: true,
+                type: 'object',
+                subobjects: false,
+              },
             },
           },
         },
-      ],
-      properties: {
-        b: {
-          type: 'object',
-          dynamic: true,
-          properties: {
-            labels: {
-              dynamic: true,
-              type: 'object',
-              subobjects: false,
-            },
-          },
-        },
-      },
-    };
-    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+    });
 
-  it('tests processing object field with subobjects set to false (case D)', () => {
-    const objectFieldWithPropertyReversedLiteralYml = `
+    it('tests processing object field with subobjects set to false (case D)', () => {
+      const objectFieldWithPropertyReversedLiteralYml = `
 - name: d.labels
   type: object
   object_type: keyword
   subobjects: false
   `;
-    const objectFieldWithPropertyReversedMapping = {
-      dynamic_templates: [
-        {
-          'd.labels': {
-            path_match: 'd.labels.*',
-            match_mapping_type: 'string',
-            mapping: {
-              type: 'keyword',
+      const objectFieldWithPropertyReversedMapping = {
+        dynamic_templates: [
+          {
+            'd.labels': {
+              path_match: 'd.labels.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword',
+              },
+            },
+          },
+        ],
+        properties: {
+          d: {
+            type: 'object',
+            dynamic: true,
+            properties: {
+              labels: {
+                dynamic: true,
+                type: 'object',
+                subobjects: false,
+              },
             },
           },
         },
-      ],
-      properties: {
-        d: {
-          type: 'object',
-          dynamic: true,
-          properties: {
-            labels: {
-              dynamic: true,
-              type: 'object',
-              subobjects: false,
-            },
-          },
-        },
-      },
-    };
-    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
-  });
+      };
+      const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+    });
 
-  it('tests processing nested field with property', () => {
-    const nestedYaml = `
+    it('tests processing nested field with property', () => {
+      const nestedYaml = `
   - name: a.b
     type: keyword
   - name: a
     type: nested
     dynamic: false
     `;
-    const expectedMapping = {
-      properties: {
-        a: {
-          dynamic: false,
-          type: 'nested',
-          properties: {
-            b: {
-              ignore_above: 1024,
-              type: 'keyword',
+      const expectedMapping = {
+        properties: {
+          a: {
+            dynamic: false,
+            type: 'nested',
+            properties: {
+              b: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(nestedYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing nested field with property, nested field first', () => {
-    const nestedYaml = `
+    it('tests processing nested field with property, nested field first', () => {
+      const nestedYaml = `
   - name: a
     type: nested
     include_in_parent: true
   - name: a.b
     type: keyword
     `;
-    const expectedMapping = {
-      properties: {
-        a: {
-          include_in_parent: true,
-          type: 'nested',
-          properties: {
-            b: {
-              ignore_above: 1024,
-              type: 'keyword',
+      const expectedMapping = {
+        properties: {
+          a: {
+            include_in_parent: true,
+            type: 'nested',
+            properties: {
+              b: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(nestedYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing nested field with subobject, nested field first', () => {
-    const nestedYaml = `
+    it('tests processing nested field with subobject, nested field first', () => {
+      const nestedYaml = `
   - name: a
     type: nested
     include_in_parent: true
@@ -1070,32 +1154,32 @@ describe('EPM template', () => {
       - name: c
         type: keyword
     `;
-    const expectedMapping = {
-      properties: {
-        a: {
-          include_in_parent: true,
-          type: 'nested',
-          properties: {
-            b: {
-              properties: {
-                c: {
-                  ignore_above: 1024,
-                  type: 'keyword',
+      const expectedMapping = {
+        properties: {
+          a: {
+            include_in_parent: true,
+            type: 'nested',
+            properties: {
+              b: {
+                properties: {
+                  c: {
+                    ignore_above: 1024,
+                    type: 'keyword',
+                  },
                 },
               },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(nestedYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing nested field with subfields', () => {
-    const nestedYaml = `
+    it('tests processing nested field with subfields', () => {
+      const nestedYaml = `
   - name: a
     type: nested
     include_in_parent: true
@@ -1103,28 +1187,28 @@ describe('EPM template', () => {
     - name: b
       type: keyword
     `;
-    const expectedMapping = {
-      properties: {
-        a: {
-          include_in_parent: true,
-          type: 'nested',
-          properties: {
-            b: {
-              ignore_above: 1024,
-              type: 'keyword',
+      const expectedMapping = {
+        properties: {
+          a: {
+            include_in_parent: true,
+            type: 'nested',
+            properties: {
+              b: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(nestedYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing nested field with subobjects', () => {
-    const nestedYaml = `
+    it('tests processing nested field with subobjects', () => {
+      const nestedYaml = `
   - name: a
     type: nested
     include_in_parent: true
@@ -1135,32 +1219,32 @@ describe('EPM template', () => {
       - name: c
         type: keyword
     `;
-    const expectedMapping = {
-      properties: {
-        a: {
-          include_in_parent: true,
-          type: 'nested',
-          properties: {
-            b: {
-              properties: {
-                c: {
-                  ignore_above: 1024,
-                  type: 'keyword',
+      const expectedMapping = {
+        properties: {
+          a: {
+            include_in_parent: true,
+            type: 'nested',
+            properties: {
+              b: {
+                properties: {
+                  c: {
+                    ignore_above: 1024,
+                    type: 'keyword',
+                  },
                 },
               },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(nestedYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing nested leaf field with properties', () => {
-    const nestedYaml = `
+    it('tests processing nested leaf field with properties', () => {
+      const nestedYaml = `
   - name: a
     type: object
     dynamic: false
@@ -1168,203 +1252,203 @@ describe('EPM template', () => {
     type: nested
     enabled: false
     `;
-    const expectedMapping = {
-      properties: {
-        a: {
-          dynamic: false,
-          properties: {
-            b: {
-              enabled: false,
-              type: 'nested',
+      const expectedMapping = {
+        properties: {
+          a: {
+            dynamic: false,
+            properties: {
+              b: {
+                enabled: false,
+                type: 'nested',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(nestedYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(nestedYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests constant_keyword field type handling', () => {
-    const constantKeywordLiteralYaml = `
+    it('tests constant_keyword field type handling', () => {
+      const constantKeywordLiteralYaml = `
 - name: constantKeyword
   type: constant_keyword
   `;
-    const constantKeywordMapping = {
-      properties: {
-        constantKeyword: {
-          type: 'constant_keyword',
+      const constantKeywordMapping = {
+        properties: {
+          constantKeyword: {
+            type: 'constant_keyword',
+          },
         },
-      },
-    };
-    const fields: Field[] = load(constantKeywordLiteralYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
-  });
+      };
+      const fields: Field[] = load(constantKeywordLiteralYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+    });
 
-  it('tests constant_keyword field type with value', () => {
-    const constantKeywordLiteralYaml = `
+    it('tests constant_keyword field type with value', () => {
+      const constantKeywordLiteralYaml = `
 - name: constantKeyword
   type: constant_keyword
   value: always_the_same
   `;
-    const constantKeywordMapping = {
-      properties: {
-        constantKeyword: {
-          type: 'constant_keyword',
-          value: 'always_the_same',
+      const constantKeywordMapping = {
+        properties: {
+          constantKeyword: {
+            type: 'constant_keyword',
+            value: 'always_the_same',
+          },
         },
-      },
-    };
-    const fields: Field[] = load(constantKeywordLiteralYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
-  });
+      };
+      const fields: Field[] = load(constantKeywordLiteralYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+    });
 
-  it('tests processing dimension field on a keyword', () => {
-    const literalYml = `
+    it('tests processing dimension field on a keyword', () => {
+      const literalYml = `
 - name: example.id
   type: keyword
   dimension: true
   `;
-    const expectedMapping = {
-      properties: {
-        example: {
-          properties: {
-            id: {
-              time_series_dimension: true,
-              type: 'keyword',
+      const expectedMapping = {
+        properties: {
+          example: {
+            properties: {
+              id: {
+                time_series_dimension: true,
+                type: 'keyword',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, true);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(literalYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, true);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing dimension field on a keyword - tsdb disabled', () => {
-    const literalYml = `
+    it('tests processing dimension field on a keyword - tsdb disabled', () => {
+      const literalYml = `
 - name: example.id
   type: keyword
   dimension: true
   `;
-    const expectedMapping = {
-      properties: {
-        example: {
-          properties: {
-            id: {
-              type: 'keyword',
+      const expectedMapping = {
+        properties: {
+          example: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, false);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(literalYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, false);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing dimension field on a long', () => {
-    const literalYml = `
+    it('tests processing dimension field on a long', () => {
+      const literalYml = `
 - name: example.id
   type: long
   dimension: true
   `;
-    const expectedMapping = {
-      properties: {
-        example: {
-          properties: {
-            id: {
-              time_series_dimension: true,
-              type: 'long',
+      const expectedMapping = {
+        properties: {
+          example: {
+            properties: {
+              id: {
+                time_series_dimension: true,
+                type: 'long',
+              },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, true);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(literalYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, true);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing metric_type field', () => {
-    const literalYml = `
+    it('tests processing metric_type field', () => {
+      const literalYml = `
 - name: total.norm.pct
   type: scaled_float
   metric_type: gauge
   unit: percent
   format: percent
 `;
-    const expectedMapping = {
-      properties: {
-        total: {
-          properties: {
-            norm: {
-              properties: {
-                pct: {
-                  scaling_factor: 1000,
-                  type: 'scaled_float',
-                  meta: {
-                    unit: 'percent',
+      const expectedMapping = {
+        properties: {
+          total: {
+            properties: {
+              norm: {
+                properties: {
+                  pct: {
+                    scaling_factor: 1000,
+                    type: 'scaled_float',
+                    meta: {
+                      unit: 'percent',
+                    },
+                    time_series_metric: 'gauge',
                   },
-                  time_series_metric: 'gauge',
                 },
               },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, true);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(literalYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, true);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing metric_type field - tsdb disabled', () => {
-    const literalYml = `
+    it('tests processing metric_type field - tsdb disabled', () => {
+      const literalYml = `
 - name: total.norm.pct
   type: scaled_float
   metric_type: gauge
   unit: percent
   format: percent
 `;
-    const expectedMapping = {
-      properties: {
-        total: {
-          properties: {
-            norm: {
-              properties: {
-                pct: {
-                  scaling_factor: 1000,
-                  type: 'scaled_float',
-                  meta: {
-                    unit: 'percent',
+      const expectedMapping = {
+        properties: {
+          total: {
+            properties: {
+              norm: {
+                properties: {
+                  pct: {
+                    scaling_factor: 1000,
+                    type: 'scaled_float',
+                    meta: {
+                      unit: 'percent',
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, false);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(literalYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, false);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('tests processing metric_type field with long field', () => {
-    const literalYml = `
+    it('tests processing metric_type field with long field', () => {
+      const literalYml = `
     - name: total
       type: long
       format: bytes
@@ -1373,47 +1457,47 @@ describe('EPM template', () => {
       description: |
         Total swap memory.
 `;
-    const expectedMapping = {
-      properties: {
-        total: {
-          type: 'long',
-          meta: {
-            unit: 'byte',
+      const expectedMapping = {
+        properties: {
+          total: {
+            type: 'long',
+            meta: {
+              unit: 'byte',
+            },
+            time_series_metric: 'gauge',
           },
-          time_series_metric: 'gauge',
         },
-      },
-    };
-    const fields: Field[] = load(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, true);
-    expect(mappings).toEqual(expectedMapping);
-  });
+      };
+      const fields: Field[] = load(literalYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, true);
+      expect(mappings).toEqual(expectedMapping);
+    });
 
-  it('processes meta fields', () => {
-    const metaFieldLiteralYaml = `
+    it('processes meta fields', () => {
+      const metaFieldLiteralYaml = `
 - name: fieldWithMetas
   type: integer
   unit: byte
   `;
-    const metaFieldMapping = {
-      properties: {
-        fieldWithMetas: {
-          type: 'long',
-          meta: {
-            unit: 'byte',
+      const metaFieldMapping = {
+        properties: {
+          fieldWithMetas: {
+            type: 'long',
+            meta: {
+              unit: 'byte',
+            },
           },
         },
-      },
-    };
-    const fields: Field[] = load(metaFieldLiteralYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
-  });
+      };
+      const fields: Field[] = load(metaFieldLiteralYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+    });
 
-  it('processes grouped meta fields', () => {
-    const metaFieldLiteralYaml = `
+    it('processes grouped meta fields', () => {
+      const metaFieldLiteralYaml = `
 - name: groupWithMetas
   type: group
   unit: byte
@@ -1425,101 +1509,101 @@ describe('EPM template', () => {
       type: integer
       unit: byte
   `;
-    const metaFieldMapping = {
-      properties: {
-        groupWithMetas: {
-          properties: {
-            fieldA: {
-              type: 'long',
-              meta: {
-                unit: 'byte',
+      const metaFieldMapping = {
+        properties: {
+          groupWithMetas: {
+            properties: {
+              fieldA: {
+                type: 'long',
+                meta: {
+                  unit: 'byte',
+                },
               },
-            },
-            fieldB: {
-              type: 'long',
-              meta: {
-                unit: 'byte',
+              fieldB: {
+                type: 'long',
+                meta: {
+                  unit: 'byte',
+                },
               },
             },
           },
         },
-      },
-    };
-    const fields: Field[] = load(metaFieldLiteralYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
-  });
+      };
+      const fields: Field[] = load(metaFieldLiteralYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+    });
 
-  it('tests processing field of aggregate_metric_double type', () => {
-    const fieldLiteralYaml = `
+    it('tests processing field of aggregate_metric_double type', () => {
+      const fieldLiteralYaml = `
     - name: aggregate_metric
       type: aggregate_metric_double
       metrics: ["min", "max", "sum", "value_count"]
       default_metric: "max"
     `;
-    const fieldMapping = {
-      properties: {
-        aggregate_metric: {
-          metrics: ['min', 'max', 'sum', 'value_count'],
-          default_metric: 'max',
-          type: 'aggregate_metric_double',
+      const fieldMapping = {
+        properties: {
+          aggregate_metric: {
+            metrics: ['min', 'max', 'sum', 'value_count'],
+            default_metric: 'max',
+            type: 'aggregate_metric_double',
+          },
         },
-      },
-    };
-    const fields: Field[] = load(fieldLiteralYaml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(fieldMapping));
-  });
+      };
+      const fields: Field[] = load(fieldLiteralYaml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(JSON.stringify(mappings)).toEqual(JSON.stringify(fieldMapping));
+    });
 
-  it('tests processing runtime fields without script', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing runtime fields without script', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: runtime_field
   type: boolean
   runtime: true
 `;
-    const runtimeFieldMapping = {
-      properties: {},
-      runtime: {
-        runtime_field: {
-          type: 'boolean',
+      const runtimeFieldMapping = {
+        properties: {},
+        runtime: {
+          runtime_field: {
+            type: 'boolean',
+          },
         },
-      },
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing runtime fields with painless script', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing runtime fields with painless script', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: day_of_week
   type: date
   runtime: |
     emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
 `;
-    const runtimeFieldMapping = {
-      properties: {},
-      runtime: {
-        day_of_week: {
-          type: 'date',
-          script: {
-            source:
-              "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+      const runtimeFieldMapping = {
+        properties: {},
+        runtime: {
+          day_of_week: {
+            type: 'date',
+            script: {
+              source:
+                "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+            },
           },
         },
-      },
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing runtime fields defined in a group', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing runtime fields defined in a group', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: responses
   type: group
   fields:
@@ -1529,221 +1613,221 @@ describe('EPM template', () => {
       runtime: |
         emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
 `;
-    const runtimeFieldMapping = {
-      properties: {},
-      runtime: {
-        'responses.day_of_week': {
-          type: 'date',
-          format: 'date_optional_time',
-          script: {
-            source:
-              "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+      const runtimeFieldMapping = {
+        properties: {},
+        runtime: {
+          'responses.day_of_week': {
+            type: 'date',
+            format: 'date_optional_time',
+            script: {
+              source:
+                "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+            },
           },
         },
-      },
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing runtime fields in a dynamic template', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing runtime fields in a dynamic template', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: labels.*
   type: keyword
   runtime: true
 `;
-    const runtimeFieldMapping = {
-      properties: {
-        labels: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
-          'labels.*': {
-            match_mapping_type: 'string',
-            path_match: 'labels.*',
-            runtime: {
-              type: 'keyword',
-            },
+      const runtimeFieldMapping = {
+        properties: {
+          labels: {
+            type: 'object',
+            dynamic: true,
           },
         },
-      ],
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+        dynamic_templates: [
+          {
+            'labels.*': {
+              match_mapping_type: 'string',
+              path_match: 'labels.*',
+              runtime: {
+                type: 'keyword',
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing store true in a dynamic template', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing store true in a dynamic template', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: messages.*
   type: text
   store: true
 `;
-    const runtimeFieldMapping = {
-      properties: {
-        messages: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
-          'messages.*': {
-            match_mapping_type: 'string',
-            path_match: 'messages.*',
-            mapping: {
-              type: 'text',
-              store: true,
-            },
+      const runtimeFieldMapping = {
+        properties: {
+          messages: {
+            type: 'object',
+            dynamic: true,
           },
         },
-      ],
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+        dynamic_templates: [
+          {
+            'messages.*': {
+              match_mapping_type: 'string',
+              path_match: 'messages.*',
+              mapping: {
+                type: 'text',
+                store: true,
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing dimension fields on a dynamic template object', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing dimension fields on a dynamic template object', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: labels.*
   type: object
   object_type: keyword
   dimension: true
 `;
-    const runtimeFieldMapping = {
-      properties: {
-        labels: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
-          'labels.*': {
-            match_mapping_type: 'string',
-            path_match: 'labels.*',
-            mapping: {
-              type: 'keyword',
-              time_series_dimension: true,
-            },
+      const runtimeFieldMapping = {
+        properties: {
+          labels: {
+            type: 'object',
+            dynamic: true,
           },
         },
-      ],
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, true);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+        dynamic_templates: [
+          {
+            'labels.*': {
+              match_mapping_type: 'string',
+              path_match: 'labels.*',
+              mapping: {
+                type: 'keyword',
+                time_series_dimension: true,
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, true);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing dimension fields on a dynamic template field', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing dimension fields on a dynamic template field', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: labels.*
   type: keyword
   dimension: true
 `;
-    const runtimeFieldMapping = {
-      properties: {
-        labels: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
-          'labels.*': {
-            match_mapping_type: 'string',
-            path_match: 'labels.*',
-            mapping: {
-              type: 'keyword',
-              time_series_dimension: true,
-            },
+      const runtimeFieldMapping = {
+        properties: {
+          labels: {
+            type: 'object',
+            dynamic: true,
           },
         },
-      ],
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, true);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+        dynamic_templates: [
+          {
+            'labels.*': {
+              match_mapping_type: 'string',
+              path_match: 'labels.*',
+              mapping: {
+                type: 'keyword',
+                time_series_dimension: true,
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, true);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing scaled_float fields in a dynamic template', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing scaled_float fields in a dynamic template', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: numeric_labels
   type: object
   object_type: scaled_float
 `;
-    const runtimeFieldMapping = {
-      properties: {
-        numeric_labels: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
+      const runtimeFieldMapping = {
+        properties: {
           numeric_labels: {
-            match_mapping_type: '*',
-            path_match: 'numeric_labels.*',
-            mapping: {
-              type: 'scaled_float',
-              scaling_factor: 1000,
-            },
+            type: 'object',
+            dynamic: true,
           },
         },
-      ],
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+        dynamic_templates: [
+          {
+            numeric_labels: {
+              match_mapping_type: '*',
+              path_match: 'numeric_labels.*',
+              mapping: {
+                type: 'scaled_float',
+                scaling_factor: 1000,
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing aggregate_metric_double fields in a dynamic template', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing aggregate_metric_double fields in a dynamic template', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: aggregate.*
   type: aggregate_metric_double
   metrics: ["min", "max", "sum", "value_count"]
   default_metric: "max"
 `;
-    const runtimeFieldMapping = {
-      properties: {
-        aggregate: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
-          'aggregate.*': {
-            match_mapping_type: '*',
-            path_match: 'aggregate.*',
-            mapping: {
-              type: 'aggregate_metric_double',
-              metrics: ['min', 'max', 'sum', 'value_count'],
-              default_metric: 'max',
-            },
+      const runtimeFieldMapping = {
+        properties: {
+          aggregate: {
+            type: 'object',
+            dynamic: true,
           },
         },
-      ],
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+        dynamic_templates: [
+          {
+            'aggregate.*': {
+              match_mapping_type: '*',
+              path_match: 'aggregate.*',
+              mapping: {
+                type: 'aggregate_metric_double',
+                metrics: ['min', 'max', 'sum', 'value_count'],
+                default_metric: 'max',
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing group sub fields in a dynamic template', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing group sub fields in a dynamic template', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: group.*.network
   type: group
   fields:
@@ -1751,54 +1835,54 @@ describe('EPM template', () => {
     type: integer
     metric_type: counter
 `;
-    const runtimeFieldMapping = {
-      properties: {
-        group: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
-          'group.*.network.bytes': {
-            match_mapping_type: 'long',
-            path_match: 'group.*.network.bytes',
-            mapping: {
-              type: 'long',
-              time_series_metric: 'counter',
-            },
+      const runtimeFieldMapping = {
+        properties: {
+          group: {
+            type: 'object',
+            dynamic: true,
           },
         },
-        {
-          'group.*.network': {
-            path_match: 'group.*.network',
-            match_mapping_type: 'object',
-            mapping: {
-              type: 'object',
-              dynamic: true,
+        dynamic_templates: [
+          {
+            'group.*.network.bytes': {
+              match_mapping_type: 'long',
+              path_match: 'group.*.network.bytes',
+              mapping: {
+                type: 'long',
+                time_series_metric: 'counter',
+              },
             },
           },
-        },
-        {
-          'group.*': {
-            path_match: 'group.*',
-            match_mapping_type: 'object',
-            mapping: {
-              type: 'object',
-              dynamic: true,
+          {
+            'group.*.network': {
+              path_match: 'group.*.network',
+              match_mapping_type: 'object',
+              mapping: {
+                type: 'object',
+                dynamic: true,
+              },
             },
           },
-        },
-      ],
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, true);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+          {
+            'group.*': {
+              path_match: 'group.*',
+              match_mapping_type: 'object',
+              mapping: {
+                type: 'object',
+                dynamic: true,
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, true);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests processing dynamic templates priority of intermediate objects', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests processing dynamic templates priority of intermediate objects', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: group.*.value
   type: object
   object_type: double
@@ -1809,121 +1893,164 @@ describe('EPM template', () => {
   object_type: histogram
   object_type_mapping_type: "*"
 `;
-    const runtimeFieldMapping = {
-      properties: {
-        group: {
-          type: 'object',
-          dynamic: true,
-        },
-      },
-      dynamic_templates: [
-        {
-          'group.*.value': {
-            match_mapping_type: '*',
-            path_match: 'group.*.value',
-            mapping: {
-              time_series_metric: 'gauge',
-              type: 'double',
-            },
+      const runtimeFieldMapping = {
+        properties: {
+          group: {
+            type: 'object',
+            dynamic: true,
           },
         },
-        {
-          'group.*.histogram': {
-            path_match: 'group.*.histogram',
-            match_mapping_type: '*',
-            mapping: {
-              type: 'histogram',
+        dynamic_templates: [
+          {
+            'group.*.value': {
+              match_mapping_type: '*',
+              path_match: 'group.*.value',
+              mapping: {
+                time_series_metric: 'gauge',
+                type: 'double',
+              },
             },
           },
-        },
-        {
-          'group.*': {
-            path_match: 'group.*',
-            match_mapping_type: 'object',
-            mapping: {
-              type: 'object',
-              dynamic: true,
+          {
+            'group.*.histogram': {
+              path_match: 'group.*.histogram',
+              match_mapping_type: '*',
+              mapping: {
+                type: 'histogram',
+              },
             },
           },
-        },
-      ],
-    };
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, true);
-    expect(mappings).toEqual(runtimeFieldMapping);
-  });
+          {
+            'group.*': {
+              path_match: 'group.*',
+              match_mapping_type: 'object',
+              mapping: {
+                type: 'object',
+                dynamic: true,
+              },
+            },
+          },
+        ],
+      };
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields, true);
+      expect(mappings).toEqual(runtimeFieldMapping);
+    });
 
-  it('tests unexpected type for field as dynamic template fails', () => {
-    const textWithRuntimeFieldsLiteralYml = `
+    it('tests unexpected type for field as dynamic template fails', () => {
+      const textWithRuntimeFieldsLiteralYml = `
 - name: labels.*
   type: object
   object_type: constant_keyword
 `;
-    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
-    expect(() => {
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      expect(() => {
+        const processedFields = processFields(fields);
+        generateMappings(processedFields);
+      }).toThrow();
+    });
+
+    it('tests processing flattened field with ignore_above 1024', () => {
+      const flattenedFieldYml = `
+- name: flattenedField
+  type: flattened
+  ignore_above: 1024
+`;
+      const flattenedFieldMapping = {
+        properties: {
+          flattenedField: {
+            type: 'flattened',
+            ignore_above: 1024,
+          },
+        },
+      };
+      const fields: Field[] = load(flattenedFieldYml);
       const processedFields = processFields(fields);
-      generateMappings(processedFields);
-    }).toThrow();
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(flattenedFieldMapping);
+    });
   });
 
-  it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
-    const dataStreamDatasetIsPrefixUnset = {
-      type: 'metrics',
-      dataset: 'package.dataset',
-      title: 'test data stream',
-      release: 'experimental',
-      package: 'package',
-      path: 'path',
-      ingest_pipeline: 'default',
-    } as RegistryDataStream;
-    const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
-    const templatePriorityDatasetIsPrefixUnset = 200;
-    const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixUnset);
-    const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixUnset);
+  describe('generateTemplateIndexPattern and getTemplatePriority', () => {
+    it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
+      const dataStreamDatasetIsPrefixUnset = {
+        type: 'metrics',
+        dataset: 'package.dataset',
+        title: 'test data stream',
+        release: 'experimental',
+        package: 'package',
+        path: 'path',
+        ingest_pipeline: 'default',
+      } as RegistryDataStream;
+      const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
+      const templatePriorityDatasetIsPrefixUnset = 200;
+      const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixUnset);
+      const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixUnset);
 
-    expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixUnset);
-    expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixUnset);
-  });
+      expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixUnset);
+      expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixUnset);
+    });
 
-  it('tests priority and index pattern for data stream with dataset_is_prefix set to false', () => {
-    const dataStreamDatasetIsPrefixFalse = {
-      type: 'metrics',
-      dataset: 'package.dataset',
-      title: 'test data stream',
-      release: 'experimental',
-      package: 'package',
-      path: 'path',
-      ingest_pipeline: 'default',
-      dataset_is_prefix: false,
-    } as RegistryDataStream;
-    const templateIndexPatternDatasetIsPrefixFalse = 'metrics-package.dataset-*';
-    const templatePriorityDatasetIsPrefixFalse = 200;
-    const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixFalse);
-    const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixFalse);
+    it('tests priority and index pattern for data stream with dataset_is_prefix set to false', () => {
+      const dataStreamDatasetIsPrefixFalse = {
+        type: 'metrics',
+        dataset: 'package.dataset',
+        title: 'test data stream',
+        release: 'experimental',
+        package: 'package',
+        path: 'path',
+        ingest_pipeline: 'default',
+        dataset_is_prefix: false,
+      } as RegistryDataStream;
+      const templateIndexPatternDatasetIsPrefixFalse = 'metrics-package.dataset-*';
+      const templatePriorityDatasetIsPrefixFalse = 200;
+      const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixFalse);
+      const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixFalse);
 
-    expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixFalse);
-    expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixFalse);
-  });
+      expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixFalse);
+      expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixFalse);
+    });
 
-  it('tests priority and index pattern for data stream with dataset_is_prefix set to true', () => {
-    const dataStreamDatasetIsPrefixTrue = {
-      type: 'metrics',
-      dataset: 'package.dataset',
-      title: 'test data stream',
-      release: 'experimental',
-      package: 'package',
-      path: 'path',
-      ingest_pipeline: 'default',
-      dataset_is_prefix: true,
-    } as RegistryDataStream;
-    const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
-    const templatePriorityDatasetIsPrefixTrue = 150;
-    const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixTrue);
-    const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixTrue);
+    it('tests priority and index pattern for data stream with dataset_is_prefix set to true', () => {
+      const dataStreamDatasetIsPrefixTrue = {
+        type: 'metrics',
+        dataset: 'package.dataset',
+        title: 'test data stream',
+        release: 'experimental',
+        package: 'package',
+        path: 'path',
+        ingest_pipeline: 'default',
+        dataset_is_prefix: true,
+      } as RegistryDataStream;
+      const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
+      const templatePriorityDatasetIsPrefixTrue = 150;
+      const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixTrue);
+      const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixTrue);
 
-    expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixTrue);
-    expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixTrue);
+      expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixTrue);
+      expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixTrue);
+    });
+
+    it('generates correct index pattern when isOtelInputType true', () => {
+      const dataStreamDatasetIsPrefixFalse = {
+        type: 'metrics',
+        dataset: 'package.dataset',
+        title: 'test data stream',
+        release: 'experimental',
+        package: 'package',
+        path: 'path',
+        ingest_pipeline: 'default',
+        dataset_is_prefix: false,
+      } as RegistryDataStream;
+
+      const templateIndexPattern = generateTemplateIndexPattern(
+        dataStreamDatasetIsPrefixFalse,
+        true
+      );
+
+      expect(templateIndexPattern).toEqual(`metrics-package.dataset.otel-*`);
+    });
   });
 
   describe('updateCurrentWriteIndices', () => {
@@ -2493,6 +2620,57 @@ describe('EPM template', () => {
           templateName: 'test',
           indexTemplate: {
             index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
+    it('should not rollover when package do not define index mode and defaut source mode is logsdb', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'logs.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'logs.prefix1-default': {
+          mappings: {},
+          settings: {
+            index: {
+              mode: 'logsdb',
+              mapping: {
+                source: {
+                  mode: 'STORED',
+                },
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {},
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'logs.prefix1',
+          indexTemplate: {
+            index_patterns: ['logs.prefix1-*'],
             template: {
               settings: { index: {} },
               mappings: {},

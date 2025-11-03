@@ -16,7 +16,7 @@ import { viewUsers } from './lib/events/view_user';
 import { deleteUser } from './lib/events/delete_user';
 import { createUser } from './lib/events/create_user';
 import { editUser } from './lib/events/edit_user';
-import { Doc, EventFunction, EventTemplate, GeneratorFunction } from '../../../types';
+import type { Doc, EventFunction, EventTemplate, GeneratorFunction } from '../../../types';
 import { qaDeployedToProduction } from './lib/events/qa_deployed_to_production';
 import { mongodbProxyTimeout } from './lib/events/mongodb_proxy_timeout';
 import { addEphemeralProjectId } from '../../../lib/add_ephemeral_project_id';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DebugState } from '@elastic/charts';
+import type { DebugState } from '@elastic/charts';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens } = getPageObjects(['visualize', 'lens']);
@@ -84,6 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render donut chart', async () => {
       await lens.setDonutHoleSize('Large');
+      await lens.closeVisualOptionsPopover();
       const data = await lens.getCurrentChartDebugState('partitionVisChart');
       assertMatchesExpectedPieData(data);
     });

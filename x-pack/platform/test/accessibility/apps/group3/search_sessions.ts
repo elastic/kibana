@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { searchSessionsManagement } = getPageObjects(['searchSessionsManagement']);
@@ -30,12 +30,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Toggle status panel meets a11y requirements', async () => {
-      await (await find.byCssSelector('[data-text="Status"]')).click();
+      await (await find.byCssSelector('[data-text="Status"]')).click(); // Open the status select
       await a11y.testAppSnapshot();
+      await (await find.byCssSelector('[data-text="Status"]')).click(); // Close the status select
     });
 
-    // https://github.com/elastic/kibana/issues/128009
-    it.skip('Search sessions management toggled on a single status meets a11y requirements ', async () => {
+    it('Search sessions management toggled on a single status meets a11y requirements ', async () => {
+      await (await find.byCssSelector('[data-text="Status"]')).click();
       await (await find.byCssSelector('[title="expired"]')).click();
 
       await retry.try(async () => {
@@ -50,8 +51,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await (await find.byCssSelector('[data-text="App"]')).click(); // Close the popover
     });
 
-    // https://github.com/elastic/kibana/issues/128009
-    it.skip('Session management filtered by applications meets a11y requirements', async () => {
+    it('Session management filtered by applications meets a11y requirements', async () => {
+      await (await find.byCssSelector('[data-text="App"]')).click();
       await (await find.byCssSelector('[title="dashboards"]')).click();
       await a11y.testAppSnapshot();
     });
@@ -71,17 +72,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('sessionManagementActionsCol');
       await testSubjects.click('sessionManagementPopoverAction-rename');
       await a11y.testAppSnapshot();
+      await testSubjects.click('cancelEditName'); // Close the edit name panel
     });
 
-    // No delete button appears to exist
-    it.skip('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
-      await testSubjects.click('cancelEditName');
+    it('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
       await testSubjects.click('sessionManagementActionsCol');
       await testSubjects.click('sessionManagementPopoverAction-delete');
       await a11y.testAppSnapshot();
       await testSubjects.click('confirmModalCancelButton');
-
-      await testSubjects.click('clearSearchButton');
     });
   });
 }

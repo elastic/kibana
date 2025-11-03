@@ -13,20 +13,20 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   removeAssignment,
   updateAssignmentColor,
   updateAssignmentRules,
 } from '../../state/color_mapping';
-import { ColorMapping } from '../../config';
+import type { ColorMapping } from '../../config';
 import { Range } from './range';
 import { Match } from './match';
 
-import { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorSwatch } from '../color_picker/color_swatch';
-import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
+import type { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
 export function Assignment({
   data,

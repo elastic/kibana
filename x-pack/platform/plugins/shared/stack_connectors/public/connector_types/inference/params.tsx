@@ -14,9 +14,9 @@ import {
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect, EuiCallOut } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
-import { ActionVariable } from '@kbn/alerting-types';
+import type { ActionVariable } from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
@@ -26,7 +26,7 @@ import {
 import { DEFAULTS_BY_TASK_TYPE } from './constants';
 import * as i18n from './translations';
 import { SUB_ACTION } from '../../../common/inference/constants';
-import { InferenceActionConnector, InferenceActionParams } from './types';
+import type { InferenceActionConnector, InferenceActionParams } from './types';
 
 const InferenceServiceParamsFields: React.FunctionComponent<
   ActionParamsProps<InferenceActionParams>
@@ -82,7 +82,12 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 
   if (!isEndpointExists) {
     return (
-      <EuiCallOut title="Missing configuration" color="warning" iconType="warning">
+      <EuiCallOut
+        announceOnMount={false}
+        title="Missing configuration"
+        color="warning"
+        iconType="warning"
+      >
         <FormattedMessage
           id="xpack.stackConnectors.components.inference.loadingErrorText"
           defaultMessage={'Inference Endpoint by ID {inferenceId} does not exist!'}
@@ -195,7 +200,14 @@ const UnifiedCompletionParamsFields: React.FunctionComponent<{
         label={i18n.BODY}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
-          editSubActionParams({ body: JSON.parse(json) });
+          let parsedJson;
+          try {
+            parsedJson = JSON.parse(json);
+          } catch (e) {
+            // If the JSON is invalid, we keep the original string so it can go through validation
+          }
+          // Update with parsedJson, when valid, to ensure the body is sent as an object when action params are submitted
+          editSubActionParams({ body: parsedJson ?? json });
         }}
         onBlur={() => {
           if (!subActionParams.body) {

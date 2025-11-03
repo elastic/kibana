@@ -15,7 +15,7 @@ import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { findPluginDir } from './find_plugin_dir';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
 import * as Tasks from './tasks';
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 import { resolveKibanaVersion } from './resolve_kibana_version';
 import { loadConfig } from './config';
 
@@ -83,10 +83,11 @@ export function runCli() {
           sourceDir,
           buildDir,
           kibanaVersion,
+          quiet: true,
         };
 
         await Tasks.initTargets(context);
-        await Tasks.buildBazelPackages(context);
+        await Tasks.buildWebpackPackages(context);
         await Tasks.optimize(context);
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
@@ -160,10 +161,11 @@ export function runCli() {
           sourceDir,
           buildDir: '',
           kibanaVersion: 'kibana',
+          quiet: false,
         };
 
         await Tasks.initDev(context);
-        await Tasks.buildBazelPackages(context);
+        await Tasks.buildWebpackPackages(context);
         await Tasks.optimize(context);
       },
     })

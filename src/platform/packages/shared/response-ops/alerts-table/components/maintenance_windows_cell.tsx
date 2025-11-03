@@ -11,7 +11,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { ALERT_MAINTENANCE_WINDOW_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { CellComponent } from '../types';
+import type { CellComponent } from '../types';
 import { TooltipContent } from './maintenance_windows_tooltip_content';
 
 const isMaintenanceWindowValid = (mw: MaintenanceWindow | undefined): mw is MaintenanceWindow => {
@@ -37,7 +37,7 @@ export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellP
             key={`${mw.id}_tooltip`}
             content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
           >
-            <span key={`${mw.id}_title`}>
+            <span key={`${mw.id}_title`} tabIndex={0}>
               {mw.title}
               {index !== totalLength - 1 && <>, &nbsp;</>}
             </span>

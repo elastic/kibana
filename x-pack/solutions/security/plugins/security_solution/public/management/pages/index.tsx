@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,14 +15,16 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { NotesContainer } from './notes';
 import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
+  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
+  MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
-  MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
-  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
-  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
   MANAGEMENT_ROUTING_NOTES_PATH,
+  MANAGEMENT_ROUTING_POLICIES_PATH,
+  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
@@ -38,6 +40,8 @@ import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
 import { PrivilegedRoute } from '../components/privileged_route';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
+import { TrustedDevicesContainer } from './trusted_devices';
+import { EndpointExceptionsContainer } from './endpoint_exceptions';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -53,10 +57,24 @@ const PolicyTelemetry = () => (
   </TrackApplicationView>
 );
 
+const EndpointExceptionsTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.endpointExceptions}>
+    <EndpointExceptionsContainer />
+    <SpyRoute pageName={SecurityPageName.endpointExceptions} />
+  </TrackApplicationView>
+);
+
 const TrustedAppTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.trustedApps}>
     <TrustedAppsContainer />
     <SpyRoute pageName={SecurityPageName.trustedApps} />
+  </TrackApplicationView>
+);
+
+const TrustedDevicesTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.trustedDevices}>
+    <TrustedDevicesContainer />
+    <SpyRoute pageName={SecurityPageName.trustedDevices} />
   </TrackApplicationView>
 );
 
@@ -88,8 +106,9 @@ const Notes = () => (
 );
 
 export const ManagementContainer = memo(() => {
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
   );
 
   const {
@@ -97,10 +116,12 @@ export const ManagementContainer = memo(() => {
     canReadPolicyManagement,
     canReadBlocklist,
     canReadTrustedApplications,
+    canReadTrustedDevices,
     canReadEventFilters,
     canReadActionsLogManagement,
     canReadEndpointList,
     canReadHostIsolationExceptions,
+    canReadEndpointExceptions,
   } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
@@ -136,11 +157,25 @@ export const ManagementContainer = memo(() => {
         component={PolicyTelemetry}
         hasPrivilege={canReadPolicyManagement}
       />
+      {endpointExceptionsMovedUnderManagement && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
+          component={EndpointExceptionsTelemetry}
+          hasPrivilege={canReadEndpointExceptions}
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
         component={TrustedAppTelemetry}
         hasPrivilege={canReadTrustedApplications}
       />
+      {trustedDevicesEnabled && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH}
+          component={TrustedDevicesTelemetry}
+          hasPrivilege={canReadTrustedDevices}
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
         component={EventFilterTelemetry}
@@ -162,9 +197,7 @@ export const ManagementContainer = memo(() => {
         hasPrivilege={canReadActionsLogManagement}
       />
 
-      {!securitySolutionNotesDisabled && (
-        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={Notes} />
-      )}
+      <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={Notes} />
 
       {canReadEndpointList && (
         <Route path={MANAGEMENT_PATH} exact>

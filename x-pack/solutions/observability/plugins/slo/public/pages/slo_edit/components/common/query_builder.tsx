@@ -6,10 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
-import React, { ReactNode } from 'react';
-import { FieldPath } from 'react-hook-form';
-import { CreateSLOForm } from '../../types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { FieldPath } from 'react-hook-form';
+import type { CreateSLOForm } from '../../types';
 import { QueryDocumentsFlyoutOpenButton } from './query_documents_flyout_open_button';
 import { QuerySearchBar } from './query_search_bar';
 import { RunTimeFieldUsed } from './runtime_field_used';

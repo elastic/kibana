@@ -8,7 +8,7 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
-import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 

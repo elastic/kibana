@@ -6,7 +6,7 @@
  */
 import { Color } from '../../../../../common/custom_threshold_rule/color_palette';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { ThresholdAnnotations } from './threshold_annotations';
@@ -37,26 +37,24 @@ describe('ThresholdAnnotations', () => {
       lastTimestamp: 987654321,
       domain: { min: 10, max: 20 },
     };
-    const wrapper = shallow(<ThresholdAnnotations {...defaultProps} {...props} />);
-
-    return wrapper;
+    return render(<ThresholdAnnotations {...defaultProps} {...props} />);
   }
 
   it('should render a line annotation for each threshold', async () => {
-    const wrapper = await setup();
+    const { getByTestId } = await setup();
 
-    const annotation = wrapper.find('[data-test-subj="threshold-line"]');
     const expectedValues = [{ dataValue: 20 }, { dataValue: 30 }];
-    const values = annotation.prop('dataValues');
 
-    expect(values).toEqual(expectedValues);
-    expect(annotation.length).toBe(1);
+    const thresholdLineElement = getByTestId('threshold-line');
+    expect(thresholdLineElement).toBeInTheDocument();
+    expect(thresholdLineElement.getAttribute('datavalues')).toEqual(expectedValues.toString());
   });
 
   it('should render a rectangular annotation for in between thresholds', async () => {
-    const wrapper = await setup({ comparator: COMPARATORS.BETWEEN });
+    const { getByTestId } = await setup({ comparator: COMPARATORS.BETWEEN });
 
-    const annotation = wrapper.find('[data-test-subj="between-rect"]');
+    const betweenRect = getByTestId('between-rect');
+
     const expectedValues = [
       {
         coordinates: {
@@ -67,15 +65,13 @@ describe('ThresholdAnnotations', () => {
         },
       },
     ];
-    const values = annotation.prop('dataValues');
 
-    expect(values).toEqual(expectedValues);
+    expect(betweenRect.getAttribute('datavalues')).toEqual(expectedValues.toString());
   });
 
   it('should render an upper rectangular annotation for outside range thresholds', async () => {
-    const wrapper = await setup({ comparator: COMPARATORS.NOT_BETWEEN });
+    const { getByTestId } = await setup({ comparator: COMPARATORS.NOT_BETWEEN });
 
-    const annotation = wrapper.find('[data-test-subj="outside-range-lower-rect"]');
     const expectedValues = [
       {
         coordinates: {
@@ -86,15 +82,15 @@ describe('ThresholdAnnotations', () => {
         },
       },
     ];
-    const values = annotation.prop('dataValues');
+    const annotation = getByTestId('outside-range-lower-rect');
 
-    expect(values).toEqual(expectedValues);
+    expect(annotation.getAttribute('datavalues')).toEqual(expectedValues.toString());
   });
 
   it('should render a lower rectangular annotation for outside range thresholds', async () => {
-    const wrapper = await setup({ comparator: COMPARATORS.NOT_BETWEEN });
+    const { getByTestId } = await setup({ comparator: COMPARATORS.NOT_BETWEEN });
 
-    const annotation = wrapper.find('[data-test-subj="outside-range-upper-rect"]');
+    const annotation = getByTestId('outside-range-upper-rect');
     const expectedValues = [
       {
         coordinates: {
@@ -105,15 +101,14 @@ describe('ThresholdAnnotations', () => {
         },
       },
     ];
-    const values = annotation.prop('dataValues');
 
-    expect(values).toEqual(expectedValues);
+    expect(annotation.getAttribute('datavalues')).toEqual(expectedValues.toString());
   });
 
   it('should render a rectangular annotation for below thresholds', async () => {
-    const wrapper = await setup({ comparator: COMPARATORS.LESS_THAN });
+    const { getByTestId } = await setup({ comparator: COMPARATORS.LESS_THAN });
 
-    const annotation = wrapper.find('[data-test-subj="below-rect"]');
+    const annotation = getByTestId('below-rect');
     const expectedValues = [
       {
         coordinates: {
@@ -124,15 +119,14 @@ describe('ThresholdAnnotations', () => {
         },
       },
     ];
-    const values = annotation.prop('dataValues');
 
-    expect(values).toEqual(expectedValues);
+    expect(annotation.getAttribute('datavalues')).toEqual(expectedValues.toString());
   });
 
   it('should render a rectangular annotation for above thresholds', async () => {
-    const wrapper = await setup({ comparator: COMPARATORS.GREATER_THAN });
+    const { getByTestId } = await setup({ comparator: COMPARATORS.GREATER_THAN });
 
-    const annotation = wrapper.find('[data-test-subj="above-rect"]');
+    const annotation = getByTestId('above-rect');
     const expectedValues = [
       {
         coordinates: {
@@ -143,8 +137,7 @@ describe('ThresholdAnnotations', () => {
         },
       },
     ];
-    const values = annotation.prop('dataValues');
 
-    expect(values).toEqual(expectedValues);
+    expect(annotation.getAttribute('datavalues')).toEqual(expectedValues.toString());
   });
 });

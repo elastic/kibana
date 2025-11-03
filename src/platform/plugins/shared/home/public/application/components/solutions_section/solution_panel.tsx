@@ -8,12 +8,14 @@
  */
 
 import { snakeCase } from 'lodash';
-import React, { FC, MouseEvent } from 'react';
+import type { FC, MouseEvent } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import { EuiCard, EuiFlexItem, UseEuiTheme, mathWithUnits } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiFlexItem, mathWithUnits } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaPageTemplateSolutionNavAvatar } from '@kbn/kibana-react-plugin/public';
-import { FeatureCatalogueSolution } from '../../..';
+import type { FeatureCatalogueSolution } from '../../..';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 

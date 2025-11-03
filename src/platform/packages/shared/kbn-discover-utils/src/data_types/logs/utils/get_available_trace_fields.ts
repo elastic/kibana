@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TraceFields } from '../../..';
+import type { TraceFields } from '../../..';
 import * as constants from '../constants';
 
 const AVAILABLE_TRACE_FIELDS = [

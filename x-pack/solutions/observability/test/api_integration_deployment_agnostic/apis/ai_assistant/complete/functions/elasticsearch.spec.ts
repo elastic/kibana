@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  ELASTICSEARCH_FUNCTION_NAME,
+  MessageRole,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
-import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LlmProxy } from '../../utils/create_llm_proxy';
+import { createLlmProxy } from '../../utils/create_llm_proxy';
 import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,

@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { renderHook } from '@testing-library/react';
-import {
-  QueryParams,
-  SortFieldInferenceEndpoint,
-  SortOrder,
-} from '../components/all_inference_endpoints/types';
+import type { QueryParams } from '../components/all_inference_endpoints/types';
+import { SortFieldInferenceEndpoint, SortOrder } from '../components/all_inference_endpoints/types';
 import { useTableData } from './use_table_data';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../components/all_inference_endpoints/types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../common/constants';
 

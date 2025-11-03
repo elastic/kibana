@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import {
-  Criteria,
-  Direction,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiLoadingChart,
-  EuiTableSortingType,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { Criteria, Direction, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
-import {
+import type {
   MetricsFetchDataResponse,
   MetricsFetchDataSeries,
   NumberOrNull,

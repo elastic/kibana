@@ -2,6 +2,7 @@
 
 exports[`toPackagePolicy With nginx package should work 1`] = `
 Object {
+  "cloud_connector_id": undefined,
   "description": "Test description",
   "enabled": true,
   "inputs": Array [
@@ -239,6 +240,7 @@ Object {
     "policy123",
   ],
   "supports_agentless": undefined,
+  "supports_cloud_connector": undefined,
   "vars": undefined,
 }
 `;

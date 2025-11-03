@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ManagementSetup } from '@kbn/management-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { BreadcrumbService } from './application/services/breadcrumbs';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { BreadcrumbService } from './application/services/breadcrumbs';
 
 export interface CloudDataMigrationPluginSetup {
   cloud: CloudSetup;

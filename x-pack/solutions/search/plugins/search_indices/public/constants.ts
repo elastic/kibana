@@ -23,7 +23,6 @@ export enum MutationKeys {
   SearchIndicesDeleteDocument = 'searchIndicesDeleteDocument',
 }
 
-export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
 export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY';
 export const INDEX_PLACEHOLDER = 'my-index';
 

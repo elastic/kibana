@@ -17,11 +17,17 @@ import {
   renderWithReduxStore,
 } from '../../../../mocks';
 
-import { DatasourcePublicAPI, SuggestionRequest, DatasourceSuggestion } from '../../../../types';
-import { ChartSwitchProps } from './chart_switch';
+import type {
+  LensAppState,
+  DatasourcePublicAPI,
+  SuggestionRequest,
+  DatasourceSuggestion,
+} from '@kbn/lens-common';
+import type { ChartSwitchProps } from './chart_switch';
 import { ChartSwitchPopover } from './chart_switch_popover';
-import { LensAppState, applyChanges } from '../../../../state_management';
+import { applyChanges } from '../../../../state_management';
 import { faker } from '@faker-js/faker';
+import { EditorFrameServiceProvider } from '../../../editor_frame_service_context';
 
 const mockFrame = (layers: string[]) => ({
   ...createMockFramePublicAPI(),
@@ -227,13 +233,15 @@ describe('chart_switch', () => {
     }
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
-      <ChartSwitchPopover
-        framePublicAPI={frame}
-        visualizationMap={visualizationMap}
-        datasourceMap={datasourceMap}
-        layerId="a"
-        {...propsOverrides}
-      />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <ChartSwitchPopover
+          filteredVisualizationMap={visualizationMap}
+          framePublicAPI={frame}
+          layerId="a"
+          {...propsOverrides}
+        />
+      </EditorFrameServiceProvider>,
+
       {},
       {
         storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),

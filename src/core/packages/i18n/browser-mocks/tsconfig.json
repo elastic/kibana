@@ -16,6 +16,7 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-i18n-browser-internal",
     "@kbn/i18n-react",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

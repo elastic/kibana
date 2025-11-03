@@ -8,8 +8,14 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { PackageInstallContext } from '../../../../../common/types';
-import type { KibanaAssetReference, KibanaAssetType } from '../../../../types';
+import {
+  KibanaSavedObjectType,
+  type KibanaAssetReference,
+  type KibanaAssetType,
+  type PackageSpecTags,
+} from '../../../../types';
 import { getPathParts } from '../../archive';
+import { appContextService } from '../../../app_context';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
 
@@ -27,6 +33,7 @@ interface InstallKibanaAssetsWithStreamingArgs {
   pkgName: string;
   packageInstallContext: PackageInstallContext;
   spaceId: string;
+  assetTags?: PackageSpecTags[];
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -59,6 +66,13 @@ export async function installKibanaAssetsWithStreaming({
     const assetType = getPathParts(path).type as KibanaAssetType;
     const soType = KibanaSavedObjectTypeMapping[assetType];
     if (savedObject.type !== soType) {
+      return;
+    }
+
+    if (
+      soType === KibanaSavedObjectType.alertingRuleTemplate &&
+      !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+    ) {
       return;
     }
 

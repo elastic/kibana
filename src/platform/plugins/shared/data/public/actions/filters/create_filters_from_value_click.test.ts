@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import {
@@ -15,9 +15,10 @@ import {
   appendFilterToESQLQueryFromValueClickAction,
   createFilterESQL,
 } from './create_filters_from_value_click';
-import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
-import { RangeFilter } from '@kbn/es-query';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import { BytesFormat } from '@kbn/field-formats-plugin/common';
+import type { RangeFilter } from '@kbn/es-query';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 const mockField = {
   name: 'bytes',
@@ -25,18 +26,17 @@ const mockField = {
 };
 describe('createFiltersFromClickEvent', () => {
   const dataStart = dataPluginMock.createStartContract();
+  const dataViews = dataViewPluginMocks.createStartContract();
+  dataViews.get = jest.fn().mockResolvedValue({
+    id: 'logstash-*',
+    fields: {
+      getByName: () => mockField,
+      filter: () => [mockField],
+    },
+    getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+  });
   setSearchService(dataStart.search);
-  setIndexPatterns({
-    ...dataStart.indexPatterns,
-    get: async () => ({
-      id: 'logstash-*',
-      fields: {
-        getByName: () => mockField,
-        filter: () => [mockField],
-      },
-      getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
-    }),
-  } as unknown as DataViewsContract);
+  setIndexPatterns(dataViews);
   describe('createFiltersFromValueClick', () => {
     let dataPoints: Parameters<typeof createFiltersFromValueClickAction>[0]['data'];
 
@@ -271,8 +271,8 @@ describe('createFiltersFromClickEvent', () => {
         query: { esql: 'from meow' },
       });
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`=="2048"
-AND \`columnB\`=="2048"`);
+| WHERE \`columnA\` == "2048"
+AND \`columnB\` == "2048"`);
     });
 
     test('should return null if no aggregate query is present', async () => {
@@ -304,7 +304,7 @@ AND \`columnB\`=="2048"`);
       });
 
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`=="2048"`);
+| WHERE \`columnA\` == "2048"`);
     });
 
     test('should return the update query string for negated action', async () => {
@@ -322,7 +322,7 @@ AND \`columnB\`=="2048"`);
       });
 
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`!="2048"`);
+| WHERE \`columnA\` != "2048"`);
     });
   });
 });

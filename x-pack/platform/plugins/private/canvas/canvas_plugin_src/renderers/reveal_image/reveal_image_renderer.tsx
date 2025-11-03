@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart } from '@kbn/core/public';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { RevealImageRendererConfig } from './types';
+import type { RevealImageRendererConfig } from './types';
 
 export const strings = {
   getDisplayName: () =>

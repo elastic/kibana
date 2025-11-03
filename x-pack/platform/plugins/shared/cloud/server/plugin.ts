@@ -21,12 +21,13 @@ import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/regis
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
+import type { DecodedCloudId } from '../common/decode_cloud_id';
+import { decodeCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
-import { CloudRequestHandlerContext } from './routes/types';
+import type { CloudRequestHandlerContext } from './routes/types';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE, setupSavedObjects } from './saved_objects';
 import { persistTokenCloudData } from './cloud_data';
 
@@ -160,7 +161,15 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     orchestratorTarget?: string;
+    /**
+     * Whether the serverless project belongs to an organization currently in trial.
+     */
+    organizationInTrial?: boolean;
   };
+  /**
+   * Method to retrieve if the organization is in trial.
+   */
+  isInTrial: () => boolean;
 }
 
 /**
@@ -183,15 +192,23 @@ export interface CloudStart {
    * @example `https://cloud.elastic.co` (on the ESS production environment)
    */
   baseUrl?: string;
+  /**
+   * Method to retrieve if the organization is in trial.
+   */
+  isInTrial: () => boolean;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly logger: Logger;
+  private readonly trialEndDate: Date | undefined;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
     this.logger = this.context.logger.get();
+    this.trialEndDate = this.config.trial_end_date
+      ? new Date(this.config.trial_end_date)
+      : undefined;
   }
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
@@ -215,6 +232,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       projectType,
       productTier,
       orchestratorTarget,
+      organizationInTrial: this.config.serverless?.in_trial,
     });
     const basePath = core.http.basePath.serverBasePath;
     core.http.resources.register(
@@ -259,8 +277,12 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                         ),
                       })
                     ),
-                    // Can be added in the future if needed:
-                    // deployment: schema.maybe(schema.object({})),
+                    deployment: schema.maybe(
+                      schema.object({
+                        id: schema.maybe(schema.string()),
+                        name: schema.maybe(schema.string()),
+                      })
+                    ),
                   })
                 ),
               },
@@ -354,7 +376,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
-      trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
+      trialEndDate: this.trialEndDate,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {
         url: this.config.apm?.url,
@@ -373,7 +395,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
         // Use `core.pricing` when checking if a feature is available for the current product tier.
         productTier,
+        organizationInTrial: this.config.serverless?.in_trial,
       },
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -381,6 +405,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     return {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -391,5 +416,20 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       baseUrl,
       projectsUrl,
     };
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    if (this.trialEndDate !== undefined) {
+      if (this.config.trial_end_date) {
+        const endDateMs = this.trialEndDate.getTime();
+        if (!Number.isNaN(endDateMs)) {
+          return Date.now() <= endDateMs;
+        } else {
+          this.logger.error('cloud.trial_end_date config value could not be parsed.');
+        }
+      }
+    }
+    return false;
   }
 }

@@ -8,7 +8,7 @@
  */
 
 import { Entity } from '../../entity';
-import { ApmOtelFields } from './apm_otel_fields';
+import type { ApmOtelFields } from './apm_otel_fields';
 import { OtelInstance } from './otel_instance';
 
 export interface OtelServiceParams {

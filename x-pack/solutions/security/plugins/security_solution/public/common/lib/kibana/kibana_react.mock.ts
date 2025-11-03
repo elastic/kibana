@@ -45,7 +45,6 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { noCasesPermissions } from '../../../cases_test_utils';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { mockApm } from '../apm/service.mock';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
@@ -126,7 +125,6 @@ export const createStartServicesMock = (
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
-  const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
   const timelineDataService = dataPluginMock.createStartContract();
@@ -255,7 +253,6 @@ export const createStartServicesMock = (
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     triggersActionsUi,
-    guidedOnboarding,
     cloud: {
       ...cloud,
       isCloudEnabled: false,
@@ -276,6 +273,7 @@ export const createStartServicesMock = (
       removeItem: jest.fn(),
       clear: jest.fn(),
     }),
+    plugins: { onStart: jest.fn() },
   } as unknown as StartServices;
 };
 

@@ -67,7 +67,7 @@ export const defaultConfig: ScoutServerConfig = {
       port: dockerRegistryPort,
       args: dockerArgs,
       waitForLogLine: 'package manifests loaded',
-      waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+      waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
     },
   }),
   esTestCluster: {
@@ -102,7 +102,6 @@ export const defaultConfig: ScoutServerConfig = {
     sourceArgs: ['--no-base-path', '--env.name=development'],
     serverArgs: [
       `--server.port=${servers.kibana.port}`,
-      `--server.prototypeHardening=true`,
       '--status.allowAnonymous=true',
       // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
       // either include `kibanaServerTestUser` credentials, or credentials provided by the test
@@ -157,7 +156,7 @@ export const defaultConfig: ScoutServerConfig = {
           pattern: '[%date][%level][%logger] %message %meta',
         },
       })}`,
-      // x-pack/test/functional/config.base.js
+      // x-pack/platform/test/functional/config.base.ts
       '--status.allowAnonymous=true',
       '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
       '--xpack.maps.showMapsInspectorAdapter=true',
@@ -171,7 +170,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--server.restrictInternalApis=false',
       // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
       `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
-      // x-pack/test/api_integration/config.ts
+      // x-pack/platform/test/api_integration/config.ts
       '--xpack.security.session.idleTimeout=3600000', // 1 hour
       '--telemetry.optIn=true',
       '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
@@ -180,7 +179,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.cache.enabled=false',
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       // SAML configuration
-      ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
+      ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.
       // In the real world the SAML config is injected by control plane.
       `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,

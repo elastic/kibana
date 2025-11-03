@@ -6,6 +6,7 @@
  */
 
 import { expect, type Page, type Locator } from '@playwright/test';
+import { DiscoverValidationPage } from './discover_validation.page';
 
 export class KubernetesEAFlowPage {
   page: Page;
@@ -14,6 +15,8 @@ export class KubernetesEAFlowPage {
   private readonly kubernetesAgentExploreDataActionLink: Locator;
   private readonly codeBlock: Locator;
   private readonly copyToClipboardButton: Locator;
+  private readonly logsDataReceivedIndicator: Locator;
+  private readonly exploreLogsButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -28,6 +31,11 @@ export class KubernetesEAFlowPage {
     this.copyToClipboardButton = this.page.getByTestId(
       'observabilityOnboardingCopyToClipboardButton'
     );
+    this.logsDataReceivedIndicator = this.page
+      .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
+      .getByText('We are monitoring your cluster');
+
+    this.exploreLogsButton = this.page.getByText('Explore logs');
   }
 
   public async assertVisibilityCodeBlock() {
@@ -45,7 +53,23 @@ export class KubernetesEAFlowPage {
     ).toBeVisible();
   }
 
+  public async assertLogsDataReceivedIndicator() {
+    await expect(
+      this.logsDataReceivedIndicator,
+      'Logs data received indicator should be visible'
+    ).toBeVisible();
+  }
+
   public async clickKubernetesAgentCTA() {
     await this.kubernetesAgentExploreDataActionLink.click();
+  }
+
+  public async clickExploreLogsCTA() {
+    await this.exploreLogsButton.click();
+  }
+
+  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
+    await this.exploreLogsButton.click();
+    return new DiscoverValidationPage(this.page);
   }
 }

@@ -11,7 +11,7 @@ import { uniq } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
-import { FieldDescriptor } from '../..';
+import type { FieldDescriptor } from '../..';
 
 // The array will have different values if values vary across indices
 const unitsArrayToFormatter = (unitArr: string[]) => {

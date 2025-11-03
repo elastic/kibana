@@ -6,17 +6,15 @@
  */
 
 import { once } from 'lodash';
-import { loadData, type EsqlDocData, type EsqlDocEntry } from './load_data';
+import { loadData, type EsqlDocData, type EsqlDocEntry, type EsqlPrompts } from './load_data';
 import { tryResolveAlias } from './aliases';
 import { getSuggestions } from './suggestions';
 import type { GetDocsOptions } from './types';
 
 const loadDataOnce = once(loadData);
 
-const overviewEntries = ['SYNTAX', 'OVERVIEW', 'OPERATORS'];
-
 export class EsqlDocumentBase {
-  private systemMessage: string;
+  private prompts: EsqlPrompts;
   private docRecords: Record<string, EsqlDocEntry>;
 
   static async load(): Promise<EsqlDocumentBase> {
@@ -25,12 +23,20 @@ export class EsqlDocumentBase {
   }
 
   constructor(rawData: EsqlDocData) {
-    this.systemMessage = rawData.systemMessage;
+    this.prompts = rawData.prompts;
     this.docRecords = rawData.docs;
   }
 
-  getSystemMessage() {
-    return this.systemMessage;
+  getPrompts(): EsqlPrompts {
+    return this.prompts;
+  }
+
+  /** @deprecated use individual prompts instead */
+  getSystemMessage(): string {
+    return `${this.prompts.syntax}
+
+    ${this.prompts.examples}
+    `;
   }
 
   getDocumentation(
@@ -38,13 +44,11 @@ export class EsqlDocumentBase {
     {
       generateMissingKeywordDoc = true,
       addSuggestions = true,
-      addOverview = true,
       resolveAliases = true,
     }: GetDocsOptions = {}
   ) {
     const keywords = rawKeywords.map((raw) => {
-      // LOOKUP JOIN  has space so we want to retain as is
-      let keyword = raw.toLowerCase().includes('join') ? raw : format(raw);
+      let keyword = format(raw);
       if (resolveAliases) {
         keyword = tryResolveAlias(keyword);
       }
@@ -53,10 +57,6 @@ export class EsqlDocumentBase {
 
     if (addSuggestions) {
       keywords.push(...getSuggestions(keywords));
-    }
-
-    if (addOverview) {
-      keywords.push(...overviewEntries);
     }
 
     return [...new Set(keywords)].reduce<Record<string, string>>((results, keyword) => {

@@ -6,13 +6,12 @@
  */
 
 import expect from 'expect';
-import { SupertestWithRoleScopeType } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlCommonApi = getService('svlCommonApi');
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
@@ -28,64 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('route access', () => {
-      // ToDo: uncomment when we disable user APIs
-      describe.skip('disabled', () => {
-        it('get', async () => {
-          const { body, status } = await supertestAdminWithCookieCredentials.get(
-            '/internal/security/users/elastic'
-          );
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('get all', async () => {
-          const { body, status } = await supertestAdminWithCookieCredentials.get(
-            '/internal/security/users'
-          );
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('create/update', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .post(`/internal/security/users/some_testuser`)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ username: 'some_testuser', password: 'testpassword', roles: [] });
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('delete', async () => {
-          const { body, status } = await supertestAdminWithCookieCredentials.delete(
-            `/internal/security/users/elastic`
-          );
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('disable', async () => {
-          const { body, status } = await supertestAdminWithCookieCredentials.post(
-            `/internal/security/users/elastic/_disable`
-          );
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('enable', async () => {
-          const { body, status } = await supertestAdminWithCookieCredentials.post(
-            `/internal/security/users/elastic/_enable`
-          );
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('set password', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .post(`/internal/security/users/{username}/password`)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({
-              password: 'old_pw',
-              newPassword: 'new_pw',
-            });
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-      });
-
-      // ToDo: remove when we disable user APIs
       describe('internal', () => {
         it('get', async () => {
           const { status } = await supertestAdminWithCookieCredentials.get(

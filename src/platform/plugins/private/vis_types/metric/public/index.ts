@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type { MetricPublicConfig } from '../server/config';
 import { MetricVisPlugin as Plugin } from './plugin';
 

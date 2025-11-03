@@ -17,7 +17,7 @@ export const SETTINGS = i18n.translate(
 export const SECURITY_AI_SETTINGS = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.securityAiSettingsTitle',
   {
-    defaultMessage: 'Security AI settings',
+    defaultMessage: 'AI Assistant for Security',
   }
 );
 
@@ -25,6 +25,13 @@ export const SETTINGS_UPDATED_TOAST_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.settingsUpdatedToastTitle',
   {
     defaultMessage: 'Settings updated',
+  }
+);
+
+export const GEN_AI_SETTINGS_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.genAiSettingsButton',
+  {
+    defaultMessage: 'GenAI Settings',
   }
 );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import {
   LICENSE_MISSING_ERROR,
   LICENSE_NOT_ACTIVE_ERROR,

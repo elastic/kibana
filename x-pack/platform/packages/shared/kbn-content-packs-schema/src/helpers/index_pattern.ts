@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { Writable } from 'utility-types';
+import type { Writable } from 'utility-types';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '@kbn/dashboard-plugin/server';
 import { cloneDeep, mapValues } from 'lodash';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, replaceESQLQueryIndexPattern } from '@kbn/esql-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
 import type {
+  IndexPatternRef,
+  TextBasedLayerColumn,
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import type { ContentPackSavedObject } from '../models';
 
 export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';

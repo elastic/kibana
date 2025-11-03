@@ -9,18 +9,19 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import type { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type HttpResourcesMock = jest.Mocked<PublicMethodsOf<HttpResourcesService>>;
 
 function createHttpResourcesService() {
-  const mock: HttpResourcesMock = {
+  const mock: HttpResourcesMock = lazyObject({
     preboot: jest.fn(),
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
-  };
+  });
 
   mock.preboot.mockReturnValue(createInternalHttpResourcesPreboot());
   mock.setup.mockReturnValue(createInternalHttpResourcesSetup());
@@ -28,14 +29,15 @@ function createHttpResourcesService() {
   return mock;
 }
 
-const createHttpResourcesMock = (): jest.Mocked<HttpResources> => ({
-  register: jest.fn(),
-});
+const createHttpResourcesMock = (): jest.Mocked<HttpResources> =>
+  lazyObject({
+    register: jest.fn(),
+  });
 
 function createInternalHttpResourcesPreboot() {
-  return {
+  return lazyObject({
     createRegistrar: jest.fn(() => createHttpResourcesMock()),
-  };
+  });
 }
 
 function createInternalHttpResourcesSetup() {
@@ -43,13 +45,13 @@ function createInternalHttpResourcesSetup() {
 }
 
 function createHttpResourcesResponseFactory() {
-  const mocked: jest.Mocked<HttpResourcesServiceToolkit> = {
+  const mocked: jest.Mocked<HttpResourcesServiceToolkit> = lazyObject({
     renderCoreApp: jest.fn(),
     renderAnonymousCoreApp: jest.fn(),
     renderHtml: jest.fn(),
     renderJs: jest.fn(),
     renderCss: jest.fn(),
-  };
+  });
 
   return {
     ...httpServerMock.createResponseFactory(),

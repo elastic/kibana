@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const getCustomPipelines = async (
   indexName: string,
@@ -18,6 +18,7 @@ export const getCustomPipelines = async (
     });
 
     return pipelinesResponse;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // If we can't find anything, we return an empty object
     return {};

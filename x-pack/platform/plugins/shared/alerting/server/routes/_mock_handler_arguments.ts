@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { HasPrivilegesResponseApplication } from '@kbn/security-plugin-types-server';
@@ -18,12 +22,13 @@ import type { RulesSettingsClientMock } from '../rules_settings/rules_settings_c
 import { rulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
 import type { MaintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
-import type { AlertsHealth, RuleType } from '../../common';
+import type { AlertsHealth } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 import {
   alertDeletionClientMock,
   type AlertDeletionClientMock,
 } from '../alert_deletion/alert_deletion_client.mock';
+import type { RegistryRuleType } from '../rule_type_registry';
 
 export function mockHandlerArguments(
   {
@@ -31,7 +36,8 @@ export function mockHandlerArguments(
     actionsClient = actionsClientMock.create(),
     rulesSettingsClient = rulesSettingsClientMock.create(),
     maintenanceWindowClient = maintenanceWindowClientMock.create(),
-    listTypes: listTypesRes = [],
+    savedObjectsClient = savedObjectsClientMock.create(),
+    listTypes: listTypesRes = new Map(),
     getFrameworkHealth,
     areApiKeysEnabled,
     alertDeletionClient,
@@ -41,7 +47,8 @@ export function mockHandlerArguments(
     actionsClient?: ActionsClientMock;
     rulesSettingsClient?: RulesSettingsClientMock;
     maintenanceWindowClient?: MaintenanceWindowClientMock;
-    listTypes?: RuleType[];
+    savedObjectsClient?: SavedObjectsClientContract;
+    listTypes?: Map<string, RegistryRuleType>;
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
@@ -61,6 +68,9 @@ export function mockHandlerArguments(
   const actionsClientMocked = actionsClient || actionsClientMock.create();
 
   actionsClient.isSystemAction.mockImplementation((id) => id === 'system_action-id');
+  const core = coreMock.createRequestHandlerContext();
+
+  core.savedObjects.getClient = jest.fn().mockReturnValue(savedObjectsClient);
 
   return [
     {
@@ -91,6 +101,7 @@ export function mockHandlerArguments(
           return actionsClientMocked;
         },
       },
+      core,
     } as unknown as AlertingRequestHandlerContext,
     request as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(response),

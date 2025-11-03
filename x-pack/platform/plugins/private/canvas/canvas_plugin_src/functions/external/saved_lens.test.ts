@@ -7,7 +7,7 @@
 
 import { savedLens } from './saved_lens';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter } from '../../../types';
+import type { ExpressionValueFilter } from '../../../types';
 
 const filterContext: ExpressionValueFilter = {
   type: 'filter',

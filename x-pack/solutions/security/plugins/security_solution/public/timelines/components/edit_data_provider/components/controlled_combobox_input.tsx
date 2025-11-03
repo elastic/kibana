@@ -65,6 +65,7 @@ export const ControlledComboboxInput = ({
       data-test-subj="is-one-of-combobox-input"
       selectedOptions={includeValues}
       placeholder={i18n.ENTER_ONE_OR_MORE_VALUES}
+      aria-label={i18n.ENTER_ONE_OR_MORE_VALUES}
       onCreateOption={onCreateOption}
       onChange={onIncludeValueChanged}
     />

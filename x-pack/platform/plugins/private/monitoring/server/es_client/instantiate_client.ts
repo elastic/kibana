@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger, ICustomClusterClient, ElasticsearchClientConfig } from '@kbn/core/server';
-import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
-import { monitoringEndpointDisableWatches } from './monitoring_endpoint_disable_watches';
-import { MonitoringElasticsearchConfig } from '../config';
+import type {
+  Logger,
+  ElasticsearchServiceStart,
+  IClusterClient,
+  ICustomClusterClient,
+} from '@kbn/core/server';
+import type { MonitoringElasticsearchConfig } from '../config';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application
@@ -15,21 +18,15 @@ import { MonitoringElasticsearchConfig } from '../config';
  * Kibana itself is connected to a production cluster.
  */
 
-type ESClusterConfig = MonitoringElasticsearchConfig;
-
 export function instantiateClient(
   elasticsearchConfig: MonitoringElasticsearchConfig,
   log: Logger,
-  createClient: (
-    type: string,
-    clientConfig?: Partial<ElasticsearchClientConfig> | undefined
-  ) => ICustomClusterClient
-) {
+  elasticsearchStart: ElasticsearchServiceStart
+): IClusterClient | ICustomClusterClient {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
-  const cluster = createClient('monitoring', {
-    ...(isMonitoringCluster ? elasticsearchConfig : {}),
-    plugins: [monitoringBulk, monitoringEndpointDisableWatches],
-  } as ESClusterConfig);
+  const cluster = isMonitoringCluster
+    ? elasticsearchStart.createClient('monitoring', elasticsearchConfig)
+    : elasticsearchStart.client;
 
   const configSource = isMonitoringCluster ? 'monitoring' : 'production';
   log.info(`config sourced from: ${configSource} cluster`);

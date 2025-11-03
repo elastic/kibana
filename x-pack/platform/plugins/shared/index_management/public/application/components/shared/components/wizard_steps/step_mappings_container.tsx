@@ -7,11 +7,11 @@
 
 import React from 'react';
 
-import { WizardContent } from '../../../template_form/template_form';
-import { TemplateDeserialized } from '../../../../../../common';
+import type { WizardContent } from '../../../template_form/template_form';
+import type { TemplateDeserialized } from '../../../../../../common';
 import { Forms } from '../../../../../shared_imports';
 import { useLoadNodesPlugins } from '../../../../services';
-import { CommonWizardSteps } from './types';
+import type { CommonWizardSteps } from './types';
 import { StepMappings } from './step_mappings';
 
 interface Props {

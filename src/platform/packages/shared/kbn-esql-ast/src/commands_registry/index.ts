@@ -25,12 +25,15 @@ import { mvExpandCommand } from './commands/mv_expand';
 import { rowCommand } from './commands/row';
 import { sortCommand } from './commands/sort';
 import { statsCommand } from './commands/stats';
+import { inlineStatsCommand } from './commands/inlinestats';
 import { sampleCommand } from './commands/sample';
 import { showCommand } from './commands/show';
 import { timeseriesCommand } from './commands/timeseries';
 import { whereCommand } from './commands/where';
 import { fuseCommand } from './commands/fuse';
+import { rerankCommand } from './commands/rerank';
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
+import { setCommand } from './commands/set';
 
 const esqlCommandRegistry = new CommandRegistry();
 
@@ -52,11 +55,14 @@ const baseCommands = [
   rowCommand,
   sortCommand,
   statsCommand,
+  inlineStatsCommand,
   sampleCommand,
+  setCommand,
   showCommand,
   timeseriesCommand,
   whereCommand,
   fuseCommand,
+  rerankCommand,
 ];
 
 baseCommands.forEach((command) => {

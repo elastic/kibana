@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { FormatSelector, FormatSelectorProps } from './format_selector';
-import { GenericIndexPatternColumn } from '../../..';
+import type { FormatSelectorProps } from './format_selector';
+import { FormatSelector } from './format_selector';
+import type { GenericIndexPatternColumn } from '../../..';
 import { renderWithProviders } from '../../../test_utils/test_utils';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { fireEvent, screen, within } from '@testing-library/react';

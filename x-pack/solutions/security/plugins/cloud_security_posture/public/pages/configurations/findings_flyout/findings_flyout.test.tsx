@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
 import { TestProvider } from '../../../test/test_provider';
 import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
-import { FindingMisconfigurationFlyoutContentProps } from '@kbn/cloud-security-posture';
+import type { FindingMisconfigurationFlyoutContentProps } from '@kbn/cloud-security-posture';
 import FindingsMisconfigurationFlyoutContent from './findings_right/content';
 import FindingsMisconfigurationFlyoutFooter from './findings_right/footer';
 import FindingsMisconfigurationFlyoutHeader from './findings_right/header';

@@ -89,6 +89,10 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
 
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
+    it('should mark query verification errors as user error', () => {
+      const errorMessage = `x_content_parse_exception Caused by: x_content_parse_exception: [1:266] [bool] failed to parse field [filter] Root causes: x_content_parse_exception: [1:266] [bool] failed to parse field [filter]`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
   });
 
   describe('missing ml job errors', () => {

@@ -122,6 +122,16 @@ export const testUsers: {
     username: 'fleet_agent_policies_all_only',
     password: 'changeme',
   },
+  fleet_agent_policies_all_and_agents_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agent_policies_all', 'agents_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agent_policies_all_and_agents_allonly',
+    password: 'changeme',
+  },
   setup: {
     permissions: {
       feature: {

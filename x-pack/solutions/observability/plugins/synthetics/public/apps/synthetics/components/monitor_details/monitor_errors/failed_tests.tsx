@@ -13,7 +13,7 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorFailedTests = ({
   time,

@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-common';
-import { Logger } from '@kbn/logging';
-import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import {
+import type {
   DocumentAnalysis,
+  FieldPatternResultWithChanges,
   TruncatedDocumentAnalysis,
-} from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
-import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analyze_documents';
-import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
-import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
+} from '@kbn/ai-tools';
+import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { chunk, isEmpty, isEqual } from 'lodash';
 import pLimit from 'p-limit';
 import {
@@ -29,8 +27,8 @@ import { chunkOutputCalls } from '../../util/chunk_output_calls';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 import { toBlockquote } from '../../util/to_blockquote';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
-import { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
 
 export interface RelatedEntityFromSearchResults {
   entity: { [x: string]: string };
@@ -314,7 +312,7 @@ export async function analyzeFetchedRelatedEntities({
       index,
       index_filter: {
         bool: {
-          filter: [...rangeQuery(start, end)],
+          filter: [...dateRangeQuery(start, end)],
         },
       },
     });
@@ -330,7 +328,7 @@ export async function analyzeFetchedRelatedEntities({
         index,
         query: {
           bool: {
-            must: [...rangeQuery(start, end), ...kqlQuery(excludeQuery)],
+            must: [...dateRangeQuery(start, end), ...kqlQuery(excludeQuery)],
             should: [
               {
                 multi_match: {
@@ -379,12 +377,12 @@ export async function analyzeFetchedRelatedEntities({
         return limiter(async () => {
           const groupValue = hit.fields![groupingField]?.[0] as string;
 
-          const analysisForGroupingField = await analyzeDocuments({
-            esClient,
+          const analysisForGroupingField = await describeDataset({
+            esClient: esClient.client,
             start,
             end,
             index,
-            kuery: getEntityKuery({
+            kql: getEntityKuery({
               [groupingField]: groupValue,
             }),
           });

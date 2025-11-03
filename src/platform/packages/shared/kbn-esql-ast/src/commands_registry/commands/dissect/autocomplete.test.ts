@@ -8,8 +8,12 @@
  */
 import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
-import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import {
+  expectSuggestions,
+  getFieldNamesByType,
+  mockFieldsWithTypes,
+} from '../../../__tests__/autocomplete';
+import type { ICommandCallbacks } from '../../types';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
 const dissectExpectSuggestions = (
@@ -36,21 +40,29 @@ describe('DISSECT Autocomplete', () => {
     mockCallbacks = getMockCallbacks();
 
     const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedFields);
   });
 
   it('suggests fields after DISSECT', async () => {
+    const contextWithoutControls = {
+      ...mockContext,
+      supportsControls: false,
+    };
+
+    const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+
     await dissectExpectSuggestions(
       'from a | DISSECT ',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
-      mockCallbacks
+      expectedStringFields.map((fieldName) => `${fieldName} `),
+      mockCallbacks,
+      contextWithoutControls
     );
+
     await dissectExpectSuggestions(
       'from a | DISSECT key/',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
-      mockCallbacks
+      expectedStringFields.map((fieldName) => `${fieldName} `),
+      mockCallbacks,
+      contextWithoutControls
     );
   });
 

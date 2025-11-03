@@ -29,6 +29,14 @@ export const createGetDocViewer =
 
     const streamsFeature = services.discoverShared.features.registry.getById('streams');
 
+    const indexes = {
+      apm: {
+        errors: services.apmContextService.errorsService.getErrorsIndexPattern(),
+        traces: services.apmContextService.tracesService.getAllTracesIndexPattern(),
+      },
+      logs: services.logsContextService.getAllLogsIndexPattern(),
+    };
+
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry) => {
@@ -86,6 +94,7 @@ export const createGetDocViewer =
                 renderAIAssistant={logsAIAssistantFeature?.render}
                 renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
                 renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+                indexes={indexes}
               />
             );
           },

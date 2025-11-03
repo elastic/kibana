@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
@@ -192,7 +193,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
               {currentItem?.error ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
+                  <EuiIconTip
                     content={
                       <FormattedMessage
                         id="xpack.fleet.requestDiagnostics.errorGeneratingFileMessage"
@@ -200,15 +201,13 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
                         values={{ reason: currentItem.error }}
                       />
                     }
-                  >
-                    <EuiIcon type="warning" color="danger" />
-                  </EuiToolTip>
+                    type="warning"
+                    color="danger"
+                  />
                 </EuiFlexItem>
               ) : currentItem?.status ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={currentItem.status}>
-                    <EuiIcon type="warning" color="danger" />
-                  </EuiToolTip>
+                  <EuiIconTip content={currentItem.status} type="warning" color="danger" />
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem>{currentItem?.name}</EuiFlexItem>

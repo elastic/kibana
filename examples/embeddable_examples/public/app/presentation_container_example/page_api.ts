@@ -9,25 +9,27 @@
 
 import { BehaviorSubject, Subject, combineLatest, map, merge, tap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import type { PanelPackage } from '@kbn/presentation-containers';
 import {
-  PanelPackage,
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import { isEqual, omit } from 'lodash';
-import {
+import type {
   PublishesDataLoading,
   PublishingSubject,
   SerializedPanelState,
   ViewMode,
+} from '@kbn/presentation-publishing';
+import {
   apiHasSerializableState,
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
-import { PageApi, PageState } from './types';
+import type { PageApi, PageState } from './types';
 
 function deserializePanels(panels: PageState['panels']) {
   const layout: Array<{ id: string; type: string }> = [];

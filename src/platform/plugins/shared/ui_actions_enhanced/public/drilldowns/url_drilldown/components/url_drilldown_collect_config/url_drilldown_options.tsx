@@ -15,7 +15,7 @@ import {
   txtUrlTemplateEncodeUrl,
   txtUrlTemplateOpenInNewTab,
 } from './i18n';
-import { UrlDrilldownOptions } from '../../types';
+import type { UrlDrilldownOptions } from '../../types';
 
 export interface UrlDrilldownOptionsProps {
   options: UrlDrilldownOptions;

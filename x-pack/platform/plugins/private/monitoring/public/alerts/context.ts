@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AlertsByName } from './types';
+import type { AlertsByName } from './types';
 
 export interface IAlertsContext {
   allAlerts: AlertsByName;

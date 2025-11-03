@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Vis, VisToExpressionAstParams } from '@kbn/visualizations-plugin/public';
+import type { Vis, VisToExpressionAstParams } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
-import { TagCloudVisParams } from './types';
+import type { TagCloudVisParams } from './types';
 
 const mockedSchemas = {
   metric: [{ accessor: 1, format: { id: 'number' }, params: {}, label: 'Count', aggType: 'count' }],

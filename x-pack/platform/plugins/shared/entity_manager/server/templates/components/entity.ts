@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ENTITY_ENTITY_COMPONENT_TEMPLATE_V1 } from '../../../common/constants_entities';
 
 export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateRequest = {

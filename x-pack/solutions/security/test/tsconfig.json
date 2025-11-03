@@ -9,15 +9,28 @@
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": [
     "**/*",
     "../../../../typings/**/*",
-    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+    "plugins/**/*",
+    "security_solution_cypress/cypress/**/*",
+    "security_solution_api_integration/**/*",
+    "security_solution_endpoint/**/*",
+    "*/packages/**/*",
+    "*/*/packages/**/*",
+  ],
   "kbn_references": [
+    {
+      "path": "security_solution_api_integration/config/services/detections_response/tsconfig.json"
+    },
+    "@kbn/security-solution-test-api-clients",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",
@@ -27,7 +40,6 @@
     "@kbn/tooling-log",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/test-suites-xpack",
     "@kbn/security-solution-plugin",
     "@kbn/dev-utils",
     "@kbn/test-suites-src",
@@ -49,5 +61,9 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
+    "@kbn/serverless-security-settings",
+    "@kbn/rison",
+    "@kbn/core-chrome-browser",
+    "@kbn/management-settings-ids",
   ]
 }

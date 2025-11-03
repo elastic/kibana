@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions();
       await surrDocs.click();
       await context.waitUntilContextLoadingHasFinished();
 
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to single doc view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [singleView] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [singleView] = await dataGrid.getRowActions();
       await singleView.click();
       await header.waitUntilLoadingHasFinished();
 
@@ -105,18 +105,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'is',
         value: 'nestedValue',
       });
+
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
       expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
       await retry.try(async function () {
         expect(await discover.getHitCount()).to.be('1');
       });
       await filterBar.removeFilter('nestedField.child');
 
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
       await queryBar.setQuery('test');
       await queryBar.submitQuery();
+
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
       await retry.try(async () => expect(await discover.getHitCount()).to.be('22'));
 
       await queryBar.clearQuery();
       await queryBar.submitQuery();
+
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should not update data view id when saving search first time', async () => {
@@ -152,29 +166,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // trigger data view id update
       await discover.addRuntimeField('_bytes-runtimefield', `emit(doc["bytes"].value.toString())`);
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
       await unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
 
       // save first search
       await discover.saveSearch('logst*-ss-_bytes-runtimefield');
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       // remove field and create with the same name, but different value
       await unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
       await discover.removeField('_bytes-runtimefield');
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
       // trigger data view id update
       await discover.addRuntimeField(
         '_bytes-runtimefield',
         `emit((doc["bytes"].value * 2).toString())`
       );
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
       await unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
 
       // save second search
       await discover.saveSearch('logst*-ss-_bytes-runtimefield-updated', true);
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
       // open searches on dashboard
       await dashboard.navigateToApp();
@@ -199,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open saved search by navigation to context from embeddable', async () => {
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions();
       await surrDocs.click();
 
       // close popup

@@ -34,7 +34,7 @@ export function AgentLatestVersion({
         values: { agentName },
       })}
     >
-      <>{NOT_AVAILABLE_LABEL}</>
+      <span tabIndex={0}>{NOT_AVAILABLE_LABEL}</span>
     </EuiToolTip>
   );
 

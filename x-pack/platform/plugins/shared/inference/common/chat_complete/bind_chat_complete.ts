@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ChatCompleteAPI, BoundChatCompleteAPI } from '@kbn/inference-common';
-import { BoundOptions, bindApi } from '@kbn/inference-common';
+import type { ChatCompleteAPI, BoundChatCompleteAPI, BoundOptions } from '@kbn/inference-common';
+import { bindApi } from '@kbn/inference-common';
 
 /**
  * Bind chatComplete to the provided parameters,

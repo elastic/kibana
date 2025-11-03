@@ -6,7 +6,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiNotificationBadge,
@@ -14,7 +14,6 @@ import {
   EuiSelectable,
   EuiText,
   EuiTourStep,
-  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -84,15 +83,9 @@ const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
 const InactiveAgentsTourStep: React.FC<{
   children: React.ReactNode;
   isOpen: boolean;
-  setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
-}> = ({ children, isOpen, setInactiveAgentsCalloutHasBeenDismissed }) => (
+  onDismiss: () => void;
+}> = ({ children, isOpen, onDismiss }) => (
   <EuiTourStep
-    title={
-      <FormattedMessage
-        id="xpack.fleet.agentList.inactiveAgentsTourStepTitle"
-        defaultMessage="Inactive agents"
-      />
-    }
     content={
       <EuiText size="s">
         <FormattedMessage
@@ -105,20 +98,22 @@ const InactiveAgentsTourStep: React.FC<{
     minWidth={300}
     step={1}
     stepsTotal={0}
-    onFinish={() => {}}
+    title={
+      <FormattedMessage
+        id="xpack.fleet.agentList.inactiveAgentsTourStepTitle"
+        defaultMessage="Inactive agents"
+      />
+    }
+    onFinish={onDismiss}
     anchorPosition="upCenter"
     maxWidth={280}
     footerAction={
-      <EuiLink
-        onClick={() => {
-          setInactiveAgentsCalloutHasBeenDismissed(true);
-        }}
-      >
+      <EuiButtonEmpty onClick={onDismiss}>
         <FormattedMessage
-          id="xpack.fleet.addAgentHelpPopover.footActionButton"
+          id="xpack.fleet.genericTourPopover.dismissButton"
           defaultMessage="Got it"
         />
-      </EuiLink>
+      </EuiButtonEmpty>
     }
   >
     {children as React.ReactElement}
@@ -142,8 +137,11 @@ export const AgentStatusFilter: React.FC<{
   } = props;
   const [lastSeenInactiveAgentsCount, setLastSeenInactiveAgentsCount] =
     useLastSeenInactiveAgentsCount();
-  const { isHidden: inactiveAgentsCalloutHasBeenDismissed, dismiss: dismissInactiveAgentsCallout } =
-    useDismissableTour('INACTIVE_AGENTS');
+  const {
+    isHidden: inactiveAgentsCalloutHasBeenDismissed,
+    isOpen: isInactiveAgentsTourOpen,
+    dismiss: dismissInactiveAgentsCallout,
+  } = useDismissableTour('INACTIVE_AGENTS');
 
   const newlyInactiveAgentsCount = useMemo(() => {
     const newVal = totalInactiveAgents - lastSeenInactiveAgentsCount;
@@ -225,8 +223,8 @@ export const AgentStatusFilter: React.FC<{
 
   return (
     <InactiveAgentsTourStep
-      isOpen={newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed}
-      setInactiveAgentsCalloutHasBeenDismissed={dismissInactiveAgentsCallout}
+      isOpen={newlyInactiveAgentsCount > 0 && isInactiveAgentsTourOpen}
+      onDismiss={dismissInactiveAgentsCallout}
     >
       <EuiPopover
         ownFocus

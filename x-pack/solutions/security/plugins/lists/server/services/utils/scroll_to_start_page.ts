@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Scroll } from '../lists/types';
+import type { Scroll } from '../lists/types';
 
 import { calculateScrollMath } from './calculate_scroll_math';
 import { getSearchAfterScroll } from './get_search_after_scroll';

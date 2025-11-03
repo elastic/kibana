@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { SampleInput } from '../../types';
+import type { SampleInput } from '../../types';
 import { DefaultFormatEditor, convertSampleInput } from './default';
 
 const fieldType = 'number';

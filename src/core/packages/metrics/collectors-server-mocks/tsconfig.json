@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/core-metrics-server",
-    "@kbn/core-metrics-collectors-server-internal"
+    "@kbn/core-metrics-collectors-server-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

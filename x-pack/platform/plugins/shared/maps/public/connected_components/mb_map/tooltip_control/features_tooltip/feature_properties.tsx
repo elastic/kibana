@@ -6,9 +6,11 @@
  */
 
 import _ from 'lodash';
-import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
+import type { CSSProperties, RefObject, ReactNode } from 'react';
+import React, { Component } from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -16,16 +18,15 @@ import {
   EuiButtonEmpty,
   EuiIcon,
   EuiContextMenu,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { GeoJsonProperties } from 'geojson';
-import { Filter } from '@kbn/es-query';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { GeoJsonProperties } from 'geojson';
+import type { Filter } from '@kbn/es-query';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
-import { RawValue } from '../../../../../common/constants';
-import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
+import type { RawValue } from '../../../../../common/constants';
+import type { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
 
 interface Props {
   featureId?: string | number;
@@ -305,6 +306,7 @@ export class FeatureProperties extends Component<Props, State> {
     if (this.state.loadPropertiesErrorMsg) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.maps.tooltip.unableToLoadContentTitle', {
             defaultMessage: 'Unable to load tooltip content',
           })}

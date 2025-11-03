@@ -8,13 +8,13 @@
  */
 
 import { EuiText, useEuiTheme } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
 export interface SecondaryMenuSectionProps {
   children: ReactNode;
-  hasGap?: boolean;
-  label: string | null;
+  label?: string;
 }
 
 /**
@@ -30,7 +30,6 @@ export interface SecondaryMenuSectionProps {
  */
 export const SecondaryMenuSectionComponent = ({
   children,
-  hasGap,
   label,
 }: SecondaryMenuSectionProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -66,8 +65,8 @@ export const SecondaryMenuSectionComponent = ({
         css={css`
           display: flex;
           flex-direction: column;
-          width: 236px;
-          ${hasGap ? `gap: ${euiTheme.size.xs};` : ''}
+          width: 100%;
+          gap: ${euiTheme.size.xxs};
         `}
       >
         {children}

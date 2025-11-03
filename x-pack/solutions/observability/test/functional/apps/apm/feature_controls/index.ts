@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('feature controls', function () {
     this.tags('skipFirefox');
     loadTestFile(require.resolve('./apm_security'));
     loadTestFile(require.resolve('./apm_spaces'));
+    loadTestFile(require.resolve('./apm_rules'));
   });
 }

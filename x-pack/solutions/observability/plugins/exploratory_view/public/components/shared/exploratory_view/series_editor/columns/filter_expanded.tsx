@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 
 import { EuiFilterButton, EuiPopover } from '@elastic/eui';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import type { SeriesConfig, SeriesUrl } from '../../types';
 import { useFilterValues } from '../use_filter_values';
 import { FilterValuesList } from '../components/filter_values_list';
 

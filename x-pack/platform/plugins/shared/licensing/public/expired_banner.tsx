@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';

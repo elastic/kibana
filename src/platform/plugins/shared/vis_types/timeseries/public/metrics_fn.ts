@@ -8,12 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaContext } from '@kbn/data-plugin/public';
-import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import type { KibanaContext } from '@kbn/data-plugin/public';
+import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 
 import type { TimeseriesVisData } from '../common/types';
 import { metricsRequestHandler } from './request_handler';
-import { TimeseriesVisParams } from './types';
+import type { TimeseriesVisParams } from './types';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimeseriesRenderValue>>;

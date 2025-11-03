@@ -8,7 +8,7 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 import type { DashboardAttributes as DashboardAttributesV1 } from '../../schema/v1';
 

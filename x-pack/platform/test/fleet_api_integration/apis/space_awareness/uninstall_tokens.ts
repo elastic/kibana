@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
-import { UninstallTokenMetadata } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import type { UninstallTokenMetadata } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, expectToRejectWithNotFound } from './helpers';
+import { cleanFleetIndices, createTestSpace, expectToRejectWithNotFound } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -38,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
       // Create agent policies it should create am uninstall token for every keys
       await apiClient.postEnableSpaceAwareness();
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([

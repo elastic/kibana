@@ -7,7 +7,7 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { ColumnHeaderOptions, SortColumnTable, ViewSelection } from '../../common/types';
 
 export interface DataTableModelSettings {

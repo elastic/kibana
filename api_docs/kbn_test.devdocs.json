@@ -569,6 +569,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.DockerServersService.Unnamed.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "disabled",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1262,7 +1277,7 @@
               "ReqOptions",
               ") => Promise<",
               "AxiosResponse",
-              "<T, any>>"
+              "<T, any, {}>>"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
@@ -3349,9 +3364,11 @@
         "type": "Function",
         "tags": [],
         "label": "runJest",
-        "description": [],
+        "description": [
+          "\nRuns Jest tests with automatic config discovery and argument forwarding.\n\nSearches for jest.config.js files starting from the working directory\nand walking up the directory tree until reaching the repo root.\n"
+        ],
         "signature": [
-          "(configName: string) => void"
+          "(configName: string) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run.ts",
         "deprecated": false,
@@ -3363,7 +3380,9 @@
             "type": "string",
             "tags": [],
             "label": "configName",
-            "description": [],
+            "description": [
+              "- Name of the Jest config file to search for"
+            ],
             "signature": [
               "string"
             ],
@@ -3373,6 +3392,23 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.runJestAll",
+        "type": "Function",
+        "tags": [],
+        "label": "runJestAll",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_all.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

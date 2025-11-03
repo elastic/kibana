@@ -6,18 +6,12 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import {
-  EuiForm,
-  EuiSpacer,
-  EuiStepsHorizontal,
-  EuiButton,
-  EuiFormRow,
-  EuiStepStatus,
-} from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiForm, EuiSpacer, EuiStepsHorizontal, EuiButton, EuiFormRow } from '@elastic/eui';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { SwimlaneFieldMappingConfig } from './types';
+import type { SwimlaneFieldMappingConfig } from './types';
 import { SwimlaneConnection, SwimlaneFields } from './steps';
 import { useGetApplication } from './use_get_application';
 import * as i18n from './translations';

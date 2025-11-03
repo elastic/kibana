@@ -27,6 +27,9 @@ export {
   getCategorizeColumns,
   getArgsFromRenameFunction,
   getCategorizeField,
+  getKqlSearchQueries,
+  getRemoteClustersFromESQLQuery,
+  convertTimeseriesCommandToFrom,
 } from './utils/query_parsing_helpers';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
 export {
@@ -51,3 +54,10 @@ export {
 export { sanitazeESQLInput } from './utils/sanitaze_input';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
 export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
+export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
+export {
+  getESQLStatsQueryMeta,
+  constructCascadeQuery,
+  mutateQueryStatsGrouping,
+  appendFilteringWhereClauseForCascadeLayout,
+} from './utils/cascaded_documents_helpers';

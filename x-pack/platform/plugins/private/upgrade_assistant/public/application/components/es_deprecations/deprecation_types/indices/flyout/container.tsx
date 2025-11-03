@@ -10,7 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { EnrichedDeprecationInfo } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
 import { DeprecationBadge } from '../../../../shared';
@@ -22,7 +23,7 @@ import {
 import { InitializingStep } from '../../../common/initializing_step';
 import { WarningFlyoutStep } from './steps/warning/warning_step';
 import { ReindexFlyoutStep } from './steps/reindex/reindex_step';
-import { FlyoutStep } from './steps/types';
+import type { FlyoutStep } from './steps/types';
 
 export interface IndexFlyoutProps extends IndexStateContext {
   deprecation: EnrichedDeprecationInfo;

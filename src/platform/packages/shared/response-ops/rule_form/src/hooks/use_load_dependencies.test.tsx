@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 
 import { useLoadDependencies } from './use_load_dependencies';
 import type { RuleTypeRegistryContract } from '../common/types';
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 
 jest.mock('../common/hooks/use_load_ui_config', () => ({
   useLoadUiConfig: jest.fn(),

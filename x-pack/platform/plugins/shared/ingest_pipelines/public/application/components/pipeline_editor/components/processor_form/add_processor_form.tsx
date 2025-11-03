@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,12 +22,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { Form, FormDataProvider, FormHook, useFormIsModified } from '../../../../../shared_imports';
+import type { FormHook } from '../../../../../shared_imports';
+import { Form, FormDataProvider, useFormIsModified } from '../../../../../shared_imports';
 import { getProcessorDescriptor } from '../shared';
 
 import { DocumentationButton } from './documentation_button';
 import { ProcessorSettingsFields } from './processor_settings_fields';
-import { Fields } from './processor_form.container';
+import type { Fields } from './processor_form.container';
 
 export interface Props {
   isOnFailure: boolean;
@@ -35,6 +37,7 @@ export interface Props {
   esDocsBasePath: string;
   closeFlyout: () => void;
   handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
+  buttonRef?: React.RefObject<HTMLButtonElement | HTMLAnchorElement>;
 }
 
 const addButtonLabel = i18n.translate(
@@ -68,6 +71,7 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
   esDocsBasePath,
   closeFlyout,
   handleSubmit,
+  buttonRef,
 }) => {
   useEffect(
     () => {
@@ -87,6 +91,19 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
         onClose={closeFlyout}
         outsideClickCloses={!isFormDirty}
         aria-labelledby={pipelineTitleId}
+        focusTrapProps={{
+          returnFocus: (triggerElement) => {
+            if (buttonRef?.current) {
+              // Using setTimeout here to postpone focus until after the flyout has finished unmounting and cleaning up its focus traps.
+              // Without this, the focus gets applied too early and it's overridden by the browser's default focus behavior.
+              setTimeout(() => {
+                buttonRef.current?.focus();
+              }, 0);
+              return false;
+            }
+            return true;
+          },
+        }}
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">

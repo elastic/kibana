@@ -6,7 +6,7 @@
  */
 
 import { addBasePath } from '..';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   // Get all inference models

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup, HttpResponse } from '@kbn/core/public';
+import type { HttpSetup, HttpResponse } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
-import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
-import { FieldsForWildcardResponse } from '../../common/types';
+import type { GetFieldsOptions, IDataViewsApiClient } from '../../common';
+import type { FieldsForWildcardResponse } from '../../common/types';
 import { FIELDS_FOR_WILDCARD_PATH, FIELDS_PATH } from '../../common/constants';
 
 const API_BASE_URL: string = `/api/index_patterns/`;

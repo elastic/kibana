@@ -9,12 +9,23 @@
 import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 import { METADATA_FIELDS } from '../../options/metadata';
+import { getRecommendedQueriesTemplatesFromExtensions } from '../../options/recommended_queries';
 
 const metadataFields = [...METADATA_FIELDS].sort();
+
+const editorExtensions = {
+  recommendedQueries: [
+    {
+      name: 'Timeseries rate',
+      query: 'TS logs* | STATS SUM(RATE(bytes)',
+    },
+  ],
+  recommendedFields: [],
+};
 
 const tsExpectSuggestions = (
   query: string,
@@ -23,10 +34,14 @@ const tsExpectSuggestions = (
   context = mockContext,
   offset?: number
 ) => {
+  const updatedContext = {
+    ...context,
+    editorExtensions,
+  };
   return expectSuggestions(
     query,
     expectedSuggestions,
-    context,
+    updatedContext,
     'ts',
     mockCallbacks,
     autocomplete,
@@ -66,6 +81,13 @@ describe('TS Autocomplete', () => {
       ]);
     });
 
+    test('can suggest timeseries after one already selected', async () => {
+      const suggestions = await suggest('TS timeseries_index,  ');
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).toEqual(['timeseries_index_with_alias', 'time_series_index']);
+    });
+
     test('discriminates between indices and aliases', async () => {
       const suggestions = await suggest('TS ');
       const indices: string[] = suggestions
@@ -90,13 +112,16 @@ describe('TS Autocomplete', () => {
     const metadataFieldsAndIndex = metadataFields.filter((field) => field !== '_index');
 
     test('on <// TS index METADATA field1, /kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
-      const expected = ['METADATA ', ',', '| '].sort();
+      const extensionsSuggestions = getRecommendedQueriesTemplatesFromExtensions(
+        editorExtensions.recommendedQueries
+      ).map((s) => s.text);
+      const expected = ['METADATA ', ',', '| ', ...extensionsSuggestions].sort();
 
       await tsExpectSuggestions('ts time_series_index ', expected);
     });
 
     test('on <kbd>SPACE</kbd> after "METADATA" keyword suggests all metadata fields', async () => {
-      await tsExpectSuggestions('from time_series_index METADATA /', metadataFields);
+      await tsExpectSuggestions('ts time_series_index METADATA /', metadataFields);
     });
 
     test('metadata field prefixes', async () => {

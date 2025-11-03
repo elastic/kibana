@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 
 export class OnboardingHomePage {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    this.page.gotoApp('observabilityOnboarding');
+    await this.page.gotoApp('observabilityOnboarding');
   }
 }

@@ -8,309 +8,141 @@
  */
 
 import React from 'react';
-import { CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
-import { first } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { DataTableRecord, LogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
-import { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
-import { HighlightField } from './sub_components/highlight_field';
-import { HighlightSection } from './sub_components/highlight_section';
-import { getUnifiedDocViewerServices } from '../../plugin';
-import { TraceIdHighlightField } from './sub_components/trace_id_highlight_field';
+import type { LogDocumentOverview } from '@kbn/discover-utils';
+import { fieldConstants } from '@kbn/discover-utils';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { EuiBadge, EuiPanel } from '@elastic/eui';
+import type { FieldConfiguration } from '../content_framework';
+import { ContentFrameworkTable } from '../content_framework';
+import { HighlightField } from '../observability/traces/components/highlight_field';
+import { TraceIdLink } from '../observability/traces/components/trace_id_link';
+import { fieldLabels } from '../observability/constants';
+
+interface LogsOverviewHighlightsProps
+  extends Pick<
+    DocViewRenderProps,
+    'filter' | 'onAddColumn' | 'onRemoveColumn' | 'dataView' | 'hit'
+  > {
+  formattedDoc: LogDocumentOverview;
+}
 
 export function LogsOverviewHighlights({
   formattedDoc,
-  doc,
-  renderFlyoutStreamField,
-}: {
-  formattedDoc: LogDocumentOverview;
-  doc: DataTableRecord;
-  renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
-}) {
-  const flattenedDoc = doc.flattened;
-  const {
-    fieldsMetadata: { useFieldsMetadata },
-  } = getUnifiedDocViewerServices();
-
-  const { fieldsMetadata = {} } = useFieldsMetadata({
-    attributes: ['flat_name', 'short', 'type'],
-    fieldNames: [
-      fieldConstants.SERVICE_NAME_FIELD,
-      fieldConstants.HOST_NAME_FIELD,
-      fieldConstants.TRACE_ID_FIELD,
-      fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
-      fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
-      fieldConstants.CLOUD_PROVIDER_FIELD,
-      fieldConstants.CLOUD_REGION_FIELD,
-      fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD,
-      fieldConstants.CLOUD_PROJECT_ID_FIELD,
-      fieldConstants.CLOUD_INSTANCE_ID_FIELD,
-      fieldConstants.LOG_FILE_PATH_FIELD,
-      fieldConstants.DATASTREAM_DATASET_FIELD,
-      fieldConstants.DATASTREAM_NAMESPACE_FIELD,
-      fieldConstants.AGENT_NAME_FIELD,
-    ],
-  });
-
-  const getHighlightProps = (field: keyof LogDocumentOverview) => ({
-    field,
-    formattedValue: formattedDoc[field],
-    value: flattenedDoc[field],
-  });
-
-  const shouldRenderHighlight = (field: keyof LogDocumentOverview) => {
-    return Boolean(formattedDoc[field] && flattenedDoc[field]);
+  hit,
+  dataView,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+}: LogsOverviewHighlightsProps) {
+  const flattenedDoc = hit.flattened;
+  const shouldRenderSection = (fields: Array<keyof LogDocumentOverview>) => {
+    return fields.some((field) => Boolean(formattedDoc[field] && flattenedDoc[field]));
   };
+
+  if (!shouldRenderSection(fieldNames)) {
+    return null;
+  }
 
   return (
     <>
-      {/* Service & Infrastructure highlight */}
-      <HighlightSection
-        title={serviceInfraAccordionTitle}
-        data-test-subj="unifiedDocViewLogsOverviewHighlightSectionServiceInfra"
-      >
-        {shouldRenderHighlight(fieldConstants.SERVICE_NAME_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewService"
-            label={serviceLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.SERVICE_NAME_FIELD]}
-            {...getHighlightProps(fieldConstants.SERVICE_NAME_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.HOST_NAME_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewHostName"
-            label={hostNameLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.HOST_NAME_FIELD]}
-            {...getHighlightProps(fieldConstants.HOST_NAME_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.TRACE_ID_FIELD) && (
-          <TraceIdHighlightField
-            data-test-subj="unifiedDocViewLogsOverviewTrace"
-            label={traceLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.TRACE_ID_FIELD]}
-            {...getHighlightProps(fieldConstants.TRACE_ID_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewClusterName"
-            label={orchestratorClusterNameLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
-            {...getHighlightProps(fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewResourceId"
-            label={orchestratorResourceIdLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
-            {...getHighlightProps(fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD)}
-            truncate
-          />
-        )}
-      </HighlightSection>
-      {/* Cloud highlight */}
-      <HighlightSection
-        title={cloudAccordionTitle}
-        data-test-subj="unifiedDocViewLogsOverviewHighlightSectionCloud"
-      >
-        {shouldRenderHighlight(fieldConstants.CLOUD_PROVIDER_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewCloudProvider"
-            label={cloudProviderLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_PROVIDER_FIELD]}
-            icon={
-              <CloudProviderIcon
-                cloudProvider={first(
-                  (flattenedDoc[fieldConstants.CLOUD_PROVIDER_FIELD] ?? []) as CloudProvider[]
-                )}
-              />
-            }
-            {...getHighlightProps(fieldConstants.CLOUD_PROVIDER_FIELD)}
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.CLOUD_REGION_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewCloudRegion"
-            label={cloudRegionLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_REGION_FIELD]}
-            {...getHighlightProps(fieldConstants.CLOUD_REGION_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewCloudAz"
-            label={cloudAvailabilityZoneLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]}
-            {...getHighlightProps(fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.CLOUD_PROJECT_ID_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewCloudProjectId"
-            label={cloudProjectIdLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_PROJECT_ID_FIELD]}
-            {...getHighlightProps(fieldConstants.CLOUD_PROJECT_ID_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.CLOUD_INSTANCE_ID_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewCloudInstanceId"
-            label={cloudInstanceIdLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_INSTANCE_ID_FIELD]}
-            {...getHighlightProps(fieldConstants.CLOUD_INSTANCE_ID_FIELD)}
-            truncate
-          />
-        )}
-      </HighlightSection>
-      {/* Other highlights */}
-      <HighlightSection
-        title={otherAccordionTitle}
-        data-test-subj="unifiedDocViewLogsOverviewHighlightSectionOther"
-      >
-        {shouldRenderHighlight(fieldConstants.LOG_FILE_PATH_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewLogPathFile"
-            label={logPathFileLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.LOG_FILE_PATH_FIELD]}
-            {...getHighlightProps(fieldConstants.LOG_FILE_PATH_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.DATASTREAM_DATASET_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewDataset"
-            label={datasetLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.DATASTREAM_DATASET_FIELD]}
-            {...getHighlightProps(fieldConstants.DATASTREAM_DATASET_FIELD)}
-            truncate
-          />
-        )}
-        {shouldRenderHighlight(fieldConstants.DATASTREAM_NAMESPACE_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewNamespace"
-            label={namespaceLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.DATASTREAM_NAMESPACE_FIELD]}
-            useBadge
-            {...getHighlightProps(fieldConstants.DATASTREAM_NAMESPACE_FIELD)}
-            truncate
-          />
-        )}
-        {renderFlyoutStreamField && renderFlyoutStreamField({ doc })}
-        {shouldRenderHighlight(fieldConstants.AGENT_NAME_FIELD) && (
-          <HighlightField
-            data-test-subj="unifiedDocViewLogsOverviewLogShipper"
-            label={shipperLabel}
-            fieldMetadata={fieldsMetadata[fieldConstants.AGENT_NAME_FIELD]}
-            {...getHighlightProps(fieldConstants.AGENT_NAME_FIELD)}
-            truncate
-          />
-        )}
-      </HighlightSection>
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+        <ContentFrameworkTable
+          fieldNames={fieldNames}
+          fieldConfigurations={fieldConfigurations}
+          filter={filter}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+          hit={hit}
+          dataView={dataView}
+          id="logs-highlights"
+          data-test-subj="unifiedDocViewLogsOverview"
+        />
+      </EuiPanel>
     </>
   );
 }
 
-const serviceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.service', {
-  defaultMessage: 'Service',
-});
+const fieldNames: Array<keyof LogDocumentOverview> = [
+  // Service & Infrastructure
+  fieldConstants.SERVICE_NAME_FIELD,
+  fieldConstants.HOST_NAME_FIELD,
+  fieldConstants.TRACE_ID_FIELD,
+  fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
+  fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
+  // Cloud
+  fieldConstants.CLOUD_PROVIDER_FIELD,
+  fieldConstants.CLOUD_REGION_FIELD,
+  fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD,
+  fieldConstants.CLOUD_PROJECT_ID_FIELD,
+  fieldConstants.CLOUD_INSTANCE_ID_FIELD,
+  // Other
+  fieldConstants.LOG_FILE_PATH_FIELD,
+  fieldConstants.DATASTREAM_DATASET_FIELD,
+  fieldConstants.DATASTREAM_NAMESPACE_FIELD,
+  fieldConstants.AGENT_NAME_FIELD,
+];
 
-const traceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.trace', {
-  defaultMessage: 'Trace',
-});
+const fieldConfigurations: Record<string, FieldConfiguration> = {
+  // Service & Infrastructure
+  [fieldConstants.SERVICE_NAME_FIELD]: {
+    title: fieldLabels.SERVICE_NAME_LABEL,
+  },
+  [fieldConstants.HOST_NAME_FIELD]: {
+    title: fieldLabels.HOST_NAME_LABEL,
+  },
+  [fieldConstants.TRACE_ID_FIELD]: {
+    title: fieldLabels.TRACE_ID_LABEL,
+    formatter: (value: unknown, formattedValue: string) => (
+      <HighlightField value={value as string} formattedValue={formattedValue}>
+        {({ content }) => (
+          <TraceIdLink
+            traceId={value as string}
+            formattedTraceId={content}
+            data-test-subj="unifiedDocViewLogsOverviewTraceIdHighlightLink"
+          />
+        )}
+      </HighlightField>
+    ),
+  },
+  [fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: {
+    title: fieldLabels.ORCHESTRATOR_CLUSTER_NAME_LABEL,
+  },
+  [fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]: {
+    title: fieldLabels.ORCHESTRATOR_RESOURCE_ID_LABEL,
+  },
+  // Cloud
+  [fieldConstants.CLOUD_PROVIDER_FIELD]: {
+    title: fieldLabels.CLOUD_PROVIDER_LABEL,
+  },
+  [fieldConstants.CLOUD_REGION_FIELD]: {
+    title: fieldLabels.CLOUD_REGION_LABEL,
+  },
+  [fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]: {
+    title: fieldLabels.CLOUD_AVAILABILITY_ZONE_LABEL,
+  },
+  [fieldConstants.CLOUD_PROJECT_ID_FIELD]: {
+    title: fieldLabels.CLOUD_PROJECT_ID_LABEL,
+  },
+  [fieldConstants.CLOUD_INSTANCE_ID_FIELD]: {
+    title: fieldLabels.CLOUD_INSTANCE_ID_LABEL,
+  },
+  // Other
+  [fieldConstants.LOG_FILE_PATH_FIELD]: {
+    title: fieldLabels.LOG_FILE_PATH_LABEL,
+  },
+  [fieldConstants.DATASTREAM_DATASET_FIELD]: {
+    title: fieldLabels.DATASTREAM_DATASET_LABEL,
+  },
+  [fieldConstants.DATASTREAM_NAMESPACE_FIELD]: {
+    title: fieldLabels.DATASTREAM_NAMESPACE_LABEL,
 
-const hostNameLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.hostName', {
-  defaultMessage: 'Host name',
-});
-
-const serviceInfraAccordionTitle = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.accordion.title.serviceInfra',
-  {
-    defaultMessage: 'Service & Infrastructure',
-  }
-);
-
-const cloudAccordionTitle = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.accordion.title.cloud',
-  {
-    defaultMessage: 'Cloud',
-  }
-);
-
-const otherAccordionTitle = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.accordion.title.other',
-  {
-    defaultMessage: 'Other',
-  }
-);
-
-const orchestratorClusterNameLabel = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.label.orchestratorClusterName',
-  {
-    defaultMessage: 'Orchestrator cluster Name',
-  }
-);
-
-const orchestratorResourceIdLabel = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.label.orchestratorResourceId',
-  {
-    defaultMessage: 'Orchestrator resource ID',
-  }
-);
-
-const cloudProviderLabel = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.label.cloudProvider',
-  {
-    defaultMessage: 'Cloud provider',
-  }
-);
-
-const cloudRegionLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudRegion', {
-  defaultMessage: 'Cloud region',
-});
-
-const cloudAvailabilityZoneLabel = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.label.cloudAvailabilityZone',
-  {
-    defaultMessage: 'Cloud availability zone',
-  }
-);
-
-const cloudProjectIdLabel = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.label.cloudProjectId',
-  {
-    defaultMessage: 'Cloud project ID',
-  }
-);
-
-const cloudInstanceIdLabel = i18n.translate(
-  'unifiedDocViewer.docView.logsOverview.label.cloudInstanceId',
-  {
-    defaultMessage: 'Cloud instance ID',
-  }
-);
-
-const logPathFileLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.logPathFile', {
-  defaultMessage: 'Log path file',
-});
-
-const namespaceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.namespace', {
-  defaultMessage: 'Namespace',
-});
-
-const datasetLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.dataset', {
-  defaultMessage: 'Dataset',
-});
-
-const shipperLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.shipper', {
-  defaultMessage: 'Shipper',
-});
+    formatter: (value, formattedValue) => (
+      <HighlightField value={value as string} formattedValue={formattedValue}>
+        {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}
+      </HighlightField>
+    ),
+  },
+  [fieldConstants.AGENT_NAME_FIELD]: {
+    title: fieldLabels.AGENT_NAME_LABEL,
+  },
+};

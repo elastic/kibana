@@ -1028,6 +1028,32 @@
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectRelation.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectRelation.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1344,7 +1370,7 @@
           "label": "getRelationships",
           "description": [],
           "signature": [
-            "(type: string, id: string, savedObjectTypes: string[]) => Promise<",
+            "(type: string, id: string, savedObjectTypes: string[], size?: number | undefined) => Promise<",
             "RelationshipsResponseHTTP",
             ">"
           ],
@@ -1396,6 +1422,21 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "savedObjectsManagement",
+              "id": "def-public.SavedObjectsManagementPluginStart.getRelationships.$4",
+              "type": "number",
+              "tags": [],
+              "label": "size",
+              "description": [],
+              "signature": [
+                "number | undefined"
+              ],
+              "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []
@@ -2205,6 +2246,32 @@
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectRelation.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectRelation.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,

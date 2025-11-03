@@ -12,7 +12,8 @@ import {
   getDefaultUserProfileImplementationMock,
 } from './user_profile_service.test.mocks';
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import { UserProfileService } from './user_profile_service';

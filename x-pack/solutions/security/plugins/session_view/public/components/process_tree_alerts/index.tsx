@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef, MouseEvent, useCallback, useMemo } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useStyles } from './styles';
 import type {
   ProcessEventAlertCategory,
@@ -80,9 +81,12 @@ export function ProcessTreeAlerts({
     [onAlertSelected]
   );
 
-  const handleProcessEventAlertCategorySelected = useCallback((eventCategory: any) => {
-    setSelectedProcessEventAlertCategory(eventCategory);
-  }, []);
+  const handleProcessEventAlertCategorySelected = useCallback(
+    (eventCategory: ProcessEventAlertCategory) => {
+      setSelectedProcessEventAlertCategory(eventCategory);
+    },
+    []
+  );
 
   const filteredProcessEventAlerts = useMemo(() => {
     return alerts?.filter((processEventAlert: ProcessEvent) => {

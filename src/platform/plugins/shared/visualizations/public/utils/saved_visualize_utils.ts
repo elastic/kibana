@@ -10,17 +10,18 @@
 import _ from 'lodash';
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
-  DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { VisualizationSavedObject } from '../../common/content_management';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import type { VisualizationSavedObject } from '../../common/content_management';
 import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
-import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
+import type { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,
   SerializedVis,
@@ -35,7 +36,7 @@ import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
 import { visualizationsClient } from '../content_management';
-import { VisualizationSavedObjectAttributes } from '../../common';
+import type { VisualizationSavedObjectAttributes } from '../../common';
 import { urlFor } from './url_utils';
 
 export const SAVED_VIS_TYPE = 'visualization';
@@ -231,7 +232,7 @@ export async function getSavedVisualization(
   } = await visualizationsClient.get(id);
 
   if (!resp.id) {
-    throw new SavedObjectNotFound(SAVED_VIS_TYPE, id || '');
+    throw new SavedObjectNotFound({ type: SAVED_VIS_TYPE, id: id || '' });
   }
 
   const attributes = _.cloneDeep(resp.attributes);
@@ -296,7 +297,8 @@ export async function getSavedVisualization(
 }
 
 export async function saveVisualization(
-  savedObject: VisSavedObject,
+  savedObject: ISavedVis &
+    Pick<VisSavedObject, 'displayName' | 'lastSavedTitle' | 'searchSource' | 'tags' | 'version'>,
   {
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
@@ -417,4 +419,4 @@ export async function saveVisualization(
 }
 
 export const shouldShowMissedDataViewError = (error: Error): error is SavedObjectNotFound =>
-  error instanceof SavedObjectNotFound && error.savedObjectType === 'data view';
+  error instanceof SavedObjectNotFound && error.savedObjectType === DATA_VIEW_SAVED_OBJECT_TYPE;

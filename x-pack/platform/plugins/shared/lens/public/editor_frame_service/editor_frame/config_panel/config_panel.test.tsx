@@ -9,28 +9,28 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 
+import type { MountStoreProps } from '../../../mocks';
 import {
   createMockFramePublicAPI,
   mockVisualizationMap,
   mockDatasourceMap,
   mockStoreDeps,
-  MountStoreProps,
 } from '../../../mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { Visualization } from '../../../types';
+import type { Visualization, LensLayerType as LayerType } from '@kbn/lens-common';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithReduxStore } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { AddLayerButton } from '../../../visualizations/xy/add_layer';
-import { LayerType } from '@kbn/visualizations-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 jest.mock('../../../id_generator');
 
@@ -82,8 +82,11 @@ describe('ConfigPanel', () => {
     query?: Query | AggregateQuery
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
+    const { visualizationMap, datasourceMap, ...rest } = props;
     return mountWithReduxStore(
-      <LayerPanels {...props} />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <LayerPanels {...rest} />
+      </EditorFrameServiceProvider>,
       {
         preloadedState: {
           datasourceStates: {

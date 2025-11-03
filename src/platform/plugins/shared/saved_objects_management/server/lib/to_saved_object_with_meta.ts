@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { SavedObjectWithMetadata } from '../../common/types/v1';
+import type { SavedObject } from '@kbn/core/server';
+import type { SavedObjectWithMetadata } from '../../common/types/v1';
 
 export function toSavedObjectWithMeta(so: SavedObject): SavedObjectWithMetadata {
   return {

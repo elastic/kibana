@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { createConfig } from './lib/create_config';
 import { deleteIndexTemplate } from './lib/delete_index_template';
-import { PartialConfig } from './types';
+import type { PartialConfig } from './types';
 
 export async function cleanup({
   client,

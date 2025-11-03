@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../workspace/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';

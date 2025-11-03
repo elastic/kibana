@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
@@ -22,6 +22,7 @@ import {
 } from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
 import { ML_PAGES } from '../../../../locator';
+import { PageTitle } from '../../../components/page_title';
 
 const SuppliedConfigurations = dynamic(async () => ({
   default: (await import('../../../supplied_configurations/supplied_configurations'))
@@ -50,29 +51,23 @@ const PageWrapper: FC = () => {
   return (
     <PageLoader context={context}>
       <MlPageHeader>
-        <EuiFlexGroup
-          responsive={false}
-          wrap={false}
-          alignItems={'flexStart'}
-          gutterSize={'m'}
-          direction="column"
-          data-test-subj="mlPageSuppliedConfigurations"
-        >
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeader"
-              defaultMessage="Supplied configurations"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
+        <PageTitle
+          title={
+            <span data-test-subj="mlPageSuppliedConfigurations">
               <FormattedMessage
-                id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription"
-                defaultMessage="This page lists pre-defined anomaly detection job configurations with related Kibana assets."
+                id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeader"
+                defaultMessage="Supplied configurations"
               />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </span>
+          }
+        />
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription"
+            defaultMessage="This page lists pre-defined anomaly detection job configurations with related Kibana assets."
+          />
+        </EuiText>
       </MlPageHeader>
       <SuppliedConfigurations />
     </PageLoader>

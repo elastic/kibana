@@ -5,56 +5,56 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useConversation } from '../../../hooks/use_conversation';
-import { AgentDisplay } from '../agent_display';
-import { AgentSelectDropdown } from '../agent_select_dropdown';
+import { ConversationAgentSelector } from '../conversation_agent_selector';
+import { ConversationActionButton } from './conversation_action_button';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { ConnectorSelector } from '../../connector_selector';
 
 interface ConversationInputActionsProps {
-  handleSubmit: () => void;
-  submitDisabled: boolean;
+  onSubmit: () => void;
+  isSubmitDisabled: boolean;
+  resetToPendingMessage: () => void;
+  agentId?: string;
 }
 
 export const ConversationInputActions: React.FC<ConversationInputActionsProps> = ({
-  handleSubmit,
-  submitDisabled,
+  onSubmit,
+  isSubmitDisabled,
+  resetToPendingMessage,
+  agentId,
 }) => {
-  const {
-    conversation,
-    hasActiveConversation,
-    actions: { setAgentId },
-  } = useConversation();
-  const agentId = conversation?.agent_id ?? oneChatDefaultAgentId;
+  const { connectorSelection } = useSendMessage();
+
   return (
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        alignItems="center"
+        justifyContent="spaceBetween"
+      >
         <EuiFlexItem grow={false}>
-          {hasActiveConversation ? (
-            <AgentDisplay selectedAgentId={agentId} />
-          ) : (
-            <AgentSelectDropdown
-              selectedAgentId={agentId}
-              onAgentChange={(newAgentId: string) => {
-                setAgentId(newAgentId);
-              }}
-            />
-          )}
+          <ConnectorSelector
+            selectedConnectorId={connectorSelection.selectedConnector}
+            onSelectConnector={connectorSelection.selectConnector}
+            defaultConnectorId={connectorSelection.defaultConnectorId}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={i18n.translate('xpack.onechat.conversationInputForm.submit', {
-              defaultMessage: 'Submit',
-            })}
-            data-test-subj="onechatAppConversationInputFormSubmitButton"
-            iconType="sortUp"
-            display="fill"
-            size="m"
-            disabled={submitDisabled}
-            onClick={handleSubmit}
-          />
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <ConversationAgentSelector agentId={agentId} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ConversationActionButton
+                onSubmit={onSubmit}
+                isSubmitDisabled={isSubmitDisabled}
+                resetToPendingMessage={resetToPendingMessage}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiSpacer, EuiText, UseEuiTheme, logicalCSS } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiText, logicalCSS } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 

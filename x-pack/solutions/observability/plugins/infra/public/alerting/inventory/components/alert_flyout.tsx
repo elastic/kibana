@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
-
+import React, { useCallback, useContext } from 'react';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { InfraClientStartDeps } from '../../../types';
@@ -22,57 +21,56 @@ interface Props {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
+  schema?: DataSchemaFormat | null;
   setVisible(val: boolean): void;
 }
 
-export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
+export const AlertFlyout = ({ options, nodeType, filter, visible, schema, setVisible }: Props) => {
   const { services } = useKibana<CoreStart & InfraClientStartDeps>();
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const { inventoryPrefill } = useAlertPrefillContext();
+
   const { customMetrics = [], accountId, region } = inventoryPrefill;
 
-  const AddAlertFlyout = useMemo(
-    () => {
-      if (!triggersActionsUI) return null;
-      const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
-      return (
-        <RuleFormFlyout
-          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
-          consumer={'infrastructure'}
-          onCancel={onCloseFlyout}
-          onSubmit={onCloseFlyout}
-          ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-          initialMetadata={{
-            accountId,
-            options,
-            nodeType,
-            filter,
-            customMetrics,
-            region,
-          }}
-          shouldUseRuleProducer
-        />
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [triggersActionsUI, visible]
-  );
+  if (!triggersActionsUI || !visible) {
+    return null;
+  }
 
-  return <>{visible && AddAlertFlyout}</>;
+  const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
+  return (
+    <RuleFormFlyout
+      plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+      consumer="infrastructure"
+      onCancel={onCloseFlyout}
+      onSubmit={onCloseFlyout}
+      ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
+      initialMetadata={{
+        accountId,
+        options,
+        nodeType,
+        filter,
+        customMetrics,
+        region,
+        schema,
+      }}
+      shouldUseRuleProducer
+    />
+  );
 };
 
 export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { nodeType, metric, filterQuery } = inventoryPrefill;
+  const { nodeType, metric, kuery, schema } = inventoryPrefill;
 
   return (
     <AlertFlyout
       options={{ metric }}
       nodeType={nodeType}
-      filter={filterQuery}
+      filter={kuery}
       visible
       setVisible={onClose}
+      schema={schema}
     />
   );
 };

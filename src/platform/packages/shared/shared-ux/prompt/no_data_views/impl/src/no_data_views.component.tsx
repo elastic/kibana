@@ -9,101 +9,91 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
-  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiSpacer,
-  EuiText,
   EuiTextAlign,
-  EuiToolTip,
   useEuiPaddingCSS,
+  EuiTitle,
+  EuiPageTemplate,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
-
-import { DocumentationLink } from './documentation_link';
+import type { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { DataViewIllustration } from './data_view_illustration';
 import { EsqlIllustration } from './esql_illustration';
+import { DocumentationLink } from './documentation_link';
 
 // max width value to use in pixels
-const MAX_WIDTH = 770;
+const MAX_WIDTH = 1200;
 
 const PromptAddDataViews = ({
   onClickCreate,
   canCreateNewDataView,
   dataViewsDocLink,
-  emptyPromptColor,
 }: Pick<
   NoDataViewsPromptComponentProps,
-  'onClickCreate' | 'canCreateNewDataView' | 'dataViewsDocLink' | 'emptyPromptColor'
+  'onClickCreate' | 'canCreateNewDataView' | 'dataViewsDocLink'
 >) => {
   const icon = <DataViewIllustration />;
 
-  const title = (
-    <FormattedMessage
-      id="sharedUXPackages.noDataViewsPrompt.createDataView"
-      defaultMessage="Create a data view"
-    />
-  );
+  const cardTitle = i18n.translate('sharedUXPackages.noDataViewsPrompt.createDataViewText', {
+    defaultMessage: 'Create a data view',
+  });
 
-  const description = (
-    <>
-      {canCreateNewDataView ? (
-        <FormattedMessage
-          id="sharedUXPackages.noDataViewsPrompt.dataViewExplanation"
-          defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data."
-        />
-      ) : (
-        <FormattedMessage
-          id="sharedUXPackages.noDataViewsPrompt.noPermission.dataViewExplanation"
-          defaultMessage="Data views identify the Elasticsearch data that you want to explore. To create data views, ask your administrator for the required permissions."
-        />
-      )}
-    </>
-  );
-
-  const footer = dataViewsDocLink ? (
-    <>
-      {canCreateNewDataView ? (
-        <EuiButton onClick={onClickCreate} fill={true} data-test-subj="createDataViewButton">
-          <FormattedMessage
-            id="sharedUXPackages.noDataViewsPrompt.addDataViewText"
-            defaultMessage="Create data view"
-          />
-        </EuiButton>
-      ) : (
-        <EuiToolTip
-          position="right"
-          content={
-            <FormattedMessage
-              id="sharedUXPackages.noDataViewsPrompt.addDataViewTooltipNoPrivilege"
-              defaultMessage="Ask your administrator for the permissions required to create a data view."
-            />
-          }
-        >
-          <EuiButton disabled data-test-subj="createDataViewButton">
-            <FormattedMessage
-              id="sharedUXPackages.noDataViewsPrompt.addDataViewTextNoPrivilege"
-              defaultMessage="Create data view"
-            />
-          </EuiButton>
-        </EuiToolTip>
-      )}
-      <EuiHorizontalRule />
-      <DocumentationLink href={dataViewsDocLink} data-test-subj="docLinkDataViews" />
-    </>
-  ) : undefined;
+  const cardDescription = canCreateNewDataView
+    ? i18n.translate('sharedUXPackages.noDataViewsPrompt.dataViewExplanation', {
+        defaultMessage: `Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data.`,
+      })
+    : i18n.translate('sharedUXPackages.noDataViewsPrompt.dataViewExplanationNoPermission', {
+        defaultMessage: `Data views identify the Elasticsearch data that you want to explore. To create data views, ask your administrator for the required permissions.`,
+      });
 
   return (
-    <EuiCard
-      hasBorder={true}
+    <EuiPageTemplate.EmptyPrompt
       data-test-subj="noDataViewsPromptCreateDataView"
-      display={emptyPromptColor}
-      {...{ icon, title, description, footer }}
+      className="NoDataViewsPromptCreateDataView"
+      style={{ maxWidth: 400 }}
+      title={
+        <EuiTitle size="m">
+          <h2>{cardTitle}</h2>
+        </EuiTitle>
+      }
+      icon={icon}
+      body={<p>{cardDescription}</p>}
+      actions={
+        canCreateNewDataView ? (
+          <EuiButton
+            color="primary"
+            fill
+            data-test-subj="createDataViewButton"
+            onClick={onClickCreate}
+          >
+            {i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewButtonLabel', {
+              defaultMessage: 'Create data view',
+            })}
+          </EuiButton>
+        ) : (
+          <EuiToolTip
+            position="right"
+            content={i18n.translate(
+              'sharedUXPackages.noDataViewsPrompt.addDataViewTooltipNoPrivilege',
+              {
+                defaultMessage: `You don't have permission to create data views. Ask your administrator for the required permissions.`,
+              }
+            )}
+          >
+            <EuiButton disabled data-test-subj="createDataViewButton">
+              {i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewButtonLabel', {
+                defaultMessage: 'Create data view',
+              })}
+            </EuiButton>
+          </EuiToolTip>
+        )
+      }
+      footer={<DocumentationLink href={dataViewsDocLink} data-test-subj="docLinkDataViews" />}
     />
   );
 };
@@ -111,7 +101,6 @@ const PromptAddDataViews = ({
 const PromptTryEsql = ({
   onTryESQL,
   esqlDocLink,
-  emptyPromptColor,
 }: Pick<
   NoDataViewsPromptComponentProps,
   'onClickCreate' | 'onTryESQL' | 'esqlDocLink' | 'emptyPromptColor'
@@ -124,39 +113,35 @@ const PromptTryEsql = ({
 
   const icon = <EsqlIllustration />;
 
-  const title = (
-    <FormattedMessage
-      id="sharedUXPackages.noDataViewsPrompt.esqlPanel.title"
-      defaultMessage="Query your data with ES|QL"
-    />
-  );
+  const cardTitle = i18n.translate('sharedUXPackages.noDataViewsPrompt.esqlPanel.title', {
+    defaultMessage: 'Query your data with ES|QL',
+  });
 
-  const description = (
-    <FormattedMessage
-      id="sharedUXPackages.noDataViewsPrompt.esqlExplanation"
-      defaultMessage="ES|QL is a next-generation piped query language and compute engine developed by Elastic for filtering, transforming, and analyzing data. ES|QL helps streamline your workflows for fast, efficient data processing."
-    />
-  );
-
-  const footer = (
-    <>
-      <EuiButton onClick={onTryESQL} fill={true} data-test-subj="tryESQLLink">
-        <FormattedMessage
-          id="sharedUXPackages.noDataViewsPrompt.tryEsqlText"
-          defaultMessage="Try ES|QL"
-        />
-      </EuiButton>
-      <EuiHorizontalRule />
-      {esqlDocLink && <DocumentationLink href={esqlDocLink} data-test-subj="docLinkEsql" />}
-    </>
-  );
+  const cardDescription = i18n.translate('sharedUXPackages.noDataViewsPrompt.esqlExplanation', {
+    defaultMessage:
+      'ES|QL is a next-generation piped query language and compute engine developed by Elastic for filtering, transforming, and analyzing data. ES|QL helps streamline your workflows for fast, efficient data processing.',
+  });
 
   return (
-    <EuiCard
-      hasBorder={true}
-      data-test-subj="noDataViewsPromptTryEsql"
-      display={emptyPromptColor}
-      {...{ icon, title, description, footer }}
+    <EuiPageTemplate.EmptyPrompt
+      data-test-subj="noDataViewsTryESQL"
+      className="NoDataViewsPromptTryESQL"
+      style={{ maxWidth: 400 }}
+      title={
+        <EuiTitle size="m">
+          <h2>{cardTitle}</h2>
+        </EuiTitle>
+      }
+      icon={icon}
+      body={<p>{cardDescription}</p>}
+      actions={
+        <EuiButton color="primary" fill data-test-subj="tryESQLLink" onClick={onTryESQL}>
+          {i18n.translate('sharedUXPackages.noDataViewsPrompt.tryEsqlButtonLabel', {
+            defaultMessage: 'Try ES|QL',
+          })}
+        </EuiButton>
+      }
+      footer={<DocumentationLink href={esqlDocLink} data-test-subj="docLinkEsql" />}
     />
   );
 };
@@ -175,6 +160,7 @@ export const NoDataViewsPrompt = ({
   const cssStyles = [
     css`
       max-width: ${MAX_WIDTH}px;
+      margin: 0 auto;
     `,
     useEuiPaddingCSS('top').m,
     useEuiPaddingCSS('right').m,
@@ -186,22 +172,52 @@ export const NoDataViewsPrompt = ({
       alignItems="center"
       justifyContent="spaceEvenly"
       data-test-subj="noDataViewsPrompt"
+      css={cssStyles}
     >
-      <EuiFlexItem css={cssStyles}>
-        <EuiText>
+      <EuiFlexItem grow={0}>
+        <EuiTitle size="l">
           <EuiTextAlign textAlign="center">
             <h2>
-              <FormattedMessage
-                id="sharedUXPackages.noDataViewsPrompt.youHaveData"
-                defaultMessage="How do you want to explore your Elasticsearch data?"
-              />
+              {i18n.translate('sharedUXPackages.noDataViewsPrompt.youHaveData', {
+                defaultMessage: 'How do you want to explore your data?',
+              })}
             </h2>
           </EuiTextAlign>
-        </EuiText>
+        </EuiTitle>
 
         <EuiSpacer size="xl" />
 
-        <EuiFlexGroup>
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="stretch"
+          css={css`
+            min-height: 400px;
+
+            /* Ensure all flex items stretch to full height */
+            > .euiFlexItem {
+              display: flex !important;
+              flex-direction: column !important;
+            }
+
+            /* Target nested elements to stretch */
+            .euiFlexItem > section,
+            [class*='css-'][class*='-euiPageSection-grow-l-center-transparent'],
+            [class*='css-'][class*='-euiPageSection__content-l-center'] {
+              flex: 1 !important;
+              display: flex !important;
+              flex-direction: column !important;
+            }
+
+            /* Final EmptyPrompt components */
+            .NoDataViewsPromptCreateDataView,
+            .NoDataViewsPromptTryESQL {
+              flex: 1 !important;
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: space-between !important;
+            }
+          `}
+        >
           <EuiFlexItem>
             <PromptAddDataViews
               {...{

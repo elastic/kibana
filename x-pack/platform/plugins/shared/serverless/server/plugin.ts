@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
 import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
 import type {

@@ -8,7 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ShareMenuManager, ShareMenuManagerStart } from './share_menu_manager';
+import type { ShareMenuManager, ShareMenuManagerStart } from './share_menu_manager';
 
 const createStartMock = (): jest.Mocked<ShareMenuManagerStart> => {
   const start = {

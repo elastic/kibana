@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFieldText,
@@ -25,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 
 import { VarConfig } from '../var_config';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
-import { CanvasVariable } from '../../../types';
+import type { CanvasVariable } from '../../../types';
 
 const strings = {
   getApplyStylesheetButtonLabel: () =>
@@ -197,7 +198,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
               position="left"
               className="canvasArg__tooltip"
             >
-              <span>{strings.getGlobalCSSLabel()}</span>
+              <span tabIndex={0}>{strings.getGlobalCSSLabel()}</span>
             </EuiToolTip>
           }
         >

@@ -39,7 +39,7 @@ describe('stats', () => {
     );
 
     expect(pipeline.toString()).toEqual(
-      'FROM logs-*\n  | STATS AVG(transaction.duration.us), COUNT(`service.name`) WHERE agent.name == "java" BY `service.environment`'
+      'FROM logs-*\n  | STATS AVG(transaction.duration.us), COUNT(service.name) WHERE agent.name == "java" BY service.environment'
     );
   });
 });

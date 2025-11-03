@@ -21,6 +21,7 @@ export {
 export { isESClientError } from './utils';
 export {
   FleetError as FleetError,
+  FleetVersionConflictError,
   OutputInvalidError as OutputInvalidError,
   AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
@@ -107,6 +108,36 @@ export class AgentlessAgentConfigError extends FleetError {
 export class AgentlessPolicyExistsRequestError extends AgentPolicyError {
   constructor(message: string) {
     super(`Unable to create integration. ${message}`);
+  }
+}
+
+export class CloudConnectorCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorGetListError extends FleetError {
+  constructor(message: string) {
+    super(`Error getting cloud connectors in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorInvalidVarsError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating cloud connector vars in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorDeleteError extends FleetError {
+  constructor(message: string) {
+    super(`Error deleting cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorUpdateError extends FleetError {
+  constructor(message: string) {
+    super(`Error updating cloud connector in Fleet, ${message}`);
   }
 }
 
@@ -208,6 +239,21 @@ export class ArtifactsElasticsearchError extends FleetError {
     } else {
       this.requestDetails = 'unable to determine request details';
     }
+  }
+}
+
+export class FleetElasticsearchError extends FleetErrorWithStatusCode {
+  constructor(esError: Error) {
+    let statusCode: number | undefined;
+    const message = esError.message;
+
+    // Extract the original ES status code and ensure we have meta with statusCode
+    if (isESClientError(esError)) {
+      statusCode = esError.meta.statusCode;
+    }
+
+    // Pass through the ES error message, status code, and original error as meta
+    super(message, statusCode, esError);
   }
 }
 

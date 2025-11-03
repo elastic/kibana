@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SearchHit } from '@kbn/es-types';
-import { DegradedFieldValues } from '../../../../common/api_types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SearchHit } from '@kbn/es-types';
+import type { DegradedFieldValues } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
 import { _IGNORED, TIMESTAMP } from '../../../../common/es_fields';
 

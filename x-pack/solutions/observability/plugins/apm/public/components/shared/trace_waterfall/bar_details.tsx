@@ -7,10 +7,10 @@
 
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -19,30 +19,34 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
-import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
 
-export function BarDetails({
-  item,
-  left,
-  onErrorClick,
-}: {
-  item: TraceItem;
-  left: number;
-  onErrorClick?: (params: { traceId: string; docId: string }) => void;
-}) {
+const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
+  defaultMessage: 'Orphan',
+});
+const ORPHAN_CONTENT = i18n.translate(
+  'xpack.apm.trace.barDetails.euiIconTip.orphanSpanContentLabel',
+  {
+    defaultMessage:
+      'This span is orphaned due to missing trace context and has been reparented to the root to restore the execution flow',
+  }
+);
+
+export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
+  const errorCount = item.errors.length;
 
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
     {
-      defaultMessage: '{count, plural, one {View related error} other {View # related errors}}',
+      defaultMessage: '{count, plural, one {View error} other {View # errors}}',
       values: {
-        count: item.errorCount,
+        count: errorCount,
       },
     }
   );
@@ -91,40 +95,31 @@ export function BarDetails({
               data-test-subj="apmBarDetailsFailureTooltip"
               content={`${item.status.fieldName} = ${item.status.value}`}
             >
-              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
+              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger" tabIndex={0}>
                 {item.status.value}
               </EuiBadge>
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        {item.errorCount > 0 ? (
+        {errorCount > 0 ? (
           <EuiFlexItem grow={false}>
-            {onErrorClick ? (
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
-                  defaultMessage: 'View error details',
-                })}
-                data-test-subj="apmBarDetailsErrorButton"
-                color="danger"
-                iconType="errorFilled"
-                iconSize="s"
-                href={getRelatedErrorsHref ? (getRelatedErrorsHref(item.id) as any) : undefined}
-                onClick={(e: React.MouseEvent) => {
-                  if (onErrorClick) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onErrorClick({ traceId: item.traceId, docId: item.id });
-                  }
-                }}
-              />
-            ) : getRelatedErrorsHref ? (
+            {getRelatedErrorsHref || onErrorClick ? (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
                 iconType="arrowRight"
-                href={getRelatedErrorsHref(item.id) as any}
+                href={getRelatedErrorsHref?.(item.id) as any}
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
-                  e.stopPropagation();
+                  if (onErrorClick) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onErrorClick({
+                      traceId: item.traceId,
+                      docId: item.id,
+                      errorCount,
+                      errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
+                    });
+                  }
                 }}
                 tabIndex={0}
                 role="button"
@@ -142,6 +137,21 @@ export function BarDetails({
                 data-test-subj="apmBarDetailsErrorIcon"
               />
             )}
+          </EuiFlexItem>
+        ) : null}
+        {item.isOrphan ? (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              data-test-subj="apmBarDetailsOrphanTooltip"
+              iconProps={{
+                'data-test-subj': 'apmBarDetailsOrphanIcon',
+                'aria-label': ORPHAN_TITLE,
+              }}
+              color={theme.euiTheme.colors.danger}
+              type="unlink"
+              title={ORPHAN_TITLE}
+              content={ORPHAN_CONTENT}
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

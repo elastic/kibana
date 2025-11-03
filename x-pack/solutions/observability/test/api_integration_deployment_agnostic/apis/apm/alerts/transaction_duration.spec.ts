@@ -14,10 +14,10 @@ import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { RoleCredentials } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ApmAlertFields } from './helpers/alerting_helper';
 import {
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-  ApmAlertFields,
   getIndexAction,
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
@@ -40,7 +40,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
   };
 
-  describe('transaction duration alert', () => {
+  describe('transaction duration alert', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/241102
+    this.tags(['failsOnMKI']);
+
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     let roleAuthc: RoleCredentials;
 
@@ -226,7 +229,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('create rule for opbeans-node using kql filter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240908
+    describe.skip('create rule for opbeans-node using kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

@@ -27,6 +27,7 @@ import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { DataVisualizerGrid } from '../overview/data_visualizer_grid';
+import { PageTitle } from '../components/page_title';
 
 function startTrialDescription() {
   return (
@@ -79,9 +80,13 @@ export const DatavisualizerSelector: FC = () => {
     <>
       <div data-test-subj="mlPageDataVisualizerSelector">
         <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
-            defaultMessage="Data Visualizer"
+          <PageTitle
+            title={
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
+                defaultMessage="Data Visualizer"
+              />
+            }
           />
         </MlPageHeader>
 

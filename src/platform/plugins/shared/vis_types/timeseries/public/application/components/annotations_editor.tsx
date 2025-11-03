@@ -15,7 +15,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { css } from '@emotion/react';
 import { AnnotationRow } from './annotation_row';
-import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
+import type { CollectionActionsProps } from './lib/collection_actions';
+import { collectionActions } from './lib/collection_actions';
 
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';

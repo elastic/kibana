@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '..';
+import { Parser, parse } from '..';
 import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
@@ -161,6 +161,54 @@ describe('function AST nodes', () => {
                 literalType: 'param',
                 paramType: 'positional',
                 value: 30035,
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('parses out function name "LAST" static name', () => {
+      const query = 'ROW LAST(1, 2, 3)';
+      const { root, errors } = Parser.parse(query);
+
+      expect(errors.length).toBe(0);
+
+      expect(root.commands).toMatchObject([
+        {
+          type: 'command',
+          name: 'row',
+          args: [
+            {
+              type: 'function',
+              name: 'last',
+              operator: {
+                type: 'identifier',
+                name: 'last',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('parses out function name "FIRST" static name', () => {
+      const query = 'ROW First(1, 2, 3)';
+      const { root, errors } = Parser.parse(query);
+
+      expect(errors.length).toBe(0);
+
+      expect(root.commands).toMatchObject([
+        {
+          type: 'command',
+          name: 'row',
+          args: [
+            {
+              type: 'function',
+              name: 'first',
+              operator: {
+                type: 'identifier',
+                name: 'first',
               },
             },
           ],

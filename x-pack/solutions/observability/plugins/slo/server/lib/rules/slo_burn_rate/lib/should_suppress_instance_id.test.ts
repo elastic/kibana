@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SLODefinition } from '../../../../domain/models';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BurnRateRuleParams } from '../types';
+import type { SLODefinition } from '../../../../domain/models';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { BurnRateRuleParams } from '../types';
 import { shouldSuppressInstanceId } from './should_suppress_instance_id';
 import { ALL_VALUE } from '@kbn/slo-schema';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BufferOptions } from 'pdfmake/interfaces';
+import type { BufferOptions } from 'pdfmake/interfaces';
 
 export const REPORTING_TABLE_LAYOUT = 'noBorder';
 

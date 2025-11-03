@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TextEditor } from '../field_components';
 
+import type { FieldConfig } from '../../../../../../shared_imports';
 import {
-  FieldConfig,
   FIELD_TYPES,
   fieldValidators,
   UseField,

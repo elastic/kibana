@@ -5947,6 +5947,34 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         }
                       }
                     },
+                    "per_agent_config_settings": {
+                      "properties": {
+                        "agent_name": {
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "The name of the agent for the service"
+                          }
+                        },
+                        "has_error": {
+                          "type": "boolean",
+                          "_meta": {
+                            "description": "Indicates whether the agent configuration has errors"
+                          }
+                        },
+                        "settings": {
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "The settings applied to the agent"
+                          }
+                        },
+                        "advanced_settings": {
+                          "type": "keyword",
+                          "_meta": {
+                            "description": "The advanced settings applied to the agent"
+                          }
+                        }
+                      }
+                    },
                     "top_traces": {
                       "properties": {
                         "max": {
@@ -6197,6 +6225,20 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                                   "type": "long",
                                   "_meta": {
                                     "description": "Execution time in milliseconds for the \\"per_service\\" task"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "per_agent_config_settings": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Execution time in milliseconds for the \\"per_agent_config_settings\\" task"
                                   }
                                 }
                               }

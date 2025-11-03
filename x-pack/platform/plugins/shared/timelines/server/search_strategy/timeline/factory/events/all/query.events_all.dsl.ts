@@ -7,12 +7,12 @@
 
 import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
-import {
+import type {
   SortItem,
   TimelineEventsAllOptions,
 } from '../../../../../../common/api/search_strategy/timeline/events_all';
 
-import { TimerangeFilter, TimerangeInput } from '../../../../../../common/search_strategy';
+import type { TimerangeFilter, TimerangeInput } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getPreferredEsType } from './helpers';
 

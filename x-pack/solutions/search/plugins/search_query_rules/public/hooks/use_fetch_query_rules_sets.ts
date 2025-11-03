@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { QUERY_RULES_SETS_QUERY_KEY } from '../../common/constants';
-import { DEFAULT_PAGE_VALUE, Page, Paginate } from '../../common/pagination';
+import type { Page, Paginate } from '../../common/pagination';
+import { DEFAULT_PAGE_VALUE } from '../../common/pagination';
 import { APIRoutes } from '../../common/api_routes';
 import { useKibana } from './use_kibana';
 

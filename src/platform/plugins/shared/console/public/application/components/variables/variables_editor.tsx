@@ -25,8 +25,9 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { useServicesContext } from '../../contexts';
 import { VariableEditorForm } from './variables_editor_form';
 import * as utils from './utils';
@@ -61,6 +62,14 @@ const copyToClipboard = async (text: string, notifications: Pick<NotificationsSt
       }),
     });
   }
+};
+
+const styles = {
+  conVariablesTable: css`
+    .euiTableRow-isExpandedRow .euiTableCellContent {
+      padding: 0;
+    }
+  `,
 };
 
 export const VariablesEditor = (props: Props) => {
@@ -256,7 +265,7 @@ export const VariablesEditor = (props: Props) => {
         columns={columns}
         itemId="id"
         responsiveBreakpoint={false}
-        className="conVariablesTable"
+        css={styles.conVariablesTable}
         data-test-subj="variablesTable"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         noItemsMessage={i18n.translate('console.variablesPage.table.noItemsMessage', {

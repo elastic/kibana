@@ -8,14 +8,13 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 /* eslint-disable no-console */
@@ -80,13 +79,13 @@ export const createAppMockRenderer = ({
       setBadge: mockedSetBadge,
     },
   };
-  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
-    <KibanaRenderContextProvider {...core}>
+  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) =>
+    core.rendering.addContext(
       <KibanaContextProvider services={services}>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>
-  ));
+    )
+  );
 
   AppWrapper.displayName = 'AppWrapper';
 

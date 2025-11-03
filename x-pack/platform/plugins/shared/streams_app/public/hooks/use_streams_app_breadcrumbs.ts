@@ -6,6 +6,6 @@
  */
 
 import { createUseBreadcrumbs } from '@kbn/typed-react-router-config';
-import { StreamsAppRoutes } from '../routes/config';
+import type { StreamsAppRoutes } from '../routes/config';
 
 export const useStreamsAppBreadcrumbs = createUseBreadcrumbs<StreamsAppRoutes>();

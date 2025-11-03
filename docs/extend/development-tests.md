@@ -13,7 +13,7 @@ The following table outlines possible test file locations and how to invoke them
 | ------------------ | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jest               | `**/*.test.{js,mjs,ts,tsx}`                      | `yarn test:jest [test path]`                                                                                                                             |
 | Jest (integration) | `**/integration_tests/**/*.test.{js,mjs,ts,tsx}` | `yarn test:jest_integration [test path]`                                                                                                                 |
-| Functional         | `test/**/config.js` `x-pack/test/**/config.js`   | `node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp` |
+| Functional         | `test/**/config.js` `x-pack/**/test/**/config.ts`   | `node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp` |
 
 Test runner arguments: - Where applicable, the optional arguments `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression. - `[test path]` is the relative path to the test file.
 
@@ -172,7 +172,6 @@ There are three ways to run the tests depending on your goals:
 When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
 
 - `--config test/functional/apps/app-name/config.js` starts {{es}} and {{kib}} servers with the WebDriver tests configured to run in Chrome for a specific app. For example, `--config test/functional/apps/home/config.js` starts {{es}} and {{kib}} servers with the WebDriver tests configured to run in Chrome for the home app.
-- `--config test/functional/config.firefox.js` starts {{es}} and {{kib}} servers with the WebDriver tests configured to run in Firefox.
 - `--config test/api_integration/config.js` starts {{es}} and {{kib}} servers with the api integration tests configuration.
 - `--config test/accessibility/config.ts` starts {{es}} and {{kib}} servers with the WebDriver tests configured to run an accessibility audit using [axe](https://www.deque.com/axe/).
 
@@ -569,7 +568,7 @@ macOS users on a machine with a discrete graphics card may see significant speed
 
 - Open Preferences (Command + ,)
 - In the General tab, under the "Magic" section, ensure "GPU rendering" is checked
-- Open "Advanced GPU Settings…​"
+- Open "Advanced GPU Settings…"
 - Uncheck the "Prefer integrated to discrete GPU" option
 - Restart iTerm
 

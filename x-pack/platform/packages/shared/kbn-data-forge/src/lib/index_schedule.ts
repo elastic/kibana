@@ -9,8 +9,8 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 import parser from '@kbn/datemath';
 import { isNumber, isString } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
 import type { Config, ParsedSchedule, Schedule } from '../types';
 import { createEvents } from './create_events';
 

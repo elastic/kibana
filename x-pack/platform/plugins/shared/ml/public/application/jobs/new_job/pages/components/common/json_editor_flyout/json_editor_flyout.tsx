@@ -20,6 +20,7 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type {
@@ -168,6 +169,8 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     setShowJsonFlyout(false);
   }
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <Fragment>
       <FlyoutButton
@@ -177,7 +180,12 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       />
 
       {showJsonFlyout === true && isDisabled === false && (
-        <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size={'l'}>
+        <EuiFlyout
+          onClose={() => setShowJsonFlyout(false)}
+          hideCloseButton
+          size={'l'}
+          aria-labelledby={flyoutTitleId}
+        >
           <EuiFlyoutBody>
             <EuiFlexGroup>
               {jobEditorMode !== EDITOR_MODE.HIDDEN ? (
@@ -190,6 +198,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                   value={jobConfigString}
                   heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
                   schema={jobSchema}
+                  flyoutTitleId={flyoutTitleId}
                 />
               ) : null}
               {datafeedEditorMode !== EDITOR_MODE.HIDDEN ? (
@@ -203,6 +212,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     value={datafeedConfigString}
                     heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
                     schema={datafeedSchema}
+                    flyoutTitleId={flyoutTitleId}
                   />
                   {datafeedEditorMode === EDITOR_MODE.EDITABLE && (
                     <EuiFlexItem>
@@ -219,6 +229,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
               <>
                 <EuiSpacer />
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   size="s"
                   title={i18n.translate(
@@ -297,7 +308,8 @@ const Contents: FC<{
   onChange(s: string): void;
   heightOffset?: number;
   schema?: object;
-}> = ({ title, value, editJson, onChange, heightOffset = 0, schema }) => {
+  flyoutTitleId?: string;
+}> = ({ title, flyoutTitleId, value, editJson, onChange, heightOffset = 0, schema }) => {
   // the editor requires a fixed height
   const editorHeight = useMemo(
     () => `${window.innerHeight - 230 - heightOffset}px`,
@@ -306,7 +318,7 @@ const Contents: FC<{
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
-        <h5>{title}</h5>
+        <h5 id={flyoutTitleId}>{title}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <MLJobEditor

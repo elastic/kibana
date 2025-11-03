@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { deleteSection, isCollapsibleSection, resolveSections } from '../utils/section_management';
-import { MainSection } from './types';
+import type { MainSection } from './types';
 
 export const DeleteGridSectionModal = ({
   sectionId,

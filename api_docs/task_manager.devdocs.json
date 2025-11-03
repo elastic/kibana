@@ -971,7 +971,7 @@
             "label": "rrule",
             "description": [],
             "signature": [
-              "RruleMonthly | RruleWeekly | RruleDaily"
+              "RruleMonthly | RruleWeekly | RruleDaily | RruleHourly"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,
@@ -1041,6 +1041,20 @@
             "signature": [
               "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RunContext.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,
@@ -2024,6 +2038,68 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.scheduleRruleSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "scheduleRruleSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ rrule: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ dtstart?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".MONTHLY; }> | Readonly<{ dtstart?: string | undefined; byweekday?: string[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".WEEKLY; bymonthday: never; }> | Readonly<{ dtstart?: string | undefined; byweekday?: string[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".DAILY; bymonthday: never; }> | Readonly<{ dtstart?: string | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".HOURLY; byweekday: never; bymonthday: never; byhour: never; }>>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/schemas/rrule/v3.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "setup": {
@@ -2192,7 +2268,7 @@
         "TaskScheduling",
         ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
         "TaskStore",
-        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; registerEncryptedSavedObjectsClient: (client: ",
+        ", \"get\" | \"aggregate\" | \"bulkGet\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; registerEncryptedSavedObjectsClient: (client: ",
         {
           "pluginId": "@kbn/encrypted-saved-objects-shared",
           "scope": "common",

@@ -10,9 +10,9 @@ import moment from 'moment';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { EntityDefinition } from '@kbn/entities-schema';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { EntityDefinition } from '@kbn/entities-schema';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   installBuiltInEntityDefinitions,
   installEntityDefinition,
@@ -20,19 +20,29 @@ import {
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   generateLatestIndexTemplateId,
+  generateHistoryIndexTemplateId,
+  generateResetIndexTemplateId,
   generateLatestIngestPipelineId,
   generateLatestTransformId,
+  generateUpdatesIndexTemplateId,
 } from './helpers/generate_component_id';
 import { generateLatestTransform } from './transform/generate_latest_transform';
 import { entityDefinition as mockEntityDefinition } from './helpers/fixtures/entity_definition';
 import { EntityDefinitionIdInvalid } from './errors/entity_definition_id_invalid';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
+import { ENTITY_HISTORY_ILM_POLICY } from '../../../common/constants_entities';
+
+const isServerless: boolean = false;
 
 const getExpectedInstalledComponents = (definition: EntityDefinition) => {
   return [
     { type: 'template', id: generateLatestIndexTemplateId(definition) },
+    { type: 'template', id: generateHistoryIndexTemplateId(definition) },
+    { type: 'template', id: generateResetIndexTemplateId(definition) },
+    { type: 'template', id: generateUpdatesIndexTemplateId(definition) },
     { type: 'ingest_pipeline', id: generateLatestIngestPipelineId(definition) },
     { type: 'transform', id: generateLatestTransformId(definition) },
+    { type: 'ilm_policy', id: ENTITY_HISTORY_ILM_POLICY },
   ];
 };
 
@@ -62,10 +72,25 @@ const assertHasCreatedDefinition = (
     installedComponents: getExpectedInstalledComponents(definition),
   });
 
-  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(4);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
       name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_reset_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_updates_${definition.id}_index_template`,
     })
   );
 
@@ -100,10 +125,25 @@ const assertHasUpgradedDefinition = (
     installedComponents: getExpectedInstalledComponents(definition),
   });
 
-  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(4);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
       name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_reset_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_updates_${definition.id}_index_template`,
     })
   );
 
@@ -136,10 +176,28 @@ const assertHasDeletedDefinition = (
     { ignore: [404] }
   );
 
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(4);
   expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
     {
       name: generateLatestIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateResetIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateHistoryIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateUpdatesIndexTemplateId(definition),
     },
     { ignore: [404] }
   );
@@ -179,6 +237,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: { id: 'a'.repeat(50) } as EntityDefinition,
           logger: loggerMock.create(),
         })
@@ -211,6 +270,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: mockEntityDefinition,
           logger: loggerMock.create(),
         })
@@ -231,6 +291,7 @@ describe('install_entity_definition', () => {
       await installEntityDefinition({
         esClient,
         soClient,
+        isServerless,
         definition: mockEntityDefinition,
         logger: loggerMock.create(),
       });
@@ -248,6 +309,7 @@ describe('install_entity_definition', () => {
         installEntityDefinition({
           esClient,
           soClient,
+          isServerless,
           definition: mockEntityDefinition,
           logger: loggerMock.create(),
         })
@@ -273,6 +335,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
@@ -316,6 +379,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: builtInDefinitions,
         logger: loggerMock.create(),
       });
@@ -361,6 +425,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [updatedDefinition],
         logger: loggerMock.create(),
       });
@@ -408,6 +473,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [updatedDefinition],
         logger: loggerMock.create(),
       });
@@ -450,6 +516,7 @@ describe('install_entity_definition', () => {
       await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless,
         definitions: [mockEntityDefinition],
         logger: loggerMock.create(),
       });

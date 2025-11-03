@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
@@ -88,6 +88,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('anomalies table is not empty');
         await ml.anomaliesTable.assertTableNotEmpty();
+
+        await ml.testExecution.logTestStep('displays the feedback button');
+        await ml.singleMetricViewer.assertFeedbackButtonExists();
       });
 
       it('should click on an anomaly marker', async () => {

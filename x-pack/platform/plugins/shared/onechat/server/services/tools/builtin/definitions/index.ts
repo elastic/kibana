@@ -11,5 +11,5 @@ export { listIndicesTool } from './list_indices';
 export { indexExplorerTool } from './index_explorer';
 export { generateEsqlTool } from './generate_esql';
 export { executeEsqlTool } from './execute_esql';
-export { naturalLanguageSearchTool } from './nl_search';
-export { relevanceSearchTool } from './relevance_search';
+export { searchTool } from './search';
+export { createVisualizationTool } from './create_visualization';

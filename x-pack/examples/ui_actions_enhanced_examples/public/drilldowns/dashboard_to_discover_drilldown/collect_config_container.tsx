@@ -7,9 +7,10 @@
 
 import React, { useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { CollectConfigProps } from './types';
-import { DiscoverDrilldownConfig, IndexPatternItem } from './components/discover_drilldown_config';
-import { Params } from './drilldown';
+import type { CollectConfigProps } from './types';
+import type { IndexPatternItem } from './components/discover_drilldown_config';
+import { DiscoverDrilldownConfig } from './components/discover_drilldown_config';
+import type { Params } from './drilldown';
 
 export interface CollectConfigContainerProps extends CollectConfigProps {
   params: Params;
@@ -25,7 +26,7 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
 
   useEffect(() => {
     (async () => {
-      const indexPatternSavedObjects = await start().plugins.data.indexPatterns.getCache();
+      const indexPatternSavedObjects = await start().plugins.data.dataViews.getCache();
       if (!isMounted()) return;
       setIndexPatterns(
         indexPatternSavedObjects

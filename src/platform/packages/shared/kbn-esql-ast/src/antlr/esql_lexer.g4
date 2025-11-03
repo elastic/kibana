@@ -63,11 +63,13 @@ import ChangePoint,
        From,
        Fork,
        Fuse,
+       Inline,
        Join,
        Lookup,
        MvExpand,
        Project,
        Rename,
+       Set,
        Show,
        UnknownCommand;
 

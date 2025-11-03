@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormatEditorFactory } from '../types';
+import type { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
-import { GeoPointFormatEditorFormatParams } from './geo_point';
+import type { GeoPointFormatEditorFormatParams } from './geo_point';
 
 export type { GeoPointFormatEditor } from './geo_point';
 export const geoPointFormatEditorFactory: FieldFormatEditorFactory<

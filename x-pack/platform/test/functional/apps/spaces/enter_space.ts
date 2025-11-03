@@ -6,7 +6,7 @@
  */
 
 import { stripVersionQualifier } from '@kbn/std';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function enterSpaceFunctionalTests({
   getService,
@@ -22,7 +22,7 @@ export default function enterSpaceFunctionalTests({
     before(async () => {
       // canvas application is only available when installation contains canvas workpads
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default'
       );
       await spacesService.create({
         id: 'another-space',
@@ -50,7 +50,7 @@ export default function enterSpaceFunctionalTests({
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default'
       );
       await spacesService.delete('another-space');
       await kibanaServer.savedObjects.cleanStandardList();

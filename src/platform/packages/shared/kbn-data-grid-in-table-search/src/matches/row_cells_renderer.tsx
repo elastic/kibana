@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AllCellsProps, RowMatches } from '../types';
+import type { AllCellsProps, RowMatches } from '../types';
 
 const TIMEOUT_PER_ROW = 2000; // 2 sec per row max
 

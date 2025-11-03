@@ -18,8 +18,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
-import { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
+import type { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
+import type { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
 
 interface Props {
   apiClient: ReportingAPIClient;
@@ -99,6 +99,7 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
     if (state.success && chromeStatus === 'complete') {
       outcomeCallout = (
         <EuiCallOut
+          announceOnMount
           data-test-subj="reportingDiagnosticSuccessCallout"
           color="success"
           title={i18n.translate('xpack.reporting.listing.diagnosticSuccessMessage', {
@@ -109,6 +110,7 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
     } else if (!state.success && chromeStatus === 'danger') {
       outcomeCallout = (
         <EuiCallOut
+          announceOnMount
           data-test-subj="reportingDiagnosticFailureCallout"
           iconType="warning"
           color="danger"

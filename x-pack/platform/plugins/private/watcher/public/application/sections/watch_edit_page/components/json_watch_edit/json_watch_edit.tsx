@@ -11,7 +11,7 @@ import { EuiPageHeader, EuiSpacer, EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExecuteDetails } from '../../../../models/execute_details';
 import { getActionType } from '../../../../../../common/lib/get_action_type';
-import { BaseWatch, ExecutedWatchDetails } from '../../../../../../common/types/watch_types';
+import type { BaseWatch, ExecutedWatchDetails } from '../../../../../../common/types/watch_types';
 import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
 import { JsonWatchEditForm } from './json_watch_edit_form';
 import { JsonWatchEditSimulate } from './json_watch_edit_simulate';

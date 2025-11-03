@@ -6,6 +6,182 @@
     "interfaces": [
       {
         "parentPluginId": "cloud",
+        "id": "def-public.CloudBasicUrls",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudBasicUrls",
+        "description": [
+          "\nRepresents basic URLs for the Cloud plugin, that do not require specific user roles to access."
+        ],
+        "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.baseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "baseUrl",
+            "description": [
+              "\nThis is the URL of the Cloud interface."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.kibanaUrl",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUrl",
+            "description": [
+              "\nThe full URL to the Kibana deployment."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.deploymentsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "deploymentsUrl",
+            "description": [
+              "\nThis is the path to the Cloud deployments management page. The value is already prepended with `baseUrl`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.deploymentUrl",
+            "type": "string",
+            "tags": [],
+            "label": "deploymentUrl",
+            "description": [
+              "\nThis is the path to the Cloud deployment management page for the deployment to which the Kibana instance belongs. The value is already prepended with `baseUrl`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.profileUrl",
+            "type": "string",
+            "tags": [],
+            "label": "profileUrl",
+            "description": [
+              "\nThe full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.organizationUrl",
+            "type": "string",
+            "tags": [],
+            "label": "organizationUrl",
+            "description": [
+              "\nThe full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.performanceUrl",
+            "type": "string",
+            "tags": [],
+            "label": "performanceUrl",
+            "description": [
+              "\nThe full URL to the performance page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.usersAndRolesUrl",
+            "type": "string",
+            "tags": [],
+            "label": "usersAndRolesUrl",
+            "description": [
+              "\nThe full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.projectsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "projectsUrl",
+            "description": [
+              "\nThe full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudBasicUrls.snapshotsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "snapshotsUrl",
+            "description": [
+              "\nThis is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloud",
         "id": "def-public.CloudConfigType",
         "type": "Interface",
         "tags": [],
@@ -247,7 +423,7 @@
             "label": "serverless",
             "description": [],
             "signature": [
-              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; } | undefined"
+              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; in_trial?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
@@ -258,279 +434,28 @@
       },
       {
         "parentPluginId": "cloud",
-        "id": "def-public.CloudStart",
+        "id": "def-public.CloudPrivilegedUrls",
         "type": "Interface",
         "tags": [],
-        "label": "CloudStart",
-        "description": [],
+        "label": "CloudPrivilegedUrls",
+        "description": [
+          "\nRepresents privileged URLs that require specific user roles to access."
+        ],
         "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.CloudContextProvider",
-            "type": "Function",
-            "tags": [],
-            "label": "CloudContextProvider",
-            "description": [
-              "\nA React component that provides a pre-wired `React.Context` which connects components to Cloud services."
-            ],
-            "signature": [
-              "React.FunctionComponent<{ children?: React.ReactNode; }>"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "cloud",
-                "id": "def-public.CloudStart.CloudContextProvider.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "P"
-                ],
-                "path": "node_modules/@types/react/ts5.0/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "cloud",
-                "id": "def-public.CloudStart.CloudContextProvider.$2",
-                "type": "Any",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "node_modules/@types/react/ts5.0/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.isCloudEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isCloudEnabled",
-            "description": [
-              "\n`true` when Kibana is running on Elastic Cloud."
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.cloudId",
-            "type": "string",
-            "tags": [],
-            "label": "cloudId",
-            "description": [
-              "\nCloud ID. Undefined if not running on Cloud."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.deploymentsUrl",
-            "type": "string",
-            "tags": [],
-            "label": "deploymentsUrl",
-            "description": [
-              "\nThis is the path to the Cloud deployments management page. The value is already prepended with `baseUrl`.\n"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.deploymentUrl",
-            "type": "string",
-            "tags": [],
-            "label": "deploymentUrl",
-            "description": [
-              "\nThis is the path to the Cloud deployment management page for the deployment to which the Kibana instance belongs. The value is already prepended with `baseUrl`.\n"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.profileUrl",
-            "type": "string",
-            "tags": [],
-            "label": "profileUrl",
-            "description": [
-              "\nThe full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.billingUrl",
+            "id": "def-public.CloudPrivilegedUrls.billingUrl",
             "type": "string",
             "tags": [],
             "label": "billingUrl",
             "description": [
-              "\nThe full URL to the billing page on Elastic Cloud. Undefined if not running on Cloud."
+              "\nThe full URL to the billing page on Elastic Cloud."
             ],
             "signature": [
               "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.organizationUrl",
-            "type": "string",
-            "tags": [],
-            "label": "organizationUrl",
-            "description": [
-              "\nThe full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.performanceUrl",
-            "type": "string",
-            "tags": [],
-            "label": "performanceUrl",
-            "description": [
-              "\nThe full URL to the performance page on Elastic Cloud. Undefined if not running on Cloud."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.usersAndRolesUrl",
-            "type": "string",
-            "tags": [],
-            "label": "usersAndRolesUrl",
-            "description": [
-              "\nThe full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.projectsUrl",
-            "type": "string",
-            "tags": [],
-            "label": "projectsUrl",
-            "description": [
-              "\nThe full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.fetchElasticsearchConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "fetchElasticsearchConfig",
-            "description": [
-              "\nFetches the full URL to the elasticsearch cluster."
-            ],
-            "signature": [
-              "() => Promise<",
-              "PublicElasticsearchConfigType",
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.kibanaUrl",
-            "type": "string",
-            "tags": [],
-            "label": "kibanaUrl",
-            "description": [
-              "\nThe full URL to the Kibana deployment."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.isServerlessEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isServerlessEnabled",
-            "description": [
-              "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
-            ],
-            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.serverless",
-            "type": "Object",
-            "tags": [],
-            "label": "serverless",
-            "description": [
-              "\nServerless configuration"
-            ],
-            "signature": [
-              "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
@@ -541,7 +466,37 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "cloud",
+        "id": "def-public.CloudUrls",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudUrls",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "cloud",
+            "scope": "public",
+            "docId": "kibCloudPluginApi",
+            "section": "def-public.CloudBasicUrls",
+            "text": "CloudBasicUrls"
+          },
+          " & ",
+          {
+            "pluginId": "cloud",
+            "scope": "public",
+            "docId": "kibCloudPluginApi",
+            "section": "def-public.CloudPrivilegedUrls",
+            "text": "CloudPrivilegedUrls"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "cloud",
@@ -550,6 +505,23 @@
       "tags": [],
       "label": "CloudSetup",
       "description": [],
+      "signature": [
+        {
+          "pluginId": "cloud",
+          "scope": "public",
+          "docId": "kibCloudPluginApi",
+          "section": "def-public.CloudSetup",
+          "text": "CloudSetup"
+        },
+        " extends ",
+        {
+          "pluginId": "cloud",
+          "scope": "public",
+          "docId": "kibCloudPluginApi",
+          "section": "def-public.CloudBasicUrls",
+          "text": "CloudBasicUrls"
+        }
+      ],
       "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -638,99 +610,54 @@
         },
         {
           "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.baseUrl",
-          "type": "string",
+          "id": "def-public.CloudSetup.getPrivilegedUrls",
+          "type": "Function",
           "tags": [],
-          "label": "baseUrl",
+          "label": "getPrivilegedUrls",
           "description": [
-            "\nThis is the URL of the Cloud interface."
+            "\nMethod to retrieve privileged URLs for the Cloud plugin."
           ],
           "signature": [
-            "string | undefined"
+            "() => Promise<",
+            {
+              "pluginId": "cloud",
+              "scope": "public",
+              "docId": "kibCloudPluginApi",
+              "section": "def-public.CloudPrivilegedUrls",
+              "text": "CloudPrivilegedUrls"
+            },
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.deploymentUrl",
-          "type": "string",
+          "id": "def-public.CloudSetup.getUrls",
+          "type": "Function",
           "tags": [],
-          "label": "deploymentUrl",
+          "label": "getUrls",
           "description": [
-            "\nThe full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.\n"
+            "\nMethod to retrieve basic URLs for the Cloud plugin."
           ],
           "signature": [
-            "string | undefined"
+            "() => ",
+            {
+              "pluginId": "cloud",
+              "scope": "public",
+              "docId": "kibCloudPluginApi",
+              "section": "def-public.CloudUrls",
+              "text": "CloudUrls"
+            }
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.projectsUrl",
-          "type": "string",
-          "tags": [],
-          "label": "projectsUrl",
-          "description": [
-            "\nThe full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless."
-          ],
-          "signature": [
-            "string | undefined"
-          ],
-          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.profileUrl",
-          "type": "string",
-          "tags": [],
-          "label": "profileUrl",
-          "description": [
-            "\nThis is the path to the Cloud User Profile page. The value is already prepended with `baseUrl`.\n"
-          ],
-          "signature": [
-            "string | undefined"
-          ],
-          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.organizationUrl",
-          "type": "string",
-          "tags": [],
-          "label": "organizationUrl",
-          "description": [
-            "\nThis is the path to the Cloud Account and Billing page. The value is already prepended with `baseUrl`.\n"
-          ],
-          "signature": [
-            "string | undefined"
-          ],
-          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.snapshotsUrl",
-          "type": "string",
-          "tags": [],
-          "label": "snapshotsUrl",
-          "description": [
-            "\nThis is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.\n"
-          ],
-          "signature": [
-            "string | undefined"
-          ],
-          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "cloud",
@@ -751,22 +678,6 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
-        },
-        {
-          "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.kibanaUrl",
-          "type": "string",
-          "tags": [],
-          "label": "kibanaUrl",
-          "description": [
-            "\nThe full URL to the Kibana deployment."
-          ],
-          "signature": [
-            "string | undefined"
-          ],
-          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -891,7 +802,7 @@
             "\nOnboarding configuration"
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"oblt\" | \"es\" | \"chat\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -920,14 +831,258 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloud",
+      "id": "def-public.CloudStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudStart",
+      "description": [],
+      "signature": [
+        {
+          "pluginId": "cloud",
+          "scope": "public",
+          "docId": "kibCloudPluginApi",
+          "section": "def-public.CloudStart",
+          "text": "CloudStart"
+        },
+        " extends ",
+        {
+          "pluginId": "cloud",
+          "scope": "public",
+          "docId": "kibCloudPluginApi",
+          "section": "def-public.CloudBasicUrls",
+          "text": "CloudBasicUrls"
+        }
+      ],
+      "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.CloudContextProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "CloudContextProvider",
+          "description": [
+            "\nA React component that provides a pre-wired `React.Context` which connects components to Cloud services."
+          ],
+          "signature": [
+            "React.FunctionComponent<{ children?: React.ReactNode; }>"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "cloud",
+              "id": "def-public.CloudStart.CloudContextProvider.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P"
+              ],
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "cloud",
+              "id": "def-public.CloudStart.CloudContextProvider.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.isCloudEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isCloudEnabled",
+          "description": [
+            "\n`true` when Kibana is running on Elastic Cloud."
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.cloudId",
+          "type": "string",
+          "tags": [],
+          "label": "cloudId",
+          "description": [
+            "\nCloud ID."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.fetchElasticsearchConfig",
+          "type": "Function",
+          "tags": [],
+          "label": "fetchElasticsearchConfig",
+          "description": [
+            "\nFetches the full URL to the elasticsearch cluster."
+          ],
+          "signature": [
+            "() => Promise<",
+            "PublicElasticsearchConfigType",
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.getPrivilegedUrls",
+          "type": "Function",
+          "tags": [],
+          "label": "getPrivilegedUrls",
+          "description": [
+            "\nMethod to retrieve privileged URLs for the Cloud plugin."
+          ],
+          "signature": [
+            "() => Promise<",
+            {
+              "pluginId": "cloud",
+              "scope": "public",
+              "docId": "kibCloudPluginApi",
+              "section": "def-public.CloudPrivilegedUrls",
+              "text": "CloudPrivilegedUrls"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.getUrls",
+          "type": "Function",
+          "tags": [],
+          "label": "getUrls",
+          "description": [
+            "\nMethod to retrieve basic URLs for the Cloud plugin."
+          ],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "cloud",
+              "scope": "public",
+              "docId": "kibCloudPluginApi",
+              "section": "def-public.CloudBasicUrls",
+              "text": "CloudBasicUrls"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.isServerlessEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isServerlessEnabled",
+          "description": [
+            "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudStart.serverless",
+          "type": "Object",
+          "tags": [],
+          "label": "serverless",
+          "description": [
+            "\nServerless configuration"
+          ],
+          "signature": [
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
       ],
-      "lifecycle": "setup",
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
@@ -1238,7 +1393,7 @@
             "\nOnboarding configuration."
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"oblt\" | \"es\" | \"chat\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
@@ -1269,11 +1424,29 @@
             "\nServerless configuration.\n"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1336,6 +1509,24 @@
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudStart.isInTrial",
+          "type": "Function",
+          "tags": [],
+          "label": "isInTrial",
+          "description": [
+            "\nMethod to retrieve if the organization is in trial."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

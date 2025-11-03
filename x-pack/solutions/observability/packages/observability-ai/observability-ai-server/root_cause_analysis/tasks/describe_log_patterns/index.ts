@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-common';
-import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import { omit, partition, sumBy } from 'lodash';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
-import { AnalyzedLogPattern } from '../analyze_log_patterns';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { AnalyzedLogPattern } from '../analyze_log_patterns';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 
 export interface LogPatternDescription {

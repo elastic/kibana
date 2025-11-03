@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types/ping';
+import type { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
 
 interface Props {

@@ -4,21 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Subscription } from 'rxjs';
-import { History, createHashHistory } from 'history';
+import type { Subscription } from 'rxjs';
+import type { History } from 'history';
+import { createHashHistory } from 'history';
 import type { TimeRange } from '@kbn/es-query';
-import { RefreshInterval, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
-import {
-  createStateContainer,
-  createKbnUrlStateStorage,
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type {
   StateContainer,
   INullableBaseStateContainer,
   IKbnUrlStateStorage,
   ISyncStateRef,
+} from '@kbn/kibana-utils-plugin/public';
+import {
+  createStateContainer,
+  createKbnUrlStateStorage,
   syncState,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import { MonitoringStartPluginDependencies, MonitoringStartServices } from './types';
+import type { MonitoringStartPluginDependencies, MonitoringStartServices } from './types';
 import { Legacy } from './legacy_shims';
 
 interface RawObject {

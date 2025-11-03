@@ -9,16 +9,17 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switchMap } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ESQLControlVariable, ESQLControlState, EsqlControlType } from '@kbn/esql-types';
-import {
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/esql-types';
+import type {
   OptionsListSearchTechnique,
   OptionsListSelection,
   OptionsListSuggestions,
 } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
@@ -31,6 +32,7 @@ export const selectionComparators: StateComparators<
     | 'selectedOptions'
     | 'availableOptions'
     | 'variableName'
+    | 'singleSelect'
     | 'variableType'
     | 'controlType'
     | 'esqlQuery'
@@ -38,21 +40,33 @@ export const selectionComparators: StateComparators<
   >
 > = {
   selectedOptions: selectedOptionsComparatorFunction,
-  availableOptions: 'referenceEquality',
+  availableOptions: (a, b, lastState, currentState) => {
+    // Only compare availableOptions for static values controls; values from query fetch these at runtime
+    if (
+      lastState?.controlType === currentState?.controlType &&
+      currentState?.controlType === EsqlControlType.VALUES_FROM_QUERY
+    ) {
+      return true;
+    }
+    return deepEqual(a ?? [], b ?? []);
+  },
   variableName: 'referenceEquality',
   variableType: 'referenceEquality',
   controlType: 'referenceEquality',
   esqlQuery: 'referenceEquality',
   title: 'referenceEquality',
+  singleSelect: 'referenceEquality',
 };
 
 export function initializeESQLControlSelections(
   initialState: ESQLControlState,
-  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>
+  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>,
+  setDataLoading: (loading: boolean) => void
 ) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
+  const singleSelect$ = new BehaviorSubject<boolean>(initialState.singleSelect ?? true);
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
   const variableType$ = new BehaviorSubject<ESQLVariableType>(
     initialState.variableType ?? ESQLVariableType.VALUES
@@ -83,16 +97,17 @@ export function initializeESQLControlSelections(
   const fetchSubscription = controlFetch$
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
-      switchMap(
-        async ({ timeRange }) =>
-          await getESQLSingleColumnValues({
-            query: esqlQuery$.getValue(),
-            search: dataService.search.search,
-            timeRange,
-          })
-      )
+      switchMap(async ({ timeRange }) => {
+        setDataLoading(true);
+        return await getESQLSingleColumnValues({
+          query: esqlQuery$.getValue(),
+          search: dataService.search.search,
+          timeRange,
+        });
+      })
     )
     .subscribe((result) => {
+      setDataLoading(false);
       if (getESQLSingleColumnValues.isSuccess(result)) {
         availableOptions$.next(result.values.map((value) => value));
       }
@@ -111,19 +126,39 @@ export function initializeESQLControlSelections(
     });
 
   // derive ESQL control variable from state.
-  const getEsqlVariable = () => ({
-    key: variableName$.value,
-    value: isNaN(Number(selectedOptions$.value[0]))
-      ? selectedOptions$.value[0]
-      : Number(selectedOptions$.value[0]),
-    type: variableType$.value,
-  });
+  const getEsqlVariable = () => {
+    const isSingleSelect = singleSelect$.value;
+    const selectedValues = selectedOptions$.value;
+
+    // For single select, return the first value; for multi-select, return the array
+    let value: ESQLControlVariable['value'];
+
+    if (isSingleSelect) {
+      // Single select: return the first value or empty string if none selected
+      const firstValue = selectedValues[0];
+      if (firstValue !== undefined) {
+        value = isNaN(Number(firstValue)) ? firstValue : Number(firstValue);
+      } else {
+        value = '';
+      }
+    } else {
+      // Multi-select: return array of all selected values
+      value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
+    }
+
+    return {
+      key: variableName$.value,
+      value,
+      type: variableType$.value,
+    };
+  };
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
   const variableSubscriptions = combineLatest([
     variableName$,
     variableType$,
     selectedOptions$,
     availableOptions$,
+    singleSelect$,
   ]).subscribe(() => esqlVariable$.next(getEsqlVariable()));
 
   return {
@@ -135,11 +170,13 @@ export function initializeESQLControlSelections(
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
       esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
+      singleSelect$: singleSelect$ as PublishingSubject<boolean>,
     },
     anyStateChange$: merge(
       selectedOptions$,
       availableOptions$,
       variableName$,
+      singleSelect$,
       variableType$,
       controlType$,
       esqlQuery$,
@@ -149,6 +186,7 @@ export function initializeESQLControlSelections(
       setSelectedOptions(lastSaved?.selectedOptions ?? []);
       availableOptions$.next(lastSaved?.availableOptions ?? []);
       variableName$.next(lastSaved?.variableName ?? '');
+      singleSelect$.next(lastSaved?.singleSelect ?? true);
       variableType$.next(lastSaved?.variableType ?? ESQLVariableType.VALUES);
       if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
@@ -157,8 +195,11 @@ export function initializeESQLControlSelections(
     getLatestState: () => {
       return {
         selectedOptions: selectedOptions$.getValue() ?? [],
-        availableOptions: availableOptions$.getValue() ?? [],
+        ...(controlType$.getValue() === EsqlControlType.STATIC_VALUES
+          ? { availableOptions: availableOptions$.getValue() ?? [] }
+          : {}),
         variableName: variableName$.getValue() ?? '',
+        singleSelect: singleSelect$.getValue() ?? true,
         variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
         controlType: controlType$.getValue(),
         esqlQuery: esqlQuery$.getValue() ?? '',

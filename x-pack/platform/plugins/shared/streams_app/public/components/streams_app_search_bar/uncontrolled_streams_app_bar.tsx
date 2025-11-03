@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 
 export type UncontrolledStreamsAppSearchBarProps = Omit<StatefulSearchBarProps, 'appName'>;
@@ -24,6 +24,7 @@ export function UncontrolledStreamsAppSearchBar(props: UncontrolledStreamsAppSea
       displayStyle="inPage"
       disableQueryLanguageSwitcher
       query={undefined}
+      isAutoRefreshDisabled={true}
       {...props}
     />
   );

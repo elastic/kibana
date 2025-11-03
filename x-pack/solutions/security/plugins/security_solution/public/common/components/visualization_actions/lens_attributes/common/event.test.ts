@@ -12,6 +12,8 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getEventsHistogramLensAttributes, stackByFieldAccessorId } from './events';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest
@@ -42,6 +44,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getEventsHistogramLensAttributes', () => {
+  beforeAll(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
+  });
+
   it('should render query and filters for hosts events histogram', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
       {

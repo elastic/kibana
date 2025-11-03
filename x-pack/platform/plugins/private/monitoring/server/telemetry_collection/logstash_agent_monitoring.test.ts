@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { LogstashAgentMonitoring } from './logstash_agent_monitoring';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

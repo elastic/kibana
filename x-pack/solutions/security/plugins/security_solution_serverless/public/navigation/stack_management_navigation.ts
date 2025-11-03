@@ -9,13 +9,20 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
-export const createStackManagementNavigationTree = (): NodeDefinition => ({
+export const createStackManagementNavigationTree = (
+  {
+    sideNavVersion,
+  }: {
+    sideNavVersion?: NodeDefinition['sideNavVersion'];
+  } = { sideNavVersion: 'v1' }
+): NodeDefinition => ({
   id: 'category-management',
   title: i18nStrings.projectSettings.title,
   icon: 'gear',
   breadcrumbStatus: 'hidden',
   renderAs: 'accordion',
   spaceBefore: null,
+  sideNavVersion,
   children: [
     {
       id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
@@ -79,7 +86,6 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
             },
             {
               cloudLink: 'userAndRoles',
-              title: i18nStrings.stackManagement.access.usersAndRoles,
             },
           ],
         },
@@ -120,6 +126,20 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
           ],
         },
         {
+          title: i18nStrings.stackManagement.ai.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              link: 'management:genAiSettings',
+              breadcrumbStatus: 'hidden',
+            },
+            {
+              link: 'management:securityAiAssistantManagement',
+              breadcrumbStatus: 'hidden',
+            },
+          ],
+        },
+        {
           title: i18nStrings.stackManagement.content.title,
           breadcrumbStatus: 'hidden',
           children: [
@@ -157,10 +177,6 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
           children: [
             {
               link: 'management:settings',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'management:securityAiAssistantManagement',
               breadcrumbStatus: 'hidden',
             },
           ],

@@ -56,6 +56,8 @@ import type { BulkDisableRulesRequestBody } from '../application/rule/methods/bu
 import { bulkDisableRules } from '../application/rule/methods/bulk_disable';
 import type { BulkEditOptions } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
 import { bulkEditRules } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
+import type { BulkEditRuleParamsOptions } from '../application/rule/methods/bulk_edit_params/types';
+import { bulkEditRuleParamsWithReadAuth } from '../application/rule/methods/bulk_edit_params/bulk_edit_rule_params';
 import type { BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { bulkEnableRules } from '../application/rule/methods/bulk_enable';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
@@ -94,6 +96,10 @@ import type {
   BulkFillGapsByRuleIdsOptions,
   BulkFillGapsByRuleIdsParams,
 } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
+import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_rule_types_by_query/types';
+import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
+import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
+import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -183,6 +189,9 @@ export class RulesClient {
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
+  public bulkEditRuleParamsWithReadAuth = <Params extends RuleTypeParams>(
+    options: BulkEditRuleParamsOptions<Params>
+  ) => bulkEditRuleParamsWithReadAuth<Params>(this.context, options);
   public bulkEnableRules = (params: BulkEnableRulesParams) => bulkEnableRules(this.context, params);
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
     bulkDisableRules(this.context, options);
@@ -228,6 +237,8 @@ export class RulesClient {
 
   public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
+  public getTemplate = (params: GetRuleTemplateParams) => getRuleTemplate(this.context, params);
+
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 
   public findGaps = (params: FindGapsParams) => findGaps(this.context, params);
@@ -244,4 +255,7 @@ export class RulesClient {
 
   public getGapsSummaryByRuleIds = (params: GetGapsSummaryByRuleIdsParams) =>
     getGapsSummaryByRuleIds(this.context, params);
+
+  public getRuleTypesByQuery = (params: GetRuleTypesByQueryParams) =>
+    getRuleTypesByQuery(this.context, params);
 }

@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/css';
-import { Navigation, NavigationProps } from './navigation';
+import classnames from 'classnames';
+import type { NavigationProps } from './navigation';
+import { Navigation } from './navigation';
 
 export interface ProjectSideNavV1Props extends NavigationProps {
   toggle: (isVisible: boolean) => void;
@@ -39,6 +42,15 @@ const CollapsibleNavigationFlyout = ({
   children: React.ReactNode;
 }) => {
   const isCollapsed = useObservable(isCollapsed$, false);
+  const className = classnames(
+    'hide-for-sharing',
+    css`
+      .euiFlyoutBody__overflowContent {
+        height: 100%;
+      }
+    `
+  );
+
   return (
     <EuiCollapsibleNavBeta
       data-test-subj="projectLayoutSideNav"
@@ -48,11 +60,7 @@ const CollapsibleNavigationFlyout = ({
         overflow: 'visible',
         clipPath: `polygon(0 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 100%, 0 100%)`,
       }}
-      className={css`
-        .euiFlyoutBody__overflowContent {
-          height: 100%;
-        }
-      `}
+      className={className}
     >
       {children}
     </EuiCollapsibleNavBeta>

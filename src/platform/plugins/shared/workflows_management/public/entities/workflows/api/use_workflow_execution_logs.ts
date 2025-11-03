@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
+import { useQuery } from '@kbn/react-query';
+import { useKibana } from '../../../hooks/use_kibana';
 interface WorkflowExecutionLogEntry {
   id: string;
   timestamp: string;
@@ -19,7 +18,7 @@ interface WorkflowExecutionLogEntry {
   stepName?: string;
   connectorType?: string;
   duration?: number;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 interface WorkflowExecutionLogsResponse {
@@ -31,6 +30,7 @@ interface WorkflowExecutionLogsResponse {
 
 interface UseWorkflowExecutionLogsParams {
   executionId: string;
+  stepExecutionId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
@@ -40,6 +40,7 @@ interface UseWorkflowExecutionLogsParams {
 
 export function useWorkflowExecutionLogs({
   executionId,
+  stepExecutionId,
   limit = 100,
   offset = 0,
   sortField = 'timestamp',
@@ -49,12 +50,21 @@ export function useWorkflowExecutionLogs({
   const { http } = useKibana().services;
 
   return useQuery<WorkflowExecutionLogsResponse>({
-    queryKey: ['workflowExecutionLogs', executionId, limit, offset, sortField, sortOrder],
+    queryKey: [
+      'workflowExecutionLogs',
+      executionId,
+      stepExecutionId,
+      limit,
+      offset,
+      sortField,
+      sortOrder,
+    ],
     queryFn: async () => {
-      const response = await http!.get<WorkflowExecutionLogsResponse>(
+      const response = await http.get<WorkflowExecutionLogsResponse>(
         `/api/workflowExecutions/${executionId}/logs`,
         {
           query: {
+            stepExecutionId,
             limit,
             offset,
             sortField,

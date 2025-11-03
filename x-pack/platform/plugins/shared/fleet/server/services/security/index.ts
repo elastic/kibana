@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './types';
+export type * from './types';
 export { makeRouterWithFleetAuthz } from './fleet_router';
 export { getRouteRequiredAuthz } from './route_required_authz';
 export {

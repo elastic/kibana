@@ -20,11 +20,11 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import type { FormSchema } from '../../../../shared_imports';
 import {
   useForm,
   Form,
   fieldValidators,
-  FormSchema,
   FIELD_TYPES,
   UseField,
   TextField,
@@ -35,7 +35,8 @@ import {
 import { useAppContext } from '../../../app_context';
 import { IndicesSelector } from './fields/indices_selector';
 import { documentationService } from '../../../services/documentation';
-import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
+import type { DraftPolicy } from '../create_policy_context';
+import { useCreatePolicyContext } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;

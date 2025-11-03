@@ -104,6 +104,7 @@ const validKeys = new Set([
 
 const paramFieldMap = {
   ids: '_id',
+  types: 'type',
   sourceTypes: 'source.type',
   sourceIds: 'source.id',
   targetTypes: 'target.type',

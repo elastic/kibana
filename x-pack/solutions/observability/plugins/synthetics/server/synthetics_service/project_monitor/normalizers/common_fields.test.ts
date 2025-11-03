@@ -6,6 +6,7 @@
  */
 
 import { ScheduleUnit } from '../../../../common/runtime_types';
+import type { NormalizedProjectProps } from './common_fields';
 import {
   flattenAndFormatObject,
   getMonitorSchedule,
@@ -13,7 +14,6 @@ import {
   getUrlsField,
   InvalidScheduleError,
   isValidURL,
-  NormalizedProjectProps,
 } from './common_fields';
 
 describe('isValidUrl', () => {

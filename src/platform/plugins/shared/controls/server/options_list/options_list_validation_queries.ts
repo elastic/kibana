@@ -10,12 +10,10 @@
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get, isEmpty } from 'lodash';
 
-import {
-  getSelectionAsFieldType,
-  OptionsListSelection,
-} from '../../common/options_list/options_list_selections';
-import { OptionsListRequestBody } from '../../common/options_list/types';
-import { OptionsListValidationAggregationBuilder } from './types';
+import type { OptionsListSelection } from '../../common/options_list/options_list_selections';
+import { getSelectionAsFieldType } from '../../common/options_list/options_list_selections';
+import type { OptionsListRequestBody } from '../../common/options_list/types';
+import type { OptionsListValidationAggregationBuilder } from './types';
 
 /**
  * Validation aggregations

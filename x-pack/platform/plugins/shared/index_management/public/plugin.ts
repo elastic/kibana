@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -17,7 +17,7 @@ import {
   ScopedHistory,
   Capabilities,
 } from '@kbn/core/public';
-import {
+import type {
   ComponentTemplateFlyoutProps,
   DatastreamFlyoutProps,
   IndexManagementPluginSetup,
@@ -26,16 +26,16 @@ import {
   IndexSettingProps,
   IndexTemplateFlyoutProps,
 } from '@kbn/index-management-shared-types';
-import {
+import type {
   IndexManagementLocator,
   IndexManagementAppMountParams,
 } from '@kbn/index-management-shared-types';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import React from 'react';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
-import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
+import type { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';
@@ -116,7 +116,7 @@ export class IndexMgmtUIPlugin
     coreSetup: CoreSetup<StartDependencies>,
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
-    const { fleet, usageCollection, management, cloud } = plugins;
+    const { fleet, usageCollection, management, cloud, reindexService } = plugins;
 
     this.capabilities$.subscribe((capabilities) => {
       const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -143,6 +143,7 @@ export class IndexMgmtUIPlugin
               config: this.config,
               cloud,
               canUseSyntheticSource: this.canUseSyntheticSource,
+              reindexService,
             });
           },
         });
@@ -170,6 +171,7 @@ export class IndexMgmtUIPlugin
           config: this.config,
           cloud,
           canUseSyntheticSource: this.canUseSyntheticSource,
+          reindexService,
         });
       },
       locator: this.locator,
@@ -181,7 +183,8 @@ export class IndexMgmtUIPlugin
     plugins: StartDependencies,
     deps: { history: ScopedHistory<unknown> }
   ) {
-    const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
+    const { fleet, usageCollection, cloud, share, console, ml, licensing, reindexService } =
+      plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
     const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -206,6 +209,7 @@ export class IndexMgmtUIPlugin
         console,
         ml,
         licensing,
+        reindexService,
       },
       services: {
         extensionsService: this.extensionsService,

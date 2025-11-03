@@ -24,6 +24,14 @@ import { NonEmptyString } from '../../../../model/primitives.gen';
 export type ThreatQuery = z.infer<typeof ThreatQuery>;
 export const ThreatQuery = z.string();
 
+export type ThreatMappingEntry = z.infer<typeof ThreatMappingEntry>;
+export const ThreatMappingEntry = z.object({
+  field: NonEmptyString,
+  type: z.literal('mapping'),
+  value: NonEmptyString,
+  negate: z.boolean().optional(),
+});
+
 /**
   * Array of entries objects that define mappings between the source event fields and the values in the Elasticsearch threat index. Each entries object must contain these fields:
 
@@ -38,13 +46,7 @@ export type ThreatMapping = z.infer<typeof ThreatMapping>;
 export const ThreatMapping = z
   .array(
     z.object({
-      entries: z.array(
-        z.object({
-          field: NonEmptyString,
-          type: z.literal('mapping'),
-          value: NonEmptyString,
-        })
-      ),
+      entries: z.array(ThreatMappingEntry),
     })
   )
   .min(1);

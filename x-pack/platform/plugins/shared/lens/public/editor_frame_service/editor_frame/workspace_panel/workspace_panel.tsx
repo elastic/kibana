@@ -32,29 +32,35 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { DropIllustration } from '@kbn/chart-icons';
-import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { useDragDropContext, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
 import chroma from 'chroma-js';
-import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
-import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
-import { getSearchWarningMessages } from '../../../utils';
-import {
+import type {
   FramePublicAPI,
-  isLensBrushEvent,
-  isLensFilterEvent,
-  isLensMultiFilterEvent,
-  isLensEditEvent,
-  VisualizationMap,
-  DatasourceMap,
   Suggestion,
   DatasourceLayers,
   UserMessage,
   UserMessagesGetter,
   AddUserMessages,
   VisualizationDisplayOptions,
-} from '../../../types';
+  VisualizationState,
+  DatasourceStates,
+  DataViewsState,
+  LensInspector,
+} from '@kbn/lens-common';
+import {
+  isLensBrushEvent,
+  isLensFilterEvent,
+  isLensMultiFilterEvent,
+  isLensEditEvent,
+} from '../../../types_guards';
+import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { getSearchWarningMessages } from '../../../utils';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
@@ -78,12 +84,8 @@ import {
   selectDatasourceLayers,
   applyChanges,
   selectChangesApplied,
-  VisualizationState,
-  DatasourceStates,
-  DataViewsState,
   selectExecutionContextSearch,
 } from '../../../state_management';
-import type { LensInspector } from '../../../lens_inspector_service';
 import {
   inferTimeField,
   DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,
@@ -92,10 +94,9 @@ import {
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export interface WorkspacePanelProps {
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   framePublicAPI: FramePublicAPI;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
@@ -148,8 +149,6 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
-  visualizationMap,
-  datasourceMap,
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
@@ -160,6 +159,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const visualization = useLensSelector(selectVisualization);
@@ -182,10 +182,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const initialWorkspaceRenderComplete = useRef<boolean>();
 
   const renderDeps = useRef<{
-    datasourceMap: DatasourceMap;
     datasourceStates: DatasourceStates;
     visualization: VisualizationState;
-    visualizationMap: VisualizationMap;
     datasourceLayers: DatasourceLayers;
     dataViews: DataViewsState;
   }>();
@@ -193,10 +191,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const { dataViews } = framePublicAPI;
 
   renderDeps.current = {
-    datasourceMap,
     datasourceStates,
     visualization,
-    visualizationMap,
     datasourceLayers,
     dataViews,
   };
@@ -225,24 +221,21 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           value3: esTookTime.current,
         });
       }
-      const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
-        (acc, datasource) => {
-          if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
-          return [
-            ...acc,
-            ...(datasource.getRenderEventCounters?.(
-              renderDeps.current!.datasourceStates[datasource.id]?.state
-            ) ?? []),
-          ];
-        },
-        []
-      );
+      const datasourceEvents = Object.values(datasourceMap).reduce<string[]>((acc, datasource) => {
+        if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
+        return [
+          ...acc,
+          ...(datasource.getRenderEventCounters?.(
+            renderDeps.current!.datasourceStates[datasource.id]?.state
+          ) ?? []),
+        ];
+      }, []);
       let visualizationEvents: string[] = [];
       if (renderDeps.current.visualization.activeId) {
         visualizationEvents =
-          renderDeps.current.visualizationMap[
-            renderDeps.current.visualization.activeId
-          ].getRenderEventCounters?.(renderDeps.current.visualization.state) ?? [];
+          visualizationMap[renderDeps.current.visualization.activeId].getRenderEventCounters?.(
+            renderDeps.current.visualization.state
+          ) ?? [];
       }
       const events = ['vis_editor', ...datasourceEvents, ...visualizationEvents];
 
@@ -255,7 +248,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
       trackUiCounterEvents(events);
     }
-  }, [core.analytics]);
+  }, [core.analytics, datasourceMap, visualizationMap]);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
   const removeExpressionBuildErrorsRef = useRef<() => void>();
@@ -266,7 +259,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         dataReceivedTime.current = performance.now();
 
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
-        const datasource = Object.values(renderDeps.current.datasourceMap)[0];
+        const datasource = Object.values(datasourceMap)[0];
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
 
         let requestWarnings: UserMessage[] = [];
@@ -301,7 +294,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }
       }
     },
-    [addUserMessages, dispatchLens, plugins.data.search]
+    [addUserMessages, dispatchLens, plugins.data.search, datasourceMap]
   );
 
   const shouldApplyExpression =
@@ -685,13 +678,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   return (
     <WorkspacePanelWrapper
-      framePublicAPI={framePublicAPI}
-      visualizationId={visualization.activeId}
-      datasourceStates={datasourceStates}
-      datasourceMap={datasourceMap}
-      visualizationMap={visualizationMap}
       isFullscreen={isFullscreen}
-      lensInspector={lensInspector}
       getUserMessages={getUserMessages}
       displayOptions={chartSizeSpec}
     >

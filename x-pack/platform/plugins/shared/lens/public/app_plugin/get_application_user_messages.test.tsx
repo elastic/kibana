@@ -7,12 +7,16 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-import { Visualization } from '..';
-import { DataViewsState } from '../state_management';
-import { Datasource, UserMessage } from '../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { Visualization } from '..';
+import type {
+  DataViewsState,
+  Datasource,
+  UserMessage,
+  LensPublicCallbacks,
+} from '@kbn/lens-common';
+import type { UserMessageGetterProps } from './get_application_user_messages';
 import {
-  UserMessageGetterProps,
   filterAndSortUserMessages,
   getApplicationUserMessages,
   handleMessageOverwriteFromConsumer,
@@ -20,7 +24,6 @@ import {
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
-import { LensPublicCallbacks } from '../react_embeddable/types';
 import { getLongMessage } from '../user_messages_utils';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {

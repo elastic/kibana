@@ -8,15 +8,12 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import {
-  ActionExecutionContext,
-  createAction,
-  UiActionsStart,
-} from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 
 export const USER_TRIGGER = 'USER_TRIGGER';
 export const COUNTRY_TRIGGER = 'COUNTRY_TRIGGER';

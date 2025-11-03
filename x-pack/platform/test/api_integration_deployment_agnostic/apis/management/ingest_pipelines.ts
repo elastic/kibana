@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { SupertestWithRoleScopeType } from '../../services';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ingestPipelines = getService('ingestPipelines');

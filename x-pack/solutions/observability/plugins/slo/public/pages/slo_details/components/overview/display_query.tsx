@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { QuerySchema } from '@kbn/slo-schema';
+import type { QuerySchema } from '@kbn/slo-schema';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterItem } from '@kbn/unified-search-plugin/public';
 import { injectI18n } from '@kbn/i18n-react';

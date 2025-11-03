@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISessionService, SessionService } from './session_service';
+import type { ISessionService } from './session_service';
+import { SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { first, take, toArray } from 'rxjs';
 import { getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
-import { CoreStart } from '@kbn/core/public';
-import { SearchUsageCollector } from '../..';
+import type { CoreStart } from '@kbn/core/public';
+import type { SearchUsageCollector } from '../..';
 import { createSearchUsageCollectorMock } from '../collectors/mocks';
 
 const mockSavedObject: SearchSessionSavedObject = {
@@ -461,6 +462,32 @@ describe('Session service', () => {
     expect(onSavingSession).toHaveBeenCalledTimes(1);
   });
 
+  test('save() return a search session', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+      appendSessionStartTimeToName: false,
+    });
+    sessionsClient.create.mockResolvedValue(mockSavedObject);
+
+    sessionService.start();
+    const abort = jest.fn();
+    const poll = jest.fn(() => Promise.resolve());
+    const onSavingSession = jest.fn(() => Promise.resolve());
+
+    sessionService.trackSearch({ poll, abort, onSavingSession });
+
+    expect(onSavingSession).toHaveBeenCalledTimes(0);
+
+    const searchSession = await sessionService.save();
+
+    expect(searchSession.attributes.name).toBe(mockSavedObject.attributes.name);
+  });
+
   describe("user doesn't have access to search session", () => {
     beforeAll(() => {
       userHasAccessToSearchSessions = false;
@@ -499,7 +526,7 @@ describe('Session service', () => {
     expect(toastService.addError).toHaveBeenCalledWith(
       renameError,
       expect.objectContaining({
-        title: expect.stringContaining('Failed to edit name of the search session'),
+        title: expect.stringContaining('Failed to edit name of the background search'),
       })
     );
   });
@@ -593,6 +620,62 @@ describe('Session service', () => {
       sessionService.start();
 
       expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('can continue an old session', () => {
+    const firstSessionId = sessionService.start();
+
+    for (let i = 0; i < 30; i++) {
+      sessionService.start();
+    }
+
+    sessionService.continue(firstSessionId!);
+    expect(sessionService.getSessionId()).toBe(firstSessionId);
+  });
+
+  it('holds a maximum of 30 sessions', () => {
+    const firstSessionId = sessionService.start();
+
+    for (let i = 0; i <= 30; i++) {
+      sessionService.start();
+    }
+
+    sessionService.continue(firstSessionId!);
+    expect(sessionService.getSessionId()).not.toBe(firstSessionId);
+  });
+
+  describe('when a search session in stored', () => {
+    describe('when a search gets updated', () => {
+      it('should update the stored search session', async () => {
+        // Given
+        sessionService.enableStorage({
+          getName: async () => 'Name',
+          getLocatorData: async () => ({
+            id: 'id',
+            initialState: {},
+            restoreState: {},
+          }),
+        });
+
+        const firstSessionId = sessionService.start();
+        // We need to store the search so poll gets called when the search is completed and we can assert on it
+        await sessionService.save();
+
+        const poll = jest.fn().mockResolvedValue(undefined);
+        const { complete } = sessionService.trackSearch({
+          abort: jest.fn(),
+          poll,
+        });
+        sessionService.start();
+
+        // When
+        complete();
+
+        // Then
+        expect(sessionService.isCurrentSession(firstSessionId)).toBe(false);
+        expect(poll).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

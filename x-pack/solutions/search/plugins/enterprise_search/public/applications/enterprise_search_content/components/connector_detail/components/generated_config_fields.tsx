@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
 
 import {
   EuiButtonIcon,
@@ -25,13 +26,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { MANAGE_API_KEYS_URL } from '../../../../../../common/constants';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
-import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH } from '../../../routes';
 import { ConnectorViewIndexLink } from '../../shared/connector_view_search_indices_details/connector_view_search_indices_details';
 
@@ -43,9 +44,10 @@ export interface GeneratedConfigFieldsProps {
 }
 
 const ConfirmModal: React.FC<{
+  focusTrapProps?: ComponentProps<typeof EuiConfirmModal>['focusTrapProps'];
   onCancel: () => void;
   onConfirm: () => void;
-}> = ({ onCancel, onConfirm }) => {
+}> = ({ onCancel, onConfirm, focusTrapProps }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   return (
@@ -73,6 +75,7 @@ const ConfirmModal: React.FC<{
         }
       )}
       defaultFocusedButton="confirm"
+      focusTrapProps={focusTrapProps}
     >
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.description',
@@ -91,6 +94,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   generateApiKey,
   isGenerateLoading,
 }) => {
+  const generateButtonRef = useRef<HTMLButtonElement>(null);
+  const refreshButtonRef = useRef<HTMLButtonElement>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const refreshButtonClick = () => {
     setIsModalVisible(true);
@@ -106,10 +111,32 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
 
   const showApiKeyInfoForSelfManagedConnector = !connector.is_native;
   const showApiKeyBanner = showApiKeyInfoForSelfManagedConnector && apiKey?.encoded;
+  const refreshApiKeyAriaLabel = i18n.translate(
+    'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
+    { defaultMessage: 'Refresh API key' }
+  );
 
   return (
     <>
-      {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
+      {isModalVisible && (
+        <ConfirmModal
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          focusTrapProps={{
+            returnFocus: () => {
+              if (generateButtonRef.current) {
+                generateButtonRef.current.focus();
+                return false;
+              }
+              if (refreshButtonRef.current) {
+                refreshButtonRef.current.focus();
+                return false;
+              }
+              return true;
+            },
+          }}
+        />
+      )}
       <>
         <EuiFlexGrid columns={3} alignItems="center" gutterSize="s">
           <EuiFlexItem>
@@ -242,13 +269,11 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                                   data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
                                   size="xs"
                                   iconType="refresh"
+                                  buttonRef={refreshButtonRef}
                                   isLoading={isGenerateLoading}
                                   onClick={refreshButtonClick}
                                   disabled={!connector.index_name}
-                                  aria-label={i18n.translate(
-                                    'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
-                                    { defaultMessage: 'Refresh an Elasticsearch API key' }
-                                  )}
+                                  aria-label={refreshApiKeyAriaLabel}
                                 />
                               </EuiFlexItem>
                             )}
@@ -275,9 +300,11 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                           data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
                           size="xs"
                           iconType="refresh"
+                          buttonRef={generateButtonRef}
                           isLoading={isGenerateLoading}
                           onClick={refreshButtonClick}
                           disabled={!connector.index_name}
+                          aria-label={refreshApiKeyAriaLabel}
                         />
                       </EuiFlexItem>
                     )
@@ -291,6 +318,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               color="success"
               size="s"
               title={i18n.translate(

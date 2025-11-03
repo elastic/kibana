@@ -6,24 +6,27 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { lazyObject } from '@kbn/lazy-object';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
 import type { ConcreteTaskInstance } from './task';
 import { TaskStatus } from './task';
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<TaskManagerSetupContract> = {
+  const mock: jest.Mocked<TaskManagerSetupContract> = lazyObject({
     index: '.kibana_task_manager',
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
     registerCanEncryptedSavedObjects: jest.fn(),
-  };
+  });
+
   return mock;
 };
 
 const createStartMock = () => {
-  const mock: jest.Mocked<TaskManagerStartContract> = {
+  const mock: jest.Mocked<TaskManagerStartContract> = lazyObject({
     fetch: jest.fn(),
     get: jest.fn(),
+    bulkGet: jest.fn(),
     aggregate: jest.fn(),
     remove: jest.fn(),
     bulkRemove: jest.fn(),
@@ -38,7 +41,8 @@ const createStartMock = () => {
     getRegisteredTypes: jest.fn(),
     bulkUpdateState: jest.fn(),
     registerEncryptedSavedObjectsClient: jest.fn(),
-  };
+  });
+
   return mock;
 };
 

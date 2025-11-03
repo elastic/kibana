@@ -8,13 +8,13 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
   NODE_DETAILS_PATH,

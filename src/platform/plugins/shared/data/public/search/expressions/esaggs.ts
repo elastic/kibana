@@ -10,14 +10,13 @@
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs';
-import { StartServicesAccessor } from '@kbn/core/public';
-import {
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
-  getEsaggsMeta,
-  getSideEffectFunction,
 } from '../../../common/search/expressions';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { getEsaggsMeta, getSideEffectFunction } from '../../../common/search/expressions';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed
@@ -49,10 +48,10 @@ export function getFunctionDefinition({
       { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
     ) {
       return defer(async () => {
-        const [{ aggs, indexPatterns, searchSource, getNow }, { handleEsaggsRequest }] =
+        const [{ aggs, dataViews, searchSource, getNow }, { handleEsaggsRequest }] =
           await Promise.all([getStartDependencies(), import('../../../common/search/expressions')]);
 
-        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const indexPattern = await dataViews.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
           args.aggs?.map((agg) => agg.value) ?? [],
@@ -111,11 +110,11 @@ export function getEsaggs({
 }) {
   return getFunctionDefinition({
     getStartDependencies: async () => {
-      const [, , self] = await getStartServices();
-      const { indexPatterns, search, nowProvider } = self;
+      const [, { dataViews }, self] = await getStartServices();
+      const { search, nowProvider } = self;
       return {
         aggs: search.aggs,
-        indexPatterns,
+        dataViews,
         searchSource: search.searchSource,
         getNow: () => nowProvider.get(),
       };

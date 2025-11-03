@@ -7,7 +7,8 @@
 
 import React, { memo, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiPopover, EuiButtonIcon, EuiSelectable } from '@elastic/eui';
 
 const iconButtonTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileSelectButton',

@@ -36,7 +36,6 @@ export function savedObjectToItem(
   {
     allowedAttributes,
     allowedReferences,
-    getTagNamesFromReferences,
   }: {
     /**
      * attributes to include in the output item
@@ -46,7 +45,6 @@ export function savedObjectToItem(
      * references to include in the output item
      */
     allowedReferences?: string[];
-    getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[];
   } = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
@@ -63,12 +61,9 @@ export function savedObjectToItem(
     managed,
   } = savedObject;
   try {
-    const dashboardState = transformDashboardOut(
-      attributes,
-      savedObject.references,
-      getTagNamesFromReferences
-    );
-    const references = transformReferencesOut(savedObject.references ?? []);
+    const dashboardState = transformDashboardOut(attributes, savedObject.references);
+
+    const references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
 
     return {
       item: {

@@ -8,9 +8,9 @@
 import { EuiLoadingChart } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
@@ -20,7 +20,7 @@ import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 
-import { SingleSloCustomInput } from './types';
+import type { SingleSloCustomInput } from './types';
 
 interface Props extends SingleSloCustomInput {
   reloadSubject?: Subject<boolean>;

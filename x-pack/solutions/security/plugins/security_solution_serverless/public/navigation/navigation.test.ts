@@ -18,7 +18,7 @@ const mockedCreateNavigationTree = createNavigationTree as jest.Mock;
 const mockedCreateAiNavigationTree = createAiNavigationTree as jest.Mock;
 
 const mockedNavTree = {};
-mockedCreateNavigationTree.mockReturnValue(mockedNavTree);
+mockedCreateNavigationTree.mockResolvedValue(mockedNavTree);
 const mockedAiNavTree = {};
 mockedCreateAiNavigationTree.mockReturnValue(mockedAiNavTree);
 
@@ -31,30 +31,28 @@ describe('Security Side Nav', () => {
     initNavigationSpy.mockReset();
   });
 
-  it('registers the navigation tree definition for serverless security', (done) => {
+  it('registers the navigation tree definition for serverless security', async () => {
     expect(initNavigationSpy).not.toHaveBeenCalled();
 
-    registerSolutionNavigation(services, []);
+    await registerSolutionNavigation(services, []);
 
     expect(initNavigationSpy).toHaveBeenCalled();
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services);
+    expect(mockedCreateAiNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
 
     navigationTree$.subscribe({
       next: (value) => {
         expect(value).toBe(mockedNavTree);
-        expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services);
-        expect(mockedCreateAiNavigationTree).not.toHaveBeenCalled();
       },
-      error: (err) => done(err),
-      complete: () => done(),
     });
   });
 
-  it('registers the navigation tree definition for serverless security with AI SOC', (done) => {
+  it('registers the navigation tree definition for serverless security with AI SOC', async () => {
     expect(initNavigationSpy).not.toHaveBeenCalled();
 
-    registerSolutionNavigation(services, [
+    await registerSolutionNavigation(services, [
       {
         product_line: 'ai_soc' as ProductLine,
         product_tier: 'search_ai_lake' as ProductTier,
@@ -62,17 +60,15 @@ describe('Security Side Nav', () => {
     ]);
 
     expect(initNavigationSpy).toHaveBeenCalled();
+    expect(mockedCreateAiNavigationTree).toHaveBeenCalled();
+    expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
 
     navigationTree$.subscribe({
       next: (value) => {
         expect(value).toBe(mockedAiNavTree);
-        expect(mockedCreateAiNavigationTree).toHaveBeenCalled();
-        expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
       },
-      error: (err) => done(err),
-      complete: () => done(),
     });
   });
 });

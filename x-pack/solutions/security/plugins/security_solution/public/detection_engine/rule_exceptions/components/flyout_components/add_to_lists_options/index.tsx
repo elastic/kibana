@@ -44,6 +44,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
   return (
     <>
       <EuiRadio
+        name="addToListsOption"
         id="add_to_lists"
         label={
           <EuiFlexGroup

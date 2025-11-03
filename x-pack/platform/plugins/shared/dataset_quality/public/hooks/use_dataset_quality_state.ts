@@ -13,12 +13,33 @@ export const useDatasetQualityState = () => {
 
   const { datasetUserPrivileges } = useSelector(service, (state) => state.context) ?? {};
 
-  const statsLoading = useSelector(service, (state) => state.matches('stats.datasets.fetching'));
+  const statsLoading = useSelector(
+    service,
+    (state) => state.matches('initializing') || state.matches('main.stats.datasets.fetching')
+  );
 
-  const canUserReadFailureStore = Boolean(datasetUserPrivileges?.canReadFailureStore);
+  const canUserReadFailureStore = Boolean(
+    Object.values(datasetUserPrivileges?.datasetsPrivilages ?? {})?.some(
+      (privilege) => privilege.canReadFailureStore
+    )
+  );
+
+  const canUserMonitorAnyDataset = Boolean(
+    Object.values(datasetUserPrivileges?.datasetsPrivilages ?? {})?.some(
+      (privilege) => privilege.canMonitor
+    )
+  );
+
+  const canUserReadAnyDataset = Boolean(
+    Object.values(datasetUserPrivileges?.datasetsPrivilages ?? {})?.some(
+      (privilege) => privilege.canRead
+    )
+  );
 
   return {
     statsLoading,
     canUserReadFailureStore,
+    canUserMonitorAnyDataset,
+    canUserReadAnyDataset,
   };
 };

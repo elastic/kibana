@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
@@ -51,6 +51,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { RULE_PREBUILD_DESCRIPTION_FIELDS } from '.';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -106,6 +107,11 @@ type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   actions: RuleUiAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
+
+type RuleTemplate = Pick<
+  Rule,
+  'id' | 'name' | 'params' | 'tags' | 'alertDelay' | 'schedule' | 'flapping' | 'ruleTypeId'
+>;
 type ResolvedRule = Omit<
   ResolvedSanitizedRule<RuleTypeParams>,
   'alertTypeId' | 'actions' | 'systemActions'
@@ -113,6 +119,29 @@ type ResolvedRule = Omit<
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
   actions: RuleUiAction[];
 };
+
+type PrebuildField<T> = (props: T) => {
+  title: string;
+  description: NonNullable<React.ReactNode>;
+};
+
+export interface PrebuildFieldsMap {
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: PrebuildField<string[]>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_ID]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
+}
+
+export type GetDescriptionFieldsFn<Params extends RuleTypeParams = RuleTypeParams> = ({
+  rule,
+  prebuildFields,
+  http,
+}: {
+  rule: Rule<Params>;
+  prebuildFields: PrebuildFieldsMap | undefined;
+  http: HttpSetup | undefined;
+}) => { title: string; description: NonNullable<ReactNode> }[];
 
 export {
   ALERT_HISTORY_PREFIX,
@@ -145,6 +174,7 @@ export type {
   RuleTagBadgeProps,
   RuleTagFilterProps,
   RuleTaskState,
+  RuleTemplate,
   RuleType,
   RuleTypeIndex,
   RuleTypeMetaData,
@@ -241,6 +271,7 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
+  isInternallyManaged: boolean;
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -272,6 +303,7 @@ export interface RuleTypeParamsExpressionProps<
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
+  getDescriptionFields?: GetDescriptionFieldsFn<Params>;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
@@ -285,6 +317,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
+  isInternallyManaged?: boolean;
 }
 
 export interface IErrorObject {
@@ -378,6 +411,7 @@ export enum RRuleFrequency {
   MONTHLY = 1,
   WEEKLY = 2,
   DAILY = 3,
+  HOURLY = 4,
 }
 
 export interface RecurrenceSchedule {

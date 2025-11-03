@@ -637,9 +637,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const attachAlertsAndPush = async ({
           syncAlerts = true,
-        }: { syncAlerts?: boolean } = {}) => {
+          extractObservables = true,
+        }: { syncAlerts?: boolean; extractObservables?: boolean } = {}) => {
           const { postedCase, connector } = await createCaseWithConnector({
-            createCaseReq: { ...getPostCaseRequest(), settings: { syncAlerts } },
+            createCaseReq: {
+              ...getPostCaseRequest(),
+              settings: { syncAlerts, extractObservables },
+            },
             configureReq: {
               closure_type: 'close-by-pushing',
             },

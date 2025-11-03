@@ -12,11 +12,11 @@ import type {
   DataViewsContract,
   FieldSpec,
 } from '@kbn/data-views-plugin/common';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/types';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/types';
 import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../constants';
 import { defaultLogViewsStaticConfig } from './defaults';
 import { ResolveLogViewError } from './errors';
-import { LogViewAttributes, LogViewColumnConfiguration, LogViewsStaticConfig } from './types';
+import type { LogViewAttributes, LogViewColumnConfiguration, LogViewsStaticConfig } from './types';
 
 export type ResolvedLogViewField = FieldSpec;
 

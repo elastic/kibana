@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { ConfigSchema } from './config';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ConfigSchema } from './config';
 import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
 import { SearchService } from './search/search_service';
@@ -20,7 +26,7 @@ import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
 import { getUiSettings } from './ui_settings';
-import { QuerySetup } from './query';
+import type { QuerySetup } from './query';
 
 export interface DataPluginSetup {
   search: ISearchSetup;

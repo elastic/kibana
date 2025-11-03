@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, MutableRefObject, useCallback } from 'react';
+import type { MutableRefObject } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
-import { ColorMapping, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { ColorMapping, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
 
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { ColorMappingByTerms } from '../../shared_components/coloring/color_mapping_by_terms';
-import { FramePublicAPI } from '../../types';
 import type { TagcloudState } from './types';
 
 interface Props {

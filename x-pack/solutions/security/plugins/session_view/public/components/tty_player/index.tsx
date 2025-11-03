@@ -14,7 +14,7 @@ import {
   EuiThemeProvider,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
 import type { ProcessEvent } from '../../../common';
@@ -28,7 +28,7 @@ import {
   POLICIES_PAGE_PATH,
   SECURITY_APP_ID,
 } from '../../../common/constants';
-import { SessionViewTelemetryKey } from '../../types';
+import type { SessionViewTelemetryKey } from '../../types';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
 import { DETAIL_PANEL, TOGGLE_TTY_PLAYER } from '../session_view/translations';

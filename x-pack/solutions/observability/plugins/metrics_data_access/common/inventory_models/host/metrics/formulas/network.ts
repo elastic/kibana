@@ -18,6 +18,7 @@ export const rx: SchemaBasedFormula = {
   },
   format: 'bits',
   decimals: 1,
+  normalizeByUnit: 's',
 };
 
 export const tx: SchemaBasedFormula = {
@@ -30,4 +31,5 @@ export const tx: SchemaBasedFormula = {
   },
   format: 'bits',
   decimals: 1,
+  normalizeByUnit: 's',
 };

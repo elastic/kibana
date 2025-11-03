@@ -6,7 +6,7 @@
  */
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../../../services/synthetics_private_location';
 import { commonVars } from './test_project_monitor_policy';
 
@@ -36,7 +36,86 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
     policy_ids: ['5347cd10-0368-11ed-8df7-a7424c6f5167'],
-    inputs: [props.isBrowser ? getBrowserInput(props) : getHttpInput(props)],
+    inputs: [
+      getHttpInput(props),
+      {
+        type: 'synthetics/tcp',
+        policy_template: 'synthetics',
+        enabled: false,
+        streams: [
+          {
+            enabled: false,
+            data_stream: {
+              type: 'synthetics',
+              dataset: 'tcp',
+            },
+            vars: {
+              __ui: { type: 'yaml' },
+              enabled: { value: true, type: 'bool' },
+              type: { value: 'tcp', type: 'text' },
+              name: { type: 'text' },
+              schedule: { value: '"@every 3m"', type: 'text' },
+              hosts: { type: 'text' },
+              'service.name': { type: 'text' },
+              timeout: { type: 'text' },
+              proxy_url: { type: 'text' },
+              processors: { type: 'yaml' },
+              proxy_use_local_resolver: { value: false, type: 'bool' },
+              tags: { type: 'yaml' },
+              'check.send': { type: 'text' },
+              'check.receive': { type: 'text' },
+              'ssl.certificate_authorities': { type: 'yaml' },
+              'ssl.certificate': { type: 'yaml' },
+              'ssl.key': { type: 'yaml' },
+              'ssl.key_passphrase': { type: 'text' },
+              'ssl.verification_mode': { type: 'text' },
+              'ssl.supported_protocols': { type: 'yaml' },
+              location_name: { value: 'Fleet managed', type: 'text' },
+              id: { type: 'text' },
+              origin: { type: 'text' },
+              ipv4: { type: 'bool', value: true },
+              ipv6: { type: 'bool', value: true },
+              mode: { type: 'text' },
+            },
+            id: 'synthetics/tcp-tcp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
+          },
+        ],
+      },
+      {
+        type: 'synthetics/icmp',
+        policy_template: 'synthetics',
+        enabled: false,
+        streams: [
+          {
+            enabled: false,
+            data_stream: {
+              type: 'synthetics',
+              dataset: 'icmp',
+            },
+            vars: {
+              __ui: { type: 'yaml' },
+              enabled: { value: true, type: 'bool' },
+              type: { value: 'icmp', type: 'text' },
+              name: { type: 'text' },
+              schedule: { value: '"@every 3m"', type: 'text' },
+              wait: { value: '1s', type: 'text' },
+              hosts: { type: 'text' },
+              'service.name': { type: 'text' },
+              timeout: { type: 'text' },
+              tags: { type: 'yaml' },
+              location_name: { value: 'Fleet managed', type: 'text' },
+              id: { type: 'text' },
+              origin: { type: 'text' },
+              ipv4: { type: 'bool', value: true },
+              ipv6: { type: 'bool', value: true },
+              mode: { type: 'text' },
+            },
+            id: 'synthetics/icmp-icmp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
+          },
+        ],
+      },
+      getBrowserInput(props),
+    ],
     is_managed: true,
     revision: 1,
     created_at: '2022-08-23T14:09:17.176Z',
@@ -52,10 +131,12 @@ export const getHttpInput = ({
   location,
   proxyUrl,
   isTLSEnabled,
+  isBrowser,
   spaceId,
+  namespace,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
-  const enabled = true;
+  const enabled = !isBrowser;
   const baseVars: PackagePolicyConfigRecord = {
     __ui: { type: 'yaml' },
     enabled: { value: true, type: 'bool' },
@@ -264,39 +345,52 @@ export const getHttpInput = ({
   };
 };
 
-export const getBrowserInput = ({ id, params, isBrowser }: PolicyProps) => {
-  const compiledBrowser = {
-    __ui: {
-      script_source: { is_generated_script: false, file_name: '' },
-      is_tls_enabled: false,
-    },
-    type: 'browser',
-    name: 'Test HTTP Monitor 03',
-    id,
-    origin: 'ui',
-    'run_from.id': 'Test private location 0',
-    'run_from.geo.name': 'Test private location 0',
-    enabled: true,
-    schedule: '@every 3m',
-    timeout: '16s',
-    throttling: { download: 5, upload: 3, latency: 20 },
-    tags: ['cookie-test', 'browser'],
-    'source.inline.script':
-      'step("Visit /users api route", async () => {\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\n  expect(response.status()).toEqual(200);\\n});',
-    ...(params ? { params } : {}),
-    screenshots: 'on',
-    processors: [
-      {
-        add_fields: {
-          target: '',
-          fields: {
-            'monitor.fleet_managed': true,
-            config_id: id,
-          },
+export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProps) => {
+  const compiledBrowser = isBrowser
+    ? {
+        __ui: {
+          script_source: { is_generated_script: false, file_name: '' },
+          is_tls_enabled: false,
         },
-      },
-    ],
-  };
+        type: 'browser',
+        name: 'Test HTTP Monitor 03',
+        id,
+        origin: 'ui',
+        'run_from.id': 'Test private location 0',
+        'run_from.geo.name': 'Test private location 0',
+        enabled: true,
+        schedule: '@every 3m',
+        timeout: '16s',
+        throttling: { download: 5, upload: 3, latency: 20 },
+        tags: ['cookie-test', 'browser'],
+        'source.inline.script':
+          'step("Visit /users api route", async () => {\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\n  expect(response.status()).toEqual(200);\\n});',
+        ...(params ? { params } : {}),
+        screenshots: 'on',
+        processors: [
+          {
+            add_fields: {
+              target: '',
+              fields: {
+                'monitor.fleet_managed': true,
+                config_id: id,
+              },
+            },
+          },
+        ],
+      }
+    : {
+        __ui: null,
+        type: 'browser',
+        name: null,
+        enabled: true,
+        schedule: '@every 3m',
+        'run_from.id': 'Fleet managed',
+        'run_from.geo.name': 'Fleet managed',
+        timeout: null,
+        throttling: null,
+        processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
+      };
 
   const browserVars = isBrowser
     ? {
@@ -430,6 +524,7 @@ export const omitIds = (policy: PackagePolicy) => {
   policy.inputs = sortBy(policy.inputs, 'type');
 
   policy.inputs.forEach((input) => {
+    input.id = '';
     input.streams = sortBy(input.streams, 'data_stream.dataset');
     input.streams.forEach((stream) => {
       stream.id = '';

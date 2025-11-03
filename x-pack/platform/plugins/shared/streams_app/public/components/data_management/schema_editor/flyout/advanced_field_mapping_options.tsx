@@ -16,13 +16,10 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  FieldDefinitionConfigAdvancedParameters,
-  isSchema,
-  recursiveRecord,
-} from '@kbn/streams-schema';
+import type { FieldDefinitionConfigAdvancedParameters } from '@kbn/streams-schema';
+import { isSchema, recursiveRecord } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', {
@@ -30,13 +27,13 @@ const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', 
 });
 
 export const AdvancedFieldMappingOptions = ({
-  field,
+  value,
   onChange,
   onValidate,
   isEditing,
 }: {
-  field: SchemaField;
-  onChange: (field: Partial<SchemaField>) => void;
+  value: SchemaField['additionalParameters'];
+  onChange: (additionalParameters: SchemaField['additionalParameters']) => void;
   onValidate?: (isValid: boolean) => void;
   isEditing: boolean;
 }) => {
@@ -47,12 +44,9 @@ export const AdvancedFieldMappingOptions = ({
   const [hasParsingError, { on: markAsParsingError, off: resetParsingErrorFlag }] =
     useBoolean(false);
 
-  const isInvalid = hasParsingError || !getValidFlag(field.additionalParameters);
+  const isInvalid = hasParsingError || !getValidFlag(value);
 
-  const jsonOptions = useMemo(
-    () => (field.additionalParameters ? JSON.stringify(field.additionalParameters, null, 2) : ''),
-    [field.additionalParameters]
-  );
+  const jsonOptions = useMemo(() => (value ? JSON.stringify(value, null, 2) : ''), [value]);
 
   return (
     <EuiAccordion id={accordionId} buttonContent={label}>
@@ -94,19 +88,22 @@ export const AdvancedFieldMappingOptions = ({
               height={120}
               languageId="json"
               value={jsonOptions}
-              onChange={(value) => {
+              onChange={(updatedValue) => {
                 try {
                   const additionalParameters =
-                    value === ''
+                    updatedValue === ''
                       ? undefined
-                      : (JSON.parse(value) as FieldDefinitionConfigAdvancedParameters);
-                  onChange({ additionalParameters });
+                      : (JSON.parse(updatedValue) as FieldDefinitionConfigAdvancedParameters);
+                  onChange(additionalParameters);
                   if (onValidate) onValidate(getValidFlag(additionalParameters));
                   resetParsingErrorFlag();
                 } catch (error: unknown) {
                   markAsParsingError();
                   if (onValidate) onValidate(false);
                 }
+              }}
+              options={{
+                automaticLayout: true,
               }}
             />
           ) : (

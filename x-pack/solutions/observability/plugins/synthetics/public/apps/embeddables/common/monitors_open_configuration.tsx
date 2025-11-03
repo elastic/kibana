@@ -7,14 +7,15 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 import { MonitorConfiguration } from './monitor_configuration';
-import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
-import { OverviewMonitorsEmbeddableCustomState } from '../monitors_overview/monitors_embeddable_factory';
-import { OverviewStatsEmbeddableCustomState } from '../stats_overview/stats_overview_embeddable_factory';
+import type { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
+import type { OverviewMonitorsEmbeddableCustomState } from '../monitors_overview/monitors_embeddable_factory';
+import type { OverviewStatsEmbeddableCustomState } from '../stats_overview/stats_overview_embeddable_factory';
 
 interface CommonParams {
   title: string;

@@ -21,7 +21,6 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-  CaseSettings,
   CaseSeverity,
   CaseStatuses,
   User,
@@ -40,6 +39,7 @@ import type {
   CasePostRequest,
   UserActionFindRequest,
 } from '../../../common/types/api';
+import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
 
 export interface BuilderParameters {
   title: {
@@ -68,7 +68,7 @@ export interface BuilderParameters {
     };
   };
   settings: {
-    parameters: { payload: { settings: CaseSettings } };
+    parameters: { payload: { settings: { syncAlerts?: boolean; extractObservables?: boolean } } };
   };
   comment: {
     parameters: {
@@ -95,6 +95,13 @@ export interface BuilderParameters {
   };
   customFields: {
     parameters: { payload: { customFields: CaseCustomFields } };
+  };
+  observables: {
+    parameters: {
+      payload: {
+        observables: { actionType: ObservablesActionType; count: number };
+      };
+    };
   };
 }
 
@@ -237,6 +244,15 @@ export interface UserActionsStatsAggsResult {
       doc_count: number;
     }>;
   };
+  deletions: {
+    doc_count: number;
+    deletions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
 }
 
 export interface MultipleCasesUserActionsTotalAggsResult {
@@ -289,6 +305,11 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
   originalValue: T[];
   newValue: T[];
+}
+
+export interface TypedUserActionItem<T> extends GetUserActionItemByDifference {
+  originalValue: T;
+  newValue: T;
 }
 
 export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -14,7 +14,7 @@ interface Props {
 
 export function OrphanItemTooltipIcon({ docType }: Props) {
   return (
-    <EuiToolTip
+    <EuiIconTip
       title={i18n.translate('xpack.apm.waterfallItem.euiToolTip.orphanLabel', {
         defaultMessage: 'Orphan',
       })}
@@ -23,8 +23,9 @@ export function OrphanItemTooltipIcon({ docType }: Props) {
           'This {type} was initially orphaned due to missing trace context but has been reparented to the root transaction to restore the execution flow',
         values: { type: docType },
       })}
-    >
-      <EuiIcon type="unlink" size="s" color="danger" />
-    </EuiToolTip>
+      type="unlink"
+      size="s"
+      color="danger"
+    />
   );
 }

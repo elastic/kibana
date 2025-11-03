@@ -7,7 +7,12 @@
 
 import type { ProductName } from '@kbn/product-doc-common';
 
-export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
+export type InstallationStatus =
+  | 'installed'
+  | 'uninstalled'
+  | 'installing'
+  | 'uninstalling'
+  | 'error';
 
 /**
  * DTO representation of the product doc install status SO

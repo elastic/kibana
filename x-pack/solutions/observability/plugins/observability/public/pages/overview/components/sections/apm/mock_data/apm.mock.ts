@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmFetchDataResponse } from '../../../../../../typings';
+import type { ApmFetchDataResponse } from '../../../../../../typings';
 
 export const response: ApmFetchDataResponse = {
   appLink: '/app/apm',

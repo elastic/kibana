@@ -8,6 +8,7 @@ mapped_pages:
 {{kib}} provides the following tools for configuring security and performing other tasks from the command line:
 
 * [`kibana-encryption-keys`](/reference/commands/kibana-encryption-keys.md)
+* [`kibana-setup`](/reference/commands/kibana-setup.md)
 * [`kibana-verification-code`](/reference/commands/kibana-verification-code.md)
 
 

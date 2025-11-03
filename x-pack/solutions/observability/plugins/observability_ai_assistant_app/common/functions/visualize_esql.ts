@@ -5,14 +5,15 @@
  * 2.0.
  */
 import type { FromSchema } from 'json-schema-to-ts';
-import { VISUALIZE_ESQL_USER_INTENTIONS } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  VISUALIZE_ESQL_USER_INTENTIONS,
+  VISUALIZE_QUERY_FUNCTION_NAME,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
-export const VISUALIZE_QUERY_NAME = 'visualize_query';
-
 export const visualizeESQLFunction = {
-  name: VISUALIZE_QUERY_NAME,
+  name: VISUALIZE_QUERY_FUNCTION_NAME,
   isInternal: true,
   description: 'Use this function to visualize charts for ES|QL queries.',
   descriptionForUser: 'Use this function to visualize charts for ES|QL queries.',

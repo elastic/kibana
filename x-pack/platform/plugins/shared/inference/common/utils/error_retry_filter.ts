@@ -9,6 +9,7 @@ import {
   type ChatCompleteRetryConfiguration,
   isInferenceProviderError,
   isToolValidationError,
+  isInferenceRequestAbortedError,
 } from '@kbn/inference-common';
 
 const STATUS_NO_RETRY = [
@@ -28,6 +29,9 @@ const retryAll = () => true;
 const isRecoverable = (err: any) => {
   // tool validation error are from malformed json or generation not matching the schema
   if (isToolValidationError(err)) {
+    return true;
+  }
+  if (isInferenceRequestAbortedError(err)) {
     return true;
   }
   if (isInferenceProviderError(err)) {

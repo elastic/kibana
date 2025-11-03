@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import type {
+  AvgIndexPatternColumn,
+  DerivativeIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  FormBasedLayer,
+  IndexPattern,
+  IndexPatternField,
+  GenericIndexPatternColumn,
+} from '@kbn/lens-common';
 import {
   sumOperation,
   averageOperation,
@@ -13,15 +22,9 @@ import {
   movingAverageOperation,
   cumulativeSumOperation,
   derivativeOperation,
-  AvgIndexPatternColumn,
-  DerivativeIndexPatternColumn,
 } from './definitions';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { documentField } from '../document_field';
-import { FormBasedLayer } from '../types';
-import { IndexPattern, IndexPatternField } from '../../../types';
-import { GenericIndexPatternColumn } from '.';
-import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 
 const indexPatternFields = [
   {

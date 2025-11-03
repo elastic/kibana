@@ -31,15 +31,19 @@ import { createExploreDataView } from '../../utils/create_explore_data_view';
  * and that state is not reset for slices that already have selections.
  *
  * @param dependencies - Core and plugin services required for data view creation and retrieval.
+ * @param attacksAlertsAlignmentEnabled - Prevent attacks dataview creation if feature flag is not enabled.
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
-export const createInitListener = (dependencies: {
-  http: CoreStart['http'];
-  application: CoreStart['application'];
-  uiSettings: CoreStart['uiSettings'];
-  dataViews: DataViewsServicePublic;
-  spaces: SpacesPluginStart;
-}) => {
+export const createInitListener = (
+  dependencies: {
+    http: CoreStart['http'];
+    application: CoreStart['application'];
+    uiSettings: CoreStart['uiSettings'];
+    dataViews: DataViewsServicePublic;
+    spaces: SpacesPluginStart;
+  },
+  attacksAlertsAlignmentEnabled: boolean
+) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
     effect: async (
@@ -54,6 +58,7 @@ export const createInitListener = (dependencies: {
           spaces: dependencies.spaces,
           application: dependencies.application,
           http: dependencies.http,
+          attacksAlertsAlignmentEnabled,
         });
 
         const exploreDataView = await createExploreDataView(
@@ -96,15 +101,6 @@ export const createInitListener = (dependencies: {
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
-            if (scope === DataViewManagerScopeName.detections) {
-              return listenerApi.dispatch(
-                selectDataViewAsync({
-                  id: alertDataView.id,
-                  scope,
-                })
-              );
-            }
-
             if (scope === DataViewManagerScopeName.explore) {
               return listenerApi.dispatch(
                 selectDataViewAsync({

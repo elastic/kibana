@@ -8,7 +8,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { DropOverlayWrapper, DropType, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
+import type { DropType } from '@kbn/dom-drag-drop';
+import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 const DROP_PROPS = {

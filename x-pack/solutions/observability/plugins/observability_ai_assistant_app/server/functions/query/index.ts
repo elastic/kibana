@@ -5,65 +5,43 @@
  * 2.0.
  */
 
-import { ToolDefinition, isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
+import { map } from 'rxjs';
+import { v4 } from 'uuid';
+import type { ToolDefinition } from '@kbn/inference-common';
+import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
+import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import {
-  MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
+  EXECUTE_QUERY_FUNCTION_NAME,
+  QUERY_FUNCTION_NAME,
+  VISUALIZE_QUERY_FUNCTION_NAME,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
-import { map } from 'rxjs';
-import { v4 } from 'uuid';
-import { VISUALIZE_QUERY_NAME } from '../../../common/functions/visualize_esql';
-import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
+import type { FunctionRegistrationParameters } from '..';
 
-export const QUERY_FUNCTION_NAME = 'query';
-export const EXECUTE_QUERY_NAME = 'execute_query';
-
-export function registerQueryFunction({
+export const registerExecuteQueryFunction = ({
   functions,
   resources,
-  pluginsStart,
   signal,
-}: FunctionRegistrationParameters) {
-  functions.registerInstruction(({ availableFunctionNames }) => {
-    if (!availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
-      return;
-    }
-
-    return `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
-  - visualize data
-  - run any arbitrary query
-  - breakdown or filter ES|QL queries that are displayed on the current page
-  - convert queries from another language to ES|QL
-  - asks general questions about ES|QL
-
-  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${QUERY_FUNCTION_NAME}" function for this.
-
-  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
-
-  Even if the "${QUERY_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
-  even if it has been called before.`;
-  });
-
+}: FunctionRegistrationParameters) => {
   functions.registerFunction(
     {
-      name: EXECUTE_QUERY_NAME,
+      name: EXECUTE_QUERY_FUNCTION_NAME,
       isInternal: true,
       description: `Execute a generated ES|QL query on behalf of the user. The results
         will be returned to you.
 
-        You must use this function if the user is asking for the result of a query,
+        You must use this tool if the user is asking for the result of a query,
         such as a metric or list of things, but does not want to visualize it in
         a table or chart. You do NOT need to ask permission to execute the query
-        after generating it, use the "${EXECUTE_QUERY_NAME}" function directly instead.
+        after generating it, use the "${EXECUTE_QUERY_FUNCTION_NAME}" tool directly instead.
 
-        Do not use when the user just asks for an example.`,
+        **EXCEPTION**: Do NOT use when the user just asks for an **EXAMPLE**.`,
       parameters: {
         type: 'object',
         properties: {
@@ -102,22 +80,27 @@ export function registerQueryFunction({
       };
     }
   );
+};
 
+export function registerQueryFunction(params: FunctionRegistrationParameters) {
+  const { functions, resources, pluginsStart } = params;
+  registerExecuteQueryFunction(params);
   functions.registerFunction(
     {
       name: QUERY_FUNCTION_NAME,
-      description: `This function generates, executes and/or visualizes a query
+      description: `This tool generates, executes and/or visualizes a query
       based on the user's request. It also explains how ES|QL works and how to
       convert queries from one language to another. Make sure you call one of
       the get_dataset functions first if you need index or field names. This
-      function takes no input.`,
+      tool takes no input.`,
     },
     async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions
         .getFunctions()
         .filter(
           (fn) =>
-            fn.definition.name === EXECUTE_QUERY_NAME || fn.definition.name === VISUALIZE_QUERY_NAME
+            fn.definition.name === EXECUTE_QUERY_FUNCTION_NAME ||
+            fn.definition.name === VISUALIZE_QUERY_FUNCTION_NAME
         )
         .map((fn) => fn.definition);
 
@@ -129,17 +112,18 @@ export function registerQueryFunction({
         resources.logger
       );
 
+      const availableToolDefinitions = Object.fromEntries(
+        [...actions, ...esqlFunctions].map((fn) => [
+          fn.name,
+          { description: fn.description, schema: fn.parameters } as ToolDefinition,
+        ])
+      );
       const events$ = naturalLanguageToEsql({
         client: pluginsStart.inference.getClient({ request: resources.request }),
         connectorId,
         messages: inferenceMessages,
         logger: resources.logger,
-        tools: Object.fromEntries(
-          [...actions, ...esqlFunctions].map((fn) => [
-            fn.name,
-            { description: fn.description, schema: fn.parameters } as ToolDefinition,
-          ])
-        ),
+        tools: availableToolDefinitions,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
         maxRetries: 0,
         metadata: {
@@ -147,6 +131,24 @@ export function registerQueryFunction({
             pluginId: 'observability_ai_assistant',
           },
         },
+        system: `
+<CriticalInstructions>
+ 1. **CHECK YOUR TOOLS FIRST.** Your capabilities are strictly limited to the tools listed in the AvailableTools section below.
+ 2. **DISREGARD PAST TOOLS.** 
+  * Under NO circumstances should you use any tool that is not explicitly defined in the AvailableTools section for THIS turn. 
+  * Tools used or mentioned in previous parts of the conversation are NOT available unless they are listed below. 
+  * Calling unavailable tools will result in a **critical error and task failure**.
+ 3. **Critical ES|QL syntax rules:**
+      * When using \`DATE_FORMAT\`, any literal text in the format string **MUST** be in single quotes. Example: \`DATE_FORMAT("d 'of' MMMM yyyy", @timestamp)\`.
+      * When grouping with \`STATS\`, use the field name directly. Example: \`STATS count = COUNT(*) BY destination.domain\`
+</CriticalInstructions>
+ <AvailableTools>
+ * These are the only known and available tools for use: 
+      \`\`\`json
+      ${JSON.stringify(availableToolDefinitions, null, 4)}
+      \'\'\'
+ * ALL OTHER tools not listed here are **NOT AVAILABLE** and calls to them will **FAIL**.
+ </AvailableTools> `,
       });
 
       const chatMessageId = v4();

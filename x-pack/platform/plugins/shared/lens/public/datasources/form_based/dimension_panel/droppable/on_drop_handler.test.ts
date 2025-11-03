@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { DropType } from '@kbn/dom-drag-drop';
+import type { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop_handler';
-import { FormBasedPrivateState } from '../../types';
-import { OperationMetadata, DatasourceDimensionDropHandlerProps } from '../../../../types';
-import { FormulaIndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
+import type {
+  FormBasedPrivateState,
+  OperationMetadata,
+  DatasourceDimensionDropHandlerProps,
+  FormulaIndexPatternColumn,
+  MedianIndexPatternColumn,
+} from '@kbn/lens-common';
 import { generateId } from '../../../../id_generator';
 import {
   mockDataViews,

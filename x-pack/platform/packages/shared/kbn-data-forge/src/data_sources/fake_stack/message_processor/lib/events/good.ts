@@ -9,7 +9,7 @@ import { sample, random, xor, sum } from 'lodash';
 import { MESSAGE_PROCESSOR_HOSTS } from '../../../common/constants';
 import { createBaseEvent } from './create_base_event';
 import { badHosts } from './bad_host';
-import { EventFunction } from '../../../../../types';
+import type { EventFunction } from '../../../../../types';
 import { createLatencyHistogram } from './create_latency_histogram';
 import { generateBytesProcessed } from './generate_bytes_processed';
 import { generateTimeSpent } from './generate_time_spent';

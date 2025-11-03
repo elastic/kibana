@@ -38,6 +38,7 @@ export const useLensAttributes = ({
   stackByField,
   title,
   esql,
+  signalIndexName,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -55,9 +56,21 @@ export const useLensAttributes = ({
   const indicesExist = newDataViewPickerEnabled
     ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+
+  const selectedPatterns = useMemo(() => {
+    if (signalIndexName) {
+      return [signalIndexName];
+    } else if (newDataViewPickerEnabled) {
+      return experimentalSelectedPatterns;
+    } else {
+      return oldSelectedPatterns;
+    }
+  }, [
+    experimentalSelectedPatterns,
+    newDataViewPickerEnabled,
+    oldSelectedPatterns,
+    signalIndexName,
+  ]);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(

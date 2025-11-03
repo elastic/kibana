@@ -8,12 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse, rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ChartData } from '../../../typings/slo';
+import type { ChartData } from '../../../typings/slo';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
-import { TimeBounds } from '../types';
+import type { TimeBounds } from '../types';
 import { WideChart } from './wide_chart';
 
 export interface Props {

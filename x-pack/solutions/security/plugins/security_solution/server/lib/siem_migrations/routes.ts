@@ -18,9 +18,9 @@ export const registerSiemMigrationsRoutes = (
 ) => {
   if (!config.experimentalFeatures.siemMigrationsDisabled) {
     registerSiemRuleMigrationsRoutes(router, config, logger);
-  }
 
-  if (config.experimentalFeatures.automaticDashboardsMigration) {
-    registerSiemDashboardMigrationsRoutes(router, logger);
+    if (config.experimentalFeatures.automaticDashboardsMigration) {
+      registerSiemDashboardMigrationsRoutes(router, config, logger);
+    }
   }
 };

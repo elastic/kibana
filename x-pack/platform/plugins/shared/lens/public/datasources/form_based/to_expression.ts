@@ -8,31 +8,35 @@
 import type { FeatureFlagsStart, IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
-import {
+import type {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { queryToAst } from '@kbn/data-plugin/common';
-import {
-  buildExpression,
-  buildExpressionFunction,
+import type {
   ExpressionAstExpression,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type {
+  DateHistogramIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  FormBasedPrivateState,
+  FormattedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  IndexPattern,
+  IndexPatternMap,
+  RangeIndexPatternColumn,
+} from '@kbn/lens-common';
 import { getESQLForLayer } from './to_esql';
 import { convertToAbsoluteDateRange } from '../../utils';
-import type { DateRange } from '../../../common/types';
-import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
-import { FormBasedPrivateState, FormBasedLayer } from './types';
-import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
-import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
@@ -487,7 +491,7 @@ function getExpressionForLayer(
           index: buildExpression([
             buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
               'indexPatternLoad',
-              { id: indexPattern.id }
+              { id: indexPattern.id, includeFields: false }
             ),
           ]),
           aggs,

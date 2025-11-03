@@ -60,6 +60,99 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-hooks",
+        "id": "def-common.isIndexNotCreatedError",
+        "type": "Function",
+        "tags": [],
+        "label": "isIndexNotCreatedError",
+        "description": [
+          "\nDetermines whether an error response from the `readListIndex`\nAPI call indicates that the index is not yet created."
+        ],
+        "signature": [
+          "(err: unknown) => err is ",
+          {
+            "pluginId": "@kbn/securitysolution-t-grid",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionTGridPluginApi",
+            "section": "def-common.SecurityAppError",
+            "text": "SecurityAppError"
+          }
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_read_list_index/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-hooks",
+            "id": "def-common.isIndexNotCreatedError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_read_list_index/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-hooks",
+        "id": "def-common.parseReadIndexResultFrom404Error",
+        "type": "Function",
+        "tags": [],
+        "label": "parseReadIndexResultFrom404Error",
+        "description": [
+          "\nParses the result of a 404 error from the read list index API into an actionable response\n\nThis endpoint returns a 404 if either of the underlying indices do\nnot exist. By default, this causes the http client to throw an error,\nbut as this is a valid result from the endpoint, we want to catch that error\nand present a result that is actionable to the consumer."
+        ],
+        "signature": [
+          "(error: ",
+          {
+            "pluginId": "@kbn/securitysolution-t-grid",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionTGridPluginApi",
+            "section": "def-common.SecurityAppError",
+            "text": "SecurityAppError"
+          },
+          ") => { list_index: boolean; list_item_index: boolean; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_read_list_index/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-hooks",
+            "id": "def-common.parseReadIndexResultFrom404Error.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "The 404 IndexNotCreated error returned from the read list index API"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-t-grid",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionTGridPluginApi",
+                "section": "def-common.SecurityAppError",
+                "text": "SecurityAppError"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_read_list_index/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-hooks",
         "id": "def-common.removeCreatedAtCreatedByFromCommentsOnUpdate",
         "type": "Function",
         "tags": [],
@@ -1430,7 +1523,7 @@
                 "section": "def-common.ApiCallMemoProps",
                 "text": "ApiCallMemoProps"
               },
-              " & { onSuccess: (arg: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }) => void; }) => Promise<void>"
+              " & { onSuccess: (arg: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }) => void; }) => Promise<void>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
             "deprecated": false,
@@ -1451,7 +1544,7 @@
                     "section": "def-common.ApiCallMemoProps",
                     "text": "ApiCallMemoProps"
                   },
-                  " & { onSuccess: (arg: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }) => void; }"
+                  " & { onSuccess: (arg: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }) => void; }"
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_api/index.ts",
                 "deprecated": false,
@@ -1757,7 +1850,7 @@
         "label": "ReturnExceptionLists",
         "description": [],
         "signature": [
-          "[loading: boolean, exceptionLists: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }[], pagination: ",
+          "[loading: boolean, exceptionLists: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }[], pagination: ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-list-types",
             "scope": "common",

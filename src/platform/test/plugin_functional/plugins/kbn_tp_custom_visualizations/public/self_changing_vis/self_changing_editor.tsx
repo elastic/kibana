@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 
 interface CounterParams {
   counter: number;

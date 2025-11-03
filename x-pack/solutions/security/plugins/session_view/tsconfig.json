@@ -39,6 +39,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/analytics",
     "@kbn/securitysolution-rules",
+    "@kbn/es-types",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

@@ -13,8 +13,8 @@ import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browse
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import { buildShipperHeaders } from '../common/ebt_v3_endpoint';
 import { isSyntheticsMonitorMock } from './plugin.test.mock';
 import { TelemetryPlugin } from './plugin';

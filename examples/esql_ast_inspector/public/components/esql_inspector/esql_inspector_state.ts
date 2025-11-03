@@ -8,9 +8,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ESQLCommand, EsqlQuery, Walker } from '@kbn/esql-ast';
-import { ESQLProperNode } from '@kbn/esql-ast/src/types';
-import { Annotation } from '../annotations';
+import type { ESQLCommand } from '@kbn/esql-ast';
+import { EsqlQuery, Walker } from '@kbn/esql-ast';
+import type { ESQLProperNode } from '@kbn/esql-ast/src/types';
+import type { Annotation } from '../annotations';
 import { highlight } from './helpers';
 
 const defaultSrc = `FROM kibana_sample_data_logs, another_index

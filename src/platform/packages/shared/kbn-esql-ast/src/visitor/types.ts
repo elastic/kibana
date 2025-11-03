@@ -59,12 +59,12 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitFunctionCallExpression'> &
       VisitorInput<Methods, 'visitLiteralExpression'> &
       VisitorInput<Methods, 'visitListLiteralExpression'> &
-      VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
       VisitorInput<Methods, 'visitInlineCastExpression'> &
       VisitorInput<Methods, 'visitOrderExpression'> &
       VisitorInput<Methods, 'visitIdentifierExpression'> &
       VisitorInput<Methods, 'visitMapExpression'> &
-      VisitorInput<Methods, 'visitMapEntryExpression'>
+      VisitorInput<Methods, 'visitMapEntryExpression'> &
+      VisitorInput<Methods, 'visitParensExpression'>
 >;
 
 /**
@@ -78,12 +78,12 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitFunctionCallExpression'>
   | VisitorOutput<Methods, 'visitLiteralExpression'>
   | VisitorOutput<Methods, 'visitListLiteralExpression'>
-  | VisitorOutput<Methods, 'visitTimeIntervalLiteralExpression'>
   | VisitorOutput<Methods, 'visitInlineCastExpression'>
   | VisitorOutput<Methods, 'visitOrderExpression'>
   | VisitorOutput<Methods, 'visitIdentifierExpression'>
   | VisitorOutput<Methods, 'visitMapExpression'>
-  | VisitorOutput<Methods, 'visitMapEntryExpression'>;
+  | VisitorOutput<Methods, 'visitMapEntryExpression'>
+  | VisitorOutput<Methods, 'visitParensExpression'>;
 
 /**
  * Input that satisfies any command visitor input constraints.
@@ -151,6 +151,7 @@ export interface VisitorMethods<
 > {
   visitQuery?: Visitor<contexts.QueryVisitorContext<Visitors, Data>, any, any>;
   visitCommand?: Visitor<contexts.CommandVisitorContext<Visitors, Data>, any, any>;
+  visitHeaderCommand?: Visitor<contexts.HeaderCommandVisitorContext<Visitors, Data>, any, any>;
   visitFromCommand?: Visitor<contexts.FromCommandVisitorContext<Visitors, Data>, any, any>;
   visitLimitCommand?: Visitor<contexts.LimitCommandVisitorContext<Visitors, Data>, any, any>;
   visitExplainCommand?: Visitor<contexts.ExplainCommandVisitorContext<Visitors, Data>, any, any>;
@@ -221,11 +222,6 @@ export interface VisitorMethods<
     any,
     any
   >;
-  visitTimeIntervalLiteralExpression?: Visitor<
-    contexts.TimeIntervalLiteralExpressionVisitorContext<Visitors, Data>,
-    any,
-    any
-  >;
   visitInlineCastExpression?: Visitor<
     contexts.InlineCastExpressionVisitorContext<Visitors, Data>,
     any,
@@ -243,6 +239,11 @@ export interface VisitorMethods<
     any,
     any
   >;
+  visitParensExpression?: Visitor<
+    contexts.ParensExpressionVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
 }
 
 /**
@@ -250,6 +251,8 @@ export interface VisitorMethods<
  */
 export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQLAstQueryNode
   ? 'visitQuery'
+  : Node extends ast.ESQLAstHeaderCommand
+  ? 'visitHeaderCommand'
   : Node extends ast.ESQLCommand
   ? 'visitCommand'
   : Node extends ast.ESQLCommandOption
@@ -264,8 +267,6 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitLiteralExpression'
   : Node extends ast.ESQLList
   ? 'visitListLiteralExpression'
-  : Node extends ast.ESQLTimeInterval
-  ? 'visitTimeIntervalLiteralExpression'
   : Node extends ast.ESQLInlineCast
   ? 'visitInlineCastExpression'
   : Node extends ast.ESQLIdentifier
@@ -274,6 +275,8 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitMapExpression'
   : Node extends ast.ESQLMapEntry
   ? 'visitMapEntryExpression'
+  : Node extends ast.ESQLParens
+  ? 'visitParensExpression'
   : never;
 
 /**

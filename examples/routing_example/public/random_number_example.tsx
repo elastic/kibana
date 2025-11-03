@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { useState } from 'react';
 import { EuiText, EuiButton, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
-import { Services } from './services';
+import type { Services } from './services';
 
 interface Props {
   fetchRandomNumber: Services['fetchRandomNumber'];
@@ -53,7 +53,7 @@ export function RandomNumberRouteExample({ fetchRandomNumber }: Props) {
         </EuiButton>
 
         {error !== undefined ? (
-          <EuiCallOut color="danger" iconType="warning">
+          <EuiCallOut announceOnMount color="danger" iconType="warning">
             {JSON.stringify(error)}
           </EuiCallOut>
         ) : null}

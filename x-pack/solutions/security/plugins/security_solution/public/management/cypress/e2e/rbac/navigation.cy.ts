@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import * as ServerlessHeaders from '@kbn/test-suites-xpack/security_solution_cypress/cypress/screens/serverless_security_header';
-import * as EssHeaders from '@kbn/test-suites-xpack/security_solution_cypress/cypress/screens/security_header';
+import * as ServerlessHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/serverless_security_header';
+import * as EssHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/security_header';
 import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
+import type { SiemVersion } from '../../common/constants';
 import { SIEM_VERSIONS } from '../../common/constants';
 
 describe('Navigation RBAC', () => {
@@ -19,7 +20,7 @@ describe('Navigation RBAC', () => {
     ? ServerlessHeaders.ASSETS_PANEL_BTN
     : EssHeaders.SETTINGS_PANEL_BTN;
 
-  const pages = [
+  const allPages = [
     {
       name: 'Endpoints',
       privilegePrefix: 'endpoint_list_',
@@ -34,6 +35,12 @@ describe('Navigation RBAC', () => {
       name: 'Trusted applications',
       privilegePrefix: 'trusted_applications_',
       selector: Selectors.TRUSTED_APPS,
+    },
+    {
+      name: 'Trusted devices',
+      privilegePrefix: 'trusted_devices_',
+      selector: Selectors.TRUSTED_DEVICES,
+      siemVersions: ['siemV3', 'siemV4'], // Only available starting siemV3
     },
     {
       name: 'Event filters',
@@ -57,9 +64,15 @@ describe('Navigation RBAC', () => {
     },
   ];
 
+  const getPagesForSiemVersion = (siemVersion: SiemVersion) => {
+    return allPages.filter((page) => !page.siemVersions || page.siemVersions.includes(siemVersion));
+  };
+
   describe('ESS - using custom roles', { tags: ['@ess'] }, () => {
     for (const siemVersion of SIEM_VERSIONS) {
       describe(siemVersion, () => {
+        const pages = getPagesForSiemVersion(siemVersion);
+
         describe('NONE access', () => {
           beforeEach(() => {
             login.withCustomKibanaPrivileges({ [siemVersion]: ['all'] });
@@ -123,10 +136,11 @@ describe('Navigation RBAC', () => {
     it('without access to any of the subpages, none of those should be displayed', () => {
       login(ROLE.detections_admin);
       loadPage('/app/security');
-      cy.get(MenuButtonSelector).click();
-      cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
+      // assets should be missing, checking that assets link and more button is missing
+      cy.get(ServerlessHeaders.MORE_MENU_BTN).should('not.exist');
+      cy.get(MenuButtonSelector).should('not.exist');
 
-      for (const page of pages) {
+      for (const page of allPages) {
         cy.get(page.selector).should('not.exist');
       }
     });
@@ -134,11 +148,15 @@ describe('Navigation RBAC', () => {
     it('with access to all of the subpages, all of those should be displayed', () => {
       login(ROLE.soc_manager);
       loadPage('/app/security');
-      cy.get(MenuButtonSelector).click();
-      cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
+      ServerlessHeaders.showMoreItems();
+      cy.get(MenuButtonSelector).click(); // click "Assets" to open the menu
+      cy.get(allPages[0].selector).click(); // open the Assets anv panel by clicking the first item in more>assets popover
 
-      for (const page of pages) {
-        cy.get(page.selector);
+      for (const page of allPages) {
+        if (page.selector !== Selectors.TRUSTED_DEVICES) {
+          // Skip Trusted Devices for now — soc_manager does not yet have the required privilege in controller (MKI would fail otherwise).
+          cy.get(page.selector);
+        }
       }
     });
   });

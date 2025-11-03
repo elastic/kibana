@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { KibanaServices } from './types';
 import { fetchActiveMaintenanceWindows } from './api';
@@ -38,6 +38,6 @@ const FETCH_ERROR = i18n.translate('alertsUIShared.maintenanceWindowCallout.fetc
 const FETCH_ERROR_DESCRIPTION = i18n.translate(
   'alertsUIShared.maintenanceWindowCallout.fetchErrorDescription',
   {
-    defaultMessage: 'Rule notifications are stopped while maintenance windows are running.',
+    defaultMessage: 'Some rule notifications may be stopped while maintenance windows are running.',
   }
 );

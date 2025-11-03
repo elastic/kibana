@@ -16,41 +16,9 @@ export enum AgentType {
 }
 
 /**
- * Execution mode for agents.
- */
-export enum AgentMode {
-  /**
-   * Normal (Q/A) mode
-   */
-  normal = 'normal',
-  /**
-   * "Think more" mode
-   */
-  reason = 'reason',
-  /**
-   * "Plan-and-execute" mode
-   */
-  plan = 'plan',
-  /**
-   * "Deep-research" mode
-   */
-  research = 'research',
-}
-
-/**
  * ID of the onechat default conversational agent
  */
-export const oneChatDefaultAgentId = 'default';
-
-/**
- * Base descriptor for an agent.
- */
-export interface AgentDescriptor {
-  type: AgentType;
-  agentId: string;
-  providerId: string;
-  description: string;
-}
+export const oneChatDefaultAgentId = 'elastic-ai-agent';
 
 /**
  * Definition of a onechat agent.
@@ -73,6 +41,27 @@ export interface AgentDefinition {
    */
   description: string;
   /**
+   * read-only attribute.
+   * Built-in agents are readonly, user-created agent are not.
+   */
+  readonly: boolean;
+  /**
+   * Optional labels used to organize or filter agents
+   */
+  labels?: string[];
+  /**
+   * Optional avatar eui icon for built-in agents
+   */
+  avatar_icon?: string;
+  /**
+   * Optional color used to represent the agent in the UI
+   */
+  avatar_color?: string;
+  /**
+   * Optional symbol used to represent the agent in the UI
+   */
+  avatar_symbol?: string;
+  /**
    * Configuration associated with this agent
    */
   configuration: AgentConfiguration;
@@ -80,11 +69,38 @@ export interface AgentDefinition {
 
 export interface AgentConfiguration {
   /**
-   * Custom instruction for the agent
+   * Custom instruction for the agent.
+   *
+   * Instructions specified that way will be added to both the research and answer prompts.
+   * For custom per-step instructions, use the `research` and `answer` configuration fields instead.
    */
   instructions?: string;
   /**
    * List of tools exposed to the agent
    */
   tools: ToolSelection[];
+
+  /**
+   * Custom configuration for the research step of the agent.
+   */
+  research?: AgentResearchStepConfiguration;
+
+  /**
+   * Custom configuration for the answer step of the agent.
+   */
+  answer?: AgentAnswerStepConfiguration;
+}
+
+export interface AgentResearchStepConfiguration {
+  /**
+   * Custom instruction for the agent's research step.
+   */
+  instructions?: string;
+}
+
+export interface AgentAnswerStepConfiguration {
+  /**
+   * Custom instruction for the agent's answer step.
+   */
+  instructions?: string;
 }

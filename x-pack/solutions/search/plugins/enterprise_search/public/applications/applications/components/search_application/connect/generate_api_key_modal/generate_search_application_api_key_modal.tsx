@@ -129,6 +129,7 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                   ) : (
                     <EuiFlexItem>
                       <EuiCallOut
+                        announceOnMount
                         title={
                           <FormattedMessage
                             id="xpack.enterpriseSearch.searchApplication.searchApplication.api.generateApiKeyModal.callOutMessage"

@@ -11,7 +11,8 @@ import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from
 import { useKibana } from '../../../../shared_imports';
 
 import { i18nTexts } from './i18n_texts';
-import { toKnownError, PipelineError } from './error_utils';
+import type { PipelineError } from './error_utils';
+import { toKnownError } from './error_utils';
 
 interface Props {
   error: unknown;

@@ -16,12 +16,12 @@ import {
 import { getLogRateAnalysisParametersFromAlert } from '@kbn/aiops-log-rate-analysis/get_log_rate_analysis_parameters_from_alert';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-service';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { ALERT_END, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { CustomThresholdAlert } from '../types';
+import type { CustomThresholdAlert } from '../types';
 import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
 import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
 
@@ -39,13 +39,12 @@ interface SignificantFieldValue {
 }
 
 export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRateAnalysisProps) {
-  const {
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-    uiSettings,
-  } = services;
+  const { observabilityAIAssistant, uiSettings } = services;
+
+  const ObservabilityAIAssistantContextualInsight =
+    observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
+  const getContextualInsightMessages = observabilityAIAssistant?.getContextualInsightMessages;
+
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
     | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }

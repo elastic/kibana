@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ChangeKbModel } from './change_kb_model';
 import {
-  KnowledgeBaseState,
+  InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
   ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
@@ -23,13 +23,7 @@ import {
   elserDescription,
   elserTitle,
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-jest.mock('../../../hooks/use_install_product_doc', () => ({
-  useInstallProductDoc: () => ({
-    mutateAsync: jest.fn(),
-  }),
-}));
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('@kbn/ai-assistant/src/hooks', () => ({
   useInferenceEndpoints: () => ({
@@ -66,7 +60,7 @@ const createMockStatus = (
 ): UseKnowledgeBaseResult['status'] => ({
   value: {
     enabled: true,
-    kbState: KnowledgeBaseState.READY,
+    inferenceModelState: InferenceModelState.READY,
     isReIndexing: false,
     currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
     concreteWriteIndex: 'index_1',
@@ -76,6 +70,7 @@ const createMockStatus = (
       service: 'my-service',
       service_settings: {},
     },
+    productDocStatus: 'uninstalled',
     ...overrides,
   },
   loading: false,
@@ -91,6 +86,10 @@ const createMockKnowledgeBase = (
   isPolling: false,
   install: jest.fn().mockResolvedValue(undefined),
   warmupModel: jest.fn().mockResolvedValue(undefined),
+  isProductDocInstalling: false,
+  isProductDocUninstalling: false,
+  installProductDoc: jest.fn().mockResolvedValue(undefined),
+  uninstallProductDoc: jest.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
@@ -117,7 +116,10 @@ const renderComponent = (mockKb: UseKnowledgeBaseResult) => {
 
   render(
     <QueryClientProvider client={queryClient}>
-      <ChangeKbModel knowledgeBase={mockKb} />{' '}
+      <ChangeKbModel
+        knowledgeBase={mockKb}
+        currentlyDeployedInferenceId={ELSER_ON_ML_NODE_INFERENCE_ID}
+      />
     </QueryClientProvider>
   );
 };

@@ -4,5 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './extensions_service';
-export * from './public_api_service';
+export type * from './extensions_service';
+export type * from './public_api_service';

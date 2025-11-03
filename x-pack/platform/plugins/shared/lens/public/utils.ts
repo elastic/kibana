@@ -16,13 +16,13 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { emptyTitleText } from '@kbn/visualization-ui-components';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { ISearchStart } from '@kbn/data-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { DateRange } from '../common/types';
-import type { LensDocument } from './persistence';
-import {
+import type {
+  LensDocument,
+  DateRange,
   Datasource,
   DatasourceMap,
   Visualization,
@@ -30,14 +30,17 @@ import {
   IndexPatternRef,
   DraggedField,
   DragDropOperation,
-  isOperation,
   UserMessage,
+  DatasourceStates,
+  VisualizationState,
   TriggerEvent,
+} from '@kbn/lens-common';
+import {
+  isOperation,
   isLensBrushEvent,
   isLensMultiFilterEvent,
   isLensFilterEvent,
-} from './types';
-import type { DatasourceStates, VisualizationState } from './state_management';
+} from './types_guards';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
 

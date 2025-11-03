@@ -12,9 +12,9 @@ import { shallow } from 'enzyme';
 
 import { ScriptingHelpFlyout } from './help_flyout';
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { ExecuteScript } from '../../types';
+import type { ExecuteScript } from '../../types';
 
 jest.mock('./test_script', () => ({
   TestScript: () => {

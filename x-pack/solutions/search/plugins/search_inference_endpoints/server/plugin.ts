@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { defineRoutes } from './routes';
-import {
+import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginSetupDependencies,
   SearchInferenceEndpointsPluginStart,
@@ -57,7 +56,6 @@ export class SearchInferenceEndpointsPlugin
       order: 2,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: ['kibana', PLUGIN_ID],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       catalogue: [PLUGIN_ID],
       privileges: {
         all: {

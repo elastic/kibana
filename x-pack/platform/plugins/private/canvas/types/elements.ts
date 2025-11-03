@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { CanvasElement } from '.';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { CanvasElement } from '.';
 
 export interface ElementSpec {
   name: string;

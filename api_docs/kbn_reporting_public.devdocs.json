@@ -1556,7 +1556,13 @@
         "description": [],
         "signature": [
           "(checkResults: ",
-          "LicenseCheck",
+          {
+            "pluginId": "@kbn/licensing-types",
+            "scope": "common",
+            "docId": "kibKbnLicensingTypesPluginApi",
+            "section": "def-common.LicenseCheck",
+            "text": "LicenseCheck"
+          },
           ") => ",
           "LicenseCheckResults"
         ],
@@ -1572,7 +1578,13 @@
             "label": "checkResults",
             "description": [],
             "signature": [
-              "LicenseCheck"
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.LicenseCheck",
+                "text": "LicenseCheck"
+              }
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/license_check.ts",
             "deprecated": false,
@@ -1921,7 +1933,7 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1991,7 +2003,13 @@
             "signature": [
               "Observable",
               "<",
-              "ILicense",
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.ILicense",
+                "text": "ILicense"
+              },
               ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",

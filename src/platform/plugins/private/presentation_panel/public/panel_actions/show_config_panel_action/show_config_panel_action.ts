@@ -9,20 +9,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   EmbeddableApiContext,
   CanAccessViewMode,
+  HasReadOnlyCapabilities,
+} from '@kbn/presentation-publishing';
+import {
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
-  HasReadOnlyCapabilities,
   hasReadOnlyCapabilities,
 } from '@kbn/presentation-publishing';
-import {
-  Action,
-  FrequentCompatibilityChangeAction,
-  IncompatibleActionError,
-} from '@kbn/ui-actions-plugin/public';
+import type { Action, FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { map } from 'rxjs';
 import { ACTION_SHOW_CONFIG_PANEL } from './constants';
 

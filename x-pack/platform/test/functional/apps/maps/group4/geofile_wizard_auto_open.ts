@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, maps } = getPageObjects(['common', 'maps']);
@@ -14,12 +14,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173095
-  // Failing: See https://github.com/elastic/kibana/issues/173095
-  describe.skip('Auto open file upload wizard in maps app', () => {
+  describe('Auto open file upload wizard in maps app', () => {
     before(async () => {
       await common.navigateToUrl('integrations', 'browse', {
         useActualUrl: true,
+        shouldUseHashForSubUrl: false,
       });
       const searchInput = await find.byCssSelector('[data-test-subj="epmList.searchBar"]');
       await searchInput.type('GeoJSON');

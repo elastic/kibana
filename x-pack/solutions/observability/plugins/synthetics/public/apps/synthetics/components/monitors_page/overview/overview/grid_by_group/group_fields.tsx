@@ -12,11 +12,8 @@ import { useUrlParams } from '../../../../../hooks';
 import { GroupMenu } from './group_menu';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
 
-import {
-  GroupByState,
-  selectOverviewState,
-  setOverviewGroupByAction,
-} from '../../../../../state/overview';
+import type { GroupByState } from '../../../../../state/overview';
+import { selectOverviewState, setOverviewGroupByAction } from '../../../../../state/overview';
 
 export const GroupFields = () => {
   const {

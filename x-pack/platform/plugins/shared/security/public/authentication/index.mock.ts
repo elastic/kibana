@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { lazyObject } from '@kbn/lazy-object';
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
@@ -13,41 +14,45 @@ import type {
 } from '@kbn/security-plugin-types-public';
 
 export const authenticationMock = {
-  createSetup: (): jest.Mocked<AuthenticationServiceSetup> => ({
-    getCurrentUser: jest.fn(),
-    areAPIKeysEnabled: jest.fn(),
-  }),
-  createStart: (): jest.Mocked<AuthenticationServiceStart> => ({
-    getCurrentUser: jest.fn(),
-    areAPIKeysEnabled: jest.fn(),
-  }),
+  createSetup: (): jest.Mocked<AuthenticationServiceSetup> =>
+    lazyObject({
+      getCurrentUser: jest.fn(),
+      areAPIKeysEnabled: jest.fn(),
+    }),
+  createStart: (): jest.Mocked<AuthenticationServiceStart> =>
+    lazyObject({
+      getCurrentUser: jest.fn(),
+      areAPIKeysEnabled: jest.fn(),
+    }),
 };
 
 export const authorizationMock = {
-  createSetup: (): jest.Mocked<AuthorizationServiceSetup> => ({
-    isRoleManagementEnabled: jest.fn(),
-    roles: {
-      getRoles: jest.fn(),
-      getRole: jest.fn(),
-      deleteRole: jest.fn(),
-      saveRole: jest.fn(),
-      bulkUpdateRoles: jest.fn(),
-    },
-    privileges: {
-      getAll: jest.fn(),
-    },
-  }),
-  createStart: (): jest.Mocked<AuthorizationServiceStart> => ({
-    isRoleManagementEnabled: jest.fn(),
-    roles: {
-      getRoles: jest.fn(),
-      getRole: jest.fn(),
-      deleteRole: jest.fn(),
-      saveRole: jest.fn(),
-      bulkUpdateRoles: jest.fn(),
-    },
-    privileges: {
-      getAll: jest.fn(),
-    },
-  }),
+  createSetup: (): jest.Mocked<AuthorizationServiceSetup> =>
+    lazyObject({
+      isRoleManagementEnabled: jest.fn(),
+      roles: lazyObject({
+        getRoles: jest.fn(),
+        getRole: jest.fn(),
+        deleteRole: jest.fn(),
+        saveRole: jest.fn(),
+        bulkUpdateRoles: jest.fn(),
+      }),
+      privileges: lazyObject({
+        getAll: jest.fn(),
+      }),
+    }),
+  createStart: (): jest.Mocked<AuthorizationServiceStart> =>
+    lazyObject({
+      isRoleManagementEnabled: jest.fn(),
+      roles: lazyObject({
+        getRoles: jest.fn(),
+        getRole: jest.fn(),
+        deleteRole: jest.fn(),
+        saveRole: jest.fn(),
+        bulkUpdateRoles: jest.fn(),
+      }),
+      privileges: lazyObject({
+        getAll: jest.fn(),
+      }),
+    }),
 };

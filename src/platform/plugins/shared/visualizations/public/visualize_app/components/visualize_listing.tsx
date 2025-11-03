@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useCallback,
-  useRef,
-  useMemo,
-  useEffect,
-  MouseEvent,
-  MutableRefObject,
-} from 'react';
+import type { MouseEvent, MutableRefObject } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,23 +24,29 @@ import {
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { TableListViewProps } from '@kbn/content-management-table-list-view';
+import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import {
+  SAVED_OBJECTS_LIMIT_SETTING,
+  SAVED_OBJECTS_PER_PAGE_SETTING,
+  VisualizeConstants,
+} from '@kbn/visualizations-common';
 import { findListItems } from '../../utils/saved_visualize_utils';
-import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
+import {
+  deleteListItems,
+  updateBasicSoAttributes,
+} from '../../utils/saved_objects_utils/update_basic_attributes';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import { SAVED_OBJECTS_LIMIT_SETTING, SAVED_OBJECTS_PER_PAGE_SETTING } from '../..';
 import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
-import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
+import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
 
 const visualizeListingStyles = {
@@ -75,7 +75,7 @@ const visualizeListingStyles = {
   `,
 };
 
-type VisualizeUserContent = VisualizationListItem &
+export type VisualizeUserContent = VisualizationListItem &
   UserContentCommonSchema & {
     type: string;
     attributes: {
@@ -129,11 +129,11 @@ const useTableListViewProps = (
     services: {
       application,
       history,
-      savedObjects,
       savedObjectsTagging,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      http,
       ...startServices
     },
   } = useKibana<VisualizeServices>();
@@ -145,7 +145,7 @@ const useTableListViewProps = (
   }, [closeNewVisModal]);
 
   const editItem = useCallback(
-    async ({ attributes: { id }, editor }: VisualizeUserContent) => {
+    async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
       if (!('editApp' in editor || 'editUrl' in editor)) {
         await editor.onEdit(id);
         return;
@@ -212,12 +212,13 @@ const useTableListViewProps = (
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            http,
             ...startServices,
           }
         );
       }
     },
-    [savedObjectsTagging, contentManagement, startServices]
+    [savedObjectsTagging, contentManagement, http, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -261,10 +262,14 @@ const useTableListViewProps = (
   );
 
   const deleteItems = useCallback(
-    async (selectedItems: object[]) => {
-      await Promise.all(
-        selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
-      ).catch((error) => {
+    async (items: object[]) => {
+      await deleteListItems(items, {
+        savedObjectsTagging,
+        typesService: getTypes(),
+        contentManagement,
+        http,
+        ...startServices,
+      }).catch((error) => {
         toastNotifications.addError(error, {
           title: i18n.translate('visualizations.visualizeListingDeleteErrorTitle', {
             defaultMessage: 'Error deleting visualization',
@@ -272,7 +277,7 @@ const useTableListViewProps = (
         });
       });
     },
-    [savedObjects.client, toastNotifications]
+    [contentManagement, http, savedObjectsTagging, startServices, toastNotifications]
   );
 
   const props: CustomTableViewProps = {
@@ -370,6 +375,11 @@ export const VisualizeListing = () => {
   });
   useUnmount(() => closeNewVisModal.current());
 
+  const getVisualizeListItemLink = useMemo(
+    () => getVisualizeListItemLinkFn(application, kbnUrlStateStorage),
+    [application, kbnUrlStateStorage]
+  );
+
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
@@ -412,7 +422,7 @@ export const VisualizeListing = () => {
         <>
           {dashboardCapabilities.createNew && (
             <>
-              <EuiCallOut size="s" title={calloutMessage} iconType="info" />
+              <EuiCallOut announceOnMount size="s" title={calloutMessage} iconType="info" />
               <EuiSpacer size="m" />
             </>
           )}
@@ -432,19 +442,11 @@ export const VisualizeListing = () => {
                 defaultMessage: 'visualizations',
               })}
               getOnClickTitle={(item) =>
-                item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
-              }
-              getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
-                readOnly || (editor && 'onEdit' in editor)
+                item.attributes.readOnly || item.error
                   ? undefined
-                  : getVisualizeListItemLink(
-                      application,
-                      kbnUrlStateStorage,
-                      editor.editApp,
-                      editor.editUrl,
-                      error
-                    )
+                  : () => tableViewProps.editItem?.(item)
               }
+              getDetailViewLink={getVisualizeListItemLink}
               tableCaption={visualizeLibraryTitle}
               {...tableViewProps}
               {...propsFromParent}
@@ -454,13 +456,14 @@ export const VisualizeListing = () => {
       ),
     };
   }, [
+    styles.calloutLink,
+    styles.table,
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    kbnUrlStateStorage,
-    tableViewProps,
     visualizeLibraryTitle,
-    styles,
+    tableViewProps,
+    getVisualizeListItemLink,
   ]);
 
   const tabs = useMemo(

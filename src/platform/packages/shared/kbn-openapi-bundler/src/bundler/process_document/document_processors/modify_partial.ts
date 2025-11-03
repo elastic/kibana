@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocumentNodeProcessor } from './types/document_node_processor';
+import type { DocumentNodeProcessor } from './types/document_node_processor';
 import { hasProp } from '../../../utils/has_prop';
 import { X_MODIFY } from '../../known_custom_props';
 import { inlineRef } from './utils/inline_ref';

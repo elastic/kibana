@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 
-import { DateFormatter } from '../services';
+import type { DateFormatter } from '../services';
 
 const DefaultDateFormatter: DateFormatter = ({ value, children }) =>
   children(new Date(value).toDateString());
@@ -28,7 +29,7 @@ export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFor
           defaultMessage: 'Last updated unknown',
         })}
       >
-        <span>-</span>
+        <span tabIndex={0}>-</span>
       </EuiToolTip>
     );
   }
@@ -39,7 +40,7 @@ export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFor
       <DateFormatterComp value={new Date(dateTime).getTime()}>
         {(formattedDate: string) => (
           <EuiToolTip content={updatedAt.format('LL LT')}>
-            <span>{formattedDate}</span>
+            <span tabIndex={0}>{formattedDate}</span>
           </EuiToolTip>
         )}
       </DateFormatterComp>
@@ -47,7 +48,7 @@ export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFor
   }
   return (
     <EuiToolTip content={updatedAt.format('LL LT')}>
-      <span>{updatedAt.format('ll')}</span>
+      <span tabIndex={0}>{updatedAt.format('ll')}</span>
     </EuiToolTip>
   );
 };

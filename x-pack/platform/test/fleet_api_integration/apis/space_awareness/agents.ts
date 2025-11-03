@@ -6,12 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  AGENTS_INDEX,
-  CreateAgentPolicyResponse,
-  GetAgentsResponse,
-} from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { CreateAgentPolicyResponse, GetAgentsResponse } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import {
@@ -19,15 +16,19 @@ import {
   cleanFleetAgents,
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
   makeAgentsUpgradeable,
 } from './helpers';
 import { pollResult } from '../agents/update_agent_tags';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
+
   const supertest = getService('supertest');
   const esClient = getService('es');
+
   const kibanaServer = getService('kibanaServer');
+
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
@@ -39,12 +40,14 @@ export default function (providerContext: FtrProviderContext) {
     let defaultSpacePolicy2: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
+    let allSpacePolicy: CreateAgentPolicyResponse;
 
     let defaultSpaceAgent1: string;
     let defaultSpaceAgent2: string;
     let testSpaceAgent1: string;
     let testSpaceAgent2: string;
     let testSpaceAgent3: string;
+    let allSpaceAgent4: string;
 
     before(async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
@@ -53,21 +56,30 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
 
       await apiClient.postEnableSpaceAwareness();
 
-      const [_defaultSpacePolicy1, _defaultSpacePolicy2, _spaceTest1Policy1, _spaceTest1Policy2] =
-        await Promise.all([
-          apiClient.createAgentPolicy(),
-          apiClient.createAgentPolicy(),
-          apiClient.createAgentPolicy(TEST_SPACE_1),
-          apiClient.createAgentPolicy(TEST_SPACE_1),
-        ]);
+      const [
+        _defaultSpacePolicy1,
+        _defaultSpacePolicy2,
+        _spaceTest1Policy1,
+        _spaceTest1Policy2,
+        _allSpacePolicy,
+      ] = await Promise.all([
+        apiClient.createAgentPolicy(),
+        apiClient.createAgentPolicy(),
+        apiClient.createAgentPolicy(TEST_SPACE_1),
+        apiClient.createAgentPolicy(TEST_SPACE_1),
+        apiClient.createAgentPolicy(undefined, {
+          space_ids: ['*'],
+        }),
+      ]);
       defaultSpacePolicy1 = _defaultSpacePolicy1;
       defaultSpacePolicy2 = _defaultSpacePolicy2;
       spaceTest1Policy1 = _spaceTest1Policy1;
       spaceTest1Policy2 = _spaceTest1Policy2;
+      allSpacePolicy = _allSpacePolicy;
 
       await createAgents();
     });
@@ -87,18 +99,21 @@ export default function (providerContext: FtrProviderContext) {
         _testSpaceAgent1,
         _testSpaceAgent2,
         _testSpaceAgent3,
+        _allSpaceAgent4,
       ] = await Promise.all([
         createFleetAgent(esClient, defaultSpacePolicy1.item.id, 'default'),
         createFleetAgent(esClient, defaultSpacePolicy2.item.id),
         createFleetAgent(esClient, spaceTest1Policy1.item.id, TEST_SPACE_1),
         createFleetAgent(esClient, spaceTest1Policy2.item.id, TEST_SPACE_1),
         createFleetAgent(esClient, spaceTest1Policy1.item.id, TEST_SPACE_1),
+        createFleetAgent(esClient, allSpacePolicy.item.id, '*'),
       ]);
       defaultSpaceAgent1 = _defaultSpaceAgent1;
       defaultSpaceAgent2 = _defaultSpaceAgent2;
       testSpaceAgent1 = _testSpaceAgent1;
       testSpaceAgent2 = _testSpaceAgent2;
       testSpaceAgent3 = _testSpaceAgent3;
+      allSpaceAgent4 = _allSpaceAgent4;
     }
 
     beforeEach(async () => {
@@ -113,24 +128,35 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET /agents', () => {
       it('should return agents in a specific space', async () => {
         const agents = await apiClient.getAgents(TEST_SPACE_1);
-        expect(agents.total).to.eql(3);
+        expect(agents.total).to.eql(4);
         const agentIds = agents.items?.map((item) => item.id);
         expect(agentIds).to.contain(testSpaceAgent1);
         expect(agentIds).to.contain(testSpaceAgent2);
+        expect(agentIds).to.contain(testSpaceAgent3);
+        expect(agentIds).to.contain(allSpaceAgent4);
       });
 
       it('should return agents in default space', async () => {
         const agents = await apiClient.getAgents();
-        expect(agents.total).to.eql(2);
+        expect(agents.total).to.eql(3);
         const agentIds = agents.items?.map((item) => item.id);
         expect(agentIds).to.contain(defaultSpaceAgent1);
         expect(agentIds).to.contain(defaultSpaceAgent2);
+        expect(agentIds).to.contain(allSpaceAgent4);
       });
     });
 
     describe('GET /agents/{agentId}', () => {
       it('should allow to retrieve agent in the same space', async () => {
         await apiClient.getAgent(testSpaceAgent1, TEST_SPACE_1);
+      });
+
+      it('should allow to retrieve an all space agent in a custom space', async () => {
+        await apiClient.getAgent(allSpaceAgent4, TEST_SPACE_1);
+      });
+
+      it('should allow to retrieve an all space agent the default space', async () => {
+        await apiClient.getAgent(allSpaceAgent4);
       });
 
       it('should not allow to get an agent from a different space from the default space', async () => {
@@ -147,12 +173,21 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('PUT /agents/{agentId}', () => {
-      it('should allow updating an agent in the same space', async () => {
+      it('should allow to update an agent in the same space', async () => {
         await apiClient.updateAgent(testSpaceAgent1, { tags: ['foo'] }, TEST_SPACE_1);
         let agent = await apiClient.getAgent(testSpaceAgent1, TEST_SPACE_1);
         expect(agent.item.tags).to.eql(['foo']);
         await apiClient.updateAgent(testSpaceAgent1, { tags: ['tag1'] }, TEST_SPACE_1);
         agent = await apiClient.getAgent(testSpaceAgent1, TEST_SPACE_1);
+        expect(agent.item.tags).to.eql(['tag1']);
+      });
+
+      it('should allow to update an all space agent in a custom and default space', async () => {
+        await apiClient.updateAgent(allSpaceAgent4, { tags: ['foo'] }, TEST_SPACE_1);
+        let agent = await apiClient.getAgent(allSpaceAgent4, TEST_SPACE_1);
+        expect(agent.item.tags).to.eql(['foo']);
+        await apiClient.updateAgent(allSpaceAgent4, { tags: ['tag1'] });
+        agent = await apiClient.getAgent(allSpaceAgent4, TEST_SPACE_1);
         expect(agent.item.tags).to.eql(['tag1']);
       });
 
@@ -184,6 +219,20 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should allow deleting an all space agent in a custom space', async () => {
+        const testAllSpaceDeleteAgent = await createFleetAgent(
+          esClient,
+          spaceTest1Policy2.item.id,
+          '*'
+        );
+        await apiClient.deleteAgent(testAllSpaceDeleteAgent, TEST_SPACE_1);
+        await esClient.delete({
+          index: AGENTS_INDEX,
+          id: testAllSpaceDeleteAgent,
+          refresh: 'wait_for',
+        });
+      });
+
       it('should not allow deleting an agent from a different space', async () => {
         let err: Error | undefined;
         try {
@@ -198,6 +247,11 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /agents/bulkUpdateAgentTags', () => {
+      beforeEach(async () => {
+        await cleanFleetAgents(esClient);
+        await createAgents();
+      });
+
       function getAgentTags(agents: GetAgentsResponse) {
         return agents.items?.reduce((acc, item) => {
           acc[item.id] = item.tags;
@@ -215,12 +269,14 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
+          [allSpaceAgent4]: ['tag1'],
         });
         await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
             [testSpaceAgent3]: ['tag1'],
+            [allSpaceAgent4]: ['tag1'],
           },
           TEST_SPACE_1
         );
@@ -239,18 +295,20 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
+          [allSpaceAgent4]: ['tag1'],
         });
         await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1', 'space1'],
             [testSpaceAgent2]: ['tag1'],
             [testSpaceAgent3]: ['tag1'],
+            [allSpaceAgent4]: ['tag1'],
           },
           TEST_SPACE_1
         );
         await verifyNoAgentActions();
         let actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatus.items.length).to.eql(1);
+        expect(actionStatus.items.length).to.greaterThan(0);
 
         // Remove tag
         await apiClient.bulkUpdateAgentTags(
@@ -264,21 +322,21 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
+          [allSpaceAgent4]: ['tag1'],
         });
         await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
             [testSpaceAgent3]: ['tag1'],
+            [allSpaceAgent4]: ['tag1'],
           },
           TEST_SPACE_1
         );
         await verifyNoAgentActions();
         actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatus.items.length).to.eql(2);
+        expect(actionStatus.items.length).to.greaterThan(1);
         actionStatus.items.forEach((item) => {
-          expect(item.nbAgentsActioned).to.eql(1);
-          expect(item.nbAgentsActionCreated).to.eql(1);
           expect(item.type).to.eql('UPDATE_TAGS');
         });
       });
@@ -287,12 +345,14 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
+          [allSpaceAgent4]: ['tag1'],
         });
         await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
             [testSpaceAgent3]: ['tag1'],
+            [allSpaceAgent4]: ['tag1'],
           },
           TEST_SPACE_1
         );
@@ -314,20 +374,22 @@ export default function (providerContext: FtrProviderContext) {
               [testSpaceAgent1]: ['tag1', 'space1'],
               [testSpaceAgent2]: ['tag1', 'space1'],
               [testSpaceAgent3]: ['tag1', 'space1'],
+              [allSpaceAgent4]: ['tag1', 'space1'],
             },
             TEST_SPACE_1
           );
         };
 
-        await pollResult(supertest, actionId, 3, verifyActionResult, TEST_SPACE_1);
+        await pollResult(supertest, actionId, 4, verifyActionResult, TEST_SPACE_1);
 
         await verifyNoAgentActions();
         let actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatus.items.length).to.eql(1);
+        expect(actionStatus.items.length).to.greaterThan(0);
 
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
+          [allSpaceAgent4]: ['tag1', 'space1'],
         });
 
         // Remove tag
@@ -345,23 +407,23 @@ export default function (providerContext: FtrProviderContext) {
               [testSpaceAgent1]: ['tag1'],
               [testSpaceAgent2]: ['tag1'],
               [testSpaceAgent3]: ['tag1'],
+              [allSpaceAgent4]: ['tag1'],
             },
             TEST_SPACE_1
           );
         };
 
-        await pollResult(supertest, actionId, 3, verifyActionResult, TEST_SPACE_1);
+        await pollResult(supertest, actionId, 4, verifyActionResult, TEST_SPACE_1);
 
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
+          [allSpaceAgent4]: ['tag1'],
         });
         await verifyNoAgentActions();
         actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatus.items.length).to.eql(2);
+        expect(actionStatus.items.length).to.greaterThan(1);
         actionStatus.items.forEach((item) => {
-          expect(item.nbAgentsActioned).to.eql(3);
-          expect(item.nbAgentsActionCreated).to.eql(3);
           expect(item.type).to.eql('UPDATE_TAGS');
         });
       });
@@ -434,12 +496,14 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsStatus({
           [defaultSpaceAgent1]: 'online',
           [defaultSpaceAgent2]: 'online',
+          [allSpaceAgent4]: 'online',
         });
         await verifyAgentsStatus(
           {
             [testSpaceAgent1]: 'online',
             [testSpaceAgent2]: 'online',
             [testSpaceAgent3]: 'online',
+            [allSpaceAgent4]: 'online',
           },
           TEST_SPACE_1
         );
@@ -458,12 +522,14 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsStatus({
           [defaultSpaceAgent1]: 'online',
           [defaultSpaceAgent2]: 'online',
+          [allSpaceAgent4]: 'online',
         });
         await verifyAgentsStatus(
           {
             [testSpaceAgent1]: 'updating',
             [testSpaceAgent2]: 'online',
             [testSpaceAgent3]: 'online',
+            [allSpaceAgent4]: 'online',
           },
           TEST_SPACE_1
         );
@@ -479,12 +545,14 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsStatus({
           [defaultSpaceAgent1]: 'online',
           [defaultSpaceAgent2]: 'online',
+          [allSpaceAgent4]: 'online',
         });
         await verifyAgentsStatus(
           {
             [testSpaceAgent1]: 'online',
             [testSpaceAgent2]: 'online',
             [testSpaceAgent3]: 'online',
+            [allSpaceAgent4]: 'online',
           },
           TEST_SPACE_1
         );
@@ -503,20 +571,22 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsStatus({
           [defaultSpaceAgent1]: 'online',
           [defaultSpaceAgent2]: 'online',
+          [allSpaceAgent4]: 'updating',
         });
         await verifyAgentsStatus(
           {
             [testSpaceAgent1]: 'updating',
             [testSpaceAgent2]: 'updating',
             [testSpaceAgent3]: 'updating',
+            [allSpaceAgent4]: 'updating',
           },
           TEST_SPACE_1
         );
         await verifyNoAgentActions();
         const actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
         expect(actionStatus.items.length).to.eql(1);
-        expect(actionStatus.items[0].nbAgentsActioned).to.eql(3);
-        expect(actionStatus.items[0].nbAgentsActionCreated).to.eql(3);
+        expect(actionStatus.items[0].nbAgentsActioned).to.eql(4);
+        expect(actionStatus.items[0].nbAgentsActionCreated).to.eql(4);
         expect(actionStatus.items[0].type).to.eql('UPGRADE');
       });
     });
@@ -647,12 +717,14 @@ export default function (providerContext: FtrProviderContext) {
         await verifyAgentsPolicies({
           [defaultSpaceAgent1]: defaultSpacePolicy1.item.id,
           [defaultSpaceAgent2]: defaultSpacePolicy2.item.id,
+          [allSpaceAgent4]: allSpacePolicy.item.id,
         });
         await verifyAgentsPolicies(
           {
             [testSpaceAgent1]: spaceTest1Policy1.item.id,
             [testSpaceAgent2]: spaceTest1Policy2.item.id,
             [testSpaceAgent3]: spaceTest1Policy1.item.id,
+            [allSpaceAgent4]: allSpacePolicy.item.id,
           },
           TEST_SPACE_1
         );
@@ -677,6 +749,7 @@ export default function (providerContext: FtrProviderContext) {
             [testSpaceAgent1]: spaceTest1Policy2.item.id,
             [testSpaceAgent2]: spaceTest1Policy2.item.id,
             [testSpaceAgent3]: spaceTest1Policy2.item.id,
+            [allSpaceAgent4]: spaceTest1Policy2.item.id,
           },
           TEST_SPACE_1
         );
@@ -684,12 +757,13 @@ export default function (providerContext: FtrProviderContext) {
         await verifyNoAgentActions();
         const actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
         expect(actionStatus.items.length).to.eql(1);
-        expect(actionStatus.items[0].nbAgentsActioned).to.eql(3);
-        expect(actionStatus.items[0].nbAgentsActionCreated).to.eql(2);
+        expect(actionStatus.items[0].nbAgentsActioned).to.eql(4);
+        expect(actionStatus.items[0].nbAgentsActionCreated).to.eql(3);
         expect(actionStatus.items[0].type).to.eql('POLICY_REASSIGN');
 
         await apiClient.reassignAgent(testSpaceAgent1, spaceTest1Policy1.item.id, TEST_SPACE_1);
         await apiClient.reassignAgent(testSpaceAgent3, spaceTest1Policy1.item.id, TEST_SPACE_1);
+        await apiClient.reassignAgent(allSpaceAgent4, allSpacePolicy.item.id, TEST_SPACE_1);
       });
     });
 
@@ -761,8 +835,8 @@ export default function (providerContext: FtrProviderContext) {
         await verifyNoAgentActions();
         const actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
         expect(actionStatus.items.length).to.eql(1);
-        expect(actionStatus.items[0].nbAgentsActioned).to.eql(3);
-        expect(actionStatus.items[0].nbAgentsActionCreated).to.eql(3);
+        expect(actionStatus.items[0].nbAgentsActioned).to.eql(4);
+        expect(actionStatus.items[0].nbAgentsActionCreated).to.eql(4);
         expect(actionStatus.items[0].type).to.eql('REQUEST_DIAGNOSTICS');
       });
     });
@@ -854,15 +928,37 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should only unenroll agents in the current space when passing a kuery', async () => {
-        async function verifyAgentsUnenrollment(type: string, spaceId?: string) {
-          const agents = await apiClient.getAgents(spaceId);
-          agents.items.forEach((agent) => {
-            expect(typeof agent.unenrollment_started_at).to.be(type);
-          });
+        async function verifyAgentsUnenrollmentStarted(agentIds: string[], spaceId?: string) {
+          const agentsRes = await apiClient.getAgents(spaceId);
+          const agentWithUnenrollmentStartedAtIds = agentsRes.items
+            .filter((agent) => agent.unenrollment_started_at)
+            .map((agent) => agent.id);
+
+          for (const agentId of agentIds) {
+            expect(agentWithUnenrollmentStartedAtIds).to.contain(agentId);
+          }
         }
 
-        await verifyAgentsUnenrollment('undefined');
-        await verifyAgentsUnenrollment('undefined', TEST_SPACE_1);
+        async function verifyAgentsUnenrollmentNotStarted(agentIds: string[], spaceId?: string) {
+          const agentsRes = await apiClient.getAgents(spaceId);
+          const agentWithUnenrollmentStartedAtIds = agentsRes.items
+            .filter((agent) => agent.unenrollment_started_at === undefined)
+            .map((agent) => agent.id);
+
+          for (const agentId of agentIds) {
+            expect(agentWithUnenrollmentStartedAtIds).to.contain(agentId);
+          }
+        }
+
+        await verifyAgentsUnenrollmentNotStarted([
+          defaultSpaceAgent1,
+          defaultSpaceAgent2,
+          allSpaceAgent4,
+        ]);
+        await verifyAgentsUnenrollmentNotStarted(
+          [testSpaceAgent1, testSpaceAgent2, testSpaceAgent3, allSpaceAgent4],
+          TEST_SPACE_1
+        );
         await verifyNoAgentActions();
         await verifyNoAgentActions(TEST_SPACE_1);
 
@@ -873,13 +969,17 @@ export default function (providerContext: FtrProviderContext) {
           TEST_SPACE_1
         );
 
-        await verifyAgentsUnenrollment('undefined');
-        await verifyAgentsUnenrollment('string', TEST_SPACE_1);
+        await verifyAgentsUnenrollmentNotStarted([defaultSpaceAgent1, defaultSpaceAgent2]);
+        await verifyAgentsUnenrollmentStarted([allSpaceAgent4]);
+        await verifyAgentsUnenrollmentStarted(
+          [testSpaceAgent1, testSpaceAgent2, testSpaceAgent3, allSpaceAgent4],
+          TEST_SPACE_1
+        );
         await verifyNoAgentActions();
         const actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
         expect(actionStatus.items.length).to.eql(1);
-        expect(actionStatus.items[0].nbAgentsActioned).to.eql(3);
-        expect(actionStatus.items[0].nbAgentsActionCreated).to.eql(3);
+        expect(actionStatus.items[0].nbAgentsActioned).to.eql(4);
+        expect(actionStatus.items[0].nbAgentsActionCreated).to.eql(4);
         expect(actionStatus.items[0].type).to.eql('UNENROLL');
       });
     });

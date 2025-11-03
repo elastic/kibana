@@ -48,71 +48,27 @@ Object {
         },
       },
       "entity.metadata.host.name": Object {
-        "aggs": Object {
-          "data": Object {
-            "terms": Object {
-              "field": "host.name",
-              "size": 10,
-            },
-          },
-        },
-        "filter": Object {
-          "range": Object {
-            "@timestamp": Object {
-              "gte": "now-10m",
-            },
-          },
+        "terms": Object {
+          "field": "host.name",
+          "size": 10,
         },
       },
       "entity.metadata.host.os.name": Object {
-        "aggs": Object {
-          "data": Object {
-            "terms": Object {
-              "field": "host.os.name",
-              "size": 10,
-            },
-          },
-        },
-        "filter": Object {
-          "range": Object {
-            "@timestamp": Object {
-              "gte": "now-10m",
-            },
-          },
+        "terms": Object {
+          "field": "host.os.name",
+          "size": 10,
         },
       },
       "entity.metadata.sourceIndex": Object {
-        "aggs": Object {
-          "data": Object {
-            "terms": Object {
-              "field": "_index",
-              "size": 10,
-            },
-          },
-        },
-        "filter": Object {
-          "range": Object {
-            "@timestamp": Object {
-              "gte": "now-10m",
-            },
-          },
+        "terms": Object {
+          "field": "_index",
+          "size": 10,
         },
       },
       "entity.metadata.tags": Object {
-        "aggs": Object {
-          "data": Object {
-            "terms": Object {
-              "field": "tags",
-              "size": 10,
-            },
-          },
-        },
-        "filter": Object {
-          "range": Object {
-            "@timestamp": Object {
-              "gte": "now-10m",
-            },
-          },
+        "terms": Object {
+          "field": "tags",
+          "size": 10,
         },
       },
       "entity.metrics.errorRate": Object {
@@ -173,6 +129,11 @@ Object {
           },
         ],
         "must_not": Array [
+          Object {
+            "term": Object {
+              "log.logger": "",
+            },
+          },
           Object {
             "terms": Object {
               "_tier": Array [

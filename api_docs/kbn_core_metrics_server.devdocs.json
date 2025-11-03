@@ -292,7 +292,7 @@
             "label": "percentiles",
             "description": [],
             "signature": [
-              "{ 50: number; 75: number; 95: number; 99: number; }"
+              "{ 50: number; 75: number; 90: number; 95: number; 99: number; }"
             ],
             "path": "src/core/packages/metrics/server/src/metrics.ts",
             "deprecated": false,

@@ -10,22 +10,17 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { render } from '@testing-library/react';
 
-import { DashboardApi } from '../dashboard_api/types';
+import type { DashboardApi } from '../dashboard_api/types';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { buildMockDashboardApi } from '../mocks';
-import { dataService, navigationService } from '../services/kibana_services';
+import { dataService, navigationService, shareService } from '../services/kibana_services';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 
-jest.mock('../dashboard_app/top_nav/dashboard_editing_toolbar', () => ({
-  DashboardEditingToolbar: () => {
-    return <div>mockDashboardEditingToolbar</div>;
-  },
-}));
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
     if (badges) {
@@ -45,6 +40,7 @@ describe('Internal dashboard top nav', () => {
     // topNavMenu is mocked as a jest.fn() so we want to mock it with a component
     // @ts-ignore type issue with the mockTopNav for this test suite
     navigationService.ui.TopNavMenu = jest.fn(({ badges }: TopNavMenuProps) => mockTopNav(badges));
+    shareService!.availableIntegrations = jest.fn().mockReturnValue([]);
   });
 
   it('should not render the managed badge by default', async () => {

@@ -21,20 +21,20 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import {
-  CSV_REPORT_TYPE_V2,
+import type {
   JobParamsCsvFromSavedObject,
   TaskPayloadCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
+import { CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import type { RunTaskOpts } from '@kbn/reporting-server';
 import {
   ExportType,
   getFieldFormats,
   type BaseExportTypeSetupDeps,
   type BaseExportTypeStartDeps,
-  RunTaskOpts,
 } from '@kbn/reporting-server';
 
-import { ReportingRequestHandlerContext } from './types';
+import type { ReportingRequestHandlerContext } from './types';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 

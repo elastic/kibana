@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';

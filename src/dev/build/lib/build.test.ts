@@ -74,8 +74,8 @@ describe('#getPlatformArchivePath()', () => {
   });
 
   describe('#getRootDirectory()', () => {
-    it('creates correct root directory name', () => {
-      expect(defaultBuild.getRootDirectory()).toMatchInlineSnapshot(`"kibana-8.0.0"`);
+    it('creates correct root directory name for a platform', () => {
+      expect(defaultBuild.getRootDirectory(linuxPlatform)).toMatchInlineSnapshot(`"kibana-8.0.0"`);
     });
   });
 });

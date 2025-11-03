@@ -21,7 +21,7 @@ import {
 } from '@kbn/content-management-user-profiles';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 
-import { Item } from '../types';
+import type { Item } from '../types';
 import { useServices } from '../services';
 
 export interface ActivityViewProps {

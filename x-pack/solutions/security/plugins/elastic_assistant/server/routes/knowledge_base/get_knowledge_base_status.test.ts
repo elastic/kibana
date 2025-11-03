@@ -9,7 +9,7 @@ import { getKnowledgeBaseStatusRoute } from './get_knowledge_base_status';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getGetKnowledgeBaseStatusRequest } from '../../__mocks__/request';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { knowledgeBaseDataClientMock } from '../../__mocks__/data_clients.mock';
 
 describe('Get Knowledge Base Status Route', () => {
@@ -18,7 +18,7 @@ describe('Get Knowledge Base Status Route', () => {
   let { context } = requestContextMock.createTools();
 
   const mockUser = {
-    username: 'my_username',
+    username: 'elastic',
     authentication_realm: {
       type: 'my_realm_type',
       name: 'my_realm_name',

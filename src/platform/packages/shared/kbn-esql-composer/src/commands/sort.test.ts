@@ -45,6 +45,6 @@ describe('sort', () => {
       })
     );
 
-    expect(pipeline.toString()).toEqual('FROM logs-*\n  | SORT @timestamp DESC, `log.level` ASC');
+    expect(pipeline.toString()).toEqual('FROM logs-*\n  | SORT @timestamp DESC, log.level ASC');
   });
 });

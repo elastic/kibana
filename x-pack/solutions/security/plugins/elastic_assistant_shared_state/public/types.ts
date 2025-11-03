@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ElasticAssistantSharedStatePublicPluginSetupDependencies {}

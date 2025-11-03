@@ -6,17 +6,22 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  AgentMode,
-  type ConversationRound,
-  type RoundInput,
-  type ChatAgentEvent,
+import type {
+  Conversation,
+  ConversationRound,
+  RawRoundInput,
+  ChatAgentEvent,
+  AgentCapabilities,
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ModelProvider } from '../src/model_provider';
-import type { ToolProvider } from '../src/tools';
-import type { ScopedRunner } from '../src/runner';
+import type {
+  ModelProvider,
+  ScopedRunner,
+  ToolProvider,
+  WritableToolResultStore,
+  AttachmentsService,
+} from '../runner';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -59,9 +64,16 @@ export interface AgentHandlerContext {
   toolProvider: ToolProvider;
   /**
    * Onechat runner scoped to the current execution.
-   * Can be used to run other workchat primitive as part of the tool execution.
    */
   runner: ScopedRunner;
+  /**
+   * Attachment service to interact with attachments.
+   */
+  attachments: AttachmentsService;
+  /**
+   * Result store to access and add tool results during execution.
+   */
+  resultStore: WritableToolResultStore;
   /**
    * Event emitter that can be used to emits custom events
    */
@@ -85,19 +97,17 @@ export interface AgentEventEmitter {
 
 export interface AgentParams {
   /**
-   * Agent mode to use for this round.
-   * Defaults to `normal`.
+   * Current conversation
    */
-  agentMode?: AgentMode;
-  /**
-   * Previous rounds of conversation.
-   * Defaults to an empty list (new conversation)
-   */
-  conversation?: ConversationRound[];
+  conversation?: Conversation;
   /**
    * The input triggering this round.
    */
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
+  /**
+   * Agent capabilities to enable.
+   */
+  capabilities?: AgentCapabilities;
 }
 
 export interface AgentResponse {

@@ -10,7 +10,7 @@
 import type { PaletteRegistry, PaletteDefinition } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '../..';
 
 export interface PaletteSetupPlugins {

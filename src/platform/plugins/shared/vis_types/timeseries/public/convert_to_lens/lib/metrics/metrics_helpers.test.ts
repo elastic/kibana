@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric, Series, Panel } from '../../../../common/types';
 import { TIME_RANGE_DATA_MODES, TSVB_METRIC_TYPES } from '../../../../common/enums';

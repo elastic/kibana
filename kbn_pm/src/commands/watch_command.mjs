@@ -7,28 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Bazel from '../lib/bazel.mjs';
+import { run } from '../lib/spawn.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
   name: 'watch',
-  description: 'Runs a build in the Bazel built packages and keeps watching them for changes',
+  description: 'Runs a build in the webpack-built packages and keeps watching them for changes',
   flagsHelp: `
-    --offline            Run the installation process without consulting online resources. This is useful and
-                          sometimes necessary for using bootstrap on an airplane for instance. The local caches
-                          will be used exclusively, including a yarn-registry local mirror which is created and
-                          maintained by successful online bootstrap executions.
+    --allow-root         Required supplementary flag if you're running this command as root.
   `,
   reportTimings: {
     group: 'scripts/kbn watch',
     id: 'total',
   },
 
-  async run({ args, log }) {
-    await Bazel.watch(log, {
-      offline: args.getBooleanValue('offline') ?? true,
-      reactVersion: process.env.REACT_18 ? '18' : '17',
-      euiAmsterdam: process.env.EUI_AMSTERDAM === 'true',
-    });
+  async run({ args }) {
+    const quiet = args.getBooleanValue('quiet') ?? false;
+
+    await run('moon', [':watch-webpack'], { pipe: !quiet });
   },
 };

@@ -15,5 +15,8 @@
     "lint:fix:generated": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-ast/src/definitions/generated",
     "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn-esql-ast/src/validation/validation.test.ts"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
 }

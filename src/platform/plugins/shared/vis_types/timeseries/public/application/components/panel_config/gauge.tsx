@@ -41,8 +41,9 @@ import { YesNo } from '../yes_no';
 
 import { limitOfSeries } from '../../../../common/ui_restrictions';
 import { PANEL_TYPES } from '../../../../common/enums';
-import { TimeseriesVisParams } from '../../../types';
-import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import type { TimeseriesVisParams } from '../../../types';
+import type { PanelConfigProps } from './types';
+import { PANEL_CONFIG_TABS } from './types';
 import { panelConfigContainerStyles } from './_panel_config';
 
 export class GaugePanelConfig extends Component<

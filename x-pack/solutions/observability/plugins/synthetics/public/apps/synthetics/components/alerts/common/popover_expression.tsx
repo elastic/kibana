@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode } from 'react';
-import { EuiExpression, EuiPopover, EuiExpressionProps } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import type { EuiExpressionProps } from '@elastic/eui';
+import { EuiExpression, EuiPopover } from '@elastic/eui';
 
 interface Props {
   title?: ReactNode;

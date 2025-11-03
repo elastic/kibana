@@ -1,0 +1,108 @@
+{
+    "type": "lens",
+    "gridData": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 6,
+        "i": "2bad2a0b-9581-4a29-8cb0-c4e713bab912"
+    },
+    "panelIndex": "2bad2a0b-9581-4a29-8cb0-c4e713bab912",
+    "embeddableConfig": {
+        "attributes": {
+            "title": "",
+            "references": [
+                {
+                    "type": "index-pattern",
+                    "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                    "name": "textBasedLanguages-datasource-layer-69d8f699-0603-479a-b4f6-712008393869"
+                }
+            ],
+            "state": {
+                "datasourceStates": {
+                    "textBased": {
+                        "layers": {
+                            "3a5310ab-2832-41db-bdbe-1b6939dd5651": {
+                                "index": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                                "query": {
+                                    "esql": ""
+                                },
+                                "columns": [],
+                                "timeField": "@timestamp"
+                            }
+                        },
+                        "indexPatternRefs": [
+                            {
+                                "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                                "title": "logs-*",
+                                "timeField": "@timestamp"
+                            }
+                        ]
+                    }
+                },
+                "filters": [],
+                "query": {
+                    "esql": ""
+                },
+                "visualization": {
+                    "shape": "treemap",
+                    "layers": [
+                        {
+                            "layerId": "3a5310ab-2832-41db-bdbe-1b6939dd5651",
+                            "primaryGroups": [
+                                "agent.name"
+                            ],
+                            "metrics": [
+                                "count()"
+                            ],
+                            "numberDisplay": "percent",
+                            "categoryDisplay": "default",
+                            "legendDisplay": "default",
+                            "nestedLegend":false,
+                            "layerType": "data",
+                            "colorMapping": {
+                                "assignments": [],
+                                "specialAssignments": [
+                                    {
+                                        "rule": {
+                                            "type": "other"
+                                        },
+                                        "color": {
+                                            "type": "loop"
+                                        },
+                                        "touched":false
+                                    }
+                                ],
+                                "paletteId": "eui_amsterdam_color_blind",
+                                "colorMode": {
+                                    "type": "categorical"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "adHocDataViews": {
+                    "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da": {
+                        "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                        "title": "logs-*",
+                        "timeFieldName": "@timestamp",
+                        "sourceFilters": [],
+                        "type": "esql",
+                        "fieldFormats": {},
+                        "runtimeFieldMap": {},
+                        "allowNoIndex": false,
+                        "name": "logs-*",
+                        "allowHidden": false
+                    }
+                }
+            },
+            "visualizationType": "lnsPie",
+            "type": "lens"
+        },
+        "disabledActions": [
+            "OPEN_FLYOUT_ADD_DRILLDOWN"
+        ],
+        "enhancements": {}
+    },
+    "title": ""
+}

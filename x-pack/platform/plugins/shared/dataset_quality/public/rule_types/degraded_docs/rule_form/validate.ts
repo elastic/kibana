@@ -7,8 +7,8 @@
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
-import { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 const invalidThresholdValue = (value?: number) =>
   !value || (value && (isNaN(value) || value < 0 || value > 100));

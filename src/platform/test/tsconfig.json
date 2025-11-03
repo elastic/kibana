@@ -18,7 +18,7 @@
     "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json"
-    , "../../../x-pack/test_serverless/functional/test_suites/common/saved_objects_management/export_transform copy.ts"  ],
+    , "../../../x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform copy.ts"  ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -28,7 +28,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/telemetry-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/analytics-ftr-helpers-plugin",
     "@kbn/analytics-plugin-a-plugin",
     "@kbn/core-app-status-plugin",
@@ -79,5 +78,9 @@
     "@kbn/apm-synthtrace",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
+    "@kbn/field-formats-common",
+    "@kbn/ai-assistant-management-plugin",
+    "@kbn/core-chrome-navigation-tour",
+    "@kbn/visualizations-common",
   ]
 }

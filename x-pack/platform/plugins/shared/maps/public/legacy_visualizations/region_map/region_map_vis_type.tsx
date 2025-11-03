@@ -8,10 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { toExpressionAst } from './to_ast';
-import { REGION_MAP_VIS_TYPE, RegionMapVisParams } from './types';
+import type { RegionMapVisParams } from './types';
+import { REGION_MAP_VIS_TYPE } from './types';
 
 export const title = i18n.translate('xpack.maps.regionMapMap.vis.title', {
   defaultMessage: 'Region Map',

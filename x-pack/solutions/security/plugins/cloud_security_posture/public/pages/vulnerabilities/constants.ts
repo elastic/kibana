@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GroupOption } from '@kbn/grouping';
-import { FindingsBaseURLQuery } from '../../common/types';
-import { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
+import type { GroupOption } from '@kbn/grouping';
+import type { FindingsBaseURLQuery } from '../../common/types';
+import type { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
 import { GROUPING_LABELS } from './translations';
 import { VULNERABILITY_GROUPING_OPTIONS, VULNERABILITY_FIELDS } from '../../common/constants';
 

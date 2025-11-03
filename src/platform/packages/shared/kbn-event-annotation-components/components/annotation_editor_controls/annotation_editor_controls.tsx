@@ -10,10 +10,10 @@
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiButtonGroup,
   EuiSpacer,
   euiPaletteColorBlind,
@@ -26,11 +26,10 @@ import {
   LineStyleSettings,
   TextDecorationSetting,
   FieldPicker,
-  FieldOption,
   type QueryInputServices,
 } from '@kbn/visualization-ui-components';
-import type { FieldOptionValue } from '@kbn/visualization-ui-components';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldOptionValue, FieldOption } from '@kbn/visualization-ui-components';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import moment from 'moment';
 import { htmlIdGenerator } from '@elastic/eui';

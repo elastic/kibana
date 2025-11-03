@@ -16,7 +16,7 @@ import {
   getGlobalSettingsMock,
   getSettingsMock,
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { SettingsApplication as Component } from '../application';
 import { SettingsApplicationProvider } from '../services';

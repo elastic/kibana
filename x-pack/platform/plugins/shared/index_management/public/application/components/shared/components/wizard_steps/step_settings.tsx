@@ -27,7 +27,7 @@ import { Forms, isJSON } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 import { documentationService } from '../../../mappings_editor/shared_imports';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
-import { IndexMode } from '../../../../../../common/types';
+import type { IndexMode } from '../../../../../../common/types';
 
 interface Props {
   onChange: (content: Forms.Content) => void;
@@ -116,6 +116,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
         {indexMode && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.idxMgmt.formWizard.stepSettings.indexModeCallout.title"

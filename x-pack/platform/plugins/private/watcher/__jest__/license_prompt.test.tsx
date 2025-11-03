@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import {
+import type {
   LicenseManagementLocator,
   LicenseManagementLocatorParams,
 } from '@kbn/license-management-plugin/public/locator';

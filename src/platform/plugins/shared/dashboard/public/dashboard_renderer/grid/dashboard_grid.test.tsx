@@ -11,10 +11,11 @@ import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { RenderResult, act, getByLabelText, render, screen, waitFor } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, getByLabelText, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { DashboardState } from '../../../common';
+import type { DashboardState } from '../../../common';
 import {
   DashboardContext,
   useDashboardApi as mockUseDashboardApi,
@@ -95,7 +96,7 @@ const createAndMountDashboardGrid = async (overrides?: Partial<DashboardState>) 
   const { panels, sections } = internalApi.layout$.value;
   const panelRenderCount = sections
     ? Object.values(panels).filter((value) => {
-        const sectionId = value.gridData.sectionId;
+        const sectionId = value.grid.sectionId;
         return sectionId ? !sections[sectionId].collapsed : true;
       }).length
     : Object.keys(panels).length;
@@ -217,8 +218,7 @@ describe('DashboardGrid', () => {
 
       const newSection = internalApi.layout$.getValue().sections['54321'];
       expect(newSection).toEqual({
-        gridData: {
-          i: '54321',
+        grid: {
           y: 8,
         },
         title: 'New collapsible section',
@@ -251,7 +251,8 @@ describe('DashboardGrid', () => {
           {
             title: 'Empty section',
             collapsed: false,
-            gridData: { i: 'emptySection', y: 8 },
+            grid: { y: 8 },
+            uid: 'emptySection',
             panels: [],
           },
         ],

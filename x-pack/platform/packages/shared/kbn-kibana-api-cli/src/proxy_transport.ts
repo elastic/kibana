@@ -5,16 +5,15 @@
  * 2.0.
  */
 import Path from 'path';
-import {
-  Transport,
+import type {
   TransportOptions,
   TransportRequestOptions,
   TransportRequestOptionsWithMeta,
   TransportRequestOptionsWithOutMeta,
   TransportRequestParams,
   TransportResult,
-  errors,
 } from '@elastic/elasticsearch';
+import { Transport, errors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 
 export function createProxyTransport({

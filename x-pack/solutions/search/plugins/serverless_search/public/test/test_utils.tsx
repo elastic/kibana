@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactElement, FC, PropsWithChildren } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactElement, FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { RenderOptions } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { I18nProvider } from '@kbn/i18n-react';

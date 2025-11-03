@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ESQLControlVariable, PublishesESQLVariable } from '@kbn/esql-types';
+import { apiPublishesESQLVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import {
-  PublishesDataViews,
-  apiPublishesDataViews,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import type { PublishesDataViews } from '@kbn/presentation-publishing';
+import { apiPublishesDataViews, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -107,7 +104,7 @@ export const getControlGroupEmbeddableFactory = () => {
         isEditingEnabled: () => true,
         openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
-            ? parentApi.dataViews$.value?.[0]?.id
+            ? parentApi.dataViews$.value?.find((dataView) => dataView.isPersisted())?.id
             : undefined;
           const newControlState = controlsManager.getNewControlState();
 

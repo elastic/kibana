@@ -14,11 +14,11 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -30,10 +30,8 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { PreviewPanel } from './preview_panel';
-import {
-  StatefulStreamsAppRouter,
-  useStreamsAppRouter,
-} from '../../../hooks/use_streams_app_router';
+import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 
 interface StreamDetailRoutingProps {
   definition: Streams.WiredStream.GetResponse;
@@ -42,7 +40,11 @@ interface StreamDetailRoutingProps {
 
 export function StreamDetailRouting(props: StreamDetailRoutingProps) {
   const router = useStreamsAppRouter();
-  const { core, dependencies } = useKibana();
+  const {
+    core,
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     data,
     streams: { streamsRepositoryClient },
@@ -59,6 +61,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
       timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
       forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
+      telemetryClient={telemetryClient}
     >
       <StreamDetailRoutingImpl />
     </StreamRoutingContextProvider>
@@ -122,23 +125,22 @@ export function StreamDetailRoutingImpl() {
       >
         <EuiPanel
           hasShadow={false}
-          hasBorder
           className={css`
             display: flex;
             max-width: 100%;
             overflow: auto;
             flex-grow: 1;
           `}
-          paddingSize="xs"
+          paddingSize="none"
         >
           <EuiResizableContainer direction={isVerticalLayout ? 'vertical' : 'horizontal'}>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
                   initialSize={40}
-                  minSize="150px"
+                  minSize="400px"
                   tabIndex={0}
-                  paddingSize="s"
+                  paddingSize="l"
                   color="subdued"
                   className={css`
                     overflow: auto;
@@ -148,13 +150,13 @@ export function StreamDetailRoutingImpl() {
                   <ChildStreamList availableStreams={availableStreams} />
                 </EuiResizablePanel>
 
-                <EuiResizableButton accountForScrollbars="both" />
+                <EuiResizableButton indicator="border" />
 
                 <EuiResizablePanel
                   initialSize={60}
                   tabIndex={0}
                   minSize="300px"
-                  paddingSize="s"
+                  paddingSize="l"
                   className={css`
                     display: flex;
                     flex-direction: column;
@@ -174,7 +176,9 @@ export function StreamDetailRoutingImpl() {
               })}
               onCancel={cancelChanges}
               onConfirm={saveChanges}
-              isLoading={routingSnapshot.matches({ ready: { reorderingRules: 'updatingStream' } })}
+              isLoading={routingSnapshot.matches({
+                ready: { reorderingRules: 'updatingStream' },
+              })}
               disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
               insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
             />
@@ -202,7 +206,7 @@ const createForkSuccessNofitier =
               href={router.link('/{key}/management/{tab}', {
                 path: {
                   key: streamName,
-                  tab: 'route',
+                  tab: 'partitioning',
                 },
               })}
             >

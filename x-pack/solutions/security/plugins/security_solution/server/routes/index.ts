@@ -51,6 +51,7 @@ import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
+import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -70,9 +71,9 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext
 ) => {
-  registerFleetIntegrationsRoutes(router);
+  registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router);
+  registerPrebuiltRulesRoutes(router, logger);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -127,7 +128,7 @@ export const initRoutes = (
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
+  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger, ml });
   registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations
@@ -136,4 +137,6 @@ export const initRoutes = (
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
   registerAssetInventoryRoutes({ router, logger });
+
+  registerSiemReadinessRoutes({ router, logger });
 };

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Criteria, EuiLink, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
+import type { Criteria, EuiSearchBarProps } from '@elastic/eui';
+import { EuiLink, EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import { uniqBy } from 'lodash';
 import { selectInspectRule } from '../../state/alert_rules/selectors';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export const RuleMonitorsTable = () => {
   const {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HasTypeDisplayName } from './has_type';
+import type { HasTypeDisplayName } from './has_type';
 
 /**
  * An interface which determines whether or not a given API offers to show the config for read only permissions.

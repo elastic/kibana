@@ -79,9 +79,6 @@ describe('createChatModel', () => {
   });
 
   it('calls getConnectorById with the right parameters', async () => {
-    const actionsClient = Symbol('actionsClient') as any;
-    actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
-
     await createChatModel({
       request,
       connectorId: '.my-connector',
@@ -98,7 +95,8 @@ describe('createChatModel', () => {
     expect(getConnectorById).toHaveBeenCalledTimes(1);
     expect(getConnectorById).toHaveBeenCalledWith({
       connectorId: '.my-connector',
-      actionsClient,
+      actions,
+      request,
     });
   });
 

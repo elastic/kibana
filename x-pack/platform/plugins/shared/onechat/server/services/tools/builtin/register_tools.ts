@@ -10,24 +10,24 @@ import type { BuiltinToolRegistry } from './builtin_registry';
 import {
   getDocumentByIdTool,
   executeEsqlTool,
-  naturalLanguageSearchTool,
+  searchTool,
   generateEsqlTool,
-  relevanceSearchTool,
   getIndexMappingsTool,
   listIndicesTool,
   indexExplorerTool,
+  createVisualizationTool,
 } from './definitions';
 
 export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegistry }) => {
-  const tools: Array<BuiltinToolDefinition<any, any>> = [
+  const tools: Array<BuiltinToolDefinition<any>> = [
+    searchTool(),
     getDocumentByIdTool(),
     executeEsqlTool(),
-    naturalLanguageSearchTool(),
     generateEsqlTool(),
-    relevanceSearchTool(),
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),
+    createVisualizationTool(),
   ];
 
   tools.forEach((tool) => {

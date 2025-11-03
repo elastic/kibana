@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunction } from './types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { MigrateFunction } from './types';
 import { migrateToLatest } from './migrate_to_latest';
 
 interface StateV1 extends SerializableRecord {

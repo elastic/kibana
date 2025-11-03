@@ -11,7 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { ListingRoute } from './apps/listing_route';
-import { GraphServices } from './application';
+import type { GraphServices } from './application';
 import { WorkspaceRoute } from './apps/workspace_route';
 
 export const graphRouter = (deps: GraphServices) => {

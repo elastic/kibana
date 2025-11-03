@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SpecDefinitionsService } from '../../../services';
+import type { SpecDefinitionsService } from '../../../services';
+import { ChunkingSettings } from './shared';
 
 export const retriever = (specService: SpecDefinitionsService) => {
   specService.addGlobalAutocompleteRules('retriever', {
@@ -114,7 +115,6 @@ export const retriever = (specService: SpecDefinitionsService) => {
       __template: {
         retriever: {},
         ids: [],
-        match_criteria: {},
       },
       retriever: {
         __scope_link: '.',
@@ -122,7 +122,6 @@ export const retriever = (specService: SpecDefinitionsService) => {
       // Only one of 'ids' or 'docs' should be used at a time
       ids: [],
       docs: [],
-      match_criteria: {},
       rank_window_size: 10,
     },
     standard: {
@@ -151,6 +150,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
         inference_id: '',
         inference_text: '',
         field: '',
+        chunk_rescorer: {},
       },
       retriever: {
         __scope_link: '.',
@@ -162,6 +162,10 @@ export const retriever = (specService: SpecDefinitionsService) => {
       min_score: 0,
       filter: {
         __scope_link: 'GLOBAL.query',
+      },
+      chunk_rescorer: {
+        size: 1,
+        chunking_settings: ChunkingSettings,
       },
     },
   });

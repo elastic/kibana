@@ -8,7 +8,7 @@
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export const [getDataViewsStart, setDataViewsStart] =
   createGetterSetter<DataViewsPublicPluginStart>('dataViews');

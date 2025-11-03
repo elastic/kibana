@@ -15,9 +15,9 @@ import {
   FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../helper';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const currentTimeMinusFourHours = new Date(Date.now() - 21600000).toISOString();
 const currentTimeMinusTenMinutes = new Date(Date.now() - 600000).toISOString();

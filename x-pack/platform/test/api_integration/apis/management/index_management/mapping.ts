@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { mappingsApi } from './lib/mappings.api';
 import { indicesHelpers } from './lib/indices.helpers';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');

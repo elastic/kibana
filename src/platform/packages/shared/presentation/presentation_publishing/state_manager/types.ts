@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { PublishingSubject } from '../publishing_subject';
+import type { Observable } from 'rxjs';
+import type { PublishingSubject } from '../publishing_subject';
 
 export type WithAllKeys<T extends object> = { [Key in keyof Required<T>]: T[Key] };
 

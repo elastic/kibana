@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiPagination,
   EuiSelect,
-  EuiSelectOption,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TooltipFeature } from '../../../../../common/descriptor_types';
-import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import type { TooltipFeature } from '../../../../../common/descriptor_types';
+import type { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
@@ -152,6 +153,9 @@ export class Footer extends Component<Props, State> {
             activePage={pageNumber}
             onPageClick={this._onPageChange}
             compressed
+            aria-label={i18n.translate('xpack.maps.tooltip.paginationLabel', {
+              defaultMessage: 'Tooltip results pagination',
+            })}
           />
         </EuiFlexItem>
       );

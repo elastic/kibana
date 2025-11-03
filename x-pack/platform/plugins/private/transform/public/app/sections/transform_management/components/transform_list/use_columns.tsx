@@ -22,8 +22,8 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
   RIGHT_ALIGNMENT,
-  EuiIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
@@ -159,7 +159,7 @@ export const useColumns = (
                   'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
               })}
             >
-              <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+              <EuiBadge tabIndex={0} color="hollow" data-test-subj="transformListRowIsManagedBadge">
                 {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
                   defaultMessage: 'Managed',
                 })}
@@ -200,15 +200,18 @@ export const useColumns = (
             );
         const needsReauthTooltipIcon = needsReauth ? (
           <>
-            <EuiToolTip content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}>
-              <EuiIcon size="s" color="warning" type={'alert'} />
-            </EuiToolTip>
+            <EuiIconTip
+              content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}
+              type="alert"
+              size="s"
+              color="warning"
+            />
             &nbsp;
           </>
         ) : null;
 
         const alertingRulesTooltipIcon = Array.isArray(item.alerting_rules) ? (
-          <EuiToolTip
+          <EuiIconTip
             position="bottom"
             content={
               <FormattedMessage
@@ -217,9 +220,8 @@ export const useColumns = (
                 values={{ rulesCount: item.alerting_rules.length }}
               />
             }
-          >
-            <EuiIcon type="bell" />
-          </EuiToolTip>
+            type="bell"
+          />
         ) : (
           <span />
         );

@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, isCombinedFilter } from '../filters';
-import { DataViewBase } from './types';
-import { buildQueryFromFilters, EsQueryFiltersConfig } from './from_filters';
-import { BooleanRelation, CombinedFilter } from '../filters/build_filters';
+import type { Filter } from '../filters';
+import { isCombinedFilter } from '../filters';
+import type { DataViewBase } from './types';
+import type { EsQueryFiltersConfig } from './from_filters';
+import { buildQueryFromFilters } from './from_filters';
+import type { CombinedFilter } from '../filters/build_filters';
+import { BooleanRelation } from '../filters/build_filters';
 
 const fromAndFilter = (
   filter: CombinedFilter,

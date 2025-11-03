@@ -8,11 +8,10 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import {
   CUSTOM_PALETTE,
-  CustomPaletteParams,
-  PaletteOutput,
-  PaletteRegistry,
+  DEFAULT_COLOR_MAPPING_CONFIG,
   applyPaletteParams,
   canCreateCustomMatch,
   getFallbackDataBounds,
@@ -20,10 +19,12 @@ import {
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getOriginalId } from '@kbn/transpose-utils';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
+import type {
+  VisualizationDimensionEditorProps,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
-import type { VisualizationDimensionEditorProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
 
 import {
   defaultPaletteParams,
@@ -34,7 +35,7 @@ import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 import { getColumnAlignment } from '../utils';
-import { FormatFactory } from '../../../../common/types';
+import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
 const idPrefix = htmlIdGenerator()();
@@ -216,15 +217,23 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 const params: Partial<ColumnType> = {
                   colorMode: newMode,
                 };
-                if (!column?.palette && newMode !== 'none') {
-                  params.palette = {
-                    ...activePalette,
-                    params: {
-                      ...activePalette.params,
-                      // that's ok, at first open we're going to throw them away and recompute
-                      stops: displayStops,
-                    },
-                  };
+
+                if (newMode !== 'none') {
+                  if (!column?.colorMapping && showColorByTerms) {
+                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                  }
+
+                  // also set palette for now
+                  if (!column?.palette) {
+                    params.palette = {
+                      ...activePalette,
+                      params: {
+                        ...activePalette.params,
+                        // that's ok, at first open we're going to throw them away and recompute
+                        stops: displayStops,
+                      },
+                    };
+                  }
                 }
 
                 // clear up when switching to no coloring

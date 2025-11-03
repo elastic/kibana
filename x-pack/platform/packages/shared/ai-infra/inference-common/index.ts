@@ -23,9 +23,8 @@ export {
   type FromToolSchema,
   type ToolSchema,
   type UnvalidatedToolCall,
-  type ToolCallsOf,
-  type ToolCallbacksOf,
   type ToolCall,
+  type ToolCallback,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,
@@ -70,7 +69,15 @@ export {
   type DeanonymizationOutput,
   type DeanonymizedMessage,
   type AnonymizationSettings,
-  type AnonymizationRegexWorkerTaskPayload,
+  type CustomToolChoice,
+  type ToolCallArgumentsOfToolDefinition,
+  type ToolCallOfToolDefinitions,
+  type ToolCallOfToolOptions,
+  type ToolCallbacksOfToolOptions,
+  type ToolNamesOf,
+  type ToolsOfChoice,
+  type ToolCallArguments,
+  type ToolCallbackResult,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';

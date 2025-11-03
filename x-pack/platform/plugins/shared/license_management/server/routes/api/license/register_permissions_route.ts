@@ -6,7 +6,7 @@
  */
 
 import { getPermissions } from '../../../lib/permissions';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
 export function registerPermissionsRoute({

@@ -9,7 +9,7 @@ import type { RecursivePartial } from '@elastic/charts';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { sloEditLocatorID } from '@kbn/observability-plugin/common';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { CreateSLOInput } from '@kbn/slo-schema';
+import type { CreateSLOInput } from '@kbn/slo-schema';
 import { SLO_CREATE_PATH } from '../../common/locators/paths';
 
 export type SloEditLocatorParams = RecursivePartial<CreateSLOInput>;

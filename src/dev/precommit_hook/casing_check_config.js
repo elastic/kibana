@@ -18,7 +18,6 @@ import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
-  'sonar-project.properties',
   '.github/**/*',
   'docs/**/*',
   '**/bin/**/*',
@@ -74,10 +73,6 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/solutions/observability/plugins/profiling/Makefile',
 
-  // Bazel default files
-  '**/WORKSPACE.bazel',
-  '**/BUILD.bazel',
-
   // Buildkite
   '.buildkite/**/*',
 
@@ -110,6 +105,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'src/dev/packages/*',
   'src/core/packages/*/*',
   'src/platform/packages/private/*',
+  'src/platform/packages/private/opentelemetry/*',
   'src/platform/packages/shared/*',
   'x-pack/platform/packages/private/*',
   'x-pack/platform/packages/shared/*',

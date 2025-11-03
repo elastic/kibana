@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 export const fetchAliasIndices = async (client: IScopedClusterClient, aliasName: string) => {
   const aliasIndices = await client.asCurrentUser.indices.getAlias({

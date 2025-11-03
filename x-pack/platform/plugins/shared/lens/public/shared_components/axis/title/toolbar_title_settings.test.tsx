@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { ToolbarTitleSettings, TitleSettingsProps } from './toolbar_title_settings';
+import type { TitleSettingsProps } from './toolbar_title_settings';
+import { ToolbarTitleSettings } from './toolbar_title_settings';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

@@ -6,17 +6,18 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
 
 import { RemoteClusterForm } from '../../../public/application/sections/components/remote_cluster_config_steps/remote_cluster_form';
-import { RemoteClustersActions, setupEnvironment } from '../helpers';
+import type { RemoteClustersActions } from '../helpers';
+import { setupEnvironment } from '../helpers';
 import { setup as setupRemoteClustersAdd } from '../add/remote_clusters_add.helpers';
 import {
   setup,
   REMOTE_CLUSTER_EDIT,
   REMOTE_CLUSTER_EDIT_NAME,
 } from './remote_clusters_edit.helpers';
-import { Cluster } from '../../../common/lib';
+import type { Cluster } from '../../../common/lib';
 import { SECURITY_MODEL } from '../../../common/constants';
 
 let component: TestBed['component'];

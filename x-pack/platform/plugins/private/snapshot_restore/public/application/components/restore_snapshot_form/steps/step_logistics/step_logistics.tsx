@@ -7,6 +7,7 @@
 
 import React, { Fragment, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -19,24 +20,22 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTitle,
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../common/constants';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
-import { RestoreSettings } from '../../../../../../common/types';
+import type { RestoreSettings } from '../../../../../../common/types';
 
 import { useCore, useServices } from '../../../../app_context';
 
 import { orderDataStreamsAndIndices } from '../../../lib';
 import { DataStreamBadge } from '../../../data_stream_badge';
 
-import { StepProps } from '..';
+import type { StepProps } from '..';
 
 import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_out';
 
@@ -44,7 +43,12 @@ import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_li
 
 import { SystemIndicesOverwrittenCallOut } from './system_indices_overwritten_callout';
 
+const styles = {
+  indicesFieldWrapper: indicesFieldWrapperStyle,
+};
+
 import { FeatureStatesFormField } from '../../../feature_states_form_field';
+import { indicesFieldWrapperStyle } from '../../../styles';
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
@@ -173,10 +177,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   };
 
   return (
-    <div
-      data-test-subj="snapshotRestoreStepLogistics"
-      className="snapshotRestore__restoreForm__stepLogistics"
-    >
+    <div data-test-subj="snapshotRestoreStepLogistics">
       {/* Step title and doc link */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -266,7 +267,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               <Fragment>
                 <EuiSpacer size="m" />
                 <EuiFormRow
-                  className="snapshotRestore__restoreForm__stepLogistics__indicesFieldWrapper"
+                  css={styles.indicesFieldWrapper}
                   label={
                     selectIndicesMode === 'list' ? (
                       <EuiFlexGroup justifyContent="spaceBetween">
@@ -704,6 +705,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               size="s"
               iconType="question"
               color="warning"

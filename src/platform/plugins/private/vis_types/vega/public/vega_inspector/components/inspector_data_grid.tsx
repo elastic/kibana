@@ -8,8 +8,9 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { EuiDataGrid, EuiDataGridSorting, EuiDataGridProps } from '@elastic/eui';
-import { VegaRuntimeData } from '../vega_adapter';
+import type { EuiDataGridSorting, EuiDataGridProps } from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
+import type { VegaRuntimeData } from '../vega_adapter';
 
 const DEFAULT_PAGE_SIZE = 15;
 

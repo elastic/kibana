@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MobileDevice, apm, ApmFields } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates mobile APM data, including crashes and device metadata for both Android and iOS.
+ */
+
+import { apm } from '@kbn/apm-synthtrace-client';
 import type {
   DeviceInfo,
   GeoInfo,
   NetworkConnectionInfo,
   OSInfo,
+  MobileDevice,
+  ApmFields,
 } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

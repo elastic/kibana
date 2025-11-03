@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import {
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type {
   EnvironmentName,
   EnvironmentStatus,
-  LABS_PROJECT_PREFIX,
   Project,
   ProjectConfig,
   ProjectID,
   SolutionName,
-  isProjectEnabledByStatus,
-  projectIDs,
-  projects,
 } from '../../common';
+import { LABS_PROJECT_PREFIX, isProjectEnabledByStatus, projectIDs, projects } from '../../common';
 import { coreServices } from './kibana_services';
 
 export interface PresentationLabsService {

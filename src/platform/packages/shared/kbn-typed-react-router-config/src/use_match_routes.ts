@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { RouteMatch } from './types';
+import type { RouteMatch } from './types';
 import { useRouter } from './use_router';
 
 export function useMatchRoutes(path?: string): RouteMatch[] {

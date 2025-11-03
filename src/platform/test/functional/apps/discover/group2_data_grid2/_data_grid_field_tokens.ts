@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render field tokens correctly for ES|QL', async function () {
       await discover.selectTextBaseLang();
-      expect(await discover.getHitCount()).to.be('10');
+      expect(await discover.getHitCount()).to.be('1,000');
       await unifiedFieldList.clickFieldListItemAdd('@timestamp');
       await unifiedFieldList.clickFieldListItemAdd('bytes');
       await unifiedFieldList.clickFieldListItemAdd('extension');
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('With columns');
 
       expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'Geo point', 'Date']);
@@ -199,10 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to the context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surroundingActionEl] = await dataGrid.getRowActions({
-        isAnchorRow: false,
-        rowIndex: 0,
-      });
+      const [, surroundingActionEl] = await dataGrid.getRowActions();
       await surroundingActionEl.click();
       await header.waitUntilLoadingHasFinished();
 

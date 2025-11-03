@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type {
   CustomBrandingSetup,
   ElasticsearchServiceSetup,
@@ -37,6 +38,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
+import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
@@ -58,11 +60,13 @@ interface AuthenticationServiceStartParams {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   session: PublicMethodsOf<Session>;
+  uiam?: UiamServicePublic;
   loggers: LoggerFactory;
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
+  buildFlavor?: BuildFlavor;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -338,6 +342,8 @@ export class AuthenticationService {
     kibanaFeatures,
     isElasticCloudDeployment,
     customLogoutURL,
+    buildFlavor = 'traditional',
+    uiam,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -345,6 +351,7 @@ export class AuthenticationService {
       license: this.license,
       applicationName,
       kibanaFeatures,
+      buildFlavor,
     });
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
@@ -378,6 +385,7 @@ export class AuthenticationService {
       session,
       isElasticCloudDeployment,
       customLogoutURL,
+      uiam,
     }));
 
     return {
@@ -404,7 +412,8 @@ export class AuthenticationService {
           this.logger.error(
             `Login attempt with "${providerIdentifier}" provider failed due to unexpected error: ${getDetailedErrorMessage(
               err
-            )}`
+            )}`,
+            { error: { stack_trace: err.stack } }
           );
           throw err;
         }

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 
-import { CreateIndexRequest, CreateIndexResponse } from '../../common/types';
+import type { CreateIndexRequest, CreateIndexResponse } from '../../common/types';
 
 export async function createIndex(
   client: ElasticsearchClient,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { EuiLink, EuiText, EuiFlexGroup } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -14,7 +15,6 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_REASON,
   TIMESTAMP,
-  ALERT_UUID,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
   ALERT_RULE_NAME,
@@ -40,7 +40,7 @@ import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
-import { GetObservabilityAlertsTableProp } from '../types';
+import type { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
 import { ElapsedTimestampTooltip } from '../../../../common';
 
@@ -76,7 +76,8 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     tableId,
     columnId,
     alert,
-    openAlertInFlyout,
+    rowIndex,
+    onExpandedAlertIndexChange,
     observabilityRuleTypeRegistry,
     services: { http },
     parentAlert,
@@ -116,7 +117,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
         <EuiLink
           data-test-subj="o11yGetRenderCellValueLink"
           css={{ ':hover': { textDecoration: 'none' } }}
-          onClick={() => openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID])}
+          onClick={() => onExpandedAlertIndexChange(rowIndex)}
         >
           {parsedAlert.reason}
         </EuiLink>

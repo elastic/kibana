@@ -9,17 +9,16 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
-import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
-import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
-import {
+import type { DashboardState, DashboardAPIGetOut } from '../../../server/content_management';
+import type { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
+import type {
   FindDashboardsByIdResponse,
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
-import { DashboardState } from '../../../common';
-import { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
+import type { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
@@ -37,7 +36,7 @@ export interface LoadDashboardFromSavedObjectProps {
   id?: string;
 }
 
-type DashboardResolveMeta = DashboardGetOut['meta'];
+type DashboardResolveMeta = DashboardAPIGetOut['meta'];
 
 export type DashboardSearchSource = Omit<SerializedSearchSourceFields, 'query'> & {
   query?: Query;
@@ -64,16 +63,15 @@ export interface LoadDashboardReturn {
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 
 export interface SaveDashboardProps {
-  controlGroupReferences?: Reference[];
   dashboardState: DashboardState;
+  references?: Reference[];
   saveOptions: SavedDashboardSaveOpts;
-  panelReferences?: Reference[];
   searchSourceReferences?: Reference[];
   lastSavedId?: string;
 }
 
 export interface GetDashboardStateReturn {
-  attributes: DashboardAttributes;
+  attributes: DashboardState;
   references: Reference[];
 }
 

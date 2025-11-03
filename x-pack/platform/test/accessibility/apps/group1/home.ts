@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, home } = getPageObjects(['common', 'home']);
@@ -13,8 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/216219
-  describe.skip('Kibana Home Accessibility', () => {
+  describe('Kibana Home Accessibility', () => {
     before(async () => {
       await common.navigateToApp('home');
     });
@@ -28,18 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    /**
-     * Test fails claiming that a user can focus on an element with aria-hidden
-     * But axe does not recognize our focus trap which prevents a user from ever actually doing that
-     * Open question on why this doesn't fail in other areas though but the structure is the
-     */
-    it.skip('toggle side nav meets a11y requirements', async () => {
+    it('toggle side nav meets a11y requirements', async () => {
       await home.openCollapsibleNav();
       await a11y.testAppSnapshot();
     });
 
-    // skipped for same reason as above "toggle side nav meets a11y requirements" test
-    it.skip('click on collapse on observability in side nav to test a11y of collapse button', async () => {
+    it('click on collapse on observability in side nav to test a11y of collapse button', async () => {
       await home.openCollapsibleNav();
       await find.clickByCssSelector(
         '[data-test-subj="collapsibleNavGroup-observability"] .euiCollapsibleNavGroup__title'

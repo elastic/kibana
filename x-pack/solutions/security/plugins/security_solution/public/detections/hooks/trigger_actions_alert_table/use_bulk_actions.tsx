@@ -114,7 +114,8 @@ export const useBulkActionsByTableType = (
 
   const timelineAction = useAddBulkToTimelineAction(timelineActionParams);
 
-  const alertActions = useBulkAlertActionItems(alertActionParams);
+  const { items: alertActions, panels: alertActionsPanels } =
+    useBulkAlertActionItems(alertActionParams);
 
   const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
 
@@ -122,6 +123,6 @@ export const useBulkActionsByTableType = (
     return [...alertActions, timelineAction, ...alertTagsItems, ...alertAssigneesItems];
   }, [alertActions, alertTagsItems, timelineAction, alertAssigneesItems]);
   return useMemo(() => {
-    return [{ id: 0, items }, ...alertTagsPanels, ...alertAssigneesPanels];
-  }, [alertTagsPanels, items, alertAssigneesPanels]);
+    return [{ id: 0, items }, ...alertActionsPanels, ...alertTagsPanels, ...alertAssigneesPanels];
+  }, [alertActionsPanels, alertTagsPanels, items, alertAssigneesPanels]);
 };

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { AGENT_ACTIONS_INDEX, AGENTS_INDEX, AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

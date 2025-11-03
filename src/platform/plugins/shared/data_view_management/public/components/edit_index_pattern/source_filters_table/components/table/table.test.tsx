@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { TableWithoutPersist as Table } from './table';
-import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SourceFiltersTableFilter } from '../../types';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { keys } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SourceFiltersTableFilter } from '../../types';
 
 const indexPattern = {} as DataView;
 const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];

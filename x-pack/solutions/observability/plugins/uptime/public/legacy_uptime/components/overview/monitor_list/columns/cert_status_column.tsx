@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
-import { X509Expiry } from '../../../../../../common/runtime_types';
+import type { X509Expiry } from '../../../../../../common/runtime_types';
 import { useCertStatus } from '../../../../hooks';
 import { EXPIRED, EXPIRES, EXPIRES_SOON } from '../../../certificates/translations';
 import { CERT_STATUS } from '../../../../../../common/constants';
@@ -41,7 +41,7 @@ export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false })
   const CertStatus = ({ color, text }: { color: string; text: string }) => {
     return (
       <EuiToolTip content={moment(notAfter).format('L LT')}>
-        <EuiText size="s">
+        <EuiText size="s" tabIndex={0}>
           <EuiIcon color={color} type="lock" size="s" />
           {boldStyle ? (
             <H4Text>

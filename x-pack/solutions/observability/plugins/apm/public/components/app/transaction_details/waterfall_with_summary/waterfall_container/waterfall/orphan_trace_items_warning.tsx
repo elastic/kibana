@@ -24,7 +24,12 @@ export function OrphanTraceItemsWarning({
       })}
       anchorClassName="eui-fullWidth"
     >
-      <EuiBadge iconType="warning" color="hollow" data-test-id="apm-missing-transaction-badge">
+      <EuiBadge
+        tabIndex={0}
+        iconType="warning"
+        color="hollow"
+        data-test-id="apm-missing-transaction-badge"
+      >
         {i18n.translate('xpack.apm.transactionDetails.agentMissingTransactionLabel', {
           defaultMessage: 'Incomplete trace',
         })}

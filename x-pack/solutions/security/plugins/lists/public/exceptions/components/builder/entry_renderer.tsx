@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ElementType, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ElementType } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -19,19 +20,23 @@ import {
   useEuiPaddingSize,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import {
+import type {
   ExceptionListType,
-  ExceptionListTypeEnum,
   ListSchema,
-  ListOperatorTypeEnum as OperatorTypeEnum,
   OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  ExceptionListTypeEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
+import type {
   BuilderEntry,
   DataViewField,
-  EXCEPTION_OPERATORS_ONLY_LISTS,
   FormattedBuilderEntry,
   OperatorOption,
+} from '@kbn/securitysolution-list-utils';
+import {
+  EXCEPTION_OPERATORS_ONLY_LISTS,
   fieldSupportsMatches,
   getEntryOnFieldChange,
   getEntryOnListChange,
@@ -57,14 +62,14 @@ import {
   WILDCARD_WARNING,
   validatePotentialWildcardInput,
 } from '@kbn/securitysolution-utils';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';
-import { EntryFieldError } from './reducer';
+import type { EntryFieldError } from './reducer';
 
 const FieldFlexItem = styled(EuiFlexItem)`
   overflow: hidden;

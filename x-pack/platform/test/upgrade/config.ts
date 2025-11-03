@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 import { MapsHelper } from './services/maps_upgrade_services';
 import { RulesHelper } from './services/rules_upgrade_services';

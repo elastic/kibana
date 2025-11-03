@@ -8,26 +8,28 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  OnSaveProps as SavedObjectOnSaveProps,
-  SavedObjectSaveModal,
-} from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps as SavedObjectOnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type {
   LayerAction,
   RegisterLibraryAnnotationGroupFunction,
-  StartServices,
+  LensStartServices as StartServices,
   StateSetter,
-} from '../../../../types';
-import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
+} from '@kbn/lens-common';
+import type {
+  XYByReferenceAnnotationLayerConfig,
+  XYAnnotationLayerConfig,
+  XYState,
+} from '../../types';
 import {
   getAnnotationLayerTitle,
   getGroupMetadataFromAnnotationLayer,
@@ -48,7 +50,7 @@ export const SaveModal = ({
 }: {
   domElement: HTMLDivElement;
   savedObjectsTagging: SavedObjectTaggingPluginStart | undefined;
-  onSave: (props: ModalOnSaveProps) => void;
+  onSave: (props: ModalOnSaveProps) => Promise<void>;
   title: string;
   description: string;
   tags: string[];
@@ -60,7 +62,9 @@ export const SaveModal = ({
 
   return (
     <SavedObjectSaveModal
-      onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
+      onSave={async (props) => {
+        await onSave({ ...props, closeModal, newTags: selectedTags });
+      }}
       onClose={closeModal}
       title={title}
       description={description}

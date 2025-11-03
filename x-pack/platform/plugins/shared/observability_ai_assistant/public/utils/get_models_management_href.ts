@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 export function getModelsManagementHref(http: HttpStart) {
   return http!.basePath.prepend(`/app/management/ml/trained_models`);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionAstExpression } from './types';
+import type { ExpressionAstExpression } from './types';
 import { format } from './format';
 
 /**

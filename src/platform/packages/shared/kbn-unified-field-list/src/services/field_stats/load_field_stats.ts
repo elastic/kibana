@@ -11,7 +11,8 @@ import { lastValueFrom } from 'rxjs';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldStatsResponse } from '../../types';
-import { fetchAndCalculateFieldStats, SearchHandler, buildSearchParams } from './field_stats_utils';
+import type { SearchHandler } from './field_stats_utils';
+import { fetchAndCalculateFieldStats, buildSearchParams } from './field_stats_utils';
 
 interface FetchFieldStatsParams {
   services: {

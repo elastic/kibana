@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('after navigation from listing page to dashboard back button works', async () => {
-      await dashboard.gotoDashboardLandingPage();
       await dashboard.loadSavedDashboard('dashboard with everything');
       await dashboard.waitForRenderComplete();
       await browser.goBack();

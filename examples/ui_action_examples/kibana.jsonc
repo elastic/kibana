@@ -3,6 +3,8 @@
   "id": "@kbn/ui-actions-examples-plugin",
   "owner": "@elastic/appex-sharedux",
   "description": "Example plugin of how to register custom uiActions",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "uiActionsExamples",
     "server": false,

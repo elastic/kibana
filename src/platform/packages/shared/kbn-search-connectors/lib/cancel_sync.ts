@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ConnectorAPICancelSyncResponse } from '../types';
+import type { ConnectorAPICancelSyncResponse } from '../types';
 
 export const cancelSync = async (client: ElasticsearchClient, syncJobId: string) => {
   const result = await client.transport.request<ConnectorAPICancelSyncResponse>({

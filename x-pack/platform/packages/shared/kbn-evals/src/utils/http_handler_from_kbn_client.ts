@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core/public';
-import { KbnClient, KbnClientRequesterError } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core/public';
+import type { KbnClient } from '@kbn/test';
+import { KbnClientRequesterError } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 // redefine args type to make it easier to handle in a type-safe way
 type HttpHandlerArgs =

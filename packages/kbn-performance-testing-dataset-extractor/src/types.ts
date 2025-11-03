@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { ScalabilitySetup } from '@kbn/journeys';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ScalabilitySetup } from '@kbn/journeys';
 
 export interface Request {
   transactionId: string;

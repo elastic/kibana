@@ -7,7 +7,7 @@
 
 import { handleError } from '../../../../../lib/errors';
 import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
-import { MonitoringCore } from '../../../../../types';
+import type { MonitoringCore } from '../../../../../types';
 import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import {
   postLogstashPipelineClusterIdsRequestParamsRT,

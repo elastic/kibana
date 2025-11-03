@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AggregationsValueCountAggregate } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type { AggregationsValueCountAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type {
   AggregationsSumAggregate,
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   calendarAlignedTimeWindowSchema,
@@ -20,10 +20,10 @@ import {
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
+import type { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { toDateRange } from '../domain/services/date_range';
-import { BurnRatesClient } from './burn_rates_client';
+import type { BurnRatesClient } from './burn_rates_client';
 import { getFlattenedGroupings } from './utils';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 

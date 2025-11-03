@@ -8,7 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ServerSentEventBase, ServerSentEventType } from './events';
+import type { ServerSentEventBase } from './events';
+import { ServerSentEventType } from './events';
 
 export enum ServerSentEventErrorCode {
   internalError = 'internalError',

@@ -12,7 +12,7 @@ import { SyntaxType, useQueryBar, DEBOUNCE_INTERVAL } from './use_query_bar';
 import { MountWithReduxProvider } from '../../../lib';
 import * as URL from '../../../hooks/use_url_params';
 import * as ES_FILTERS from '../../../hooks/use_update_kuery_string';
-import { UptimeUrlParams } from '../../../lib/helper/url_params';
+import type { UptimeUrlParams } from '../../../lib/helper/url_params';
 
 const SAMPLE_ES_FILTERS = `{"bool":{"should":[{"match_phrase":{"monitor.id":"NodeServer"}}],"minimum_should_match":1}}`;
 

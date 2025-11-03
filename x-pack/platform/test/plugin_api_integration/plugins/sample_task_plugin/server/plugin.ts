@@ -7,11 +7,11 @@
 
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
@@ -218,6 +218,21 @@ export class SampleTaskManagerFixturePlugin
             }),
           },
         },
+      },
+      sampleRecurringTaskDisablesItself: {
+        title: 'Sample Recurring Task that disables itself',
+        description: 'A sample task that disables itself.',
+        maxAttempts: 3,
+        timeout: '60s',
+        createTaskRunner: () => ({
+          async run() {
+            await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
+            return {
+              shouldDisableTask: true,
+              state: {},
+            };
+          },
+        }),
       },
       sampleRecurringTaskTimingOut: {
         title: 'Sample Recurring Task that Times Out',

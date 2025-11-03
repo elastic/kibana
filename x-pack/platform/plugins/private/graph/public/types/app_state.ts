@@ -8,7 +8,7 @@
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { GenericIcon } from '../helpers/style_choices';
-import { OutlinkEncoder } from '../helpers/outlink_encoders';
+import type { OutlinkEncoder } from '../helpers/outlink_encoders';
 
 export interface UrlTemplate {
   url: string;

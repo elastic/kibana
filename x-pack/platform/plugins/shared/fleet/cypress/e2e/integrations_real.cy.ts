@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+
 import { INTEGRATIONS, navigateTo } from '../tasks/navigation';
 import {
   addIntegration,
@@ -60,7 +62,16 @@ function getAllIntegrations() {
   const cardItems = new Set<string>();
 
   for (let i = 0; i < 10; i++) {
-    cy.scrollTo(0, i * 600);
+    cy.window().then((win) => {
+      const scrollContainer = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      } else {
+        cy.scrollTo(0, i * 600);
+      }
+    });
+
     cy.wait(50);
     cy.getBySel(INTEGRATION_LIST)
       .find('.euiCard')
@@ -215,6 +226,17 @@ describe('Add Integration - Real API', () => {
     });
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
+  });
+});
+
+describe('It should handle non existing package', () => {
+  beforeEach(() => {
+    login();
+  });
+  it('should display error when visiting a non existing package details page', () => {
+    cy.visit('/app/integrations/detail/packagedonotexists');
+
+    cy.contains('[packagedonotexists] package not installed or found in registry').should('exist');
   });
 });
 

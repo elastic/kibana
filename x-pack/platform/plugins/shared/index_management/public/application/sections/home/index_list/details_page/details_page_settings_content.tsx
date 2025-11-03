@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState, useCallback } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -17,7 +19,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -27,8 +28,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { monaco as monacoEditor } from '@kbn/monaco';
-import { IndexSettingsResponse } from '../../../../../../common';
-import { Error } from '../../../../../shared_imports';
+import type { IndexSettingsResponse } from '../../../../../../common';
+import type { Error } from '../../../../../shared_imports';
 import { documentationService, updateIndexSettings } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
 import { flattenObject } from '../../../../lib/flatten_object';
@@ -37,7 +38,8 @@ import {
   defaultsToDisplay,
   limitedEditableSettings,
 } from '../../../../lib/edit_settings';
-import { AppDependencies, useAppContext } from '../../../../app_context';
+import type { AppDependencies } from '../../../../app_context';
+import { useAppContext } from '../../../../app_context';
 
 const getEditableSettings = ({
   data,
@@ -247,6 +249,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage',
                   {

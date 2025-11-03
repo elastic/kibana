@@ -9,7 +9,8 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { AssistantCallToAction, AssistantCallToActionProps } from './call_to_action';
+import type { AssistantCallToActionProps } from './call_to_action';
+import { AssistantCallToAction } from './call_to_action';
 import { translations } from './call_to_action.translations';
 
 describe('AssistantCallToAction', () => {

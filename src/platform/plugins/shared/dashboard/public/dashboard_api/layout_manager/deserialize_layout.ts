@@ -24,18 +24,17 @@ export function deserializeLayout(
   const childState: DashboardChildState = {};
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
-    const panelId = panel.panelIndex ?? v4();
+    const panelId = panel.uid ?? v4();
     layout.panels[panelId] = {
       type: panel.type,
-      gridData: {
-        ...panel.gridData,
+      grid: {
+        ...panel.grid,
         ...(sectionId && { sectionId }),
-        i: panelId,
       },
     };
     childState[panelId] = {
       rawState: {
-        ...panel.panelConfig,
+        ...panel.config,
       },
       references: getReferences(panelId),
     };
@@ -43,17 +42,13 @@ export function deserializeLayout(
 
   panels.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const sectionId = widget.gridData.i ?? v4();
-      const { panels: sectionPanels, ...restOfSection } = widget;
+      const { panels: sectionPanels, uid, ...restOfSection } = widget;
+      const sectionId = uid ?? v4();
       layout.sections[sectionId] = {
         collapsed: false,
         ...restOfSection,
-        gridData: {
-          ...widget.gridData,
-          i: sectionId,
-        },
       };
-      (sectionPanels as DashboardPanel[]).forEach((panel) => {
+      sectionPanels.forEach((panel) => {
         pushPanel(panel, sectionId);
       });
     } else {

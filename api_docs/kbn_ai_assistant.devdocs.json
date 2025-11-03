@@ -11,8 +11,14 @@
         "label": "ChatBody",
         "description": [],
         "signature": [
-          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n}: { connectors: ",
-          "UseGenAIConnectorsResult",
+          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToConnectorsManagementApp,\n}: { connectors: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.UseGenAIConnectorsResult",
+            "text": "UseGenAIConnectorsResult"
+          },
           "; currentUser?: Pick<",
           "AuthenticatedUser",
           ", \"username\" | \"full_name\" | \"profile_uid\"> | undefined; flyoutPositionMode?: ",
@@ -55,7 +61,9 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; }) => React.JSX.Element"
+          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; navigateToConnectorsManagementApp: (application: ",
+          "ApplicationStart",
+          ") => void; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
         "deprecated": false,
@@ -66,7 +74,7 @@
             "id": "def-public.ChatBody.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n}",
+            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToConnectorsManagementApp,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
             "deprecated": false,
@@ -80,7 +88,13 @@
                 "label": "connectors",
                 "description": [],
                 "signature": [
-                  "UseGenAIConnectorsResult"
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "public",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-public.UseGenAIConnectorsResult",
+                    "text": "UseGenAIConnectorsResult"
+                  }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
@@ -447,6 +461,40 @@
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.navigateToConnectorsManagementApp",
+                "type": "Function",
+                "tags": [],
+                "label": "navigateToConnectorsManagementApp",
+                "description": [],
+                "signature": [
+                  "(application: ",
+                  "ApplicationStart",
+                  ") => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.navigateToConnectorsManagementApp.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "application",
+                    "description": [],
+                    "signature": [
+                      "ApplicationStart"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
                   }
                 ],
                 "returnComment": []
@@ -1502,7 +1550,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "UseGenAIConnectorsResult"
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.UseGenAIConnectorsResult",
+            "text": "UseGenAIConnectorsResult"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
         "deprecated": false,
@@ -1844,15 +1898,17 @@
               "InferenceInferenceEndpointInfo",
               " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
-              "> | undefined; kbState: ",
+              "> | undefined; inferenceModelState: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.KnowledgeBaseState",
-                "text": "KnowledgeBaseState"
+                "section": "def-common.InferenceModelState",
+                "text": "InferenceModelState"
               },
-              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }> & { refresh: () => void; }"
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; productDocStatus: ",
+              "InstallationStatus",
+              "; }> & { refresh: () => void; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
@@ -1954,6 +2010,92 @@
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isProductDocInstalling",
+            "type": "boolean",
+            "tags": [],
+            "label": "isProductDocInstalling",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isProductDocUninstalling",
+            "type": "boolean",
+            "tags": [],
+            "label": "isProductDocUninstalling",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.installProductDoc",
+            "type": "Function",
+            "tags": [],
+            "label": "installProductDoc",
+            "description": [],
+            "signature": [
+              "(inferenceId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.installProductDoc.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.uninstallProductDoc",
+            "type": "Function",
+            "tags": [],
+            "label": "uninstallProductDoc",
+            "description": [],
+            "signature": [
+              "(inferenceId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.uninstallProductDoc.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

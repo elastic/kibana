@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiText, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
@@ -47,6 +48,10 @@ const timeSliderStyles = {
     .timeSlider__anchorText--invalid {
       text-decoration: line-through;
       color: ${euiTheme.colors.mediumShade};
+    }
+
+    &:focus-visible {
+      outline-offset: -3px;
     }
   `,
 };

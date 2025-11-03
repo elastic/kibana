@@ -96,7 +96,7 @@
         "label": "parseThemeNameValue",
         "description": [],
         "signature": [
-          "(value: unknown) => \"amsterdam\" | \"borealis\""
+          "(value: unknown) => \"borealis\""
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -693,7 +693,7 @@
         "label": "FALLBACK_THEME_TAG",
         "description": [],
         "signature": [
-          "\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\""
+          "\"borealislight\" | \"borealisdark\""
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -742,7 +742,7 @@
         "label": "ThemeName",
         "description": [],
         "signature": [
-          "\"amsterdam\" | \"borealis\""
+          "\"borealis\""
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -757,7 +757,7 @@
         "label": "ThemeTag",
         "description": [],
         "signature": [
-          "\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\""
+          "\"borealislight\" | \"borealisdark\""
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -772,7 +772,7 @@
         "label": "ThemeTags",
         "description": [],
         "signature": [
-          "readonly (\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\")[]"
+          "readonly (\"borealislight\" | \"borealisdark\")[]"
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -819,7 +819,7 @@
         "label": "UiSettingsSolutions",
         "description": [],
         "signature": [
-          "(\"security\" | \"oblt\" | \"es\" | \"chat\" | \"classic\")[]"
+          "(\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | \"classic\")[]"
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
@@ -855,7 +855,7 @@
           "\nAn array of theme tags available in Kibana by default when not customized\nusing KBN_OPTIMIZER_THEMES environment variable."
         ],
         "signature": [
-          "readonly (\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\")[]"
+          "readonly (\"borealislight\" | \"borealisdark\")[]"
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -870,7 +870,7 @@
         "label": "SUPPORTED_THEME_NAMES",
         "description": [],
         "signature": [
-          "readonly [\"amsterdam\", \"borealis\"]"
+          "readonly [\"borealis\"]"
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -887,7 +887,7 @@
           "\nAn array of all theme tags supported by Kibana. Note that this list doesn't\nreflect what theme tags are available in a Kibana build."
         ],
         "signature": [
-          "readonly [\"v8light\", \"v8dark\", \"borealislight\", \"borealisdark\"]"
+          "readonly [\"borealislight\", \"borealisdark\"]"
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,

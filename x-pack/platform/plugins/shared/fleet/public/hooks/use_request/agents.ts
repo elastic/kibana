@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type {
   GetActionStatusRequest,
@@ -23,6 +23,10 @@ import type {
   MigrateSingleAgentResponse,
   BulkMigrateAgentsRequest,
   BulkMigrateAgentsResponse,
+  ChangeAgentPrivilegeLevelRequest,
+  ChangeAgentPrivilegeLevelResponse,
+  BulkChangeAgentPrivilegeLevelRequest,
+  BulkChangeAgentPrivilegeLevelResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -94,8 +98,21 @@ export function useGetAgentsQuery(
   });
 }
 
+/**
+ * @deprecated use sendGetAgentsForRq or useGetAgentsQuery instead
+ */
 export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {
   return sendRequest<GetAgentsResponse>({
+    method: 'get',
+    path: agentRouteService.getListPath(),
+    version: API_VERSIONS.public.v1,
+    query,
+    ...options,
+  });
+}
+
+export function sendGetAgentsForRq(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequestForRq<GetAgentsResponse>({
     method: 'get',
     path: agentRouteService.getListPath(),
     version: API_VERSIONS.public.v1,
@@ -135,8 +152,8 @@ export function sendGetAgentStatus(
   });
 }
 
-export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: RequestOptions) {
-  return sendRequest<GetAgentTagsResponse>({
+export function sendGetAgentTagsForRq(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequestForRq<GetAgentTagsResponse>({
     method: 'get',
     path: agentRouteService.getListTagsPath(),
     query,
@@ -383,8 +400,8 @@ export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: b
     enabled: options.enabled,
   });
 }
-export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
-  return sendRequest<MigrateSingleAgentResponse>({
+export function sendMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
+  return sendRequestForRq<MigrateSingleAgentResponse>({
     path: agentRouteService.postMigrateSingleAgent(options.id),
     method: 'post',
     version: API_VERSIONS.public.v1,
@@ -396,8 +413,8 @@ export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']
   });
 }
 
-export function useBulkMigrateAgents(options: BulkMigrateAgentsRequest['body']) {
-  return sendRequest<BulkMigrateAgentsResponse>({
+export function sendBulkMigrateAgents(options: BulkMigrateAgentsRequest['body']) {
+  return sendRequestForRq<BulkMigrateAgentsResponse>({
     path: agentRouteService.postBulkMigrateAgents(),
     method: 'post',
     version: API_VERSIONS.public.v1,
@@ -407,5 +424,23 @@ export function useBulkMigrateAgents(options: BulkMigrateAgentsRequest['body']) 
       enrollment_token: options.enrollment_token,
       settings: options.settings ?? {},
     },
+  });
+}
+
+export function sendChangeAgentPrivilegeLevel(request: ChangeAgentPrivilegeLevelRequest) {
+  return sendRequestForRq<ChangeAgentPrivilegeLevelResponse>({
+    path: agentRouteService.postChangeAgentPrivilegeLevel(request.agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: request.body,
+  });
+}
+
+export function sendBulkChangeAgentPrivilegeLevel(request: BulkChangeAgentPrivilegeLevelRequest) {
+  return sendRequestForRq<BulkChangeAgentPrivilegeLevelResponse>({
+    path: agentRouteService.postBulkChangeAgentPrivilegeLevel(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: request.body,
   });
 }

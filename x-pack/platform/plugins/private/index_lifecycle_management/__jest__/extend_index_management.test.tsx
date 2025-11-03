@@ -21,7 +21,7 @@ import {
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
-import { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '@kbn/index-management-plugin/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -100,6 +100,7 @@ const indexWithLifecyclePolicy: Index = {
     action_time_millis: 1544187775867,
     step: 'complete',
     step_time_millis: 1544187775867,
+    skip: false,
   },
 };
 
@@ -133,6 +134,7 @@ const indexWithLifecycleError: Index = {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
     },
+    skip: false,
   },
 };
 const indexWithLifecyclePhaseDefinition: Index = {
@@ -166,6 +168,7 @@ const indexWithLifecyclePhaseDefinition: Index = {
       version: 1,
       modified_date_in_millis: 1544031699844,
     },
+    skip: false,
   },
 };
 const indexWithLifecycleWaitingStep: Index = {
@@ -199,6 +202,7 @@ const indexWithLifecycleWaitingStep: Index = {
       all_shards_active: false,
       number_of_replicas: 2,
     },
+    skip: false,
   },
 };
 const indexWithNonExistentPolicyError: Index = {
@@ -225,6 +229,7 @@ const indexWithNonExistentPolicyError: Index = {
       type: 'illegal_argument_exception',
       reason: 'policy [testy] does not exist',
     },
+    skip: false,
   },
 };
 

@@ -5,30 +5,36 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import {
+import type {
   CheckAndLoadIntegrationResponse,
-  checkAndLoadIntegrationResponseRt,
   DataStreamRolloverResponse,
-  dataStreamRolloverResponseRt,
   DegradedFieldAnalysis,
-  degradedFieldAnalysisRt,
   DegradedFieldValues,
-  degradedFieldValuesRt,
   FailedDocsDetails,
   FailedDocsErrorsResponse,
+  IntegrationDashboardsResponse,
+  UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
+  NonAggregatableDatasets,
+} from '../../../common/api_types';
+import {
+  checkAndLoadIntegrationResponseRt,
+  dataStreamRolloverResponseRt,
+  degradedFieldAnalysisRt,
+  degradedFieldValuesRt,
   failedDocsErrorsRt,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
-  IntegrationDashboardsResponse,
   integrationDashboardsRT,
   qualityIssueBaseRT,
-  UpdateFieldLimitResponse,
   updateFieldLimitResponseRt,
+  updateFailureStoreResponseRt,
+  getNonAggregatableDatasetsRt,
 } from '../../../common/api_types';
-import {
+import type {
   DataStreamDetails,
   DataStreamSettings,
   DegradedFieldResponse,
@@ -38,21 +44,26 @@ import {
   GetDataStreamDetailsResponse,
   GetDataStreamFailedDocsDetailsParams,
   GetDataStreamFailedDocsErrorsParams,
+  GetDataStreamNonAggregatableParams,
   GetDataStreamSettingsParams,
   GetDataStreamSettingsResponse,
   GetIntegrationDashboardsParams,
 } from '../../../common/data_streams_stats';
-import { IDataStreamDetailsClient } from './types';
+import type { IDataStreamDetailsClient } from './types';
 import { Integration } from '../../../common/data_streams_stats/integration';
-import {
+import type {
   AnalyzeDegradedFieldsParams,
   CheckAndLoadIntegrationParams,
   UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
 import { DatasetQualityError } from '../../../common/errors';
+import type { ITelemetryClient } from '../telemetry';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(
+    private readonly http: HttpStart,
+    private readonly telemetryClient: ITelemetryClient
+  ) {}
 
   public async getDataStreamSettings({ dataStream }: GetDataStreamSettingsParams) {
     const response = await this.http
@@ -305,6 +316,61 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       dataStreamRolloverResponseRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode rollover response: ${message}"`)
+    )(response);
+  }
+
+  public async updateFailureStore({
+    dataStream,
+    failureStoreEnabled,
+    customRetentionPeriod,
+  }: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<UpdateFailureStoreResponse> {
+    const response = await this.http
+      .put<UpdateFailureStoreResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        {
+          body: JSON.stringify({
+            failureStoreEnabled,
+            customRetentionPeriod,
+          }),
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
+      });
+
+    this.telemetryClient.trackFailureStoreUpdated({
+      data_stream_name: dataStream,
+      failure_store_enabled: failureStoreEnabled,
+      custom_retention_period: customRetentionPeriod,
+    });
+
+    return decodeOrThrow(
+      updateFailureStoreResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode update failure store response: ${message}"`)
+    )(response);
+  }
+
+  public async getNonAggregatableDatasets(
+    params: GetDataStreamNonAggregatableParams
+  ): Promise<NonAggregatableDatasets> {
+    const response = await this.http
+      .get<NonAggregatableDatasets>(
+        `/internal/dataset_quality/data_streams/${params.dataStream}/non_aggregatable`,
+        { query: { start: params.start, end: params.end } }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to fetch non-aggregatable datasets: ${error}`, error);
+      });
+
+    return decodeOrThrow(
+      getNonAggregatableDatasetsRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode non-aggregatable datasets response: ${message}`)
     )(response);
   }
 }

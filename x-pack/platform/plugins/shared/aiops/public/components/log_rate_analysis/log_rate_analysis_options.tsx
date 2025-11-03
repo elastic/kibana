@@ -131,26 +131,31 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
     },
   ];
 
+  // Temporarily hide smart grouping controls as it is disabled until https://github.com/elastic/kibana/issues/232849 is resolved
+  const smartGroupingDisabled = true;
+
   return (
     <>
-      <EuiFlexItem grow={growFirstItem}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">{groupResultsMessage}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              data-test-subj={`aiopsLogRateAnalysisGroupSwitch${groupResults ? ' checked' : ''}`}
-              buttonSize="s"
-              isDisabled={disabledGroupResultsSwitch}
-              legend={groupResultsMessage}
-              options={toggleButtons}
-              idSelected={toggleIdSelected}
-              onChange={onGroupResultsToggle}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {smartGroupingDisabled ? null : (
+        <EuiFlexItem grow={growFirstItem}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">{groupResultsMessage}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                data-test-subj={`aiopsLogRateAnalysisGroupSwitch${groupResults ? ' checked' : ''}`}
+                buttonSize="s"
+                isDisabled={disabledGroupResultsSwitch}
+                legend={groupResultsMessage}
+                options={toggleButtons}
+                idSelected={toggleIdSelected}
+                onChange={onGroupResultsToggle}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <FieldFilterPopover
           dataTestSubj="aiopsFieldFilterButton"

@@ -8,7 +8,8 @@
  */
 
 import React, { forwardRef, useMemo, useState } from 'react';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiBadge,
@@ -19,23 +20,21 @@ import {
   EuiTitle,
   EuiBasicTable,
   useGeneratedHtmlId,
-  EuiBasicTableColumn,
   EuiHeaderLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import {
-  DATA_QUALITY_DETAILS_LOCATOR_ID,
-  DataQualityDetailsLocatorParams,
-} from '@kbn/deeplinks-observability';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { DataQualityDetailsLocatorParams } from '@kbn/deeplinks-observability';
+import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import {
-  ScrollableSectionWrapper,
-  ScrollableSectionWrapperApi,
-} from './scrollable_section_wrapper';
+import type { ScrollableSectionWrapperApi } from './scrollable_section_wrapper';
+import { ScrollableSectionWrapper } from './scrollable_section_wrapper';
 
 type Direction = 'asc' | 'desc';
 type SortField = 'issue' | 'values';
@@ -195,36 +194,46 @@ export const LogsOverviewDegradedFields = forwardRef<
     </EuiFlexGroup>
   );
 
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
+
   return countOfDegradedFields > 0 ? (
     <ScrollableSectionWrapper ref={ref}>
-      {({ forceState, onToggle }) => (
-        <>
-          <EuiAccordion
-            id={accordionId}
-            buttonContent={accordionTitle}
-            paddingSize="m"
-            forceState={forceState}
-            onToggle={onToggle}
-            extraAction={
-              !isCCSRemoteIndex && (
-                <DatasetQualityLink urlService={urlService} dataStream={dataStream} />
-              )
-            }
-            data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsAccordion"
-          >
-            <EuiBasicTable
-              tableLayout="fixed"
-              columns={columns}
-              items={renderedItems ?? []}
-              sorting={{ sort: tableOptions.sort }}
-              onChange={onTableChange}
-              pagination={pagination}
-              data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable"
-            />
-          </EuiAccordion>
-          <EuiHorizontalRule margin="xs" />
-        </>
-      )}
+      {({ forceState, onToggle }) => {
+        return (
+          <>
+            <EuiAccordion
+              id={accordionId}
+              buttonContent={accordionTitle}
+              forceState={forceState}
+              onToggle={(isOpen: boolean) => {
+                setIsAccordionExpanded(isOpen);
+                if (onToggle) {
+                  onToggle(isOpen);
+                }
+              }}
+              extraAction={
+                !isCCSRemoteIndex && (
+                  <DatasetQualityLink urlService={urlService} dataStream={dataStream} />
+                )
+              }
+              data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsAccordion"
+            >
+              <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+                <EuiBasicTable
+                  tableLayout="fixed"
+                  columns={columns}
+                  items={renderedItems ?? []}
+                  sorting={{ sort: tableOptions.sort }}
+                  onChange={onTableChange}
+                  pagination={pagination}
+                  data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable"
+                />
+              </EuiPanel>
+            </EuiAccordion>
+            {!isAccordionExpanded ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="s" />}
+          </>
+        );
+      }}
     </ScrollableSectionWrapper>
   ) : null;
 });
@@ -236,9 +245,9 @@ const getDegradedFieldsColumns = (): Array<EuiBasicTableColumn<DegradedField>> =
     field: 'issue',
     render: (issue: string) => {
       return (
-        <>
+        <EuiText size="xs">
           <b>{issue}</b>&nbsp;{textFieldIgnored}
-        </>
+        </EuiText>
       );
     },
   },
@@ -313,6 +322,7 @@ const DatasetQualityLink = React.memo(
         data-test-subj="unifiedDocViewLogsOverviewDegradedFieldDatasetLink"
         iconType="popout"
         target="_blank"
+        size="xs"
       >
         {datasetQualityLinkTitle}
       </EuiHeaderLink>

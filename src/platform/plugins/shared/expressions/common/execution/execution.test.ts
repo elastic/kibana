@@ -11,11 +11,12 @@ import { lastValueFrom, of } from 'rxjs';
 import { scan } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
-import { parseExpression, ExpressionAstExpression } from '../ast';
+import type { ExpressionAstExpression } from '../ast';
+import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
-import { ExpressionFunctionDefinition } from '..';
+import type { ExpressionFunctionDefinition } from '..';
 import { ExecutionContract } from './execution_contract';
-import { ExpressionValueBoxed } from '../expression_types';
+import type { ExpressionValueBoxed } from '../expression_types';
 
 beforeAll(() => {
   if (typeof performance === 'undefined') {

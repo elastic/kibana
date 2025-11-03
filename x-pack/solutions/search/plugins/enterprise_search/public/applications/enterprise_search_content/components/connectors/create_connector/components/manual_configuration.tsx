@@ -22,12 +22,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { NATIVE_CONNECTOR_DEFINITIONS, NativeConnector } from '@kbn/search-connectors';
+import type { NativeConnector } from '@kbn/search-connectors';
+import { NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
-import { KibanaDeps } from '../../../../../../../common/types';
+import type { KibanaDeps } from '../../../../../../../common/types';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
-import { SelfManagePreference } from '../create_connector';
+import type { SelfManagePreference } from '../create_connector';
 
 import { ManualConfigurationFlyout } from './manual_configuration_flyout';
 

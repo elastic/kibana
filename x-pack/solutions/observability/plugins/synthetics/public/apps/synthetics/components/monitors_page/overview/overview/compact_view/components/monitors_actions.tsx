@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { ActionsPopover } from '../../actions_popover';
 
 export const MonitorsActions = ({ monitor }: { monitor: OverviewStatusMetaData }) => {

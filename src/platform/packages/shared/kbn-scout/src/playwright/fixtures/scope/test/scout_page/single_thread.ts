@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page, test as base } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { PathOptions } from '../../../../../common/services/kibana_url';
-import { KibanaUrl, ScoutLogger } from '../../worker';
-import { ScoutPage } from '.';
+import { keyTo } from '../../../../utils';
+import type { PathOptions } from '../../../../../common/services/kibana_url';
+import type { KibanaUrl, ScoutLogger } from '../../worker';
+import type { ScoutPage } from '.';
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
@@ -64,6 +66,7 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
       await page.waitForTimeout(delay);
     }
   };
+
   // custom method to clear an input field
   extendedMethods.clearInput = async (selector: string) => {
     const testSubjSelector = subj(selector);
@@ -91,6 +94,14 @@ export function extendPlaywrightPage({
     extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
       state: 'attached',
     });
+  // Method to press a key until an element with the provided selector is in focus.
+  extendedPage.keyTo = async (
+    selector: string,
+    key: string,
+    maxElementsToTraverse: number = 1000
+  ) => {
+    return await keyTo(page, selector, key, maxElementsToTraverse);
+  };
   return extendedPage;
 }
 

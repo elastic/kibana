@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 
-import { ConnectorScheduling, Frequency } from '../../types';
+import type { ConnectorScheduling, Frequency } from '../../types';
 
 import { CronEditor } from './cron_editor';
 

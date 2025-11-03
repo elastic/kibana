@@ -11,8 +11,10 @@ import {
   getFormatClashes,
   CLASH_TYPE,
   CLASH_ERROR_TYPE,
+  getFieldsFromMappings,
 } from './merge_tools';
 import type { FileWrapper, FileAnalysis } from './file_wrapper';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 
 describe('merge_tools', () => {
   describe('createMergedMappings', () => {
@@ -123,6 +125,106 @@ describe('merge_tools', () => {
           },
         },
       ]);
+    });
+
+    it('should handle existing index mappings with no clashes', () => {
+      const files = [
+        {
+          getFileName: () => 'file1',
+          getMappings: () => ({
+            properties: { field1: { type: 'text' }, field3: { type: 'boolean' } },
+          }),
+        } as never as FileWrapper,
+      ];
+
+      const existingIndexMappings = {
+        properties: { field1: { type: 'text' }, field2: { type: 'number' } },
+      } as never as FindFileStructureResponse['mappings'];
+
+      const result = createMergedMappings(files, existingIndexMappings);
+
+      expect(result.mergedMappings).toEqual({
+        properties: {
+          field1: { type: 'text' },
+          field2: { type: 'number' },
+          field3: { type: 'boolean' },
+        },
+      });
+      expect(result.mappingClashes).toEqual([]);
+      expect(result.existingIndexChecks).toBeDefined();
+      expect(result.existingIndexChecks?.existingFields.sort()).toEqual(
+        ['field1', 'field2'].sort()
+      );
+      expect(result.existingIndexChecks?.newFieldsPerFile).toEqual([
+        { fileName: 'file1', fileIndex: 0, fields: ['field3'] },
+      ]);
+      expect(result.existingIndexChecks?.commonFieldsPerFile).toEqual([
+        { fileName: 'file1', fileIndex: 0, fields: ['field1'] },
+      ]);
+      expect(result.existingIndexChecks?.unmappedFieldsPerFile).toEqual([
+        { fileName: 'file1', fileIndex: 0, fields: ['field2'] },
+      ]);
+      expect(result.existingIndexChecks?.mappingClashes).toEqual([]);
+    });
+
+    it('should handle existing index mappings with clashes', () => {
+      const files = [
+        {
+          getFileName: () => 'file1',
+          getMappings: () => ({ properties: { field1: { type: 'number' } } }),
+        } as never as FileWrapper,
+      ];
+
+      const existingIndexMappings = {
+        properties: { field1: { type: 'text' } },
+      } as never as FindFileStructureResponse['mappings'];
+
+      const result = createMergedMappings(files, existingIndexMappings);
+
+      expect(result.mergedMappings).toEqual({
+        properties: {
+          field1: { type: 'text' },
+        },
+      });
+      expect(result.mappingClashes).toEqual([
+        {
+          fieldName: 'field1',
+          existingType: 'text',
+          clashingType: { fileName: undefined, newType: 'number', fileIndex: 1 },
+        },
+      ]);
+      expect(result.existingIndexChecks).toBeDefined();
+      expect(result.existingIndexChecks?.mappingClashes).toEqual([
+        {
+          fieldName: 'field1',
+          existingType: 'text',
+          clashingType: { fileName: 'file1', newType: 'number', fileIndex: 0 },
+        },
+      ]);
+    });
+
+    it('should handle existing index mappings with text/keyword compatibility', () => {
+      const files = [
+        {
+          getFileName: () => 'file1',
+          getMappings: () => ({ properties: { field1: { type: 'keyword' } } }),
+        } as never as FileWrapper,
+      ];
+
+      const existingIndexMappings = {
+        properties: { field1: { type: 'text' } },
+      } as never as FindFileStructureResponse['mappings'];
+
+      const result = createMergedMappings(files, existingIndexMappings);
+
+      expect(result.mergedMappings).toEqual({
+        properties: {
+          field1: { type: 'text' },
+        },
+      });
+      expect(result.mappingClashes).toEqual([]);
+      expect(result.existingIndexChecks).toBeDefined();
+      expect(result.existingIndexChecks?.mappingClashes).toEqual([]);
     });
   });
 
@@ -265,6 +367,115 @@ describe('merge_tools', () => {
         { fileName: 'file2', clash: CLASH_ERROR_TYPE.NONE, clashType: undefined },
         { fileName: 'file3', clash: CLASH_ERROR_TYPE.ERROR, clashType: CLASH_TYPE.UNSUPPORTED },
       ]);
+    });
+
+    describe('getFieldsFromMappings', () => {
+      it('should return an empty array for empty mappings', () => {
+        const mappings = { properties: {} };
+        expect(getFieldsFromMappings(mappings)).toEqual([]);
+      });
+
+      it('should handle mappings with no properties field', () => {
+        const mappings = {};
+        expect(getFieldsFromMappings(mappings as any)).toEqual([]);
+      });
+
+      it('should extract a single top-level field', () => {
+        const mappings = {
+          properties: {
+            field1: { type: 'text' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any)).toEqual([
+          { name: 'field1', value: { type: 'text' } },
+        ]);
+      });
+
+      it('should extract multiple top-level fields and sort them', () => {
+        const mappings = {
+          properties: {
+            field2: { type: 'keyword' },
+            field1: { type: 'float' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any)).toEqual([
+          { name: 'field1', value: { type: 'float' } },
+          { name: 'field2', value: { type: 'keyword' } },
+        ]);
+      });
+
+      it('should extract nested fields with dot notation', () => {
+        const mappings = {
+          properties: {
+            parent: {
+              properties: {
+                child: { type: 'text' },
+              },
+            },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any)).toEqual([
+          { name: 'parent.child', value: { type: 'text' } },
+        ]);
+      });
+
+      it('should extract a mix of top-level and nested fields and sort them', () => {
+        const mappings = {
+          properties: {
+            field2: { type: 'keyword' },
+            parent: {
+              properties: {
+                child2: { type: 'float' },
+                child1: { type: 'text' },
+              },
+            },
+            field1: { type: 'boolean' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any)).toEqual([
+          { name: 'field1', value: { type: 'boolean' } },
+          { name: 'field2', value: { type: 'keyword' } },
+          { name: 'parent.child1', value: { type: 'text' } },
+          { name: 'parent.child2', value: { type: 'float' } },
+        ]);
+      });
+
+      it('should filter fields by a single allowed type', () => {
+        const mappings = {
+          properties: {
+            field1: { type: 'text' },
+            field2: { type: 'keyword' },
+            field3: { type: 'float' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any, ['text'])).toEqual([
+          { name: 'field1', value: { type: 'text' } },
+        ]);
+      });
+
+      it('should filter fields by multiple allowed types and sort them', () => {
+        const mappings = {
+          properties: {
+            field1: { type: 'text' },
+            field2: { type: 'keyword' },
+            field3: { type: 'float' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any, ['float', 'text'])).toEqual([
+          { name: 'field1', value: { type: 'text' } },
+          { name: 'field3', value: { type: 'float' } },
+        ]);
+      });
+
+      it('should return an empty array when allowed types do not match any field', () => {
+        const mappings = {
+          properties: {
+            field1: { type: 'text' },
+            field2: { type: 'keyword' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any, ['float'])).toEqual([]);
+      });
     });
   });
 });

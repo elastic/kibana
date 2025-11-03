@@ -13,6 +13,7 @@ import type { UserAuthzAccessLevel } from './types';
 
 const artifactPageTopTestSubjPrefix: Readonly<Record<EndpointArtifactPageId, string>> = {
   trustedApps: 'trustedAppsListPage',
+  trustedDevices: 'trustedDevicesList',
   eventFilters: 'EventFiltersListPage',
   hostIsolationExceptions: 'hostIsolationExceptionsListPage',
   blocklist: 'blocklistPage',

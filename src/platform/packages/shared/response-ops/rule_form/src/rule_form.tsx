@@ -9,7 +9,7 @@
 
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
@@ -18,8 +18,8 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
   RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
 } from './translations';
-import { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
-import { RuleFormStepId } from './constants';
+import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
+import type { RuleFormStepId } from './constants';
 
 const queryClient = new QueryClient();
 

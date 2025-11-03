@@ -8,8 +8,8 @@
  */
 
 import { BuildkiteClient } from './client';
-import { Build } from './types/build';
-import { Job } from './types/job';
+import type { Build } from './types/build';
+import type { Job } from './types/job';
 
 describe('BuildkiteClient', () => {
   let buildkite: BuildkiteClient;

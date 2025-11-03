@@ -12,9 +12,10 @@ import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
+import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {
+  AlertUtils,
   checkAAD,
   getTestRuleData,
   getUnauthorizedErrorMessage,
@@ -674,5 +675,19 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('internally managed rule types', () => {
+      const alertUtils = new AlertUtils({
+        user: SuperuserAtSpace1.user,
+        space: SuperuserAtSpace1.space,
+        supertestWithoutAuth,
+      });
+
+      it('should throw 400 error when trying to create an internally managed rule type', async () => {
+        const response = await alertUtils.createInternallyManagedRule(objectRemover);
+
+        expect(response.statusCode).to.eql(400);
+      });
+    });
   });
 }

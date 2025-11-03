@@ -8,8 +8,8 @@
  */
 
 import chalk from 'chalk';
-import { OpenAPIV3 } from 'openapi-types';
-import { ResolvedDocument } from '../ref_resolver/resolved_document';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { mergePaths } from './merge_paths';
 import { mergeSharedComponents } from './merge_shared_components';
 import { mergeServers } from './merge_servers';
@@ -17,7 +17,7 @@ import { mergeSecurityRequirements } from './merge_security_requirements';
 import { mergeTags } from './merge_tags';
 import { getOasVersion } from '../../utils/get_oas_version';
 import { getOasDocumentVersion } from '../../utils/get_oas_document_version';
-import { MergeOptions } from './merge_options';
+import type { MergeOptions } from './merge_options';
 
 interface MergeDocumentsOptions extends MergeOptions {
   splitDocumentsByVersion: boolean;

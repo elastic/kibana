@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from 'react-redux';
-import { OverviewStatusState } from '../../../../common/runtime_types';
+import type { OverviewStatusState } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
 
 export function useStatusByLocationOverview({

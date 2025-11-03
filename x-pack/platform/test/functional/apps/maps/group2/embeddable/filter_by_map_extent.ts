@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const FILTER_BY_MAP_EXTENT_DATA_TEST_SUBJ = 'embeddablePanelAction-FILTER_BY_MAP_EXTENT';
 
@@ -24,8 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         { skipBrowserRefresh: true }
       );
       await dashboard.navigateToApp();
-      await dashboard.gotoDashboardEditMode('filter by map extent dashboard');
-      await header.waitUntilLoadingHasFinished();
+      await dashboard.loadDashboardInEditMode('filter by map extent dashboard');
       await dashboard.waitForRenderComplete();
     });
 

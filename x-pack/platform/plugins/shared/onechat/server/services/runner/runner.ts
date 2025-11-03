@@ -18,11 +18,14 @@ import type {
   Runner,
   RunToolReturn,
   RunAgentReturn,
+  WritableToolResultStore,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
-import { ModelProviderFactoryFn } from './model_provider';
+import type { AttachmentServiceStart } from '../attachments';
+import type { ModelProviderFactoryFn } from './model_provider';
 import { createEmptyRunContext } from './utils/run_context';
+import { createResultStore } from './tool_result_store';
 import { runTool } from './run_tool';
 import { runAgent } from './run_agent';
 
@@ -34,13 +37,19 @@ export interface CreateScopedRunnerDeps {
   modelProviderFactory: ModelProviderFactoryFn;
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
+  attachmentsService: AttachmentServiceStart;
   // other deps
   logger: Logger;
   request: KibanaRequest;
   defaultConnectorId?: string;
+  // context-aware deps
+  resultStore: WritableToolResultStore;
 }
 
-export type CreateRunnerDeps = Omit<CreateScopedRunnerDeps, 'request' | 'defaultConnectorId'>;
+export type CreateRunnerDeps = Omit<
+  CreateScopedRunnerDeps,
+  'request' | 'defaultConnectorId' | 'resultStore'
+>;
 
 export class RunnerManager {
   public readonly deps: CreateScopedRunnerDeps;
@@ -54,11 +63,11 @@ export class RunnerManager {
   // arrow function is required, risks of loosing context when passed down as handler.
   getRunner = (): ScopedRunner => {
     return {
-      runTool: <TParams = Record<string, unknown>, TResult = unknown>(
+      runTool: <TParams = Record<string, unknown>>(
         toolExecutionParams: ScopedRunnerRunToolsParams<TParams>
-      ): Promise<RunToolReturn<TResult>> => {
+      ): Promise<RunToolReturn> => {
         try {
-          return runTool<TParams, TResult>({ toolExecutionParams, parentManager: this });
+          return runTool<TParams>({ toolExecutionParams, parentManager: this });
         } catch (e) {
           if (isOnechatError(e)) {
             throw e;
@@ -95,13 +104,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   return {
     runTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
-      const allDeps = { ...deps, request, defaultConnectorId };
+      const resultStore = createResultStore();
+      const allDeps = { ...deps, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runTool(otherParams);
     },
     runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
-      const allDeps = { ...deps, request, defaultConnectorId };
+      const resultStore = createResultStore(params.agentParams.conversation?.rounds);
+      const allDeps = { ...deps, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runAgent(otherParams);
     },

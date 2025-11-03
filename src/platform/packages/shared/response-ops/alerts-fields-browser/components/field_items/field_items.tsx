@@ -10,8 +10,8 @@
 import React from 'react';
 import {
   EuiCheckbox,
-  EuiIcon,
   EuiToolTip,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { EcsFlat } from '@elastic/ecs';
-import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';
@@ -111,13 +111,14 @@ const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): Fiel
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={type}>
-              <EuiIcon
-                data-test-subj={`field-${name}-icon`}
-                css={styles.icon}
-                type={getIconFromType(type ?? null)}
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              content={type}
+              css={styles.icon}
+              type={getIconFromType(type ?? null)}
+              iconProps={{
+                'data-test-subj': `field-${name}-icon`,
+              }}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -139,7 +140,7 @@ const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): Fiel
           <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
             <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
           </EuiScreenReaderOnly>
-          <span css={styles.truncatable}>
+          <span css={styles.truncatable} tabIndex={0}>
             <span css={styles.description} data-test-subj={`field-${name}-description`}>
               {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
             </span>

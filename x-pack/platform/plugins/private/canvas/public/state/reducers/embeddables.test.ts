@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { State } from '../../../types';
+import type { State } from '../../../types';
 import { updateEmbeddableExpression } from '../actions/embeddable';
 import { embeddableReducer } from './embeddable';
 

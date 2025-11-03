@@ -9,13 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
+import type {
   RowControlColumn,
   RowControlComponent,
   RowControlProps,
   RowControlRowProps,
 } from './types';
-import { LogDocument } from '../../data_types';
+import type { LogDocument } from '../../data_types';
 import { getStacktraceFields } from '../../utils/get_stack_trace_fields';
 
 /**

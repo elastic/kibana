@@ -6,9 +6,9 @@
  */
 
 import { compact, uniqBy } from 'lodash';
-import { Instruction } from '../../../common/types';
+import type { Instruction } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
-import { InstructionOrCallback } from '../types';
+import type { InstructionOrCallback } from '../types';
 
 export const USER_INSTRUCTIONS_HEADER = `## User instructions
           

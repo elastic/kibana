@@ -12,7 +12,7 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public/customiz
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
 import { from, type Subscription } from 'rxjs';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -121,7 +121,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     return {
       ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
       timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
-      refreshInterval: discoverStateContainer.current?.globalState.get()?.refreshInterval,
+      refreshInterval: discoverStateContainer.current?.getCurrentTab().globalState.refreshInterval,
       breakdownField: discoverStateContainer.current?.appState.getState().breakdownField,
       rowsPerPage: discoverStateContainer.current?.appState.getState().rowsPerPage,
       title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(title),
@@ -214,10 +214,14 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
       if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {
-          stateContainer.globalState.set({
-            ...stateContainer.globalState.get(),
-            time: savedSearchAppState?.savedSearch.timeRange,
-          });
+          stateContainer.internalState.dispatch(
+            stateContainer.injectCurrentTab(stateContainer.internalStateActions.setGlobalState)({
+              globalState: {
+                ...stateContainer.getCurrentTab().globalState,
+                timeRange: savedSearchAppState.savedSearch.timeRange,
+              },
+            })
+          );
         }
         stateContainer.appState.set(finalAppState);
         await stateContainer.appState.replaceUrlState(finalAppState);
@@ -231,12 +235,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const savedSearchStateSub = stateContainer.savedSearchState.getHasChanged$().subscribe({
-        next: (hasChanged) => {
-          if (hasChanged) {
-            const latestSavedSearchState = stateContainer.savedSearchState.getState();
-            setDiscoverSavedSearchState(latestSavedSearchState);
-          }
+      const savedSearchStateSub = stateContainer.savedSearchState.getCurrent$().subscribe({
+        next: (latestSavedSearchState) => {
+          setDiscoverSavedSearchState(latestSavedSearchState);
         },
       });
 

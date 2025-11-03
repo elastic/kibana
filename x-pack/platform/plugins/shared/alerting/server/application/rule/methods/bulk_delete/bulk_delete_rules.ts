@@ -6,11 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import {
+  combineFiltersWithInternalRuleTypeFilter,
+  constructIgnoreInternalRuleTypesFilter,
+} from '../../../../rules_client/common/construct_ignore_internal_rule_type_filters';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -52,17 +55,28 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
 
   const { ids, filter } = options;
   const actionsClient = await context.getActionsClient();
+  const ignoreInternalRuleTypes = options.ignoreInternalRuleTypes ?? true;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
+    ruleTypes: context.ruleTypeRegistry.list(),
+  });
 
   const kueryNodeFilterWithAuth =
     authorizationFilter && kueryNodeFilter
       ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
       : kueryNodeFilter;
 
+  const finalFilter = ignoreInternalRuleTypes
+    ? combineFiltersWithInternalRuleTypeFilter({
+        filter: kueryNodeFilterWithAuth,
+        internalRuleTypeFilter,
+      })
+    : kueryNodeFilterWithAuth;
+
   const { total } = await checkAuthorizationAndGetTotal(context, {
-    filter: kueryNodeFilterWithAuth,
+    filter: finalFilter,
     action: 'DELETE',
   });
 
@@ -74,7 +88,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
           bulkDeleteWithOCC(context, { filter: filterKueryNode }),
-        filter: kueryNodeFilterWithAuth,
+        filter: finalFilter,
       })
   );
 
@@ -200,19 +214,12 @@ const bulkDeleteWithOCC = async (
   const ruleIds = rulesToDelete.map((rule) => rule.id);
   try {
     const eventLogClient = await context.getEventLogClient();
-    await pMap(
+    await softDeleteGaps({
       ruleIds,
-      (ruleId) =>
-        softDeleteGaps({
-          ruleId,
-          logger: context.logger,
-          eventLogClient,
-          eventLogger: context.eventLogger,
-        }),
-      {
-        concurrency: 10,
-      }
-    );
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    });
   } catch (error) {
     // Failing to soft delete gaps should not block the rule deletion
     context.logger.error(

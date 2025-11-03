@@ -8,7 +8,7 @@
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useLicense } from '../licence/use_licence';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
-import { LicenseService } from '../licence/license_service';
+import type { LicenseService } from '../licence/license_service';
 import { renderHook } from '@testing-library/react';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
@@ -56,7 +56,7 @@ describe('useAssistantAvailability', () => {
               delete: true,
             },
             management: {
-              kibana: {
+              ai: {
                 aiAssistantManagementSelection: true,
               },
             },
@@ -66,7 +66,7 @@ describe('useAssistantAvailability', () => {
           aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -114,7 +114,7 @@ describe('useAssistantAvailability', () => {
               delete: true,
             },
             management: {
-              kibana: {
+              ai: {
                 aiAssistantManagementSelection: true,
               },
             },
@@ -124,7 +124,7 @@ describe('useAssistantAvailability', () => {
           aiAssistantManagementSelection$: jest.fn(),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -168,14 +168,14 @@ describe('useAssistantAvailability', () => {
               delete: false,
             },
             management: {
-              kibana: {
+              ai: {
                 aiAssistantManagementSelection: false,
               },
             },
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -218,15 +218,10 @@ describe('useAssistantAvailability', () => {
               save: false,
               delete: false,
             },
-            management: {
-              kibana: {
-                aiAssistantManagementSelection: false,
-              },
-            },
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -240,7 +235,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: true,
-      isAssistantManagementEnabled: false,
+      isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -257,7 +252,7 @@ describe('useAssistantAvailability', () => {
           capabilities: {},
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(undefined),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);

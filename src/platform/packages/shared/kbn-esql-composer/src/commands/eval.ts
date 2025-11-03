@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Params } from '../types';
+import type { Params } from '../types';
 import { append } from '../pipeline/append';
 
+/**
+ * Appends an `EVAL` command to the ESQL composer pipeline.
+ *
+ * @param body The body of the `EVAL` command.
+ * @param params The parameters to use in the `EVAL` command.
+ * @returns A `QueryPipeline` instance with the `EVAL` command appended.
+ */
 export function evaluate<TQuery extends string, TParams extends Params<TQuery>>(
   body: TQuery,
   params?: TParams
