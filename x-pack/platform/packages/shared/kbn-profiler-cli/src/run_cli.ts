@@ -22,8 +22,10 @@ export function cli() {
         'amount',
         'grep',
         'inspector-port',
+        'max-profile-size',
+        'output-timestamp',
       ] as const,
-      boolean: ['heap', 'spawn'] as const,
+      boolean: ['heap', 'spawn', 'periodic-write'] as const,
       help: `
           Usage: node scripts/profiler.js <args> <command>
 
@@ -36,6 +38,9 @@ export function cli() {
           --grep              Grep through running Node.js processes
           --spawn             Spawn and profile a new Node.js process until completion
           --inspector-port    Port at which the inspector will be running. Defaults to ${DEFAULT_INSPECTOR_PORT}
+          --periodic-write    Write profile to disk periodically when it reaches max size
+          --max-profile-size  Maximum profile size in bytes before writing (default: 50MB)
+          --output-timestamp  Custom timestamp for output filename (format: YYYYMMDD-HHmmss)
         `,
       default: {
         grep: NO_GREP,
