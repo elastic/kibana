@@ -10,9 +10,14 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
+import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 
 const gmailDigestSchema = z.object({
-  since: z.string().describe('ISO datetime string for the start time to fetch Gmail messages'),
+  since: z
+    .string()
+    .describe(
+      'ISO datetime string for the start time to fetch Gmail messages. If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
+    ),
   connectorId: z
     .string()
     .optional()
@@ -29,7 +34,7 @@ export const gmailDigestTool = (): BuiltinToolDefinition<typeof gmailDigestSchem
     type: ToolType.builtin,
     description: `Summarizes email conversations from Gmail since a given timestamp.
     
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
+The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The 'connectorId' should be a Gmail connector configured in Kibana Actions.
 Optionally filters by keywords like "incident", "alert", or "case".`,
     schema: gmailDigestSchema,
@@ -37,7 +42,9 @@ Optionally filters by keywords like "incident", "alert", or "case".`,
       try {
         logger.debug(`gmail digest tool called with since: ${since}, connectorId: ${connectorId}`);
 
-        const sinceTimestamp = new Date(since).getTime();
+        // Normalize date to current year if year is missing
+        const normalizedSince = normalizeDateToCurrentYear(since);
+        const sinceTimestamp = new Date(normalizedSince).getTime();
         if (isNaN(sinceTimestamp)) {
           throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
         }
@@ -58,7 +65,7 @@ Optionally filters by keywords like "incident", "alert", or "case".`,
                 message:
                   'Gmail digest tool requires connector secrets access. Full implementation pending.',
                 connectorId: connectorId || null,
-                since,
+                since: normalizedSince,
                 keywords: keywords || ['incident', 'alert', 'case'],
                 emails: [],
               },

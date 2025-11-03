@@ -10,9 +10,14 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
+import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 
 const slackDigestSchema = z.object({
-  since: z.string().describe('ISO datetime string for the start time to fetch Slack messages'),
+  since: z
+    .string()
+    .describe(
+      'ISO datetime string for the start time to fetch Slack messages. If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
+    ),
   connectorId: z.string().describe('Slack connector ID configured in Kibana'),
   keywords: z
     .array(z.string())
@@ -26,7 +31,7 @@ export const slackDigestTool = (): BuiltinToolDefinition<typeof slackDigestSchem
     type: ToolType.builtin,
     description: `Fetches messages and threads from Slack since a given timestamp.
     
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
+The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The 'connectorId' should be a Slack connector configured in Kibana Actions.
 Optionally filters by keywords for user mentions or project names.`,
     schema: slackDigestSchema,
@@ -47,7 +52,9 @@ Optionally filters by keywords for user mentions or project names.`,
         // - Filter by timestamp and keywords
         // - Return summarized threads
 
-        const sinceTimestamp = new Date(since).getTime();
+        // Normalize date to current year if year is missing
+        const normalizedSince = normalizeDateToCurrentYear(since);
+        const sinceTimestamp = new Date(normalizedSince).getTime();
         if (isNaN(sinceTimestamp)) {
           throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
         }
@@ -61,7 +68,7 @@ Optionally filters by keywords for user mentions or project names.`,
                 message:
                   'Slack digest tool requires connector secrets access. Full implementation pending.',
                 connectorId,
-                since,
+                since: normalizedSince,
                 keywords: keywords || [],
                 slack_threads: [],
               },

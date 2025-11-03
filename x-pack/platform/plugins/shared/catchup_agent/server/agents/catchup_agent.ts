@@ -17,6 +17,12 @@ export const catchupAgentDefinition = (): BuiltInAgentDefinition => {
       tools: [
         {
           tool_ids: [
+            // Individual security tools (for specific queries)
+            'platform.catchup.security.attack_discoveries',
+            'platform.catchup.security.detections',
+            'platform.catchup.security.cases',
+            'platform.catchup.security.rule_changes',
+            // Security summary tool (for general catch-up queries)
             'platform.catchup.security.summary',
             // 'platform.catchup.observability.summary', // Temporarily disabled
             // 'platform.catchup.search.summary', // Temporarily disabled

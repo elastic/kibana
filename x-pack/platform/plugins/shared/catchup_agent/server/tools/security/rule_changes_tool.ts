@@ -11,9 +11,20 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { getPluginServices } from '../../services/service_locator';
+import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 
 const ruleChangesSchema = z.object({
-  since: z.string().describe('ISO datetime string for the start time to track rule changes'),
+  start: z
+    .string()
+    .describe(
+      'ISO datetime string for the start time to track rule changes (inclusive). If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
+    ),
+  end: z
+    .string()
+    .optional()
+    .describe(
+      'ISO datetime string for the end time to track rule changes (exclusive). If not provided, defaults to now. If no year is specified (e.g., "11-02T00:00:00Z"), the current year is assumed. Use this to filter for a specific date range (e.g., for "November 2", use start="11-02T00:00:00Z" and end="11-03T00:00:00Z")'
+    ),
 });
 
 export const ruleChangesTool = (): BuiltinToolDefinition<typeof ruleChangesSchema> => {
@@ -22,16 +33,31 @@ export const ruleChangesTool = (): BuiltinToolDefinition<typeof ruleChangesSchem
     type: ToolType.builtin,
     description: `Tracks recently edited detection rules from Elastic Security since a given timestamp.
     
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
+The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
+The optional 'end' parameter allows filtering to a specific date range. For example, to get rules updated on November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
 Returns rules with name, updated_by, enabled status, and updated_at fields.`,
     schema: ruleChangesSchema,
-    handler: async ({ since }, { request, logger }) => {
+    handler: async ({ start, end }, { request, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] Rule changes tool called with since: ${since}`);
+        logger.info(
+          `[CatchUp Agent] Rule changes tool called with start: ${start}, end: ${end || 'now'}`
+        );
 
-        const sinceDate = new Date(since);
-        if (isNaN(sinceDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
+        // Normalize dates to current year if year is missing
+        const normalizedStart = normalizeDateToCurrentYear(start);
+        const startDate = new Date(normalizedStart);
+        if (isNaN(startDate.getTime())) {
+          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
+        }
+
+        let endDate: Date | null = null;
+        let normalizedEnd: string | null = null;
+        if (end) {
+          normalizedEnd = normalizeDateToCurrentYear(end);
+          endDate = new Date(normalizedEnd);
+          if (isNaN(endDate.getTime())) {
+            throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
+          }
         }
 
         const { plugin, core } = getPluginServices();
@@ -69,11 +95,14 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
           },
         });
 
-        // Filter rules that were updated after the 'since' date
-        const sinceTimestamp = sinceDate.getTime();
+        // Filter rules that were updated within the date range
+        const startTimestamp = startDate.getTime();
+        const endTimestamp = endDate ? endDate.getTime() : null;
         const filteredRules = findResult.data.filter((rule) => {
           const updatedAt = new Date(rule.updatedAt ?? rule.updated_at ?? '').getTime();
-          return updatedAt > sinceTimestamp;
+          const afterStart = updatedAt >= startTimestamp;
+          const beforeEnd = endTimestamp === null || updatedAt < endTimestamp;
+          return afterStart && beforeEnd;
         });
 
         // Format rules data
@@ -105,7 +134,8 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
               type: ToolResultType.other,
               data: {
                 total: rulesData.length,
-                since,
+                start: normalizedStart,
+                end: normalizedEnd || null,
               },
             },
           ],

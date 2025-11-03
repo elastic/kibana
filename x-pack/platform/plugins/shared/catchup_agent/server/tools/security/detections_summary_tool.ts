@@ -11,10 +11,22 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
-import { getSpaceId } from '../../services/service_locator';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import { getSpaceId, getPluginServices } from '../../services/service_locator';
+import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 
 const detectionsSummarySchema = z.object({
-  since: z.string().describe('ISO datetime string for the start time to summarize detections'),
+  start: z
+    .string()
+    .describe(
+      'ISO datetime string for the start time to summarize detections (inclusive). If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
+    ),
+  end: z
+    .string()
+    .optional()
+    .describe(
+      'ISO datetime string for the end time to summarize detections (exclusive). If not provided, defaults to now. If no year is specified (e.g., "11-02T00:00:00Z"), the current year is assumed. Use this to filter for a specific date range (e.g., for "November 2", use start="11-02T00:00:00Z" and end="11-03T00:00:00Z")'
+    ),
 });
 
 export const detectionsSummaryTool = (): BuiltinToolDefinition<typeof detectionsSummarySchema> => {
@@ -23,82 +35,207 @@ export const detectionsSummaryTool = (): BuiltinToolDefinition<typeof detections
     type: ToolType.builtin,
     description: `Summarizes detection alerts from Elastic Security since a given timestamp.
     
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
+The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
+The optional 'end' parameter allows filtering to a specific date range. For example, to get detections from November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
 Returns aggregated statistics including total count, counts by severity, and top rules.`,
     schema: detectionsSummarySchema,
-    handler: async ({ since }, { request, esClient, logger }) => {
+    handler: async ({ start, end }, { request, esClient, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] Detections summary tool called with since: ${since}`);
+        logger.info(
+          `[CatchUp Agent] Detections summary tool called with start: ${start}, end: ${
+            end || 'now'
+          }`
+        );
 
-        const sinceDate = new Date(since);
-        if (isNaN(sinceDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
+        // Normalize dates to current year if year is missing
+        const normalizedStart = normalizeDateToCurrentYear(start);
+        const startDate = new Date(normalizedStart);
+        if (isNaN(startDate.getTime())) {
+          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
+        }
+
+        let endDate: Date | null = null;
+        let normalizedEnd: string | null = null;
+        if (end) {
+          normalizedEnd = normalizeDateToCurrentYear(end);
+          endDate = new Date(normalizedEnd);
+          if (isNaN(endDate.getTime())) {
+            throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
+          }
         }
 
         // Get space ID from request
         const spaceId = getSpaceId(request);
+        logger.info(`[CatchUp Agent] Detections tool using spaceId: ${spaceId}`);
+
+        // Get authorized alerts indices from Rule Registry
+        const { plugin } = getPluginServices();
+        let indexPattern: string = `.alerts-security.alerts-${spaceId}*`; // Default fallback
+
+        if (plugin.ruleRegistry) {
+          try {
+            const racClient = await plugin.ruleRegistry.getRacClientWithRequest(request);
+            const authorizedIndices = await racClient.getAuthorizedAlertsIndices(
+              SECURITY_SOLUTION_RULE_TYPE_IDS
+            );
+
+            if (authorizedIndices && authorizedIndices.length > 0) {
+              // Filter out preview indices and internal indices
+              // Also log all indices to help debug
+              logger.debug(
+                `[CatchUp Agent] All authorized indices: ${JSON.stringify(authorizedIndices)}`
+              );
+              const filteredIndices = authorizedIndices.filter(
+                (idx: string) =>
+                  !idx.includes('.preview.') &&
+                  !idx.includes('.internal.') &&
+                  !idx.startsWith('.internal.')
+              );
+              if (filteredIndices.length > 0) {
+                indexPattern = filteredIndices.join(',');
+                logger.info(
+                  `[CatchUp Agent] Using authorized indices from Rule Registry (${filteredIndices.length}/${authorizedIndices.length} after filtering): ${indexPattern}`
+                );
+                if (filteredIndices.length !== authorizedIndices.length) {
+                  const excluded = authorizedIndices.filter(
+                    (idx: string) =>
+                      idx.includes('.preview.') ||
+                      idx.includes('.internal.') ||
+                      idx.startsWith('.internal.')
+                  );
+                  logger.debug(`[CatchUp Agent] Excluded indices: ${JSON.stringify(excluded)}`);
+                }
+              }
+            }
+          } catch (error) {
+            logger.warn(
+              `[CatchUp Agent] Failed to get authorized indices from Rule Registry: ${error.message}, using fallback pattern`
+            );
+          }
+        }
 
         // Query detections using ES|QL with aggregations
         // Use TO_DATETIME to convert ISO string to datetime for comparison
-        // Use space-aware index pattern: .alerts-security.alerts-${spaceId}*
-        // Also include legacy .siem-signals-* for backwards compatibility
-        const query = `FROM .alerts-security.alerts-${spaceId}*,.siem-signals-*
-| WHERE @timestamp > TO_DATETIME("${since}")
-| STATS 
-    total = COUNT(*),
-    critical = COUNT_IF(kibana.alert.severity == "critical" OR signal.severity == "critical"),
-    high = COUNT_IF(kibana.alert.severity == "high" OR signal.severity == "high"),
-    medium = COUNT_IF(kibana.alert.severity == "medium" OR signal.severity == "medium"),
-    low = COUNT_IF(kibana.alert.severity == "low" OR signal.severity == "low")
-| LIMIT 1`;
+        // Result will be grouped by severity with counts
+        let result: any = {
+          columns: [
+            { name: 'severity', type: 'keyword' },
+            { name: 'count', type: 'long' },
+          ],
+          values: [],
+        };
 
-        let result;
+        // Build date range filter using normalized dates
+        // "since" means inclusive, so use >= for start date
+        let dateFilter: string;
+        if (endDate && normalizedEnd) {
+          dateFilter = `@timestamp >= TO_DATETIME("${normalizedStart}") AND @timestamp <= TO_DATETIME("${normalizedEnd}")`;
+        } else {
+          dateFilter = `@timestamp >= TO_DATETIME("${normalizedStart}")`;
+        }
+
+        // Build query matching the DSL structure:
+        // - Filter for open workflow_status
+        // - Exclude building_block_type alerts
+        // - Filter by date range
+        // - Group by severity and count
+        const query = `FROM ${indexPattern}
+| WHERE ${dateFilter}
+  AND kibana.alert.workflow_status == "open"
+  AND kibana.alert.building_block_type IS NULL
+| EVAL severity = COALESCE(kibana.alert.severity, "unknown")
+| STATS count = COUNT(*) BY severity
+| SORT severity DESC`;
+
+        logger.info(
+          `[CatchUp Agent] Executing detections query with index pattern: ${indexPattern}`
+        );
+        logger.debug(`[CatchUp Agent] Query: ${query}`);
         try {
           result = await executeEsql({
             query,
             esClient: esClient.asCurrentUser,
           });
-        } catch (esqlError: any) {
-          // If indices don't exist, return empty results instead of failing
-          if (
-            esqlError.message?.includes('Unknown index') ||
-            esqlError.message?.includes('no such index')
-          ) {
-            logger.debug(`Security alerts indices not found, returning empty results`);
-            result = {
-              columns: [
-                { name: 'total', type: 'long' },
-                { name: 'critical', type: 'long' },
-                { name: 'high', type: 'long' },
-                { name: 'medium', type: 'long' },
-                { name: 'low', type: 'long' },
-              ],
-              values: [[0, 0, 0, 0, 0]],
-            };
-          } else {
-            throw esqlError;
-          }
-        }
 
-        return {
-          results: [
-            {
-              type: ToolResultType.tabularData,
-              data: {
-                source: 'esql',
-                query,
-                columns: result.columns,
-                values: result.values,
+          // Log the raw result structure for debugging
+          logger.debug(
+            `[CatchUp Agent] Raw ES|QL result: columns=${JSON.stringify(
+              result.columns
+            )}, values=${JSON.stringify(result.values)}`
+          );
+
+          // Calculate totals from grouped results
+          // ES|QL STATS BY returns: aggregated columns first, then grouping columns
+          // Based on "STATS count = COUNT(*) BY severity", columns are: [count, severity]
+          const countIndex = result.columns.findIndex((col: any) => col.name === 'count');
+          const severityIndex = result.columns.findIndex((col: any) => col.name === 'severity');
+
+          if (countIndex === -1 || severityIndex === -1) {
+            logger.error(
+              `[CatchUp Agent] Unexpected column structure: ${JSON.stringify(result.columns)}`
+            );
+            throw new Error('Unexpected query result structure');
+          }
+
+          logger.debug(
+            `[CatchUp Agent] Column indices: countIndex=${countIndex}, severityIndex=${severityIndex}`
+          );
+
+          // Calculate total and severity breakdown
+          const severityCounts: Record<string, number> = {};
+          let total = 0;
+
+          result.values.forEach((row: any[]) => {
+            const count = Number(row[countIndex]);
+            const severity = String(row[severityIndex] || 'unknown');
+
+            if (isNaN(count)) {
+              logger.warn(
+                `[CatchUp Agent] Invalid count value in row: ${JSON.stringify(
+                  row
+                )}, countIndex=${countIndex}`
+              );
+              return;
+            }
+
+            total += count;
+            severityCounts[severity] = count;
+          });
+
+          logger.info(
+            `[CatchUp Agent] Detections query succeeded, total: ${total}, severity breakdown: ${JSON.stringify(
+              severityCounts
+            )}`
+          );
+
+          // Return both the grouped results and a summary
+          return {
+            results: [
+              {
+                type: ToolResultType.tabularData,
+                data: {
+                  source: 'esql',
+                  columns: result.columns,
+                  values: result.values,
+                },
               },
-            },
-            {
-              type: ToolResultType.other,
-              data: {
-                since,
+              {
+                type: ToolResultType.other,
+                data: {
+                  total,
+                  by_severity: severityCounts,
+                  start: normalizedStart,
+                  end: normalizedEnd || null,
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
+        } catch (error: any) {
+          logger.error(
+            `[CatchUp Agent] Error executing detections query: ${error.message}, query: ${query}`
+          );
+          throw error;
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;

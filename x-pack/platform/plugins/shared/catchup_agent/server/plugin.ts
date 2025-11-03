@@ -111,6 +111,7 @@ export class CatchupAgentPlugin
       getCasesClient: plugins.cases?.getCasesClientWithRequest,
       getRulesClient: plugins.alerting?.getRulesClientWithRequest,
       spaces: plugins.spaces,
+      ruleRegistry: plugins.ruleRegistry,
     };
     // Store services for tools to access
     setPluginServices(core, pluginStart);

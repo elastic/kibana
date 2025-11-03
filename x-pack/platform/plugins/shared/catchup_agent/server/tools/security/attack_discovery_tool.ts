@@ -12,39 +12,71 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
 import { getSpaceId } from '../../services/service_locator';
+import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 
 const attackDiscoverySchema = z.object({
-  since: z.string().describe('ISO datetime string for the start time to fetch attack discoveries'),
+  start: z
+    .string()
+    .describe(
+      'ISO datetime string for the start time to fetch attack discoveries (inclusive). If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
+    ),
+  end: z
+    .string()
+    .optional()
+    .describe(
+      'ISO datetime string for the end time to fetch attack discoveries (exclusive). If not provided, defaults to now. If no year is specified (e.g., "11-02T00:00:00Z"), the current year is assumed. Use this to filter for a specific date range (e.g., for "November 2", use start="11-02T00:00:00Z" and end="11-03T00:00:00Z")'
+    ),
 });
 
 export const attackDiscoveryTool = (): BuiltinToolDefinition<typeof attackDiscoverySchema> => {
   return {
     id: 'platform.catchup.security.attack_discoveries',
     type: ToolType.builtin,
-    description: `Retrieves new or updated attack discoveries from Elastic Security since a given timestamp.
+    description: `Retrieves attack discoveries from Elastic Security. **Use this tool when the user asks specifically about "attack discoveries", "attack discovery", "AI-generated security insights", or "how many attack discoveries"**. This tool is specialized for attack discovery queries and should be preferred over the general security summary tool when the user's question is specifically about attack discoveries.
     
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
-Returns attack discoveries with metadata including attack name, severity, status, entities, and related cases.`,
+The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
+The optional 'end' parameter allows filtering to a specific date range. For example, to get discoveries created on November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
+Returns attack discoveries with metadata including attack name, severity, status, alert IDs, and related cases.`,
     schema: attackDiscoverySchema,
-    handler: async ({ since }, { request, esClient, logger }) => {
+    handler: async ({ start, end }, { request, esClient, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] Attack discovery tool called with since: ${since}`);
+        logger.info(
+          `[CatchUp Agent] Attack discovery tool called with start: ${start}, end: ${end || 'now'}`
+        );
 
-        // Query attack discoveries index using ES|QL
-        // Validate datetime format first
-        const sinceDate = new Date(since);
-        if (isNaN(sinceDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
+        // Normalize dates to current year if year is missing
+        const normalizedStart = normalizeDateToCurrentYear(start);
+        const startDate = new Date(normalizedStart);
+        if (isNaN(startDate.getTime())) {
+          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
+        }
+
+        let endDate: Date | null = null;
+        let normalizedEnd: string | null = null;
+        if (end) {
+          normalizedEnd = normalizeDateToCurrentYear(end);
+          endDate = new Date(normalizedEnd);
+          if (isNaN(endDate.getTime())) {
+            throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
+          }
         }
 
         // Get space ID from request
         const spaceId = getSpaceId(request);
 
+        // Build date range filter using normalized dates
+        // If end is provided, use a range query; otherwise use a simple greater-than query
+        let dateFilter: string;
+        if (endDate && normalizedEnd) {
+          dateFilter = `@timestamp >= TO_DATETIME("${normalizedStart}") AND @timestamp < TO_DATETIME("${normalizedEnd}")`;
+        } else {
+          dateFilter = `@timestamp > TO_DATETIME("${normalizedStart}")`;
+        }
+
         // Use space-aware index pattern for attack discoveries
-        // Format: .alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*
         const query = `FROM .alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*
-| WHERE @timestamp > TO_DATETIME("${since}")
-| KEEP metadata.attack_name, metadata.severity, metadata.status, metadata.entities.hosts, related_cases, @timestamp
+| WHERE ${dateFilter}
+| KEEP kibana.alert.attack_discovery.title, kibana.alert.severity, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp
 | SORT @timestamp DESC
 | LIMIT 100`;
 
@@ -63,11 +95,11 @@ Returns attack discoveries with metadata including attack name, severity, status
             logger.debug(`Attack discovery indices not found, returning empty results`);
             result = {
               columns: [
-                { name: 'metadata.attack_name', type: 'keyword' },
-                { name: 'metadata.severity', type: 'keyword' },
-                { name: 'metadata.status', type: 'keyword' },
-                { name: 'metadata.entities.hosts', type: 'object' },
-                { name: 'related_cases', type: 'keyword' },
+                { name: 'kibana.alert.attack_discovery.title', type: 'text' },
+                { name: 'kibana.alert.severity', type: 'keyword' },
+                { name: 'kibana.alert.workflow_status', type: 'keyword' },
+                { name: 'kibana.alert.attack_discovery.alert_ids', type: 'keyword' },
+                { name: 'kibana.alert.case_ids', type: 'keyword' },
                 { name: '@timestamp', type: 'date' },
               ],
               values: [],
@@ -92,7 +124,8 @@ Returns attack discoveries with metadata including attack name, severity, status
               type: ToolResultType.other,
               data: {
                 total: result.values.length,
-                since,
+                start: normalizedStart,
+                end: normalizedEnd || null,
               },
             },
           ],
