@@ -27,21 +27,19 @@ export function WorkflowYAMLEditorShortcuts({
   const commandKey = isMac() ? '⌘' : 'Ctrl';
 
   return (
-    <div>
-      <EuiButtonEmpty onClick={() => onOpenActionsMenu(true)}>
-        <EuiText css={{ display: 'flex', alignItems: 'center', gap: '6px' }} size="xs">
-          <b>
-            <FormattedMessage
-              id="workflows.workflowDetail.yamlEditor.actionsMenu"
-              defaultMessage="Actions menu"
-            />
-          </b>
-          <EuiTextColor color="subdued" css={styles.withKbd}>
-            <kbd>{commandKey}</kbd> {'+'} <kbd>{'K'}</kbd>
-          </EuiTextColor>
-        </EuiText>
-      </EuiButtonEmpty>
-    </div>
+    <EuiButtonEmpty onClick={() => onOpenActionsMenu(true)} size="s">
+      <EuiText css={{ display: 'flex', alignItems: 'center', gap: '6px' }} size="xs">
+        <b>
+          <FormattedMessage
+            id="workflows.workflowDetail.yamlEditor.actionsMenu"
+            defaultMessage="Actions menu"
+          />
+        </b>
+        <EuiTextColor color="subdued" css={styles.withKbd}>
+          <kbd>{commandKey}</kbd> {'+'} <kbd>{'K'}</kbd>
+        </EuiTextColor>
+      </EuiText>
+    </EuiButtonEmpty>
   );
 }
 

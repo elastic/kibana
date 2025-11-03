@@ -145,6 +145,7 @@ export function WorkflowYAMLValidationErrors({
         initialIsOpen={allValidationErrors !== null && allValidationErrors.length > 0}
         isDisabled={allValidationErrors == null || allValidationErrors.length === 0}
         css={styles.accordion}
+        extraAction={rightSide}
       >
         <div css={styles.separator} />
         <div css={styles.accordionContent} className="eui-yScrollWithShadows">
@@ -203,7 +204,6 @@ export function WorkflowYAMLValidationErrors({
           </EuiFlexGroup>
         </div>
       </EuiAccordion>
-      {rightSide && <div css={styles.rightSideWrapper}>{rightSide}</div>}
     </div>
   );
 }
@@ -246,15 +246,6 @@ const componentStyles = {
   buttonContentRightSide: css({
     justifySelf: 'flex-end',
   }),
-  rightSideWrapper: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      position: 'absolute',
-      top: '50%',
-      right: euiTheme.size.m,
-      transform: 'translateY(-50%)',
-      zIndex: 10,
-      pointerEvents: 'auto',
-    }),
   accordionContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxHeight: '200px',
