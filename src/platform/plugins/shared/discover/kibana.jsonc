@@ -51,8 +51,7 @@
       "embeddableEnhanced",
       "apmSourcesAccess",
       "fileUpload",
-      "metricsExperience",
-      "onechat"
+      "metricsExperience"
     ],
     "requiredBundles": [
       "kibanaUtils",

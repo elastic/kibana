@@ -62,7 +62,6 @@ import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
-import { registerDiscoverBrowserTools } from './browser_tools_integration';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -84,7 +83,6 @@ export class DiscoverPlugin
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
   private profileProviderSharedServices?: Promise<ProfileProviderSharedServices>;
-  private browserTools?: Array<any>;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -171,15 +169,6 @@ export class DiscoverPlugin
 
     registerDiscoverEBTManagerAnalytics(core, this.discoverEbtContext$);
 
-    if (plugins.onechat) {
-      try {
-        this.browserTools = registerDiscoverBrowserTools(plugins.onechat);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to register Discover browser tools:', error);
-      }
-    }
-
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
@@ -230,30 +219,7 @@ export class DiscoverPlugin
           customizationContext: defaultCustomizationContext,
         });
 
-        // Configure onechat flyout with Discover browser tools when app mounts
-        if (discoverStartPlugins.onechat && this.browserTools) {
-          try {
-            discoverStartPlugins.onechat.setConversationFlyoutActiveConfig({
-              sessionTag: 'discover',
-              browserApiTools: this.browserTools,
-            });
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Failed to configure onechat flyout for Discover:', error);
-          }
-        }
-
         return () => {
-          // Clear onechat flyout config when app unmounts
-          if (discoverStartPlugins.onechat) {
-            try {
-              discoverStartPlugins.onechat.clearConversationFlyoutActiveConfig();
-            } catch (error) {
-              // eslint-disable-next-line no-console
-              console.error('Failed to clear onechat flyout config:', error);
-            }
-          }
-
           ebtManager.onDiscoverAppUnmounted();
           unlistenParentHistory();
           unmount();
