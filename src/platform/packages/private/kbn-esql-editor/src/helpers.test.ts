@@ -8,7 +8,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { SOURCES_TYPES } from '@kbn/esql-types';
+import { SOURCES_TYPES, SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { filterDataErrors, getIndicesList, parseErrors, parseWarning } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
@@ -286,7 +286,7 @@ describe('helpers', function () {
       ]);
 
       expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
-        '/internal/esql/autocomplete/sources/local'
+        `${SOURCES_AUTOCOMPLETE_ROUTE}local`
       );
     });
 
@@ -334,7 +334,7 @@ describe('helpers', function () {
       ]);
 
       expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
-        '/internal/esql/autocomplete/sources/all'
+        `${SOURCES_AUTOCOMPLETE_ROUTE}all`
       );
     });
 
@@ -350,7 +350,7 @@ describe('helpers', function () {
       ]);
 
       expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
-        '/internal/esql/autocomplete/sources/local'
+        `${SOURCES_AUTOCOMPLETE_ROUTE}local`
       );
     });
   });

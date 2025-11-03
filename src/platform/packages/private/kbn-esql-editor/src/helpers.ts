@@ -12,7 +12,7 @@ import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
-import { SOURCES_TYPES } from '@kbn/esql-types';
+import { SOURCES_TYPES, SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ILicense } from '@kbn/licensing-types';
 import { monaco } from '@kbn/monaco';
@@ -207,12 +207,10 @@ export const getIndicesList = async (
   areRemoteIndicesAvailable: boolean
 ) => {
   const scope = areRemoteIndicesAvailable ? 'all' : 'local';
-  const response = await core.http
-    .get(`/internal/esql/autocomplete/sources/${scope}`)
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch the sources', error);
-    });
+  const response = await core.http.get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`).catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error('Failed to fetch the sources', error);
+  });
 
   return response as ESQLSourceResult[];
 };

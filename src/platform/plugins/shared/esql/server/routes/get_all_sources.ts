@@ -9,12 +9,13 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '../services/esql_service';
 
 export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
     {
-      path: '/internal/esql/autocomplete/sources/{scope}',
+      path: `${SOURCES_AUTOCOMPLETE_ROUTE}{scope}`,
       validate: {
         params: schema.object({
           scope: schema.oneOf([schema.literal('all'), schema.literal('local')], {

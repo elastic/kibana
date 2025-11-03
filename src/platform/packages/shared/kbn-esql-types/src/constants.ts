@@ -8,6 +8,7 @@
  */
 
 export const REGISTRY_EXTENSIONS_ROUTE = '/internal/esql_registry/extensions/';
+export const SOURCES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/sources/';
 
 export enum SOURCES_TYPES {
   INDEX = 'Index',
