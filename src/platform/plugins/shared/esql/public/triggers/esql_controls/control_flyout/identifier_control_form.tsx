@@ -63,9 +63,6 @@ export function IdentifierControlForm({
       : []
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
-  // TODO Remove these from control state
-  const [minimumWidth] = useState(initialState?.width ?? 'medium');
-  const [grow] = useState(initialState?.grow ?? false);
 
   useEffect(
     function initAvailableIdentifiersOptions() {
@@ -154,22 +151,18 @@ export function IdentifierControlForm({
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
-      width: minimumWidth,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
       variableType,
       esqlQuery: queryString,
       controlType: EsqlControlType.STATIC_VALUES,
-      grow,
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);
     }
   }, [
-    grow,
     initialState,
     label,
-    minimumWidth,
     queryString,
     selectedIdentifiers,
     setControlState,
