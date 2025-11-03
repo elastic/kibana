@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RoleApiCredentials, apiTest, expect } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
+import { apiTest, expect } from '@kbn/scout';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
@@ -18,20 +21,19 @@ apiTest.describe(
     });
     apiTest('returns autocomplete definitions', async ({ apiClient }) => {
       const { body } = await apiClient.get('api/console/api_server', {
-       headers: {
+        headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
-      expect(body.es).toBeOK();
+      await expect(body.es).toBeOK();
       const {
         es: { name, globals, endpoints },
       } = body;
-      expect(name).toBeOK();
+      await expect(name).toBeOK();
       expect(Object.keys(globals).length).toBeGreaterThan(0);
       expect(Object.keys(endpoints).length).toBeGreaterThan(0);
-
     });
   }
 );
