@@ -19,6 +19,7 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   Subject,
   BehaviorSubject,
@@ -60,12 +61,13 @@ interface StartDeps {
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
   featureFlags: FeatureFlagsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
   private feedbackUrlParams$ = new BehaviorSubject<URLSearchParams | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
@@ -99,6 +101,7 @@ export class ProjectNavigationService {
   private featureFlags?: FeatureFlagsStart;
   private navLinksService?: ChromeNavLinks;
   private _http?: InternalHttpStart;
+  private uiSettings?: IUiSettingsClient;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
 
@@ -111,12 +114,15 @@ export class ProjectNavigationService {
     chromeBreadcrumbs$,
     logger,
     featureFlags,
+    uiSettings,
   }: StartDeps) {
     this.application = application;
     this.featureFlags = featureFlags;
     this.navLinksService = navLinksService;
     this._http = http;
     this.logger = logger;
+    this.uiSettings = uiSettings;
+
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
@@ -135,22 +141,19 @@ export class ProjectNavigationService {
     return {
       setProjectHome: this.setProjectHome.bind(this),
       getProjectHome$: () => {
-        return this.projectHome$.asObservable();
+        return this.projectHome$.pipe(map((home) => this.uiSettings?.get('defaultRoute') || home));
       },
       setCloudUrls: (cloudUrls: CloudURLs) => {
-        // Cloud links never change, so we only need to parse them once
-        if (Object.keys(this.cloudLinks$.getValue()).length > 0) return;
-
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
       setFeedbackUrlParams: (feedbackUrlParams: URLSearchParams) => {
         this.feedbackUrlParams$.next(feedbackUrlParams);
       },
-      setProjectName: (projectName: string) => {
-        this.projectName$.next(projectName);
+      setKibanaName: (kibanaName: string) => {
+        this.kibanaName$.next(kibanaName);
       },
-      getProjectName$: () => {
-        return this.projectName$.asObservable();
+      getKibanaName$: () => {
+        return this.kibanaName$.asObservable();
       },
       getFeedbackUrlParams$: () => {
         return this.feedbackUrlParams$.asObservable();
@@ -180,12 +183,12 @@ export class ProjectNavigationService {
           this.projectBreadcrumbs$,
           this.activeNodes$,
           chromeBreadcrumbs$,
-          this.projectName$,
+          this.kibanaName$,
           this.cloudLinks$,
         ]).pipe(
-          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, projectName, cloudLinks]) => {
+          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, kibanaName, cloudLinks]) => {
             return buildBreadcrumbs({
-              projectName,
+              kibanaName,
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,

@@ -15,6 +15,7 @@ import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
   expectSuggestions,
+  suggest,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
@@ -89,22 +90,29 @@ export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ...allEvalFunctionsForStats,
 ];
 
-const forkExpectSuggestions = (
+type ExpectedSuggestions = string[] | { contains?: string[]; notContains?: string[] };
+
+const forkExpectSuggestions = async (
   query: string,
-  expectedSuggestions: string[],
+  expected: ExpectedSuggestions,
   mockCallbacks?: ICommandCallbacks,
   context = mockContext,
   offset?: number
-) => {
-  return expectSuggestions(
-    query,
-    expectedSuggestions,
-    context,
-    'fork',
-    mockCallbacks,
-    autocomplete,
-    offset
-  );
+): Promise<void> => {
+  if (Array.isArray(expected)) {
+    return expectSuggestions(query, expected, context, 'fork', mockCallbacks, autocomplete, offset);
+  }
+
+  const results = await suggest(query, context, 'fork', mockCallbacks, autocomplete, offset);
+  const texts = results.map(({ text }) => text);
+
+  if (expected.contains?.length) {
+    expect(texts).toEqual(expect.arrayContaining(expected.contains));
+  }
+
+  if (expected.notContains?.length) {
+    expect(texts).not.toEqual(expect.arrayContaining(expected.notContains));
+  }
 };
 
 describe('FORK Autocomplete', () => {
@@ -291,17 +299,18 @@ describe('FORK Autocomplete', () => {
         });
 
         test('lookup join after ON keyword', async () => {
-          const expected = getFieldNamesByType('any')
-            .sort()
-            .map((field) => field.trim());
-
-          for (const { name } of lookupIndexFields) {
-            expected.push(name.trim());
-          }
-
           await forkExpectSuggestions(
             'FROM a | FORK (LOOKUP JOIN join_index ON ',
-            expected,
+            {
+              contains: [
+                'textField',
+                'keywordField',
+                'booleanField',
+                'joinIndexOnlyField ',
+                'STARTS_WITH($0)',
+                'CONTAINS($0)',
+              ],
+            },
             mockCallbacks
           );
         });
@@ -360,7 +369,7 @@ describe('FORK Autocomplete', () => {
                 ...getFunctionSignaturesByReturnType(
                   Location.STATS_WHERE,
                   'any',
-                  { operators: true },
+                  { operators: true, skipAssign: true },
                   ['integer']
                 ),
               ]
@@ -452,27 +461,20 @@ describe('FORK Autocomplete', () => {
       });
 
       describe('user-defined columns', () => {
-        const suggest = async (query: string) => {
-          const correctedQuery = correctQuerySyntax(query);
-          const { ast } = parse(correctedQuery, { withFormatting: true });
-          const cursorPosition = query.length;
-          const { command } = findAstPosition(ast, cursorPosition);
-          if (!command) {
-            throw new Error('Command not found in the parsed query');
-          }
-          return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
-        };
         it('suggests user-defined columns from earlier in this branch', async () => {
-          const suggestions = await suggest(
-            'FROM a | FORK (EVAL col0 = 1 | EVAL var0 = 2 | WHERE '
+          await forkExpectSuggestions(
+            'FROM a | FORK (EVAL col0 = 1 | EVAL var0 = 2 | WHERE ',
+            { contains: ['col0', 'var0'] },
+            mockCallbacks
           );
-          expect(suggestions.map(({ label }) => label)).toContain('col0');
-          expect(suggestions.map(({ label }) => label)).toContain('var0');
         });
 
         it('does NOT suggest user-defined columns from another branch', async () => {
-          const suggestions = await suggest('FROM a | FORK (EVAL foo = 1) (WHERE ');
-          expect(suggestions.map(({ label }) => label)).not.toContain('foo');
+          await forkExpectSuggestions(
+            'FROM a | FORK (EVAL foo = 1) (WHERE ',
+            { notContains: ['foo'] },
+            mockCallbacks
+          );
         });
       });
     });

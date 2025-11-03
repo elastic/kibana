@@ -268,7 +268,7 @@ describe('validation logic', () => {
 
         await expectErrors('f', [expect.any(String)]);
         await expectErrors('from ', [
-          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
         ]);
       });
 
@@ -277,10 +277,10 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors('from index,', [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
           ]);
           await expectErrors(`FROM index\n, \tother_index\t,\n \t `, [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
           ]);
 
           await expectErrors(`from assignment = 1`, [
@@ -305,8 +305,7 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors(`from index (metadata _id)`, [
-            "SyntaxError: extraneous input ')' expecting <EOF>",
-            "SyntaxError: token recognition error at: '('",
+            "SyntaxError: mismatched input '(' expecting <EOF>",
           ]);
         });
 
@@ -354,6 +353,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
         '"t" is not a valid JOIN index. Please use a "lookup" mode index.',
       ]);
+
+      testErrorsAndWarnings(
+        'FROM a_index | LEFT JOIN join_index ON textField == keywordField, booleanField',
+        ['JOIN ON clause must be a comma separated list of fields or a single expression']
+      );
     });
 
     describe('drop', () => {

@@ -80,7 +80,7 @@ export const CreateArchivesSources: Task = {
           );
 
           // Copy solution config.yml
-          const WORKPLACE_AI_CONFIGS = ['serverless.workplace_ai.yml'];
+          const WORKPLACE_AI_CONFIGS = ['serverless.workplaceai.yml'];
           const SEARCH_CONFIGS = ['serverless.es.yml'];
           const OBSERVABILITY_CONFIGS = [
             'serverless.oblt.yml',
@@ -92,7 +92,7 @@ export const CreateArchivesSources: Task = {
           ];
           const configFiles = ['serverless.yml'];
           switch (platform.getSolution()) {
-            case 'workplace_ai':
+            case 'workplaceai':
               configFiles.push(...WORKPLACE_AI_CONFIGS);
               break;
             case 'search':
@@ -128,9 +128,9 @@ export const CreateArchivesSources: Task = {
             await removeSolutions(solutionsToRemove, platform);
           }
         } else if (config.isRelease) {
-          // For stateful release builds, remove the workplace_ai solution.
+          // For stateful release builds, remove the workplaceai solution.
           // Snapshot builds support all solutions to faciliate functional testing
-          await removeSolutions(['workplace_ai'], platform);
+          await removeSolutions(['workplaceai'], platform);
         }
       })
     );

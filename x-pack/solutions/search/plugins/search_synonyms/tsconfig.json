@@ -31,6 +31,7 @@
     "@kbn/try-in-console",
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

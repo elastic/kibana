@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { i18n } from '@kbn/i18n';
@@ -144,7 +144,7 @@ export const DebugPage: React.FunctionComponent<{
             {!isInitialized && setupError?.message && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut color="danger" iconType="warning" title="Setup error">
+                <EuiCallOut announceOnMount color="danger" iconType="warning" title="Setup error">
                   <EuiText grow={false}>
                     <FormattedMessage
                       id="xpack.fleet.debug.initializationError.description"

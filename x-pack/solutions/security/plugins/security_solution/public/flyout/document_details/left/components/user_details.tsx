@@ -15,12 +15,12 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +32,7 @@ import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
@@ -74,7 +75,6 @@ import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_DETAILS_ID = 'entities-users-details';
@@ -186,7 +186,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
     queryId: USER_DETAILS_INSIGHTS_ID,
   });
 
-  const { openDetailsPanel } = useNavigateToUserDetails({
+  const openDetailsPanel = useNavigateToUserDetails({
     userName,
     scopeId,
     isRiskScoreExist,

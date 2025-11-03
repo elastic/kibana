@@ -155,6 +155,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
         {!isNew && (
           <div>
             <EuiCallOut
+              announceOnMount={false}
               title={strings.getEditWarning()}
               color="warning"
               iconType="warning"

@@ -129,7 +129,7 @@ import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_te
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
 import type { XYPersistedState } from './persistence';
 import { convertPersistedState, convertToPersistable } from './persistence';
-import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
+import { shouldDisplayTable } from '../../shared_components/legend/legend_settings';
 import {
   ANNOTATION_MISSING_DATE_HISTOGRAM,
   LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
