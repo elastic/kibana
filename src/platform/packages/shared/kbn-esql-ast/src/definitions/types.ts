@@ -399,7 +399,11 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  forkNotAllowedInSubquery: {
+  forkNotAllowedWithSubqueries: {
+    message: string;
+    type: {};
+  };
+  inlineStatsNotAllowedAfterLimit: {
     message: string;
     type: {};
   };

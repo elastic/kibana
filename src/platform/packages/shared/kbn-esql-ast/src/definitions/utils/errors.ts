@@ -342,10 +342,18 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'forkNotAllowedInSubquery':
+    case 'forkNotAllowedWithSubqueries':
       return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.forkNotAllowedInSubquery', {
-          defaultMessage: '[FORK] Command is not allowed inside subqueries.',
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkNotAllowedWithSubqueries', {
+          defaultMessage: '[FORK] Command is not allowed when the query contains subqueries.',
+        }),
+        type: 'error',
+      };
+    case 'inlineStatsNotAllowedAfterLimit':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.inlineStatsNotAllowedAfterLimit', {
+          defaultMessage:
+            '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
         }),
         type: 'error',
       };
@@ -577,8 +585,11 @@ export const errors = {
   forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooFewBranches', command.location, {}),
 
-  forkNotAllowedInSubquery: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('forkNotAllowedInSubquery', command.location, {}),
+  forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
+
+  inlineStatsNotAllowedAfterLimit: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('inlineStatsNotAllowedAfterLimit', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>
