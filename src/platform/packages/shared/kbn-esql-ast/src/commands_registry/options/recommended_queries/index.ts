@@ -199,7 +199,7 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       command: {
         id: 'esql.recommendedQuery.accept',
         title: 'Accept recommended query',
-        arguments: [query.label],
+        arguments: [{ queryLabel: query.label }],
       },
     };
   });

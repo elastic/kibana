@@ -330,7 +330,7 @@ const ESQLEditorInternal = function ESQLEditor({
   });
 
   monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
-    const [, queryLabel] = args;
+    const [, { queryLabel }] = args;
     telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
   });
 
