@@ -179,14 +179,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
       const now = Date.now();
       // We need to create data points in precise time buckets to ensure the derivative works properly
-      // 4 minutes ago (first data point for component1)
-      const fourMinutesAgo = new Date(now - 4 * 60 * 1000);
-      fourMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
+      // 3 minutes ago (first data point for component1)
+      const threeMinutesAgo = new Date(now - 3 * 60 * 1000);
+      threeMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
+
+      // eslint-disable-next-line no-console
+      console.log(`First doc @timestamp ${threeMinutesAgo}`);
+
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': fourMinutesAgo.toISOString(),
+          '@timestamp': threeMinutesAgo.toISOString(),
           data_stream: {
             namespace: 'default',
             type: 'metrics',
@@ -209,14 +213,18 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      // 3 minutes ago (second data point for component1)
-      const threeMinutesAgo = new Date(now - 3 * 60 * 1000);
-      threeMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
+      // 2 minutes ago (second data point for component1)
+      const twoMinutesAgo = new Date(now - 3 * 60 * 1000);
+      twoMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
+
+      // eslint-disable-next-line no-console
+      console.log(`Second doc @timestamp ${twoMinutesAgo}`);
+
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': threeMinutesAgo.toISOString(),
+          '@timestamp': twoMinutesAgo.toISOString(),
           data_stream: {
             namespace: 'default',
             type: 'metrics',
@@ -242,6 +250,10 @@ export default function ({ getService }: FtrProviderContext) {
       // 1 minute ago (data point for component2) - same agent but different component
       const oneMinuteAgo = new Date(now - 1 * 60 * 1000);
       oneMinuteAgo.setSeconds(0, 0); // Set to exact minute boundary
+
+      // eslint-disable-next-line no-console
+      console.log(`Third doc @timestamp ${oneMinuteAgo}`);
+
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
