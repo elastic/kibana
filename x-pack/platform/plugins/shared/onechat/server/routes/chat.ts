@@ -104,7 +104,7 @@ export function registerChatRoutes({
         }
       )
     ),
-    browserApiTools: schema.maybe(
+    browser_api_tools: schema.maybe(
       schema.arrayOf(
         schema.object({
           id: schema.string({
@@ -165,7 +165,7 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       input,
       capabilities,
-      browserApiTools,
+      browser_api_tools: browserApiTools,
     } = payload;
 
     return chatService.converse({

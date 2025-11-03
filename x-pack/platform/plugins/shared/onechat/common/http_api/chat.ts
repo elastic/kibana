@@ -23,7 +23,7 @@ export interface ChatRequestBodyPayload {
   capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];
   input: string;
-  browserApiTools?: BrowserApiToolMetadata[];
+  browser_api_tools?: BrowserApiToolMetadata[];
 }
 
 export interface ChatResponse {
