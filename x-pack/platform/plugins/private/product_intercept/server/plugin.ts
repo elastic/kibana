@@ -13,7 +13,7 @@ import {
   type Logger,
 } from '@kbn/core/server';
 import type { InterceptSetup, InterceptStart } from '@kbn/intercepts-plugin/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
   TRIGGER_DEF_ID,
   UPGRADE_TRIGGER_DEF_PREFIX_ID,
@@ -22,11 +22,12 @@ import {
 import type { ServerConfigSchema } from '../common/config';
 
 interface ProductInterceptServerPluginSetup {
-  cloud: CloudSetup;
+  cloud?: CloudSetup;
   intercepts: InterceptSetup;
 }
 
 interface ProductInterceptServerPluginStart {
+  cloud?: CloudStart;
   intercepts: InterceptStart;
 }
 
@@ -39,7 +40,6 @@ export class ProductInterceptServerPlugin
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
   private readonly buildVersion: string;
-  private trialEndDate?: Date;
 
   constructor(initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
@@ -48,12 +48,10 @@ export class ProductInterceptServerPlugin
   }
 
   setup(core: CoreSetup, { cloud }: ProductInterceptServerPluginSetup) {
-    this.trialEndDate = cloud?.trialEndDate;
-
     return {};
   }
 
-  start(core: CoreStart, { intercepts }: ProductInterceptServerPluginStart) {
+  start(core: CoreStart, { cloud, intercepts }: ProductInterceptServerPluginStart) {
     if (this.config.enabled) {
       void intercepts.registerTriggerDefinition?.(TRIGGER_DEF_ID, () => {
         this.logger.debug('Registering global product intercept trigger definition');
@@ -69,7 +67,7 @@ export class ProductInterceptServerPlugin
       );
 
       // Register trial intercept only if the trial end date is set and not passed
-      if (Date.now() <= (this.trialEndDate?.getTime() ?? 0)) {
+      if (cloud?.isInTrial()) {
         void intercepts.registerTriggerDefinition?.(
           `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
           () => {
