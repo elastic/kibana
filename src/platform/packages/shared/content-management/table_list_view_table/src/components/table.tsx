@@ -51,6 +51,7 @@ import {
   UserFilterContextProvider,
   NULL_USER as USER_FILTER_NULL_USER,
 } from './user_filter_panel';
+import { FavoritesFilterPanel } from './favorites_filter_panel';
 import { TabbedTableFilter } from './tabbed_filter';
 
 type State<T extends UserContentCommonSchema> = Pick<
@@ -227,11 +228,29 @@ export function Table<T extends UserContentCommonSchema>({
       : null;
   }, [createdByEnabled]);
 
+  const favoritesFilterPanel = useMemo<SearchFilterConfig | null>(() => {
+    if (!favoritesEnabled) return null;
+
+    return {
+      type: 'custom_component',
+      component: () => {
+        return (
+          <FavoritesFilterPanel
+            isFavoritesOnly={tableFilter.favorites}
+            onToggleFavorites={() => {
+              onFilterChange({ favorites: !tableFilter.favorites });
+            }}
+          />
+        );
+      },
+    };
+  }, [favoritesEnabled, tableFilter.favorites, onFilterChange]);
+
   const searchFilters = useMemo(() => {
-    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel].filter(
+    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterPanel].filter(
       (f: SearchFilterConfig | null): f is SearchFilterConfig => Boolean(f)
     );
-  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel]);
+  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterPanel]);
 
   const search = useMemo((): Search => {
     const showHint = !!searchQuery.error && searchQuery.error.containsForbiddenChars;
@@ -287,7 +306,7 @@ export function Table<T extends UserContentCommonSchema>({
     />
   );
 
-  const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
+  const { data: favorites, isError: favoritesError } = useFavorites();
 
   const visibleItems = React.useMemo(() => {
     let filteredItems = items;
