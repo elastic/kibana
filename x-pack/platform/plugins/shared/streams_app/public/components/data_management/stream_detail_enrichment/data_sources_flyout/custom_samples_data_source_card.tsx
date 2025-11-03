@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { isSchema } from '@kbn/streams-schema';
-import { useResizeChecker } from '@kbn/react-hooks';
+import { useDebounceFn, useResizeChecker } from '@kbn/react-hooks';
 import { customSamplesDataSourceDocumentsSchema } from '../../../../../common/url_schema';
 import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
 import { useDataSourceSelector } from '../state_management/data_source_state_machine';
@@ -37,9 +37,12 @@ export const CustomSamplesDataSourceCard = ({
 
   const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
-  const handleChange = (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
-    dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
-  };
+  const { run: handleChange } = useDebounceFn(
+    (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
+      dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
+    },
+    { wait: 500 }
+  );
 
   /**
    * To have the editor properly handle the set xjson language
@@ -63,6 +66,7 @@ export const CustomSamplesDataSourceCard = ({
       dataSourceRef={dataSourceRef}
       title={DATA_SOURCES_I18N.customSamples.defaultName}
       subtitle={DATA_SOURCES_I18N.customSamples.subtitle}
+      isForCompleteSimulation
     >
       <div style={{ minWidth: 0 }}>
         <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.customSamples.callout} />

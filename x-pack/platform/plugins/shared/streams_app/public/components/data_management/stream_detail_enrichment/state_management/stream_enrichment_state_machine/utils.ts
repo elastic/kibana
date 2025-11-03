@@ -7,7 +7,6 @@
 
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { i18n } from '@kbn/i18n';
 import type { AssignArgs } from 'xstate5';
 import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
@@ -40,7 +39,7 @@ export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
 export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   type: 'kql-samples',
   name: DATA_SOURCES_I18N.kqlDataSource.defaultName,
-  enabled: true,
+  enabled: false,
   timeRange: {
     from: 'now-15m',
     to: 'now',
@@ -55,7 +54,7 @@ export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
 export const defaultCustomSamplesDataSource: CustomSamplesDataSource = {
   type: 'custom-samples',
   name: DATA_SOURCES_I18N.customSamples.defaultName,
-  enabled: true,
+  enabled: false,
   documents: [],
 };
 

@@ -38,6 +38,7 @@ interface DataSourceCardProps {
   readonly title?: string;
   readonly subtitle?: string;
   readonly isPreviewVisible?: boolean;
+  readonly isForCompleteSimulation?: boolean;
 }
 
 export const DataSourceCard = ({
@@ -55,9 +56,7 @@ export const DataSourceCard = ({
 
   const canDeleteDataSource = dataSourceState.can({ type: 'dataSource.delete' });
   const isEnabled = dataSourceState.matches('enabled');
-  const isLoading =
-    dataSourceState.matches({ enabled: 'loadingData' }) ||
-    dataSourceState.matches({ enabled: 'debouncingChanges' });
+  const isLoading = dataSourceState.matches({ enabled: 'loadingData' });
   const isDeletableDataSource = dataSource.type !== 'latest-samples'; // We don't allow deleting the latest-samples source to always have a data source available
 
   const handleSelection = () => selectDataSource(dataSourceRef.id);
@@ -77,23 +76,11 @@ export const DataSourceCard = ({
       id={`dataSourceCard-${dataSourceRef.id}`}
       label={
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m" wrap>
             <EuiTitle size="xs">
               <h3>{title ?? dataSource.type}</h3>
             </EuiTitle>
-            {isForCompleteSimulation ? (
-              <EuiBadge color="primary">
-                {i18n.translate('xpack.streams.dataSourceCard.completeSimulationBadgeLabel', {
-                  defaultMessage: 'Complete pipeline simulation',
-                })}
-              </EuiBadge>
-            ) : (
-              <EuiBadge color="warning">
-                {i18n.translate('xpack.streams.dataSourceCard.partialSimulationBadgeLabel', {
-                  defaultMessage: 'Partial pipeline simulation',
-                })}
-              </EuiBadge>
-            )}
+            {isForCompleteSimulation ? <CompleteSimulationBadge /> : <PartialSimulationBadge />}
             <EuiFlexItem grow />
             {isDeletableDataSource && (
               <EuiToolTip
@@ -144,5 +131,25 @@ export const DataSourceCard = ({
         )}
       </EuiAccordion>
     </EuiCheckableCard>
+  );
+};
+
+export const PartialSimulationBadge = () => {
+  return (
+    <EuiBadge color="warning">
+      {i18n.translate('xpack.streams.dataSourceCard.partialSimulationBadgeLabel', {
+        defaultMessage: 'Partial simulation',
+      })}
+    </EuiBadge>
+  );
+};
+
+export const CompleteSimulationBadge = () => {
+  return (
+    <EuiBadge color="primary">
+      {i18n.translate('xpack.streams.dataSourceCard.completeSimulationBadgeLabel', {
+        defaultMessage: 'Complete simulation',
+      })}
+    </EuiBadge>
   );
 };

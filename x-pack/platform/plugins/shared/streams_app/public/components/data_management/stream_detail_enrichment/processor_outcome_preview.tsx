@@ -59,12 +59,9 @@ export const ProcessorOutcomePreview = () => {
   );
 
   const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
-    state.context.dataSourcesRefs.some((ref) => {
-      const snap = ref.getSnapshot();
-      return (
-        snap.matches({ enabled: 'loadingData' }) || snap.matches({ enabled: 'debouncingChanges' })
-      );
-    })
+    state.context.dataSourcesRefs.some((ref) =>
+      ref.getSnapshot().matches({ enabled: 'loadingData' })
+    )
   );
 
   if (isEmpty(samples)) {

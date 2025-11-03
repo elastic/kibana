@@ -80,12 +80,12 @@ const DataSourceSelector = () => {
       value: dataSourceRef.id,
       inputDisplay: name,
       dropdownDisplay: (
-        <>
+        <EuiFlexGroup direction="column" gutterSize="xs">
           <strong>{name}</strong>
           <EuiText component="p" size="xs" color="subdued">
             {getOptionSubtitle(snapshot.context.dataSource.type)}
           </EuiText>
-        </>
+        </EuiFlexGroup>
       ),
     };
   });
@@ -98,11 +98,9 @@ const DataSourceSelector = () => {
       options={options}
       valueOfSelected={selectedDataSourceId ?? undefined}
       onChange={(id) => selectDataSource(id)}
-      itemLayoutAlign="top"
       hasDividers
-      fullWidth
       css={css`
-        width: 250px;
+        width: 280px;
       `}
     />
   );

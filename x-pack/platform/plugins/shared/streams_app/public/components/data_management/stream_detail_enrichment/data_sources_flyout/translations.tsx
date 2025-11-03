@@ -27,7 +27,7 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.infoDescription',
       {
         defaultMessage:
-          'Active data sources will be used for simulation. You can toggle data sources on/off without removing them.',
+          'Select a data source to be used for the processing simulation or create a new one.',
       }
     ),
     infoTitle: i18n.translate(

@@ -9,7 +9,6 @@ import { assertEvent, assign, sendTo, setup } from 'xstate5';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
-import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import type {
   DataSourceInput,
   DataSourceContext,
@@ -26,16 +25,6 @@ import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
 export type DataSourceActorSnapshot = SnapshotFrom<typeof dataSourceMachine>;
 
-const dataSourceColors = euiPaletteColorBlindBehindText();
-let colorCounter = 0;
-
-// Retain a global state for assigning unique colors to data sources
-function getNewColor() {
-  const color = dataSourceColors[colorCounter % dataSourceColors.length];
-  colorCounter += 1;
-  return color;
-}
-
 export const dataSourceMachine = setup({
   types: {
     input: {} as DataSourceInput,
@@ -44,9 +33,6 @@ export const dataSourceMachine = setup({
   },
   actors: {
     collectData: getPlaceholderFor(createDataCollectorActor),
-  },
-  delays: {
-    dataSourceChangeDebounceTime: 800,
   },
   actions: {
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNofitier),
@@ -87,13 +73,16 @@ export const dataSourceMachine = setup({
     parentRef: input.parentRef,
     dataSource: input.dataSource,
     streamName: input.streamName,
-    uiAttributes: {
-      color: getNewColor(),
-    },
     data: [],
   }),
   initial: 'determining',
   on: {
+    'dataSource.change': {
+      actions: [
+        { type: 'storeDataSource', params: ({ event }) => event },
+        { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+      ],
+    },
     'dataSource.toggleActivity': [
       {
         guard: 'isEnabled',
@@ -123,7 +112,7 @@ export const dataSourceMachine = setup({
         'dataSource.change': [
           {
             guard: 'shouldCollectData',
-            target: '.debouncingChanges',
+            target: '.loadingData',
             reenter: true,
             actions: [
               { type: 'storeDataSource', params: ({ event }) => event },
@@ -140,11 +129,6 @@ export const dataSourceMachine = setup({
       },
       states: {
         idle: {},
-        debouncingChanges: {
-          after: {
-            dataSourceChangeDebounceTime: 'loadingData',
-          },
-        },
         loadingData: {
           invoke: {
             id: 'dataCollectorActor',
