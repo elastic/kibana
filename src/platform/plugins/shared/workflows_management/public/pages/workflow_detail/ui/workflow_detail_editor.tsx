@@ -124,7 +124,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
             <WorkflowYAMLEditor
               stepExecutions={execution?.stepExecutions}
               workflowYaml={overrideYamlValue ?? workflowYaml}
-              readOnly={activeTab === 'executions'}
+              isExecutionYaml={activeTab === 'executions'}
               highlightDiff={highlightDiff}
               selectedExecutionId={selectedExecutionId}
               onStepActionClicked={handleStepRun}
