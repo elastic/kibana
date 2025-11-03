@@ -9,6 +9,10 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import {
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_ALIAS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_LATEST,
+} from '@kbn/cloud-security-posture-common';
+import {
   latestFindingsTransform,
   DEPRECATED_FINDINGS_TRANSFORMS_VERSION,
   CURRENT_FINDINGS_TRANSFORM_VERSION,
@@ -38,8 +42,11 @@ export const initializeTransform = async (
   logger: Logger
 ) => {
   const success = await createTransformIfNotExists(esClient, transform, logger);
-
   if (success) {
+    // Create alias for vulnerabilities transform
+    if (transform.transform_id.includes('vulnerabilities_latest')) {
+      await createVulnerabilitiesIndexAlias(esClient, logger);
+    }
     await startTransformIfNotStarted(esClient, transform.transform_id, logger);
   }
 };
@@ -119,6 +126,62 @@ export const startTransformIfNotStarted = async (
   } catch (statsErr) {
     const statsError = transformError(statsErr);
     logger.error(`Failed to check if transform ${transformId} is started: ${statsError.message}`);
+  }
+};
+
+/**
+ * Creates an alias for the vulnerabilities index
+ * This allows queries to use the alias instead of the versioned index
+ */
+export const createVulnerabilitiesIndexAlias = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+) => {
+  try {
+    // Check if the versioned index exists
+    const indexExists = await esClient.indices.exists({
+      index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_LATEST,
+    });
+
+    if (!indexExists) {
+      logger.debug(
+        `Index ${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_LATEST} does not exist yet, skipping alias creation`
+      );
+      return;
+    }
+
+    // Check if alias already exists
+    const aliasExists = await esClient.indices.existsAlias({
+      name: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_ALIAS,
+    });
+
+    if (aliasExists) {
+      logger.debug(
+        `Alias ${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_ALIAS} already exists, skipping alias creation`
+      );
+      return;
+    }
+
+    // Create the alias
+    await esClient.indices.updateAliases({
+      actions: [
+        {
+          add: {
+            index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_LATEST,
+            alias: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_ALIAS,
+          },
+        },
+      ],
+    });
+
+    logger.info(
+      `Created alias ${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_ALIAS} for index ${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_LATEST}`
+    );
+  } catch (err) {
+    const error = transformError(err);
+    logger.error(
+      `Failed to create alias ${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_ALIAS}: ${error.message}`
+    );
   }
 };
 
