@@ -16,3 +16,4 @@ liquidjs
 @tanstack/react-table
 @tanstack/react-virtual
 @storybook/addon-docs
+@babel/plugin-transform-class-static-block
