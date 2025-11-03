@@ -36,10 +36,10 @@ export const findCasesContainingAllDocumentsRoute = createCasesRoute({
     request,
     response,
   }): Promise<IKibanaResponse<{ casesWithAllAttachments: string[] }>> => {
-    const { documentIds: alertIds, caseIds } =
+    const { documentIds, caseIds } =
       request.body as caseApiV1.FindCasesContainingAllDocumentsRequest;
 
-    if (!caseIds.length || !alertIds.length) {
+    if (!caseIds.length || !documentIds.length) {
       return response.ok({
         body: { casesWithAllAttachments: [] },
       });
@@ -47,7 +47,7 @@ export const findCasesContainingAllDocumentsRoute = createCasesRoute({
 
     const caseIdsToCheck = Array.isArray(caseIds) ? caseIds : [caseIds];
 
-    const documentIdSet = new Set(alertIds);
+    const documentIdSet = new Set(documentIds);
     const casesContext = await context.cases;
     const casesClient = await casesContext.getCasesClient();
 
@@ -79,22 +79,25 @@ export const processCase = async (
   caseId: string,
   documentIds: Set<string>
 ) => {
-  const documentsForCase = await casesClient.attachments.getAllAlertsAttachToCase({
+  const documentsForCase = await casesClient.attachments.getAllDocumentsAttachedToCase({
     caseId,
-    filter: combineFilters([
-      buildFilter({
-        filters: Array.from(documentIds),
-        field: 'eventId',
-        operator: 'or',
-        type: 'cases-comments',
-      }),
-      buildFilter({
-        filters: Array.from(documentIds),
-        field: 'alertId',
-        operator: 'or',
-        type: 'cases-comments',
-      }),
-    ]),
+    filter: combineFilters(
+      [
+        buildFilter({
+          filters: Array.from(documentIds),
+          field: 'eventId',
+          operator: 'or',
+          type: 'cases-comments',
+        }),
+        buildFilter({
+          filters: Array.from(documentIds),
+          field: 'alertId',
+          operator: 'or',
+          type: 'cases-comments',
+        }),
+      ],
+      'or' as const
+    ),
   });
 
   return documentIds.size === documentsForCase.length ? caseId : null;

@@ -27,13 +27,21 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type { AlertAttachmentAttributes, AttachmentTotals } from '../../../../common/types/domain';
-import { AttachmentType, AlertAttachmentAttributesRt } from '../../../../common/types/domain';
+import type {
+  AlertAttachmentAttributes,
+  AttachmentTotals,
+  DocumentAttachmentAttributes,
+} from '../../../../common/types/domain';
+import {
+  AttachmentType,
+  AlertAttachmentAttributesRt,
+  DocumentAttachmentAttributesRt,
+} from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
   EventIdsAggsResult,
-  GetAllAlertsAttachToCaseArgs,
+  GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
   GetAttachmentArgs,
   ServiceContext,
 } from '../types';
@@ -44,6 +52,7 @@ import {
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import type { AttachmentSavedObject } from '../../../common/types';
 import { getCaseReferenceId } from '../../../common/references';
+import { inspect } from 'node:util';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -139,20 +148,20 @@ export class AttachmentGetter {
   /**
    * Retrieves all the alerts attached to a case.
    */
-  public async getAllAlertsAttachToCase({
+  public async getAllDocumentsAttachedToCase({
     caseId,
     filter,
-  }: GetAllAlertsAttachToCaseArgs): Promise<Array<SavedObject<AlertAttachmentAttributes>>> {
+  }: GetAllDocumentsAttachedToCaseArgs): Promise<Array<SavedObject<DocumentAttachmentAttributes>>> {
     try {
       this.context.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
-      const alertsFilter = buildFilter({
-        filters: [AttachmentType.alert],
+      const documentsFilter = buildFilter({
+        filters: [AttachmentType.alert, AttachmentType.event],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
       });
 
-      const combinedFilter = combineFilters([alertsFilter, filter]);
+      const combinedFilter = combineFilters([documentsFilter, filter]);
 
       const finder =
         this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
@@ -166,9 +175,9 @@ export class AttachmentGetter {
           }
         );
 
-      let result: Array<SavedObject<AlertAttachmentAttributes>> = [];
+      let result: Array<SavedObject<DocumentAttachmentAttributes>> = [];
       for await (const userActionSavedObject of finder.find()) {
-        result = result.concat(AttachmentGetter.decodeAlerts(userActionSavedObject));
+        result = result.concat(AttachmentGetter.decodeDocuments(userActionSavedObject));
       }
 
       return result;
@@ -178,11 +187,11 @@ export class AttachmentGetter {
     }
   }
 
-  private static decodeAlerts(
+  private static decodeDocuments(
     response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
-  ): Array<SavedObject<AlertAttachmentAttributes>> {
+  ): Array<SavedObject<DocumentAttachmentAttributes>> {
     return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(AlertAttachmentAttributesRt)(so.attributes);
+      const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRt)(so.attributes);
 
       return Object.assign(so, { attributes: validatedAttributes });
     });

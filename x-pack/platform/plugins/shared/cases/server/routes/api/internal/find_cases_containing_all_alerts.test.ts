@@ -18,7 +18,7 @@ describe('findCasesContainingAllAlerts', () => {
       } as unknown as CasesClient;
 
       const result = await processCase(casesClient, 'case-id', new Set(['alert-id']));
-      expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalled();
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalled();
       expect(result).toBeNull();
     });
 
@@ -31,8 +31,8 @@ describe('findCasesContainingAllAlerts', () => {
 
       const result = await processCase(casesClient, 'case-id', new Set(['alert-id']));
       expect(result).toBe('case-id');
-      expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalledTimes(1);
-      expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalledWith({
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledTimes(1);
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledWith({
         caseId: 'case-id',
         filter: {
           arguments: [

@@ -32,7 +32,7 @@ export class AlertDetails extends SingleCaseAggregationHandler {
     const { casesClient } = this.options;
 
     try {
-      const alerts = await casesClient.attachments.getAllAlertsAttachToCase({
+      const alerts = await casesClient.attachments.getAllDocumentsAttachedToCase({
         caseId: this.caseId,
       });
 
