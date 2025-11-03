@@ -10,10 +10,11 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { EsqlQuery, BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
 import {
   getRecommendedQueriesTemplates,
-  getCategorizationField,
+  getTimeAndCategorizationFields,
 } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../shared/columns';
+import { getFromCommandHelper } from '../shared/resources_helpers';
 
 export interface InlineSuggestionItem {
   /**
@@ -127,55 +128,14 @@ async function getFromCommand(
   textBeforeCursor: string,
   callbacks?: ESQLCallbacks
 ): Promise<string> {
+  // First, try to extract data source from the existing query
   const dataSource = getIndexPatternFromESQLQuery(textBeforeCursor);
-
   if (dataSource) {
     return `FROM ${dataSource}`;
   }
 
-  const sources = (await callbacks?.getSources?.()) || [];
-  const visibleSources = sources.filter((source) => !source.hidden);
-
-  if (visibleSources.find((source) => source.name.startsWith('logs'))) {
-    return 'FROM logs*';
-  }
-
-  if (visibleSources.length > 0) {
-    return `FROM ${visibleSources[0].name}`;
-  }
-
-  return 'FROM *';
-}
-
-/**
- * Fetches field information and determines time and categorization fields
- */
-async function getFieldInfo(
-  fromCommand: string,
-  callbacks?: ESQLCallbacks
-): Promise<{ timeField: string; categorizationField: string | undefined }> {
-  const { getColumnsByType } = getColumnsByTypeRetriever(
-    EsqlQuery.fromSrc(fromCommand).ast,
-    fromCommand,
-    callbacks
-  );
-
-  const [dateFields, textFields] = await Promise.all([
-    getColumnsByType(['date'], []),
-    getColumnsByType(['text'], []),
-  ]);
-
-  const timeField =
-    dateFields.length > 0
-      ? dateFields.find((field) => field.text === '@timestamp')?.text || dateFields[0].text
-      : '';
-
-  const categorizationField =
-    textFields.length > 0
-      ? getCategorizationField(textFields.map((field) => field.text))
-      : undefined;
-
-  return { timeField, categorizationField };
+  const suggestedFromCommand = await getFromCommandHelper(callbacks);
+  return suggestedFromCommand || 'FROM *';
 }
 
 /**
@@ -236,7 +196,16 @@ export async function inlineSuggest(
 
     // Fetch data sources and field information
     const fromCommand = await getFromCommand(trimmedText, callbacks);
-    const { timeField, categorizationField } = await getFieldInfo(fromCommand, callbacks);
+
+    const { getColumnsByType } = getColumnsByTypeRetriever(
+      EsqlQuery.fromSrc(fromCommand).ast,
+      fromCommand,
+      callbacks
+    );
+
+    const { timeField, categorizationField } = await getTimeAndCategorizationFields(
+      getColumnsByType
+    );
 
     // Fetch all suggestions
     const allSuggestions = await fetchAllSuggestions(

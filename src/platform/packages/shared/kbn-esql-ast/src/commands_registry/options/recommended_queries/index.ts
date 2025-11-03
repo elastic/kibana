@@ -160,28 +160,33 @@ export const getRecommendedQueriesTemplates = ({
   return queries;
 };
 
+export async function getTimeAndCategorizationFields(
+  getColumnsByType: GetColumnsByTypeFn
+): Promise<{ timeField: string; categorizationField: string | undefined }> {
+  const [dateFields, textFields] = await Promise.all([
+    getColumnsByType(['date'], [], { openSuggestions: true }),
+    // get text fields separately to avoid mixing them with date fields
+    getColumnsByType(['text'], [], { openSuggestions: true }),
+  ]);
+
+  const timeField =
+    dateFields.length > 0
+      ? dateFields.find((field) => field.text === '@timestamp')?.text || dateFields[0].text
+      : '';
+
+  const categorizationField =
+    textFields.length > 0
+      ? getCategorizationField(textFields.map((field) => field.text))
+      : undefined;
+
+  return { timeField, categorizationField };
+}
+
 export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
   fromCommand: string = ''
 ): Promise<ISuggestionItem[]> => {
-  const [fieldSuggestions, textFieldSuggestions] = await Promise.all([
-    getFieldsByType(['date'], [], { openSuggestions: true }),
-    // get text fields separately to avoid mixing them with date fields
-    getFieldsByType(['text'], [], { openSuggestions: true }),
-  ]);
-
-  let timeField = '';
-  let categorizationField: string | undefined = '';
-
-  if (fieldSuggestions.length) {
-    timeField =
-      fieldSuggestions?.find((field) => field.label === '@timestamp')?.label ||
-      fieldSuggestions[0].label;
-  }
-
-  if (textFieldSuggestions.length) {
-    categorizationField = getCategorizationField(textFieldSuggestions.map((field) => field.label));
-  }
+  const { timeField, categorizationField } = await getTimeAndCategorizationFields(getFieldsByType);
 
   const recommendedQueries = getRecommendedQueriesTemplates({
     fromCommand,
