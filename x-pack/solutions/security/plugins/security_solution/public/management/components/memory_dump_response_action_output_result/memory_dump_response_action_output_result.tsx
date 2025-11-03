@@ -44,7 +44,7 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
     return useMemo(() => {
       if (!action.agents.includes(agentId)) {
         window.console.error(
-          `MemoryDumpResponseActionOutputResult called with agentId( ${agentId}) not in action.agents`
+          `MemoryDumpResponseActionOutputResult called with agentId [${agentId}] not in action.agents`
         );
         return <div data-test-subj={testId()} />;
       }

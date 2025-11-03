@@ -72,8 +72,12 @@ export const MemoryDumpActionResult = memo<
   if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
     return (
       <ResultComponent>
-        {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
-        <MemoryDumpResponseActionOutputResult action={actionDetails} agentId={endpointId!} />
+        {}
+        <MemoryDumpResponseActionOutputResult
+          action={actionDetails}
+          agentId={endpointId}
+          data-test-subj="memoryDumpResult"
+        />
       </ResultComponent>
     );
   }
