@@ -779,7 +779,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 2000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)
@@ -858,6 +858,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.exists('lnsVisualOptionsPopover_title');
       });
     },
+    async closeVisualOptionsPopover() {
+      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
+        await testSubjects.click('lnsVisualOptionsButton');
+      }
+    },
     async openTextOptions() {
       if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
         return;
@@ -866,6 +871,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('lnsTextOptionsButton');
         await testSubjects.exists('lnsTextOptionsPopover_title');
       });
+    },
+    async closeTitlesAndTextOptionsPopover() {
+      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
+        await testSubjects.click('lnsTextOptionsButton');
+      }
     },
     async retrySetValue(
       input: string,
@@ -943,13 +953,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
+      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
         return;
       }
       await retry.try(async () => {
         const allChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
         await allChartSwitches[layerIndex].click();
-        await testSubjects.existOrFail('lnsChartSwitchList');
+        await testSubjects.existOrFail('lnsChartSwitchList', { timeout: 2000 });
       });
     },
 

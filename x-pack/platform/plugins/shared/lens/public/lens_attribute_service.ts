@@ -9,15 +9,12 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type {
   SharingSavedObjectProps,
-  LensRuntimeState,
   LensSavedObjectAttributes,
   CheckDuplicateTitleProps,
   LensAttributesService,
 } from '@kbn/lens-common';
-import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
 
@@ -93,20 +90,6 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
           onTitleDuplicate
         ),
       };
-    },
-    // Make sure to inject references from the container down to the runtime state
-    // this ensure migrations/copy to spaces works correctly
-    injectReferences: (runtimeState, references) => {
-      return inject(
-        runtimeState as unknown as EmbeddableStateWithType,
-        references ?? runtimeState.attributes.references
-      ) as unknown as LensRuntimeState;
-    },
-    // Make sure to move the internal references into the parent references
-    // so migrations/move to spaces can work properly
-    extractReferences: (runtimeState) => {
-      const { state, references } = extract(runtimeState as unknown as EmbeddableStateWithType);
-      return { rawState: state as unknown as LensRuntimeState, references };
     },
   };
 }
