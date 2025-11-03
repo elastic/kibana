@@ -14,8 +14,8 @@ import { css } from '@emotion/react';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { FlyoutContainer } from './flyout_container';
-import type { VisualizationToolbarProps } from '../types';
 
 type Options = 'legend' | 'style' | 'filters';
 

@@ -16,6 +16,62 @@ describe('WorkflowTemplatingEngine', () => {
     templatingEngine = new WorkflowTemplatingEngine();
   });
 
+  describe('object rendering', () => {
+    it('should render object with string templates', () => {
+      const obj = {
+        message: 'Hello, {{user.name}}!',
+        details: {
+          age: '{{user.age}}',
+          address: '{{user.address.street}}, {{user.address.city}}',
+        },
+        tags: ['{{user.tag1}}', '{{user.tag2}}'],
+      };
+
+      const context = {
+        user: {
+          name: 'Alice',
+          age: 30,
+          address: {
+            street: '123 Main St',
+            city: 'Wonderland',
+          },
+          tag1: 'admin',
+          tag2: 'editor',
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        message: 'Hello, Alice!',
+        details: {
+          age: '30',
+          address: '123 Main St, Wonderland',
+        },
+        tags: ['admin', 'editor'],
+      });
+    });
+
+    it('should handle non-string values without modification', () => {
+      const obj = {
+        number: 42,
+        boolean: true,
+        nullValue: null,
+        undefinedValue: undefined,
+        array: [1, 2, 3],
+        nested: {
+          value: 3.14,
+        },
+      };
+
+      const context = {};
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual(obj);
+    });
+  });
+
   describe('basic rendering', () => {
     it('should render simple variables', () => {
       const template = 'Hello {{ name }}!';
@@ -206,6 +262,69 @@ describe('WorkflowTemplatingEngine', () => {
       const context = { text: 'This is not JSON' };
       const result = templatingEngine.render(template, context);
       expect(result).toBe('This is not JSON');
+    });
+  });
+
+  describe('evaluateExpression', () => {
+    describe('invalid expression', () => {
+      it('should throw error for non-output template', () => {
+        const template = `{% if true %}foo{% endif %}`;
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+          'The provided expression is invalid. Got: {% if true %}foo{% endif %}'
+        );
+      });
+
+      it('should throw error for multi-node template', () => {
+        const template = `{{ "foo" }} {{ "bar" }}`;
+
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+          'The provided expression is invalid. Got: {{ "foo" }} {{ "bar" }}'
+        );
+      });
+    });
+
+    describe('string manipulation', () => {
+      it('should evaluate split filter over string', () => {
+        const template = `{{ "foo,bar,dak" | split: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {});
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+
+      it('should evaluate split filter over variable', () => {
+        const template = `{{ my_string | split: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_string: 'foo,bar,dak',
+        });
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+
+      it('should evaluate split filter with variable separator', () => {
+        const template = `{{ my_string | split: separator }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_string: 'foo|bar|dak',
+          separator: '|',
+        });
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+    });
+
+    describe('array manipulation', () => {
+      it('should evaluate join filter over array', () => {
+        const template = `{{ my_array | join: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_array: ['foo', 'bar', 'dak'],
+        });
+        expect(actual).toEqual('foo,bar,dak');
+      });
+
+      it('should evaluate join filter with variable separator', () => {
+        const template = `{{ my_array | join: separator }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_array: ['foo', 'bar', 'dak'],
+          separator: '|',
+        });
+        expect(actual).toEqual('foo|bar|dak');
+      });
     });
   });
 });

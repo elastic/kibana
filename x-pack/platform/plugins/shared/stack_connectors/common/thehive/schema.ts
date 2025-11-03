@@ -5,184 +5,191 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { TheHiveSeverity, TheHiveTLP, SUB_ACTION } from './constants';
 
-export const TheHiveConfigSchema = schema.object({
-  url: schema.string(),
-  organisation: schema.nullable(schema.string()),
-});
+export const TheHiveConfigSchema = z
+  .object({
+    url: z.string(),
+    organisation: z.string().nullable().default(null),
+  })
+  .strict();
 
-export const TheHiveSecretsSchema = schema.object({
-  apiKey: schema.string(),
-});
+export const TheHiveSecretsSchema = z
+  .object({
+    apiKey: z.string(),
+  })
+  .strict();
 
-export const ExecutorSubActionPushParamsSchema = schema.object({
-  incident: schema.object({
-    title: schema.string(),
-    description: schema.string(),
-    externalId: schema.nullable(schema.string()),
-    severity: schema.nullable(schema.number({ defaultValue: TheHiveSeverity.MEDIUM })),
-    tlp: schema.nullable(schema.number({ defaultValue: TheHiveTLP.AMBER })),
-    tags: schema.nullable(schema.arrayOf(schema.string())),
-  }),
-  comments: schema.nullable(
-    schema.arrayOf(
-      schema.object({
-        comment: schema.string(),
-        commentId: schema.string(),
+export const ExecutorSubActionPushParamsSchema = z
+  .object({
+    incident: z
+      .object({
+        title: z.string(),
+        description: z.string(),
+        externalId: z.string().nullable().default(null),
+        severity: z.coerce.number().default(TheHiveSeverity.MEDIUM).nullable().default(null),
+        tlp: z.coerce.number().default(TheHiveTLP.AMBER).nullable().default(null),
+        tags: z.array(z.string()).nullable().default(null),
       })
-    )
-  ),
-});
+      .strict(),
+    comments: z
+      .array(
+        z
+          .object({
+            comment: z.string(),
+            commentId: z.string(),
+          })
+          .strict()
+      )
+      .nullable()
+      .default(null),
+  })
+  .strict();
 
 export const PushToServiceIncidentSchema = {
-  title: schema.string(),
-  description: schema.string(),
-  severity: schema.nullable(schema.number()),
-  tlp: schema.nullable(schema.number()),
-  tags: schema.nullable(schema.arrayOf(schema.string())),
+  title: z.string(),
+  description: z.string(),
+  severity: z.coerce.number().nullable().default(null),
+  tlp: z.coerce.number().nullable().default(null),
+  tags: z.array(z.string()).nullable().default(null),
 };
 
-export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
-  externalId: schema.string(),
-});
+export const ExecutorSubActionGetIncidentParamsSchema = z
+  .object({
+    externalId: z.string(),
+  })
+  .strict();
 
-export const ExecutorSubActionCreateAlertParamsSchema = schema.object({
-  title: schema.string(),
-  description: schema.string(),
-  type: schema.string(),
-  source: schema.string(),
-  sourceRef: schema.string(),
-  severity: schema.nullable(schema.number({ defaultValue: TheHiveSeverity.MEDIUM })),
-  isRuleSeverity: schema.nullable(schema.boolean({ defaultValue: false })),
-  tlp: schema.nullable(schema.number({ defaultValue: TheHiveTLP.AMBER })),
-  tags: schema.nullable(schema.arrayOf(schema.string())),
-  body: schema.nullable(schema.string()),
-});
+export const ExecutorSubActionCreateAlertParamsSchema = z
+  .object({
+    title: z.string(),
+    description: z.string(),
+    type: z.string(),
+    source: z.string(),
+    sourceRef: z.string(),
+    severity: z.coerce.number().default(TheHiveSeverity.MEDIUM).nullable().default(null),
+    isRuleSeverity: z.boolean().default(false).nullable(),
+    tlp: z.coerce.number().default(TheHiveTLP.AMBER).nullable().default(null),
+    tags: z.array(z.string()).nullable().default(null),
+    body: z.string().nullable().default(null),
+  })
+  .strict();
 
-export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal(SUB_ACTION.PUSH_TO_SERVICE),
-    subActionParams: ExecutorSubActionPushParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal(SUB_ACTION.CREATE_ALERT),
-    subActionParams: ExecutorSubActionCreateAlertParamsSchema,
-  }),
+export const ExecutorParamsSchema = z.union([
+  z
+    .object({
+      subAction: z.literal(SUB_ACTION.PUSH_TO_SERVICE),
+      subActionParams: ExecutorSubActionPushParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal(SUB_ACTION.CREATE_ALERT),
+      subActionParams: ExecutorSubActionCreateAlertParamsSchema,
+    })
+    .strict(),
 ]);
 
-export const TheHiveIncidentResponseSchema = schema.object(
-  {
-    _id: schema.string(),
-    _type: schema.string(),
-    _createdBy: schema.string(),
-    _updatedBy: schema.nullable(schema.string()),
-    _createdAt: schema.number(),
-    _updatedAt: schema.nullable(schema.number()),
-    number: schema.number(),
-    title: schema.string(),
-    description: schema.string(),
-    severity: schema.number(),
-    severityLabel: schema.string(),
-    startDate: schema.number(),
-    endDate: schema.nullable(schema.number()),
-    tags: schema.nullable(schema.arrayOf(schema.string())),
-    flag: schema.boolean(),
-    tlp: schema.number(),
-    tlpLabel: schema.string(),
-    pap: schema.number(),
-    papLabel: schema.string(),
-    status: schema.string(),
-    stage: schema.string(),
-    summary: schema.nullable(schema.string()),
-    impactStatus: schema.nullable(schema.string()),
-    assignee: schema.nullable(schema.string()),
-    customFields: schema.nullable(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
-    userPermissions: schema.nullable(schema.arrayOf(schema.string())),
-    extraData: schema.object({}, { unknowns: 'allow' }),
-    newDate: schema.number(),
-    inProgressDate: schema.nullable(schema.number()),
-    closedDate: schema.nullable(schema.number()),
-    alertDate: schema.nullable(schema.number()),
-    alertNewDate: schema.nullable(schema.number()),
-    alertInProgressDate: schema.nullable(schema.number()),
-    alertImportedDate: schema.nullable(schema.number()),
-    timeToDetect: schema.number(),
-    timeToTriage: schema.nullable(schema.number()),
-    timeToQualify: schema.nullable(schema.number()),
-    timeToAcknowledge: schema.nullable(schema.number()),
-    timeToResolve: schema.nullable(schema.number()),
-    handlingDuration: schema.nullable(schema.number()),
-  },
-  { unknowns: 'ignore' }
-);
+export const TheHiveIncidentResponseSchema = z.object({
+  _id: z.string(),
+  _type: z.string(),
+  _createdBy: z.string(),
+  _updatedBy: z.string().nullable().default(null),
+  _createdAt: z.coerce.number(),
+  _updatedAt: z.coerce.number().nullable().default(null),
+  number: z.coerce.number(),
+  title: z.string(),
+  description: z.string(),
+  severity: z.coerce.number(),
+  severityLabel: z.string(),
+  startDate: z.coerce.number(),
+  endDate: z.coerce.number().nullable().default(null),
+  tags: z.array(z.string()).nullable().default(null),
+  flag: z.boolean(),
+  tlp: z.coerce.number(),
+  tlpLabel: z.string(),
+  pap: z.coerce.number(),
+  papLabel: z.string(),
+  status: z.string(),
+  stage: z.string(),
+  summary: z.string().nullable().default(null),
+  impactStatus: z.string().nullable().default(null),
+  assignee: z.string().nullable().default(null),
+  customFields: z.array(z.record(z.string(), z.any())).nullable().default(null),
+  userPermissions: z.array(z.string()).nullable().default(null),
+  extraData: z.object({}).passthrough(),
+  newDate: z.coerce.number(),
+  inProgressDate: z.coerce.number().nullable().default(null),
+  closedDate: z.coerce.number().nullable().default(null),
+  alertDate: z.coerce.number().nullable().default(null),
+  alertNewDate: z.coerce.number().nullable().default(null),
+  alertInProgressDate: z.coerce.number().nullable().default(null),
+  alertImportedDate: z.coerce.number().nullable().default(null),
+  timeToDetect: z.coerce.number(),
+  timeToTriage: z.coerce.number().nullable().default(null),
+  timeToQualify: z.coerce.number().nullable().default(null),
+  timeToAcknowledge: z.coerce.number().nullable().default(null),
+  timeToResolve: z.coerce.number().nullable().default(null),
+  handlingDuration: z.coerce.number().nullable().default(null),
+});
 
-export const TheHiveUpdateIncidentResponseSchema = schema.any();
+export const TheHiveUpdateIncidentResponseSchema = z.any();
 
-export const TheHiveAddCommentResponseSchema = schema.object(
-  {
-    _id: schema.string(),
-    _type: schema.string(),
-    createdBy: schema.string(),
-    createdAt: schema.number(),
-    updatedAt: schema.nullable(schema.number()),
-    updatedBy: schema.nullable(schema.string()),
-    message: schema.string(),
-    isEdited: schema.boolean(),
-    extraData: schema.object({}, { unknowns: 'allow' }),
-  },
-  { unknowns: 'ignore' }
-);
+export const TheHiveAddCommentResponseSchema = z.object({
+  _id: z.string(),
+  _type: z.string(),
+  createdBy: z.string(),
+  createdAt: z.coerce.number(),
+  updatedAt: z.coerce.number().nullable().default(null),
+  updatedBy: z.string().nullable().default(null),
+  message: z.string(),
+  isEdited: z.boolean(),
+  extraData: z.object({}).passthrough(),
+});
 
-export const TheHiveCreateAlertResponseSchema = schema.object(
-  {
-    _id: schema.string(),
-    _type: schema.string(),
-    _createdBy: schema.string(),
-    _updatedBy: schema.nullable(schema.string()),
-    _createdAt: schema.number(),
-    _updatedAt: schema.nullable(schema.number()),
-    type: schema.string(),
-    source: schema.string(),
-    sourceRef: schema.string(),
-    externalLink: schema.nullable(schema.string()),
-    title: schema.string(),
-    description: schema.string(),
-    severity: schema.number(),
-    severityLabel: schema.string(),
-    date: schema.number(),
-    tags: schema.nullable(schema.arrayOf(schema.string())),
-    tlp: schema.number(),
-    tlpLabel: schema.string(),
-    pap: schema.number(),
-    papLabel: schema.string(),
-    follow: schema.nullable(schema.boolean()),
-    customFields: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-    caseTemplate: schema.nullable(schema.string()),
-    observableCount: schema.number(),
-    caseId: schema.nullable(schema.string()),
-    status: schema.string(),
-    stage: schema.string(),
-    assignee: schema.nullable(schema.string()),
-    summary: schema.nullable(schema.string()),
-    extraData: schema.object({}, { unknowns: 'allow' }),
-    newDate: schema.number(),
-    inProgressDate: schema.nullable(schema.number()),
-    closedDate: schema.nullable(schema.number()),
-    importedDate: schema.nullable(schema.number()),
-    timeToDetect: schema.number(),
-    timeToTriage: schema.nullable(schema.number()),
-    timeToQualify: schema.nullable(schema.number()),
-    timeToAcknowledge: schema.nullable(schema.number()),
-  },
-  { unknowns: 'ignore' }
-);
+export const TheHiveCreateAlertResponseSchema = z.object({
+  _id: z.string(),
+  _type: z.string(),
+  _createdBy: z.string(),
+  _updatedBy: z.string().nullable().default(null),
+  _createdAt: z.coerce.number(),
+  _updatedAt: z.coerce.number().nullable().default(null),
+  type: z.string(),
+  source: z.string(),
+  sourceRef: z.string(),
+  externalLink: z.string().nullable().default(null),
+  title: z.string(),
+  description: z.string(),
+  severity: z.coerce.number(),
+  severityLabel: z.string(),
+  date: z.coerce.number(),
+  tags: z.array(z.string()).nullable().default(null),
+  tlp: z.coerce.number(),
+  tlpLabel: z.string(),
+  pap: z.coerce.number(),
+  papLabel: z.string(),
+  follow: z.boolean().nullable().default(null),
+  customFields: z.array(z.object({}).passthrough()).nullable().default(null),
+  caseTemplate: z.string().nullable().default(null),
+  observableCount: z.coerce.number(),
+  caseId: z.string().nullable().default(null),
+  status: z.string(),
+  stage: z.string(),
+  assignee: z.string().nullable().default(null),
+  summary: z.string().nullable().default(null),
+  extraData: z.object({}).passthrough(),
+  newDate: z.coerce.number(),
+  inProgressDate: z.coerce.number().nullable().default(null),
+  closedDate: z.coerce.number().nullable().default(null),
+  importedDate: z.coerce.number().nullable().default(null),
+  timeToDetect: z.coerce.number(),
+  timeToTriage: z.coerce.number().nullable().default(null),
+  timeToQualify: z.coerce.number().nullable().default(null),
+  timeToAcknowledge: z.coerce.number().nullable().default(null),
+});
 
-export const TheHiveFailureResponseSchema = schema.object(
-  {
-    type: schema.number(),
-    message: schema.string(),
-  },
-  { unknowns: 'ignore' }
-);
+export const TheHiveFailureResponseSchema = z.object({
+  type: z.coerce.number(),
+  message: z.string(),
+});

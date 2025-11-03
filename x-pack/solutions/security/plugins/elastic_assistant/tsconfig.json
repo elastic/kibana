@@ -96,7 +96,9 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/core-security-server",
     "@kbn/index-adapter",
-    "@kbn/langgraph-checkpoint-saver"
+    "@kbn/langgraph-checkpoint-saver",
+    "@kbn/lists-plugin",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*",

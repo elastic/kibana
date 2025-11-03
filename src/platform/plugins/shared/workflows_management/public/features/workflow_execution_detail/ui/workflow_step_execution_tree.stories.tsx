@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { Meta, StoryObj } from '@storybook/react';
 import type { SafeParseReturnType } from '@kbn/zod';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
   component: WorkflowStepExecutionTree,

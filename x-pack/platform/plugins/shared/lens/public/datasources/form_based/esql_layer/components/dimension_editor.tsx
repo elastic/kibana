@@ -11,14 +11,17 @@ import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
+import type {
+  TextBasedPrivateState,
+  TextBasedLayer,
+  DatasourceDimensionEditorProps,
+  DataType,
+} from '@kbn/lens-common';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../dimension_panel/format_selector';
 import { FormatSelector } from '../../dimension_panel/format_selector';
-import type { DatasourceDimensionEditorProps, DataType } from '../../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
-import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
-import type { TextBasedLayer } from '../types';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
 
 export type TextBasedDimensionEditorProps =

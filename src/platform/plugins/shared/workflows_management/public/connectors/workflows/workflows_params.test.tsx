@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowsActionParams } from './types';
 import WorkflowsParamsFields from './workflows_params';
 
@@ -17,6 +18,11 @@ import WorkflowsParamsFields from './workflows_params';
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
+
+// Helper function to render with I18n provider
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(component, { wrapper: I18nProvider });
+};
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -88,7 +94,7 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...props} />);
+      renderWithIntl(<WorkflowsParamsFields {...props} />);
     });
 
     expect(mockEditAction).toHaveBeenCalledWith('subAction', 'run', 0);
@@ -97,7 +103,7 @@ describe('WorkflowsParamsFields', () => {
 
   test('should render workflow selection dropdown', async () => {
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
@@ -108,7 +114,7 @@ describe('WorkflowsParamsFields', () => {
 
   test('should render create new workflow link', async () => {
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
@@ -120,7 +126,7 @@ describe('WorkflowsParamsFields', () => {
     mockHttpPost.mockReturnValue(new Promise(() => {})); // Never resolves
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -128,7 +134,7 @@ describe('WorkflowsParamsFields', () => {
 
   test('should populate workflow options when fetch succeeds', async () => {
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
@@ -150,7 +156,7 @@ describe('WorkflowsParamsFields', () => {
 
   test('should handle workflow selection', async () => {
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     // Wait for workflows to load
@@ -183,7 +189,7 @@ describe('WorkflowsParamsFields', () => {
     mockHttpPost.mockRejectedValue(new Error('Failed to fetch'));
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
@@ -199,7 +205,7 @@ describe('WorkflowsParamsFields', () => {
     mockHttpPost.mockResolvedValue({ results: [] });
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
@@ -212,7 +218,8 @@ describe('WorkflowsParamsFields', () => {
     fireEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+      const createButtons = screen.getAllByText('Create your first workflow');
+      expect(createButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -225,7 +232,7 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...propsWithError} />);
+      renderWithIntl(<WorkflowsParamsFields {...propsWithError} />);
     });
 
     await waitFor(() => {
@@ -245,7 +252,7 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...propsWithWorkflowId} />);
+      renderWithIntl(<WorkflowsParamsFields {...propsWithWorkflowId} />);
     });
 
     await waitFor(() => {
@@ -284,7 +291,7 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
@@ -325,7 +332,7 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...propsWithDisabledSelected} />);
+      renderWithIntl(<WorkflowsParamsFields {...propsWithDisabledSelected} />);
     });
 
     await waitFor(() => {
@@ -356,7 +363,7 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...propsWithSelected} />);
+      renderWithIntl(<WorkflowsParamsFields {...propsWithSelected} />);
     });
 
     // Wait for workflows to load
@@ -379,7 +386,7 @@ describe('WorkflowsParamsFields', () => {
       } as WorkflowsActionParams,
     };
 
-    render(<WorkflowsParamsFields {...propsWithSelected} />);
+    renderWithIntl(<WorkflowsParamsFields {...propsWithSelected} />);
 
     // Wait for component to load
     await waitFor(() => {
@@ -408,7 +415,7 @@ describe('WorkflowsParamsFields', () => {
     } as any);
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
@@ -428,7 +435,7 @@ describe('WorkflowsParamsFields', () => {
     } as any);
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     // Should not crash and should render the component
@@ -442,7 +449,11 @@ describe('WorkflowsParamsFields', () => {
 
     // Should show no workflows available
     await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+      // Check that the empty state is shown
+      expect(screen.getAllByText("You don't have any workflows yet").length).toBeGreaterThan(0);
+      // Check that there's at least one "Create your first workflow" button
+      const createButtons = screen.getAllByText('Create your first workflow');
+      expect(createButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -453,7 +464,7 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...props} />);
+      renderWithIntl(<WorkflowsParamsFields {...props} />);
     });
 
     await waitFor(() => {
@@ -479,7 +490,7 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...propsWithExistingParams} />);
+      renderWithIntl(<WorkflowsParamsFields {...propsWithExistingParams} />);
     });
 
     await waitFor(() => {
@@ -502,7 +513,7 @@ describe('WorkflowsParamsFields', () => {
     };
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...propsWithSelectedWorkflow} />);
+      renderWithIntl(<WorkflowsParamsFields {...propsWithSelectedWorkflow} />);
     });
 
     // Wait for workflows to load
@@ -587,7 +598,7 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     // Wait for workflows to load
@@ -669,7 +680,7 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     // Wait for workflows to load
@@ -741,7 +752,7 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await act(async () => {
-      render(<WorkflowsParamsFields {...defaultProps} />);
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     // Wait for workflows to load
@@ -776,5 +787,73 @@ describe('WorkflowsParamsFields', () => {
     expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
 
     window.open = originalOpen;
+  });
+
+  test('should show disabled badge for disabled workflows', async () => {
+    const mockWorkflows = {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Disabled Workflow',
+          description: 'A disabled workflow',
+          enabled: false,
+          definition: { triggers: [] },
+        },
+      ],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the disabled workflow to appear
+    await waitFor(() => {
+      expect(screen.getByText('Disabled Workflow')).toBeInTheDocument();
+      expect(screen.getByText('Disabled')).toBeInTheDocument();
+    });
+  });
+
+  test('should show "No description" for workflows with undefined description', async () => {
+    const mockWorkflows = {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Workflow without description',
+          description: undefined,
+          enabled: true,
+          definition: { triggers: [] },
+        },
+      ],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the workflow to appear
+    await waitFor(() => {
+      expect(screen.getByText('Workflow without description')).toBeInTheDocument();
+      expect(screen.getByText('No description')).toBeInTheDocument();
+    });
   });
 });

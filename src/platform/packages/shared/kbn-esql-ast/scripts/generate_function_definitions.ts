@@ -45,9 +45,9 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
       ? defaultScalarFunctionLocations
       : defaultAggFunctionLocations;
 
-  // MATCH and QSRT has limited supported for where commands only
+  // MATCH and QSTR have limited support for WHERE, STATS_WHERE, and JOIN commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    locationsAvailable = [Location.WHERE, Location.STATS_WHERE];
+    locationsAvailable = [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL];
   }
 
   if (ESFunctionDefinition.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
@@ -180,6 +180,7 @@ const enrichOperators = (
         Location.STATS_BY,
         Location.COMPLETION,
         Location.RERANK,
+        Location.JOIN,
       ]);
       // Adding comparison operator signatures for ip and version types
       signatures.push(...comparisonOperatorSignatures);
@@ -196,6 +197,7 @@ const enrichOperators = (
         Location.STATS_BY,
         Location.COMPLETION,
         Location.RERANK,
+        Location.JOIN,
       ]);
 
       // taking care the `...EVAL col = @timestamp + 1 year` cases
@@ -212,6 +214,7 @@ const enrichOperators = (
         Location.STATS_WHERE,
         Location.COMPLETION,
         Location.RERANK,
+        Location.JOIN,
       ];
     }
     if (isInOperator) {

@@ -14,9 +14,6 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { ResponseButton } from './response_button';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockValidSearchHit = {
   fields: {
@@ -43,9 +40,9 @@ const renderResponseButton = (panelContextValue: DocumentDetailsContext = mockCo
       </TestProvider>
     </IntlProvider>
   );
+
 describe('<ResponseButton />', () => {
   it('should render response button correctly', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     const panelContextValue = { ...mockContextValue, searchHit: mockValidSearchHit };
     const { getByTestId, queryByTestId } = renderResponseButton(panelContextValue);
     expect(getByTestId(RESPONSE_BUTTON_TEST_ID)).toBeInTheDocument();

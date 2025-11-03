@@ -8,11 +8,13 @@ import { BehaviorSubject } from 'rxjs';
 import { defaultDoc } from '../mocks/services_mock';
 import { deserializeState, getStructuredDatasourceStates } from './helper';
 import { makeEmbeddableServices } from './mocks';
-import type { FormBasedPersistedState } from '../datasources/form_based/types';
-import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import expect from 'expect';
-import type { DatasourceState } from '../state_management';
-import type { StructuredDatasourceStates } from './types';
+import type {
+  FormBasedPersistedState,
+  TextBasedPersistedState,
+  DatasourceState,
+  StructuredDatasourceStates,
+} from '@kbn/lens-common';
 
 describe('Embeddable helpers', () => {
   describe('deserializeState', () => {
@@ -60,63 +62,6 @@ describe('Embeddable helpers', () => {
       });
       // check the visualizationType set to null for empty state
       expect(runtimeState.attributes.visualizationType).toBeNull();
-    });
-
-    describe('injected references should overwrite inner ones', () => {
-      // There are 3 possible scenarios here for reference injections:
-      // * default space for a by-value
-      // * default space for a by-ref with a "lens" panel reference type
-      // * other space for a by-value with new ref ids
-
-      it('should inject correctly serialized references into runtime state for a by value in the default space', async () => {
-        const services = getServices();
-        const mockedReferences = [
-          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
-        ];
-        const runtimeState = await deserializeState(
-          services,
-          {
-            attributes: defaultDoc,
-          },
-          mockedReferences
-        );
-        expect(services.attributeService.injectReferences).toHaveBeenCalled();
-        expect(runtimeState.attributes.references).toEqual(mockedReferences);
-      });
-
-      it('should inject correctly serialized references into runtime state for a by ref in the default space', async () => {
-        const services = getServices();
-        const mockedReferences = [
-          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
-        ];
-        const runtimeState = await deserializeState(
-          services,
-          {
-            savedObjectId: '123',
-          },
-          mockedReferences
-        );
-        expect(services.attributeService.injectReferences).not.toHaveBeenCalled();
-        // Note the original references should be kept
-        expect(runtimeState.attributes.references).toEqual(defaultDoc.references);
-      });
-
-      it('should inject correctly serialized references into runtime state for a by value in another space', async () => {
-        const services = getServices();
-        const mockedReferences = [
-          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
-        ];
-        const runtimeState = await deserializeState(
-          services,
-          {
-            attributes: defaultDoc,
-          },
-          mockedReferences
-        );
-        expect(services.attributeService.injectReferences).toHaveBeenCalled();
-        // note: in this case the references are swapped
-        expect(runtimeState.attributes.references).toEqual(mockedReferences);
-      });
     });
   });
 

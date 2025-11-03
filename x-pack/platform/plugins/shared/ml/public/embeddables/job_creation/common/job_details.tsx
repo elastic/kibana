@@ -417,7 +417,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
       {state === STATE.SAVE_FAILED && createError !== null ? (
         <>
           <EuiSpacer />
-          <EuiCallOut color="danger" title={createError.text}>
+          <EuiCallOut announceOnMount color="danger" title={createError.text}>
             {createError.errorText}
           </EuiCallOut>
         </>
@@ -425,7 +425,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
       {incomingCreateError ? (
         <>
           <EuiSpacer />
-          <EuiCallOut color="danger" title={incomingCreateError.text}>
+          <EuiCallOut announceOnMount color="danger" title={incomingCreateError.text}>
             {incomingCreateError.errorText}
           </EuiCallOut>
         </>

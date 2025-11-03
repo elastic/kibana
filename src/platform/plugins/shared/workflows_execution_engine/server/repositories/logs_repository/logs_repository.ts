@@ -8,8 +8,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import { createIndexWithMappings } from '../../../common/create_index';
 
 export interface WorkflowLogEvent {
@@ -41,7 +41,7 @@ export interface WorkflowLogEvent {
     stack_trace?: string;
   };
   tags?: string[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface LogSearchResult {
@@ -57,7 +57,7 @@ export interface LogSearchResult {
       step_id?: string;
       step_name?: string;
     };
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
 }
 
@@ -99,7 +99,7 @@ export class LogsRepository {
   }
 
   public async getLogsByLevel(level: string, executionId?: string): Promise<LogSearchResult> {
-    const mustClauses: any[] = [
+    const mustClauses: unknown[] = [
       {
         term: {
           level,
@@ -141,6 +141,7 @@ export class LogsRepository {
         typeof response.hits.total === 'number'
           ? response.hits.total
           : response.hits.total?.value || 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logs: response.hits.hits.map((hit: any) => hit._source),
     };
   }
@@ -166,6 +167,7 @@ export class LogsRepository {
     return this.searchLogs(query);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async searchLogs(query: any): Promise<LogSearchResult> {
     const response = await this.esClient.search({
       index: this.indexName,
@@ -179,6 +181,7 @@ export class LogsRepository {
         typeof response.hits.total === 'number'
           ? response.hits.total
           : response.hits.total?.value || 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logs: response.hits.hits.map((hit: any) => hit._source),
     };
   }

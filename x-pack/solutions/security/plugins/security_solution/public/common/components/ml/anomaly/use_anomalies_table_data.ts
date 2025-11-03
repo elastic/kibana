@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
+import { getThreshold } from '../../../../../common/utils/ml';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
@@ -38,20 +39,6 @@ export const influencersOrCriteriaToString = (
   influencers == null
     ? ''
     : influencers.reduce((accum, item) => `${accum}${item.fieldName}:${item.fieldValue}`, '');
-
-export const getThreshold = (anomalyScore: number | undefined, threshold: number): number => {
-  if (threshold !== -1) {
-    return threshold;
-  } else if (anomalyScore == null) {
-    return 50;
-  } else if (anomalyScore < 0) {
-    return 0;
-  } else if (anomalyScore > 100) {
-    return 100;
-  } else {
-    return Math.floor(anomalyScore);
-  }
-};
 
 export const useAnomaliesTableData = ({
   criteriaFields = [],

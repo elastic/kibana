@@ -8,7 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with fallback on failure', () => {
