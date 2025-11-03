@@ -757,3 +757,37 @@ export const globalArtifactManagementSubFeature = (
     ],
   };
 };
+
+export const socManagementSubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: false,
+  privilegesTooltip: undefined,
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.socManagement',
+    { defaultMessage: 'SOC Management' }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.socManagement.description',
+    {
+      defaultMessage:
+        'Access to SOC management capabilities including AI value reporting and analytics.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-socManagement`],
+          id: 'soc_management_all',
+          includeIn: 'none',
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['socManagement'],
+        },
+      ],
+    },
+  ],
+});

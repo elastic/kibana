@@ -34,7 +34,7 @@ const METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.metricsExperience.esqlQueries.allMetrics.name', {
       defaultMessage: 'All metrics',
     }),
-    query: `FROM ${METRICS_INDEX_PATTERN}`,
+    query: `TS ${METRICS_INDEX_PATTERN}`,
     description: i18n.translate('xpack.metricsExperience.esqlQueries.allMetrics.description', {
       defaultMessage: 'Loads all available metrics',
     }),
