@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ErrorObject } from 'ajv';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { DeanonymizationInput, DeanonymizationOutput } from './types';
 import { type Message } from './types';
@@ -112,8 +113,8 @@ export enum ChatCompletionErrorCode {
   InternalError = 'internalError',
   NotFoundError = 'notFoundError',
   TokenLimitReachedError = 'tokenLimitReachedError',
-  FunctionNotFoundError = 'functionNotFoundError',
   FunctionLimitExceededError = 'functionLimitExceededError',
+  FunctionArgsValidationError = 'functionArgsValidationError',
 }
 
 interface ErrorMetaAttributes {
@@ -123,10 +124,10 @@ interface ErrorMetaAttributes {
     tokenLimit?: number;
     tokenCount?: number;
   };
-  [ChatCompletionErrorCode.FunctionNotFoundError]: {
-    name: string;
-  };
   [ChatCompletionErrorCode.FunctionLimitExceededError]: {};
+  [ChatCompletionErrorCode.FunctionArgsValidationError]: {
+    errors: ErrorObject[];
+  };
 }
 
 export class ChatCompletionError<T extends ChatCompletionErrorCode> extends Error {
@@ -188,4 +189,20 @@ export function isTokenLimitReachedError(
 
 export function isChatCompletionError(error: Error): error is ChatCompletionError<any> {
   return error instanceof ChatCompletionError;
+}
+export function createFunctionArgsValidationError(errors: ErrorObject[]) {
+  return new ChatCompletionError(
+    ChatCompletionErrorCode.FunctionArgsValidationError,
+    'Function arguments are invalid',
+    { errors }
+  );
+}
+
+export function isFunctionArgsValidationError(
+  error: Error
+): error is ChatCompletionError<ChatCompletionErrorCode.FunctionArgsValidationError> {
+  return (
+    error instanceof ChatCompletionError &&
+    error.code === ChatCompletionErrorCode.FunctionArgsValidationError
+  );
 }
