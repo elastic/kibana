@@ -146,8 +146,6 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
     switchMap(async (reloadTimeFetchContext) => {
-      console.log({ api, reloadTimeFetchContext });
-
       let searchSessionId;
       if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
         searchSessionId =
