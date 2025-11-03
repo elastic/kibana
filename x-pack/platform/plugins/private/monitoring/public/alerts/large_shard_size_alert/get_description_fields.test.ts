@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
 import { getDescriptionFields } from '.';
@@ -14,7 +13,7 @@ import type { ValidateOptions as RuleParams } from '.';
 describe('shard size getDescriptionFields', () => {
   const mockPrebuildField = jest.fn();
   const mockPrebuildFields = {
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: mockPrebuildField,
+    indexPattern: mockPrebuildField,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
