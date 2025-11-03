@@ -23,6 +23,7 @@ export interface StepExecutionTreeItemLabelProps {
   executionTimeMs: number | null;
   stepType: string;
   selected: boolean;
+  onClick?: React.MouseEventHandler;
 }
 
 export function StepExecutionTreeItemLabel({
@@ -32,6 +33,7 @@ export function StepExecutionTreeItemLabel({
   executionTimeMs,
   stepType,
   selected,
+  onClick,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
   const isDangerous = status && isDangerousStatus(status);
@@ -44,6 +46,7 @@ export function StepExecutionTreeItemLabel({
       justifyContent="spaceBetween"
       responsive={false}
       css={styles.label}
+      onClick={onClick}
     >
       <EuiFlexItem
         css={[
