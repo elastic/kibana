@@ -86,10 +86,10 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('install prebuilt rules from a package', async () => {
-      const { body: bootstrapPrebuiltRulesResponse } = await detectionsApi
-        .bootstrapPrebuiltRules()
-        .expect(200);
+      const { statusCode: bootstrapPrebuiltRulesStatusCode, body: bootstrapPrebuiltRulesResponse } =
+        await detectionsApi.bootstrapPrebuiltRules();
 
+      // Assert body first to be able to see error messages in case of failure
       expect(bootstrapPrebuiltRulesResponse).toMatchObject({
         packages: expect.arrayContaining([
           expect.objectContaining({
@@ -100,6 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ]),
       });
+      expect(bootstrapPrebuiltRulesStatusCode).toBe(200);
 
       const { body: reviewPrebuiltRulesForInstallationResponse } = await supertest
         .post(REVIEW_RULE_INSTALLATION_URL)
