@@ -5,38 +5,67 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
 import { globalSetupHook } from '@kbn/scout-oblt';
+import { APM_AGENT_POLICY_ID } from '../fixtures/constants';
 
 globalSetupHook(
   'Set up Profiling Resources and Data',
   { tag: ['@ess'] },
-  async ({ profilingSetup }) => {
+  async ({ profilingSetup, apiServices, log }) => {
     try {
+      // Create APM agent policy via Fleet API
+      await apiServices.fleet.internal.setup();
+      log.info('Fleet infrastructure setup completed');
+      await apiServices.fleet.agent.setup();
+      log.info('Fleet agents setup completed');
+      log.info('Checking if APM agent policy exists, creating if needed...');
+      const getPolicyResponse = await apiServices.fleet.agent_policies.get({
+        page: 1,
+        perPage: 10,
+      });
+      const apmPolicyData = getPolicyResponse.data.items.find(
+        (policy: { id: string }) => policy.id === 'policy-elastic-agent-on-cloud'
+      );
+
+      if (!apmPolicyData) {
+        await apiServices.fleet.agent_policies.create(
+          'Elastic APM',
+          'default',
+          false, // sysMonitoring
+          {
+            id: APM_AGENT_POLICY_ID,
+            description: 'Elastic APM agent policy created via Fleet API',
+          }
+        );
+        log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' is created`);
+      } else {
+        log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
+      }
+
       // Check profiling status
-      console.info('Checking profiling status...');
+      log.info('Checking profiling status...');
       const status = await profilingSetup.checkStatus();
-      console.info('Profiling status:', status);
+      log.info('Profiling status:', status);
 
       // Set up profiling resources if needed
       if (!status.has_setup) {
-        console.info('Setting up Universal profiling resources...');
+        log.info('Setting up Universal profiling resources...');
         await profilingSetup.setupResources();
-        console.info('[Done] Setting up Universal profiling resources.');
+        log.info('[Done] Setting up Universal profiling resources.');
       } else {
-        console.info('Profiling resources already set up.');
+        log.info('Profiling resources already set up.');
       }
 
       // Load profiling data if needed
       if (!status.has_data) {
-        console.info('Loading Universal profiling data...');
+        log.info('Loading Universal profiling data...');
         await profilingSetup.loadData();
-        console.info('[Done] Loading Universal profiling data.');
+        log.info('[Done] Loading Universal profiling data.');
       } else {
-        console.info('Profiling data already loaded.');
+        log.info('Profiling data already loaded.');
       }
     } catch (error) {
-      console.error('Error setting up profiling:', error);
+      log.error(`Error setting up profiling: ${error}`);
       throw error;
     }
   }
