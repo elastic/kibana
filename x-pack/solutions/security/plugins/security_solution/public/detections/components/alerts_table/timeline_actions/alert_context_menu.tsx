@@ -15,6 +15,8 @@ import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { flattenObject } from '@kbn/object-utils';
+import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
@@ -392,6 +394,10 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   onConfirm,
   alertStatus,
 }) => {
+  const isEndpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
 
@@ -457,12 +463,21 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     enrichedAlert == null ||
     isWaitingForIndexOrDataView;
 
+  const isEndpointItem = exceptionListType === ExceptionListTypeEnum.ENDPOINT;
+
   if (isLoading || isRuleLoading) return null;
 
-  return (
+  return isEndpointItem && isEndpointExceptionsMovedUnderManagement ? (
+    <EndpointExceptionsFlyout
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      alertData={enrichedAlert}
+      isAlertDataLoading={isLoading || isRuleLoading}
+    />
+  ) : (
     <AddExceptionFlyout
       rules={memoRule}
-      isEndpointItem={exceptionListType === ExceptionListTypeEnum.ENDPOINT}
+      isEndpointItem={isEndpointItem}
       alertData={enrichedAlert}
       isAlertDataLoading={isLoading || isRuleLoading}
       alertStatus={alertStatus}

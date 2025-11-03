@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
+import type { IHttpFetchError } from '@kbn/core/public';
 import type { ArtifactListPageLabels } from '../../components/artifact_list_page';
 
 export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
@@ -136,3 +137,12 @@ export const NAME_ERROR = i18n.translate(
   'xpack.securitySolution.endpointExceptions.form.name.error',
   { defaultMessage: "The name can't be empty" }
 );
+
+export const getCreationErrorMessage = (creationError: IHttpFetchError) => {
+  return {
+    title: i18n.translate('xpack.securitySolution.endpointExceptions.flyoutCreateErrorToastTitle', {
+      defaultMessage: 'There was an error creating the new endpoint exception.',
+    }),
+    message: { error: creationError.message },
+  };
+};
