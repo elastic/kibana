@@ -25,6 +25,7 @@ import {
   fileOperationsSubFeature,
   executeActionSubFeature,
   scanActionSubFeature,
+  socManagementSubFeature,
 } from '../kibana_sub_features';
 
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
@@ -55,6 +56,7 @@ const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>
   ],
   [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.socManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V5 }],
@@ -92,6 +94,7 @@ export const getSecuritySubFeaturesMap = ({
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature()],
     [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature()],
+    [SecuritySubFeatureId.socManagement, socManagementSubFeature()],
     [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature()],
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature()],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature()],

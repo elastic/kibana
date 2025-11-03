@@ -57,6 +57,9 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
       },
     },
   },
+  [ProductFeatureSecurityKey.aiValueReport]: {
+    subFeatureIds: [SecuritySubFeatureId.socManagement],
+  },
   [ProductFeatureSecurityKey.investigationGuideInteractions]: {
     privileges: {
       all: {

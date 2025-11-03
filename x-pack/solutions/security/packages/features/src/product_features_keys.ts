@@ -12,6 +12,9 @@ export enum ProductFeatureSecurityKey {
   /** Enables Configurations page for AI SOC */
   configurations = 'configurations',
 
+  /** Enables AI Value Report access */
+  aiValueReport = 'ai_value_report',
+
   /** Elastic endpoint detections, includes CSP rules which remain provisionally within siem */
   detections = 'detections',
   /**
@@ -199,6 +202,7 @@ export enum SecuritySubFeatureId {
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
   workflowInsights = 'workflowInsightsSubFeature',
+  socManagement = 'socManagementSubFeature',
   hostIsolation = 'hostIsolationSubFeature',
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
