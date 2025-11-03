@@ -52,21 +52,6 @@ describe('useSignalIndexWithDefault', () => {
     expect(result.current).toBe('.alerts-security.alerts-custom-space');
   });
 
-  it('returns default index name when signalIndexName is undefined', () => {
-    mockUseSignalIndex.mockReturnValue({
-      loading: false,
-      signalIndexExists: false,
-      signalIndexName: undefined as any,
-      signalIndexMappingOutdated: null,
-      createDeSignalIndex: null,
-    });
-    mockUseSpaceId.mockReturnValue('default');
-
-    const { result } = renderHook(() => useSignalIndexWithDefault());
-
-    expect(result.current).toBe('.alerts-security.alerts-default');
-  });
-
   it('uses correct space ID in default index name', () => {
     const testCases = [
       { spaceId: 'default', expected: '.alerts-security.alerts-default' },

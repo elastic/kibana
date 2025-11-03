@@ -110,9 +110,9 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         type: 'index-pattern',
       },
     ]);
-    const mockFilters = [
+    const mockFilters: ExtraOptions['filters'] = [
       { meta: { alias: 'test filter', disabled: false, negate: false } },
-    ] as ExtraOptions['filters'];
+    ];
     expect(getAlertFilteringMetricLensAttributes(defaultArgs).state.filters).toEqual([
       getAlertIndexFilter(defaultSignalIndexName),
     ]);
@@ -179,9 +179,9 @@ describe('getAlertFilteringMetricLensAttributes', () => {
   });
 
   it('combines alert index filter with extra options filters', () => {
-    const mockFilters = [
+    const mockFilters: ExtraOptions['filters'] = [
       { meta: { alias: 'extra filter', disabled: false, negate: false } },
-    ] as ExtraOptions['filters'];
+    ];
     const result = getAlertFilteringMetricLensAttributes({
       ...defaultArgs,
       extraOptions: { filters: mockFilters },
