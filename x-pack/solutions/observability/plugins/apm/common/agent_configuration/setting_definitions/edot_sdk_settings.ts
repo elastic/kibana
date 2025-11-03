@@ -100,7 +100,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'The default interval between checking the collector for new changes to config.\n' +
         'Note the interval is automatically exponentially extended on failures then reset to the value specified here, on recovery.',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'sampling_rate',
@@ -115,7 +115,11 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'To reduce overhead and storage requirements, you can set the sampling rate to a value between 0.0 and 1.0. ' +
         'Further details can be found in the [OpenTelemetry Sampling Concepts](https://opentelemetry.io/docs/concepts/sampling/) page.',
     }),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/python/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
   {
     key: 'send_traces',
