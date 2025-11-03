@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { ADMIN_SECURITY } from './route_security';
+import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerPostTestStepRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -18,7 +18,7 @@ export function registerPostTestStepRoute({ router, api, logger, spaces }: Route
     {
       path: '/api/workflows/testStep',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: ADMIN_SECURITY,
+      security: WORKFLOW_EXECUTE_SECURITY,
       validate: {
         body: schema.object({
           stepId: schema.string(),

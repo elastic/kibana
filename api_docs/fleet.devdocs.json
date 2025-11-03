@@ -31455,7 +31455,7 @@
         "signature": [
           "{ type?: ",
           "PackageSpecPackageType",
-          " | undefined; version: string; name: string; title: string; description?: string | undefined; path?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
+          " | undefined; path?: string | undefined; version: string; name: string; title: string; description?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
