@@ -15,7 +15,7 @@ import type { IAdditionalFields } from '../../registry';
 
 export const columnsAfter = async (
   command: ESQLCommand,
-  _previousColumns: ESQLColumnData[],
+  _previousColumns: ESQLColumnData[], // will always be empty for FROM
   query: string,
   additionalFields: IAdditionalFields
 ) => {
