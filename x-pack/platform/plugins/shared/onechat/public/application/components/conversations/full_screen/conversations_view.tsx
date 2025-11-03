@@ -12,7 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { Conversation } from '../conversation';
 import { FullScreenConversationHeader } from './header';
-import { ConversationSidebar } from '../conversation_sidebar/conversation_sidebar';
+import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
 import { RoutedConversationsProvider } from '../../../context/conversation/routed_conversations_provider';
 import { SendMessageProvider } from '../../../context/send_message/send_message_context';
 

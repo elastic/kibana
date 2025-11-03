@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useConversationList } from '../../../hooks/use_conversation_list';
+import { useConversationList } from '../../../../hooks/use_conversation_list';
 import { ConversationSections } from './conversation_sections';
 import { ConversationSidebarNav } from './conversation_sidebar_nav';
 

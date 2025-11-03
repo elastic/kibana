@@ -10,10 +10,10 @@ import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useNavigation } from '../../../hooks/use_navigation';
-import { appPaths } from '../../../utils/app_paths';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useConversationId } from '../../../../context/conversation/use_conversation_id';
+import { useNavigation } from '../../../../hooks/use_navigation';
+import { appPaths } from '../../../../utils/app_paths';
+import { useConversationContext } from '../../../../context/conversation/conversation_context';
 
 interface ConversationItemProps {
   conversation: ConversationWithoutRounds;

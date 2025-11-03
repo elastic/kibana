@@ -15,7 +15,7 @@ import {
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
 import { ConversationActions } from './conversation_actions';
 import { ConversationTitle } from '../conversation_title';
-import { ConversationSidebarToggle } from '../conversation_sidebar/conversation_sidebar_toggle';
+import { ConversationSidebarToggle } from './conversation_sidebar/conversation_sidebar_toggle';
 
 export interface FullScreenConversationHeaderProps {
   sidebar: {

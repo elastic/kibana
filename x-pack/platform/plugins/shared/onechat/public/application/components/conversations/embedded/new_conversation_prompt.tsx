@@ -16,7 +16,6 @@ const fullHeightStyles = css`
 export const EmbeddedNewConversationPrompt: React.FC<{
   welcomeText: React.ReactNode;
   inputForm: React.ReactNode;
-  navigationCards?: React.ReactNode;
 }> = ({ welcomeText, inputForm }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="l" css={fullHeightStyles} justifyContent="center">

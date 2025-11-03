@@ -9,8 +9,8 @@ import { EuiListGroup, EuiListGroupItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useNavigation } from '../../../hooks/use_navigation';
-import { appPaths } from '../../../utils/app_paths';
+import { useNavigation } from '../../../../hooks/use_navigation';
+import { appPaths } from '../../../../utils/app_paths';
 
 export const ConversationSidebarNav: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();

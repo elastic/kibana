@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
-import { groupConversationsByTime } from '../../../utils/group_conversations';
+import { groupConversationsByTime } from '../../../../utils/group_conversations';
 import { ConversationItem } from './conversation_item';
 import { NoConversationsPrompt } from './no_conversations_prompt';
 
