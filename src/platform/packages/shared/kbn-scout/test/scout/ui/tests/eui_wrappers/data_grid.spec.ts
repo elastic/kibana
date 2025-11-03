@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect } from '../../../../src/playwright';
-import { EuiDataGridWrapper } from '../../../../src/playwright/eui_components';
-import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
+import { test, expect } from '../../../../../src/playwright';
+import { EuiDataGridWrapper } from '../../../../../src/playwright/eui_components';
+import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiDataGrid', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`data grid, run`, async ({ page, log }) => {

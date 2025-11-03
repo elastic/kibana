@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, expect } from '../../../src/playwright';
+import { apiTest, expect } from '../../../../../src/playwright';
 
 apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess'] }, () => {
   let integrationName: string;
