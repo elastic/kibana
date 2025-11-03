@@ -319,12 +319,14 @@ describe('extractMigrationInfo', () => {
     });
 
     it('returns the correct values for schemas', () => {
+      const typeSchemaV1 = schema.object({ title: schema.string() });
       const type = createType({
         modelVersions: {
           1: {
             changes: [],
             schemas: {
               forwardCompatibility: jest.fn(),
+              create: typeSchemaV1,
             },
           },
           2: {
@@ -336,7 +338,7 @@ describe('extractMigrationInfo', () => {
       const output = extractMigrationInfo(type);
       expect(output.modelVersions[0].schemas).toEqual({
         forwardCompatibility: '895cafb0656e467454fa1448312a7ebba48f7a12',
-        create: false,
+        create: '023e5360d8802d04f03ee8bece0ab6d0035a329e',
       });
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,
