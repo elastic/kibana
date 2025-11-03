@@ -3590,6 +3590,7 @@ Object {
                 },
                 "channelNames": Object {
                   "items": Object {
+                    "maxLength": 200,
                     "type": "string",
                   },
                   "maxItems": 1,
@@ -3638,6 +3639,7 @@ Object {
                 },
                 "channelNames": Object {
                   "items": Object {
+                    "maxLength": 200,
                     "type": "string",
                   },
                   "maxItems": 1,
