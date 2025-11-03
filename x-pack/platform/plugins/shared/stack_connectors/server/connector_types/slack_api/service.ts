@@ -213,9 +213,6 @@ export const createExternalService = (
         allowedList: allowedChannelNames,
       });
 
-      // For now, we only allow one channel but we wanted
-      // to have a array in case we need to allow multiple channels
-      // in one actions
       return channelNames[0];
     }
 

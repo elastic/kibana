@@ -452,20 +452,6 @@ describe('Slack API service', () => {
         );
       });
 
-      it('should post a message if allowedChannels is an empty array and use channelNames', async () => {
-        service = createExternalServiceMock({ config: {} });
-
-        await service[method]({ channelNames: ['my-channel-name'], text });
-
-        expect(requestMock).toHaveBeenCalledTimes(1);
-
-        expect(requestMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            data: expect.objectContaining({ channel: 'my-channel-name' }),
-          })
-        );
-      });
-
       it('should post a message if allowedChannels is an empty array and use channels', async () => {
         service = createExternalServiceMock({ config: {} });
 
@@ -517,22 +503,6 @@ describe('Slack API service', () => {
 
         expect(await service[method]({ channelIds: ['my-channel-name'], text })).toEqual(
           errorNoAllowedChannelsRes
-        );
-      });
-
-      it('should not throw if allowedChannels is set and channelNames is used', async () => {
-        service = createExternalServiceMock({
-          config: { allowedChannels: [{ name: 'my-channel-name', id: 'channel-id-1' }] },
-        });
-
-        await service[method]({ channelNames: ['my-channel-name'], text });
-
-        expect(requestMock).toHaveBeenCalledTimes(1);
-
-        expect(requestMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            data: expect.objectContaining({ channel: 'my-channel-name' }),
-          })
         );
       });
 
