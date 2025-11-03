@@ -19,6 +19,35 @@ import { getChatSpan } from './get_chat_span';
 import { getExecuteToolSpan } from './get_execute_tool_span';
 import { PhoenixProtoExporter } from './phoenix_otlp_exporter';
 
+/**
+ * Ensure the base URL is treated as a directory (trailing '/'),
+ * so that relative paths are resolved under any existing path prefix (e.g. '/phoenix/').
+ */
+function getDirectoryBaseUrl(url: URL): URL {
+  if (!url.pathname.endsWith('/')) {
+    const clone = new URL(url);
+    clone.pathname = `${clone.pathname}/`;
+    return clone;
+  }
+  return url;
+}
+
+/**
+ * Resolve a path (may start with '/') within the base URL's pathname,
+ * preserving the base URL's path prefix. Supports optional query string.
+ */
+function resolvePathWithinBasePrefix(base: URL, path: string): URL {
+  const [pathPart, searchPart] = path.split('?');
+  const relative = pathPart.startsWith('/') ? pathPart.slice(1) : pathPart;
+  const result = new URL(base.origin);
+  const basePath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
+  result.pathname = `${basePath}${relative}`;
+  if (searchPart) {
+    result.search = `?${searchPart}`;
+  }
+  return result;
+}
+
 export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
   constructor(private readonly config: InferenceTracingPhoenixExportConfig) {
@@ -38,9 +67,11 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
         return undefined;
       }
 
-      const base = new URL(config.public_url);
+      const base = getDirectoryBaseUrl(new URL(config.public_url));
 
-      const { data } = await fetch(new URL('/v1/projects', base), { headers }).then(
+      const { data } = await fetch(resolvePathWithinBasePrefix(base, '/v1/projects'), {
+        headers,
+      }).then(
         (response) =>
           response.json() as Promise<{
             data: Array<{ id: string; name: string; description: string }>;
@@ -80,9 +111,10 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
           return;
         }
 
-        const url = new URL(
-          `/projects/${projectId}/traces/${traceId}?selected`,
-          new URL(this.config.public_url)
+        const publicBase = getDirectoryBaseUrl(new URL(this.config.public_url));
+        const url = resolvePathWithinBasePrefix(
+          publicBase,
+          `/projects/${projectId}/traces/${traceId}?selected`
         );
         diag.info(`View trace at ${url.toString()}`);
       });
