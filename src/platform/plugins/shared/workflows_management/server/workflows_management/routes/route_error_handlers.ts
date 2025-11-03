@@ -15,6 +15,7 @@ import {
 import {
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
+  isWorkflowConflictError,
   isWorkflowValidationError,
 } from '../../../common/lib/errors';
 
@@ -30,7 +31,6 @@ export function handleRouteError(
   error: Error,
   options?: { checkNotFound?: boolean }
 ) {
-  // Check for specific error types that need special handling
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
     return response.notFound();
   }
@@ -58,6 +58,12 @@ export function handleRouteError(
   }
 
   // Generic error handler
+  if (isWorkflowConflictError(error)) {
+    return response.conflict({
+      body: error.toJSON(),
+    });
+  }
+
   return response.customError({
     statusCode: 500,
     body: {
