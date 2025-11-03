@@ -100,12 +100,7 @@ export const DashboardViewport = () => {
             panelProps={{ hideLoader: true }}
             type={CONTROLS_GROUP_TYPE}
             maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
-            getParentApi={() => {
-              return {
-                ...dashboardApi,
-                reload$: dashboardInternalApi.controlGroupReload$,
-              };
-            }}
+            getParentApi={() => dashboardApi}
             onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
           />
         </div>
