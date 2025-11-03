@@ -5,146 +5,32 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useEntityAnalyticsRoutes } from '../../../api/api';
-import { useConfigureSORiskEngineMutation } from '../../../api/hooks/use_configure_risk_engine_saved_object';
-import * as i18n from '../../../translations';
-
-export interface RiskScoreConfiguration {
-  includeClosedAlerts: boolean;
-  range: {
-    start: string;
-    end: string;
-  };
-  enableResetToZero: boolean;
-}
-
-const settingsAreEqual = (
-  first?: Partial<RiskScoreConfiguration>,
-  second?: Partial<RiskScoreConfiguration>
-) => {
-  return (
-    first?.includeClosedAlerts === second?.includeClosedAlerts &&
-    first?.range?.start === second?.range?.start &&
-    first?.range?.end === second?.range?.end &&
-    first?.enableResetToZero === second?.enableResetToZero
-  );
-};
-
-const riskEngineSettingsWithDefaults = (riskEngineSettings?: Partial<RiskScoreConfiguration>) => ({
-  includeClosedAlerts: riskEngineSettings?.includeClosedAlerts ?? false,
-  range: {
-    start: riskEngineSettings?.range?.start ?? 'now-30d',
-    end: riskEngineSettings?.range?.end ?? 'now',
-  },
-  enableResetToZero:
-    riskEngineSettings?.enableResetToZero === undefined
-      ? true
-      : riskEngineSettings.enableResetToZero,
-});
-
-const FETCH_RISK_ENGINE_SETTINGS = ['GET', 'FETCH_RISK_ENGINE_SETTINGS'];
-
-export const useInvalidateRiskEngineSettingsQuery = () => {
-  const queryClient = useQueryClient();
-
-  return useCallback(async () => {
-    await queryClient.invalidateQueries(FETCH_RISK_ENGINE_SETTINGS, {
-      refetchType: 'active',
-    });
-  }, [queryClient]);
-};
+import { useRiskEngineSettingsQuery } from './use_risk_engine_settings_query';
+import { useRiskEngineSettingsMutations } from './use_risk_engine_settings_mutations';
+import { useRiskEngineSettingsState } from './use_risk_engine_settings_state';
 
 export const useConfigurableRiskEngineSettings = () => {
-  const { addSuccess } = useAppToasts();
-
-  const { fetchRiskEngineSettings } = useEntityAnalyticsRoutes();
-
-  const [selectedRiskEngineSettings, setSelectedRiskEngineSettings] = useState<
-    RiskScoreConfiguration | undefined
-  >(undefined);
-
-  const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
+  const { savedRiskEngineSettings, isLoadingRiskEngineSettings, isError } =
+    useRiskEngineSettingsQuery();
 
   const {
-    data: savedRiskEngineSettings,
-    isLoading: isLoadingRiskEngineSettings,
-    isError,
-  } = useQuery(
-    FETCH_RISK_ENGINE_SETTINGS,
-    async () => {
-      const riskEngineSettings = await fetchRiskEngineSettings();
-      setSelectedRiskEngineSettings((currentValue) => {
-        return currentValue ?? riskEngineSettingsWithDefaults(riskEngineSettings);
-      });
-      return riskEngineSettings;
-    },
-    { retry: false, refetchOnWindowFocus: false }
-  );
-
-  useEffect(() => {
-    // An error case, where we set the selection to default values, is a legitimate and expected part of this flow, particularly when a configuration has never been saved.
-    if (isError) {
-      setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults());
-    }
-  }, [isError]);
-
-  const resetSelectedSettings = () => {
-    setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults(savedRiskEngineSettings));
-  };
-
-  const { mutateAsync: mutateRiskEngineSettingsAsync } = useConfigureSORiskEngineMutation();
-
-  const saveSelectedSettingsMutation = useMutation(async () => {
-    if (selectedRiskEngineSettings) {
-      await mutateRiskEngineSettingsAsync(
-        {
-          includeClosedAlerts: selectedRiskEngineSettings.includeClosedAlerts,
-          range: {
-            start: selectedRiskEngineSettings.range.start,
-            end: selectedRiskEngineSettings.range.end,
-          },
-          enableResetToZero: selectedRiskEngineSettings.enableResetToZero,
-        },
-        {
-          onSuccess: () => {
-            addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, {
-              toastLifeTimeMs: 5000,
-            });
-          },
-        }
-      );
-      await invalidateRiskEngineSettingsQuery();
-    }
-  });
-
-  const setSelectedDateSetting = ({ start, end }: { start: string; end: string }) => {
-    setSelectedRiskEngineSettings((prevState) => {
-      if (!prevState) return undefined;
-      return { ...prevState, ...{ range: { start, end } } };
-    });
-  };
-
-  const toggleSelectedClosedAlertsSetting = () => {
-    setSelectedRiskEngineSettings((prevState) => {
-      if (!prevState) return undefined;
-      return { ...prevState, ...{ includeClosedAlerts: !prevState.includeClosedAlerts } };
-    });
-  };
-
-  const selectedSettingsMatchSavedSettings = settingsAreEqual(
     selectedRiskEngineSettings,
-    riskEngineSettingsWithDefaults(savedRiskEngineSettings)
-  );
+    selectedSettingsMatchSavedSettings,
+    resetSelectedSettings,
+    setSelectedDateSetting,
+    toggleSelectedClosedAlertsSetting,
+    toggleScoreRetainment,
+    setAlertFilters,
+    getUIAlertFilters,
+    waitingForSaveRefetch,
+    preSaveFilterCount,
+  } = useRiskEngineSettingsState(savedRiskEngineSettings, isLoadingRiskEngineSettings, isError);
 
-  const toggleScoreRetainment = () => {
-    setSelectedRiskEngineSettings((prevState) => {
-      if (!prevState) return undefined;
-      return { ...prevState, ...{ enableResetToZero: !prevState.enableResetToZero } };
-    });
-  };
+  const { saveSelectedSettingsMutation } = useRiskEngineSettingsMutations(
+    savedRiskEngineSettings,
+    waitingForSaveRefetch,
+    preSaveFilterCount
+  );
 
   return {
     savedRiskEngineSettings,
@@ -156,5 +42,14 @@ export const useConfigurableRiskEngineSettings = () => {
     saveSelectedSettingsMutation,
     isLoadingRiskEngineSettings,
     toggleScoreRetainment,
+    setAlertFilters,
+    getUIAlertFilters,
   };
 };
+
+// Re-export the individual hooks for direct use if needed
+export { useRiskEngineSettingsQuery } from './use_risk_engine_settings_query';
+export { useRiskEngineSettingsMutations } from './use_risk_engine_settings_mutations';
+export { useRiskEngineSettingsState } from './use_risk_engine_settings_state';
+export { useInvalidateRiskEngineSettingsQuery } from './use_risk_engine_settings_query';
+export type { RiskScoreConfiguration } from '../common';

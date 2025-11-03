@@ -16,7 +16,7 @@ import type { Dataset } from '..';
 import { RuleDataWriterInitializationError } from '..';
 import { resourceInstallerMock } from '../rule_data_plugin_service/resource_installer.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { createNoMatchingIndicesError } from '@kbn/data-views-plugin/server/fetcher/lib/errors';
 import type { ElasticsearchClient } from '@kbn/core/server';
 

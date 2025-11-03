@@ -17,6 +17,9 @@ interface ReportScheduleIndicatorProps {
 }
 
 const translations = {
+  [Frequency.HOURLY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.hourly', {
+    defaultMessage: 'Hourly',
+  }),
   [Frequency.DAILY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.daily', {
     defaultMessage: 'Daily',
   }),
@@ -33,6 +36,7 @@ export const ReportScheduleIndicator: FC<ReportScheduleIndicatorProps> = ({ sche
     return null;
   }
 
+  // @ts-ignore to be fixed by https://github.com/elastic/kibana/pull/234121
   const statusText = translations[schedule.rrule.freq];
 
   if (!statusText) {

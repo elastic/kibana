@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isWhereBlock } from '@kbn/streamlang';
 import React from 'react';
 import { useSelector } from '@xstate5/react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { CreateStepButton } from '../../../create_step_button';
 import { StepContextMenu } from '../context_menu';
 import { BlockDisableOverlay } from '../block_disable_overlay';
@@ -25,6 +26,10 @@ export const WhereBlockSummary = ({
   isLastStepInLevel,
 }: StepConfigurationProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+
+  const handleTitleClick = () => {
+    stepRef.send({ type: 'step.edit' });
+  };
 
   if (!isWhereBlock(step)) return null;
 
@@ -47,7 +52,37 @@ export const WhereBlockSummary = ({
           overflow: hidden;
         `}
       >
-        <ConditionDisplay condition={step.where} showKeyword={true} keyword="WHERE" />
+        <ConditionDisplay
+          condition={step.where}
+          showKeyword={true}
+          keyword="WHERE"
+          keywordWrapper={(children) => (
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'xpack.streams.streamDetailEnrichment.whereBlockSummary.editConditionTooltip',
+                {
+                  defaultMessage: 'Edit condition',
+                }
+              )}
+            >
+              <EuiButtonEmpty
+                onClick={handleTitleClick}
+                color="text"
+                size="xs"
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailEnrichment.whereBlockSummary.editConditionLabel',
+                  {
+                    defaultMessage: 'Edit condition',
+                  }
+                )}
+                data-test-subj="streamsAppDetailEnrichmentConditionTitleEditButton"
+              >
+                {children}
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          )}
+        />
       </EuiFlexItem>
 
       <EuiFlexItem

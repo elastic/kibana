@@ -39,13 +39,12 @@ interface SignificantFieldValue {
 }
 
 export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRateAnalysisProps) {
-  const {
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-    uiSettings,
-  } = services;
+  const { observabilityAIAssistant, uiSettings } = services;
+
+  const ObservabilityAIAssistantContextualInsight =
+    observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
+  const getContextualInsightMessages = observabilityAIAssistant?.getContextualInsightMessages;
+
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
     | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }

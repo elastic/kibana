@@ -61,7 +61,7 @@ describe('Search service', () => {
       } as unknown as SearchServiceSetupDependencies);
       data = searchService.start(mockCoreStart, {
         fieldFormats: {} as FieldFormatsStart,
-        indexPatterns: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         inspector: {} as InspectorStartContract,
         screenshotMode: screenshotModePluginMock.createStartContract(),
         scriptedFieldsEnabled: true,

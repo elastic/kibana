@@ -192,6 +192,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 1,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 0,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 0,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 0,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -232,6 +254,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -314,6 +337,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 1,
             disabled: 0,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 0,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 0,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 0,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -354,6 +399,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -436,6 +482,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 1,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 1,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 1,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 1,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -476,6 +544,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -558,6 +627,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 1,
             disabled: 0,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 1,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 1,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 1,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -570,7 +661,7 @@ describe('Detections Usage and Metrics', () => {
       savedObjectsClient.find.mockResolvedValueOnce(
         getMockRuleSearchResponse(
           true /* immutable (elastic) */,
-          true /* customized */,
+          false /* customized */,
           false /* enabled */
         )
       );
@@ -598,6 +689,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -609,7 +701,7 @@ describe('Detections Usage and Metrics', () => {
               cases_count_total: 1,
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
-              is_customized: true,
+              is_customized: false,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -660,6 +752,20 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
             elastic_customized_total: {
+              alerts: 0,
+              cases: 0,
+              disabled: 0,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
+              response_actions: initialResponseActionsUsage,
+            },
+            elastic_noncustomized_total: {
               alerts: 3400,
               cases: 1,
               disabled: 1,
@@ -679,6 +785,28 @@ describe('Detections Usage and Metrics', () => {
             customized: 0,
             enabled: 0,
             disabled: 0,
+          },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 0,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 0,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 0,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
           },
         },
       });
@@ -720,6 +848,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -802,6 +931,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 0,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 0,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 0,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 0,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -842,6 +993,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -924,6 +1076,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 0,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 1,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 1,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 1,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -964,6 +1138,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -1046,6 +1221,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 0,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 1,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 1,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 1,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -1127,6 +1324,28 @@ describe('Detections Usage and Metrics', () => {
             },
           },
           elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+          elastic_detection_rule_customization_status: {
+            name: 0,
+            description: 0,
+            risk_score: 0,
+            severity: 0,
+            timeline_id: 0,
+            note: 0,
+            investigation_fields: 0,
+            tags: 0,
+            interval: 0,
+            from: 0,
+            setup: 0,
+            query: 0,
+            index: 0,
+            data_view_id: 0,
+            filters: 0,
+            alert_suppression: 0,
+            threshold: 0,
+            threat_query: 0,
+            anomaly_threshold: 0,
+            new_terms_fields: 0,
+          },
         },
       });
     });
@@ -1247,6 +1466,28 @@ describe('Detections Usage and Metrics', () => {
             },
           },
           elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+          elastic_detection_rule_customization_status: {
+            name: 0,
+            description: 0,
+            risk_score: 0,
+            severity: 0,
+            timeline_id: 0,
+            note: 0,
+            investigation_fields: 0,
+            tags: 0,
+            interval: 0,
+            from: 0,
+            setup: 0,
+            query: 0,
+            index: 0,
+            data_view_id: 0,
+            filters: 0,
+            alert_suppression: 0,
+            threshold: 0,
+            threat_query: 0,
+            anomaly_threshold: 0,
+            new_terms_fields: 0,
+          },
         },
       });
     });

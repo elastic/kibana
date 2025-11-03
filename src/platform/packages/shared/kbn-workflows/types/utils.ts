@@ -8,6 +8,13 @@
  */
 
 import type {
+  ConnectorContractUnion,
+  DynamicConnectorContract,
+  EnhancedInternalConnectorContract,
+  EsWorkflow,
+} from './v1';
+import { ExecutionStatus } from './v1';
+import type {
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
@@ -22,7 +29,6 @@ import type {
   WorkflowYaml,
 } from '../spec/schema';
 import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
-import { type EsWorkflow, ExecutionStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -70,3 +76,11 @@ export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
   BuiltInStepTypes.includes(type as BuiltInStepType);
 export const isTriggerType = (type: string): type is TriggerType =>
   TriggerTypes.includes(type as TriggerType);
+
+export const isDynamicConnector = (
+  connector: ConnectorContractUnion
+): connector is DynamicConnectorContract => 'actionTypeId' in connector;
+
+export const isEnhancedInternalConnector = (
+  connector: ConnectorContractUnion
+): connector is EnhancedInternalConnectorContract => 'examples' in connector;

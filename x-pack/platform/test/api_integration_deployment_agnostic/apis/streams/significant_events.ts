@@ -31,9 +31,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Significant Events', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/237572
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -70,12 +67,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           ...emptyAssets,
         }).then((response) => expect(response).to.have.property('acknowledged', true));
+      });
 
-        /**
-         * Rule APIs forbid deleting internal rules types.
-         * So we delete the rules directly using ES.
-         */
-        await alertingApi.deleteAllRulesEs();
+      afterEach(async () => {
+        await deleteStream(apiClient, STREAM_NAME);
       });
 
       it('updates the queries', async () => {
@@ -250,6 +245,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         streamDefinition = await getStream(apiClient, indexName);
+
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
@@ -258,6 +254,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await clean();
+        await deleteStream(apiClient, indexName);
       });
     });
   });

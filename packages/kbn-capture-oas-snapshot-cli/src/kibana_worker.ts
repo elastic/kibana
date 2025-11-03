@@ -9,18 +9,22 @@
 
 import {
   createRootWithCorePlugins,
-  createTestServerlessInstances,
+  createServerlessKibana,
 } from '@kbn/core-test-helpers-kbn-server';
 import { set } from '@kbn/safer-lodash-set';
+import type { Root } from '@kbn/core-root-server-internal';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
-import { buildFlavourEnvArgName } from './common';
+import { buildFlavourEnvArgName, filtersJsonEnvArgName } from './common';
 
-export type Result = 'ready';
+export type Result = string;
 
 (async () => {
   if (!process.send) {
     throw new Error('worker must be run in a node.js fork');
   }
+  const filtersString = process.env[filtersJsonEnvArgName];
+  if (!filtersString) throw new Error(`env arg ${filtersJsonEnvArgName} must be provided`);
+  const filters = JSON.parse(filtersString);
   const buildFlavour = process.env[buildFlavourEnvArgName];
   if (!buildFlavour) throw new Error(`env arg ${buildFlavourEnvArgName} must be provided`);
 
@@ -52,25 +56,25 @@ export type Result = 'ready';
     watch: false,
   };
 
+  let root: Root;
+
+  set(settings, 'migrations.skip', true);
+  set(settings, 'elasticsearch.skipStartupConnectionCheck', true);
+
   if (serverless) {
     // Satisfy spaces config for serverless:
     set(settings, 'xpack.spaces.allowFeatureVisibility', false);
     set(settings, 'xpack.spaces.allowSolutionVisibility', false);
-    const { startKibana } = createTestServerlessInstances({
-      kibana: { settings, cliArgs },
-    });
-    await startKibana();
+    root = createServerlessKibana(settings, cliArgs);
   } else {
-    const root = createRootWithCorePlugins(settings, cliArgs);
-    await root.preboot();
-    await root.setup();
-    await root.start();
+    root = createRootWithCorePlugins(settings, cliArgs);
   }
-
-  const result: Result = 'ready';
-
-  process.send(result);
+  await root.preboot();
+  await root.setup();
+  const { http } = await root.start();
+  const oas = await http.generateOas({ baseUrl: 'http://localhost:5622', filters });
+  process.send(JSON.stringify(oas));
 })().catch((error) => {
-  process.stderr.write(`UNHANDLED ERROR: ${error.stack}`);
+  process.stderr.write(`UNHANDLED ERROR: ${error}`);
   process.exit(1);
 });

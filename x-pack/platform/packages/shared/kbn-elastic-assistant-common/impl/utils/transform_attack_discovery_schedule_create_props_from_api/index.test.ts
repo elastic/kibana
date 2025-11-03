@@ -50,6 +50,20 @@ describe('transformAttackDiscoveryScheduleCreatePropsFromApi', () => {
           throttle: '5m',
         },
       },
+      {
+        action_type_id: '.cases',
+        id: 'system-connector-.cases',
+        params: {
+          subAction: 'run',
+          subActionParams: {
+            timeWindow: '7d',
+            reopenClosedCases: false,
+            groupingBy: [],
+            templateId: null,
+          },
+        },
+        uuid: '2c749fe6-9ae0-4518-98c6-02add52a1fa6',
+      },
     ],
   };
 
@@ -96,6 +110,20 @@ describe('transformAttackDiscoveryScheduleCreatePropsFromApi', () => {
             notifyWhen: 'onActiveAlert',
             throttle: '5m',
           },
+        },
+        {
+          actionTypeId: '.cases',
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              groupingBy: [],
+              reopenClosedCases: false,
+              templateId: null,
+              timeWindow: '7d',
+            },
+          },
+          uuid: '2c749fe6-9ae0-4518-98c6-02add52a1fa6',
         },
       ],
     });
@@ -174,7 +202,17 @@ describe('transformAttackDiscoveryScheduleCreatePropsFromApi', () => {
       createPropsWithActionWithoutFrequency
     );
 
-    expect(result.actions?.[0].frequency).toBeUndefined();
+    expect(result.actions?.[0]).toEqual({
+      actionTypeId: '.slack',
+      alertsFilter: undefined,
+      frequency: undefined,
+      group: 'default',
+      id: 'action1',
+      params: {
+        message: 'Test message',
+      },
+      uuid: undefined,
+    });
   });
 
   it('should handle actions without optional fields', () => {

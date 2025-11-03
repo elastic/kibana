@@ -43,6 +43,10 @@ const defaultProps = {
       name: ['test-host'],
     },
   },
+  nonEcsData: [
+    { field: 'event.kind', value: ['signal'] },
+    { field: 'host.name', value: ['test-host'] },
+  ],
   refetch,
 };
 

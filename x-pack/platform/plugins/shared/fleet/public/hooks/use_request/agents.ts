@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type {
   GetActionStatusRequest,
@@ -23,6 +23,10 @@ import type {
   MigrateSingleAgentResponse,
   BulkMigrateAgentsRequest,
   BulkMigrateAgentsResponse,
+  ChangeAgentPrivilegeLevelRequest,
+  ChangeAgentPrivilegeLevelResponse,
+  BulkChangeAgentPrivilegeLevelRequest,
+  BulkChangeAgentPrivilegeLevelResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -420,5 +424,23 @@ export function sendBulkMigrateAgents(options: BulkMigrateAgentsRequest['body'])
       enrollment_token: options.enrollment_token,
       settings: options.settings ?? {},
     },
+  });
+}
+
+export function sendChangeAgentPrivilegeLevel(request: ChangeAgentPrivilegeLevelRequest) {
+  return sendRequestForRq<ChangeAgentPrivilegeLevelResponse>({
+    path: agentRouteService.postChangeAgentPrivilegeLevel(request.agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: request.body,
+  });
+}
+
+export function sendBulkChangeAgentPrivilegeLevel(request: BulkChangeAgentPrivilegeLevelRequest) {
+  return sendRequestForRq<BulkChangeAgentPrivilegeLevelResponse>({
+    path: agentRouteService.postBulkChangeAgentPrivilegeLevel(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: request.body,
   });
 }

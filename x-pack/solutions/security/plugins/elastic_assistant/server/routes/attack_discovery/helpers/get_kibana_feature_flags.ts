@@ -20,7 +20,7 @@ export const getKibanaFeatureFlags = async (
 
   const attackDiscoveryPublicApiEnabled = await featureFlags.getBooleanValue(
     ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG,
-    false
+    true
   );
 
   return {

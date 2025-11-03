@@ -345,6 +345,7 @@ export class ChromeService {
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
       featureFlags,
+      uiSettings,
     });
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
@@ -405,9 +406,8 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
-    const setProjectName = (projectName: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectName(projectName);
+    const setKibanaName = (kibanaName: string) => {
+      projectNavigation.setKibanaName(kibanaName);
     };
 
     const setIsSideNavCollapsed = (isCollapsed: boolean) => {
@@ -487,6 +487,7 @@ export class ChromeService {
     const loadingCount$ = http.getLoadingCount$();
     const recentlyAccessed$ = recentlyAccessed.get$();
     const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
+    const feedbackUrlParams$ = projectNavigation.getFeedbackUrlParams$();
 
     const navProps: SideNavV2NavigationProps = {
       basePath: http.basePath,
@@ -502,6 +503,7 @@ export class ChromeService {
       dataTestSubj$: activeDataTestSubj$,
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       navigationTourManager: projectNavigation.tourManager,
+      feedbackUrlParams$,
     };
 
     const getProjectHeader = ({
@@ -786,7 +788,8 @@ export class ChromeService {
       project: {
         setHome: setProjectHome,
         setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
-        setProjectName,
+        setFeedbackUrlParams: projectNavigation.setFeedbackUrlParams.bind(projectNavigation),
+        setKibanaName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setBreadcrumbs: setProjectBreadcrumbs,

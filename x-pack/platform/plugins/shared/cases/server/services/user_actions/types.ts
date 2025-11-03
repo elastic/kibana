@@ -21,7 +21,6 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-  CaseSettings,
   CaseSeverity,
   CaseStatuses,
   User,
@@ -69,7 +68,7 @@ export interface BuilderParameters {
     };
   };
   settings: {
-    parameters: { payload: { settings: CaseSettings } };
+    parameters: { payload: { settings: { syncAlerts?: boolean; extractObservables?: boolean } } };
   };
   comment: {
     parameters: {
@@ -306,6 +305,11 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
   originalValue: T[];
   newValue: T[];
+}
+
+export interface TypedUserActionItem<T> extends GetUserActionItemByDifference {
+  originalValue: T;
+  newValue: T;
 }
 
 export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (

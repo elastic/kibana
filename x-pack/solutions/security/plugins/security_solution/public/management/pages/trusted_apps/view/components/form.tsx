@@ -17,11 +17,13 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiSuperSelect,
   EuiTextArea,
   EuiText,
   EuiTitle,
   EuiSpacer,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
@@ -46,6 +48,7 @@ import {
 } from '@kbn/securitysolution-exception-list-components';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useCanAssignArtifactPerPolicy, useGetUpdatedTags } from '../../../../hooks/artifacts';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
@@ -78,6 +81,8 @@ import {
   SELECT_OS_LABEL,
   USING_ADVANCED_MODE,
   USING_ADVANCED_MODE_DESCRIPTION,
+  PROCESS_DESCENDANTS_TRUSTED_APP,
+  TRUSTED_APPLICATIONS,
 } from '../translations';
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
@@ -91,8 +96,15 @@ import {
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
-import { isAdvancedModeEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
-import { ADVANCED_MODE_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import {
+  isAdvancedModeEnabled,
+  isProcessDescendantsEnabled,
+} from '../../../../../../common/endpoint/service/artifacts/utils';
+import {
+  ADVANCED_MODE_TAG,
+  PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { TrustedAppsApiClient } from '../../service';
 import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
@@ -146,7 +158,7 @@ const addResultToValidation = (
   validation.result[field]!.isInvalid = true;
 };
 
-const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
+export const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
   let isValid: ValidationResult['isValid'] = true;
   const validation: ValidationResult = {
     isValid,
@@ -170,7 +182,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
   if (
     isAdvancedModeEnabled(values) &&
     (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
-      (e) => e.value === '' || !e.value.length
+      (e) => e.type !== 'nested' && (e.value === '' || !e.value.length)
     )
   ) {
     isValid = false;
@@ -285,6 +297,9 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode, error: submitError }) => {
     const isTAAdvancedModeFeatureFlagEnabled =
       useIsExperimentalFeatureEnabled('trustedAppsAdvancedMode');
+    const isProcessDescendantsFeatureForTrustedAppsEnabled = useIsExperimentalFeatureEnabled(
+      'filterProcessDescendantsForTrustedAppsEnabled'
+    );
     const getTestId = useTestIdGenerator('trustedApps-form');
     const [visited, setVisited] = useState<
       Partial<{
@@ -301,6 +316,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const [lastAdvancedFormConditions, setLastAdvancedFormConditions] = useState<
       ArtifactFormComponentProps['item']['entries']
     >(isFormAdvancedMode ? item.entries : []);
+    const isProcessDescendantsSelected = useMemo(
+      () => isProcessDescendantsEnabled(item, TRUSTED_PROCESS_DESCENDANTS_TAG),
+      [item]
+    );
 
     // Combine related state into a single object to reduce re-renders
     const [conditionsState, setConditionsState] = useState({
@@ -674,6 +693,87 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [autocompleteSuggestions, getTestId, http, indexPatterns, trustedApp, handleOnBuilderChange]
     );
 
+    const handleFilterTypeOnChange = useCallback(
+      (id: string) => {
+        const newTagsForDescendants = id === 'descendants' ? [TRUSTED_PROCESS_DESCENDANTS_TAG] : [];
+        const tags = getTagsUpdatedBy('trustedProcessDescendants', newTagsForDescendants);
+        processChanged({ ...item, tags });
+        if (!hasFormChanged) setHasFormChanged(true);
+      },
+      [getTagsUpdatedBy, hasFormChanged, processChanged, item]
+    );
+
+    const filterTypeOptions = useMemo(
+      () => [
+        {
+          id: 'events',
+          label: <EuiText size="s">{TRUSTED_APPLICATIONS}</EuiText>,
+          iconType: isProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
+          'data-test-subj': 'trustedApps-filterEventsButton',
+        },
+        {
+          id: 'descendants',
+          label: (
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiText size="s">{PROCESS_DESCENDANTS_TRUSTED_APP}</EuiText>
+              <EuiIconTip
+                content={
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.securitySolution.trustedApps.filterProcessDescendants.tooltip"
+                        defaultMessage="When enabled, all child processes of a trusted parent process also become Trusted Applications. Supported by Elastic Agent v9.2+."
+                      />
+                    </p>
+                  </EuiText>
+                }
+                data-test-subj="trustedAppsProcessDescendantsTooltip"
+                iconProps={{ 'data-test-subj': 'trustedAppsProcessDescendantsTooltipIcon' }}
+                type="info"
+              />
+            </EuiFlexGroup>
+          ),
+          iconType: isProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
+          'data-test-subj': 'trustedApps-filterProcessDescendantsButton',
+        },
+      ],
+      [isProcessDescendantsSelected]
+    );
+
+    const filterTypeSubsection = useMemo(() => {
+      if (!isProcessDescendantsFeatureForTrustedAppsEnabled) return null;
+      return (
+        <>
+          <EuiButtonGroup
+            legend="Events or Process descendants selector"
+            color="primary"
+            onChange={handleFilterTypeOnChange}
+            options={filterTypeOptions}
+            idSelected={isProcessDescendantsSelected ? 'descendants' : 'events'}
+            data-test-subj="trustedApps-processDescendantsSelector"
+          />
+          <EuiSpacer size="m" />
+          {isProcessDescendantsSelected && (
+            <>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedApps.filterProcessDescendants.additionalConditionDescription"
+                  defaultMessage="Additional condition added:"
+                />
+              </EuiText>
+              <code>{PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT}</code>
+              <EuiSpacer size="m" />
+            </>
+          )}
+        </>
+      );
+    }, [
+      isProcessDescendantsFeatureForTrustedAppsEnabled,
+      handleFilterTypeOnChange,
+      filterTypeOptions,
+      isProcessDescendantsSelected,
+    ]);
+
     useEffect(() => {
       processChanged();
     }, [processChanged]);
@@ -812,6 +912,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             data-test-subj={getTestId('osSelectField')}
           />
         </EuiFormRow>
+
+        <EuiSpacer size="m" />
+        {isTAAdvancedModeFeatureFlagEnabled &&
+          isFormAdvancedMode &&
+          isProcessDescendantsFeatureForTrustedAppsEnabled &&
+          filterTypeSubsection}
 
         <EuiFormRow
           fullWidth

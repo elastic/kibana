@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
+import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
 import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
 import type {
   IgnoredField,
@@ -244,23 +245,38 @@ export function PreviewTable({
   );
 
   const gridColumns = useMemo(() => {
-    return canonicalColumnOrder.map((column) => ({
-      id: column,
-      displayAsText: column,
-      actions:
-        Boolean(setVisibleColumns) || Boolean(setSorting)
-          ? {
-              showHide: Boolean(setVisibleColumns),
-              showMoveLeft: Boolean(setVisibleColumns),
-              showMoveRight: Boolean(setVisibleColumns),
-              showSortAsc: Boolean(setSorting),
-              showSortDesc: Boolean(setSorting),
-            }
-          : (false as false),
-      initialWidth: columnWidths[column],
-      cellActions,
-    }));
-  }, [canonicalColumnOrder, setVisibleColumns, setSorting, columnWidths, cellActions]);
+    return canonicalColumnOrder.map((column) => {
+      const columnparts = column.split('.');
+      // interlave the columnparts with a dot and a breakable non-whitespace character
+      const interleavedColumnParts = columnparts.reduce((acc, part, index) => {
+        if (index === 0) {
+          return [part];
+        }
+        return [...acc, '.', <wbr key={index} />, part];
+      }, [] as React.ReactNode[]);
+
+      return {
+        id: column,
+        display: (
+          <ColumnHeaderTruncateContainer wordBreak="normal">
+            {interleavedColumnParts}
+          </ColumnHeaderTruncateContainer>
+        ),
+        actions:
+          Boolean(setVisibleColumns) || Boolean(setSorting)
+            ? {
+                showHide: Boolean(setVisibleColumns),
+                showMoveLeft: Boolean(setVisibleColumns),
+                showMoveRight: Boolean(setVisibleColumns),
+                showSortAsc: Boolean(setSorting),
+                showSortDesc: Boolean(setSorting),
+              }
+            : (false as false),
+        initialWidth: columnWidths[column],
+        cellActions,
+      };
+    });
+  }, [cellActions, canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   return (
     <EuiDataGrid

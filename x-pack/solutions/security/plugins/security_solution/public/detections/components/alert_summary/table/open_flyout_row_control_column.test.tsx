@@ -13,7 +13,7 @@ import {
   ROW_ACTION_FLYOUT_ICON_TEST_ID,
 } from './open_flyout_row_control_column';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { IOCPanelKey } from '../../../../flyout/ai_for_soc/constants/panel_keys';
+import { EasePanelKey } from '../../../../flyout/ease/constants/panel_keys';
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -50,7 +50,7 @@ describe('OpenFlyoutRowControlColumn', () => {
 
     expect(openFlyout).toHaveBeenCalledWith({
       right: {
-        id: IOCPanelKey,
+        id: EasePanelKey,
         params: {
           id: alert._id,
           indexName: alert._index,

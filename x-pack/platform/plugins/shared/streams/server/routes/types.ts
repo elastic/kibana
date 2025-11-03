@@ -21,6 +21,7 @@ import type { StreamsClient } from '../lib/streams/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { FeatureClient } from '../lib/streams/feature/feature_client';
+import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
 
 type GetScopedClients = ({
   request,
@@ -47,6 +48,7 @@ export interface RouteDependencies {
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
+  processorSuggestions: ProcessorSuggestionsService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

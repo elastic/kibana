@@ -36,7 +36,6 @@ export default function updateSpaceTestSuite(context: DeploymentAgnosticFtrProvi
         spaceId: SPACES.DEFAULT.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
@@ -50,7 +49,6 @@ export default function updateSpaceTestSuite(context: DeploymentAgnosticFtrProvi
         spaceId: SPACES.SPACE_1.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
@@ -76,25 +74,6 @@ export default function updateSpaceTestSuite(context: DeploymentAgnosticFtrProvi
           newSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
-          },
-        },
-      });
-
-      updateTest(`superuser from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.superuser,
-        tests: {
-          alreadyExists: {
-            statusCode: 200,
-            response: expectAlreadyExistsResult,
-          },
-          defaultSpace: {
-            statusCode: 200,
-            response: expectDefaultSpaceResult,
-          },
-          newSpace: {
-            statusCode: 404,
-            response: expectNotFound,
           },
         },
       });

@@ -23,7 +23,6 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import { NavigationTour } from '@kbn/core-chrome-navigation-tour';
 import useObservable from 'react-use/lib/useObservable';
-import { RedirectNavigationAppLinks } from './redirect_app_links';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
@@ -52,11 +51,14 @@ export interface ChromeNavigationProps {
   isFeedbackBtnVisible$: Observable<boolean>;
   loadingCount$: Observable<number>;
   dataTestSubj$?: Observable<string | undefined>;
+
+  feedbackUrlParams$: Observable<URLSearchParams | undefined>;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
+  const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
 
   if (!state) {
     return null;
@@ -73,17 +75,20 @@ export const Navigation = (props: ChromeNavigationProps) => {
           props.isCollapsed ? 'collapsed' : 'expanded'
         }
       />
-      <RedirectNavigationAppLinks application={props.application}>
-        <NavigationComponent
-          items={navItems}
-          logo={logoItem}
-          sidePanelFooter={<NavigationFeedbackSnippet solutionId={solutionId} />}
-          isCollapsed={props.isCollapsed}
-          setWidth={props.setWidth}
-          activeItemId={activeItemId}
-          data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
-        />
-      </RedirectNavigationAppLinks>
+      <NavigationComponent
+        items={navItems}
+        logo={logoItem}
+        sidePanelFooter={
+          <NavigationFeedbackSnippet
+            solutionId={solutionId}
+            feedbackUrlParams={feedbackUrlParams}
+          />
+        }
+        isCollapsed={props.isCollapsed}
+        setWidth={props.setWidth}
+        activeItemId={activeItemId}
+        data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
+      />
     </>
   );
 };
@@ -96,8 +101,8 @@ const useNavigationItems = (
   props: Pick<ChromeNavigationProps, 'navigationTree$' | 'navLinks$' | 'activeNodes$' | 'basePath'>
 ): NavigationItems | null => {
   const state$ = useMemo(
-    () => combineLatest([props.navigationTree$, props.navLinks$, props.activeNodes$]),
-    [props.navigationTree$, props.navLinks$, props.activeNodes$]
+    () => combineLatest([props.navigationTree$, props.activeNodes$]),
+    [props.navigationTree$, props.activeNodes$]
   );
   const state = useObservable(state$);
 
@@ -106,8 +111,8 @@ const useNavigationItems = (
 
   const memoizedItems = useMemo(() => {
     if (!state) return null;
-    const [navigationTree, navLinks, activeNodes] = state;
-    return toNavigationItems(navigationTree, navLinks, activeNodes, panelStateManager);
+    const [navigationTree, activeNodes] = state;
+    return toNavigationItems(navigationTree, activeNodes, panelStateManager);
   }, [state, panelStateManager]);
 
   return memoizedItems;

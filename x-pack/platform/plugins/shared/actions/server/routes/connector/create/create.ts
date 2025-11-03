@@ -12,7 +12,7 @@ import type { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
-import { transformConnectorResponseV1 } from '../common_transforms';
+import { transformConnectorResponseV2 } from '../common_transforms';
 import {
   createConnectorRequestParamsSchemaV1,
   createConnectorRequestBodySchemaV1,
@@ -52,7 +52,7 @@ export const createConnectorRoute = (
           const actionsClient = (await context.actions).getActionsClient();
           const action = transformCreateConnectorBodyV1(req.body);
           const resp = await actionsClient.create({ action, options: req.params });
-          const body = transformConnectorResponseV1(resp);
+          const body = transformConnectorResponseV2(resp);
 
           return res.ok({
             body,

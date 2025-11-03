@@ -63,7 +63,6 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
-  | RENAME host.name AS ${DIMENSIONS_COLUMN}
 `.trim()
     );
   });
@@ -218,7 +217,6 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name IN ("host-1")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
-  | RENAME host.name AS ${DIMENSIONS_COLUMN}
 `.trim()
     );
   });

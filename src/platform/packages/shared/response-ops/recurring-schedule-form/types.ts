@@ -11,7 +11,7 @@ import type { Frequency, WeekdayStr, Options } from '@kbn/rrule';
 
 export type RecurrenceFrequency = Extract<
   Frequency,
-  Frequency.YEARLY | Frequency.MONTHLY | Frequency.WEEKLY | Frequency.DAILY
+  Frequency.YEARLY | Frequency.MONTHLY | Frequency.WEEKLY | Frequency.DAILY | Frequency.HOURLY
 >;
 
 export interface RecurringSchedule {

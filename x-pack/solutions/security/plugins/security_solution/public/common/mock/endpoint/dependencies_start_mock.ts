@@ -12,8 +12,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
-type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
-  indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {
+type DataMock = Omit<DataPublicStartMock, 'dataViews' | 'query'> & {
+  dataViews: Omit<DataPublicStartMock['dataViews'], 'getFieldsForWildcard'> & {
     getFieldsForWildcard: jest.Mock;
   };
   // We can't Omit (override) 'query' here because FilterManager is a class not an interface.
@@ -41,7 +41,7 @@ export interface DepsStartMock {
  */
 export const depsStartMock: () => DepsStartMock = () => {
   const dataMock: DataMock = dataPluginMock.createStartContract() as unknown as DataMock;
-  dataMock.indexPatterns.getFieldsForWildcard = jest.fn();
+  dataMock.dataViews.getFieldsForWildcard = jest.fn();
   dataMock.query.filterManager.setFilters = jest.fn();
   dataMock.query.filterManager.getUpdates$ = jest.fn(() => {
     return {

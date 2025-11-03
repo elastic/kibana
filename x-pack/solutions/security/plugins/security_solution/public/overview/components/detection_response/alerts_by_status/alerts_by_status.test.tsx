@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertsByStatus } from './alerts_by_status';
@@ -18,9 +19,9 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/lib/kibana/kibana_react');
-jest.mock('../../../../common/hooks/use_experimental_features', () => {
-  return { useIsExperimentalFeatureEnabled: jest.fn(), useEnableExperimental: () => jest.fn() };
-});
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 jest.mock('./chart_label', () => {

@@ -42,6 +42,11 @@ export interface ProcessesEntry {
 export interface GetProcessesActionOutputContent {
   code: string;
   entries: ProcessesEntry[];
+  /**
+   * The relative API path to download the output file for this response action.
+   * Only supported by some `agentType`'s
+   */
+  downloadUri?: string;
 }
 
 export interface SuspendProcessActionOutputContent {
@@ -70,6 +75,10 @@ export interface ResponseActionGetFileOutputContent {
     file_name: string;
     type: string;
   }>;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
 }
 
 export interface ResponseActionExecuteOutputContent {
@@ -91,6 +100,10 @@ export interface ResponseActionExecuteOutputContent {
    * */
   output_file_stdout_truncated: boolean;
   output_file_stderr_truncated: boolean;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
 }
 
 export interface ResponseActionScanOutputContent {
@@ -101,6 +114,10 @@ export interface ResponseActionRunScriptOutputContent {
   stdout: string;
   stderr: string;
   code: string;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
 }
 
 export interface ResponseActionCancelOutputContent {

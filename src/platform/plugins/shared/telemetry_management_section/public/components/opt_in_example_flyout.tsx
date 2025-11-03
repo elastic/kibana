@@ -90,6 +90,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     if (!hasPrivilegeToRead) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="telemetry.callout.errorUnprivilegedUserTitle"
@@ -110,6 +111,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     if (data === null) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="telemetry.callout.errorLoadingClusterStatisticsTitle"

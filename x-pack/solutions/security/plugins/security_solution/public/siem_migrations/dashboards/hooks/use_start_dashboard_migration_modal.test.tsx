@@ -69,7 +69,7 @@ describe('useStartDashboardsMigrationModal', () => {
 
     rerender();
 
-    expect(result.current.modal?.props.title).toEqual('Start dashboards migration');
+    expect(result.current.modal?.props.title).toEqual('Migrate dashboards');
   });
 
   it('should have correct title for "retry" type', () => {
