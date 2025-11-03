@@ -184,7 +184,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText
-                  size="s"
+                  size="xs"
                   color="subdued"
                   title={item.description}
                   css={css`
