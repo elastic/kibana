@@ -358,6 +358,11 @@ export function getDataStateContainer({
             abortController,
             getCurrentTab,
             onFetchRecordsComplete: async () => {
+              if (isEsqlQuery) {
+                // defer triggering chart fetching until after main request completes for ES|QL mode
+                fetchChart$.next(latestFetchDetails);
+              }
+
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
@@ -387,11 +392,6 @@ export function getDataStateContainer({
                   },
                 })
               );
-
-              if (isEsqlQuery) {
-                // defer triggering chart fetching until after main request completes for ES|QL mode
-                fetchChart$.next(latestFetchDetails);
-              }
             },
           });
 

@@ -411,26 +411,43 @@ export const useDiscoverHistogram = (
     [getModifiedVisAttributesAccessor]
   );
 
-  return {
-    setUnifiedHistogramApi,
-    services,
-    localStorageKeyPrefix: 'discover',
-    initialState: {
+  return useMemo(
+    () => ({
+      setUnifiedHistogramApi,
+      services,
+      localStorageKeyPrefix: 'discover',
+      initialState: {
+        chartHidden,
+        timeInterval,
+        topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
+        totalHitsStatus: UnifiedHistogramFetchStatus.loading,
+        totalHitsResult: undefined,
+      },
+      onFilter: histogramCustomization?.onFilter,
+      onBrushEnd: histogramCustomization?.onBrushEnd,
+      withDefaultActions: histogramCustomization?.withDefaultActions,
+      disabledActions: histogramCustomization?.disabledActions,
+      isChartLoading: isSuggestionLoading,
+      onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
+      onBreakdownFieldChange,
+      getModifiedVisAttributes, // TODO: should it be a part of fetch params?
+    }),
+    [
       chartHidden,
+      getModifiedVisAttributes,
+      histogramCustomization?.disabledActions,
+      histogramCustomization?.onBrushEnd,
+      histogramCustomization?.onFilter,
+      histogramCustomization?.withDefaultActions,
+      isEsqlMode,
+      isSuggestionLoading,
+      onBreakdownFieldChange,
+      onVisContextChanged,
+      options?.initialLayoutProps?.topPanelHeight,
+      services,
       timeInterval,
-      topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
-      totalHitsStatus: UnifiedHistogramFetchStatus.loading,
-      totalHitsResult: undefined,
-    },
-    onFilter: histogramCustomization?.onFilter,
-    onBrushEnd: histogramCustomization?.onBrushEnd,
-    withDefaultActions: histogramCustomization?.withDefaultActions,
-    disabledActions: histogramCustomization?.disabledActions,
-    isChartLoading: isSuggestionLoading,
-    onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
-    onBreakdownFieldChange,
-    getModifiedVisAttributes, // TODO: should it be a part of fetch params?
-  };
+    ]
+  );
 };
 
 // Use pairwise to diff the previous and current state (starting with undefined to ensure
