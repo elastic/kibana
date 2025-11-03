@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../../../context/conversation/embeddable_conversations_provider';
-import { Conversation } from '../conversation';
+import { EmbeddableConversation } from './conversation';
 import { EmbeddedConversationHeader } from './header';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
@@ -68,7 +68,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
           }}
           aria-label={labels.content}
         >
-          <Conversation />
+          <EmbeddableConversation />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     </EmbeddableConversationsProvider>
