@@ -19,17 +19,17 @@ import {
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { ConditionPanel } from '../../data_management/shared';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,
-} from '../../../../constants';
-import { ConditionPanel } from '../../shared';
-import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
-import { useStreamFeaturesApi } from '../../../../hooks/use_stream_features_api';
+} from '../../../constants';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { StreamFeatureDetailsFlyout } from './stream_feature_details_flyout';
 import { FeatureEventsSparkline } from './feature_events_sparkline';
 import { TableTitle } from './table_title';
-import { useAIFeatures } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
 
 export function StreamExistingFeaturesTable({

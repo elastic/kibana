@@ -24,9 +24,9 @@ import type { Streams, Feature } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { EditableConditionPanel } from '../../shared';
+import { EditableConditionPanel } from '../../data_management/shared';
 import { FeatureEventsData } from './feature_events_data';
-import { useStreamFeaturesApi } from '../../../../hooks/use_stream_features_api';
+import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 
 export const StreamFeatureDetailsFlyout = ({
   feature,
