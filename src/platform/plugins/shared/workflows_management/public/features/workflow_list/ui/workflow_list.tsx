@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
@@ -434,7 +433,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         showStart={showStart}
         showEnd={showEnd}
       />
-      <EuiSpacer />
       <EuiBasicTable
         css={css`
           .euiBasicTableAction-showOnHover {
