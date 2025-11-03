@@ -247,6 +247,11 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         onChange={onAlertParamChange('resultType')}
       />
       <EuiSpacer size="m" />
+      <SeverityControl
+        value={ruleParams.severity}
+        onChange={onAlertParamChange('severity')}
+        disabled={kqlFieldUsage.hasAnomalyScoreFilter}
+      />
       <AnomalyKqlFilter
         value={ruleParams.customFilter}
         onChange={onAlertParamChange('customFilter')}
@@ -256,11 +261,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         onFieldUsageChange={setKqlFieldUsage}
         errors={Array.isArray(errors.customFilter) ? errors.customFilter : []}
         disabled={ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET}
-      />
-      <SeverityControl
-        value={ruleParams.severity}
-        onChange={onAlertParamChange('severity')}
-        disabled={kqlFieldUsage.hasAnomalyScoreFilter}
       />
       <EuiSpacer size="m" />
       <InterimResultsControl
