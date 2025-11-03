@@ -439,6 +439,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             opacity: 1 !important;
           }
         `}
+        rowProps={() => ({
+          style: { height: '68px' },
+        })}
         columns={columns}
         items={workflows?.results ?? []}
         itemId="id"
