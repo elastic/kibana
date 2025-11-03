@@ -141,12 +141,24 @@ function getSlackAPIActionParams(
     subAction: 'postMessage',
     subActionParams: {
       text: recovery ? defaultRecoveryMessage : defaultActionMessage,
-      channelIds: allowedChannels
-        .map((channel) => channel.id)
-        .filter((id): id is string => id !== undefined),
+      channels: getValidChannels(allowedChannels),
     },
   };
 }
+
+const getValidChannels = (allowedChannels: Array<{ id?: string; name: string }>) => {
+  return allowedChannels.reduce((channels, channel) => {
+    if (channel.name) {
+      channels.push(channel.name);
+    }
+
+    if (channel.id) {
+      channels.push(channel.id);
+    }
+
+    return channels;
+  }, [] as string[]);
+};
 
 function getIndexActionParams(translations: Translations, recovery = false): IndexActionParams {
   if (recovery) {
