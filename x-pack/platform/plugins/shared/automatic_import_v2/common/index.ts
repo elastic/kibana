@@ -7,14 +7,15 @@
 
 export type {
   CreateAutoImportIntegrationRequestBody,
-  UpdateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
+  DeleteAutoImportIntegrationRequestParams,
+  GetAutoImportIntegrationRequestParams,
+  GetAutoImportIntegrationResponse,
+  GetAutoImportIntegrationsResponse,
+  UpdateAutoImportIntegrationRequestBody,
+  UpdateAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 
-export type {
-  CreateAutoImportDataStreamRequestBody,
-  UpdateAutoImportDataStreamRequestBody,
-  CreateAutoImportDataStreamResponse,
-} from './model/api/data_streams/data_stream.gen';
-
 export type { DataStreamSamples } from './model/index_samples.gen';
+
+export type { Integration } from './model/common_attributes.gen';

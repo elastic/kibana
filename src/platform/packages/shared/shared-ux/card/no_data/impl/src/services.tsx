@@ -9,10 +9,6 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useContext } from 'react';
-import {
-  RedirectAppLinksProvider,
-  RedirectAppLinksKibanaProvider,
-} from '@kbn/shared-ux-link-redirect-app';
 
 import type {
   Services,
@@ -31,11 +27,7 @@ export const NoDataCardProvider: FC<PropsWithChildren<NoDataCardServices>> = ({
 }) => {
   const { addBasePath, canAccessFleet } = services;
 
-  return (
-    <Context.Provider value={{ addBasePath, canAccessFleet }}>
-      <RedirectAppLinksProvider {...services}>{children}</RedirectAppLinksProvider>
-    </Context.Provider>
-  );
+  return <Context.Provider value={{ addBasePath, canAccessFleet }}>{children}</Context.Provider>;
 };
 
 /**
@@ -50,11 +42,7 @@ export const NoDataCardKibanaProvider: FC<PropsWithChildren<NoDataCardKibanaDepe
     canAccessFleet: dependencies.coreStart.application.capabilities.navLinks.integrations,
   };
 
-  return (
-    <Context.Provider {...{ value }}>
-      <RedirectAppLinksKibanaProvider {...dependencies}>{children}</RedirectAppLinksKibanaProvider>
-    </Context.Provider>
-  );
+  return <Context.Provider {...{ value }}>{children}</Context.Provider>;
 };
 
 /**

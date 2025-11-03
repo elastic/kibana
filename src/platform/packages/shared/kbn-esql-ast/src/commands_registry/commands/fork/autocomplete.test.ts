@@ -369,7 +369,7 @@ describe('FORK Autocomplete', () => {
                 ...getFunctionSignaturesByReturnType(
                   Location.STATS_WHERE,
                   'any',
-                  { operators: true },
+                  { operators: true, skipAssign: true },
                   ['integer']
                 ),
               ]
