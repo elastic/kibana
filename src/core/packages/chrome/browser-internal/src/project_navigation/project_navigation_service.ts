@@ -141,7 +141,7 @@ export class ProjectNavigationService {
     return {
       setProjectHome: this.setProjectHome.bind(this),
       getProjectHome$: () => {
-        return this.projectHome$.asObservable();
+        return this.projectHome$.pipe(map((home) => this.uiSettings?.get('defaultRoute') || home));
       },
       setCloudUrls: (cloudUrls: CloudURLs) => {
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
@@ -403,7 +403,7 @@ export class ProjectNavigationService {
   }
 
   private setProjectHome(homeHref: string) {
-    this.projectHome$.next(this.uiSettings?.get('defaultRoute') || homeHref);
+    this.projectHome$.next(homeHref);
   }
 
   private changeActiveSolutionNavigation(id: SolutionId | null) {
