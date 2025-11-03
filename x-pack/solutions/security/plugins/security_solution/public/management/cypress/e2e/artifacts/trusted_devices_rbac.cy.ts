@@ -17,5 +17,6 @@ describe(
   getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('trustedDevices'), [
     'siemV3',
     'siemV4',
+    'siemV5',
   ])
 );
