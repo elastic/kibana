@@ -48,10 +48,6 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import {
-  hasLimitBeforeAggregate,
-  missingSortBeforeLimit,
-} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
@@ -201,7 +197,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const onQuerySubmit = useCallback(
-    (source: TelemetryQuerySubmittedProps['query_source']) => {
+    (source: TelemetryQuerySubmittedProps['source']) => {
       if (isQueryLoading && isLoading && allowQueryCancellation) {
         abortController?.abort();
         setIsQueryLoading(false);
@@ -218,11 +214,8 @@ const ESQLEditorInternal = function ESQLEditor({
         // TODO: add rest of options
         if (currentValue) {
           telemetryService.trackQuerySubmitted({
-            query_source: source,
-            query_length: editor1.current?.getModel()?.getValueLength().toString() ?? '0',
-            query_lines: editor1.current?.getModel()?.getLineCount().toString() ?? '0',
-            anti_limit_before_aggregate: hasLimitBeforeAggregate(currentValue),
-            anti_missing_sort_before_limit: missingSortBeforeLimit(currentValue),
+            source,
+            query: currentValue,
           });
         }
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
@@ -334,6 +327,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
   monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
     openTimePickerPopover();
+  });
+
+  monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
+    const [, { queryLabel }] = args;
+    telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
   });
 
   const controlCommands = [
