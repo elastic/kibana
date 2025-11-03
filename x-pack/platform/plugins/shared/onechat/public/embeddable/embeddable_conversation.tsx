@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
-import { ConversationHeader } from '../application/components/conversations/conversation_header';
+import { EmbeddedConversationHeader } from '../application/components/conversations/embedded_conversation_header';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -58,7 +58,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
           aria-label={labels.header}
           paddingSize="m"
         >
-          <ConversationHeader />
+          <EmbeddedConversationHeader />
         </KibanaPageTemplate.Header>
         <KibanaPageTemplate.Section
           paddingSize="none"

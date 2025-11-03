@@ -19,12 +19,8 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
-import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { docLinks } from '../../../../common/doc_links';
-import { WelcomeText } from '../common/welcome_text';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
-import { useConversationContext } from '../../context/conversation/conversation_context';
-import { NewConversationPromptLayout } from './layouts/new_conversation_prompt_layout';
 
 interface QuickNavigationCard {
   key: string;
@@ -109,7 +105,7 @@ const cards: Array<QuickNavigationCard> = [
   },
 ];
 
-const QuickNavigationCards: React.FC<{}> = () => {
+export const QuickNavigationCards: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();
   const { manageAgents } = useUiPrivileges();
   const { euiTheme } = useEuiTheme();
@@ -160,22 +156,5 @@ const QuickNavigationCards: React.FC<{}> = () => {
         );
       })}
     </EuiFlexGroup>
-  );
-};
-
-const fullHeightStyles = css`
-  height: 100%;
-`;
-
-export const NewConversationPrompt: React.FC<{}> = () => {
-  const { isEmbeddedContext } = useConversationContext();
-
-  return (
-    <NewConversationPromptLayout
-      welcomeText={<WelcomeText />}
-      inputForm={<ConversationInputForm />}
-      navigationCards={!isEmbeddedContext ? <QuickNavigationCards /> : undefined}
-      className={fullHeightStyles}
-    />
   );
 };

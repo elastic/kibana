@@ -11,14 +11,25 @@ import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
-import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
 import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
-import { ConversationInputLayout } from './layouts/conversation_input_layout';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
+import { useConversationContext } from '../../context/conversation/conversation_context';
+import {
+  FullScreenConversationRounds,
+  FullScreenConversationInput,
+  FullScreenNewConversationPrompt,
+} from './layouts/full_screen_conversation_layout';
+import {
+  EmbeddedConversationRounds,
+  EmbeddedConversationInput,
+  EmbeddedNewConversationPrompt,
+} from './layouts/embedded_conversation_layout';
+import { WelcomeText } from '../common/welcome_text';
+import { QuickNavigationCards } from './quick_navigation_cards';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -35,8 +46,20 @@ export const Conversation: React.FC<{}> = () => {
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
   const shouldStickToBottom = useShouldStickToBottom();
+  const { isEmbeddedContext } = useConversationContext();
 
   useSendPredefinedInitialMessage();
+
+  // Select layout wrappers based on context
+  const ConversationRoundsWrapper = isEmbeddedContext
+    ? EmbeddedConversationRounds
+    : FullScreenConversationRounds;
+  const ConversationInputWrapper = isEmbeddedContext
+    ? EmbeddedConversationInput
+    : FullScreenConversationInput;
+  const NewConversationPromptWrapper = isEmbeddedContext
+    ? EmbeddedNewConversationPrompt
+    : FullScreenNewConversationPrompt;
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -79,7 +102,13 @@ export const Conversation: React.FC<{}> = () => {
   `;
 
   if (!hasActiveConversation) {
-    return <NewConversationPrompt />;
+    return (
+      <NewConversationPromptWrapper
+        welcomeText={<WelcomeText />}
+        inputForm={<ConversationInputForm />}
+        navigationCards={!isEmbeddedContext ? <QuickNavigationCards /> : undefined}
+      />
+    );
   }
 
   return (
@@ -89,7 +118,9 @@ export const Conversation: React.FC<{}> = () => {
           <>
             <EuiResizablePanel initialSize={80}>
               <div ref={scrollContainerRef} css={scrollContainerStyles}>
-                <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
+                <ConversationRoundsWrapper>
+                  <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
+                </ConversationRoundsWrapper>
               </div>
               {showScrollButton && (
                 <EuiButtonIcon
@@ -105,9 +136,9 @@ export const Conversation: React.FC<{}> = () => {
             </EuiResizablePanel>
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
-              <ConversationInputLayout className={contentStyles}>
+              <ConversationInputWrapper className={contentStyles}>
                 <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
-              </ConversationInputLayout>
+              </ConversationInputWrapper>
             </EuiResizablePanel>
           </>
         );
