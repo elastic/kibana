@@ -78,7 +78,7 @@ export interface LogDocumentOverview
     LogCloudFields,
     LogOtelStackTraceFields,
     Partial<ApmErrorLogFields>,
-    Partial<OtelExceptionsLogFields> {
+    Partial<OtelExceptionLogFields> {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
@@ -99,7 +99,7 @@ export interface ApmErrorLogFields {
   'error.exception.message'?: string;
 }
 
-export interface OtelExceptionsLogFields {
+export interface OtelExceptionLogFields {
   event_name: string; // OTEL-specific field
 }
 
