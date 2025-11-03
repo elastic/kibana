@@ -47,6 +47,7 @@ export interface CasePersistedAttributes {
   total_alerts: number;
   total_comments: number;
   total_events?: number;
+  total_observables?: number;
   updated_at: string | null;
   updated_by: User | null;
   category?: string | null;
