@@ -24,11 +24,11 @@
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*",
+    "*/*/packages/**/*"
   ],
   "kbn_references": [
     "@kbn/security-solution-test-api-clients",
-    "@kbn/security_solution_api_integration",
+    "@kbn/security-solution-detections-response-service",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",
@@ -62,6 +62,6 @@
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
-    "@kbn/management-settings-ids",
+    "@kbn/management-settings-ids"
   ]
 }

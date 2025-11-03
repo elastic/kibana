@@ -50,7 +50,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '@kbn/security_solution_api_integration/config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import {
   createSecuritySolutionAlerts,
   getSecuritySolutionAlerts,
