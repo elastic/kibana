@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export const API_STATUS = {
-  IDLE: 'idle',
-  LOADING: 'loading',
-  UPDATING: 'updating',
-  SAVING: 'saving',
-  DELETING: 'deleting',
-} as const;
+export { usePolling } from './use_polling';
