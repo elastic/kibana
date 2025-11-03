@@ -36,6 +36,15 @@ export class OTLPSpanProcessor extends BaseInferenceSpanProcessor {
   }
 
   processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
+    // Orphan @kbn/evals spans to make them queryable as roots in OTLP
+    if (span.attributes['inscrumentationScope.name'] === '@kbn/evals' && span.parentSpanContext) {
+      span = {
+        ...span,
+        spanContext: span.spanContext.bind(span),
+        parentSpanContext: undefined,
+      };
+    }
+
     // Clean up internal tracking attributes
     delete span.attributes._should_track;
     delete span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME];

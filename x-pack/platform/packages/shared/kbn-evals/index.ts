@@ -11,9 +11,8 @@ export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval
 export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
-export { createTokenUseEvaluator } from './src/evaluators/trace_based/input_tokens';
 export type { EvaluationDataset, EvaluationWorkerFixtures } from './src/types';
-
+export { withEvaluateExampleSpan, withEvaluatorSpan } from './src/utils/tracing';
 export {
   createDefaultTerminalReporter,
   createEvaluationReportTable,
