@@ -130,6 +130,7 @@ describe('SearchSessionService', () => {
   });
 
   describe('Feature enabled', () => {
+    let mockLogger: jest.Mocked<any>;
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
       const config: ConfigSchema = {
@@ -144,7 +145,7 @@ describe('SearchSessionService', () => {
           },
         },
       } as unknown as ConfigSchema;
-      const mockLogger: any = {
+      mockLogger = {
         debug: jest.fn(),
         warn: jest.fn(),
         error: jest.fn(),
@@ -691,6 +692,25 @@ describe('SearchSessionService', () => {
     });
 
     describe('trackId', () => {
+      it('logs error and returns if requestHash not provided', async () => {
+        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
+          sessionId,
+          strategy: MOCK_STRATEGY,
+          // requestHash not provided
+        } as any);
+
+        expect(savedObjectsClient.update).not.toHaveBeenCalled();
+        expect(savedObjectsClient.create).not.toHaveBeenCalled();
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `SearchSessionService: trackId | Missing requestHash | sessionId: "${sessionId}" | searchId:"${searchId}"`
+          )
+        );
+      });
+
       it('updates the saved object if search session already exists', async () => {
         const requestHash = faker.string.alpha(64);
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';

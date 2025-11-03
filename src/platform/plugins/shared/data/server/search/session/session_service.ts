@@ -288,7 +288,12 @@ export class SearchSessionService implements ISearchSessionService {
   ) => {
     const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY, requestHash } = options;
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
-    if (!requestHash) return;
+    if (!requestHash) {
+      this.logger.error(
+        `SearchSessionService: trackId | Missing requestHash | sessionId: "${sessionId}" | searchId:"${searchId}"`
+      );
+      return;
+    }
 
     this.logger.debug(
       `SearchSessionService: trackId | sessionId: "${sessionId}" | searchId:"${searchId}" | requestHash: "${requestHash}"`
