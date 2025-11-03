@@ -63,6 +63,7 @@ const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('visTypeVega.inspector.errorHeading', {
           defaultMessage: `Vega didn't render successfully`,
         })}
