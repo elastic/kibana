@@ -169,6 +169,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             >
               {showLibraryCallout && (
                 <EuiCallOut
+                  announceOnMount={false}
                   size="s"
                   color={'warning'}
                   title={

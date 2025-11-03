@@ -15,7 +15,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useAiValueRoleCheck } from '../hooks/use_ai_value_role_check';
+import { useHasSecurityCapability } from '../../helper_hooks';
 import { TestProviders } from '../../common/mock/test_providers';
 import * as i18n from './translations';
 
@@ -40,8 +40,8 @@ jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn(),
 }));
 
-jest.mock('../hooks/use_ai_value_role_check', () => ({
-  useAiValueRoleCheck: jest.fn(),
+jest.mock('../../helper_hooks', () => ({
+  useHasSecurityCapability: jest.fn(),
 }));
 
 // Mock docLinks for NoPrivileges component
@@ -123,8 +123,8 @@ const mockUseAlertsPrivileges = useAlertsPrivileges as jest.MockedFunction<
   typeof useAlertsPrivileges
 >;
 const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
-const mockUseAiValueRoleCheck = useAiValueRoleCheck as jest.MockedFunction<
-  typeof useAiValueRoleCheck
+const mockUseHasSecurityCapability = useHasSecurityCapability as jest.MockedFunction<
+  typeof useHasSecurityCapability
 >;
 
 describe('AIValue', () => {
@@ -162,18 +162,12 @@ describe('AIValue', () => {
       status: 'ready',
       dataView: {} as never,
     });
-    mockUseAiValueRoleCheck.mockReturnValue({
-      hasRequiredRole: true,
-      isLoading: false,
-    });
+    mockUseHasSecurityCapability.mockReturnValue(true);
   });
 
-  describe('Loading States', () => {
-    it('shows page loader when role check is loading', () => {
-      mockUseAiValueRoleCheck.mockReturnValue({
-        hasRequiredRole: false,
-        isLoading: true,
-      });
+  describe('Access states', () => {
+    it('shows no privileges when user lacks soc management capability', () => {
+      mockUseHasSecurityCapability.mockReturnValue(false);
 
       render(
         <TestProviders>
@@ -181,7 +175,7 @@ describe('AIValue', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
     });
 
     it('shows page loader when new data view picker is enabled and status is pristine', () => {
@@ -221,57 +215,8 @@ describe('AIValue', () => {
   });
 
   describe('Access Control', () => {
-    it('shows no privileges when user lacks required role', () => {
-      mockUseAiValueRoleCheck.mockReturnValue({
-        hasRequiredRole: false,
-        isLoading: false,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
-    });
-
-    it('shows no privileges when user lacks alert read privileges', () => {
-      mockUseAlertsPrivileges.mockReturnValue({
-        hasKibanaREAD: false,
-        hasIndexRead: true,
-        hasIndexUpdateDelete: false,
-        hasKibanaCRUD: false,
-        loading: false,
-        isAuthenticated: true,
-        hasEncryptionKey: true,
-        hasIndexManage: false,
-        hasIndexWrite: false,
-        hasIndexMaintenance: false,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
-    });
-
-    it('shows no privileges when user lacks index read privileges', () => {
-      mockUseAlertsPrivileges.mockReturnValue({
-        hasKibanaREAD: true,
-        hasIndexRead: false,
-        hasIndexUpdateDelete: false,
-        hasKibanaCRUD: false,
-        loading: false,
-        isAuthenticated: true,
-        hasEncryptionKey: true,
-        hasIndexManage: false,
-        hasIndexWrite: false,
-        hasIndexMaintenance: false,
-      });
+    it('shows no privileges when user lacks soc management capability', () => {
+      mockUseHasSecurityCapability.mockReturnValue(false);
 
       render(
         <TestProviders>
@@ -327,7 +272,7 @@ describe('AIValue', () => {
       expect(mockUseSyncTimerangeUrlParam).toHaveBeenCalled();
       expect(mockUseDeepEqualSelector).toHaveBeenCalledWith(expect.any(Function));
       expect(mockUseIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newDataViewPickerEnabled');
-      expect(mockUseAiValueRoleCheck).toHaveBeenCalled();
+      expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('socManagement');
       expect(mockUseAlertsPrivileges).toHaveBeenCalled();
     });
   });
