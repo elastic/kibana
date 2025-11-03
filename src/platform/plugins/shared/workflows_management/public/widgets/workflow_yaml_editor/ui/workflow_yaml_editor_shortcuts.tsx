@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -28,19 +28,19 @@ export function WorkflowYAMLEditorShortcuts({
 
   return (
     <div>
-      <EuiText size="xs" css={styles.withKbd} onClick={() => onOpenActionsMenu(true)}>
-        <p css={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <EuiButtonEmpty onClick={() => onOpenActionsMenu(true)} color="text">
+        <EuiText css={{ display: 'flex', alignItems: 'center', gap: '6px' }} size="xs">
           <b>
             <FormattedMessage
               id="workflows.workflowDetail.yamlEditor.actionsMenu"
               defaultMessage="Actions menu"
             />
           </b>
-          <EuiTextColor color="subdued">
+          <EuiTextColor color="subdued" css={styles.withKbd}>
             <kbd>{commandKey}</kbd> {'+'} <kbd>{'K'}</kbd>
           </EuiTextColor>
-        </p>
-      </EuiText>
+        </EuiText>
+      </EuiButtonEmpty>
     </div>
   );
 }
@@ -48,9 +48,12 @@ export function WorkflowYAMLEditorShortcuts({
 const componentStyles = {
   withKbd: ({ euiTheme }: UseEuiTheme) =>
     css({
-      cursor: 'pointer',
       '& kbd': {
         borderColor: euiTheme.colors.borderBaseSubdued,
+        borderRadius: euiTheme.border.radius.small,
+        borderWidth: euiTheme.border.width.thin,
+        borderStyle: 'solid',
+        padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
       },
     }),
 };
