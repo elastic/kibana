@@ -63,9 +63,9 @@ export interface CreateMaintenanceWindowFormProps {
 const useDefaultTimezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
   if (!kibanaTz || kibanaTz === 'Browser') {
-    return { defaultTimezone: moment.tz?.guess() ?? 'UTC', isBrowser: true };
+    return { defaultTimezone: moment.tz?.guess() ?? 'UTC' };
   }
-  return { defaultTimezone: kibanaTz, isBrowser: false };
+  return { defaultTimezone: kibanaTz };
 };
 
 const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((timezoneOption) => ({
