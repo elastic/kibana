@@ -45,6 +45,7 @@ import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
+import { esql } from '@kbn/esql-ast';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -145,28 +146,7 @@ export function initializeFetch({
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const rawESQLVariables$ = apiPublishesESQLVariables(api.parentApi)
-    ? api.parentApi.esqlVariables$
-    : undefined;
-
-  // Only emits when relevant variables change
-  const relevantESQLVariables$ = rawESQLVariables$
-    ? combineLatest([api.savedSearch$, rawESQLVariables$]).pipe(
-        map(([savedSearch, allVariables]) => getRelevantESQLVariables(savedSearch, allVariables)),
-        distinctUntilChanged(
-          (prev, curr) =>
-            prev.length === curr.length &&
-            prev.every((p, i) => p.key === curr[i]?.key && p.value === curr[i]?.value)
-        )
-      )
-    : undefined;
-
-  const observables = [
-    fetch$(api),
-    api.savedSearch$,
-    api.dataViews$,
-    ...(relevantESQLVariables$ ? [relevantESQLVariables$] : []),
-  ] as const;
+  const observables = [fetch$(api), api.savedSearch$, api.dataViews$] as const;
 
   const fetchSubscription = combineLatest(observables)
     .pipe(
@@ -177,7 +157,7 @@ export function initializeFetch({
           abortController = undefined;
         }
       }),
-      switchMap(async ([fetchContext, savedSearch, dataViews, esqlVariables]) => {
+      switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         setBlockingError(undefined);
         if (!dataView || !savedSearch.searchSource) {
@@ -234,7 +214,7 @@ export function initializeFetch({
               expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
-              esqlVariables,
+              esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
             });
             return {
               columnsMeta: result.esqlQueryColumns

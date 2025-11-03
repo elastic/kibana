@@ -6,30 +6,33 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import deepEqual from 'react-fast-compare';
 import {
   BehaviorSubject,
-  Observable,
   combineLatest,
   debounceTime,
   filter,
   map,
   merge,
+  of,
   switchMap,
 } from 'rxjs';
-import { ESQLVariableType } from '@kbn/esql-types';
+
+import type { OptionsListSearchTechnique, OptionsListSelection } from '@kbn/controls-schemas';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { apiHasSections } from '@kbn/presentation-containers';
 import {
   fetch$,
   type PublishingSubject,
   type StateComparators,
 } from '@kbn/presentation-publishing';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
-import type { OptionsListSearchTechnique, OptionsListSelection } from '@kbn/controls-schemas';
-import { EsqlControlType } from '@kbn/esql-types';
+
+import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
-import type { OptionsListSuggestions } from '../../../common/options_list';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -73,7 +76,7 @@ export function initializeESQLControlSelections(
   initialState: ESQLControlState,
   setDataLoading: (loading: boolean) => void
 ) {
-  const sectionId$: Observable<string> = parentApi?.getPanelSection$(uuid);
+  const sectionId$ = apiHasSections(parentApi) ? parentApi.getPanelSection$(uuid) : of(undefined);
 
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);

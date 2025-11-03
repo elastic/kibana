@@ -113,13 +113,11 @@ export function ESQLEditor({
 
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
-  // const esqlVariables = useStateFromPublishingSubject(
-  //   apiPublishesESQLVariables(parentApi)
-  //     ? parentApi?.esqlVariables$
-  //     : new BehaviorSubject(undefined)
-  // );
-
-  // console.log({ esqlVariables });
+  const esqlVariables = useStateFromPublishingSubject(
+    apiPublishesESQLVariables(parentApi)
+      ? parentApi?.esqlVariables$
+      : new BehaviorSubject(undefined)
+  );
 
   const dispatch = useLensDispatch();
 
