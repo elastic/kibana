@@ -1727,6 +1727,37 @@
                     "description": "The ID of the agent to chat with. Defaults to the default Elastic AI agent.",
                     "type": "string"
                   },
+                  "attachments": {
+                    "description": "Optional attachments to send with the message.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "description": "Payload of the attachment.",
+                          "type": "object"
+                        },
+                        "hidden": {
+                          "description": "When true, the attachment will not be displayed in the UI.",
+                          "type": "boolean"
+                        },
+                        "id": {
+                          "description": "Optional id for the attachment.",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "Type of the attachment.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "data"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
                   "capabilities": {
                     "additionalProperties": false,
                     "description": "Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.",
@@ -1849,6 +1880,37 @@
                     "default": "elastic-ai-agent",
                     "description": "The ID of the agent to chat with. Defaults to the default Elastic AI agent.",
                     "type": "string"
+                  },
+                  "attachments": {
+                    "description": "Optional attachments to send with the message.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "description": "Payload of the attachment.",
+                          "type": "object"
+                        },
+                        "hidden": {
+                          "description": "When true, the attachment will not be displayed in the UI.",
+                          "type": "boolean"
+                        },
+                        "id": {
+                          "description": "Optional id for the attachment.",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "Type of the attachment.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "data"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
                   },
                   "capabilities": {
                     "additionalProperties": false,
@@ -4512,7 +4574,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -6150,7 +6212,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -9301,7 +9363,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -9331,7 +9394,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get agent binary download sources",
@@ -9531,7 +9595,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -9561,7 +9626,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Create an agent binary download source",
@@ -9611,7 +9677,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -9641,7 +9708,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete an agent binary download source",
@@ -9755,7 +9823,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -9785,7 +9854,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get an agent binary download source",
@@ -9993,7 +10063,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -10023,7 +10094,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Update an agent binary download source",
@@ -11114,7 +11186,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -11144,7 +11217,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get agent policies",
@@ -12460,7 +12534,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -12490,7 +12565,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Create an agent policy",
@@ -13528,7 +13604,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -13558,7 +13635,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Bulk get agent policies",
@@ -13626,7 +13704,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -13656,7 +13735,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete an agent policy",
@@ -13804,7 +13884,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -13834,7 +13915,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get outputs for agent policies",
@@ -14838,7 +14920,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -14868,7 +14951,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get an agent policy",
@@ -16199,7 +16283,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -16229,7 +16314,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Update an agent policy",
@@ -16299,7 +16385,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -16329,7 +16416,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get auto upgrade agent status",
@@ -17365,7 +17453,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -17395,7 +17484,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Copy an agent policy",
@@ -17450,7 +17540,8 @@
                   "type": "string"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -17480,7 +17571,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "404": {
             "content": {
@@ -17510,7 +17602,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Not found."
           }
         },
         "summary": "Download an agent policy",
@@ -18163,7 +18256,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -18193,7 +18287,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a full agent policy",
@@ -18314,7 +18409,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -18344,7 +18440,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get outputs for an agent policy",
@@ -18460,7 +18557,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -18490,7 +18588,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get an agent status summary",
@@ -18585,7 +18684,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -18615,7 +18715,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get incoming agent data",
@@ -19190,7 +19291,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -19220,7 +19322,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get agents",
@@ -19284,7 +19387,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -19314,7 +19418,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get agents by action ids",
@@ -19518,7 +19623,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -19548,7 +19654,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get an agent action status",
@@ -19652,7 +19759,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -19682,7 +19790,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Cancel an agent action",
@@ -19716,7 +19825,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -19746,7 +19856,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get available agent versions",
@@ -19880,7 +19991,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -19911,7 +20022,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Migrate multiple agents",
@@ -19992,7 +20103,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20022,7 +20134,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Bulk reassign agents",
@@ -20104,7 +20217,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20134,7 +20248,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Bulk request diagnostics from agents",
@@ -20221,7 +20336,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20251,7 +20367,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Bulk unenroll agents",
@@ -20340,7 +20457,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20370,7 +20488,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Bulk update agent tags",
@@ -20467,7 +20586,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20497,7 +20617,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Bulk upgrade agents",
@@ -20551,7 +20672,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20581,7 +20703,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete an uploaded file",
@@ -20620,7 +20743,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20650,7 +20774,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get an uploaded file",
@@ -20718,7 +20843,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20748,7 +20874,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get agent setup info",
@@ -20809,7 +20936,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20839,7 +20967,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Initiate agent setup",
@@ -20891,7 +21020,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -20921,7 +21051,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get agent tags",
@@ -20974,7 +21105,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -21004,7 +21136,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete an agent",
@@ -21445,7 +21578,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -21475,7 +21609,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get an agent",
@@ -21939,7 +22074,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -21969,7 +22105,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Update an agent by ID",
@@ -22148,7 +22285,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -22178,7 +22316,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Create an agent action",
@@ -22306,7 +22445,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -22337,7 +22476,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Migrate a single agent",
@@ -22398,7 +22537,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -22428,7 +22568,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Reassign an agent",
@@ -22500,7 +22641,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -22530,7 +22672,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Request agent diagnostics",
@@ -22650,7 +22793,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -22680,7 +22824,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Upgrade an agent",
@@ -22763,7 +22908,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -22793,7 +22939,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get agent uploads",
@@ -22840,7 +22987,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -22870,7 +23018,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Check permissions",
@@ -22959,7 +23108,7 @@
                 }
               }
             },
-            "description": "Indicates a successful call."
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -22990,7 +23139,7 @@
                 }
               }
             },
-            "description": "Indicates a bad request call."
+            "description": "A bad request."
           }
         },
         "summary": "Get cloud connectors",
@@ -23158,7 +23307,7 @@
                 }
               }
             },
-            "description": "Indicates a successful call."
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -23189,7 +23338,7 @@
                 }
               }
             },
-            "description": "Indicates a bad request call."
+            "description": "A bad request."
           }
         },
         "summary": "Create cloud connector",
@@ -23249,7 +23398,7 @@
                 }
               }
             },
-            "description": "Indicates a successful call."
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -23280,7 +23429,7 @@
                 }
               }
             },
-            "description": "Indicates a bad request call."
+            "description": "A bad request."
           }
         },
         "summary": "Delete cloud connector (supports force deletion)",
@@ -23357,7 +23506,7 @@
                 }
               }
             },
-            "description": "Indicates a successful call."
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -23388,7 +23537,7 @@
                 }
               }
             },
-            "description": "Indicates a bad request call."
+            "description": "A bad request."
           }
         },
         "summary": "Get cloud connector",
@@ -23551,7 +23700,7 @@
                 }
               }
             },
-            "description": "Indicates a successful call."
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -23582,7 +23731,7 @@
                 }
               }
             },
-            "description": "Indicates a bad request call."
+            "description": "A bad request."
           }
         },
         "summary": "Update cloud connector",
@@ -23703,7 +23852,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -23733,7 +23883,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get data streams",
@@ -23892,7 +24043,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -23922,7 +24074,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get enrollment API keys",
@@ -24032,7 +24185,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -24062,7 +24216,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Create an enrollment API key",
@@ -24115,7 +24270,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -24145,7 +24301,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Revoke an enrollment API key",
@@ -24222,7 +24379,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -24252,7 +24410,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get an enrollment API key",
@@ -24366,7 +24525,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -24396,7 +24556,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Bulk get assets",
@@ -24470,7 +24631,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -24500,7 +24662,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get package categories",
@@ -24687,7 +24850,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -24717,7 +24881,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Create a custom integration",
@@ -24775,7 +24940,9 @@
           }
         },
         "responses": {
-          "200": {},
+          "200": {
+            "description": "OK: A successful request."
+          },
           "400": {
             "content": {
               "application/json": {
@@ -24804,7 +24971,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Update a custom integration",
@@ -24893,7 +25061,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -24923,7 +25092,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get data streams",
@@ -25527,7 +25697,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -25557,7 +25728,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get packages",
@@ -25722,7 +25894,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -25752,7 +25925,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Install a package by upload",
@@ -26005,7 +26179,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -26036,10 +26210,271 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Bulk install packages",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
+    "/api/fleet/epm/packages/_bulk_rollback": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "post-fleet-epm-packages-bulk-rollback",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "bulkRollbackRequest": {
+                  "value": {
+                    "packages": [
+                      {
+                        "name": "system"
+                      }
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "packages": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "description": "Package name to rollback",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "type": "object"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "packages"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "taskId": "taskId"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "taskId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "taskId"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Bulk rollback packages",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
+    "/api/fleet/epm/packages/_bulk_rollback/{taskId}": {
+      "get": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "get-fleet-epm-packages-bulk-rollback-taskid",
+        "parameters": [
+          {
+            "description": "Task ID of the bulk operation",
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "status": "success"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "results": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "error": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "message"
+                            ],
+                            "type": "object"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "success"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Get Bulk rollback packages details",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -26118,7 +26553,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -26149,7 +26584,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Bulk uninstall packages",
@@ -26164,6 +26599,7 @@
         "operationId": "get-fleet-epm-packages-bulk-uninstall-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
@@ -26233,7 +26669,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -26264,7 +26700,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Get Bulk uninstall packages details",
@@ -26352,7 +26788,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -26383,7 +26819,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Bulk upgrade packages",
@@ -26398,6 +26834,7 @@
         "operationId": "get-fleet-epm-packages-bulk-upgrade-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
@@ -26467,7 +26904,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -26498,7 +26935,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Get Bulk upgrade packages details",
@@ -26702,7 +27139,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -26732,7 +27170,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get installed packages",
@@ -26766,7 +27205,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -26796,13 +27236,117 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a limited package list",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
+      }
+    },
+    "/api/fleet/epm/packages/{pkgName}/rollback": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "post-fleet-epm-packages-pkgname-rollback",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Package name to roll back",
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "success": true,
+                      "version": "1.0.0"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "version",
+                    "success"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Rollback a package to previous version",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "x-state": "Technical Preview"
       }
     },
     "/api/fleet/epm/packages/{pkgName}/stats": {
@@ -26849,7 +27393,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -26879,7 +27424,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get package stats",
@@ -27025,7 +27571,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -27055,7 +27602,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete a package",
@@ -27768,7 +28316,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -27798,7 +28347,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a package",
@@ -27999,7 +28549,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -28030,7 +28580,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Install a package from the registry",
@@ -28727,7 +29277,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -28757,7 +29308,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Update package settings",
@@ -28823,7 +29375,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -28853,7 +29406,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete assets for an input package",
@@ -28912,7 +29466,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -28943,7 +29497,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Delete Kibana assets for a package",
@@ -29024,7 +29578,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -29055,7 +29609,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Install Kibana assets for a package",
@@ -29130,7 +29684,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -29161,7 +29715,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Install Kibana alert rule for a package",
@@ -29267,7 +29821,8 @@
                   "type": "array"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -29297,7 +29852,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Authorize transforms",
@@ -29342,7 +29898,8 @@
               "application/json": {
                 "schema": {}
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -29372,7 +29929,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a package file",
@@ -29504,7 +30062,8 @@
                   ]
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -29534,7 +30093,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get an inputs template",
@@ -29566,7 +30126,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -29596,7 +30157,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a package signature verification key ID",
@@ -29798,7 +30360,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -29828,7 +30391,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get Fleet Server hosts",
@@ -30188,7 +30752,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -30218,7 +30783,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Create a Fleet Server host",
@@ -30268,7 +30834,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -30298,7 +30865,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete a Fleet Server host",
@@ -30492,7 +31060,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -30522,7 +31091,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a Fleet Server host",
@@ -30881,7 +31451,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -30911,7 +31482,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Update a Fleet Server host",
@@ -30977,7 +31549,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -31007,7 +31580,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "404": {
             "content": {
@@ -31037,7 +31611,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Not found."
           }
         },
         "summary": "Check Fleet Server health",
@@ -31093,7 +31668,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -31123,7 +31699,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a full K8s agent manifest",
@@ -31170,7 +31747,8 @@
                   "type": "string"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -31200,7 +31778,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "404": {
             "content": {
@@ -31230,7 +31809,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Not found."
           }
         },
         "summary": "Download an agent manifest",
@@ -31272,7 +31852,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -31302,7 +31883,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Generate a Logstash API key",
@@ -31353,7 +31935,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -31383,7 +31966,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "500": {
             "content": {
@@ -31413,7 +31997,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "An internal server error."
           }
         },
         "summary": "Rotate a Fleet message signing key pair",
@@ -32570,7 +33155,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -32600,7 +33186,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get outputs",
@@ -34871,7 +35458,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -34901,7 +35489,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Create output",
@@ -34951,7 +35540,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -34981,7 +35571,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "404": {
             "content": {
@@ -35011,7 +35602,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Not found."
           }
         },
         "summary": "Delete output",
@@ -36160,7 +36752,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -36190,7 +36783,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get output",
@@ -38445,7 +39039,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -38475,7 +39070,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Update output",
@@ -38526,7 +39122,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -38556,7 +39153,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get the latest output health",
@@ -39263,7 +39861,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -39293,7 +39892,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get package policies",
@@ -40581,7 +41181,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -40611,7 +41212,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "409": {
             "content": {
@@ -40641,7 +41243,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A conflict occurred."
           }
         },
         "summary": "Create a package policy",
@@ -41311,7 +41914,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -41341,7 +41945,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "404": {
             "content": {
@@ -41359,7 +41964,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Not found."
           }
         },
         "summary": "Bulk get package policies",
@@ -41529,7 +42135,8 @@
                   "type": "array"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -41559,7 +42166,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Bulk delete package policies",
@@ -41647,7 +42255,8 @@
                   "type": "array"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -41677,7 +42286,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Upgrade a package policy",
@@ -42934,7 +43544,8 @@
                   "type": "array"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -42964,7 +43575,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Dry run a package policy upgrade",
@@ -43022,7 +43634,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -43052,7 +43665,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete a package policy",
@@ -43691,7 +44305,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -43721,7 +44336,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "404": {
             "content": {
@@ -43739,7 +44355,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Not found."
           }
         },
         "summary": "Get a package policy",
@@ -45028,7 +45645,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -45058,7 +45676,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "403": {
             "content": {
@@ -45088,7 +45707,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Forbidden."
           }
         },
         "summary": "Update a package policy",
@@ -45184,7 +45804,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -45214,7 +45835,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get proxies",
@@ -45362,7 +45984,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -45392,7 +46015,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Create a proxy",
@@ -45442,7 +46066,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -45472,7 +46097,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Delete a proxy",
@@ -45560,7 +46186,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -45590,7 +46217,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a proxy",
@@ -45741,7 +46369,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -45771,7 +46400,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Update a proxy",
@@ -45866,7 +46496,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -45896,7 +46527,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "404": {
             "content": {
@@ -45914,7 +46546,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Not found."
           }
         },
         "summary": "Get settings",
@@ -46069,7 +46702,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -46099,7 +46733,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "404": {
             "content": {
@@ -46117,7 +46752,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Not found."
           }
         },
         "summary": "Update settings",
@@ -46180,7 +46816,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -46210,7 +46847,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           },
           "500": {
             "content": {
@@ -46229,7 +46867,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "An internal server error occurred."
           }
         },
         "summary": "Initiate Fleet setup",
@@ -46274,7 +46913,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           }
         },
         "summary": "Get space settings",
@@ -46346,7 +46986,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           }
         },
         "summary": "Create space settings",
@@ -46457,7 +47098,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -46487,7 +47129,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get metadata for latest uninstall tokens",
@@ -46558,7 +47201,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
@@ -46588,7 +47232,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "A bad request."
           }
         },
         "summary": "Get a decrypted uninstall token",
