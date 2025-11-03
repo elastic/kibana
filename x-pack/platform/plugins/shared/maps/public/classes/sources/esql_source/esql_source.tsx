@@ -47,7 +47,7 @@ import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { getData, getIndexPatternService, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
-import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
+import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ESQLField } from '../../fields/esql_field';
@@ -347,7 +347,13 @@ export class ESQLSource
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
-    return <UpdateSourceEditor onChange={onChange} sourceDescriptor={this._descriptor} />;
+    return (
+      <UpdateSourceEditor
+        onChange={onChange}
+        sourceDescriptor={this._descriptor}
+        getDataViewFields={this._getDataViewFields}
+      />
+    );
   }
 
   getSyncMeta(): ESQLSourceSyncMeta {
@@ -383,4 +389,8 @@ export class ESQLSource
   getESQL() {
     return this._descriptor.esql;
   }
+
+  private _getDataViewFields = async () => {
+    return getFields(await this.getIndexPattern());
+  };
 }

@@ -11,35 +11,29 @@ import userEvent from '@testing-library/user-event';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ESQLSource } from './esql_source';
 
-jest.mock('../../../kibana_services', () => {
-  return {
-    getIndexPatternService() {
-      return {
-        get: async () => {
-          return {
-            fields: [
-              {
-                name: 'timestamp',
-                type: 'date',
-              },
-              {
-                name: 'utc_timestamp',
-                type: 'date',
-              },
-              {
-                name: 'location',
-                type: 'geo_point',
-              },
-              {
-                name: 'utc_timestamp',
-                type: 'geo_point',
-              },
-            ],
-          };
-        },
-      };
+jest.mock('../../../kibana_services', () => {});
+
+const mockGetDataViewFields = jest.fn().mockResolvedValue({
+  dateFields: [
+    {
+      name: 'timestamp',
+      type: 'date',
     },
-  };
+    {
+      name: 'utc_timestamp',
+      type: 'date',
+    },
+  ],
+  geoFields: [
+    {
+      name: 'location',
+      type: 'geo_point',
+    },
+    {
+      name: 'utc_timestamp',
+      type: 'geo_point',
+    },
+  ],
 });
 
 describe('UpdateSourceEditor', () => {
@@ -51,11 +45,16 @@ describe('UpdateSourceEditor', () => {
     test('should set geoField when checked and geo field is not set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
-        dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
         narrowByMapBounds: false,
       });
-      render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
+      render(
+        <UpdateSourceEditor
+          onChange={onChange}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
       await waitFor(() => getNarrowByMapBoundsSwitch());
       await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
@@ -69,12 +68,17 @@ describe('UpdateSourceEditor', () => {
     test('should not reset geoField when checked and geoField is set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
-        dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
         geoField: 'dest_location',
         narrowByMapBounds: false,
       });
-      render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
+      render(
+        <UpdateSourceEditor
+          onChange={onChange}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
       await waitFor(() => getNarrowByMapBoundsSwitch());
       await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
@@ -91,11 +95,16 @@ describe('UpdateSourceEditor', () => {
     test('should set dateField when checked and date field is not set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
-        dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
         narrowByGlobalTime: false,
       });
-      render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
+      render(
+        <UpdateSourceEditor
+          onChange={onChange}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
       await waitFor(() => getNarrowByTimeSwitch());
       await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
@@ -109,12 +118,17 @@ describe('UpdateSourceEditor', () => {
     test('should not reset dateField when checked and dateField is set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
-        dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
         dateField: 'utc_timestamp',
         narrowByGlobalTime: false,
       });
-      render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
+      render(
+        <UpdateSourceEditor
+          onChange={onChange}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
       await waitFor(() => getNarrowByTimeSwitch());
       await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>

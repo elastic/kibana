@@ -9,23 +9,17 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ESQLSource } from './esql_source';
 
-jest.mock('../../../kibana_services', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { dataPluginMock } = require('@kbn/data-plugin/public/mocks');
-  return {
-    getData: () => dataPluginMock.createStartContract(),
-  };
-});
-
 describe('getIndexPatternId', () => {
   test('should return same dataViewId as getESQLAdHocDataview', async () => {
     const esql = 'from kibana_sample_data_logs | keep geo.coordinates';
     const esqlSource = new ESQLSource({ esql });
-    expect(esqlSource.getIndexPatternId()).toBe('e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a');
+    expect(esqlSource.getIndexPatternId()).toBe(
+      'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a'
+    );
 
-    const dataStartService = dataPluginMock.createStartContract()
+    const dataStartService = dataPluginMock.createStartContract();
     await getESQLAdHocDataview(esql, dataStartService.dataViews);
-    const createSpecParameter = (dataStartService.dataViews.create as jest.Mock).mock.calls[0][0]
+    const createSpecParameter = (dataStartService.dataViews.create as jest.Mock).mock.calls[0][0];
     expect(createSpecParameter.id).toBe(esqlSource.getIndexPatternId());
   });
 });
