@@ -33,7 +33,7 @@ export const createOptionsListControlAction =
       order: 1,
       getIconType: () => 'editorChecklist',
       getDisplayName: () =>
-        i18n.translate('controls.optionsList.displayName', {
+        i18n.translate('controls.optionsList.action.displayName', {
           defaultMessage: 'Options list',
         }),
       isCompatible: async ({ state: { dataViewId, fieldName } }) => {
