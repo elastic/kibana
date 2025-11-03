@@ -64,6 +64,7 @@ export const DeprecationsCountCallout: FunctionComponent<Props> = ({ checkpoint 
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18nTexts.loadingError}
         color="danger"
         iconType="warning"

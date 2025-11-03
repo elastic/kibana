@@ -308,6 +308,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultTitle',
           {

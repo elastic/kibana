@@ -199,24 +199,24 @@ steps:
         );
       });
 
-    //   it('should use provided workflowId when both workflowYaml and workflowId are provided', async () => {
-    //     const result = await api.testWorkflow({
-    //       workflowId: 'custom-workflow-id',
-    //       workflowYaml: mockWorkflowYaml,
-    //       inputs,
-    //       spaceId,
-    //       request: mockRequest,
-    //     });
+      //   it('should use provided workflowId when both workflowYaml and workflowId are provided', async () => {
+      //     const result = await api.testWorkflow({
+      //       workflowId: 'custom-workflow-id',
+      //       workflowYaml: mockWorkflowYaml,
+      //       inputs,
+      //       spaceId,
+      //       request: mockRequest,
+      //     });
 
-    //     expect(result).toBe('test-execution-id');
-    //     expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
-    //       expect.objectContaining({
-    //         id: 'custom-workflow-id',
-    //       }),
-    //       expect.any(Object),
-    //       mockRequest
-    //     );
-    //   });
+      //     expect(result).toBe('test-execution-id');
+      //     expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+      //       expect.objectContaining({
+      //         id: 'custom-workflow-id',
+      //       }),
+      //       expect.any(Object),
+      //       mockRequest
+      //     );
+      //   });
 
       it('should throw error when YAML parsing fails', async () => {
         const parseError = new Error('Invalid YAML syntax');
@@ -362,29 +362,29 @@ steps:
         expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
       });
 
-    //   it('should prefer workflowYaml over workflowId when both are provided', async () => {
-    //     const differentYaml = 'name: Different Workflow\nenabled: true';
+      //   it('should prefer workflowYaml over workflowId when both are provided', async () => {
+      //     const differentYaml = 'name: Different Workflow\nenabled: true';
 
-    //     await api.testWorkflow({
-    //       workflowId: 'existing-workflow-id',
-    //       workflowYaml: differentYaml,
-    //       inputs,
-    //       spaceId,
-    //       request: mockRequest,
-    //     });
+      //     await api.testWorkflow({
+      //       workflowId: 'existing-workflow-id',
+      //       workflowYaml: differentYaml,
+      //       inputs,
+      //       spaceId,
+      //       request: mockRequest,
+      //     });
 
-    //     // Should not fetch workflow when YAML is provided
-    //     expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
-    //     expect(mockParseWorkflowYamlToJSON).toHaveBeenCalledWith(differentYaml, {});
-    //     expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
-    //       expect.objectContaining({
-    //         yaml: differentYaml,
-    //         id: 'existing-workflow-id',
-    //       }),
-    //       expect.any(Object),
-    //       mockRequest
-    //     );
-    //   });
+      //     // Should not fetch workflow when YAML is provided
+      //     expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+      //     expect(mockParseWorkflowYamlToJSON).toHaveBeenCalledWith(differentYaml, {});
+      //     expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+      //       expect.objectContaining({
+      //         yaml: differentYaml,
+      //         id: 'existing-workflow-id',
+      //       }),
+      //       expect.any(Object),
+      //       mockRequest
+      //     );
+      //   });
     });
 
     describe('when missing required parameters', () => {

@@ -24,14 +24,13 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   ExecutionStatus,
-  ExecutionType,
   UpdatedWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
@@ -40,9 +39,10 @@ import {
   WorkflowExecutionListDto,
   WorkflowListDto,
   WorkflowStatsDto,
-  WorkflowYaml,
-} from '@kbn/workflows';
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+  WorkflowYaml} from '@kbn/workflows';
+import {
+  ExecutionType
+ transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';

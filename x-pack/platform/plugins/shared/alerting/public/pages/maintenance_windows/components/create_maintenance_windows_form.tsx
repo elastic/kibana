@@ -417,6 +417,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
             <EuiCallOut
+              announceOnMount
               data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
               title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
               color="warning"
