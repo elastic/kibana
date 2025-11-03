@@ -23,7 +23,7 @@ import {
   EuiButton,
   EuiPopoverFooter,
 } from '@elastic/eui';
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, PropsWithChildren } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +37,7 @@ const COLUMN_INDEX_PROP = 'data-column-index';
 
 const options = [
   {
-    value: 'Integer',
+    value: 'number',
     inputDisplay: (
       <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
         <FieldIcon type="number" label="Integer" />
@@ -87,7 +87,9 @@ export const getColumnInputRenderer = (
         initialColumnType={columnType}
         columnIndex={columnIndex}
         telemetryService={telemetryService}
-      />
+      >
+        {column.display}
+      </AddColumnHeader>
     ),
     displayHeaderCellProps: { [COLUMN_INDEX_PROP]: columnIndex } as HTMLAttributes<HTMLDivElement>,
     actions: {
@@ -146,7 +148,8 @@ export const AddColumnHeader = ({
   initialColumnType,
   columnIndex,
   telemetryService,
-}: AddColumnHeaderProps) => {
+  children,
+}: PropsWithChildren<AddColumnHeaderProps>) => {
   const { euiTheme } = useEuiTheme();
 
   const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
@@ -178,7 +181,7 @@ export const AddColumnHeader = ({
       defaultMessage="Add a column…"
     />
   ) : (
-    initialColumnName
+    children // The default column header display comming from UnifiedDataTable, the type icon + column name
   );
 
   const errorMessage = useMemo(() => {
