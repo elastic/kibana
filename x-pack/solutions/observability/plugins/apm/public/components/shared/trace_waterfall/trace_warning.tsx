@@ -19,6 +19,14 @@ const FALLBACK_WARNING = i18n.translate(
   }
 );
 
+const INSTRUMENTATION_WARNING = i18n.translate(
+  'xpack.apm.traceWarning.euiCallOut.aDuplicatedSpanWasLabel',
+  {
+    defaultMessage:
+      'A duplicated span was detected. This indicates a problem with how your application has been instrumented, as span IDs are meant to be unique.',
+  }
+);
+
 export function TraceWarning({ children }: { children: React.ReactNode }) {
   const { traceState } = useTraceWaterfallContext();
 
@@ -45,6 +53,16 @@ export function TraceWarning({ children }: { children: React.ReactNode }) {
           color="warning"
           size="s"
           title={FALLBACK_WARNING}
+        />
+      );
+
+    case TraceDataState.Invalid:
+      return (
+        <EuiCallOut
+          data-test-subj="traceWarning"
+          color="danger"
+          size="s"
+          title={INSTRUMENTATION_WARNING}
         />
       );
 

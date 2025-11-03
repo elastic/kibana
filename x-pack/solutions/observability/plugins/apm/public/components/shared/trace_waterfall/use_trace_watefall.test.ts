@@ -171,7 +171,7 @@ describe('getFlattenedTraceWaterfall', () => {
     expect(result[1].depth).toBe(1);
   });
 
-  it('guards against invalid span lists', () => {
+  it('errors when it encounters invalid trace documents', () => {
     // We have a duplicate span id, that is both a root span and a child span
     // This indicates an instrumentation error. We should never be hitting this
     // particular case in normal/correctly configured tracing.
@@ -227,20 +227,15 @@ describe('getFlattenedTraceWaterfall', () => {
 
     const { orphans, rootItem } = getRootItemOrFallback(invalidMap, invalidSpans);
 
-    const result = getTraceWaterfall({
-      rootItem: rootItem!,
-      parentChildMap: invalidMap,
-      orphans: orphans!,
-      colorMap: serviceColorsMap,
-      colorBy: WaterfallLegendType.ServiceName,
-    });
-
-    // The duplicate span ID is not rendered, and we prevent
-    // a call stack overflow from occurring.
-    expect(result.length).toBe(3);
-    expect(result[0].id).toBe('b5');
-    expect(result[1].id).toBe('d8');
-    expect(result[2].id).toBe('9d');
+    expect(() =>
+      getTraceWaterfall({
+        rootItem: rootItem!,
+        parentChildMap: invalidMap,
+        orphans: orphans!,
+        colorMap: serviceColorsMap,
+        colorBy: WaterfallLegendType.ServiceName,
+      })
+    ).toThrowError('Duplicate span id detected');
   });
 });
 

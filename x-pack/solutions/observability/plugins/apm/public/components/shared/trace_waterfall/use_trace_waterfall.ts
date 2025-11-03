@@ -26,33 +26,45 @@ export function useTraceWaterfall({
   isFiltered?: boolean;
 }) {
   const waterfall = useMemo(() => {
-    const legends = getLegends(traceItems);
-    const colorBy = getColorByType(legends);
-    const colorMap = createColorLookupMap(legends);
-    const traceParentChildrenMap = getTraceParentChildrenMap(traceItems, isFiltered);
-    const { rootItem, traceState, orphans } = getRootItemOrFallback(
-      traceParentChildrenMap,
-      traceItems
-    );
-    const traceWaterfall = rootItem
-      ? getTraceWaterfall({
-          rootItem,
-          parentChildMap: traceParentChildrenMap,
-          orphans,
-          colorMap,
-          colorBy,
-        })
-      : [];
+    try {
+      const legends = getLegends(traceItems);
+      const colorBy = getColorByType(legends);
+      const colorMap = createColorLookupMap(legends);
+      const traceParentChildrenMap = getTraceParentChildrenMap(traceItems, isFiltered);
+      const { rootItem, traceState, orphans } = getRootItemOrFallback(
+        traceParentChildrenMap,
+        traceItems
+      );
 
-    return {
-      rootItem,
-      traceState,
-      traceWaterfall,
-      duration: getTraceWaterfallDuration(traceWaterfall),
-      maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
-      legends,
-      colorBy,
-    };
+      const traceWaterfall = rootItem
+        ? getTraceWaterfall({
+            rootItem,
+            parentChildMap: traceParentChildrenMap,
+            orphans,
+            colorMap,
+            colorBy,
+          })
+        : [];
+
+      return {
+        rootItem,
+        traceState,
+        traceWaterfall,
+        duration: getTraceWaterfallDuration(traceWaterfall),
+        maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
+        legends,
+        colorBy,
+      };
+    } catch (e) {
+      return {
+        traceState: TraceDataState.Invalid,
+        traceWaterfall: [],
+        legends: [],
+        duration: 0,
+        maxDepth: 0,
+        colorBy: WaterfallLegendType.Type,
+      };
+    }
   }, [traceItems, isFiltered]);
 
   return waterfall;
@@ -136,6 +148,7 @@ export enum TraceDataState {
   Full = 'full',
   Partial = 'partial',
   Empty = 'empty',
+  Invalid = 'invalid',
 }
 
 export function getRootItemOrFallback(
@@ -235,7 +248,7 @@ export function getTraceWaterfall({
       // present in the flattened list, so we return an empty array so we don't duplicate
       // spans. This should guard against circular or unusual links between spans.
       if (visitor.has(child.id)) {
-        return [];
+        throw new Error('Duplicate span id detected');
       }
 
       // If we haven't visited it before, then we can process the waterfall item.
