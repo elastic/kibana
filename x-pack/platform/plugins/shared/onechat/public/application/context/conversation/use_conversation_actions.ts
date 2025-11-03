@@ -61,7 +61,6 @@ export interface ConversationActions {
 
 interface UseConversationActionsParams {
   conversationId?: string;
-  queryKey: string[];
   queryClient: QueryClient;
   conversationsService: ConversationsService;
   onConversationCreated?: (params: { conversationId: string; title: string }) => void;
@@ -70,13 +69,13 @@ interface UseConversationActionsParams {
 
 export const useConversationActions = ({
   conversationId,
-  queryKey,
   queryClient,
   conversationsService,
   onConversationCreated,
   onDeleteConversation,
 }: UseConversationActionsParams): ConversationActions => {
   const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
 
   const setConversation = useCallback(
     (updater: (conversation?: Conversation) => Conversation) => {

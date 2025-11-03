@@ -58,6 +58,7 @@ export const ShareMenuTabs = () => {
       aboveTabsContent={
         showAccessModeContainer ? (sharingData?.accessModeContainer as ReactNode) : null
       }
+      outsideClickCloses
     />
   ) : null;
 };
