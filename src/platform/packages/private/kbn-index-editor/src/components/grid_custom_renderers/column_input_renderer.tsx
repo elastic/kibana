@@ -37,7 +37,7 @@ const COLUMN_INDEX_PROP = 'data-column-index';
 
 const options = [
   {
-    value: 'number',
+    value: 'integer',
     inputDisplay: (
       <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
         <FieldIcon type="number" label="Integer" />

@@ -408,9 +408,15 @@ export class IndexUpdateService {
       const unsavedFields = pendingColumnsToBeSaved
         .filter((column) => !dataView.fields.getByName(column.name))
         .map((column) => {
+          let type = column.fieldType ?? KBN_FIELD_TYPES.UNKNOWN;
+          if (type === 'integer') {
+            // HD Change!!!!
+            type = 'number';
+          }
           return dataView.fields.create({
             name: column.name,
-            type: column.fieldType ?? KBN_FIELD_TYPES.UNKNOWN,
+            type,
+            esTypes: column.fieldType ? [column.fieldType] : undefined,
             aggregatable: true,
             searchable: true,
           });
@@ -516,17 +522,36 @@ export class IndexUpdateService {
     this._subscription.add(
       this._flush$
         .pipe(
-          withLatestFrom(this.bufferState$),
-          map(([, updates]) => updates),
+          withLatestFrom(this.bufferState$, this._pendingColumnsToBeSaved$),
+          map(([, updates, newColumns]) => ({ updates, newColumns })),
           skipWhile(() => !this.isIndexCreated()),
-          filter((updates) => updates.length > 0),
-          map((updates) => ({ updates, startTime: Date.now() })),
+          filter(({ updates }) => updates.length > 0),
+          map(({ updates, newColumns }) => ({
+            updates,
+            newColumns,
+            startTime: Date.now(),
+          })),
           tap(() => {
             this._isSaving$.next(true);
           }),
           // Save updates
-          exhaustMap(({ updates, startTime }) => {
-            return from(this.bulkUpdate(updates)).pipe(
+          exhaustMap(({ updates, newColumns, startTime }) => {
+            // First update index mapping for new columns
+            const newFieldsMapping = newColumns
+              .filter((col) => !isPlaceholderColumn(col.name) && col.fieldType)
+              .reduce<Record<string, { type: string }>>((acc, col) => {
+                acc[col.name] = { type: col.fieldType! }; // Field type is defined due to the filter above
+                return acc;
+              }, {});
+
+            const updateMappingPromise =
+              Object.keys(newFieldsMapping).length > 0
+                ? this.updateIndexMappings(newFieldsMapping)
+                : Promise.resolve();
+
+            return from(updateMappingPromise).pipe(
+              // Then save all updates using a bulk request
+              switchMap(() => from(this.bulkUpdate(updates))),
               catchError((errors) => {
                 return of({
                   bulkOperations: [],
@@ -958,17 +983,26 @@ export class IndexUpdateService {
     };
   }
 
-  private async updateIndexMapping(newFields: Record<string, string>) {
+  private async updateIndexMappings(newFields: Record<string, { type: string }>): Promise<void> {
     const body = JSON.stringify({
-      fields: newFields,
+      properties: newFields,
     });
 
-    await this.http.put(
-      `/internal/esql/lookup_index/${encodeURIComponent(this.getIndexName()!)}/mappings`,
-      {
-        body,
-      }
-    );
+    try {
+      await this.http.put(
+        `/internal/esql/lookup_index/${encodeURIComponent(this.getIndexName()!)}/mappings`,
+        {
+          body,
+        }
+      );
+    } catch (error) {
+      this.notifications.toasts.addError(error, {
+        title: i18n.translate('indexEditor.indexManagement.updateMappingErrorTitle', {
+          defaultMessage: 'Error updating index mapping',
+        }),
+      });
+      throw error;
+    }
   }
 
   public addNewColumn() {
@@ -1037,7 +1071,9 @@ export class IndexUpdateService {
   public async createIndex({ exitAfterFlush = false }) {
     try {
       this._isSaving$.next(true);
-      await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+      await this.http.post(
+        `/internal/esql/lookup_index/${encodeURIComponent(this.getIndexName()!)}`
+      );
 
       this.setIndexCreated(true);
       this.flush({ exitAfterFlush });

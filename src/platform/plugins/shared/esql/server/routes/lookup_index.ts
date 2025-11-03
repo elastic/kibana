@@ -143,7 +143,7 @@ export const registerLookupIndexRoutes = (
 
   router.put(
     {
-      path: `/internal/esql/lookup_index/{indexName}/mapping`,
+      path: `/internal/esql/lookup_index/{indexName}/mappings`,
       security: {
         authz: {
           enabled: false,
@@ -151,19 +151,23 @@ export const registerLookupIndexRoutes = (
         },
       },
       validate: {
-        body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+        body: schema.object({
+          properties: schema.object({}, { unknowns: 'allow' }),
+        }),
         params: schema.object({
           indexName: schema.string(),
         }),
       },
     },
-    async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
+    async (requestHandlerContext, request, response) => {
+      const core = await requestHandlerContext.core;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+
       const { indexName } = request.params;
 
       try {
-        const responseBody = await client.asCurrentUser.indices.putMapping({
-          properties: request.body,
+        const responseBody = await esClient.indices.putMapping({
+          properties: request.body.properties,
           index: indexName,
         });
         return response.ok({ body: responseBody });
