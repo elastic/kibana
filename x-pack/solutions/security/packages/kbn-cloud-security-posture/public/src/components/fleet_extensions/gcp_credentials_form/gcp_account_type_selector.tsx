@@ -144,7 +144,7 @@ export const GcpAccountTypeSelect = ({
       <EuiSpacer size="l" />
       {!gcpOrganizationEnabled && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount={false} color="warning">
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.organizationNotSupportedMessage"
               defaultMessage="GCP Organization not supported in current integration version. Please upgrade to the latest version to enable GCP Organizations integration."
