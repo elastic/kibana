@@ -10,21 +10,13 @@ import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugi
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { LlmProxy } from '../utils/create_llm_proxy';
 import { createLlmProxy } from '../utils/create_llm_proxy';
+import { clearConversations } from '../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-
-  const messages: Message[] = [
-    {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.User,
-        content: 'Good morning, bot!',
-      },
-    },
-  ];
+  const es = getService('es');
 
   describe('/api/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
@@ -32,29 +24,55 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let llmProxy: LlmProxy;
     let connectorId: string;
 
+    const defaultUserPrompt = 'Good morning, bot!';
+
+    interface NonStreamingChatResponse {
+      conversationId: string;
+      connectorId: string;
+      data?: string;
+    }
+
     async function callPublicChatComplete({
       actions,
       instructions,
       persist = true,
+      isStream,
+      conversationId,
+      messages,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       instructions?: Array<string | Instruction>;
       persist?: boolean;
-    }) {
-      const response = await observabilityAIAssistantAPIClient.admin({
+      isStream?: boolean;
+      conversationId?: string;
+      messages?: Message[];
+    }): Promise<string | NonStreamingChatResponse> {
+      const defaultMessages: Message[] = [
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.User,
+            content: defaultUserPrompt,
+          },
+        },
+      ];
+
+      const { body } = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
           body: {
-            messages,
+            messages: messages ?? defaultMessages,
             connectorId,
             persist,
             actions,
             instructions,
+            isStream,
+            conversationId,
           },
         },
       });
 
-      return String(response.body);
+      return String(body);
     }
 
     before(async () => {
@@ -93,6 +111,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'my_action',
           arguments: () => JSON.stringify({ foo: 'bar' }),
+          when: (body) => {
+            const content = body.messages?.[0]?.content as string;
+            return Boolean(content.includes('This is a random instruction'));
+          },
         });
 
         await callPublicChatComplete({
@@ -117,7 +139,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptTitle('My Title');
         void llmProxy.interceptWithResponse('Hello');
 
-        responseBody = await callPublicChatComplete({});
+        responseBody = (await callPublicChatComplete({})) as string;
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
@@ -175,6 +197,99 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           id: String(parsedChunk.id),
           created: Number(parsedChunk.created),
         });
+      });
+    });
+
+    // Skipped because `isStream` has been temporarily removed from the public API
+    describe.skip('when isStream:false and persist:false', () => {
+      let conversationResponseBody: NonStreamingChatResponse;
+
+      before(async () => {
+        void llmProxy.interceptWithResponse('Hello sync');
+
+        conversationResponseBody = (await callPublicChatComplete({
+          isStream: false,
+          persist: false,
+        })) as NonStreamingChatResponse;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      });
+
+      it('returns the connector metadata and assistant response', () => {
+        expect(conversationResponseBody.conversationId).to.be.a('string');
+        expect(conversationResponseBody.connectorId).to.be(connectorId);
+        expect(conversationResponseBody.data).to.contain('Hello sync');
+      });
+    });
+
+    // Skipped because `isStream` has been temporarily removed from the public API
+    describe.skip('when isStream:false for existing conversation', () => {
+      const followUpQuestion = 'Can you give me more details?';
+      const followUpAnswer = 'Yes John. Here are some more details: yadadada.';
+      let createdConversationResponse: NonStreamingChatResponse;
+      let updatedConversationResponse: NonStreamingChatResponse;
+      let conversationMessages: Message[];
+
+      before(async () => {
+        await clearConversations(es);
+
+        void llmProxy.interceptTitle('Conversation that will be updated');
+        void llmProxy.interceptWithResponse('Good morning, John!');
+
+        conversationMessages = [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: defaultUserPrompt,
+            },
+          },
+        ];
+
+        createdConversationResponse = (await callPublicChatComplete({
+          messages: conversationMessages,
+          persist: true,
+          isStream: false,
+        })) as NonStreamingChatResponse;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        void llmProxy.interceptWithResponse(followUpAnswer);
+
+        conversationMessages = [
+          ...conversationMessages,
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: followUpQuestion,
+            },
+          },
+        ];
+
+        updatedConversationResponse = (await callPublicChatComplete({
+          messages: conversationMessages,
+          persist: true,
+          isStream: false,
+          conversationId: createdConversationResponse.conversationId,
+        })) as NonStreamingChatResponse;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      });
+
+      after(async () => {
+        await clearConversations(es);
+      });
+
+      it('retains the original conversation id', () => {
+        expect(updatedConversationResponse.conversationId).to.be(
+          createdConversationResponse.conversationId
+        );
+      });
+
+      it('includes the follow-up assistant response', () => {
+        expect(updatedConversationResponse.data).to.be(followUpAnswer);
+        expect(updatedConversationResponse.connectorId).to.be(connectorId);
       });
     });
   });
