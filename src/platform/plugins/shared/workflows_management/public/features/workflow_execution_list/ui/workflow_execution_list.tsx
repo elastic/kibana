@@ -133,6 +133,7 @@ export const WorkflowExecutionList = ({
               <EuiFlexItem grow={false}>
                 <WorkflowExecutionListItem
                   status={execution.status}
+                  isTestRun={execution.isTestRun}
                   startedAt={new Date(execution.startedAt)}
                   duration={execution.duration}
                   selected={execution.id === selectedId}

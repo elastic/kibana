@@ -29,6 +29,7 @@ import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
   selected: boolean;
@@ -37,6 +38,7 @@ interface WorkflowExecutionListItemProps {
 
 export const WorkflowExecutionListItem = ({
   status,
+  isTestRun,
   startedAt,
   duration,
   selected = false,
@@ -75,6 +77,7 @@ export const WorkflowExecutionListItem = ({
         <EuiFlexItem css={styles.iconContainer}>
           {getExecutionStatusIcon(euiTheme, status)}
         </EuiFlexItem>
+
         <EuiFlexItem css={styles.contentContainer}>
           <EuiFlexGroup direction="column" css={styles.content} gutterSize="xs">
             <EuiFlexItem>
@@ -111,7 +114,16 @@ export const WorkflowExecutionListItem = ({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <span css={styles.duration}>{formattedDuration}</span>
+              <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+                {isTestRun && (
+                  <EuiFlexItem>
+                    <EuiIcon type="flask" color={euiTheme.colors.backgroundFilledText} />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <span css={styles.duration}>{formattedDuration}</span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             {onClick ? (
               <EuiFlexItem grow={false}>

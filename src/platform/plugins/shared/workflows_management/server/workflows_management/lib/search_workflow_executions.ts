@@ -74,6 +74,7 @@ function transformToWorkflowExecutionListModel(
         id: hit._id!,
         stepId: workflowExecution.stepId,
         status: workflowExecution.status,
+        isTestRun: workflowExecution.isTestRun ?? false,
         startedAt: workflowExecution.startedAt,
         finishedAt: workflowExecution.finishedAt,
         duration: workflowExecution.duration,

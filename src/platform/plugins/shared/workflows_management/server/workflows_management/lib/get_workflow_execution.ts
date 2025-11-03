@@ -92,6 +92,7 @@ function transformToWorkflowExecutionDetailDto(
   return {
     ...workflowExecution,
     id,
+    isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
     stepExecutions,
     triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
