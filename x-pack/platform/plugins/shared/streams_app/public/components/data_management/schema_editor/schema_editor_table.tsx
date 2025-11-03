@@ -176,7 +176,14 @@ const createCellRenderer =
 
     if (columnId === 'status') {
       const editorField = field as SchemaEditorField;
-      return <FieldStatusBadge status={status} uncommitted={editorField.uncommitted} />;
+      const streamType = getStreamTypeFromDefinition(stream);
+      return (
+        <FieldStatusBadge
+          status={status}
+          uncommitted={editorField.uncommitted}
+          streamType={streamType}
+        />
+      );
     }
 
     if (columnId === 'source') {

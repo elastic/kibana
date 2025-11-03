@@ -84,10 +84,19 @@ export const FIELD_STATUS_MAP = {
   unmapped: {
     color: 'default',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmappedStatusLabel', {
-      defaultMessage: 'Unmanaged',
+      defaultMessage: 'Unmapped',
     }),
     tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmappedStatusTooltip', {
       defaultMessage: 'The mapping for this field is not managed by this stream or a parent.',
+    }),
+  },
+  dynamic: {
+    color: 'default',
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorDynamicStatusLabel', {
+      defaultMessage: 'Dynamic',
+    }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorDynamicStatusTooltip', {
+      defaultMessage: 'The mapping for this field is controlled by the underlying index template.',
     }),
   },
   pending: {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SchemaEditorField } from './types';
 
@@ -16,17 +16,26 @@ const FIELD_RESULT_MAP = {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorNewResultLabel', {
       defaultMessage: 'New',
     }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorNewResultTooltip', {
+      defaultMessage: 'The simulated processing steps newly introduce this field.',
+    }),
   },
   modified: {
     color: 'warning' as const,
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorModifiedResultLabel', {
       defaultMessage: 'Modified',
     }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorModifiedResultTooltip', {
+      defaultMessage: 'The simulated processing steps change this field.',
+    }),
   },
   unchanged: {
     color: 'default' as const,
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorUnchangedResultLabel', {
       defaultMessage: 'Unchanged',
+    }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorUnchangedResultTooltip', {
+      defaultMessage: 'The simulated processing steps do not modify this field.',
     }),
   },
 };
@@ -37,6 +46,10 @@ export const FieldResultBadge = ({ result }: { result: SchemaEditorField['result
   }
 
   return (
-    <EuiBadge color={FIELD_RESULT_MAP[result].color}>{FIELD_RESULT_MAP[result].label}</EuiBadge>
+    <EuiToolTip content={FIELD_RESULT_MAP[result].tooltip}>
+      <EuiBadge tabIndex={0} color={FIELD_RESULT_MAP[result].color}>
+        {FIELD_RESULT_MAP[result].label}
+      </EuiBadge>
+    </EuiToolTip>
   );
 };

@@ -187,7 +187,13 @@ export function SchemaChangesReviewModal({
         }),
         width: '200px',
         render: (status: string, field: SchemaEditorField) => {
-          return <FieldStatusBadge status={status as any} uncommitted={field.uncommitted} />;
+          return (
+            <FieldStatusBadge
+              status={status as any}
+              uncommitted={field.uncommitted}
+              streamType={streamType}
+            />
+          );
         },
       },
     ];
