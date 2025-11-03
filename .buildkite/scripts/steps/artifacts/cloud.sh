@@ -89,6 +89,9 @@ echo "ES: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
 # Disable ansi color output for Node.js as we want to get plain values when executing node as a script runner below
 export FORCE_COLOR=0
 
+# Needed to skip modifying the refresh interval, we don't have required permissions. https://github.com/elastic/kibana/pull/238634
+export TEST_CLOUD=1
+
 export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).protocol.replace(':', ''))")
 export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).hostname)")
 export TEST_KIBANA_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).port || 443)")
