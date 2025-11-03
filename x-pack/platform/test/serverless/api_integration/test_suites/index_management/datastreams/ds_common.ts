@@ -7,14 +7,8 @@
 
 import expect from '@kbn/expect';
 
-<<<<<<< HEAD:x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams.ts
-import { DataStream } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
-=======
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
->>>>>>> f8984ec6420 ([Index Management] Branch data streams api tests lifecycle validation (#241105)):x-pack/platform/test/serverless/api_integration/test_suites/index_management/datastreams/ds_common.ts
 
 const API_BASE_PATH = '/api/index_management';
 
