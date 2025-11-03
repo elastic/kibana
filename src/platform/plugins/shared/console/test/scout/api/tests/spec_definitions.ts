@@ -20,13 +20,14 @@ apiTest.describe(
       adminApiCredentials = await requestAuth.getApiKey('admin');
     });
     apiTest('returns autocomplete definitions', async ({ apiClient }) => {
-      const { body } = await apiClient.get('api/console/api_server', {
+      const { body, statusCode } = await apiClient.get('api/console/api_server', {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
+      expect(statusCode).toBe(200);
       await expect(body.es).toBeOK();
       const {
         es: { name, globals, endpoints },
