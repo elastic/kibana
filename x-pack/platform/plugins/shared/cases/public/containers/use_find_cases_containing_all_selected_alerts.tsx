@@ -12,8 +12,8 @@ import { findCasesByAttachmentId } from './api';
 const normalizeQueryKey = (selectedAlertIds: string[], caseIds: string[]) =>
   [...new Set([...selectedAlertIds, ...caseIds])].sort();
 
-export const useFindCasesContainingAllSelectedAlerts = (
-  selectedAlertIds: string[],
+export const useFindCasesContainingAllSelectedDocuments = (
+  selectedDocumentIds: string[],
   caseIds: string[]
 ) => {
   return useQuery<
@@ -22,10 +22,10 @@ export const useFindCasesContainingAllSelectedAlerts = (
     { casesWithAllAttachments?: string[] },
     readonly string[]
   >(
-    normalizeQueryKey(selectedAlertIds, caseIds),
-    () => findCasesByAttachmentId(selectedAlertIds, caseIds),
+    normalizeQueryKey(selectedDocumentIds, caseIds),
+    () => findCasesByAttachmentId(selectedDocumentIds, caseIds),
     {
-      enabled: selectedAlertIds.length > 0 && caseIds.length > 0,
+      enabled: selectedDocumentIds.length > 0 && caseIds.length > 0,
     }
   );
 };

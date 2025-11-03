@@ -13,18 +13,18 @@ import { INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL } from '../../../../common/co
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { type CasesClient } from '../../../client';
 import { type caseApiV1 } from '../../../../common/types/api';
-import { buildFilter } from '../../../client/utils';
+import { buildFilter, combineFilters } from '../../../client/utils';
 
 // cases modal shows 10 cases by default
 const MAX_CONCURRENT_CASES = 10;
 
-export const findCasesContainingAllAlertsRoute = createCasesRoute({
+export const findCasesContainingAllDocumentsRoute = createCasesRoute({
   method: 'post',
   path: INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     body: schema.object({
-      alertIds: schema.arrayOf(schema.string()),
+      documentIds: schema.arrayOf(schema.string()),
       caseIds: schema.arrayOf(schema.string()),
     }),
   },
@@ -36,7 +36,8 @@ export const findCasesContainingAllAlertsRoute = createCasesRoute({
     request,
     response,
   }): Promise<IKibanaResponse<{ casesWithAllAttachments: string[] }>> => {
-    const { alertIds, caseIds } = request.body as caseApiV1.FindCasesContainingAllAlertsRequest;
+    const { documentIds: alertIds, caseIds } =
+      request.body as caseApiV1.FindCasesContainingAllDocumentsRequest;
 
     if (!caseIds.length || !alertIds.length) {
       return response.ok({
@@ -46,7 +47,7 @@ export const findCasesContainingAllAlertsRoute = createCasesRoute({
 
     const caseIdsToCheck = Array.isArray(caseIds) ? caseIds : [caseIds];
 
-    const alertIdSet = new Set(alertIds);
+    const documentIdSet = new Set(alertIds);
     const casesContext = await context.cases;
     const casesClient = await casesContext.getCasesClient();
 
@@ -54,7 +55,7 @@ export const findCasesContainingAllAlertsRoute = createCasesRoute({
 
     const results: Array<string | null> = await Promise.all(
       caseIdsToCheck.map((caseId) => {
-        return limit(async () => processCase(casesClient, caseId, alertIdSet));
+        return limit(async () => processCase(casesClient, caseId, documentIdSet));
       })
     );
 
@@ -76,17 +77,25 @@ export const isStringOrArray = (value: unknown): value is string | string[] => {
 export const processCase = async (
   casesClient: CasesClient,
   caseId: string,
-  alertIds: Set<string>
+  documentIds: Set<string>
 ) => {
-  const alertsForCase = await casesClient.attachments.getAllAlertsAttachToCase({
+  const documentsForCase = await casesClient.attachments.getAllAlertsAttachToCase({
     caseId,
-    filter: buildFilter({
-      filters: Array.from(alertIds),
-      field: 'alertId',
-      operator: 'or',
-      type: 'cases-comments',
-    }),
+    filter: combineFilters([
+      buildFilter({
+        filters: Array.from(documentIds),
+        field: 'eventId',
+        operator: 'or',
+        type: 'cases-comments',
+      }),
+      buildFilter({
+        filters: Array.from(documentIds),
+        field: 'alertId',
+        operator: 'or',
+        type: 'cases-comments',
+      }),
+    ]),
   });
 
-  return alertIds.size === alertsForCase.length ? caseId : null;
+  return documentIds.size === documentsForCase.length ? caseId : null;
 };

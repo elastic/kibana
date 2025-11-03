@@ -533,12 +533,12 @@ export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
 export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
 
-export const FindCasesContainingAllAlertsRequestRt = rt.exact(
+export const FindCasesContainingAllDocumentsRequestRt = rt.exact(
   rt.type({
     /**
-     * The IDs of the alerts to find cases for.
+     * The IDs of the documents to find cases for.
      */
-    alertIds: rt.array(rt.string),
+    documentIds: rt.array(rt.string),
     // The IDs of the cases to find alerts for.
     caseIds: rt.array(rt.string),
   })
@@ -575,8 +575,8 @@ export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
 export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchRequestRt>;
 export type CasesSimilarResponse = rt.TypeOf<typeof CasesSimilarResponseRt>;
-export type FindCasesContainingAllAlertsRequest = rt.TypeOf<
-  typeof FindCasesContainingAllAlertsRequestRt
+export type FindCasesContainingAllDocumentsRequest = rt.TypeOf<
+  typeof FindCasesContainingAllDocumentsRequestRt
 >;
 export type FindCasesContainingAllAlertsResponse = rt.TypeOf<
   typeof FindCasesContainingAllAlertsResponseRt

@@ -27,6 +27,7 @@ import type {
   UserActionInternalFindResponse,
   FindCasesContainingAllAlertsResponse,
   BulkAddObservablesRequest,
+  FindCasesContainingAllDocumentsRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -189,15 +190,15 @@ export const getSingleCaseMetrics = async (
   );
 };
 
-export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
+export const findCasesByAttachmentId = async (documentIds: string[], caseIds: string[]) => {
   const response = await KibanaServices.get().http.fetch<FindCasesContainingAllAlertsResponse>(
     `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
     {
       method: 'POST',
       body: JSON.stringify({
-        alertIds,
+        documentIds,
         caseIds,
-      }),
+      } as FindCasesContainingAllDocumentsRequest),
     }
   );
   return decodeFindAllAttachedAlertsResponse(response);
