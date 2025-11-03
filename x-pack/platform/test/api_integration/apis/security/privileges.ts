@@ -252,6 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_list_read',
         'workflow_insights_all',
         'workflow_insights_read',
+        'soc_management_all',
         'global_artifact_management_all',
         'trusted_applications_all',
         'trusted_applications_read',
