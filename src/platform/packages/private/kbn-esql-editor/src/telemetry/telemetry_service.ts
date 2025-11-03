@@ -108,6 +108,8 @@ export class ESQLEditorTelemetryService {
   }
 
   public trackQuerySubmitted({ source, query }: TelemetryQuerySubmittedProps) {
+    // parsing and prettifying the raw query
+    // to remove comments for accurately measuring its length
     const { root } = Parser.parse(query);
     const prettyQuery = BasicPrettyPrinter.print(root);
     const hasLimitBeforeStats =
