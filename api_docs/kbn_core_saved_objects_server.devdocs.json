@@ -9174,10 +9174,6 @@
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts"
               },
               {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
-              },
-              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/exception_list.ts"
               },
@@ -9204,6 +9200,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/saved_object_mappings.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
               },
               {
                 "plugin": "eventAnnotation",
