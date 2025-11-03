@@ -6,7 +6,6 @@
  */
 
 import { test as base } from '@kbn/scout';
-import type { KbnClient } from '@kbn/test';
 import path from 'path';
 import fs from 'fs';
 
@@ -24,7 +23,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
     async ({ kbnClient, esClient, log }, use) => {
       const checkStatus = async (): Promise<{ has_setup: boolean; has_data: boolean }> => {
         try {
-          const response = await (kbnClient as KbnClient).request({
+          const response = await kbnClient.request({
             description: 'Check profiling status',
             path: '/api/profiling/setup/es_resources',
             method: 'GET',
@@ -39,7 +38,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
       const setupResources = async (): Promise<void> => {
         try {
           log.info('Setting up profiling resources');
-          await (kbnClient as KbnClient).request({
+          await kbnClient.request({
             description: 'Setup profiling resources',
             path: '/api/profiling/setup/es_resources',
             method: 'POST',
