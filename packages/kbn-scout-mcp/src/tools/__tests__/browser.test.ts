@@ -206,18 +206,13 @@ describe('Browser Tools', () => {
     });
 
     it('should require text parameter', async () => {
-      const result = await scoutType(mockSession, {
-        testSubj: 'searchInput',
-        text: '',
-      });
-
       // Empty string is technically provided, let's test without text field
-      const result2 = await scoutType(mockSession, {
+      const result = await scoutType(mockSession, {
         testSubj: 'searchInput',
       } as any);
 
-      expect(result2.success).toBe(false);
-      expect(result2.error).toContain('text parameter is required');
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('text parameter is required');
     });
 
     it('should validate text length', async () => {

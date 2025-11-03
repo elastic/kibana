@@ -202,8 +202,6 @@ describe('Security Validators', () => {
     });
 
     it('should reject paths with traversal attempts', () => {
-      const cwd = process.cwd();
-      const parentPath = path.resolve(cwd, '../config.json');
       // This might pass if it's still within a parent that's under cwd
       // But deep traversals should fail
       expect(() => validateConfigPath('../../../etc/config.json')).toThrow();

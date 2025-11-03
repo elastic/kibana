@@ -249,6 +249,9 @@ describe('ScoutSession', () => {
       await session.initialize();
 
       const role = {
+        elasticsearch: {
+          cluster: [],
+        },
         kibana: [
           {
             spaces: ['*'],
@@ -273,6 +276,9 @@ describe('ScoutSession', () => {
       await session.initialize();
 
       const role = {
+        elasticsearch: {
+          cluster: [],
+        },
         kibana: [{ spaces: ['*'], base: ['read'], feature: {} }],
       };
 
