@@ -65,7 +65,7 @@ interface StartDeps {
 export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
   private feedbackUrlParams$ = new BehaviorSubject<URLSearchParams | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
@@ -138,19 +138,16 @@ export class ProjectNavigationService {
         return this.projectHome$.asObservable();
       },
       setCloudUrls: (cloudUrls: CloudURLs) => {
-        // Cloud links never change, so we only need to parse them once
-        if (Object.keys(this.cloudLinks$.getValue()).length > 0) return;
-
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
       setFeedbackUrlParams: (feedbackUrlParams: URLSearchParams) => {
         this.feedbackUrlParams$.next(feedbackUrlParams);
       },
-      setProjectName: (projectName: string) => {
-        this.projectName$.next(projectName);
+      setKibanaName: (kibanaName: string) => {
+        this.kibanaName$.next(kibanaName);
       },
-      getProjectName$: () => {
-        return this.projectName$.asObservable();
+      getKibanaName$: () => {
+        return this.kibanaName$.asObservable();
       },
       getFeedbackUrlParams$: () => {
         return this.feedbackUrlParams$.asObservable();
@@ -180,12 +177,12 @@ export class ProjectNavigationService {
           this.projectBreadcrumbs$,
           this.activeNodes$,
           chromeBreadcrumbs$,
-          this.projectName$,
+          this.kibanaName$,
           this.cloudLinks$,
         ]).pipe(
-          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, projectName, cloudLinks]) => {
+          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, kibanaName, cloudLinks]) => {
             return buildBreadcrumbs({
-              projectName,
+              kibanaName,
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,

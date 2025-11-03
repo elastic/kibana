@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { number } from 'io-ts';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';

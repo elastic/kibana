@@ -32,6 +32,7 @@ export interface Props {
   isEmbeddable?: boolean;
   showLegend?: boolean;
   serviceName?: string;
+  isFiltered?: boolean;
 }
 
 export function TraceWaterfall({
@@ -45,6 +46,7 @@ export function TraceWaterfall({
   isEmbeddable = false,
   showLegend = false,
   serviceName,
+  isFiltered,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -58,6 +60,7 @@ export function TraceWaterfall({
       isEmbeddable={isEmbeddable}
       showLegend={showLegend}
       serviceName={serviceName}
+      isFiltered={isFiltered}
     >
       <TraceWarning>
         <TraceWaterfallComponent />

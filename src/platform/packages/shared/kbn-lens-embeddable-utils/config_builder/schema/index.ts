@@ -9,14 +9,16 @@
 
 import { schema } from '@kbn/config-schema';
 import { metricStateSchema } from './charts/metric';
+import { legacyMetricStateSchema } from './charts/legacy_metric';
 import type { LensApiAllMetricOperations } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 
-export const lensApiStateSchema = schema.oneOf([metricStateSchema]);
+export const lensApiStateSchema = schema.oneOf([metricStateSchema, legacyMetricStateSchema]);
 
 export type LensApiState = typeof lensApiStateSchema.type;
 
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
+export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
 
 export type NarrowByType<T, U> = T extends { type: U } ? T : never;
 

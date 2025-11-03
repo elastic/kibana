@@ -18,6 +18,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const headerPage = getPageObject('header');
   const retry = getService('retry');
+  const common = getPageObject('common');
+  const solutionNavigation = getPageObject('solutionNavigation');
 
   describe('navigation', function () {
     before(async () => {
@@ -108,6 +110,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.tour.expectHidden();
       await browser.refresh();
       await svlCommonNavigation.sidenav.tour.expectHidden();
+    });
+
+    it('opens panel on legacy management landing page', async () => {
+      await common.navigateToApp('management');
+      await testSubjects.exists('cards-navigation-page');
+      await solutionNavigation.sidenav.expectPanelExists('stack_management');
     });
   });
 }

@@ -6,8 +6,8 @@
  */
 import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { QueryObserverResult, UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import {
   MANAGEMENT_DEFAULT_PAGE,
