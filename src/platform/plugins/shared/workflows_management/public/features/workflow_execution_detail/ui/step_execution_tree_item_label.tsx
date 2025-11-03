@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, euiFontSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiFontSize, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -63,7 +63,9 @@ export function StepExecutionTreeItemLabel({
       </EuiFlexItem>
       {executionTimeMs && (
         <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>
-          {executionTimeMs ? formatDuration(executionTimeMs) : null}
+          <EuiText size="xs" color="subdued">
+            {formatDuration(executionTimeMs)}
+          </EuiText>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -19,6 +19,7 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   Subject,
   BehaviorSubject,
@@ -59,6 +60,7 @@ interface StartDeps {
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
   featureFlags: FeatureFlagsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export class ProjectNavigationService {
@@ -93,16 +95,26 @@ export class ProjectNavigationService {
   private application?: InternalApplicationStart;
   private navLinksService?: ChromeNavLinks;
   private _http?: InternalHttpStart;
+  private uiSettings?: IUiSettingsClient;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
 
   constructor(private isServerless: boolean) {}
 
-  public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
+  public start({
+    application,
+    navLinksService,
+    http,
+    chromeBreadcrumbs$,
+    logger,
+    uiSettings,
+  }: StartDeps) {
     this.application = application;
     this.navLinksService = navLinksService;
     this._http = http;
     this.logger = logger;
+    this.uiSettings = uiSettings;
+
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
@@ -121,7 +133,7 @@ export class ProjectNavigationService {
     return {
       setProjectHome: this.setProjectHome.bind(this),
       getProjectHome$: () => {
-        return this.projectHome$.asObservable();
+        return this.projectHome$.pipe(map((home) => this.uiSettings?.get('defaultRoute') || home));
       },
       setCloudUrls: (cloudUrls: CloudURLs) => {
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
