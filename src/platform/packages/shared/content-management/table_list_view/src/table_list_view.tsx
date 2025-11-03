@@ -16,6 +16,7 @@ import {
 } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { DeveloperToolbarItem } from '@kbn/developer-toolbar';
 
 export type TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
   TableListViewTableProps<T>,
@@ -97,6 +98,15 @@ export const TableListView = <T extends UserContentCommonSchema>({
         rightSideItems={additionalRightSideActions?.slice(0, 2)}
         data-test-subj="top-nav"
       />
+      <DeveloperToolbarItem id={'table-debug'}>
+        <button
+          onClick={() => {
+            alert('debug');
+          }}
+        >
+          debug
+        </button>
+      </DeveloperToolbarItem>
       <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
         {/* Any children passed to the component */}
         {children}
