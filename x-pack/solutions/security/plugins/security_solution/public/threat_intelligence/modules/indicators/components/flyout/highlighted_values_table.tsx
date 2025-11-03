@@ -38,20 +38,13 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
 }) => {
-  const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
-
-  const sanitisedIndicatorType = useMemo(
-    () => (!Array.isArray(indicatorType) && indicatorType) || '',
-    [indicatorType]
-  );
-
-  const highlightedFields = useMemo(
-    () =>
-      Object.keys(indicator.fields).filter((field) =>
-        byIndicatorType(sanitisedIndicatorType, field)
-      ),
-    [indicator.fields, sanitisedIndicatorType]
-  );
+  const highlightedFields = useMemo(() => {
+    const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
+    const sanitisedIndicatorType = (!Array.isArray(indicatorType) && indicatorType) || '';
+    return Object.keys(indicator.fields).filter((field) =>
+      byIndicatorType(sanitisedIndicatorType, field)
+    );
+  }, [indicator]);
 
   return (
     <EuiPanel hasBorder hasShadow={false}>
