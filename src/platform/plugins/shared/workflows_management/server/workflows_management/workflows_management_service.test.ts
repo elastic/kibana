@@ -1239,6 +1239,7 @@ describe('WorkflowsService', () => {
             spaceId: 'default',
             id: 'execution-1',
             status: 'completed',
+            isTestRun: false,
             startedAt: '2023-01-01T00:00:00Z',
             finishedAt: '2023-01-01T00:05:00Z',
             duration: 300000,
