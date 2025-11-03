@@ -11,9 +11,9 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
-import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
-import { Conversation } from '../application/components/conversations/conversation';
-import { EmbeddedConversationHeader } from '../application/components/conversations/embedded/header';
+import { EmbeddableConversationsProvider } from '../../../context/conversation/embeddable_conversations_provider';
+import { Conversation } from '../conversation';
+import { EmbeddedConversationHeader } from './header';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props

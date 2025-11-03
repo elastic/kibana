@@ -21,9 +21,9 @@ import { useConversationContext } from '../../context/conversation/conversation_
 import { FullScreenConversationRounds } from './full_screen/rounds_layout';
 import { FullScreenConversationInput } from './full_screen/input_layout';
 import { FullScreenNewConversationPrompt } from './full_screen/new_conversation_prompt_layout';
-import { EmbeddedConversationRounds } from './embedded/rounds_layout';
-import { EmbeddedConversationInput } from './embedded/input_layout';
-import { EmbeddedNewConversationPrompt } from './embedded/new_conversation_prompt';
+import { EmbeddedConversationRounds } from './embeddable/rounds_layout';
+import { EmbeddedConversationInput } from './embeddable/input_layout';
+import { EmbeddedNewConversationPrompt } from './embeddable/new_conversation_prompt';
 import { WelcomeText } from '../common/welcome_text';
 import { QuickNavigationCards } from './full_screen/quick_navigation_cards';
 

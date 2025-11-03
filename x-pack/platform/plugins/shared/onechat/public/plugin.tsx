@@ -41,7 +41,7 @@ import type {
   OnechatStartDependencies,
 } from './types';
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
-import type { EmbeddableConversationProps } from './embeddable/types';
+import type { EmbeddableConversationProps } from './application/components/conversations/embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
 export class OnechatPlugin

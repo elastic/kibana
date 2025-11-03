@@ -34,7 +34,7 @@ export function openConversationFlyout(
 
   const LazyConversationComponent = lazy(async () => {
     const { createEmbeddableConversation } = await import(
-      '../embeddable/create_embeddable_conversation'
+      '../application/components/conversations/embeddable/create_embeddable_conversation'
     );
     const ConversationComponent = createEmbeddableConversation({
       services,

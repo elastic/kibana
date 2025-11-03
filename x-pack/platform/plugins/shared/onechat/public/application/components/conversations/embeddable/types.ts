@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { OnechatInternalService } from '../services';
+import type { OnechatInternalService } from '../../../../services';
 
 export interface EmbeddableConversationDependencies {
   services: OnechatInternalService;

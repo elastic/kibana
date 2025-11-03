@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EmbeddableConversationProps } from '../embeddable/types';
+import type { EmbeddableConversationProps } from '../application/components/conversations/embeddable/types';
 
 export interface ConversationFlyoutProps extends EmbeddableConversationProps {
   onClose: () => void;

@@ -9,7 +9,7 @@ import React, { useMemo, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { EmbeddableConversationInternalProps } from '../../../embeddable/types';
+import type { EmbeddableConversationInternalProps } from '../../components/conversations/embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
