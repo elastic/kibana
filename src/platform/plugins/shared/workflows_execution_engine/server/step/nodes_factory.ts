@@ -172,8 +172,7 @@ export class NodesFactory {
           return new EnterWorkflowTimeoutZoneNodeImpl(
             node,
             this.workflowRuntime,
-            this.stepExecutionRuntimeFactory,
-            stepExecutionRuntime
+            this.stepExecutionRuntimeFactory
           );
         }
 
