@@ -144,7 +144,7 @@ export const AssistantOverlay = React.memo(() => {
     });
   }, []);
 
-  const flyoutRef = useRef<HTMLDivElement>();
+  const flyoutRef = useRef<HTMLDivElement | null>(null);
 
   if (!isModalVisible) return null;
 
