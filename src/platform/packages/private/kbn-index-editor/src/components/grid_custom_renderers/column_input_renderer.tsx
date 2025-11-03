@@ -19,15 +19,15 @@ import {
   EuiFormRow,
   EuiText,
   EuiSuperSelect,
-  EuiHealth,
   EuiFlexGroup,
   EuiButton,
   EuiPopoverFooter,
 } from '@elastic/eui';
-import type { HTMLAttributes, KeyboardEvent } from 'react';
+import type { HTMLAttributes } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field';
 import { isPlaceholderColumn } from '../../utils';
 import type { IndexUpdateService } from '../../index_update_service';
 import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
@@ -37,29 +37,32 @@ const COLUMN_INDEX_PROP = 'data-column-index';
 
 const options = [
   {
-    value: 'warning',
+    value: 'Integer',
     inputDisplay: (
-      <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
-        Warning
-      </EuiHealth>
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+        <FieldIcon type="number" label="Integer" />
+        <span>Integer</span>
+      </EuiFlexGroup>
     ),
     'data-test-subj': 'option-warning',
   },
   {
-    value: 'minor',
+    value: 'keyword',
     inputDisplay: (
-      <EuiHealth color="warning" style={{ lineHeight: 'inherit' }}>
-        Minor
-      </EuiHealth>
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+        <FieldIcon type="keyword" label="Keyword" />
+        <span>Keyword</span>
+      </EuiFlexGroup>
     ),
     'data-test-subj': 'option-minor',
   },
   {
-    value: 'critical',
+    value: 'text',
     inputDisplay: (
-      <EuiHealth color="danger" style={{ lineHeight: 'inherit' }}>
-        Critical
-      </EuiHealth>
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+        <FieldIcon type="text" label="Text" />
+        <span>Text</span>
+      </EuiFlexGroup>
     ),
     'data-test-subj': 'option-critical',
   },
@@ -142,19 +145,12 @@ export const AddColumnHeader = ({
 }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const [selectedType, setSelectedType] = useState(options[1].value);
-  const canSubmit = true; // HD
+  const [selectedType, setSelectedType] = useState<string | undefined>();
+
   const { columnName, setColumnName, saveColumn, resetColumnName, validationError } =
     useAddColumnName(initialColumnName);
 
-  const onBlur = useCallback(() => {
-    if (columnName && !validationError) {
-      saveColumn();
-    } else {
-      resetColumnName();
-    }
-    setEditingColumnIndex(null);
-  }, [columnName, validationError, setEditingColumnIndex, saveColumn, resetColumnName]);
+  const canSubmit = selectedType && columnName.length > 0 && !validationError;
 
   const onSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -253,72 +249,69 @@ export const AddColumnHeader = ({
           <EuiSuperSelect
             compressed
             valueOfSelected={selectedType}
+            placeholder={i18n.translate('indexEditor.columnHeaderEdit.selectATypePlaceholder', {
+              defaultMessage: 'Select option',
+            })}
+            id="typeSelect"
+            data-test-subj="indexEditorindexEditorColumnTypeSelect"
             onChange={(value) => setSelectedType(value)}
             options={options}
           />
         </EuiFormRow>
-        <EuiPopoverFooter>
-          <EuiFormRow
-            label={i18n.translate('indexEditor.columnHeaderEdit.columnNameLabel', {
-              defaultMessage: 'Name',
-            })}
-            isInvalid={!!errorMessage}
-            error={errorMessage}
-          >
-            <EuiFieldText
-              isInvalid={!!errorMessage}
-              data-test-subj="indexEditorindexEditorColumnNameInput"
-              value={columnName}
-              placeholder={i18n.translate('indexEditor.columnHeaderEdit.columnNamePlaceholder', {
-                defaultMessage: 'Choose the name of the field',
+        {selectedType && (
+          <EuiPopoverFooter>
+            <EuiFormRow
+              label={i18n.translate('indexEditor.columnHeaderEdit.columnNameLabel', {
+                defaultMessage: 'Name',
               })}
-              fullWidth
-              controlOnly
-              compressed
-              onChange={(e) => {
-                setColumnName(e.target.value);
-              }}
-              // onBlur={onBlur}
-              onKeyDown={(e: KeyboardEvent) => {
-                e.stopPropagation();
-
-                if (e.key === 'Escape') {
-                  e.preventDefault();
-                  resetColumnName();
-                  setEditingColumnIndex(null);
-                }
-              }}
-            />
-          </EuiFormRow>
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            gutterSize="m"
-            css={{ marginTop: euiTheme.size.l }}
-          >
-            <EuiButton color="text" size="s">
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="indexEditor.flyout.grid.columnHeader.cancelButton"
-                  defaultMessage="Cancel"
-                />
-              </EuiText>
-            </EuiButton>
-            <EuiButton
-              data-test-subj="indexEditorindexEditorColumnNameSaveButton"
-              fill
-              type="submit"
-              disabled={!canSubmit}
-              size="s"
+              isInvalid={!!errorMessage}
+              error={errorMessage}
             >
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="indexEditor.flyout.grid.columnHeader.saveButton"
-                  defaultMessage="Save"
-                />
-              </EuiText>
-            </EuiButton>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
+              <EuiFieldText
+                isInvalid={!!errorMessage}
+                data-test-subj="indexEditorindexEditorColumnNameInput"
+                value={columnName}
+                placeholder={i18n.translate('indexEditor.columnHeaderEdit.columnNamePlaceholder', {
+                  defaultMessage: 'Choose the name of the field',
+                })}
+                fullWidth
+                controlOnly
+                compressed
+                onChange={(e) => {
+                  setColumnName(e.target.value);
+                }}
+              />
+            </EuiFormRow>
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              gutterSize="m"
+              css={{ marginTop: euiTheme.size.l }}
+            >
+              <EuiButton color="text" size="s" onClick={() => setEditingColumnIndex(null)}>
+                <EuiText size="xs">
+                  <FormattedMessage
+                    id="indexEditor.flyout.grid.columnHeader.cancelButton"
+                    defaultMessage="Cancel"
+                  />
+                </EuiText>
+              </EuiButton>
+              <EuiButton
+                data-test-subj="indexEditorindexEditorColumnNameSaveButton"
+                fill
+                type="submit"
+                disabled={!canSubmit}
+                size="s"
+              >
+                <EuiText size="xs">
+                  <FormattedMessage
+                    id="indexEditor.flyout.grid.columnHeader.saveButton"
+                    defaultMessage="Save"
+                  />
+                </EuiText>
+              </EuiButton>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        )}
       </EuiForm>
     </EuiPopover>
   );
