@@ -290,7 +290,11 @@ export interface CommandArgumentValueSelectorProps<
   TSelection = any,
   TState = any,
   /** The metadata defined on the Command Definition */
-  TMeta = any
+  TMeta = any,
+  /** List of arguments that the command supports and that the console parses by default */
+  TArgs extends SupportedArguments = any,
+  /** The `state` that is stored for Argument Selectors. See the full definition under the ` Command ` type */
+  TSelectorArgsState extends object = any
 > {
   /**
    * The current value that was selected. This will not be displayed in the UI, but will
@@ -334,7 +338,7 @@ export interface CommandArgumentValueSelectorProps<
    * The full Command object containing command definition, input, and parsed arguments.
    * This provides context that selector components can use to access command metadata.
    */
-  command: Command<CommandDefinition<TMeta>>;
+  command: Command<CommandDefinition<TMeta>, TArgs, TSelectorArgsState>;
 
   /**
    * Callback to request focus back to the console input after selector operations.

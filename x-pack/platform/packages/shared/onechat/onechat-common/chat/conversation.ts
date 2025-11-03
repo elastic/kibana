@@ -7,6 +7,7 @@
 
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
+import type { Attachment, AttachmentInput } from '../attachments';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -16,6 +17,24 @@ export interface RoundInput {
    * A text message from the user.
    */
   message: string;
+  /**
+   * Optional attachments to provide to the agent.
+   */
+  attachments?: Attachment[];
+}
+
+/**
+ * Raw version of RoundInput, as accepted as input by the converse and agent APIs.
+ */
+export interface RawRoundInput {
+  /**
+   * A text message from the user.
+   */
+  message: string;
+  /**
+   * Optional attachments to provide to the agent.
+   */
+  attachments?: AttachmentInput[];
 }
 
 /**

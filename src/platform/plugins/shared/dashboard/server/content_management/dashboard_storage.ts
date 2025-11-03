@@ -8,8 +8,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { tagsToFindOptions } from '@kbn/content-management-utils';
-import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
 import type {
@@ -31,23 +29,7 @@ import type {
   DashboardGetOut,
 } from './latest';
 import type { DashboardCreateOut, DashboardSearchOut, DashboardUpdateOut } from './v1/types';
-
-const searchArgsToSOFindOptions = (
-  query: SearchQuery,
-  options: DashboardSearchOptions
-): SavedObjectsFindOptions => {
-  return {
-    type: DASHBOARD_SAVED_OBJECT_TYPE,
-    searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    fields: options?.fields,
-    search: query.text,
-    perPage: query.limit,
-    page: query.cursor ? +query.cursor : undefined,
-    defaultSearchOperator: 'AND',
-    namespaces: options?.spaces,
-    ...tagsToFindOptions(query.tags),
-  };
-};
+import { getSavedObjectFindOptions } from './get_saved_object_find_options';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -304,13 +286,15 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
     }
 
-    const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
-    const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
+    const soResponse = await soClient.find<DashboardSavedObjectAttributes>(
+      getSavedObjectFindOptions(query, optionsToLatest)
+    );
     const hits = soResponse.saved_objects
       .map((so) => {
         const { item } = savedObjectToItem(so, false, {
-          allowedAttributes: soQuery.fields,
+          // TODO remove allowedAttributes, fields are already filtered at saved object level
+          allowedAttributes: optionsToLatest?.fields,
           allowedReferences: optionsToLatest?.includeReferences,
         });
         return item;
