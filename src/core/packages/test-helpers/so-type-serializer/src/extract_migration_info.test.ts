@@ -10,7 +10,6 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { extractMigrationInfo } from './extract_migration_info';
-import { create } from 'lodash';
 
 const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'test-type',
@@ -23,7 +22,7 @@ const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
 const dummyMigration = jest.fn();
 const dummySchema = schema.object({});
 
-describe.only('extractMigrationInfo', () => {
+describe('extractMigrationInfo', () => {
   describe('simple fields', () => {
     it('returns the `name` from the SO type', () => {
       const type = createType({ name: 'my-type' });
@@ -161,7 +160,7 @@ describe.only('extractMigrationInfo', () => {
     });
   });
 
-  describe.only('modelVersions', () => {
+  describe('modelVersions', () => {
     it('returns a proper summary of the model versions', () => {
       const type = createType({
         modelVersions: {
@@ -319,7 +318,7 @@ describe.only('extractMigrationInfo', () => {
       expect(output.modelVersions).toEqual([]);
     });
 
-    it.only('returns the correct values for schemas', () => {
+    it('returns the correct values for schemas', () => {
       const type = createType({
         modelVersions: {
           1: {
@@ -346,7 +345,7 @@ describe.only('extractMigrationInfo', () => {
     });
   });
 
-  describe.skip('migrations and modelVersions', () => {
+  describe('migrations and modelVersions', () => {
     it('generate properties for both', () => {
       const type = createType({
         migrations: {
@@ -388,8 +387,10 @@ describe.only('extractMigrationInfo', () => {
               version: '1',
               changeTypes: ['data_backfill'],
               hasTransformation: true,
+              modelVersionHash: 'e38f4951df6a13718630d2433f359333b7e6f2f2',
               newMappings: [],
               schemas: {
+                create: false,
                 forwardCompatibility: false,
               },
             },
@@ -397,8 +398,10 @@ describe.only('extractMigrationInfo', () => {
               version: '2',
               changeTypes: ['mappings_addition'],
               hasTransformation: false,
+              modelVersionHash: '7879fa7115c6e2be00b25676f11a41b6f98fc678',
               newMappings: ['foo.type'],
               schemas: {
+                create: false,
                 forwardCompatibility: false,
               },
             },
