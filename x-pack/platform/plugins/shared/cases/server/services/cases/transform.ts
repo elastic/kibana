@@ -155,6 +155,7 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
           extractObservables: settings.extractObservables ?? false,
         },
       }),
+      total_observables: restAttributes.observables?.length ?? 0,
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
@@ -213,6 +214,7 @@ export function transformSavedObjectToExternalModel(
     ? []
     : (caseSavedObjectAttributes.customFields as CaseCustomFields);
   const observables = caseSavedObjectAttributes.observables ?? [];
+  const total_observables = observables.length;
   const incremental_id = caseSavedObjectAttributes.incremental_id ?? undefined;
   const settings = {
     syncAlerts: caseSavedObjectAttributes.settings?.syncAlerts ?? false,
@@ -230,6 +232,7 @@ export function transformSavedObjectToExternalModel(
       category,
       customFields,
       observables,
+      total_observables,
       incremental_id,
       settings,
     },
