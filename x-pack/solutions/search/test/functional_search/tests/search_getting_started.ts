@@ -78,8 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         describe('Add data button', function () {
-          // TODO: remove skip once this PR is merged: https://github.com/elastic/kibana/pull/241325
-          it.skip('navigates to the upload file page when option is selected', async () => {
+          it('navigates to the upload file page when option is selected', async () => {
             await pageObjects.searchGettingStarted.selectAddDataOption(
               'gettingStartedUploadMenuItem'
             );
