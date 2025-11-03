@@ -183,9 +183,6 @@ export default function ({ getService }: FtrProviderContext) {
       const threeMinutesAgo = new Date(now - 3 * 60 * 1000);
       threeMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
 
-      // eslint-disable-next-line no-console
-      console.log(`First doc @timestamp ${threeMinutesAgo}`);
-
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
@@ -216,9 +213,6 @@ export default function ({ getService }: FtrProviderContext) {
       // 2 minutes ago (second data point for component1)
       const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
       twoMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
-
-      // eslint-disable-next-line no-console
-      console.log(`Second doc @timestamp ${twoMinutesAgo}`);
 
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
@@ -251,9 +245,6 @@ export default function ({ getService }: FtrProviderContext) {
       const oneMinuteAgo = new Date(now - 1 * 60 * 1000);
       oneMinuteAgo.setSeconds(0, 0); // Set to exact minute boundary
 
-      // eslint-disable-next-line no-console
-      console.log(`Third doc @timestamp ${oneMinuteAgo}`);
-
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
@@ -284,9 +275,6 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/agents?withMetrics=true`)
         .expect(200);
-
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(apiResponse, null, 2));
 
       expect(apiResponse).to.have.keys('page', 'total', 'items');
       expect(apiResponse.total).to.greaterThan(1);
