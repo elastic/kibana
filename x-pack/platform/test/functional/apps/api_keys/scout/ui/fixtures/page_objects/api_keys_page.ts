@@ -33,6 +33,7 @@ export class ApiKeysPage {
   readonly crossClusterFilterButton;
   readonly ownerFilterButton;
   readonly apiKeysSearchBar;
+  readonly apiKeysTable;
 
   constructor(private readonly page: ScoutPage) {
     // Initialize all locators in the constructor
@@ -67,6 +68,7 @@ export class ApiKeysPage {
     this.crossClusterFilterButton = this.page.testSubj.locator('crossClusterFilterButton');
     this.ownerFilterButton = this.page.testSubj.locator('ownerFilterButton');
     this.apiKeysSearchBar = this.page.testSubj.locator('apiKeysSearchBar');
+    this.apiKeysTable = this.page.testSubj.locator('apiKeysTable');
   }
 
   /**
@@ -161,15 +163,6 @@ export class ApiKeysPage {
   }
 
   /**
-   * Wait for the submit button to be enabled
-   */
-  async waitForSubmitButtonOnApiKeyFlyoutEnabled() {
-    await this.formFlyoutSubmitButton.waitFor({ state: 'visible' });
-    await this.page.waitForTimeout(10000); // Wait up to 10 seconds for the button to be enabled
-    return await this.formFlyoutSubmitButton.isEnabled();
-  }
-
-  /**
    * Click the cancel button on the API key flyout
    */
   async clickCancelButtonOnApiKeyFlyout() {
@@ -190,6 +183,9 @@ export class ApiKeysPage {
    * Get the new API key creation message
    */
   async getNewApiKeyCreation() {
+    this.page.testSubj
+      .locator('apiKeyCreatedCalloutSuccessDescription')
+      .waitFor({ state: 'visible', timeout: 10000 });
     const euiCallOutHeader = this.page.locator('.euiCallOutHeader__title');
     return await euiCallOutHeader.innerText();
   }
@@ -271,6 +267,13 @@ export class ApiKeysPage {
    */
   async ensureApiKeyExists(apiKeyName: string) {
     await this.page.testSubj.locator(`apiKeyRowName-${apiKeyName}`).waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Ensure that an API key does not exist (will fail if found)
+   */
+  async ensureApiKeyDoesNotExist(apiKeyName: string) {
+    await this.page.testSubj.locator(`apiKeyRowName-${apiKeyName}`).waitFor({ state: 'detached' });
   }
 
   /**

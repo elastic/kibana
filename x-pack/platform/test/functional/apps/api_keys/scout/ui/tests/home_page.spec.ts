@@ -126,9 +126,6 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
       // Click submit
       await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
 
-      // Wait for modal to close
-      await page.waitForTimeout(1000);
-
       // Get creation message
       const creationMessage = await pageObjects.apiKeys.getNewApiKeyCreation();
 
@@ -218,7 +215,7 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
       await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
 
       // Wait for submit button to be visible
-      await pageObjects.apiKeys.waitForSubmitButtonOnApiKeyFlyoutEnabled();
+      expect(pageObjects.apiKeys.formFlyoutSubmitButton).toBeEnabled({ timeout: 10000 });
 
       // Verify flyout title
       const flyoutTitle = await pageObjects.apiKeys.getFlyoutTitleText();
@@ -408,7 +405,7 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
 
       // Refresh browser
       await page.reload();
-      await page.waitForTimeout(1000);
+      expect(pageObjects.apiKeys.apiKeysTable).toBeVisible({ timeout: 10000 });
 
       // Click on API key to open flyout
       await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
@@ -558,7 +555,6 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
     test('active/expired filter buttons work as expected', async ({ page, pageObjects }) => {
       // Click active filter
       await pageObjects.apiKeys.clickExpiryFilters('active');
-      await page.waitForTimeout(500);
 
       // Ensure active keys exist
       await pageObjects.apiKeys.ensureApiKeyExists('my api key');
@@ -566,43 +562,36 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
       await pageObjects.apiKeys.ensureApiKeyExists('test_cross_cluster');
 
       // Verify expired key does not exist
-      const expiredExists = await pageObjects.apiKeys.doesApiKeyExist('test_api_key');
-      expect(expiredExists).toBe(false);
+      await pageObjects.apiKeys.ensureApiKeyDoesNotExist('test_api_key');
 
       // Click expired filter
       await pageObjects.apiKeys.clickExpiryFilters('expired');
-      await page.waitForTimeout(500);
 
       // Ensure expired key exists
       await pageObjects.apiKeys.ensureApiKeyExists('test_api_key');
 
       // Verify active key does not exist
-      const activeExists = await pageObjects.apiKeys.doesApiKeyExist('my api key');
-      expect(activeExists).toBe(false);
+      await pageObjects.apiKeys.ensureApiKeyDoesNotExist('my api key');
 
       // Reset filter by clicking expired again
       await pageObjects.apiKeys.clickExpiryFilters('expired');
-      await page.waitForTimeout(500);
     });
 
     test('api key type filter buttons work as expected', async ({ page, pageObjects }) => {
       // Click personal filter
       await pageObjects.apiKeys.clickTypeFilters('personal');
-      await page.waitForTimeout(500);
 
       // Ensure personal key exists
       await pageObjects.apiKeys.ensureApiKeyExists('custom role api key');
 
       // Click cross_cluster filter
       await pageObjects.apiKeys.clickTypeFilters('cross_cluster');
-      await page.waitForTimeout(500);
 
       // Ensure cross-cluster key exists
       await pageObjects.apiKeys.ensureApiKeyExists('test_cross_cluster');
 
       // Click managed filter
       await pageObjects.apiKeys.clickTypeFilters('managed');
-      await page.waitForTimeout(500);
 
       // Ensure managed keys exist
       await pageObjects.apiKeys.ensureApiKeyExists('my api key');
@@ -610,17 +599,16 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
 
       // Reset filters by clicking managed again
       await pageObjects.apiKeys.clickTypeFilters('managed');
-      await page.waitForTimeout(500);
     });
 
     test('username filter buttons work as expected', async ({ page, pageObjects, samlAuth }) => {
       // Click username dropdown
       await pageObjects.apiKeys.clickUserNameDropdown();
-      await page.waitForTimeout(300);
 
       // Verify user options exist
       const customUserExists = await page.testSubj.isVisible(
-        `userProfileSelectableOption-elastic_${samlAuth.customRoleName}`
+        `userProfileSelectableOption-elastic_${samlAuth.customRoleName}`,
+        { timeout: 1000 }
       );
       expect(customUserExists).toBe(true);
 
@@ -629,18 +617,15 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
 
       // Click custom role option
       await page.testSubj.click(`userProfileSelectableOption-elastic_${samlAuth.customRoleName}`);
-      await page.waitForTimeout(500);
 
       // Ensure custom role API key exists
       await pageObjects.apiKeys.ensureApiKeyExists('custom role api key');
 
       // Deselect custom role
       await page.testSubj.click(`userProfileSelectableOption-elastic`);
-      await page.waitForTimeout(500);
 
       // Click elastic option
       await page.testSubj.click(`userProfileSelectableOption-elastic_${samlAuth.customRoleName}`);
-      await page.waitForTimeout(500);
 
       // Ensure elastic user keys exist
       await pageObjects.apiKeys.ensureApiKeyExists('my api key');
@@ -651,21 +636,18 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
     test('search bar works as expected', async ({ page, pageObjects }) => {
       // Search for custom role api key
       await pageObjects.apiKeys.setSearchBarValue('custom role api key');
-      await page.waitForTimeout(500);
 
       // Ensure API key exists
       await pageObjects.apiKeys.ensureApiKeyExists('custom role api key');
 
       // Search with exact match quotes
       await pageObjects.apiKeys.setSearchBarValue('"custom role api key"');
-      await page.waitForTimeout(500);
 
       // Ensure API key exists
       await pageObjects.apiKeys.ensureApiKeyExists('my api key');
 
       // Search with partial match
       await pageObjects.apiKeys.setSearchBarValue('"api"');
-      await page.waitForTimeout(500);
 
       // Ensure API key exists
       await pageObjects.apiKeys.ensureApiKeyExists('my api key');

@@ -349,6 +349,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
             </>
           )}
           <EuiBasicTable
+            data-test-subj="apiKeysTable"
             items={itemsToDisplay}
             itemId="id"
             columns={columns}

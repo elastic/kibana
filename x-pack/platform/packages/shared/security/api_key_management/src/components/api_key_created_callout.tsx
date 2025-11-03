@@ -31,7 +31,7 @@ export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> 
         values: { name: createdApiKey.name },
       })}
     >
-      <p>
+      <p data-test-subj="apiKeyCreatedCalloutSuccessDescription">
         <FormattedMessage
           id="xpack.security.management.apiKeys.successDescription"
           defaultMessage="Copy this key now. You will not be able to view it again."
