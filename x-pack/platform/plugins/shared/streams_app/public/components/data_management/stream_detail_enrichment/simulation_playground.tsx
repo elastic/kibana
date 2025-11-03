@@ -24,7 +24,7 @@ import {
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
-import { DataSourcesList } from './data_sources_list';
+import { DataSourcesControls } from './data_sources_controls';
 
 export const SimulationPlayground = () => {
   const { refreshSimulation, viewSimulationPreviewData, viewSimulationDetectedFields } =
@@ -85,7 +85,7 @@ export const SimulationPlayground = () => {
             </EuiTabs>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <DataSourcesList />
+            <DataSourcesControls />
           </EuiFlexItem>
           <ProgressBar />
         </EuiFlexGroup>

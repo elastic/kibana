@@ -6,6 +6,7 @@
  */
 
 import type { PropsWithChildren } from 'react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   EuiCheckableCard,
@@ -29,6 +30,7 @@ import { useDataSourceSelector } from '../state_management/data_source_state_mac
 import { AssetImage } from '../../../asset_image';
 import { PreviewTable } from '../../shared/preview_table';
 import { DATA_SOURCES_I18N } from './translations';
+import { useStreamEnrichmentEvents } from '../state_management/stream_enrichment_state_machine';
 
 interface DataSourceCardProps {
   readonly dataSourceRef: DataSourceActorRef;
@@ -43,7 +45,9 @@ export const DataSourceCard = ({
   title,
   subtitle,
   isPreviewVisible,
+  isForCompleteSimulation = false,
 }: PropsWithChildren<DataSourceCardProps>) => {
+  const { selectDataSource } = useStreamEnrichmentEvents();
   const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
 
   const { data: previewDocs, dataSource } = dataSourceState.context;
@@ -54,7 +58,7 @@ export const DataSourceCard = ({
     dataSourceState.matches({ enabled: 'loadingData' }) ||
     dataSourceState.matches({ enabled: 'debouncingChanges' });
 
-  const toggleActivity = () => dataSourceRef.send({ type: 'dataSource.toggleActivity' });
+  const handleSelection = () => selectDataSource(dataSourceRef.id);
 
   const deleteDataSource = useDiscardConfirm(
     () => dataSourceRef.send({ type: 'dataSource.delete' }),
@@ -75,13 +79,19 @@ export const DataSourceCard = ({
             <EuiTitle size="xs">
               <h3>{title ?? dataSource.type}</h3>
             </EuiTitle>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="success" isDisabled={!isEnabled}>
-                {isEnabled
-                  ? DATA_SOURCES_I18N.dataSourceCard.enabled
-                  : DATA_SOURCES_I18N.dataSourceCard.disabled}
+            {isForCompleteSimulation ? (
+              <EuiBadge color="primary">
+                {i18n.translate('xpack.streams.dataSourceCard.completeSimulationBadgeLabel', {
+                  defaultMessage: 'Complete pipeline simulation',
+                })}
               </EuiBadge>
-            </EuiFlexItem>
+            ) : (
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.streams.dataSourceCard.partialSimulationBadgeLabel', {
+                  defaultMessage: 'Partial pipeline simulation',
+                })}
+              </EuiBadge>
+            )}
             <EuiFlexItem grow />
             {canDeleteDataSource && (
               <EuiButtonIcon
@@ -96,8 +106,8 @@ export const DataSourceCard = ({
           </EuiText>
         </EuiFlexGroup>
       }
-      checkableType="checkbox"
-      onChange={toggleActivity}
+      checkableType="radio"
+      onChange={handleSelection}
       checked={isEnabled}
     >
       {children}

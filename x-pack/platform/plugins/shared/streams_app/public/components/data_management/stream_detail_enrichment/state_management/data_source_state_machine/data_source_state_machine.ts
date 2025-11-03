@@ -69,7 +69,7 @@ export const dataSourceMachine = setup({
   },
   guards: {
     isEnabled: ({ context }) => context.dataSource.enabled,
-    isDeletable: ({ context }) => context.dataSource.type !== 'random-samples', // We don't allow deleting the random-sample source to always have a data source available
+    isDeletable: ({ context }) => context.dataSource.type !== 'latest-samples', // We don't allow deleting the latest-samples source to always have a data source available
     isValidData: (_, params: { data?: SampleDocument[] }) => Array.isArray(params.data),
     shouldCollectData: ({ context, event }) => {
       assertEvent(event, 'dataSource.change');
@@ -143,7 +143,6 @@ export const dataSourceMachine = setup({
           },
         ],
       },
-      exit: [{ type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } }],
       states: {
         idle: {},
         debouncingChanges: {

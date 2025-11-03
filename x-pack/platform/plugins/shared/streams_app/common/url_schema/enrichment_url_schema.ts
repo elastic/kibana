@@ -29,13 +29,13 @@ const baseDataSourceSchema = z.object({
 /**
  * Random samples data source that retrieves data from the stream index
  */
-export interface RandomSamplesDataSource extends BaseDataSource {
-  type: 'random-samples';
+export interface LatestSamplesDataSource extends BaseDataSource {
+  type: 'latest-samples';
 }
 
-const randomSamplesDataSourceSchema = baseDataSourceSchema.extend({
-  type: z.literal('random-samples'),
-}) satisfies z.Schema<RandomSamplesDataSource>;
+const latestSamplesDataSourceSchema = baseDataSourceSchema.extend({
+  type: z.literal('latest-samples'),
+}) satisfies z.Schema<LatestSamplesDataSource>;
 
 /**
  * KQL samples data source that retrieves data based on KQL query
@@ -84,7 +84,7 @@ export const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
  * Union type of all possible data source types
  */
 export type EnrichmentDataSource =
-  | RandomSamplesDataSource
+  | LatestSamplesDataSource
   | KqlSamplesDataSource
   | CustomSamplesDataSource;
 
@@ -92,7 +92,7 @@ export type EnrichmentDataSource =
  * Schema for validating enrichment data sources
  */
 const enrichmentDataSourceSchema = z.union([
-  randomSamplesDataSourceSchema,
+  latestSamplesDataSourceSchema,
   kqlSamplesDataSourceSchema,
   customSamplesDataSourceSchema,
 ]) satisfies z.Schema<EnrichmentDataSource>;

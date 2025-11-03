@@ -53,7 +53,7 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
  * Returns the appropriate data collector function based on the data source type
  */
 function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
-  if (dataSource.type === 'random-samples') {
+  if (dataSource.type === 'latest-samples') {
     return (args: CollectorParams) => collectKqlData(args);
   }
   if (dataSource.type === 'kql-samples') {

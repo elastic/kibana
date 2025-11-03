@@ -89,24 +89,24 @@ export const DATA_SOURCES_I18N = {
       ),
     },
   },
-  randomSamples: {
-    name: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.name',
-      { defaultMessage: 'Random samples from stream' }
+  latestSamples: {
+    defaultName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.latestSamples.name',
+      { defaultMessage: 'Latest samples' }
     ),
     placeholderName: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.placeholderName',
-      { defaultMessage: 'Random samples' }
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.latestSamples.placeholderName',
+      { defaultMessage: 'Latest samples' }
     ),
     subtitle: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.subtitle',
-      { defaultMessage: 'Automatically samples random data from the stream.' }
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.latestSamples.subtitle',
+      { defaultMessage: 'Sample the last 100 documents.' }
     ),
     callout: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.callout',
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.latestSamples.callout',
       {
         defaultMessage:
-          'The random samples data source cannot be deleted to guarantee available samples for the simulation. You can still disable it if you want to focus on samples from other data sources.',
+          'The latest samples data source cannot be deleted to guarantee available samples for the simulation.',
       }
     ),
   },

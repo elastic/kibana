@@ -61,6 +61,7 @@ import {
   spawnDataSource,
   spawnStep,
   reorderSteps,
+  getActiveDataSourceId,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -417,6 +418,25 @@ export const streamEnrichmentMachine = setup({
                 },
                 { type: 'syncUrlState' },
               ],
+            },
+            'dataSources.select': {
+              actions: enqueueActions(({ enqueue, context, event }) => {
+                const activeDataSourceId = getActiveDataSourceId(context.dataSourcesRefs);
+
+                // Skip update in case the selected data source is already active
+                if (activeDataSourceId === event.id) {
+                  return;
+                }
+
+                // Disable the previous active data source
+                if (activeDataSourceId) {
+                  enqueue.sendTo(activeDataSourceId, {
+                    type: 'dataSource.toggleActivity',
+                  });
+                }
+                // Enable the selected data source
+                enqueue.sendTo(event.id, { type: 'dataSource.toggleActivity' });
+              }),
             },
             'dataSource.change': {
               actions: raise({ type: 'url.sync' }),

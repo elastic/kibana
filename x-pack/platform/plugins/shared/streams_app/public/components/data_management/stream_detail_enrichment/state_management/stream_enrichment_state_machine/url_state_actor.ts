@@ -10,7 +10,7 @@ import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import { ENRICHMENT_URL_STATE_KEY, enrichmentUrlSchema } from '../../../../../../common/url_schema';
 import type { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
-import { defaultEnrichmentUrlState, defaultRandomSamplesDataSource } from './utils';
+import { defaultEnrichmentUrlState, defaultLatestSamplesDataSource } from './utils';
 
 export function createUrlInitializerActor({
   core,
@@ -30,9 +30,9 @@ export function createUrlInitializerActor({
     const urlState = enrichmentUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
-      // Always add default random samples data source
-      if (!hasDefaultRandomSamplesDataSource(urlState.data.dataSources)) {
-        urlState.data.dataSources.push(defaultRandomSamplesDataSource);
+      // Always add default latest samples data source
+      if (!hasDefaultLatestSamplesDataSource(urlState.data.dataSources)) {
+        urlState.data.dataSources.push(defaultLatestSamplesDataSource);
       }
 
       sendBack({
@@ -51,8 +51,8 @@ export function createUrlInitializerActor({
   });
 }
 
-const hasDefaultRandomSamplesDataSource = (dataSources: EnrichmentDataSource[]) => {
-  return dataSources.some((dataSource) => dataSource.type === 'random-samples');
+const hasDefaultLatestSamplesDataSource = (dataSources: EnrichmentDataSource[]) => {
+  return dataSources.some((dataSource) => dataSource.type === 'latest-samples');
 };
 
 export function createUrlSyncAction({

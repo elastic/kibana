@@ -345,8 +345,8 @@ export function PreviewTable({
 
 function dataSourceTypeToI18nKey(type: EnrichmentDataSourceWithUIAttributes['type']) {
   switch (type) {
-    case 'random-samples':
-      return 'randomSamples';
+    case 'latest-samples':
+      return 'latestSamples';
     case 'kql-samples':
       return 'kqlDataSource';
     case 'custom-samples':

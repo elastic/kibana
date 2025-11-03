@@ -21,25 +21,25 @@ import {
 import type {
   EnrichmentUrlState,
   KqlSamplesDataSource,
-  RandomSamplesDataSource,
+  LatestSamplesDataSource,
   CustomSamplesDataSource,
   EnrichmentDataSource,
 } from '../../../../../../common/url_schema';
 import { dataSourceConverter } from '../../utils';
 import type { StepActorRef } from '../steps_state_machine';
 import { isStepUnderEdit } from '../steps_state_machine';
+import type { DataSourceActorRef } from '../data_source_state_machine';
+import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
 
-export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
-  type: 'random-samples',
-  name: i18n.translate('xpack.streams.enrichment.dataSources.randomSamples.defaultName', {
-    defaultMessage: 'Random samples',
-  }),
+export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
+  type: 'latest-samples',
+  name: DATA_SOURCES_I18N.latestSamples.defaultName,
   enabled: true,
 };
 
 export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   type: 'kql-samples',
-  name: '',
+  name: DATA_SOURCES_I18N.kqlDataSource.defaultName,
   enabled: true,
   timeRange: {
     from: 'now-15m',
@@ -54,14 +54,14 @@ export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
 
 export const defaultCustomSamplesDataSource: CustomSamplesDataSource = {
   type: 'custom-samples',
-  name: '',
+  name: DATA_SOURCES_I18N.customSamples.defaultName,
   enabled: true,
   documents: [],
 };
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
   v: 1,
-  dataSources: [defaultRandomSamplesDataSource],
+  dataSources: [defaultLatestSamplesDataSource],
 };
 
 export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
@@ -332,4 +332,11 @@ export function getRootLevelStepsMap(stepRefs: StepActorRef[]): Map<string, stri
   }
 
   return result;
+}
+
+export function getActiveDataSourceId(dataSourcesRefs: DataSourceActorRef[]): string | null {
+  return (
+    dataSourcesRefs.find((dataSourceRef) => dataSourceRef.getSnapshot().matches('enabled'))?.id ??
+    null
+  );
 }
