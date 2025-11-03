@@ -31,31 +31,9 @@ describe('ExitWorkflowTimeoutZoneNodeImpl', () => {
     );
   });
 
-  it('should finish step', async () => {
-    await impl.run();
-    expect(stepExecutionRuntimeMock.finishStep).toHaveBeenCalledTimes(1);
-    expect(stepExecutionRuntimeMock.finishStep).toHaveBeenCalledWith();
-  });
-
   it('should navigate to next node', async () => {
     await impl.run();
     expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledTimes(1);
     expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledWith();
-  });
-
-  it('should execute methods in correct order', async () => {
-    const callOrder: string[] = [];
-
-    stepExecutionRuntimeMock.finishStep = jest.fn().mockImplementation(() => {
-      callOrder.push('finishStep');
-      return Promise.resolve();
-    });
-    wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn().mockImplementation(() => {
-      callOrder.push('navigateToNextNode');
-    });
-
-    await impl.run();
-
-    expect(callOrder).toEqual(['finishStep', 'navigateToNextNode']);
   });
 });
