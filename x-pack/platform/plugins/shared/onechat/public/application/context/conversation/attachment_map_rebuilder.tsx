@@ -39,12 +39,6 @@ export const AttachmentMapRebuilder: React.FC<AttachmentMapRebuilderProps> = ({
       });
 
       attachmentContentMapRef.current = rebuiltMap;
-
-      // Log for debugging (can be removed in production)
-      // eslint-disable-next-line no-console
-      console.debug(
-        `Rebuilt attachment content map with ${rebuiltMap.size} attachments from conversation history`
-      );
     }
   }, [conversation?.rounds, attachmentContentMapRef]);
 
