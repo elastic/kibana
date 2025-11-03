@@ -181,6 +181,7 @@ export async function additionalSourcesSuggestions(
             filterText: fragment,
             text: fragment + ' | ',
             rangeToReplace,
+            sortText: '0',
           }),
           withAutoSuggest({
             ...commaCompleteItem,
