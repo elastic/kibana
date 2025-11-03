@@ -25,7 +25,7 @@ describe('getIndexPatternId', () => {
 
     const dataStartService = dataPluginMock.createStartContract()
     await getESQLAdHocDataview(esql, dataStartService.dataViews);
-    const createParameters = (dataStartService.dataViews.create as jest.Mock).mock.calls[0][0]
-    expect(createParameters.id).toBe(esqlSource.getIndexPatternId());
+    const createSpecParameter = (dataStartService.dataViews.create as jest.Mock).mock.calls[0][0]
+    expect(createSpecParameter.id).toBe(esqlSource.getIndexPatternId());
   });
 });
