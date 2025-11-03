@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
-import { createReasoningEvent, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
 import type { ResolvedConfiguration } from '../types';
 import { getActPrompt, getAnswerPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
@@ -57,7 +57,8 @@ export const createAgentGraph = ({
         getActPrompt({
           customInstructions: configuration.research.instructions,
           capabilities,
-          messages: [...state.initialMessages, ...state.addedMessages],
+          initialMessages: state.initialMessages,
+          actions: state.mainActions,
         })
       );
 
@@ -66,7 +67,6 @@ export const createAgentGraph = ({
       return {
         currentCycle: state.currentCycle + 1,
         mainActions: [action],
-        // nextMessage: response,
       };
     } catch (error) {
       // TODO: handle this and add an error action
@@ -100,7 +100,15 @@ export const createAgentGraph = ({
   };
 
   const executeTool = async (state: StateType) => {
-    const toolNodeResult = await toolNode.invoke([state.nextMessage], {});
+    const lastAction = state.mainActions[state.mainActions.length - 1];
+    if (!isToolCallAction(lastAction)) {
+      throw new Error(
+        `Error during executeTool: Invalid state - expected last action to be "tool_call" action, got "${lastAction.type}"`
+      );
+    }
+
+    const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
+    const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
     const action = processToolNodeResponse(toolNodeResult);
     return {
       mainActions: [action],
@@ -109,13 +117,7 @@ export const createAgentGraph = ({
 
   const prepareToAnswer = async (state: StateType) => {
     const maxCycleReached = state.currentCycle > state.cycleLimit;
-    let handoverNote: string | undefined;
-    if (!maxCycleReached) {
-      const handoverMessage = state.nextMessage;
-      handoverNote = extractTextContent(handoverMessage);
-    }
     return {
-      handoverNote,
       maxCycleReached,
     };
   };
@@ -131,9 +133,10 @@ export const createAgentGraph = ({
         getAnswerPrompt({
           customInstructions: configuration.answer.instructions,
           capabilities,
-          handoverNote: state.handoverNote,
           searchInterrupted: state.maxCycleReached,
-          discussion: [...state.initialMessages, ...state.addedMessages],
+          initialMessages: state.initialMessages,
+          actions: state.mainActions,
+          answerActions: state.answerActions,
         })
       );
 

@@ -25,6 +25,7 @@ export interface AgentErrorAction {
 export interface ToolCallAction {
   type: AgentActionType.ToolCall;
   tool_calls: ToolCall[];
+  message?: string;
 }
 
 export interface ExecuteToolAction {
@@ -87,10 +88,11 @@ export function createAgentErrorAction(error: Error): AgentErrorAction {
   };
 }
 
-export function toolCallAction(toolCalls: ToolCall[]): ToolCallAction {
+export function toolCallAction(toolCalls: ToolCall[], message?: string): ToolCallAction {
   return {
     type: AgentActionType.ToolCall,
     tool_calls: toolCalls,
+    message,
   };
 }
 

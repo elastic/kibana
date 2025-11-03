@@ -15,6 +15,8 @@ import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
+import type { ResearchAgentAction, AnswerAgentAction } from './actions';
+import { formatActions } from './prompts/format_actions';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -25,11 +27,13 @@ const tools = {
 export const getActPrompt = ({
   customInstructions,
   capabilities,
-  messages,
+  initialMessages,
+  actions,
 }: {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
-  messages: BaseMessageLike[];
+  initialMessages: BaseMessageLike[];
+  actions: ResearchAgentAction[];
 }): BaseMessageLike[] => {
   return [
     [
@@ -130,25 +134,28 @@ ${customInstructionsBlock(customInstructions)}
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
 - [ ] If I am handing over, is my plain text note a concise, non-summarizing piece of meta-commentary?`,
     ],
-    ...messages,
+    ...initialMessages,
+    ...formatActions({ actions }),
   ];
 };
 
 export const getAnswerPrompt = ({
   customInstructions,
-  discussion,
-  handoverNote,
+  initialMessages,
+  actions,
   searchInterrupted = false,
   capabilities,
 }: {
   customInstructions?: string;
-  discussion: BaseMessageLike[];
-  handoverNote?: string;
+  initialMessages: BaseMessageLike[];
+  actions: ResearchAgentAction[];
+  answerActions: AnswerAgentAction[];
   searchInterrupted?: boolean;
   capabilities: ResolvedAgentCapabilities;
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
 
+  // TODO: move to graph logic
   let searchInterruptedMessages: BaseMessageLike[] = [];
   if (searchInterrupted) {
     searchInterruptedMessages = [
@@ -166,18 +173,6 @@ export const getAnswerPrompt = ({
       `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** capability is to generate a natural language response to the user.
-
-## IMPORTANT CONTEXT FROM THE PREVIOUS STEP
-The previous agent has completed its research and provided the following handover note:
----
-${
-  handoverNote ??
-  (searchInterrupted
-    ? 'Research was interrupted, please answer to the user as best as you can with the collected information'
-    : 'No handover note was provided.')
-}
----
-Use the context above to inform your final answer.
 
 ## INSTRUCTIONS
 - Carefully read the original discussion and the gathered information.
@@ -216,7 +211,8 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
 - [ ] No internal tool process or names revealed (unless user asked).`,
     ],
-    ...discussion,
+    ...initialMessages,
+    ...formatActions({ actions }),
     ...searchInterruptedMessages,
   ];
 };

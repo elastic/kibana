@@ -6,9 +6,9 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
-import type { AgentAction, AnswerAgentAction, ResearchAgentAction } from './actions';
+import type { AnswerAgentAction, ResearchAgentAction } from './actions';
 
 export const StateAnnotation = Annotation.Root({
   // inputs
@@ -26,8 +26,6 @@ export const StateAnnotation = Annotation.Root({
     default: () => 0,
   }),
   maxCycleReached: Annotation<boolean>(),
-  nextMessage: Annotation<AIMessage>(), // TODO: remove
-  handoverNote: Annotation<string>(), // TODO: remove
   mainActions: Annotation<ResearchAgentAction[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
