@@ -91,9 +91,6 @@ export default function ({ getService }: FtrProviderContext) {
           hidden: false,
           failureStoreEnabled: false,
           indexMode: 'standard',
-          failureStoreRetention: {
-            defaultRetentionPeriod: '30d',
-          },
         });
       } else {
         expect(testDataStream).to.eql({
@@ -175,9 +172,6 @@ export default function ({ getService }: FtrProviderContext) {
           meteringStorageSizeBytes: 0,
           failureStoreEnabled: false,
           indexMode: 'standard',
-          failureStoreRetention: {
-            defaultRetentionPeriod: '30d',
-          },
         });
       } else {
         expect(dataStreamWithoutStorageSize).to.eql({
@@ -209,9 +203,6 @@ export default function ({ getService }: FtrProviderContext) {
           meteringStorageSizeBytes: 0,
           failureStoreEnabled: false,
           indexMode: 'standard',
-          failureStoreRetention: {
-            defaultRetentionPeriod: '30d',
-          },
         });
       }
     });
