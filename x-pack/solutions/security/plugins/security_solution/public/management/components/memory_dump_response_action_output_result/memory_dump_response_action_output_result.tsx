@@ -26,15 +26,17 @@ export interface MemoryDumpResponseActionOutputResultProps {
     ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
   >;
   /**
-   * The agent ID (from the list of agents the response action was sent to) to show results for
+   * The agent ID (from the list of agents the response action was sent to) to show results for.
+   * Defaults to the first one on the list
    */
-  agentId: string;
+  agentId?: string;
   textSize?: EuiTextProps['size'];
   'data-test-subj'?: string;
 }
 
 export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActionOutputResultProps>(
-  ({ action, agentId, 'data-test-subj': dataTestSubj, textSize = 's' }) => {
+  ({ action, agentId: _agentId, 'data-test-subj': dataTestSubj, textSize = 's' }) => {
+    const agentId = _agentId || action.agents[0];
     const testId = useTestIdGenerator(dataTestSubj);
     const agentActionState = action.agentState[agentId];
     const agentActionResult = action.outputs?.[agentId];
