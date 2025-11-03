@@ -27,20 +27,6 @@ export function SearchGettingStartedProvider({ getService }: FtrProviderContext)
       await testSubjects.click('gettingStartedAddDataButton');
       await testSubjects.click(optionDataTestSubj);
     },
-    async expectConsoleTutorial(tutorialDataTestSubj: string) {
-      await testSubjects.existOrFail(tutorialDataTestSubj);
-      // Check that the card opens the console
-      await testSubjects.click(tutorialDataTestSubj);
-      await testSubjects.existOrFail('consoleEditorContainer');
-      // Close the console
-      await testSubjects.click('consoleEmbeddedControlBar');
-      await testSubjects.existOrFail(`${tutorialDataTestSubj}-btn`);
-      // Check that the card button opens the console
-      await testSubjects.click(`${tutorialDataTestSubj}-btn`);
-      await testSubjects.existOrFail('consoleEditorContainer');
-      // Close the console
-      await testSubjects.click('consoleEmbeddedControlBar');
-    },
     async selectCodingLanguage(language: string) {
       await testSubjects.existOrFail('codeExampleLanguageSelect');
       await testSubjects.click('codeExampleLanguageSelect');

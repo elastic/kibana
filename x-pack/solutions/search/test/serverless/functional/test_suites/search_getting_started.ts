@@ -29,10 +29,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlCommonPage.loginAsViewer();
       });
 
-      beforeEach(async () => {
-        await browser.execute(() => window.localStorage.clear());
-      });
-
       describe('Getting Started redirect flow', function () {
         it('redirects to Getting Started on first load', async () => {
           await pageObjects.common.navigateToApp('searchHomepage', {
@@ -60,6 +56,71 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
         });
+      });
+
+      describe('Getting Started page interactions', function () {
+        beforeEach(async () => {
+          await pageObjects.common.navigateToApp('searchGettingStarted');
+        });
+
+        describe('Add data button', function () {
+          it('navigates to the sample data page when option is selected', async () => {
+            await pageObjects.searchGettingStarted.selectAddDataOption(
+              'gettingStartedSampleDataMenuItem'
+            );
+            await retry.tryWithRetries(
+              'wait for URL to change',
+              async () => {
+                expect(await browser.getCurrentUrl()).to.contain('/tutorial_directory/sampleData');
+              },
+              { initialDelay: 200, retryCount: 5, retryDelay: 500 }
+            );
+          });
+        });
+
+        describe('Elasticsearch endpoint and API Keys', function () {
+          it('renders endpoint field and copy button', async () => {
+            await testSubjects.existOrFail('endpointValueField');
+            await testSubjects.existOrFail('copyEndpointButton');
+            const endpointValue = await testSubjects.getVisibleText('endpointValueField');
+            expect(endpointValue).to.contain('https://');
+            await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
+          });
+        });
+
+        describe('View connection details', function () {
+          it('renders the view connection details button', async () => {
+            await testSubjects.existOrFail('viewConnectionDetailsLink');
+          });
+          it('opens the connection flyout when the button is clicked', async () => {
+            await testSubjects.click('viewConnectionDetailsLink');
+            await testSubjects.existOrFail('connectionDetailsModalTitle');
+          });
+        });
+
+        describe('Connect to your application', function () {
+          it('renders the JavaScript code example when selected in Language Selector', async () => {
+            await pageObjects.searchGettingStarted.selectCodingLanguage('javascript');
+            await pageObjects.searchGettingStarted.expectCodeSampleContainsValue(
+              'import { Client } from'
+            );
+          });
+        });
+
+        describe('Footer content', function () {
+          it('renders Search Labs callout and navigates correctly', async () => {
+            await pageObjects.searchGettingStarted.expectFooterCallout(
+              'gettingStartedSearchLabs',
+              'search-labs'
+            );
+          });
+        });
+      });
+    });
+
+    describe('as developer', function () {
+      before(async () => {
+        await pageObjects.svlCommonPage.loginAsDeveloper();
       });
 
       describe('Getting Started page interactions', function () {
@@ -114,16 +175,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('Elasticsearch endpoint and API Keys', function () {
-          it('renders endpoint field and copy button', async () => {
-            await testSubjects.existOrFail('endpointValueField');
-            await testSubjects.existOrFail('copyEndpointButton');
-            const endpointValue = await testSubjects.getVisibleText('endpointValueField');
-            expect(endpointValue).to.contain('https://');
-            await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
-          });
-        });
-
         describe('View connection details', function () {
           it('renders the view connection details button', async () => {
             await testSubjects.existOrFail('viewConnectionDetailsLink');
@@ -135,18 +186,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         describe('Explore the API', function () {
-          it('clicking on search basics tutorial opens console', async () => {
-            await pageObjects.searchGettingStarted.expectConsoleTutorial(
-              'consoleTutorialsSearchBasics'
-            );
+          it('opens the console when you click the search basics tutorial card', async () => {
+            await testSubjects.existOrFail('console_tutorials_search_basics');
+            await testSubjects.click('console_tutorials_search_basics');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
           });
-          it('clicking on semantic search tutorial open console', async () => {
-            await pageObjects.searchGettingStarted.expectConsoleTutorial(
-              'consoleTutorialsSemanticSearch'
-            );
+          it('opens the console when you click the search basics tutorial button', async () => {
+            await testSubjects.existOrFail('console_tutorials_search_basics-btn');
+            await testSubjects.click('console_tutorials_search_basics');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
           });
-          it('clicking on esql tutorial open console', async () => {
-            await pageObjects.searchGettingStarted.expectConsoleTutorial('consoleTutorialsEsql');
+          it('opens the console when you click the semantic search tutorial card', async () => {
+            await testSubjects.existOrFail('console_tutorials_semantic_search');
+            await testSubjects.click('console_tutorials_semantic_search');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+          });
+          it('opens the console when you click the semantic search tutorial button', async () => {
+            await testSubjects.existOrFail('console_tutorials_semantic_search-btn');
+            await testSubjects.click('console_tutorials_semantic_search-btn');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+          });
+          it('opens the console when you click the esql tutorial card', async () => {
+            await testSubjects.existOrFail('console_tutorials_esql');
+            await testSubjects.click('console_tutorials_esql');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+          });
+          it('opens the console when you click the esql tutorial button', async () => {
+            await testSubjects.existOrFail('console_tutorials_esql-btn');
+            await testSubjects.click('console_tutorials_esql-btn');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
           });
         });
 

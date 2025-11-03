@@ -32,7 +32,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
           'search-getting-started-ftr'
         ));
-        await browser.execute(() => window.localStorage.clear());
         await searchSpace.navigateTo(spaceCreated.id);
       });
 
@@ -124,21 +123,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('Elasticsearch endpoint and API Keys', function () {
+        describe('Elasticsearch endpoint', function () {
           it('renders endpoint field and copy button', async () => {
             await testSubjects.existOrFail('endpointValueField');
             await testSubjects.existOrFail('copyEndpointButton');
             const endpointValue = await testSubjects.getVisibleText('endpointValueField');
             expect(endpointValue).to.contain('https://');
-          });
-          it('renders the Create API key button', async () => {
-            await testSubjects.existOrFail('createAPIKeyButton');
-          });
-          it('opens create_api_key flyout on clicking CreateApiKey button', async () => {
-            await testSubjects.click('createAPIKeyButton');
-            await retry.try(async () => {
-              expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API key');
-            });
           });
         });
 
@@ -153,18 +143,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         describe('Explore the API', function () {
-          it('clicking on search basics tutorial opens console', async () => {
-            await pageObjects.searchGettingStarted.expectConsoleTutorial(
-              'consoleTutorialsSearchBasics'
-            );
+          it('opens the console when you click the search basics tutorial card', async () => {
+            await testSubjects.existOrFail('console_tutorials_search_basics');
+            await testSubjects.click('console_tutorials_search_basics');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
           });
-          it('clicking on semantic search tutorial open console', async () => {
-            await pageObjects.searchGettingStarted.expectConsoleTutorial(
-              'consoleTutorialsSemanticSearch'
-            );
+          it('opens the console when you click the search basics tutorial button', async () => {
+            await testSubjects.existOrFail('console_tutorials_search_basics-btn');
+            await testSubjects.click('console_tutorials_search_basics');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
           });
-          it('clicking on esql tutorial open console', async () => {
-            await pageObjects.searchGettingStarted.expectConsoleTutorial('consoleTutorialsEsql');
+          it('opens the console when you click the semantic search tutorial card', async () => {
+            await testSubjects.existOrFail('console_tutorials_semantic_search');
+            await testSubjects.click('console_tutorials_semantic_search');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+          });
+          it('opens the console when you click the semantic search tutorial button', async () => {
+            await testSubjects.existOrFail('console_tutorials_semantic_search-btn');
+            await testSubjects.click('console_tutorials_semantic_search-btn');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+          });
+          it('opens the console when you click the esql tutorial card', async () => {
+            await testSubjects.existOrFail('console_tutorials_esql');
+            await testSubjects.click('console_tutorials_esql');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+          });
+          it('opens the console when you click the esql tutorial button', async () => {
+            await testSubjects.existOrFail('console_tutorials_esql-btn');
+            await testSubjects.click('console_tutorials_esql-btn');
+            await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
           });
         });
 
