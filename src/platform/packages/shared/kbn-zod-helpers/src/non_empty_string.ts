@@ -18,4 +18,8 @@ export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
   }
 }
 
-export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
+export const NonEmptyString = z
+  .string()
+  .min(1)
+  .superRefine(isNonEmptyString)
+  .describe('A non-empty string.');

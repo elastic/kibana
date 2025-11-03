@@ -20,6 +20,8 @@ import {
 import type { ElasticsearchProcessorType } from './manual_ingest_pipeline_processors';
 import { elasticsearchProcessorTypes } from './manual_ingest_pipeline_processors';
 
+export { NonEmptyString };
+
 /**
  * Base processor
  */
@@ -33,11 +35,17 @@ export interface ProcessorBase {
   ignore_failure?: boolean;
 }
 
-const processorBaseSchema = z.object({
-  customIdentifier: z.optional(NonEmptyString),
-  description: z.optional(z.string()),
-  ignore_failure: z.optional(z.boolean()),
-});
+const processorBaseSchema = z
+  .object({
+    customIdentifier: z
+      .optional(NonEmptyString)
+      .describe('Custom identifier to correlate this processor across outputs'),
+    description: z.optional(z.string()).describe('Human-readable notes about this processor step'),
+    ignore_failure: z
+      .optional(z.boolean())
+      .describe('Continue pipeline execution if this processor fails'),
+  })
+  .describe('Base processor options shared by all processors') satisfies z.Schema<ProcessorBase>;
 
 /**
  * Base with where
@@ -46,9 +54,15 @@ export interface ProcessorBaseWithWhere extends ProcessorBase {
   where?: Condition;
 }
 
-const processorBaseWithWhereSchema = processorBaseSchema.extend({
-  where: z.optional(conditionSchema),
-});
+export const processorBaseWithWhereSchema = processorBaseSchema
+  .extend({
+    where: z
+      .optional(conditionSchema)
+      .describe('Conditional expression controlling whether this processor runs'),
+  })
+  .describe(
+    'Base processor options plus conditional execution'
+  ) satisfies z.Schema<ProcessorBaseWithWhere>;
 
 /* Manual ingest pipeline processor */
 
@@ -65,12 +79,22 @@ export interface ManualIngestPipelineProcessor extends ProcessorBaseWithWhere {
   on_failure?: Array<Record<string, unknown>>;
 }
 
-export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('manual_ingest_pipeline'),
-  processors: z.array(z.record(z.enum(elasticsearchProcessorTypes), z.unknown())),
-  tag: z.optional(z.string()),
-  on_failure: z.optional(z.array(z.record(z.unknown()))),
-}) satisfies z.Schema<ManualIngestPipelineProcessor>;
+export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z
+      .literal('manual_ingest_pipeline')
+      .describe('Manual ingest pipeline - executes raw Elasticsearch ingest processors'),
+    processors: z
+      .array(z.record(z.enum(elasticsearchProcessorTypes), z.unknown()))
+      .describe('List of raw Elasticsearch ingest processors to run'),
+    tag: z.optional(z.string()).describe('Optional ingest processor tag for Elasticsearch'),
+    on_failure: z
+      .optional(z.array(z.record(z.unknown())))
+      .describe('Fallback processors to run when a processor fails'),
+  })
+  .describe(
+    'Manual ingest pipeline wrapper around native Elasticsearch processors'
+  ) satisfies z.Schema<ManualIngestPipelineProcessor>;
 
 /**
  * Grok processor
@@ -82,12 +106,21 @@ export interface GrokProcessor extends ProcessorBaseWithWhere {
   ignore_missing?: boolean;
 }
 
-export const grokProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('grok'),
-  from: StreamlangSourceField,
-  patterns: z.array(NonEmptyString).nonempty(),
-  ignore_missing: z.optional(z.boolean()),
-}) satisfies z.Schema<GrokProcessor>;
+export const grokProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('grok'),
+    from: StreamlangSourceField.describe('Source field to parse with grok patterns'),
+    patterns: z
+      .array(NonEmptyString)
+      .nonempty()
+      .describe('Grok patterns applied in order to extract fields'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'Grok processor - Extract fields from text using grok patterns'
+  ) satisfies z.Schema<GrokProcessor>;
 
 /**
  * Dissect processor
@@ -101,13 +134,21 @@ export interface DissectProcessor extends ProcessorBaseWithWhere {
   ignore_missing?: boolean;
 }
 
-export const dissectProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('dissect'),
-  from: StreamlangSourceField,
-  pattern: NonEmptyString,
-  append_separator: z.optional(StreamlangSeparator),
-  ignore_missing: z.optional(z.boolean()),
-}) satisfies z.Schema<DissectProcessor>;
+export const dissectProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('dissect'),
+    from: StreamlangSourceField.describe('Source field to parse with dissect pattern'),
+    pattern: NonEmptyString.describe('Dissect pattern describing field boundaries'),
+    append_separator: z
+      .optional(StreamlangSeparator)
+      .describe('Separator inserted when target fields are concatenated'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'Dissect processor - Extract fields from text using a lightweight, delimiter-based parser'
+  ) satisfies z.Schema<DissectProcessor>;
 
 /**
  * Date processor
@@ -121,13 +162,21 @@ export interface DateProcessor extends ProcessorBaseWithWhere {
   output_format?: string;
 }
 
-export const dateProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('date'),
-  from: StreamlangSourceField,
-  to: z.optional(StreamlangTargetField),
-  formats: z.array(NonEmptyString),
-  output_format: z.optional(NonEmptyString),
-}) satisfies z.Schema<DateProcessor>;
+export const dateProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('date'),
+    from: StreamlangSourceField.describe('Source field containing the date/time text'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe('Target field for the parsed date (defaults to source)'),
+    formats: z.array(NonEmptyString).describe('Accepted input date formats, tried in order'),
+    output_format: z
+      .optional(NonEmptyString)
+      .describe('Optional output format for storing the parsed date as text'),
+  })
+  .describe(
+    'Date processor - Parse dates from strings using one or more expected formats'
+  ) satisfies z.Schema<DateProcessor>;
 
 /**
  * Rename processor
@@ -141,13 +190,19 @@ export interface RenameProcessor extends ProcessorBaseWithWhere {
   override?: boolean;
 }
 
-export const renameProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('rename'),
-  from: StreamlangSourceField,
-  to: StreamlangTargetField,
-  ignore_missing: z.optional(z.boolean()),
-  override: z.optional(z.boolean()),
-}) satisfies z.Schema<RenameProcessor>;
+export const renameProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('rename'),
+    from: StreamlangSourceField.describe('Existing source field to rename or move'),
+    to: StreamlangTargetField.describe('New field name or destination path'),
+    ignore_missing: z.optional(z.boolean()).describe('Skip when source field is missing'),
+    override: z
+      .optional(z.boolean())
+      .describe('Allow overwriting the target field if it already exists'),
+  })
+  .describe(
+    'Rename processor - Change a field name and optionally its location'
+  ) satisfies z.Schema<RenameProcessor>;
 
 /**
  * Set processor
@@ -166,15 +221,20 @@ export interface SetProcessor extends ProcessorBaseWithWhere {
 const setProcessorSchema = processorBaseWithWhereSchema
   .extend({
     action: z.literal('set'),
-    to: StreamlangTargetField,
-    override: z.optional(z.boolean()),
-    value: z.optional(NoMustacheValue),
-    copy_from: z.optional(StreamlangSourceField),
+    to: StreamlangTargetField.describe('Target field to set or create'),
+    override: z.optional(z.boolean()).describe('Allow overwriting an existing target field'),
+    value: z.optional(NoMustacheValue).describe('Literal value to assign to the target field'),
+    copy_from: z
+      .optional(StreamlangSourceField)
+      .describe('Copy value from another field instead of providing a literal'),
   })
   .refine((obj) => (obj.value && !obj.copy_from) || (!obj.value && obj.copy_from), {
     message: 'Set processor must have either value or copy_from, but not both.',
     path: ['value', 'copy_from'],
-  }) satisfies z.Schema<SetProcessor>;
+  })
+  .describe(
+    'Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)'
+  ) satisfies z.Schema<SetProcessor>;
 
 /**
  * Append processor
@@ -187,12 +247,18 @@ export interface AppendProcessor extends ProcessorBaseWithWhere {
   allow_duplicates?: boolean;
 }
 
-export const appendProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('append'),
-  to: StreamlangTargetField,
-  value: NoMustacheArrayValues, // Rejects values like ["production", "{{{app}}}"]
-  allow_duplicates: z.optional(z.boolean()),
-}) satisfies z.Schema<AppendProcessor>;
+export const appendProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('append'),
+    to: StreamlangTargetField.describe('Array field to append values to'),
+    value: NoMustacheArrayValues.describe('Values to append (must be literal, no templates)'),
+    allow_duplicates: z
+      .optional(z.boolean())
+      .describe('If true, do not deduplicate appended values'),
+  })
+  .describe(
+    'Append processor - Append one or more values to an existing or new array field'
+  ) satisfies z.Schema<AppendProcessor>;
 
 export type StreamlangProcessorDefinition =
   | DateProcessor
