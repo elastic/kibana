@@ -14,7 +14,6 @@ import { isObject } from 'lodash';
 import type {
   LensApi,
   LensApiCallbacks,
-  ESQLVariablesCompatibleDashboardApi,
   LensPublicCallbacks,
   LensComponentForwardedProps,
 } from '@kbn/lens-common';

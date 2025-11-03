@@ -8,7 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, distinctUntilChanged, lastValueFrom, map, switchMap, tap } from 'rxjs';
+import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
 import {
@@ -16,7 +16,7 @@ import {
   SEARCH_EMBEDDABLE_TYPE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { apiPublishesESQLVariables, type ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable } from '@kbn/esql-types';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -45,7 +45,6 @@ import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
-import { esql } from '@kbn/esql-ast';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
