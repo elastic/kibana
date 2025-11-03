@@ -16,10 +16,13 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
     margin: ${euiTheme.size.m} 0;
     border-radius: ${euiTheme.border.radius.medium};
     height: ${euiTheme.size.xxl};
+    color: ${euiTheme.colors.link};
+    weight: ${euiTheme.font.weight.medium};
   }
 
   [class*='cssTreeNode-']:hover {
     background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+    text-decoration: underline;
   }
 
   [class*='cssTreeNode-children'] {
@@ -44,7 +47,11 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
     margin-left: ${euiTheme.size.xl};
     width: calc(100% - ${euiTheme.size.xl});
     background-color: ${euiTheme.colors.backgroundLightPrimary};
-    color: ${euiTheme.colors.textPrimary} !important;
     border: none;
+  }
+
+  .euiTreeView__nodeInner {
+    width: 100%;
+    justify-content: space-between;
   }
 `;

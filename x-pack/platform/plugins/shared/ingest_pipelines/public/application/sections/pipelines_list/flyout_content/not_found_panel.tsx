@@ -90,7 +90,7 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
   const pipelineErrorTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiSplitPanel.Inner data-test-subj="pipelineErrorFlyout" paddingSize="l">
+    <EuiSplitPanel.Inner data-test-subj="pipelineErrorFlyout" style={{ width: '540px' }}>
       {pipelineName && (
         <EuiTitle id="notFoundFlyoutTitle" data-test-subj="title">
           <h2 id={pipelineErrorTitleId}>{pipelineName}</h2>

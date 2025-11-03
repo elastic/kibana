@@ -17,6 +17,7 @@ describe('PipelineTreeNodeLabel', () => {
         isManaged={false}
         isDeprecated={false}
         onClick={() => {}}
+        level={1}
       />
     );
 
@@ -31,6 +32,7 @@ describe('PipelineTreeNodeLabel', () => {
         isManaged={true}
         isDeprecated={false}
         onClick={() => {}}
+        level={1}
       />
     );
 
@@ -44,6 +46,7 @@ describe('PipelineTreeNodeLabel', () => {
         isManaged={false}
         isDeprecated={true}
         onClick={() => {}}
+        level={1}
       />
     );
 
@@ -57,6 +60,7 @@ describe('PipelineTreeNodeLabel', () => {
         isManaged={true}
         isDeprecated={true}
         onClick={() => {}}
+        level={1}
       />
     );
 
@@ -72,6 +76,7 @@ describe('PipelineTreeNodeLabel', () => {
         isManaged={false}
         isDeprecated={false}
         onClick={handleClick}
+        level={1}
       />
     );
 
@@ -90,10 +95,11 @@ describe('PipelineTreeNodeLabel', () => {
         isManaged={false}
         isDeprecated={false}
         onClick={handleClick}
+        level={1}
       />
     );
 
     const label = getByTestId(`pipelineTreeNode-${longName}-link`);
-    expect(label.textContent).toBe(`${longName.slice(0, 30)}...`);
+    expect(label.textContent).toBe(`${longName.slice(0, 45)}...`);
   });
 });

@@ -42,7 +42,12 @@ export const TreePanel = React.memo(
       <EuiSplitPanel.Inner
         color="subdued"
         data-test-subj="pipelineTreePanel"
-        style={{ overflowY: 'auto', borderRight: euiTheme.border.thin, maxWidth: '460px' }}
+        style={{
+          overflowY: 'auto',
+          borderRight: euiTheme.border.thin,
+          maxWidth: '460px',
+          minWidth: '460px',
+        }}
         paddingSize="l"
       >
         <EuiTitle id="pipelineTreeTitle">
