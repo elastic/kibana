@@ -42,6 +42,9 @@ async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents
     index: 'metrics-elastic_agent.*',
   });
 
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify(res, null, 2));
+
   const formattedResults =
     res.aggregations?.agents.buckets.reduce((acc, bucket) => {
       acc[bucket.key] = {

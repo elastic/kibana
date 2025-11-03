@@ -273,6 +273,9 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/api/fleet/agents?withMetrics=true`)
         .expect(200);
 
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(apiResponse, null, 2));
+
       expect(apiResponse).to.have.keys('page', 'total', 'items');
       expect(apiResponse.total).to.greaterThan(1);
 
