@@ -8,7 +8,7 @@
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 
-function isBase64Encoded(str: unknown): boolean {
+export function isBase64Encoded(str: unknown): boolean {
   if (typeof str !== 'string' || str.length === 0) {
     return false;
   }
@@ -73,8 +73,3 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
     throw new Error(`SVG sanitization failed: ${error.message}`);
   }
 }
-
-module.exports = {
-  sanitizeSvg,
-  isBase64Encoded,
-};
