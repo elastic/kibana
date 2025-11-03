@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   DOCUMENT_TYPE_ENTITY,
@@ -61,27 +61,24 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
           min-width: 0;
         `}
       >
-        {/* truncated title */}
-        <EuiToolTip content={title}>
-          <EuiLink
-            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-              e.preventDefault();
-              emitGroupedItemClick(item);
-            }}
-            color="primary"
-            css={css`
-              display: block;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              font-weight: ${euiTheme.font.weight.semiBold};
-              width: 100%;
-            `}
-            data-test-subj={GROUPED_ITEM_TITLE_TEST_ID}
-          >
-            {title}
-          </EuiLink>
-        </EuiToolTip>
+        <EuiLink
+          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            emitGroupedItemClick(item);
+          }}
+          color="primary"
+          css={css`
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: ${euiTheme.font.weight.semiBold};
+            width: 100%;
+          `}
+          data-test-subj={GROUPED_ITEM_TITLE_TEST_ID}
+        >
+          {title}
+        </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

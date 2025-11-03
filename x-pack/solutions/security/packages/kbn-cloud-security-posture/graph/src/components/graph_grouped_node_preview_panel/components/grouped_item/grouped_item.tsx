@@ -32,7 +32,7 @@ export type GroupedItemProps =
 export const GroupedItem = memo(({ item, isLoading }: GroupedItemProps) => {
   if (isLoading) {
     return (
-      <Panel>
+      <Panel grow={false}>
         <Skeleton />
       </Panel>
     );

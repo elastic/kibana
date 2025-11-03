@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState, type FC } from 'react';
+import React, { memo, useMemo, useState, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
@@ -116,27 +116,19 @@ const useContentMetadata = (
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
   ({ docMode, dataViewId, documentIds, entityItems }) => {
-    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+    const [fetchPagination, setFetchPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
-    const onChangeItemsPerPage = useCallback((pageSize: number) => {
-      setPagination({ pageSize, pageIndex: 0 });
-    }, []);
-
-    const onChangePage = useCallback((pageIndex: number) => {
-      setPagination((prevState) => ({ ...prevState, pageIndex }));
-    }, []);
-
-    const { data, isLoading, refresh } = useFetchDocumentDetails({
+    const { data, isLoading } = useFetchDocumentDetails({
       dataViewId,
       ids: documentIds,
       options: {
-        pageIndex: pagination.pageIndex,
-        pageSize: pagination.pageSize,
+        pageIndex: fetchPagination.pageIndex,
+        pageSize: fetchPagination.pageSize,
         enabled: docMode === 'grouped-events',
       },
     });
 
-    const { items, totalHits } = usePaginatedData(docMode, entityItems, pagination, data);
+    const { items, totalHits } = usePaginatedData(docMode, entityItems, fetchPagination, data);
     const { icon, groupedItemsType } = useContentMetadata(docMode, items);
 
     if (isLoading) {
@@ -144,7 +136,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
     }
 
     if (items.length === 0) {
-      return <EmptyBody onRefresh={refresh} />;
+      return <EmptyBody />;
     }
 
     return (
@@ -153,9 +145,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
         totalHits={totalHits}
         icon={icon}
         groupedItemsType={groupedItemsType}
-        pagination={pagination}
-        onChangePage={onChangePage}
-        onChangeItemsPerPage={onChangeItemsPerPage}
+        onPaginationChange={setFetchPagination}
       />
     );
   }

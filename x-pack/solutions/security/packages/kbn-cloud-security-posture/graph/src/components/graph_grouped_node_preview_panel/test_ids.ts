@@ -14,7 +14,6 @@ export const LOADING_BODY_TEST_ID = `${PREFIX}LoadingBody` as const;
 export const EMPTY_BODY_TEST_ID = `${PREFIX}EmptyBody` as const;
 export const CONTENT_BODY_TEST_ID = `${PREFIX}ContentBody` as const;
 
-export const REFRESH_BUTTON_TEST_ID = `${PREFIX}RefreshBtn` as const;
 export const PAGE_SIZE_BTN_TEST_ID = `${PREFIX}PageSizeBtn` as const;
 export const TOTAL_HITS_TEST_ID = `${PREFIX}TotalHits` as const;
 export const ICON_TEST_ID = `${PREFIX}DocumentIcon` as const;

@@ -20,6 +20,20 @@ const geoLabel = i18n.translate(`${i18nNamespaceKey}.groupedItem.geoLabel`, {
 
 /* Helper components */
 
+const VerticalSeparator = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        width: 1px;
+        height: 14px;
+        background-color: ${euiTheme.colors.borderBaseSubdued};
+      `}
+    />
+  );
+};
+
 const CountryFlag = ({ countryCode }: { countryCode?: string }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -78,7 +92,7 @@ export interface MetadataRowProps {
 export const MetadataRow = ({ item }: MetadataRowProps) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup wrap gutterSize="m" responsive={false} alignItems="center" direction="row">
+    <EuiFlexGroup wrap gutterSize="s" responsive={false} alignItems="center" direction="row">
       {item.ip && (
         <EuiFlexItem grow={false}>
           <div
@@ -108,6 +122,12 @@ export const MetadataRow = ({ item }: MetadataRowProps) => {
               {item.ip}
             </EuiText>
           </div>
+        </EuiFlexItem>
+      )}
+
+      {item.ip && item.countryCode && (
+        <EuiFlexItem grow={false}>
+          <VerticalSeparator />
         </EuiFlexItem>
       )}
 

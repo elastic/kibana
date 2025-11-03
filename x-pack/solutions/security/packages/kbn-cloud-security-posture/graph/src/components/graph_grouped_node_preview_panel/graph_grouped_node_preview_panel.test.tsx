@@ -16,7 +16,6 @@ import {
   LOADING_BODY_TEST_ID,
   EMPTY_BODY_TEST_ID,
   CONTENT_BODY_TEST_ID,
-  REFRESH_BUTTON_TEST_ID,
   PAGE_SIZE_BTN_TEST_ID,
   TOTAL_HITS_TEST_ID,
   ICON_TEST_ID,
@@ -67,6 +66,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     entityIdCounter = 0;
     mockUseFetchDocumentDetails.mockReturnValue(
       createMockHookResult({
@@ -136,22 +136,6 @@ describe('GraphGroupedNodePreviewPanel', () => {
         expect(screen.queryByTestId(LOADING_BODY_TEST_ID)).not.toBeInTheDocument();
         expect(screen.queryByTestId(CONTENT_BODY_TEST_ID)).not.toBeInTheDocument();
       });
-
-      it('should provide refresh callback to EmptyBody', async () => {
-        const mockRefresh = jest.fn();
-        mockUseFetchDocumentDetails.mockReturnValue(
-          createMockHookResult({
-            refresh: mockRefresh,
-          })
-        );
-
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-        expect(screen.getByTestId(REFRESH_BUTTON_TEST_ID)).toBeInTheDocument();
-
-        await userEvent.click(screen.getByTestId(REFRESH_BUTTON_TEST_ID));
-        expect(mockRefresh).toHaveBeenCalledTimes(1);
-      });
     });
 
     describe('Content State', () => {
@@ -164,16 +148,16 @@ describe('GraphGroupedNodePreviewPanel', () => {
         expect(screen.queryByTestId(EMPTY_BODY_TEST_ID)).not.toBeInTheDocument();
       });
 
-      it('should render icon, title, grouped type and pagination controls in ContentBody', () => {
+      it('should render icon, title, and grouped type in ContentBody', () => {
         const entityItems = [createEntityItem({ icon: 'test-icon', type: 'host' })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
-        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toBeInTheDocument();
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toBeInTheDocument();
         expect(screen.getByTestId(ICON_TEST_ID)).toBeInTheDocument();
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toBeInTheDocument();
-        expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
-        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toBeInTheDocument();
+        // Pagination should not be visible with only 1 item (less than MIN_PAGE_SIZE)
+        expect(screen.queryByTestId(PAGE_SIZE_BTN_TEST_ID)).not.toBeInTheDocument();
+        expect(screen.queryByLabelText(/Page 1/)).not.toBeInTheDocument();
       });
 
       it('should display correct icon based on entity type', () => {
@@ -197,13 +181,26 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
   describe('Pagination Behavior', () => {
     describe('Initial Pagination State', () => {
-      it('should start with default pagination pageIndex: 0, pageSize: 10', () => {
-        const entityItems = [createEntityItem()];
+      it('should start with default pagination pageIndex: 0, pageSize: 10 when items >= MIN_PAGE_SIZE', () => {
+        const entityItems = Array.from({ length: 15 }, (_, i) =>
+          createEntityItem({ id: `entity-${i}` })
+        );
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         // EUI pagination uses 1-based indexing for display
         expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
         expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 10');
+      });
+
+      it('should hide pagination when items < MIN_PAGE_SIZE', () => {
+        const entityItems = Array.from({ length: 5 }, (_, i) =>
+          createEntityItem({ id: `entity-${i}` })
+        );
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+
+        // Pagination should not be visible with only 5 items
+        expect(screen.queryByTestId(PAGE_SIZE_BTN_TEST_ID)).not.toBeInTheDocument();
+        expect(screen.queryByLabelText(/Page 1/)).not.toBeInTheDocument();
       });
     });
 
@@ -282,34 +279,36 @@ describe('GraphGroupedNodePreviewPanel', () => {
     });
 
     describe('Pagination Edge Cases', () => {
-      it('should handle total items less than pageSize (single page)', () => {
+      it('should hide pagination when total items less than MIN_PAGE_SIZE (single page)', () => {
         const entityItems = Array.from({ length: 5 }, (_, i) =>
           createEntityItem({ id: `entity-${i}` })
         );
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
-        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 10');
+        // Pagination should be hidden when totalHits < MIN_PAGE_SIZE
+        expect(screen.queryByTestId(PAGE_SIZE_BTN_TEST_ID)).not.toBeInTheDocument();
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('5');
       });
 
-      it('should handle total items exactly equal to pageSize', () => {
+      it('should hide pagination when total items equal pageSize (boundary case)', () => {
         const entityItems = Array.from({ length: 10 }, (_, i) =>
           createEntityItem({ id: `entity-${i}` })
         );
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
-        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('10');
+        // Pagination should be hidden when totalHits === MIN_PAGE_SIZE (all items fit in one page)
+        expect(screen.queryByTestId(PAGE_SIZE_BTN_TEST_ID)).not.toBeInTheDocument();
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('10');
       });
 
-      it('should handle total items one more than pageSize (2 pages)', () => {
+      it('should show pagination when total items one more than MIN_PAGE_SIZE (2 pages)', () => {
         const entityItems = Array.from({ length: 11 }, (_, i) =>
           createEntityItem({ id: `entity-${i}` })
         );
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
-        // First page
-        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('10');
+        // Pagination should be visible with 11 items (more than MIN_PAGE_SIZE)
+        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 10');
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('11');
       });
     });
@@ -614,24 +613,6 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
       expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
     });
-
-    it('should return refresh function', async () => {
-      const mockRefresh = jest.fn();
-      mockUseFetchDocumentDetails.mockReturnValue({
-        data: { page: [], total: 0 },
-        isLoading: false,
-        isFetching: false,
-        isError: false,
-        error: null,
-        refresh: mockRefresh,
-      });
-
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-      await userEvent.click(screen.getByTestId(REFRESH_BUTTON_TEST_ID));
-
-      expect(mockRefresh).toHaveBeenCalled();
-    });
   });
 
   describe('Async State Management', () => {
@@ -701,7 +682,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       );
       render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={largeEntityItems} />);
 
-      expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('10');
+      expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent(/Rows per page: \d+/);
       expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('1500');
     });
   });

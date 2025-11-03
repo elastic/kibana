@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -20,6 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { i18nNamespaceKey } from '../constants';
 import { PAGE_SIZE_BTN_TEST_ID } from '../test_ids';
 
+const GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY =
+  'securitySolution.graphGroupedNodePreview.pagination';
+
+const PAGE_OPTIONS = [10, 20, 50];
+export const MIN_PAGE_SIZE = PAGE_OPTIONS[0];
+
 const rowsPerPageLabel = i18n.translate(`${i18nNamespaceKey}.rowsPerPageLabel`, {
   defaultMessage: 'Rows per page',
 });
@@ -33,34 +40,46 @@ const paginationLabel = i18n.translate(`${i18nNamespaceKey}.paginationLabel`, {
 });
 
 export interface PaginationControlsProps {
-  pageIndex: number;
-  pageSize: number;
-  pageCount?: number;
-  onChangeItemsPerPage: (pageSize: number) => void;
-  onChangePage: (pageIndex: number) => void;
+  totalHits: number;
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
 }
 
-export const PaginationControls = ({
-  pageSize,
-  pageIndex,
-  pageCount = 10,
-  onChangeItemsPerPage,
-  onChangePage,
-}: PaginationControlsProps) => {
+export const PaginationControls = ({ totalHits, onPaginationChange }: PaginationControlsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [activePage, setActivePage] = useState(pageIndex);
-  const [rowSize, setRowSize] = useState(pageSize);
+
+  // Manage pagination state internally with localStorage
+  const [pagination, setPagination] = useLocalStorage<{
+    pageIndex: number;
+    pageSize: number;
+  }>(GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY, {
+    pageIndex: 0,
+    pageSize: MIN_PAGE_SIZE,
+  });
+
+  // Reset pageIndex if current page is out of bounds
+  useEffect(() => {
+    if (pagination && totalHits > 0) {
+      const maxPageIndex = Math.ceil(totalHits / pagination.pageSize) - 1;
+      if (pagination.pageIndex > maxPageIndex) {
+        const newPagination = { ...pagination, pageIndex: 0 };
+        setPagination(newPagination);
+        onPaginationChange(newPagination);
+      }
+    }
+  }, [totalHits, pagination, setPagination, onPaginationChange]);
 
   const onButtonClick = () => setIsPopoverOpen((s) => !s);
   const closePopover = () => setIsPopoverOpen(false);
 
   const goToPage = (pageNumber: number) => {
-    setActivePage(pageNumber);
-    onChangePage(pageNumber);
+    if (!pagination) return;
+    const newPagination = { ...pagination, pageIndex: pageNumber };
+    setPagination(newPagination);
+    onPaginationChange(newPagination);
   };
 
   const getIconType = (size: number) => {
-    return size === rowSize ? 'check' : 'empty';
+    return size === pagination?.pageSize ? 'check' : 'empty';
   };
 
   const button = (
@@ -73,25 +92,30 @@ export const PaginationControls = ({
       onClick={onButtonClick}
       aria-label={rowsPerPageLabel}
     >
-      {`${rowsPerPageLabel}: ${rowSize}`}
+      {`${rowsPerPageLabel}: ${pagination?.pageSize ?? MIN_PAGE_SIZE}`}
     </EuiButtonEmpty>
   );
 
-  const items = [10, 20, 50].map((rowsNumber) => {
+  const items = PAGE_OPTIONS.map((rowsNumber) => {
     return (
       <EuiContextMenuItem
         key={`${rowsNumber} rows`}
         icon={getIconType(rowsNumber)}
         onClick={() => {
           closePopover();
-          setRowSize(rowsNumber);
-          onChangeItemsPerPage(rowsNumber);
+          const newPagination = { pageSize: rowsNumber, pageIndex: 0 };
+          setPagination(newPagination);
+          onPaginationChange(newPagination);
         }}
       >
         {`${rowsNumber} ${rowsLabel}`}
       </EuiContextMenuItem>
     );
   });
+
+  if (!pagination) return null;
+
+  const pageCount = Math.ceil(totalHits / pagination.pageSize);
 
   return (
     <EuiFlexGroup
@@ -117,7 +141,7 @@ export const PaginationControls = ({
         <EuiPagination
           aria-label={paginationLabel}
           pageCount={pageCount}
-          activePage={activePage}
+          activePage={pagination.pageIndex}
           onPageClick={goToPage}
         />
       </EuiFlexItem>

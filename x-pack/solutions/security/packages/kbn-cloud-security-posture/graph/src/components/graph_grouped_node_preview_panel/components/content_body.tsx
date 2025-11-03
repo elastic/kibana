@@ -15,7 +15,7 @@ import { Title } from './title';
 import { ListHeader } from './list_header';
 import { GroupedItem } from './grouped_item/grouped_item';
 import type { EntityOrEventItem } from './grouped_item/types';
-import { PaginationControls } from './pagination_controls';
+import { PaginationControls, MIN_PAGE_SIZE } from './pagination_controls';
 
 const maxDocumentsShownLabel = i18n.translate(`${i18nNamespaceKey}.maxDocumentsShownLabel`, {
   defaultMessage: '(Maximum 50 document details shown)',
@@ -26,9 +26,7 @@ export interface ContentBodyProps {
   totalHits: number;
   icon: string;
   groupedItemsType: string;
-  pagination: { pageIndex: number; pageSize: number };
-  onChangePage: (pageIndex: number) => void;
-  onChangeItemsPerPage: (pageSize: number) => void;
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
 }
 
 export const ContentBody: FC<ContentBodyProps> = ({
@@ -36,27 +34,25 @@ export const ContentBody: FC<ContentBodyProps> = ({
   totalHits,
   icon,
   groupedItemsType,
-  pagination,
-  onChangePage,
-  onChangeItemsPerPage,
-}) => (
-  <PanelBody data-test-subj={CONTENT_BODY_TEST_ID}>
-    <Title icon={icon} text={groupedItemsType} count={totalHits} />
-    <ListHeader groupedItemsType={groupedItemsType} />
-    <EuiText size="s">{maxDocumentsShownLabel}</EuiText>
-    <List>
-      {items.map((item) => (
-        <li key={item.id}>
-          <GroupedItem item={item} />
-        </li>
-      ))}
-    </List>
-    <PaginationControls
-      pageIndex={pagination.pageIndex}
-      pageSize={pagination.pageSize}
-      pageCount={Math.ceil(totalHits / pagination.pageSize)}
-      onChangePage={onChangePage}
-      onChangeItemsPerPage={onChangeItemsPerPage}
-    />
-  </PanelBody>
-);
+  onPaginationChange,
+}) => {
+  const shouldShowPagination = totalHits > MIN_PAGE_SIZE;
+
+  return (
+    <PanelBody data-test-subj={CONTENT_BODY_TEST_ID}>
+      <Title icon={icon} text={groupedItemsType} count={totalHits} />
+      <ListHeader groupedItemsType={groupedItemsType} />
+      <EuiText size="s">{maxDocumentsShownLabel}</EuiText>
+      <List>
+        {items.map((item) => (
+          <li key={item.id}>
+            <GroupedItem item={item} />
+          </li>
+        ))}
+      </List>
+      {shouldShowPagination && (
+        <PaginationControls totalHits={totalHits} onPaginationChange={onPaginationChange} />
+      )}
+    </PanelBody>
+  );
+};
