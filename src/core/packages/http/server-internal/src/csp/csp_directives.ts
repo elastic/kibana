@@ -67,14 +67,15 @@ export class CspDirectives {
   addDirectiveValue(directiveName: CspDirectiveName, directiveValue: string, enforce = true) {
     const directivesMap = enforce ? this.directives : this.reportOnlyDirectives;
 
-    if (!directivesMap.has(directiveName)) {
-      directivesMap.set(directiveName, new Set());
+    let directive = directivesMap.get(directiveName);
+    if (!directive) {
+      directivesMap.set(directiveName, (directive = new Set()));
     }
-    const directive = directivesMap.get(directiveName)!;
+
+    const normalizedDirectiveValue = normalizeDirectiveValue(directiveValue);
     // 'none' can not coexist with other values, and will be ignored by browsers.
     // In practice, this should only happen when a default rule defined above is set to 'none',
     // AND the administrator chose to specify a value via kibana.yml configuration. (e.g. see `object-src` above)
-    const normalizedDirectiveValue = normalizeDirectiveValue(directiveValue);
     if (directive.has(`'none'`) && normalizedDirectiveValue !== `'report-sample'`) {
       directive.delete(`'none'`);
     }
