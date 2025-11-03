@@ -51,7 +51,7 @@ describe('KibanaEuiProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme: KibanaTheme = { darkMode: true, name: 'amsterdam' };
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'borealis' };
 
     render(
       <KibanaEuiProvider
@@ -74,7 +74,7 @@ describe('KibanaEuiProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'amsterdam' });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'borealis' });
 
     render(
       <KibanaEuiProvider theme={{ theme$: coreTheme$ }} userProfile={userProfile}>
@@ -91,7 +91,7 @@ describe('KibanaEuiProvider', () => {
 
     // Update the theme
     act(() => {
-      coreTheme$.next({ darkMode: false, name: 'amsterdam' });
+      coreTheme$.next({ darkMode: false, name: 'borealis' });
     });
 
     // Wait for the component to update with new theme
@@ -103,7 +103,7 @@ describe('KibanaEuiProvider', () => {
   });
 
   it('passes component defaults to EuiProvider', async () => {
-    const coreTheme: KibanaTheme = { darkMode: true, name: 'amsterdam' };
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'borealis' };
 
     render(
       <KibanaEuiProvider theme={{ theme$: of(coreTheme) }} userProfile={userProfile}>
