@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare global {
-  interface Window {
-    _checkCanSendTelemetry: (signal?: AbortSignal) => Promise<boolean>;
-    _resetTelemetry: (signal?: AbortSignal) => Promise<void>;
-  }
-}
+import { run } from '../../lib/spawn.mjs';
+import { REPO_ROOT } from '../../lib/paths.mjs';
+import { resolve } from 'path';
 
-// Turn this file into a module
-export {};
+/**
+ * Bootstraps the the .buildkite directory
+ * @return {Promise<*>}
+ */
+export function bootstrapBuildkite() {
+  return run('npm', ['i'], { cwd: resolve(REPO_ROOT, '.buildkite') });
+}
