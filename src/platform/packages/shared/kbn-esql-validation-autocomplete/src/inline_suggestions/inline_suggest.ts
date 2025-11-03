@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { EsqlQuery, BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
+import { EsqlQuery } from '@kbn/esql-ast';
+
 import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,
@@ -15,62 +16,20 @@ import {
 import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../shared/columns';
 import { getFromCommandHelper } from '../shared/resources_helpers';
+import type { InlineSuggestionItem } from './types';
+import { fromCache, setToCache } from './inline_suggestions_cache';
 
-export interface InlineSuggestionItem {
-  /**
-   * The text to insert.
-   * If the text contains a line break, the range must end at the end of a line.
-   * If existing text should be replaced, the existing text must be a prefix of the text to insert.
-   */
-  insertText: string;
-  /**
-   * A text that is used to decide if this inline completion should be shown.
-   * An inline completion is shown if the text to replace is a subword of the filter text.
-   */
-  filterText?: string;
-  /**
-   * The range to replace.
-   * Must begin and end on the same line.
-   */
-  range?: {
-    /**
-     * Line number on which the range starts (starts at 1).
-     */
-    readonly startLineNumber: number;
-    /**
-     * Column on which the range starts in line `startLineNumber` (starts at 1).
-     */
-    readonly startColumn: number;
-    /**
-     * Line number on which the range ends.
-     */
-    readonly endLineNumber: number;
-    /**
-     * Column on which the range ends in line `endLineNumber`.
-     */
-    readonly endColumn: number;
-  };
-  /**
-   * Suggestions can trigger a command by id. This is useful to trigger specific actions in some contexts
-   */
-  command?: {
-    title: string;
-    id: string;
-  };
-  /**
-   * If set to `true`, unopened closing brackets are removed and unclosed opening brackets are closed.
-   * Defaults to `false`.
-   */
-  completeBracketPairs?: boolean;
-}
+const FALLBACK_FROM_COMMAND = 'FROM *';
 
 /**
- * Normalizes query text by removing comments, newlines and standardizing pipe operators
+ * Normalizes query text by removing comments and newlines
  */
 function processQuery(query: string): string {
-  const ast = Parser.parse(query);
-  const queryWithoutComments = BasicPrettyPrinter.print(ast.root);
-  return queryWithoutComments;
+  return query
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
+    .replace(/[\n\r]/g, '') // Remove newlines
+    .replace(/\s*\|\s*/g, ' | ') // Normalize pipe spacing
+    .trim();
 }
 
 /**
@@ -135,38 +94,61 @@ async function getFromCommand(
   }
 
   const suggestedFromCommand = await getFromCommandHelper(callbacks);
-  return suggestedFromCommand || 'FROM *';
+  return suggestedFromCommand || FALLBACK_FROM_COMMAND;
 }
 
 /**
- * Fetches all suggestion sources with conditional LLM handling
+ * Fetches extension-based suggestions
  */
-async function fetchAllSuggestions(
+async function getExtensionSuggestions(
   fromCommand: string,
-  timeField: string,
-  categorizationField: string | undefined,
   range: InlineSuggestionItem['range'],
   callbacks?: ESQLCallbacks
 ): Promise<InlineSuggestionItem[]> {
-  const [editorExtensions, historyStarredItems] = await Promise.all([
-    callbacks
-      ?.getEditorExtensions?.(fromCommand)
-      .then((result) => result ?? { recommendedQueries: [] }),
-    callbacks?.getHistoryStarredItems?.().then((result) => result ?? []),
-  ]);
+  const editorExtensions = await callbacks
+    ?.getEditorExtensions?.(fromCommand)
+    .then((result) => result ?? { recommendedQueries: [] });
 
-  // Convert fast sources to InlineSuggestionItem format
-  const extensionSuggestions = (editorExtensions?.recommendedQueries || []).map((query) => ({
+  return (editorExtensions?.recommendedQueries || []).map((query) => ({
     insertText: query.query,
     range,
   }));
+}
 
-  const historySuggestions = (historyStarredItems || []).map((item) => ({
+/**
+ * Fetches history-based suggestions
+ */
+async function getHistorySuggestions(
+  range: InlineSuggestionItem['range'],
+  callbacks?: ESQLCallbacks
+): Promise<InlineSuggestionItem[]> {
+  const historyStarredItems = await callbacks
+    ?.getHistoryStarredItems?.()
+    .then((result) => result ?? []);
+
+  return (historyStarredItems || []).map((item) => ({
     insertText: item,
     range,
   }));
+}
 
-  const templateSuggestions = getRecommendedQueriesTemplates({
+/**
+ * Gets template-based suggestions with caching
+ */
+function getRecommendedTemplateSuggestions(
+  fromCommand: string,
+  timeField: string,
+  categorizationField: string | undefined,
+  range: InlineSuggestionItem['range']
+): InlineSuggestionItem[] {
+  const cacheKey = `${fromCommand}:${timeField}:${categorizationField}`;
+  const cached = fromCache<InlineSuggestionItem[]>(cacheKey);
+  if (cached) {
+    // Update range for cached results since range can change
+    return cached.map((item) => ({ ...item, range }));
+  }
+
+  const suggestions = getRecommendedQueriesTemplates({
     fromCommand,
     timeField,
     categorizationField,
@@ -175,8 +157,63 @@ async function fetchAllSuggestions(
     range,
   }));
 
-  const baseSuggestions = [...extensionSuggestions, ...templateSuggestions, ...historySuggestions];
-  return baseSuggestions;
+  // Cache the templates
+  setToCache(cacheKey, suggestions);
+  return suggestions;
+}
+
+/**
+ * Fetches all suggestion sources
+ */
+async function fetchAllSuggestions(
+  fromCommand: string,
+  timeField: string,
+  categorizationField: string | undefined,
+  range: InlineSuggestionItem['range'],
+  callbacks?: ESQLCallbacks
+): Promise<InlineSuggestionItem[]> {
+  const [extensionSuggestions, historySuggestions] = await Promise.all([
+    getExtensionSuggestions(fromCommand, range, callbacks),
+    getHistorySuggestions(range, callbacks),
+  ]);
+
+  const templateSuggestions = getRecommendedTemplateSuggestions(
+    fromCommand,
+    timeField,
+    categorizationField,
+    range
+  );
+
+  return [...extensionSuggestions, ...templateSuggestions, ...historySuggestions];
+}
+
+/**
+ * Gets field information with caching
+ */
+async function getCachedTimeAndCategorizationFields(
+  fromCommand: string,
+  callbacks?: ESQLCallbacks
+): Promise<{ timeField: string; categorizationField: string | undefined }> {
+  const cacheKey = `${fromCommand}`;
+  const cached = fromCache<{ timeField: string; categorizationField: string | undefined }>(
+    cacheKey
+  );
+
+  if (cached) {
+    return cached;
+  }
+
+  const { getColumnsByType } = getColumnsByTypeRetriever(
+    EsqlQuery.fromSrc(fromCommand).ast,
+    fromCommand,
+    callbacks
+  );
+
+  const fieldInfo = await getTimeAndCategorizationFields(getColumnsByType);
+
+  // Cache the field information
+  setToCache(cacheKey, fieldInfo);
+  return fieldInfo;
 }
 
 export async function inlineSuggest(
@@ -194,17 +231,11 @@ export async function inlineSuggest(
       return { items: [] };
     }
 
-    // Fetch data sources and field information
+    // Important for recommended queries
     const fromCommand = await getFromCommand(trimmedText, callbacks);
-
-    const { getColumnsByType } = getColumnsByTypeRetriever(
-      EsqlQuery.fromSrc(fromCommand).ast,
+    const { timeField, categorizationField } = await getCachedTimeAndCategorizationFields(
       fromCommand,
       callbacks
-    );
-
-    const { timeField, categorizationField } = await getTimeAndCategorizationFields(
-      getColumnsByType
     );
 
     // Fetch all suggestions
@@ -219,6 +250,7 @@ export async function inlineSuggest(
     // Process suggestions: remove duplicates, filter by prefix, and trim prefix
     const uniqueSuggestions = removeDuplicates(allSuggestions);
     const filteredSuggestions = filterByPrefix(uniqueSuggestions, trimmedText, fullText);
+
     const finalSuggestions = filteredSuggestions.map((item) =>
       trimSuggestionPrefix(item, trimmedText.length)
     );
