@@ -6,9 +6,11 @@
  */
 
 import React, { useMemo, useEffect, useCallback, useRef } from 'react';
+import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { EmbeddableConversationInternalProps } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { OnechatServicesContext } from '../onechat_services_context';
@@ -107,13 +109,38 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onConversationCreated,
   });
 
-  const getAttachmentContentMap = useCallback(() => {
-    return attachmentContentMapRef.current;
-  }, []);
+  const getProcessedAttachments = useCallback(async (): Promise<AttachmentInput[]> => {
+    if (!contextProps.attachments || contextProps.attachments.length === 0) {
+      return [];
+    }
 
-  const updateAttachmentContent = useCallback((id: string, content: Record<string, unknown>) => {
-    attachmentContentMapRef.current.set(id, content);
-  }, []);
+    const attachmentsToSend: AttachmentInput[] = [];
+
+    for (const attachment of contextProps.attachments) {
+      try {
+        const currentContent = await Promise.resolve(attachment.getContent());
+        const previousContent = attachmentContentMapRef.current.get(attachment.id);
+
+        const contentChanged = !isEqual(currentContent, previousContent);
+
+        if (contentChanged || !previousContent) {
+          attachmentsToSend.push({
+            id: attachment.id,
+            type: attachment.type,
+            data: currentContent,
+            hidden: true,
+          });
+
+          attachmentContentMapRef.current.set(attachment.id, currentContent);
+        }
+      } catch (attachmentError) {
+        // eslint-disable-next-line no-console
+        console.warn(`Failed to fetch content for attachment ${attachment.id}:`, attachmentError);
+      }
+    }
+
+    return attachmentsToSend;
+  }, [contextProps.attachments]);
 
   const conversationContextValue = useMemo(
     () => ({
@@ -126,8 +153,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       setConversationId,
       attachments: contextProps.attachments,
       conversationActions,
-      getAttachmentContentMap,
-      updateAttachmentContent,
+      getProcessedAttachments,
     }),
     [
       persistedConversationId,
@@ -136,8 +162,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       contextProps.initialMessage,
       contextProps.attachments,
       conversationActions,
-      getAttachmentContentMap,
-      updateAttachmentContent,
+      getProcessedAttachments,
       setConversationId,
     ]
   );

@@ -7,8 +7,6 @@
 
 import { useMutation } from '@kbn/react-query';
 import { useRef, useState } from 'react';
-import { isEqual } from 'lodash';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
@@ -25,8 +23,7 @@ interface UseSendMessageMutationProps {
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const { reportConverseError } = useReportConverseError();
-  const { conversationActions, attachments, getAttachmentContentMap, updateAttachmentContent } =
-    useConversationContext();
+  const { conversationActions, getProcessedAttachments } = useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
@@ -52,39 +49,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       return Promise.reject(new Error('Abort signal not present'));
     }
 
-    let processedAttachments: AttachmentInput[] | undefined;
-
-    if (attachments && attachments.length > 0) {
-      const attachmentContentMap = getAttachmentContentMap();
-      const attachmentsToSend: AttachmentInput[] = [];
-
-      for (const attachment of attachments) {
-        try {
-          const currentContent = await Promise.resolve(attachment.getContent());
-          const previousContent = attachmentContentMap.get(attachment.id);
-
-          const contentChanged = !isEqual(currentContent, previousContent);
-
-          if (contentChanged || !previousContent) {
-            attachmentsToSend.push({
-              id: attachment.id,
-              type: attachment.type,
-              data: currentContent,
-              hidden: true,
-            });
-
-            updateAttachmentContent(attachment.id, currentContent);
-          }
-        } catch (attachmentError) {
-          // eslint-disable-next-line no-console
-          console.warn(`Failed to fetch content for attachment ${attachment.id}:`, attachmentError);
-        }
-      }
-
-      if (attachmentsToSend.length > 0) {
-        processedAttachments = attachmentsToSend;
-      }
-    }
+    const processedAttachments = await getProcessedAttachments();
 
     const events$ = chatService.chat({
       signal,
@@ -92,7 +57,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
-      attachments: processedAttachments,
+      attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
     });
 
     return subscribeToChatEvents(events$);
