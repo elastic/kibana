@@ -6,7 +6,7 @@
  */
 
 // playwright is in root package.json dependencies, managed at workspace level
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import {
   chromium,
   type Browser,

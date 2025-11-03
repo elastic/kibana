@@ -84,13 +84,15 @@ export async function runProfiler({
   }
 
   const periodicWrite = flags['periodic-write'] ?? false;
-  const maxProfileSize = flags['max-profile-size'] 
-    ? Number(flags['max-profile-size']) 
+  const maxProfileSize = flags['max-profile-size']
+    ? Number(flags['max-profile-size'])
     : DEFAULT_MAX_PROFILE_SIZE;
   const outputTimestamp = flags['output-timestamp'];
 
   // Estimate write interval based on size (roughly 1MB per 10 seconds of profiling)
-  const writeIntervalMs = periodicWrite ? Math.max(10000, (maxProfileSize / (1024 * 1024)) * 10000) : 0;
+  const writeIntervalMs = periodicWrite
+    ? Math.max(10000, (maxProfileSize / (1024 * 1024)) * 10000)
+    : 0;
 
   let stopFn = await getProfiler({
     pid,
@@ -104,25 +106,27 @@ export async function runProfiler({
   let periodicWriteInterval: NodeJS.Timeout | null = null;
 
   if (periodicWrite) {
-    log.info(`Periodic write enabled: will write profile every ${Math.round(writeIntervalMs / 1000)}s`);
-    
+    log.info(
+      `Periodic write enabled: will write profile every ${Math.round(writeIntervalMs / 1000)}s`
+    );
+
     periodicWriteInterval = setInterval(async () => {
       try {
         profileCount++;
         log.info(`Writing periodic profile #${profileCount}...`);
-        
+
         // Stop current profiling session and write
         await stopFn();
-        
+
         // Start a new profiling session
         stopFn = await getProfiler({
-      pid,
-      log,
-      type: flags.heap ? 'heap' : 'cpu',
-      inspectorPort,
+          pid,
+          log,
+          type: flags.heap ? 'heap' : 'cpu',
+          inspectorPort,
           outputTimestamp,
         });
-        
+
         log.info(`Resumed profiling after writing profile #${profileCount}`);
       } catch (error) {
         log.error(`Failed to write periodic profile: ${error}`);
