@@ -523,6 +523,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             data-test-subj="repositoryNotFoundWarning"
             title={
               <FormattedMessage
