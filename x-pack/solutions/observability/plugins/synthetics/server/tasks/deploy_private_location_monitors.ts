@@ -1,0 +1,224 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
+import { normalizeSecrets } from '../synthetics_service/utils';
+import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
+import type {
+  HeartbeatConfig,
+  MonitorFields,
+  SyntheticsMonitorWithSecretsAttributes,
+} from '../../common/runtime_types';
+import { MonitorConfigRepository } from '../services/monitor_config_repository';
+import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsServerSetup } from '../types';
+import {
+  formatHeartbeatRequest,
+  mixParamsWithGlobalParams,
+} from '../synthetics_service/formatters/public_formatters/format_configs';
+
+export class DeployPrivateLocationMonitors {
+  constructor(
+    public serverSetup: SyntheticsServerSetup,
+    public taskManager: TaskManagerSetupContract,
+    public syntheticsMonitorClient: SyntheticsMonitorClient
+  ) {}
+
+  async syncPackagePolicies({
+    allPrivateLocations,
+    encryptedSavedObjects,
+    soClient,
+    spaceIds,
+  }: {
+    spaceIds: string[];
+    soClient: SavedObjectsClientContract;
+    allPrivateLocations: PrivateLocationAttributes[];
+    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  }) {
+    if (allPrivateLocations.length === 0) {
+      this.debugLog('No private locations found, skipping sync of private location monitors');
+      return;
+    }
+
+    const { privateLocationAPI } = this.syntheticsMonitorClient;
+
+    const { configsBySpaces, paramsBySpace, monitorSpaceIds, maintenanceWindows } =
+      await this.getAllMonitorConfigs({
+        encryptedSavedObjects,
+        soClient,
+        spaceIds,
+      });
+
+    return this.serverSetup.fleet.runWithCache(async () => {
+      for (const spaceId of monitorSpaceIds) {
+        const privateConfigs: Array<{
+          config: HeartbeatConfig;
+          globalParams: Record<string, string>;
+        }> = [];
+        const monitors = configsBySpaces[spaceId];
+        this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
+        if (!monitors) {
+          continue;
+        }
+        for (const monitor of monitors) {
+          const { privateLocations } = this.parseLocations(monitor);
+
+          if (privateLocations.length > 0) {
+            privateConfigs.push({ config: monitor, globalParams: paramsBySpace[spaceId] });
+          }
+        }
+        if (privateConfigs.length > 0) {
+          this.debugLog(
+            `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}`
+          );
+
+          await privateLocationAPI.editMonitors(
+            privateConfigs,
+            allPrivateLocations,
+            spaceId,
+            maintenanceWindows
+          );
+        } else {
+          this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
+        }
+      }
+    });
+  }
+
+  async getAllMonitorConfigs({
+    soClient,
+    encryptedSavedObjects,
+    spaceIds = [ALL_SPACES_ID],
+  }: {
+    soClient: SavedObjectsClientContract;
+    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+    spaceIds: string[];
+  }) {
+    const { syntheticsService } = this.syntheticsMonitorClient;
+    const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceIds });
+    const maintenanceWindowsPromise = syntheticsService.getMaintenanceWindows();
+    const monitorConfigRepository = new MonitorConfigRepository(
+      soClient,
+      encryptedSavedObjects.getClient()
+    );
+
+    const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({
+      spaceId: ALL_SPACES_ID,
+    });
+
+    const [paramsBySpace, monitors, maintenanceWindows] = await Promise.all([
+      paramsBySpacePromise,
+      monitorsPromise,
+      maintenanceWindowsPromise,
+    ]);
+
+    return {
+      ...this.mixParamsWithMonitors(monitors, paramsBySpace),
+      paramsBySpace,
+      maintenanceWindows,
+    };
+  }
+
+  parseLocations(config: HeartbeatConfig) {
+    const { locations } = config;
+
+    const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
+    const publicLocations = locations.filter((loc) => loc.isServiceManaged);
+
+    return { privateLocations, publicLocations };
+  }
+
+  mixParamsWithMonitors(
+    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
+    paramsBySpace: Record<string, Record<string, string>>
+  ) {
+    const configsBySpaces: Record<string, HeartbeatConfig[]> = {};
+    const monitorSpaceIds = new Set<string>();
+
+    for (const monitor of monitors) {
+      const spaceId = monitor.namespaces?.[0];
+      if (!spaceId) {
+        continue;
+      }
+      monitorSpaceIds.add(spaceId);
+      const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
+      const { str: paramsString } = mixParamsWithGlobalParams(
+        paramsBySpace[spaceId],
+        normalizedMonitor
+      );
+
+      if (!configsBySpaces[spaceId]) {
+        configsBySpaces[spaceId] = [];
+      }
+
+      configsBySpaces[spaceId].push(
+        formatHeartbeatRequest(
+          {
+            spaceId,
+            monitor: normalizedMonitor,
+            configId: monitor.id,
+          },
+          paramsString
+        )
+      );
+    }
+
+    return { configsBySpaces, monitorSpaceIds };
+  }
+
+  async hasMWsChanged({
+    soClient,
+    lastStartedAt,
+    lastTotalMWs,
+  }: {
+    soClient: SavedObjectsClientContract;
+    lastStartedAt: string;
+    lastTotalMWs: number;
+  }) {
+    const { logger } = this.serverSetup;
+
+    const [editedMWs, totalMWs] = await Promise.all([
+      soClient.find({
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        filter: `${MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE}.updated_at > "${lastStartedAt}"`,
+        fields: [],
+      }),
+      soClient.find({
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        fields: [],
+      }),
+    ]);
+    logger.debug(
+      `Found ${editedMWs.total} maintenance windows updated and ${totalMWs.total} total maintenance windows`
+    );
+    const updatedMWs = editedMWs.total;
+    const noOfMWs = totalMWs.total;
+
+    const hasMWsChanged = updatedMWs > 0 || noOfMWs !== lastTotalMWs;
+
+    return {
+      hasMWsChanged,
+      updatedMWs,
+      totalMWs: noOfMWs,
+    };
+  }
+
+  debugLog = (message: string) => {
+    this.serverSetup.logger.debug(`[SyncPrivateLocationMonitorsTask] ${message}`);
+  };
+}

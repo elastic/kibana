@@ -443,7 +443,7 @@ describe('SyntheticsService', () => {
         ],
       });
 
-      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+      const params = await service.getSyntheticsParams({ spaceIds: ['default'] });
 
       expect(params).toEqual({
         '*': {
@@ -468,7 +468,7 @@ describe('SyntheticsService', () => {
         ],
       });
 
-      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+      const params = await service.getSyntheticsParams({ spaceIds: ['default'] });
 
       expect(params).toEqual({
         default: {
@@ -498,7 +498,7 @@ describe('SyntheticsService', () => {
         ],
       });
 
-      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+      const params = await service.getSyntheticsParams({ spaceIds: ['default'] });
 
       expect(params).toEqual({
         '*': {

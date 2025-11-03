@@ -595,10 +595,10 @@ export class SyntheticsService {
   }
 
   async getSyntheticsParams({
-    spaceId,
+    spaceIds = [ALL_SPACES_ID],
     hideParams = false,
     canSave = true,
-  }: { spaceId?: string; canSave?: boolean; hideParams?: boolean } = {}) {
+  }: { spaceIds?: string[]; canSave?: boolean; hideParams?: boolean } = {}) {
     if (!canSave) {
       return Object.create(null);
     }
@@ -610,7 +610,7 @@ export class SyntheticsService {
       await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>({
         type: syntheticsParamType,
         perPage: 1000,
-        namespaces: spaceId ? [spaceId] : [ALL_SPACES_ID],
+        namespaces: spaceIds,
       });
 
     for await (const response of finder.find()) {
@@ -638,6 +638,7 @@ export class SyntheticsService {
           };
         }
       });
+      const spaceId = spaceIds.find((id) => id !== ALL_SPACES_ID);
       if (spaceId) {
         paramsBySpace[spaceId] = {
           ...(paramsBySpace?.[spaceId] ?? {}),
