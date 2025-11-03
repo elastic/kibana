@@ -27,6 +27,8 @@ import { PromptComponent } from './prompt';
 import { LinkIcon } from '../../../../common/components/link_icon';
 import { useHeaderLinkBackStyles } from '../../../../common/components/header_page';
 
+import { APP_UI_ID } from '../../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 const AiAssistedCreateRulePageComponent: React.FC = () => {
   const [
     {
@@ -37,13 +39,20 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
       // canUserCRUD,
     },
   ] = useUserData();
+
+  const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
+    'aiAssistedRuleCreationEnabled'
+  );
   const { loading: listsConfigLoading } = useListsConfig();
   const { addError } = useAppToasts();
   // const { navigateToApp } = useKibana().services.application;
   const isLoading = userInfoLoading || listsConfigLoading;
   const collapseFn = useRef<() => void | undefined>();
   const lastSubmittedPrompt = useRef<string>('');
-  const { settings } = useKibana().services;
+  const {
+    settings,
+    application: { navigateToApp },
+  } = useKibana().services;
   const styles = useHeaderLinkBackStyles();
 
   const [promptValue, setPromptValue] = useState('');
@@ -111,6 +120,13 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     ),
     [styles.linkBack, submittedPromptValue]
   );
+
+  if (!aiAssistedRuleCreationEnabled) {
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+    });
+    return null;
+  }
 
   return showForm ? (
     <CreateRulePage

@@ -127,6 +127,11 @@ export const allowedExperimentalValues = Object.freeze({
   siemMigrationsDisabled: false,
 
   /**
+   * Enables AI assisted rule creation feature
+   */
+  aiAssistedRuleCreationEnabled: false,
+
+  /**
    * Enables the Defend Insights Policy Response Failure feature
    */
   defendInsightsPolicyResponseFailure: true,

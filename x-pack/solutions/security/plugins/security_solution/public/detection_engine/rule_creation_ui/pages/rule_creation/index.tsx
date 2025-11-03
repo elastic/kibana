@@ -237,7 +237,6 @@ const CreateRulePageComponent: React.FC<{
 
   useEffect(() => {
     if (prevRuleType && prevRuleType !== ruleType) {
-      console.log('ruleType changed:', { prevRuleType, ruleType });
       aboutStepForm.updateFieldValues({
         threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
       });

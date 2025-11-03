@@ -107,7 +107,6 @@ export const initRoutes = (
   finalizeSignalsMigrationRoute(router, ruleDataService, docLinks);
   deleteSignalsMigrationRoute(router, docLinks);
   suggestUserProfilesRoute(router, getStartServices);
-  registerAIAssistedRoutes(router, logger);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
@@ -123,7 +122,11 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled, aiAssistedRuleCreationEnabled } = config.experimentalFeatures;
+
+  if (aiAssistedRuleCreationEnabled) {
+    registerAIAssistedRoutes(router, logger);
+  }
 
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
