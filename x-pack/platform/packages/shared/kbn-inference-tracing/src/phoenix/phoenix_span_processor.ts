@@ -25,9 +25,9 @@ import { PhoenixProtoExporter } from './phoenix_otlp_exporter';
  */
 function getDirectoryBaseUrl(url: URL): URL {
   if (!url.pathname.endsWith('/')) {
-    const clone = new URL(url);
-    clone.pathname = `${clone.pathname}/`;
-    return clone;
+    const clonedUrl = new URL(url);
+    clonedUrl.pathname = `${clonedUrl.pathname}/`;
+    return clonedUrl;
   }
   return url;
 }
