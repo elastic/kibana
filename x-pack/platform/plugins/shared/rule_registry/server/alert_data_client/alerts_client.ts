@@ -71,8 +71,8 @@ import { getConsumersFilter } from '../lib/get_consumers_filter';
 import { mergeUniqueFieldsByName } from '../utils/unique_fields';
 import { getAlertFieldsFromIndexFetcher } from '../utils/get_alert_fields_from_index_fetcher';
 import {
+  STATUS_UPDATE_SCRIPT,
   ADD_TAGS_UPDATE_SCRIPT,
-  getStatusUpdateScript,
   REMOVE_TAGS_UPDATE_SCRIPT,
 } from '../utils/alert_client_bulk_update_scripts';
 import type { GetAlertFieldsResponseV1 } from '../routes/get_alert_fields';
@@ -803,10 +803,11 @@ export class AlertsClient {
     removeTags,
   }: BulkUpdateOptions<Params>) {
     const scriptOps: string[] = [];
-    const params: Record<string, string[]> = {};
+    const params: Record<string, string[] | STATUS_VALUES> = {};
 
     if (status != null) {
-      scriptOps.push(getStatusUpdateScript(status));
+      params.status = status;
+      scriptOps.push(STATUS_UPDATE_SCRIPT);
     }
 
     if (addTags != null && addTags.length > 0) {

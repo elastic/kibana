@@ -14,7 +14,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import {
-  getStatusUpdateScript,
+  STATUS_UPDATE_SCRIPT,
   ADD_TAGS_UPDATE_SCRIPT,
   REMOVE_TAGS_UPDATE_SCRIPT,
 } from '../utils/alert_client_bulk_update_scripts';
@@ -860,12 +860,13 @@ describe('AlertsClient', () => {
           {
             script: {
               source: [
-                getStatusUpdateScript('acknowledged'),
+                STATUS_UPDATE_SCRIPT,
                 ADD_TAGS_UPDATE_SCRIPT,
                 REMOVE_TAGS_UPDATE_SCRIPT,
               ].join('\n'),
               lang: 'painless',
               params: {
+                status: 'acknowledged',
                 addTags: ['reviewed'],
                 removeTags: ['pending'],
               },
@@ -880,12 +881,13 @@ describe('AlertsClient', () => {
           {
             script: {
               source: [
-                getStatusUpdateScript('acknowledged'),
+                STATUS_UPDATE_SCRIPT,
                 ADD_TAGS_UPDATE_SCRIPT,
                 REMOVE_TAGS_UPDATE_SCRIPT,
               ].join('\n'),
               lang: 'painless',
               params: {
+                status: 'acknowledged',
                 addTags: ['reviewed'],
                 removeTags: ['pending'],
               },
@@ -1028,8 +1030,11 @@ describe('AlertsClient', () => {
           },
           {
             script: {
-              source: getStatusUpdateScript('acknowledged'),
+              source: STATUS_UPDATE_SCRIPT,
               lang: 'painless',
+              params: {
+                status: 'acknowledged',
+              },
             },
           },
         ],
@@ -1082,8 +1087,11 @@ describe('AlertsClient', () => {
           },
           {
             script: {
-              source: getStatusUpdateScript('acknowledged'),
+              source: STATUS_UPDATE_SCRIPT,
               lang: 'painless',
+              params: {
+                status: 'acknowledged',
+              },
             },
           },
         ],
