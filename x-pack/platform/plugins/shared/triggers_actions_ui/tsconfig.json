@@ -90,6 +90,7 @@
     "@kbn/ebt-tools",
     "@kbn/presentation-util",
     "@kbn/discover-utils",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

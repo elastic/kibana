@@ -8,7 +8,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { WorkflowStatsDto } from '@kbn/workflows/types/v1';
 import { useKibana } from '../../../hooks/use_kibana';
 

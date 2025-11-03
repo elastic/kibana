@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 import type {
   FormBasedPersistedState,
-  XYState,
-  XYReferenceLineLayerConfig,
-  XYDataLayerConfig,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
-import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
-import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+  TextBasedLayerColumn,
+  XYByValueAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYState,
+} from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import type {

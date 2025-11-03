@@ -25,17 +25,18 @@ export interface ReloadTimeFetchContext extends Omit<FetchContext, 'isReload'> {
 }
 
 export function isReloadTimeFetchContextEqual(
-  currentContext: ReloadTimeFetchContext,
-  lastContext: ReloadTimeFetchContext
+  previousContext: ReloadTimeFetchContext,
+  currentContext: ReloadTimeFetchContext
 ): boolean {
-  if (currentContext.searchSessionId !== lastContext.searchSessionId) return false;
-
   return (
-    isReloadTimestampEqualForFetch(currentContext.reloadTimestamp, lastContext.reloadTimestamp) &&
-    areFiltersEqualForFetch(currentContext.filters, lastContext.filters) &&
-    isQueryEqualForFetch(currentContext.query, lastContext.query) &&
-    isTimeRangeEqualForFetch(currentContext.timeRange, lastContext.timeRange) &&
-    isTimeSliceEqualForFetch(currentContext.timeslice, lastContext.timeslice)
+    isReloadTimestampEqualForFetch(
+      previousContext.reloadTimestamp,
+      currentContext.reloadTimestamp
+    ) &&
+    areFiltersEqualForFetch(previousContext.filters, currentContext.filters) &&
+    isQueryEqualForFetch(previousContext.query, currentContext.query) &&
+    isTimeRangeEqualForFetch(previousContext.timeRange, currentContext.timeRange) &&
+    isTimeSliceEqualForFetch(previousContext.timeslice, currentContext.timeslice)
   );
 }
 
@@ -48,11 +49,11 @@ export const areFiltersEqualForFetch = (currentFilters?: Filter[], lastFilters?:
 };
 
 export const isReloadTimestampEqualForFetch = (
-  currentReloadTimestamp?: number,
-  lastReloadTimestamp?: number
+  previousReloadTimestamp?: number,
+  currentReloadTimestamp?: number
 ) => {
   if (!currentReloadTimestamp) return true; // if current reload timestamp is not set, this is not a force refresh.
-  return currentReloadTimestamp === lastReloadTimestamp;
+  return currentReloadTimestamp === previousReloadTimestamp;
 };
 
 export const isQueryEqualForFetch = (

@@ -8,16 +8,18 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
-import { LegendValue, ScaleType } from '@elastic/charts';
+import { ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
-import type { XYLegendValue } from '@kbn/chart-expressions-common';
+import type {
+  AxesSettingsConfig,
+  VisualizationToolbarProps,
+  FramePublicAPI,
+  XYState,
+} from '@kbn/lens-common';
 import { LegendSize } from '@kbn/chart-expressions-common';
-import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
-import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
-import type { State, XYState } from '../types';
+import type { LegendSettingsProps } from '../../../shared_components/legend/legend_settings';
 import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -29,47 +31,20 @@ import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
 import type { AxesSettingsConfigKeys } from '../../../shared_components';
+import { defaultLegendTitle, legendOptions, xyLegendValues } from './legend_settings';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
 export function updateLayer(
-  state: State,
-  layer: UnwrapArray<State['layers']>,
+  state: XYState,
+  layer: UnwrapArray<XYState['layers']>,
   index: number
-): State {
+): XYState {
   return {
     ...state,
     layers: state.layers.map((l, i) => (i === index ? layer : l)),
   };
 }
-
-const legendOptions: Array<{
-  id: string;
-  value: 'auto' | 'show' | 'hide';
-  label: string;
-}> = [
-  {
-    id: `xy_legend_auto`,
-    value: 'auto',
-    label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
-      defaultMessage: 'Auto',
-    }),
-  },
-  {
-    id: `xy_legend_show`,
-    value: 'show',
-    label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
-      defaultMessage: 'Show',
-    }),
-  },
-  {
-    id: `xy_legend_hide`,
-    value: 'hide',
-    label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
-      defaultMessage: 'Hide',
-    }),
-  },
-];
 
 export const getDataBounds = function (
   activeData: FramePublicAPI['activeData'],
@@ -129,174 +104,7 @@ export const axisKeyToTitleMapping: Record<
   yRight: 'yRightTitle',
 };
 
-const xyLegendValues: Array<{
-  value: XYLegendValue;
-  label: string;
-  toolTipContent: string;
-}> = [
-  {
-    value: LegendValue.Average,
-    label: i18n.translate('xpack.lens.shared.legendValues.average', {
-      defaultMessage: 'Average',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.averageDesc', {
-      defaultMessage: 'Average of all values in the series.',
-    }),
-  },
-  {
-    value: LegendValue.Median,
-    label: i18n.translate('xpack.lens.shared.legendValues.median', {
-      defaultMessage: 'Median',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.medianDesc', {
-      defaultMessage: 'Median value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.Min,
-    label: i18n.translate('xpack.lens.shared.legendValues.min', {
-      defaultMessage: 'Minimum',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.minDesc', {
-      defaultMessage: 'Minimum value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.Max,
-    label: i18n.translate('xpack.lens.shared.legendValues.max', {
-      defaultMessage: 'Maximum',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.maxDesc', {
-      defaultMessage: 'Maximum value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.Range,
-    label: i18n.translate('xpack.lens.shared.legendValues.range', {
-      defaultMessage: 'Range',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.rangeDesc', {
-      defaultMessage: 'Difference between the min and the max in the series.',
-    }),
-  },
-  {
-    value: LegendValue.LastValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
-      defaultMessage: 'Last value',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
-      defaultMessage: 'Last value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.LastNonNullValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValue', {
-      defaultMessage: 'Last non-null value',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValueDesc', {
-      defaultMessage: 'Last non-null value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.FirstValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.firstValue', {
-      defaultMessage: 'First value',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.firstValueDesc', {
-      defaultMessage: 'First value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.FirstNonNullValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.firstNonNullValue', {
-      defaultMessage: 'First non-null value',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.firstNonNullValueDesc', {
-      defaultMessage: 'First non-null value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.Difference,
-    label: i18n.translate('xpack.lens.shared.legendValues.diff', {
-      defaultMessage: 'Difference',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.diffDesc', {
-      defaultMessage: 'Difference between first and last value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.DifferencePercent,
-    label: i18n.translate('xpack.lens.shared.legendValues.diffPercent', {
-      defaultMessage: 'Difference %',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.diffPercentDesc', {
-      defaultMessage: 'Difference in percent between first and last value in the series.',
-    }),
-  },
-  {
-    value: LegendValue.Total,
-    label: i18n.translate('xpack.lens.shared.legendValues.total', {
-      defaultMessage: 'Sum',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.totalDesc', {
-      defaultMessage: 'The sum of all values in the series.',
-    }),
-  },
-  {
-    value: LegendValue.Count,
-    label: i18n.translate('xpack.lens.shared.legendValues.count', {
-      defaultMessage: 'Count',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.countDesc', {
-      defaultMessage: 'Count of all the values in the series.',
-    }),
-  },
-  {
-    value: LegendValue.DistinctCount,
-    label: i18n.translate('xpack.lens.shared.legendValues.distinctCount', {
-      defaultMessage: 'Distinct count',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.distinctCountDesc', {
-      defaultMessage: 'Count of distinct values in the series.',
-    }),
-  },
-  {
-    value: LegendValue.Variance,
-    label: i18n.translate('xpack.lens.shared.legendValues.variance', {
-      defaultMessage: 'Variance',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.varianceDesc', {
-      defaultMessage: 'Variance of all the values in the series.',
-    }),
-  },
-  {
-    value: LegendValue.StdDeviation,
-    label: i18n.translate('xpack.lens.shared.legendValues.stdDev', {
-      defaultMessage: 'Std deviation',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.stdDevDesc', {
-      defaultMessage: 'Standard deviation of all the values in the series.',
-    }),
-  },
-  // Moved to the bottom to limit its usage. It could cause some UX issues due to the dynamic nature
-  // of the data displayed
-  {
-    value: LegendValue.CurrentAndLastValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.currentValue', {
-      defaultMessage: 'Current or last value',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.currentValueDesc', {
-      defaultMessage:
-        'Value of the bucket being hovered or the last bucket value when not hovering.',
-    }),
-  },
-];
-
-const defaultLegendTitle = i18n.translate('xpack.lens.xyChart.legendTitle', {
-  defaultMessage: 'Legend',
-});
-
-export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
+export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<XYState>) {
   const { state, setState, frame } = props;
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
@@ -715,9 +523,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           }}
           onAlignmentChange={(value) => {
             const [vertical, horizontal] = value.split('_');
-            const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
-            const horizontalAlignment =
-              horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
+            const verticalAlignment = vertical as LegendSettingsProps['verticalAlignment'];
+            const horizontalAlignment = horizontal as LegendSettingsProps['horizontalAlignment'];
 
             setState({
               ...state,

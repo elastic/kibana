@@ -103,6 +103,11 @@ export const testFieldMap: FieldMap = {
     required: false,
     format: 'epoch_millis||strict_date_optional_time',
   },
+  // this field should be skipped in the mapping
+  unmapped_field: {
+    type: 'unmapped',
+    required: false,
+  },
 };
 export const expectedTestMapping = {
   properties: {
@@ -310,6 +315,16 @@ describe('mappingFromFieldMap', () => {
                       type: 'keyword',
                     },
                     uuid: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                scheduled_action: {
+                  properties: {
+                    date: {
+                      type: 'keyword',
+                    },
+                    group: {
                       type: 'keyword',
                     },
                   },
