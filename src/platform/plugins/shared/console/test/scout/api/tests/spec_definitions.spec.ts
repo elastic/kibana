@@ -13,11 +13,11 @@ import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'GET /api/console/api_server',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
+  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch', 'esGate'] },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      adminApiCredentials = await requestAuth.getApiKey('viewer');
     });
     apiTest('returns autocomplete definitions', async ({ apiClient }) => {
       const { body, statusCode } = await apiClient.get('api/console/api_server', {
