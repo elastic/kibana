@@ -10,15 +10,12 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
-import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -150,123 +147,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     (state) => state.persistedDiscoverSession
   );
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-
-  // Create attachments with lazy content loading
-  const createAttachments = useCallback((): Array<{
-    id: string;
-    type: string;
-    getContent: () => Promise<Record<string, unknown>> | Record<string, unknown>;
-  }> => {
-    const attachments: Array<{
-      id: string;
-      type: string;
-      getContent: () => Promise<Record<string, unknown>> | Record<string, unknown>;
-    }> = [];
-
-    // Screen context attachment
-    attachments.push({
-      id: 'discover-screen-context',
-      type: AttachmentType.screenContext,
-      getContent: async () => {
-        const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
-        const stateContainer = currentTabRuntimeState?.stateContainer$.getValue();
-
-        if (!stateContainer) {
-          return {
-            app: 'discover',
-            description: 'Discover - Data exploration',
-            additional_data: {},
-          };
-        }
-
-        const appState = stateContainer.appState.getState();
-        const savedSearch = stateContainer.savedSearchState.getState();
-        const currentTab = stateContainer.getCurrentTab();
-        const timeRange = currentTab.globalState.timeRange;
-        const isEsqlMode = isDataSourceType(appState.dataSource, DataSourceType.Esql);
-        const isSaved = Boolean(savedSearch.id);
-
-        const additionalData: Record<string, string> = {
-          isSaved: isSaved ? 'true' : 'false',
-          mode: isEsqlMode ? 'esql' : 'normal',
-        };
-
-        if (isSaved && savedSearch.id) {
-          additionalData.savedSearchId = savedSearch.id;
-        }
-
-        if (timeRange) {
-          additionalData.timeRange = JSON.stringify({
-            from: timeRange.from,
-            to: timeRange.to,
-          });
-        }
-
-        if (isEsqlMode && isOfAggregateQueryType(appState.query)) {
-          additionalData.esqlQuery = appState.query.esql;
-        }
-
-        if (appState.columns && appState.columns.length > 0) {
-          additionalData.selectedFields = JSON.stringify(appState.columns);
-        }
-
-        return {
-          app: 'discover',
-          description: 'Discover - Data exploration',
-          url: window.location.href,
-          additional_data: additionalData,
-        };
-      },
-    });
-
-    // Text attachment with first 25 documents
-    attachments.push({
-      id: 'discover-documents',
-      type: AttachmentType.text,
-      getContent: async () => {
-        const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
-        const stateContainer = currentTabRuntimeState?.stateContainer$.getValue();
-
-        if (!stateContainer) {
-          return { content: '' };
-        }
-
-        // Get current documents from the data state
-        const documents$ = stateContainer.dataState.data$.documents$;
-        const documents = documents$.getValue();
-
-        if (!documents || !documents.result || documents.result.length === 0) {
-          return { content: 'No documents available' };
-        }
-
-        // Get first 25 documents
-        const first25Docs = documents.result.slice(0, 5);
-        const content = first25Docs
-          .map((doc, index) => {
-            const docData = doc.raw._source || {};
-            return `Document ${index + 1}:\n${JSON.stringify(docData, null, 2)}\n`;
-          })
-          .join('\n---\n\n');
-
-        return { content };
-      },
-    });
-
-    return attachments;
-  }, [runtimeStateManager, currentTabId]);
-
-  // Set conversation flyout active config when Discover mounts or when state changes
-  useEffect(() => {
-    if (services.onechat && currentTabId) {
-      const attachments = createAttachments();
-      services.onechat.setConversationFlyoutActiveConfig({
-        sessionTag: 'discover',
-        attachments,
-        newConversation: true,
-      });
-    }
-  }, [services.onechat, currentTabId, createAttachments]);
-
   const initializeDiscoverSession = useLatest(
     ({ nextDiscoverSessionId }: { nextDiscoverSessionId: string | undefined }) => {
       const persistedDiscoverSessionId = persistedDiscoverSession?.id;
@@ -303,11 +183,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
 
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       dispatch(internalStateActions.disconnectTab({ tabId }));
-    }
-
-    // Clear conversation flyout active config when Discover unmounts
-    if (services.onechat) {
-      services.onechat.clearConversationFlyoutActiveConfig();
     }
   });
 
