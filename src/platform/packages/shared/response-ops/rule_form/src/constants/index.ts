@@ -14,6 +14,7 @@ import {
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ESQL_RULE_ID,
 } from '@kbn/rule-data-utils';
 import type { RuleFormData } from '../types';
 
@@ -63,6 +64,7 @@ export const MULTI_CONSUMER_RULE_TYPE_IDS = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  ESQL_RULE_ID,
 ];
 
 export const DEFAULT_VALID_CONSUMERS: RuleCreationValidConsumer[] = [

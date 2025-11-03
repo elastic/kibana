@@ -10,6 +10,7 @@
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
 export const ES_QUERY_ID = '.es-query';
 export const ML_ANOMALY_DETECTION_RULE_TYPE_ID = 'xpack.ml.anomaly_detection_alert';
+export const ESQL_RULE_ID = '.esql';
 
 export const DEGRADED_DOCS_RULE_TYPE_ID = 'datasetQuality.degradedDocs';
 
@@ -22,4 +23,5 @@ export const STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY = [
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   DEGRADED_DOCS_RULE_TYPE_ID,
+  ESQL_RULE_ID,
 ];
