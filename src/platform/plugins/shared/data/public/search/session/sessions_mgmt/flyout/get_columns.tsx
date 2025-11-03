@@ -43,7 +43,6 @@ export const getColumns: any = ({
     core,
     api,
     onActionComplete,
-    onInspectSession,
-    allowedActions: [ACTION.INSPECT, ACTION.EXTEND, ACTION.RENAME, ACTION.DELETE],
+    allowedActions: [ACTION.EXTEND, ACTION.RENAME, ACTION.DELETE],
   }),
 ];
