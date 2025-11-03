@@ -38,7 +38,6 @@ import {
   EuiButton,
   EuiButtonIcon,
   useEuiTheme,
-  // EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
@@ -181,7 +180,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
-  isNLToESQLConversionEnabled?: boolean;
   /**
    * Style of the submit button
    * `iconOnly` - use IconButton
@@ -949,7 +947,7 @@ export const QueryBarTopRow = React.memo(
                   : 0};
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
-              alignItems="center"
+              wrap
             >
               {props.showProjectPicker && renderProjectPicker()}
               {props.dataViewPickerOverride || renderDataViewsPicker()}
@@ -972,14 +970,6 @@ export const QueryBarTopRow = React.memo(
               {renderQueryInput()}
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
-              {/* {Boolean(props.isNLToESQLConversionEnabled) &&
-                isQueryLangSelected &&
-                props.query &&
-                isOfAggregateQueryType(props.query) && (
-                  <EuiLink onClick={() => setIsNLToESQLModalVisible(true)}>
-                    <AssistantBeacon size="m" backgroundColor="emptyShade" />
-                  </EuiLink>
-                )} */}
               {renderUpdateButton()}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}

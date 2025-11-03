@@ -31,7 +31,7 @@ export const getRecommendedQueriesTemplates = ({
   const queries = [
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.label', {
-        defaultMessage: 'Search...',
+        defaultMessage: 'Search all fields',
       }),
       description: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.description', {
         defaultMessage: 'Use WHERE to filter/search data',

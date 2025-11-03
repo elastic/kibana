@@ -14,13 +14,10 @@ import type { ESQLExtensionsRegistry } from '../extensions_registry';
 import { registerGetJoinIndicesRoute } from './get_join_indices';
 import { registerGetTimeseriesIndicesRoute } from './get_timeseries_indices';
 import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
-import { registerNLtoESQLRoute } from '../nl_to_esql/nl_to_esql_route';
-import { registerESQLCompletionRoute } from '../nl_to_esql/esql_completion_route';
-import type { EsqlServerPluginStart } from '../types';
 import { registerLookupIndexRoutes } from './lookup_index';
 
 export const registerRoutes = (
-  setup: CoreSetup<EsqlServerPluginStart>,
+  setup: CoreSetup,
   extensionsRegistry: ESQLExtensionsRegistry,
   initContext: PluginInitializerContext
 ) => {
@@ -30,7 +27,5 @@ export const registerRoutes = (
   registerGetTimeseriesIndicesRoute(router, initContext);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
   registerGetInferenceEndpointsRoute(router, initContext);
-  registerNLtoESQLRoute(router, setup.getStartServices, initContext);
-  registerESQLCompletionRoute(router, setup.getStartServices, initContext);
   registerLookupIndexRoutes(router, initContext);
 };

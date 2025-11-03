@@ -19,8 +19,6 @@
       "dataViews",
       "uiActions",
       "contentManagement",
-      "inference",
-      "actions",
       "share",
       "fileUpload",
       "fieldFormats"

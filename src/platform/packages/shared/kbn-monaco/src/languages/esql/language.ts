@@ -36,11 +36,6 @@ const removeKeywordSuffix = (name: string) => {
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
-// Global state for LLM trigger tracking (outside provider instances)
-const globalLLMTriggerState = {
-  isTriggered: false,
-};
-
 export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
 
 export type ESQLDependencies = ESQLCallbacks &
@@ -119,7 +114,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   },
   getInlineCompletionsProvider: (
     callbacks?: ESQLCallbacks
-  ): monaco.languages.InlineCompletionsProvider & { triggerLLMSuggestions: () => void } => {
+  ): monaco.languages.InlineCompletionsProvider => {
     const provider = {
       async provideInlineCompletions(model: monaco.editor.ITextModel, position: monaco.Position) {
         const fullText = model.getValue();
@@ -141,9 +136,6 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
       },
       freeInlineCompletions: () => {},
-      triggerLLMSuggestions: () => {
-        globalLLMTriggerState.isTriggered = true;
-      },
     };
 
     return provider;

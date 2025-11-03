@@ -7,28 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { EsqlQuery } from '@kbn/esql-ast';
+import { EsqlQuery, BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
 import {
   getRecommendedQueriesTemplates,
   getCategorizationField,
 } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import type { ESQLCallbacks } from '../shared/types';
-import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
+import { getColumnsByTypeRetriever } from '../shared/columns';
 
 export interface InlineSuggestionItem {
   /**
    * The text to insert.
    * If the text contains a line break, the range must end at the end of a line.
    * If existing text should be replaced, the existing text must be a prefix of the text to insert.
-   *
-   * The text can also be a snippet. In that case, a preview with default parameters is shown.
-   * When accepting the suggestion, the full snippet is inserted.
    */
-  insertText:
-    | string
-    | {
-        snippet: string;
-      };
+  insertText: string;
   /**
    * A text that is used to decide if this inline completion should be shown.
    * An inline completion is shown if the text to replace is a subword of the filter text.
@@ -74,34 +67,18 @@ export interface InlineSuggestionItem {
  * Normalizes query text by removing comments, newlines and standardizing pipe operators
  */
 function processQuery(query: string): string {
-  return query
-    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove C-style comments
-    .replace(/[\n\r]/g, '') // Remove newlines
-    .replace(/\s*\|\s*/g, ' | ') // Normalize pipe spacing
-    .trim();
+  const ast = Parser.parse(query);
+  const queryWithoutComments = BasicPrettyPrinter.print(ast.root);
+  return queryWithoutComments;
 }
 
 /**
- * Extracts the insert text content from an InlineSuggestionItem
- */
-function getInsertTextContent(item: InlineSuggestionItem): string {
-  return typeof item.insertText === 'string' ? item.insertText : item.insertText.snippet;
-}
-
-/**
- * Creates a normalized key for deduplication based on the insert text
- */
-function createDeduplicationKey(item: InlineSuggestionItem): string {
-  return processQuery(getInsertTextContent(item)).toLowerCase();
-}
-
-/**
- * Removes duplicate suggestions using a Set for O(n) performance
+ * Removes duplicate suggestions
  */
 function removeDuplicates(suggestions: InlineSuggestionItem[]): InlineSuggestionItem[] {
   const seenKeys = new Set<string>();
   return suggestions.filter((item) => {
-    const key = createDeduplicationKey(item);
+    const key = processQuery(item.insertText).toLowerCase();
     if (seenKeys.has(key)) {
       return false;
     }
@@ -121,7 +98,7 @@ function filterByPrefix(
   const normalizedFullText = processQuery(fullText).toLowerCase();
 
   return suggestions.filter((item) => {
-    const normalizedText = createDeduplicationKey(item);
+    const normalizedText = processQuery(item.insertText).toLowerCase();
     return (
       normalizedText.startsWith(prefix) &&
       normalizedText !== prefix &&
@@ -137,18 +114,9 @@ function trimSuggestionPrefix(
   item: InlineSuggestionItem,
   prefixLength: number
 ): InlineSuggestionItem {
-  if (typeof item.insertText === 'string') {
-    return {
-      ...item,
-      insertText: processQuery(item.insertText).substring(prefixLength),
-    };
-  }
-
   return {
     ...item,
-    insertText: {
-      snippet: processQuery(item.insertText.snippet).substring(prefixLength),
-    },
+    insertText: processQuery(item.insertText).substring(prefixLength),
   };
 }
 
@@ -288,7 +256,6 @@ export async function inlineSuggest(
 
     return { items: finalSuggestions };
   } catch (error) {
-    // Return empty array on error to maintain user experience
     return { items: [] };
   }
 }
