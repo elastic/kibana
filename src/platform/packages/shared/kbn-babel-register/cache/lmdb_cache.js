@@ -46,7 +46,7 @@ class LmdbCache {
   constructor(config) {
     this.#log = config.log;
     this.#prefix = config.prefix;
-    this.#db = LmdbStore.open(Path.resolve(config.dir, 'v5'), {
+    this.#db = LmdbStore.open(Path.resolve(config.dir, 'v6'), {
       name: 'db',
       encoding: 'json',
     });
@@ -64,7 +64,7 @@ Failed to cleanup @kbn/babel-register cache:
 To eliminate this problem you may want to delete the "${Path.relative(process.cwd(), config.dir)}"
 directory and report this error to the Operations team.\n`);
       } finally {
-        this.#db.putSync('@last clean', [GLOBAL_ATIME, '', {}]);
+        this.#db.putSync('@last clean', [GLOBAL_ATIME, '', '', {}]);
       }
     }
   }
@@ -90,10 +90,10 @@ directory and report this error to the Operations team.\n`);
       // when we use a file from the cache set the "atime" of that cache entry
       // so that we know which cache items we use and which haven't been
       // used in a long time (currently 30 days)
-      this.#safePut(this.#db, key, [GLOBAL_ATIME, entry[1], entry[2]]);
+      this.#safePut(this.#db, key, [GLOBAL_ATIME, entry[1], entry[2], entry[3]]);
     }
 
-    return entry?.[1];
+    return entry?.[2];
   }
 
   /**
@@ -103,16 +103,27 @@ directory and report this error to the Operations team.\n`);
   getSourceMap(key) {
     const entry = this.#safeGet(this.#db, key);
     if (entry) {
-      return entry[2];
+      return entry[3];
     }
   }
 
   /**
    * @param {string} key
-   * @param {{ code: string, map: object }} entry
+   * @returns {string|undefined}
+   */
+  getPath(key) {
+    const entry = this.#safeGet(this.#db, key);
+    if (entry) {
+      return entry[1];
+    }
+  }
+
+  /**
+   * @param {string} key
+   * @param {{ path: string, code: string, map: object }} entry
    */
   async update(key, entry) {
-    this.#safePut(this.#db, key, [GLOBAL_ATIME, entry.code, entry.map]);
+    this.#safePut(this.#db, key, [GLOBAL_ATIME, entry.path, entry.code, entry.map]);
   }
 
   /**

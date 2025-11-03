@@ -29,6 +29,10 @@ class NoCacheCache {
     return undefined;
   }
 
+  getPath() {
+    return undefined;
+  }
+
   async update() {
     return undefined;
   }
