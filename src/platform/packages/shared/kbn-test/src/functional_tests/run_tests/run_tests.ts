@@ -20,6 +20,7 @@ import { Config, readConfigFile } from '../../functional_test_runner';
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
+import { runDockerServers } from '../lib/run_docker_servers';
 import type { RunTestsOptions } from './flags';
 
 /**
@@ -106,12 +107,21 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         let shutdownEs;
+        let shutdownDockerServers;
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
             shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
             if (abortCtrl.signal.aborted) {
               return;
             }
+          }
+
+          // Start docker servers (e.g., package registry) early alongside ES
+          // Only some tests need this, but if they need it it's faster to start them here.
+          // runDockerServers decides if the test needs docker servers
+          shutdownDockerServers = await runDockerServers({ log, config, onEarlyExit });
+          if (abortCtrl.signal.aborted) {
+            return;
           }
 
           await runKibanaServer({
@@ -180,6 +190,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
             await procs.stop('kibana');
           } finally {
+            // Clean up docker servers before ES
+            if (shutdownDockerServers) {
+              await shutdownDockerServers();
+            }
             if (shutdownEs) {
               await shutdownEs();
             }
