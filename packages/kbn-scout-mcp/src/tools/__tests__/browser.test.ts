@@ -157,7 +157,7 @@ describe('Browser Tools', () => {
     });
 
     it('should handle click failures with helpful message', async () => {
-      const locator = mockPage.locator();
+      const locator = mockPage.locator('[data-test-subj="missing"]');
       (locator.click as jest.Mock).mockRejectedValue(new Error('Timeout 30000ms exceeded'));
 
       const result = await scoutClick(mockSession, { testSubj: 'missing' });
@@ -176,7 +176,7 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      const locator = mockPage.locator();
+      const locator = mockPage.locator('[data-test-subj="searchInput"]');
       expect(locator.clear).toHaveBeenCalled();
       expect(locator.fill).toHaveBeenCalledWith('test query');
     });
@@ -189,7 +189,7 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      const locator = mockPage.locator();
+      const locator = mockPage.locator('[data-test-subj="searchInput"]');
       expect(locator.pressSequentially).toHaveBeenCalledWith('test query', { delay: 100 });
     });
 
@@ -201,7 +201,7 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      const locator = mockPage.locator();
+      const locator = mockPage.locator('[data-test-subj="searchInput"]');
       expect(locator.press).toHaveBeenCalledWith('Enter');
     });
 
@@ -320,7 +320,7 @@ describe('Browser Tools', () => {
       const result = await scoutWaitFor(mockSession, { testSubj: 'element' });
 
       expect(result.success).toBe(true);
-      const locator = mockPage.locator();
+      const locator = mockPage.locator('[data-test-subj="element"]');
       expect(locator.waitFor).toHaveBeenCalledWith({ state: 'visible' });
     });
 
@@ -397,7 +397,7 @@ describe('Browser Tools', () => {
     });
 
     it('should provide helpful suggestions for timeout errors', async () => {
-      const locator = mockPage.locator();
+      const locator = mockPage.locator('[data-test-subj="button"]');
       (locator.click as jest.Mock).mockRejectedValue(new Error('Timeout exceeded'));
 
       const result = await scoutClick(mockSession, { testSubj: 'button' });
