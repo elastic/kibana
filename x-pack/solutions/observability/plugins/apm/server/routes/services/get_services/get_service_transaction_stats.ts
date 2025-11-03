@@ -61,6 +61,7 @@ export interface ServiceTransactionStatsResponse {
     transactionErrorRate?: number;
     throughput?: number;
   }>;
+  maxCountExceeded: boolean;
   serviceOverflowCount: number;
 }
 
@@ -164,6 +165,8 @@ export async function getServiceTransactionStats({
     },
   });
 
+  const maxCountExceeded = (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0;
+
   return {
     serviceStats:
       response.aggregations?.sample.services.buckets.map((bucket) => {
@@ -198,6 +201,7 @@ export async function getServiceTransactionStats({
             : undefined,
         };
       }) ?? [],
+    maxCountExceeded,
     serviceOverflowCount: response.aggregations?.sample?.overflowCount?.value || 0,
   };
 }
