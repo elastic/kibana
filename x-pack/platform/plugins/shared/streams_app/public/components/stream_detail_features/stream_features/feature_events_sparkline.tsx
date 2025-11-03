@@ -8,7 +8,7 @@
 import type { Streams, Feature } from '@kbn/streams-schema';
 
 import React, { useMemo } from 'react';
-import { PreviewDataSparkPlot } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/preview_data_spark_plot';
+import { PreviewDataSparkPlot } from '../../stream_detail_significant_events_view/add_significant_event_flyout/common/preview_data_spark_plot';
 
 export const FeatureEventsSparkline = ({
   feature,
