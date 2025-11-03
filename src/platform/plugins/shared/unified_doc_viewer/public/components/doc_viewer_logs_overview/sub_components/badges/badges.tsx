@@ -28,7 +28,12 @@ interface BadgesProps {
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
 }
 
-export const Badges = ({ formattedDoc, hit, renderFlyoutStreamProcessingLink }: BadgesProps) => {
+export const Badges = ({
+  formattedDoc,
+  hit,
+  renderFlyoutStreamProcessingLink,
+  hasMessageField,
+}: BadgesProps) => {
   const { field: logLevelField, value: logLevelValue } = getLogLevelFieldWithFallback(formattedDoc);
   const { field: eventTypeField, value: eventTypeValue } =
     getLogEventTypeFieldWithFallback(formattedDoc);
@@ -40,8 +45,6 @@ export const Badges = ({ formattedDoc, hit, renderFlyoutStreamProcessingLink }: 
 
   const timestampField = formattedDoc[fieldConstants.TIMESTAMP_FIELD];
   const hasTimestamp = Boolean(timestampField);
-
-  const hasMessageField = Boolean(formattedDoc[fieldConstants.MESSAGE_FIELD]);
 
   const hasBadges = hasMessageField || hasLogLevel || isErrorEventType || hasTimestamp;
 
