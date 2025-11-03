@@ -18,8 +18,7 @@
   "kbn_references": [
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/content-management-table-list-view-table",
-    "@kbn/content-management-table-list-view-common",
-    "@kbn/developer-toolbar"
+    "@kbn/content-management-table-list-view-common"
   ],
   "exclude": [
     "target/**/*",
