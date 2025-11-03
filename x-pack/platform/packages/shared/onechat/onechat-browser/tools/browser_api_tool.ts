@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { ZodSchema } from '@kbn/zod';
-import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 /**
@@ -16,8 +16,12 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 export interface BrowserApiToolDefinition<TParams = unknown> {
   /**
    * Unique identifier for the tool.
-   * Should follow naming convention: consumer.domain.action
-   * Example: 'dashboard.config.update_title'
+   * Must use underscores (not dots) to comply with OpenAI API requirements.
+   * Should follow naming convention: consumer_domain_action
+   * Example: 'set_time_range', 'update_filters'
+   *
+   * NOTE: Dots are NOT allowed in tool IDs as they don't match the OpenAI
+   * API tool name pattern ^[a-zA-Z0-9_-]+$
    */
   id: string;
 
@@ -41,19 +45,17 @@ export interface BrowserApiToolDefinition<TParams = unknown> {
   handler: (params: TParams) => void | Promise<void>;
 }
 
-/**
- * Tool definition formatted for transmission to the server.
- * Handlers are not serializable, so we only send metadata.
- */
-export interface BrowserApiToolMetadata {
-  id: string;
-  description: string;
-  schema: JsonSchema7Type;
-}
-
 export function toToolMetadata<TParams>(
   tool: BrowserApiToolDefinition<TParams>
 ): BrowserApiToolMetadata {
+  // Validate tool ID doesn't contain dots
+  // OpenAI API requires tool names to match ^[a-zA-Z0-9_-]+$ (no dots allowed)
+  if (tool.id.includes('.')) {
+    throw new Error(
+      `Browser tool ID "${tool.id}" contains dots. Tool IDs must use underscores instead of dots (e.g., "set_time_range" not "set.time.range") to comply with OpenAI API requirements.`
+    );
+  }
+
   return {
     id: tool.id,
     description: tool.description,

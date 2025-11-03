@@ -12,23 +12,8 @@ import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browse
 import { z } from '@kbn/zod';
 
 /**
- * Trigger a Discover state update via custom event
- * This is a fallback approach when direct API access isn't available
- */
-function triggerDiscoverAction(action: string, payload: unknown) {
-
-}
-
-/**
  * Register browser API tools for Discover integration
  * These tools demonstrate how Discover can expose functionality to AI agents
- *
- * NOTE: Full implementation would require:
- * 1. Access to Discover's state container
- * 2. Access to data plugin services
- * 3. Access to dataViews plugin
- * 4. Proper error handling and validation
- *
  * @returns Array of browser tool definitions for use in setConversationFlyoutActiveConfig
  */
 export function registerDiscoverBrowserTools(
@@ -64,72 +49,90 @@ export function registerDiscoverBrowserTools(
   };
   tools.push(showFieldStatisticsTool);
 
-  // Tool 2: Add field as column
+  // Example tool 2: Add field as column
   const addFieldColumnTool: BrowserApiToolDefinition<any> = {
     id: 'add_field_column',
+    type: 'builtin',
     description: 'Add a field as a column to the Discover document table',
     schema: z.object({
       fieldName: z.string().describe('Name of the field to add as a column'),
     }),
     handler: async ({ fieldName }) => {
-      console.log('[Discover Browser Tool] Add field as column:', fieldName);
+      console.log('📊 Add field as column:', fieldName);
+      alert(`Tool called: Add "${fieldName}" as a column`);
 
-      // Trigger custom event for Discover to handle
-      triggerDiscoverAction('add_column', {
-        fieldName,
-      });
-
-      console.log(`Added column: ${fieldName}`);
+      return {
+        results: [
+          {
+            type: 'other' as const,
+            data: {
+              message: `Added field "${fieldName}" as a column`,
+              action: 'add_field_column',
+              field: fieldName,
+            },
+          },
+        ],
+      };
     },
   };
   tools.push(addFieldColumnTool);
 
-  // Tool 3: Filter for value
-  // This demonstrates triggering Discover actions via custom events
+  // Example tool 3: Filter for value
   const filterForValueTool: BrowserApiToolDefinition<any> = {
     id: 'filter_for_value',
+    type: 'builtin',
     description: 'Add a filter to show only documents where a field matches a specific value',
     schema: z.object({
       fieldName: z.string().describe('Name of the field to filter'),
       value: z.union([z.string(), z.number(), z.boolean()]).describe('Value to filter for'),
     }),
     handler: async ({ fieldName, value }) => {
-      console.log('[Discover Browser Tool] Filter for value:', fieldName, '=', value);
+      console.log('✅ Filter for value:', fieldName, '=', value);
+      alert(`Tool called: Filter for ${fieldName} = ${value}`);
 
-      // Trigger custom event for Discover to handle
-      // NOTE: Discover would need to listen for this event and add the filter
-      triggerDiscoverAction('add_filter', {
-        fieldName,
-        value,
-        operation: 'is', // filter for (positive filter)
-      });
-
-      // For development/demo, also show a toast notification
-      console.log(`Added filter: ${fieldName} = ${value}`);
+      return {
+        results: [
+          {
+            type: 'other' as const,
+            data: {
+              message: `Added filter: ${fieldName} = ${value}`,
+              action: 'filter_for_value',
+              field: fieldName,
+              value,
+            },
+          },
+        ],
+      };
     },
   };
   tools.push(filterForValueTool);
 
-  // Tool 4: Change time range
-  // This tool demonstrates how to update time range in Discover
+  // Example tool 4: Change time range
   const setTimeRangeTool: BrowserApiToolDefinition<any> = {
     id: 'set_time_range',
+    type: 'builtin',
     description: 'Change the time range for the Discover search',
     schema: z.object({
-      from: z.string().describe('Start time (e.g., "now-15m", "now-1h", "now-24h", or ISO date)'),
-      to: z.string().describe('End time (e.g., "now" or ISO date)'),
+      from: z.string().describe('Start time (e.g., "now-15m", "now-1h", "now-24h")'),
+      to: z.string().describe('End time (e.g., "now")'),
     }),
     handler: async ({ from, to }) => {
-      console.log('[Discover Browser Tool] Set time range:', from, 'to', to);
+      console.log('⏰ Set time range:', from, 'to', to);
+      alert(`Tool called: Set time range from "${from}" to "${to}"`);
 
-      // Trigger custom event for Discover to handle
-      // Discover would update the timefilter service
-      triggerDiscoverAction('set_time_range', {
-        from,
-        to,
-      });
-
-      console.log(`Time range set: ${from} to ${to}`);
+      return {
+        results: [
+          {
+            type: 'other' as const,
+            data: {
+              message: `Time range set to: ${from} to ${to}`,
+              action: 'set_time_range',
+              from,
+              to,
+            },
+          },
+        ],
+      };
     },
   };
   tools.push(setTimeRangeTool);

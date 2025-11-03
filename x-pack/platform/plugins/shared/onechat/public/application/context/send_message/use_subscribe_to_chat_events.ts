@@ -19,17 +19,20 @@ import {
 import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import type { Observable } from 'rxjs';
 import { useConversationContext } from '../conversation/conversation_context';
+import type { BrowserToolExecutor } from '../../services/browser_tool_executor';
 
 export const useSubscribeToChatEvents = ({
   setAgentReasoning,
   setIsResponseLoading,
   isAborted,
+  browserToolExecutor,
 }: {
   setAgentReasoning: (agentReasoning: string) => void;
   setIsResponseLoading: (isResponseLoading: boolean) => void;
   isAborted: () => boolean;
+  browserToolExecutor?: BrowserToolExecutor;
 }) => {
-  const { conversationActions } = useConversationContext();
+  const { conversationActions, browserApiTools } = useConversationContext();
 
   return (events$: Observable<ChatEvent>) => {
     return new Promise<void>((resolve, reject) => {
@@ -68,6 +71,33 @@ export const useSubscribeToChatEvents = ({
                 tool_id: event.data.tool_id,
               }),
             });
+
+            // Check if this is a browser tool call and execute it immediately
+            const toolId = event.data.tool_id;
+            if (toolId && toolId.startsWith('browser_') && browserToolExecutor && browserApiTools) {
+              const originalToolId = toolId.substring('browser_'.length);
+
+              const toolDef = browserApiTools.find((tool) => tool.id === originalToolId);
+              if (toolDef) {
+                const toolsMap = new Map([[originalToolId, toolDef]]);
+                browserToolExecutor
+                  .executeToolCalls(
+                    [
+                      {
+                        tool_id: originalToolId,
+                        call_id: event.data.tool_call_id,
+                        params: event.data.params,
+                        timestamp: Date.now(),
+                      },
+                    ],
+                    toolsMap
+                  )
+                  .catch((error) => {
+                    // eslint-disable-next-line no-console
+                    console.error('Failed to execute browser tool:', error);
+                  });
+              }
+            }
           } else if (isToolResultEvent(event)) {
             const { tool_call_id: toolCallId, results } = event.data;
             conversationActions.setToolCallResult({ results, toolCallId });

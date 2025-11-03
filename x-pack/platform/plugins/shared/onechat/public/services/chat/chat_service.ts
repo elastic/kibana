@@ -11,7 +11,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent, AgentCapabilities } from '@kbn/onechat-common';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/onechat-common/agents';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapOnechatErrors } from '../utils/errors';

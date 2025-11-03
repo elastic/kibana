@@ -22,7 +22,6 @@ export interface RoundResponseProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
-  isHistorical?: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -30,7 +29,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
   steps,
   isLoading,
-  isHistorical = false,
 }) => {
   const showThinking = steps.length > 0;
   return (
@@ -52,7 +50,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
         {isLoading ? (
           <StreamingText content={message} steps={steps} />
         ) : (
-          <ChatMessageText content={message} steps={steps} isHistorical={isHistorical} />
+          <ChatMessageText content={message} steps={steps} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

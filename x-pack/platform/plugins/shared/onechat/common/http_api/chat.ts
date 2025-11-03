@@ -11,7 +11,7 @@ import type {
   AgentCapabilities,
 } from '@kbn/onechat-common';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 
 /**
  * body payload for request to the /internal/onechat/chat endpoint

@@ -104,6 +104,27 @@ export function registerChatRoutes({
         }
       )
     ),
+    browserApiTools: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          id: schema.string({
+            meta: { description: 'Unique identifier for the browser API tool.' },
+          }),
+          description: schema.string({
+            meta: { description: 'Description of what the browser API tool does.' },
+          }),
+          schema: schema.any({
+            meta: { description: 'JSON Schema defining the tool parameters (JsonSchema7Type).' },
+          }),
+        }),
+        {
+          meta: {
+            description:
+              'Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.',
+          },
+        }
+      )
+    ),
   });
 
   const validateAttachments = async ({
@@ -144,6 +165,7 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       input,
       capabilities,
+      browserApiTools,
     } = payload;
 
     return chatService.converse({
@@ -151,6 +173,7 @@ export function registerChatRoutes({
       connectorId,
       conversationId,
       capabilities,
+      browserApiTools,
       abortSignal,
       nextInput: {
         message: input,
