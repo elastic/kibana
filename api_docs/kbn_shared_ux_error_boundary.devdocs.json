@@ -70,7 +70,7 @@
           "KibanaErrorBoundaryProviderDeps",
           ">) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,7 +86,7 @@
               "KibanaErrorBoundaryProviderDeps",
               ">"
             ],
-            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
