@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID } from '@kbn/management-settings-ids';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type {
   ObservabilityAgentPluginSetupDependencies,
@@ -24,6 +25,7 @@ import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createObservabilityGetDataSourcesTool,
 } from './tools/get_data_sources';
+import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 
 export const OBSERVABILITY_AGENT_ID = 'platform.core.observability';
 
@@ -54,6 +56,14 @@ export async function registerObservabilityAgent({
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }) {
+  const isObservabilityAgentEnabled = await getIsObservabilityAgentEnabled(core);
+  if (!isObservabilityAgentEnabled) {
+    logger.debug(
+      `Skipping observability agent registration because ${OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID} is disabled`
+    );
+    return;
+  }
+
   const observabilityGetServicesTool = await createObservabilityGetServicesTool({
     core,
     plugins,
