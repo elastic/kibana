@@ -2650,26 +2650,26 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.5.0.tgz#99ca807edeb157baf38fef9e39fd031f19b702a5"
   integrity sha512-dW6U7N4HAdSst+Iqhaw1In8zxT8rE4AMnIJIN6C/vNM8XDKmFyzkw/AddpvW5oZHdV0D7+3w/VI9petN4RnWBQ==
 
-"@elastic/eui-theme-borealis@3.6.0":
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.6.0.tgz#95a8106981112eff010d691590ca758ab2950462"
-  integrity sha512-mQMtVfBB50Cnq0myytWTec4vwxxg1sgSoTpMK/i4lsr+xcfUbkjGQRIpPWfJaiWGnrUYhJeL1GyG8dHxEPeyYg==
+"@elastic/eui-theme-borealis@4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-4.0.0.tgz#9fc6463f8e358f9b3b2f6387e5935d66be481122"
+  integrity sha512-NV+g4vaoPfAV1mAI2oORMY7WD2YdLqx1zMGSH/HKjM9j49U/OK8Jl3DvHGTTAloWe2TvjlWnq6QJgm0xNwxjiA==
 
-"@elastic/eui-theme-common@5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-5.0.0.tgz#896da358c1fd0ce16681c7bca1793840a2bb8f33"
-  integrity sha512-NcTKneakMdf2dIsQ9ZOqcRMsttCDQGos/RK51C9V+9QTA8roMDoDVg1zqGZY8ELOttzov1JUuPkfmN6Ga1jlkA==
+"@elastic/eui-theme-common@6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-6.0.0.tgz#0227f2a1d2b023024fe5777afd57257c53048f69"
+  integrity sha512-Qi52Jfby/W5huw8Tj5mTjSxwn4qoXPqidscukPEgUe8IVdgaIJ3CLTR1gOplsPKf/CDfX8Tb7l4dLoL2FWSaMA==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@107.0.1":
-  version "107.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-107.0.1.tgz#7d7bcae7115b5e6c92a1994971170190149f817b"
-  integrity sha512-Uk8W3yI4DOdWRHHJiAZ+Q3tr8COeU6MiC+AitZLDbBGNiQ7a3lr/C8pNc8yFhpOVCPQpjofALEZiENg2AzFrGA==
+"@elastic/eui@108.0.0":
+  version "108.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-108.0.0.tgz#409fc6c49f19651832c411072482cd79bcdbd17c"
+  integrity sha512-W9l/jGlhxYYT0pN9vpaGmeR7nWYwTpmiLCkX8HnYOORQLUY6eXz5+9ng6WY68XzHWTcWUOMQB15OSyisj4VLVw==
   dependencies:
-    "@elastic/eui-theme-common" "5.0.0"
+    "@elastic/eui-theme-common" "6.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
