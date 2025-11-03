@@ -31,6 +31,9 @@ import {
   clearConversations,
   decodeEvents,
   getConversationCreatedEvent,
+  invokeChatCompleteWithFunctionRequest,
+  getMessageAddedEvents,
+  chatComplete,
 } from '../utils/conversation';
 
 interface NonStreamingChatResponse {
@@ -564,6 +567,249 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await clearConversations(es);
+      });
+    });
+
+    describe('when calling a tool', () => {
+      describe('when calling a tool that is not available', () => {
+        before(async () => {
+          proxy.close();
+          proxy = await createLlmProxy(log);
+          connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
+            port: proxy.getPort(),
+          });
+        });
+        after(async () => {
+          proxy.close();
+          await observabilityAIAssistantAPIClient.deleteActionConnector({
+            actionId: connectorId,
+          });
+        });
+        describe('when invoking the chat complete with the function request', function () {
+          let events: MessageAddEvent[];
+
+          before(async () => {
+            void proxy.interceptWithResponse('Hello from LLM Proxy');
+
+            const responseBody = await invokeChatCompleteWithFunctionRequest({
+              connectorId,
+              observabilityAIAssistantAPIClient,
+              functionCall: {
+                name: 'unknown_tool',
+                trigger: MessageRole.User,
+                arguments: JSON.stringify({
+                  foo: 'bar',
+                }),
+              },
+            });
+
+            await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
+            events = getMessageAddedEvents(responseBody);
+          });
+
+          it('return 2 message add events', () => {
+            expect(events.length).to.be(2);
+          });
+
+          it('the first message add event has the tool name and an error', () => {
+            expect(events[0].message.message.name).to.be('unknown_tool');
+            expect(events[0].message.message.content).to.contain('toolNotFoundError');
+          });
+
+          it('the second message add event interact with the LLM to fix the error', () => {
+            expect(events[1].message.message.content).to.be('Hello from LLM Proxy');
+          });
+        });
+
+        describe('when the LLM calls a function that is not available', function () {
+          let messageAddedEvents: MessageAddEvent[];
+          let fullConversation: Conversation;
+          before(async () => {
+            proxy.interceptTitle('LLM-generated title');
+
+            void proxy.interceptWithFunctionRequest({
+              name: 'unknown_tool',
+              arguments: () =>
+                JSON.stringify({
+                  foo: 'bar',
+                }),
+              when: () => true,
+            });
+
+            proxy.interceptWithResponse('Hello from LLM Proxy, again!');
+
+            const { messageAddedEvents: messageAddedEventsResponse, conversationCreateEvent } =
+              await chatComplete({
+                userPrompt: 'user prompt test spec',
+                connectorId,
+                persist: true,
+                observabilityAIAssistantAPIClient,
+              });
+            messageAddedEvents = messageAddedEventsResponse;
+
+            await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
+            const conversationId = conversationCreateEvent.conversation.id;
+            const conversationResponse = await observabilityAIAssistantAPIClient.editor({
+              endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId,
+                },
+              },
+            });
+            expect(conversationResponse.status).to.be(200);
+            fullConversation = conversationResponse.body;
+          });
+
+          after(async () => {
+            await clearConversations(es);
+          });
+
+          it('makes 4 requests to the LLM', () => {
+            expect(proxy.interceptedRequests.length).to.be(4);
+          });
+
+          it('emits 5 messageAdded events', () => {
+            expect(messageAddedEvents.length).to.be(5);
+          });
+
+          it('conversation has the correct messages', () => {
+            expect(fullConversation.messages.length).to.be(6);
+            expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
+            expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
+            expect(fullConversation.messages[2].message.name).to.be('context');
+            expect(fullConversation.messages[3].message.function_call?.name).to.be('unknown_tool');
+            expect(fullConversation.messages[4].message.name).to.contain('unknown_tool');
+            expect(fullConversation.messages[4].message.content).to.contain('toolNotFoundError');
+            expect(fullConversation.messages[5].message.content).to.be(
+              'Hello from LLM Proxy, again!'
+            );
+          });
+        });
+      });
+
+      describe('when calling a tool with invalid arguments', () => {
+        before(async () => {
+          proxy.close();
+          proxy = await createLlmProxy(log);
+          connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
+            port: proxy.getPort(),
+          });
+        });
+        after(async () => {
+          proxy.close();
+          await observabilityAIAssistantAPIClient.deleteActionConnector({
+            actionId: connectorId,
+          });
+        });
+        describe('when invoking the chat complete with the function request with invalid arguments', function () {
+          let events: MessageAddEvent[];
+
+          before(async () => {
+            void proxy.interceptWithResponse('Hello from LLM Proxy');
+
+            const responseBody = await invokeChatCompleteWithFunctionRequest({
+              connectorId,
+              observabilityAIAssistantAPIClient,
+              functionCall: {
+                name: 'kibana',
+                trigger: MessageRole.User,
+                arguments: JSON.stringify({
+                  foo: 'bar',
+                }),
+              },
+            });
+
+            await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
+            events = getMessageAddedEvents(responseBody);
+          });
+
+          it('return 2 message add events', () => {
+            expect(events.length).to.be(2);
+          });
+
+          it('the first message add event has the tool name and an error', () => {
+            expect(events[0].message.message.name).to.be('kibana');
+            expect(events[0].message.message.content).to.contain('Function arguments are invalid');
+          });
+
+          it('the second message add event interact with the LLM to fix the error', () => {
+            expect(events[1].message.message.content).to.be('Hello from LLM Proxy');
+          });
+        });
+
+        describe('when the LLM calls a function with invalid arguments', function () {
+          let messageAddedEvents: MessageAddEvent[];
+          let fullConversation: Conversation;
+          before(async () => {
+            proxy.interceptTitle('LLM-generated title');
+
+            void proxy.interceptWithFunctionRequest({
+              name: 'kibana',
+              arguments: () =>
+                JSON.stringify({
+                  foo: 'bar',
+                }),
+              when: () => true,
+            });
+
+            proxy.interceptWithResponse('I will not call the kibana function!');
+            proxy.interceptWithResponse('Hello from LLM Proxy, again!');
+
+            const { messageAddedEvents: messageAddedEventsResponse, conversationCreateEvent } =
+              await chatComplete({
+                userPrompt: 'user prompt test spec',
+                connectorId,
+                persist: true,
+                observabilityAIAssistantAPIClient,
+              });
+            messageAddedEvents = messageAddedEventsResponse;
+
+            await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
+            const conversationId = conversationCreateEvent.conversation.id;
+            const conversationResponse = await observabilityAIAssistantAPIClient.editor({
+              endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId,
+                },
+              },
+            });
+            expect(conversationResponse.status).to.be(200);
+            fullConversation = conversationResponse.body;
+          });
+
+          after(async () => {
+            await clearConversations(es);
+          });
+
+          it('makes 5 requests to the LLM', () => {
+            expect(proxy.interceptedRequests.length).to.be(5);
+          });
+
+          it('emits 5 messageAdded events', () => {
+            expect(messageAddedEvents.length).to.be(5);
+          });
+
+          it('conversation has the correct messages', () => {
+            expect(fullConversation.messages.length).to.be(6);
+            expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
+            expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
+            expect(fullConversation.messages[2].message.name).to.be('context');
+            expect(fullConversation.messages[3].message.function_call?.name).to.be('kibana');
+            expect(fullConversation.messages[4].message.name).to.contain('kibana');
+            expect(fullConversation.messages[4].message.content).to.contain(
+              'Function arguments are invalid'
+            );
+            expect(fullConversation.messages[5].message.content).to.be(
+              'Hello from LLM Proxy, again!'
+            );
+          });
+        });
       });
     });
 

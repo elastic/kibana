@@ -12,6 +12,7 @@ import { isToolNotFoundError } from '@kbn/inference-common';
 import { MessageRole } from '../../../../common';
 import type {
   ChatCompletionChunkEvent,
+  MessageAddEvent,
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { StreamingChatResponseEventType } from '../../../../common/conversation_complete';
@@ -79,7 +80,24 @@ export function catchFunctionNotFoundError(
               appendFunctionLimitExceededErrorMessageToAssistantResponse()
             );
           }
-          return chunksWithoutErrors$.pipe(emitWithConcatenatedMessage());
+          // Instead of throwing error, return a message with the function name, to be handled by the function client
+          const simpleMessage: MessageAddEvent = {
+            type: StreamingChatResponseEventType.MessageAdd as const,
+            id: 'error_recovery_message',
+            message: {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                content: '',
+                role: MessageRole.Assistant,
+                function_call: {
+                  name: error.meta.name,
+                  arguments: '',
+                  trigger: MessageRole.Assistant,
+                },
+              },
+            },
+          };
+          return of(simpleMessage);
         }
         return throwError(() => error);
       })

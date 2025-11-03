@@ -37,7 +37,10 @@ import {
   StreamingChatResponseEventType,
 } from '../../../../common';
 import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
-import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
+import {
+  createFunctionLimitExceededError,
+  isFunctionArgsValidationError,
+} from '../../../../common/conversation_complete';
 import type { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
@@ -111,6 +114,15 @@ export function executeFunctionAndCatchError({
       catchError((error) => {
         span?.recordException(error);
         logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
+
+        if (isFunctionArgsValidationError(error)) {
+          return of(
+            createFunctionResponseMessage({
+              name,
+              content: { message: error.message, errors: error.meta.errors },
+            })
+          );
+        }
         // We want to catch the error only when a promise occurs
         // if it occurs in the Observable, we cannot easily recover
         // from it because the function may have already emitted

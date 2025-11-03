@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable max-classes-per-file*/
 
-import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
+import Ajv, { type ValidateFunction } from 'ajv';
 import { compact, keyBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
+import { createFunctionArgsValidationError } from '../../../common/conversation_complete';
 import { type FunctionResponse } from '../../../common/functions/types';
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
@@ -21,12 +21,6 @@ import type {
   RegisterInstruction,
 } from '../types';
 import { registerGetDataOnScreenFunction } from '../../functions/get_data_on_screen';
-
-export class FunctionArgsValidationError extends Error {
-  constructor(public readonly errors: ErrorObject[]) {
-    super('Function arguments are invalid');
-  }
-}
 
 const ajv = new Ajv({
   strict: false,
@@ -71,7 +65,7 @@ export class ChatFunctionClient {
 
     const result = validator(parameters);
     if (!result) {
-      throw new FunctionArgsValidationError(validator.errors!);
+      throw createFunctionArgsValidationError(validator.errors!);
     }
   }
 
