@@ -700,7 +700,7 @@ export const getEndpointConsoleCommands = ({
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 7,
+      helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
     });

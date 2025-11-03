@@ -82,11 +82,11 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'get-file',
   'execute',
+  'memory-dump',
   'upload',
   'scan',
   'runscript',
   'cancel',
-  'memory-dump',
 ] as const;
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
