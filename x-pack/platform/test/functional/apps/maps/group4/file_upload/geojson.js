@@ -63,9 +63,7 @@ export default function ({ getPageObjects, getService }) {
       await retry.try(async () => {
         await maps.waitForLayersToLoad();
         const tooltipText = await maps.getLayerTocTooltipMsg(indexName);
-        expect(tooltipText).to.contain(`${indexName}`);
-        expect(tooltipText).to.match(/Found ~\d+ documents/);
-        expect(tooltipText).to.contain('This count is approximate.');
+        expect(tooltipText).to.be(`${indexName}\nFound ~281 documents. This count is approximate.`);
       });
     });
   });
