@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { EsqlQuery } from '@kbn/esql-ast';
+import { EsqlQuery, type ESQLSource } from '@kbn/esql-ast';
 
 import {
   getRecommendedQueriesTemplates,
@@ -20,6 +19,14 @@ import type { InlineSuggestionItem } from './types';
 import { fromCache, setToCache } from './inline_suggestions_cache';
 
 const FALLBACK_FROM_COMMAND = 'FROM *';
+
+export function getSourceFromQuery(esql?: string) {
+  const queryExpression = EsqlQuery.fromSrc(esql || '').ast;
+  const sourceCommand = queryExpression.commands.find(({ name }) => ['from', 'ts'].includes(name));
+  const args = (sourceCommand?.args ?? []) as ESQLSource[];
+  const indices = args.filter((arg) => arg.sourceType === 'index');
+  return indices?.map((index) => index.name).join(',');
+}
 
 /**
  * Normalizes query text by removing comments and newlines
@@ -88,7 +95,7 @@ async function getFromCommand(
   callbacks?: ESQLCallbacks
 ): Promise<string> {
   // First, try to extract data source from the existing query
-  const dataSource = getIndexPatternFromESQLQuery(textBeforeCursor);
+  const dataSource = getSourceFromQuery(textBeforeCursor);
   if (dataSource) {
     return `FROM ${dataSource}`;
   }

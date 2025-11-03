@@ -11,17 +11,6 @@ import { inlineSuggest } from './inline_suggest';
 import type { ESQLCallbacks } from '../shared/types';
 import type { InlineSuggestionItem } from './types';
 
-// Mock the dependencies
-jest.mock('@kbn/esql-utils', () => ({
-  getIndexPatternFromESQLQuery: jest.fn(),
-}));
-
-jest.mock('@kbn/esql-ast', () => ({
-  EsqlQuery: {
-    fromSrc: jest.fn(),
-  },
-}));
-
 jest.mock('@kbn/esql-ast/src/commands_registry/options/recommended_queries', () => ({
   getRecommendedQueriesTemplates: jest.fn(),
   getTimeAndCategorizationFields: jest.fn(),
@@ -31,16 +20,11 @@ jest.mock('../shared/columns', () => ({
   getColumnsByTypeRetriever: jest.fn(),
 }));
 
-jest.mock('../shared/resources_helpers', () => ({
-  getFromCommandHelper: jest.fn(),
-}));
-
 jest.mock('./inline_suggestions_cache', () => ({
   fromCache: jest.fn(),
   setToCache: jest.fn(),
 }));
 
-import { EsqlQuery } from '@kbn/esql-ast';
 import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,
@@ -48,7 +32,6 @@ import {
 import { getColumnsByTypeRetriever } from '../shared/columns';
 import { setToCache } from './inline_suggestions_cache';
 
-const mockEsqlQuery = EsqlQuery as jest.Mocked<typeof EsqlQuery>;
 const mockGetRecommendedQueriesTemplates = getRecommendedQueriesTemplates as jest.MockedFunction<
   typeof getRecommendedQueriesTemplates
 >;
@@ -95,7 +78,6 @@ describe('inlineSuggest', () => {
       getColumnsByType: jest.fn(),
       getColumnMap: jest.fn(),
     });
-    mockEsqlQuery.fromSrc.mockReturnValue({ ast: {} } as any);
 
     // Callbacks
     (mockCallbacks.getEditorExtensions as jest.Mock).mockResolvedValue({
