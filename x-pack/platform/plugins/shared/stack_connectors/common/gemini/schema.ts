@@ -22,6 +22,7 @@ export const ConfigSchema = z
     gcpRegion: z.string(),
     gcpProjectID: z.string(),
     contextWindowLength: z.coerce.number().optional(),
+    temperature: z.coerce.number().optional(),
   })
   .strict();
 

@@ -14,10 +14,13 @@ import {
 } from '@kbn/esql-ast/src/types';
 
 import type { ESQLCallbacks } from '../shared/types';
+import { getColumnsByTypeRetriever } from '../shared/columns';
 import { correctQuerySyntax, getVariablesHoverContent } from './helpers';
 import { getPolicyHover } from './get_policy_hover';
-import { getFunctionArgumentHover } from './get_function_argument_hover';
 import { getFunctionSignatureHover } from './get_function_signature_hover';
+import { getQueryForFields } from '../autocomplete/get_query_for_fields';
+import { getFunctionArgumentHover } from './get_function_argument_hover';
+import { getColumnHover } from './get_column_hover';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -67,6 +70,13 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     return hoverContent;
   }
 
+  // getColumnMap has its own cache, shared with the autocomplete system
+  const { getColumnMap } = getColumnsByTypeRetriever(
+    getQueryForFields(fullText, root),
+    fullText,
+    callbacks
+  );
+
   // ES|QL variables hover
   const variables = callbacks?.getVariables?.();
   const variablesContent = getVariablesHoverContent(node, variables);
@@ -77,19 +87,13 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
 
   // Function arguments hover
   if (containingFunction) {
-    const argHints = await getFunctionArgumentHover(
-      containingFunction,
-      root,
-      fullText,
-      offset,
-      callbacks
-    );
+    const argHints = await getFunctionArgumentHover(containingFunction, offset);
     hoverContent.contents.push(...argHints);
   }
 
-  // Function hover
+  // Function signature hover
   if (node.type === 'function') {
-    const functionSignature = await getFunctionSignatureHover(node, fullText, root, callbacks);
+    const functionSignature = await getFunctionSignatureHover(node, getColumnMap);
     hoverContent.contents.push(...functionSignature);
   }
 
@@ -98,6 +102,12 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     const source = node as ESQLSource;
     const policyHoverInfo = await getPolicyHover(source, callbacks);
     hoverContent.contents.push(...policyHoverInfo);
+  }
+
+  // Column hover
+  if (node.type === 'column') {
+    const columnHover = await getColumnHover(node, getColumnMap);
+    hoverContent.contents.push(...columnHover);
   }
 
   return hoverContent;

@@ -276,6 +276,7 @@ const SkipFields = [
   'kibana.alert.flapping_history',
   'kibana.alert.rule.execution.uuid',
   'kibana.alert.rule.execution.timestamp',
+  'kibana.alert.state',
 
   // fields under our control we test separately
   'runCount',
