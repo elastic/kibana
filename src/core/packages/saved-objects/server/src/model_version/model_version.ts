@@ -83,6 +83,14 @@ export interface SavedObjectsModelVersion {
   schemas?: SavedObjectsModelVersionSchemaDefinitions;
 }
 
+/**
+ * Represents a model version of a given saved object type.
+ *
+ * Model versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs
+ * by exposing an unified way of describing the changes of shape or data of a type.
+ *
+ * @public
+ */
 export interface SavedObjectsFullModelVersion {
   changes: SavedObjectsModelChange[];
   /**

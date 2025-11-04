@@ -9,7 +9,8 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import equal from 'fast-deep-equal';
-import type { MigrationInfoRecord, MigrationSnapshot } from '../types';
+import { cloneDeep } from 'lodash';
+import type { MigrationInfoRecord, MigrationSnapshot, ModelVersionSummary } from '../types';
 
 export function assertValidUpdates({
   log,
@@ -130,9 +131,24 @@ function getMutatedModelVersions(
   infoBefore: MigrationInfoRecord,
   infoAfter: MigrationInfoRecord
 ): string[] {
-  const mutatedModelVersions = infoBefore.modelVersions.filter(
-    (summaryBefore, index) => !equal(summaryBefore, infoAfter.modelVersions[index])
-  );
+  const mutatedModelVersions = infoBefore.modelVersions.filter((summaryBefore, index) => {
+    const summaryAfter = infoAfter.modelVersions[index];
+
+    if (!summaryBefore.modelVersionHash) {
+      // TODO remove this conditional when all the baseline snapshots have the new hash properties
+      // we're comparing against an old snapshot, downgrade the infoAfter one to match the old format
+      const to: Partial<ModelVersionSummary> = cloneDeep(summaryAfter);
+      delete to.modelVersionHash;
+      // @ts-ignore we're simulating an older version of the type without the new properties
+      delete to.schemas.create;
+      // @ts-ignore we're simulating an older version of the type without the new properties
+      to.schemas.forwardCompatibility = Boolean(to.schemas.forwardCompatibility);
+      return !equal(summaryBefore, to);
+    } else {
+      // comparing old snapshot with new snapshot, both have the new hash properties
+      return !equal(summaryBefore, infoAfter.modelVersions[index]);
+    }
+  });
   return mutatedModelVersions.map(({ version }) => `10.${version}.0`);
 }
 
