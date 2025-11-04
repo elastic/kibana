@@ -42,6 +42,7 @@ export function getBaseTypeIconsStyles(euiThemeContext: UseEuiTheme) {
       vertical-align: middle;
       position: relative;
       top: -1px;
+      background-color: ${euiTheme.colors.textParagraph};
     }
   `;
 }
