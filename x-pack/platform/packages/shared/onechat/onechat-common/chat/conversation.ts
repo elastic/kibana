@@ -153,8 +153,10 @@ export interface ConversationRound {
   response: AssistantResponse;
   /** when the round was started */
   started_at: string;
-  /** time it took for the round to resolve, in ms */
-  took: number;
+  /** time it took to first token, in ms */
+  time_to_first_token: number;
+  /** time it took to last token, in ms */
+  time_to_last_token: number;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
 }
@@ -163,7 +165,7 @@ export interface ConversationRound {
  * Main structure representing a conversation with an agent.
  */
 export interface Conversation {
-  /** unique id for this round */
+  /** unique id for this conversation */
   id: string;
   /** id of the agent this conversation is bound to */
   agent_id: string;

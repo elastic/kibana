@@ -21,6 +21,7 @@ import {
   ChatEventType,
   ConversationRoundStepType,
   isMessageCompleteEvent,
+  isThinkingCompleteEvent,
   isToolCallEvent,
   isToolResultEvent,
   isToolProgressEvent,
@@ -83,10 +84,18 @@ const createRoundFromEvents = ({
   const toolProgressions = events.filter(isToolProgressEvent).map((event) => event.data);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const stepEvents = events.filter(isStepEvent);
+  const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
 
   if (!endTime) {
     endTime = new Date();
   }
+
+  const endTimeMs = endTime.getTime();
+  const startTimeMs = startTime.getTime();
+  const timeToLastToken = endTimeMs - startTimeMs;
+  const timeToFirstToken = thinkingCompleteEvent
+    ? thinkingCompleteEvent.data.time_to_first_token
+    : 0;
 
   const eventToStep = (event: StepEvents): ConversationRoundStep[] => {
     if (isToolCallEvent(event)) {
@@ -134,7 +143,8 @@ const createRoundFromEvents = ({
     steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
-    took: endTime.getTime() - startTime.getTime(),
+    time_to_first_token: timeToFirstToken,
+    time_to_last_token: timeToLastToken,
     response: { message: messages[messages.length - 1].message_content },
   };
 

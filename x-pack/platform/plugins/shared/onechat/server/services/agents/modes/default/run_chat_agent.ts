@@ -120,6 +120,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       graphName: chatAgentGraphName,
       toolIdMapping,
       logger,
+      startTime,
     }),
     finalize(() => manualEvents$.complete())
   );
