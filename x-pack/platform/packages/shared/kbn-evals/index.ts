@@ -20,6 +20,7 @@ export {
   type EvaluationReporter,
   type EvaluationReport,
   type EvaluationTableOptions,
+  type EvaluatorFormatConfig,
 } from './src/utils/report_model_score';
 
 export {

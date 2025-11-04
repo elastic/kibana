@@ -9,7 +9,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import { sumBy, mean } from 'lodash';
+import { sumBy } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
 import { hostname } from 'os';
@@ -184,10 +184,46 @@ function buildReportHeader(model: Model, evaluatorModel: Model): string[] {
   ];
 }
 
+export interface EvaluatorFormatConfig {
+  hidePercentage?: boolean;
+  decimalPlaces?: number;
+  unitSuffix?: string;
+  showDecimalOnlyIfNeeded?: boolean;
+}
+
 export interface EvaluationTableOptions {
   firstColumnHeader?: string;
   styleRowName?: (name: string) => string;
   statsToInclude?: Array<keyof EvaluatorStats>;
+  decimalPlaces?: number;
+  evaluatorFormats?: Map<string, EvaluatorFormatConfig>;
+}
+
+/**
+ * Detects terminal width for responsive table rendering
+ */
+function getTerminalWidth(): number {
+  return process.stdout.columns || 120;
+}
+
+/**
+ * Determines if compact mode should be used based on terminal width
+ */
+function shouldUseCompactMode(): boolean {
+  return getTerminalWidth() < 120;
+}
+
+/**
+ * Gets default evaluator-specific format configurations
+ */
+function getDefaultEvaluatorFormats(): Map<string, EvaluatorFormatConfig> {
+  return new Map([
+    ['Input Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
+    ['Output Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
+    ['Cached Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
+    ['Tool Calls', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
+    ['Latency', { hidePercentage: true, unitSuffix: 's' }],
+  ]);
 }
 
 /**
@@ -198,13 +234,23 @@ export function createEvaluationReportTable(
   report: EvaluationReport,
   options: EvaluationTableOptions = {}
 ): string {
-  const { firstColumnHeader = 'Dataset', styleRowName = (name) => name, statsToInclude } = options;
+  const {
+    firstColumnHeader = 'Dataset',
+    styleRowName = (name) => name,
+    statsToInclude,
+    decimalPlaces = 2,
+    evaluatorFormats,
+  } = options;
 
   const { datasetScoresWithStats, repetitions } = report;
 
   const evaluatorNames = getUniqueEvaluatorNames(datasetScoresWithStats);
   const overallStats = calculateOverallStats(datasetScoresWithStats);
   const totalExamples = sumBy(datasetScoresWithStats, (d) => d.numExamples);
+
+  const isCompact = shouldUseCompactMode();
+  const defaultFormats = getDefaultEvaluatorFormats();
+  const mergedFormats = new Map([...defaultFormats, ...(evaluatorFormats || [])]);
 
   const formatExampleCount = (numExamples: number): string => {
     return repetitions > 1
@@ -223,7 +269,15 @@ export function createEvaluationReportTable(
     evaluatorNames.forEach((evaluatorName) => {
       const stats = dataset.evaluatorStats.get(evaluatorName);
       if (stats && stats.count > 0) {
-        const cellContent = formatStatsCell(stats, false, statsToInclude);
+        const cellContent = formatStatsCell(
+          stats,
+          evaluatorName,
+          false,
+          isCompact,
+          decimalPlaces,
+          mergedFormats,
+          statsToInclude
+        );
         row.push(cellContent);
       } else {
         row.push(chalk.gray('-'));
@@ -241,16 +295,24 @@ export function createEvaluationReportTable(
   evaluatorNames.forEach((evaluatorName) => {
     const stats = overallStats.get(evaluatorName);
     if (stats && stats.count > 0) {
-      const cellContent = formatStatsCell(stats, true, statsToInclude);
+      const cellContent = formatStatsCell(
+        stats,
+        evaluatorName,
+        true,
+        isCompact,
+        decimalPlaces,
+        mergedFormats,
+        statsToInclude
+      );
       overallRow.push(cellContent);
     } else {
       overallRow.push(chalk.bold.green('-'));
     }
   });
 
-  const columnConfig = buildColumnAlignment(tableHeaders.length);
+  const tableConfig = buildTableConfig(tableHeaders.length, isCompact);
 
-  return table([tableHeaders, ...datasetRows, overallRow], { columns: columnConfig });
+  return table([tableHeaders, ...datasetRows, overallRow], tableConfig);
 }
 
 /**
@@ -258,7 +320,11 @@ export function createEvaluationReportTable(
  */
 function formatStatsCell(
   stats: Partial<EvaluatorStats>,
+  evaluatorName: string,
   isBold: boolean,
+  isCompact: boolean,
+  defaultDecimalPlaces: number,
+  evaluatorFormats: Map<string, EvaluatorFormatConfig>,
   statsToInclude?: Array<keyof EvaluatorStats>
 ): string {
   const colorFn = isBold ? chalk.bold.green : chalk.cyan;
@@ -266,46 +332,76 @@ function formatStatsCell(
 
   const lines: string[] = [];
 
+  const evaluatorConfig = evaluatorFormats.get(evaluatorName) || {};
+  const decimalPlaces = evaluatorConfig.decimalPlaces ?? defaultDecimalPlaces;
+  const showDecimalOnlyIfNeeded = evaluatorConfig.showDecimalOnlyIfNeeded ?? false;
+  const unitSuffix = evaluatorConfig.unitSuffix || '';
+  const hidePercentage = evaluatorConfig.hidePercentage ?? false;
+
+  const labels = isCompact
+    ? { mean: 'μ', median: 'p50', stdDev: 'σ', min: 'min', max: 'max' }
+    : { mean: 'mean', median: 'median', stdDev: 'std', min: 'min', max: 'max' };
+
+  const formatNumber = (value: number): string => {
+    if (showDecimalOnlyIfNeeded && Number.isInteger(value)) {
+      return value.toString();
+    }
+    return value.toFixed(decimalPlaces);
+  };
+
   const shouldInclude = (stat: keyof EvaluatorStats) => {
     return !statsToInclude || statsToInclude.includes(stat);
   };
 
-  if (shouldInclude('percentage') && stats.percentage !== undefined) {
+  if (shouldInclude('percentage') && stats.percentage !== undefined && !hidePercentage) {
     lines.push(percentageColor(`${(stats.percentage * 100).toFixed(1)}%`));
   }
 
   if (shouldInclude('mean') && stats.mean !== undefined) {
-    lines.push(colorFn(`mean: ${stats.mean.toFixed(3)}`));
+    lines.push(colorFn(`${labels.mean}: ${formatNumber(stats.mean)}${unitSuffix}`));
   }
 
   if (shouldInclude('median') && stats.median !== undefined) {
-    lines.push(colorFn(`median: ${stats.median.toFixed(3)}`));
+    lines.push(colorFn(`${labels.median}: ${formatNumber(stats.median)}${unitSuffix}`));
   }
 
   if (shouldInclude('stdDev') && stats.stdDev !== undefined) {
-    lines.push(colorFn(`std: ${stats.stdDev.toFixed(3)}`));
+    lines.push(colorFn(`${labels.stdDev}: ${formatNumber(stats.stdDev)}${unitSuffix}`));
   }
 
   if (shouldInclude('min') && stats.min !== undefined) {
-    lines.push(colorFn(`min: ${stats.min.toFixed(3)}`));
+    lines.push(colorFn(`${labels.min}: ${formatNumber(stats.min)}${unitSuffix}`));
   }
 
   if (shouldInclude('max') && stats.max !== undefined) {
-    lines.push(colorFn(`max: ${stats.max.toFixed(3)}`));
+    lines.push(colorFn(`${labels.max}: ${formatNumber(stats.max)}${unitSuffix}`));
   }
 
   return lines.join('\n');
 }
 
-function buildColumnAlignment(
-  columnCount: number
-): Record<number, { alignment: 'right' | 'left' }> {
-  const config: Record<number, { alignment: 'right' | 'left' }> = {
+function buildTableConfig(
+  columnCount: number,
+  isCompact: boolean
+): {
+  columns: Record<number, { alignment: 'right' | 'left' }>;
+  columnDefault?: { paddingLeft: number; paddingRight: number };
+} {
+  const columns: Record<number, { alignment: 'right' | 'left' }> = {
     0: { alignment: 'left' },
   };
 
   for (let i = 1; i < columnCount; i++) {
-    config[i] = { alignment: 'right' };
+    columns[i] = { alignment: 'right' };
+  }
+
+  const config: {
+    columns: Record<number, { alignment: 'right' | 'left' }>;
+    columnDefault?: { paddingLeft: number; paddingRight: number };
+  } = { columns };
+
+  if (isCompact) {
+    config.columnDefault = { paddingLeft: 1, paddingRight: 1 };
   }
 
   return config;
