@@ -28,11 +28,11 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(statusCode).toBe(200);
-      await expect(body.es).toBeOK();
+      expect(body).toHaveProperty('es');
       const {
         es: { name, globals, endpoints },
       } = body;
-      await expect(name).toBeOK();
+      expect(name).toBe('es');
       expect(Object.keys(globals).length).toBeGreaterThan(0);
       expect(Object.keys(endpoints).length).toBeGreaterThan(0);
     });
