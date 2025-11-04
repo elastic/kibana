@@ -496,6 +496,16 @@ const compareCustomAssets = ({
         sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedCompTemplate, ccrCustomAsset?.template)) {
+      if (ccrCustomAsset?.template.settings?.index?.lifecycle?.name) {
+        return {
+          ...result,
+          sync_status: SyncStatus.WARNING,
+          warning: {
+            title: `Component template references ILM policy`,
+            message: `${ccrCustomAsset.name} references "${ccrCustomAsset?.template.settings?.index?.lifecycle?.name}" that might not exist on the remote cluster. Please create it manually.`,
+          },
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.COMPLETED,

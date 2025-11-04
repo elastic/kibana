@@ -929,7 +929,9 @@ describe('custom assets', () => {
           { debug: jest.fn() } as any
         )
       ).rejects.toThrowError(
-        new Error(`Not supported to sync ingest pipelines referencing enrich policies`)
+        new Error(
+          `Not supported to sync ingest pipelines referencing enrich policies. Please sync manually.`
+        )
       );
 
       expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
