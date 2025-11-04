@@ -31,7 +31,7 @@ export const createTreeNodesFromPipelines = (
         isDeprecated={treeNode.isDeprecated}
         isSelected={treeNode.pipelineName === selectedPipeline}
         onClick={() => clickTreeNode(treeNode.pipelineName)}
-        level={level}
+        level={level - 1}
       />
     ),
     'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,

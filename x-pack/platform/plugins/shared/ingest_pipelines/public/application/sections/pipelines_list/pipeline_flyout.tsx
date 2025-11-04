@@ -63,8 +63,8 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
       onClose={onClose}
       aria-labelledby="pipelineDetailsFlyoutTitle"
       data-test-subj="pipelineDetails"
-      size="l"
-      maxWidth={pipelineTree ? 1000 : 500}
+      size={isResponsiveFlyout ? 'm' : 'l'}
+      maxWidth={pipelineTree && !isResponsiveFlyout ? 1000 : 460}
     >
       <EuiSplitPanel.Outer
         direction="row"

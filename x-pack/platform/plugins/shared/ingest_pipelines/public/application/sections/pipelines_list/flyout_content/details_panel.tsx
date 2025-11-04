@@ -129,7 +129,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({
     />
   );
   return (
-    <EuiSplitPanel.Inner grow={true} paddingSize="none" style={{ maxWidth: '540px' }}>
+    <EuiSplitPanel.Inner grow={true} paddingSize="none">
       <EuiSplitPanel.Outer hasShadow={false} grow={true} css={{ height: '100%' }}>
         <EuiSplitPanel.Inner style={{ overflowY: 'auto' }} paddingSize="l" grow={true}>
           <EuiSkeletonTitle isLoading={isLoading}>

@@ -15,10 +15,10 @@ interface PipelineTreeNodeLabelProps {
   isDeprecated: boolean;
   isSelected?: boolean;
   onClick: () => void;
-  level: number;
+  level: number; // 0-based level in the tree
 }
 
-const MAX_PIPELINE_NAME_LENGTH = 50;
+const MAX_PIPELINE_NAME_LENGTH = 40;
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
@@ -28,13 +28,13 @@ export const PipelineTreeNodeLabel = ({
   onClick,
   level,
 }: PipelineTreeNodeLabelProps) => {
-  const maxCharacters = MAX_PIPELINE_NAME_LENGTH - level * 5;
+  const maxCharacters = MAX_PIPELINE_NAME_LENGTH - level * 4;
 
   return (
     <EuiFlexGroup
       direction="row"
       gutterSize="s"
-      css={{ width: '100%', minWidth: `${400 - level * 35}px`, position: 'relative' }}
+      css={{ width: '100%', minWidth: `${360 - level * 25}px`, position: 'relative' }}
       alignItems="center"
       justifyContent="center"
       data-test-subj={`pipelineTreeNode-${pipelineName}`}

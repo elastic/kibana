@@ -45,13 +45,8 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
 
   .cssTreeNode-morePipelines {
     margin-left: ${euiTheme.size.xl};
-    width: calc(100% - ${euiTheme.size.xl});
+    max-width: calc(100% - ${euiTheme.size.xl});
     background-color: ${euiTheme.colors.backgroundLightPrimary};
     border: none;
-  }
-
-  .euiTreeView__nodeInner {
-    width: 100%;
-    justify-content: space-between;
   }
 `;
