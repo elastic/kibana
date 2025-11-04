@@ -29,7 +29,6 @@ const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,
   AlertConsumers.OBSERVABILITY,
   STACK_ALERTS_FEATURE_ID,
-  AlertConsumers.ALERTS,
 ];
 
 interface EsQueryAlertMetaData extends RuleTypeMetaData {
@@ -100,7 +99,7 @@ const CreateAlertFlyout: React.FC<{
         actionTypeRegistry,
       }}
       initialMetadata={discoverMetadata}
-      consumer={AlertConsumers.ALERTS}
+      consumer={'alerts'}
       onCancel={onFinishAction}
       onSubmit={onFinishAction}
       onChangeMetaData={(metadata: EsQueryAlertMetaData) =>
@@ -110,8 +109,8 @@ const CreateAlertFlyout: React.FC<{
       initialValues={{ params: getParams() }}
       validConsumers={EsQueryValidConsumer}
       shouldUseRuleProducer
-      // Default to the Alerts consumer if it's available. This should fall back to Stack Alerts if it's not.
-      multiConsumerSelection={AlertConsumers.ALERTS}
+      // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
+      multiConsumerSelection={AlertConsumers.LOGS}
     />
   );
 };
