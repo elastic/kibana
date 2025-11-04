@@ -89,7 +89,8 @@
     "@kbn/inference-langchain",
     "@kbn/security-solution-features",
     "@kbn/core-http-server-mocks",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*",

@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '../..';
-
-// eslint-disable-next-line import/no-default-export
-export default createPlaywrightConfig({
-  testDir: './tests',
-});
+export const MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH = 10000;

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@kbn/react-query';
 
 const createWrapper = () => {
   const queryClient = new QueryClient();
