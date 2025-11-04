@@ -87,6 +87,7 @@ export function registerA2ARoutes({
       options: {
         tags: ['a2a', 'oas-tag:agent builder'],
         xsrfRequired: false,
+        excludeFromOAS: true,
         availability: {
           stability: 'experimental',
           since: '9.2.0',
