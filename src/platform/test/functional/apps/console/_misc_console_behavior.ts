@@ -242,7 +242,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Wait for download to trigger
         await PageObjects.common.sleep(1000);
 
-        const downloadPath = resolve(REPO_ROOT, `target/functional-tests/downloads/console_export.txt`);
+        const downloadPath = resolve(
+          REPO_ROOT,
+          `target/functional-tests/downloads/console_export.txt`
+        );
         await retry.try(async () => {
           const fileExists = existsSync(downloadPath);
           expect(fileExists).to.be(true);
