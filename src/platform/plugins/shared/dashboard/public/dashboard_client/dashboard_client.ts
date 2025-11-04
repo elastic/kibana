@@ -75,10 +75,13 @@ export const dashboardClient = {
     }
     return result;
   },
-  search: async (search: DashboardSearchRequestBody) => {
+  search: async (searchBody: DashboardSearchRequestBody) => {
     return await coreServices.http.post<DashboardSearchResponseBody>(`/api/dashboards/search`, {
       version: DASHBOARD_API_VERSION,
-      body: JSON.stringify(search),
+      body: JSON.stringify({
+        ...searchBody,
+        search: searchBody.search ? `${searchBody.search}*` : undefined
+      }),
     });
   },
   update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
