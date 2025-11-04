@@ -283,6 +283,30 @@ const serviceAgentRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAgentResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { start, end } = params.query;
+
+    return getServiceAgent({
+      serviceName,
+      apmEventClient,
+      start,
+      end,
+    });
+  },
+});
+
+const serviceEntitiesAgentRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/entities/services/{serviceName}/agent',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: rangeRt,
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceAgentResponse> => {
     const { request, plugins } = resources;
     const entityManagerStart = await plugins.entityManager.start();
 
@@ -927,6 +951,7 @@ export const serviceRouteRepository = {
   ...serviceMetadataDetailsRoute,
   ...serviceMetadataIconsRoute,
   ...serviceAgentRoute,
+  ...serviceEntitiesAgentRoute,
   ...serviceTransactionTypesRoute,
   ...serviceNodeMetadataRoute,
   ...serviceAnnotationsRoute,

@@ -6,6 +6,7 @@
  */
 
 import { useFetcher } from '../../hooks/use_fetcher';
+import { useEntityCentricExperienceSetting } from '../../hooks/use_entity_centric_experience_setting';
 
 const INITIAL_STATE = {
   agentName: undefined,
@@ -24,6 +25,8 @@ export function useServiceAgentFetcher({
   start: string;
   end: string;
 }) {
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
+
   const {
     data = INITIAL_STATE,
     error,
@@ -31,15 +34,24 @@ export function useServiceAgentFetcher({
   } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
-        return callApmApi('GET /internal/apm/services/{serviceName}/agent', {
-          params: {
-            path: { serviceName },
-            query: { start, end },
-          },
-        });
+        if (isEntityCentricExperienceEnabled) {
+          return callApmApi('GET /internal/apm/entities/services/{serviceName}/agent', {
+            params: {
+              path: { serviceName },
+              query: { start, end },
+            },
+          });
+        } else {
+          return callApmApi('GET /internal/apm/services/{serviceName}/agent', {
+            params: {
+              path: { serviceName },
+              query: { start, end },
+            },
+          });
+        }
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end, isEntityCentricExperienceEnabled]
   );
 
   return { ...data, status, error };
