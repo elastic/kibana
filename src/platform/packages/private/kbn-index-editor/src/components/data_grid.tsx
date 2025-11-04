@@ -35,6 +35,7 @@ import { getColumnInputRenderer } from './grid_custom_renderers/column_input_ren
 import { type KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
+import { getAddRowControl } from './grid_custom_renderers/add_row_control';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -225,6 +226,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [indexUpdateService]
   );
 
+  const rowAdditionalLeadingControls = useMemo(() => {
+    return [
+      {
+        id: 'add-row',
+        render: getAddRowControl(indexUpdateService),
+      },
+    ];
+  }, [indexUpdateService]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
@@ -234,6 +244,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         <UnifiedDataTable
           ref={dataTableRef}
           customGridColumnsConfiguration={customGridColumnsConfiguration}
+          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
           columns={renderedColumns}
           rows={rows}
           columnsMeta={columnsMeta}
@@ -281,6 +292,14 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             .euiDataGridHeaderCell {
               align-items: center;
               display: flex;
+            }
+
+            .dataGrid__addRowAction {
+              opacity: 0;
+            }
+
+            .euiDataGridRow:hover .dataGrid__addRowAction {
+              opacity: 1;
             }
           `}
         />
