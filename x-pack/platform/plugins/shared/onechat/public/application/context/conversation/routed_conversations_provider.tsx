@@ -114,6 +114,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       shouldStickToBottom,
       isEmbeddedContext: false,
       conversationActions,
+      getProcessedAttachments: async () => {
+        return [];
+      },
     }),
     [conversationId, shouldStickToBottom, conversationActions]
   );
