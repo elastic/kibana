@@ -271,7 +271,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const derivedColumns = useMemo(() => [], []);
 
     return (
-      <EuiPanel paddingSize="s">
+      <EuiPanel paddingSize="none">
         <UnifiedDataTable
           dataView={dataView}
           showTimeCol={showTimeCol}
