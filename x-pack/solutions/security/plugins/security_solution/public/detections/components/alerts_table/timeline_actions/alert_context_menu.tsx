@@ -472,7 +472,9 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       onCancel={onCancel}
       onConfirm={onConfirm}
       alertData={enrichedAlert}
+      alertStatus={alertStatus}
       isAlertDataLoading={isLoading || isRuleLoading}
+      rules={memoRule}
     />
   ) : (
     <AddExceptionFlyout
