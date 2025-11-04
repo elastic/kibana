@@ -34,6 +34,7 @@ export const useMetricsGridState = () => {
   const onDimensionsChange = useCallback(
     (nextDimensions: string[]) => {
       dispatch(setDimensions(nextDimensions));
+      dispatch(setCurrentPage(0));
       const filteredValues =
         nextDimensions.length === 0
           ? []
@@ -44,11 +45,15 @@ export const useMetricsGridState = () => {
   );
 
   const onValuesChange = useCallback(
-    (values: string[]) => dispatch(setValueFilters(values)),
+    (values: string[]) => {
+      dispatch(setCurrentPage(0));
+      dispatch(setValueFilters(values));
+    },
     [dispatch]
   );
 
   const onClearAllDimensions = useCallback(() => {
+    dispatch(setCurrentPage(0));
     dispatch(setDimensions([]));
     dispatch(setValueFilters([]));
   }, [dispatch]);
@@ -58,11 +63,13 @@ export const useMetricsGridState = () => {
   const onPageChange = useCallback((page: number) => dispatch(setCurrentPage(page)), [dispatch]);
 
   const onClearSearchTerm = useCallback(() => {
+    dispatch(setCurrentPage(0));
     dispatch(setSearchTerm(''));
   }, [dispatch]);
 
   const onSearchTermChange = useCallback(
     (term: string) => {
+      dispatch(setCurrentPage(0));
       dispatch(setSearchTerm(term));
     },
     [dispatch]
