@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 /**
  * Tool call source - identifies where the tool was called from
  */
@@ -95,7 +95,7 @@ export class TrackingService {
   trackQueryStart(requestId?: string): string | undefined {
     try {
       if (!requestId) {
-        requestId = uuid.v4();
+        requestId = uuidv4();
       }
       this.queryStartTimes.set(requestId, Date.now());
       this.logger.debug(`Tracked query start: ${requestId}`);

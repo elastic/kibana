@@ -40,7 +40,6 @@ export class OnechatPlugin
   private serviceManager = new ServiceManager();
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
-  private cleanupTaskInterval?: NodeJS.Timeout;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -54,16 +53,10 @@ export class OnechatPlugin
     // Create usage counter for telemetry (if usageCollection is available)
     if (setupDeps.usageCollection) {
       this.usageCounter = createOnechatUsageCounter(setupDeps.usageCollection);
-      this.trackingService = new TrackingService(
-        this.usageCounter,
-        this.logger.get('telemetry')
-      );
-
-      // Register telemetry collector
-      registerTelemetryCollector({
-        usageCollection: setupDeps.usageCollection,
-        logger: this.logger.get('telemetry'),
-      });
+      if (this.usageCounter) {
+        this.trackingService = new TrackingService(this.usageCounter, this.logger.get('telemetry'));
+        registerTelemetryCollector(setupDeps.usageCollection, this.logger.get('telemetry'));
+      }
 
       this.logger.info('Onechat telemetry initialized');
     } else {
@@ -129,20 +122,6 @@ export class OnechatPlugin
     const { tools, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
-    // Schedule periodic cleanup of stale query tracking data (every hour)
-    if (this.trackingService) {
-      this.cleanupTaskInterval = setInterval(() => {
-        try {
-          this.trackingService!.cleanupStaleQueries();
-          this.logger.debug('Cleaned up stale query tracking data');
-        } catch (error) {
-          this.logger.error(`Failed to cleanup stale queries: ${error.message}`);
-        }
-      }, 60 * 60 * 1000); // 1 hour
-
-      this.logger.info('Scheduled cleanup task for query tracking');
-    }
-
     return {
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
@@ -151,11 +130,5 @@ export class OnechatPlugin
     };
   }
 
-  stop() {
-    // Clear cleanup interval
-    if (this.cleanupTaskInterval) {
-      clearInterval(this.cleanupTaskInterval);
-      this.logger.info('Stopped cleanup task for query tracking');
-    }
-  }
+  stop() {}
 }
