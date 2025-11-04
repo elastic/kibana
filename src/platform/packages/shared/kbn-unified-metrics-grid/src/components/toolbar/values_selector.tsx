@@ -29,7 +29,7 @@ import {
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
 
-interface ValuesFilterProps {
+export interface ValuesFilterProps {
   selectedDimensions: string[];
   selectedValues: string[];
   indices?: string[];
