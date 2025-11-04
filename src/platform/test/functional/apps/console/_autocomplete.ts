@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
-  const find = getService('find');
 
   async function runTemplateTest(type: string, template: string) {
     await PageObjects.console.enterText(`{\n\t"type": "${type}",\n`);
