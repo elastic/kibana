@@ -12,6 +12,7 @@ import {
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
+  DefaultPolicyDeviceNotificationMessage,
   policyFactory,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
@@ -842,14 +843,14 @@ describe('policy_config and licenses', () => {
       if (policy.windows.device_control) policy.windows.device_control.enabled = false;
       if (policy.windows.popup.device_control) {
         policy.windows.popup.device_control.enabled = false;
-        policy.windows.popup.device_control.message = DefaultPolicyRuleNotificationMessage;
+        policy.windows.popup.device_control.message = DefaultPolicyDeviceNotificationMessage;
       }
       if (policy.mac.device_control) {
         policy.mac.device_control.enabled = false;
       }
       if (policy.mac.popup.device_control) {
         policy.mac.popup.device_control.enabled = false;
-        policy.mac.popup.device_control.message = DefaultPolicyRuleNotificationMessage;
+        policy.mac.popup.device_control.message = DefaultPolicyDeviceNotificationMessage;
       }
 
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);

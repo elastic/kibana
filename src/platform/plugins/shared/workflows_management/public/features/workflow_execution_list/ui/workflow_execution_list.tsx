@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { type WorkflowExecutionListDto } from '@kbn/workflows';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -31,10 +31,12 @@ export interface WorkflowExecutionListProps {
   executions: WorkflowExecutionListDto | null;
   filters: ExecutionListFiltersQueryParams;
   onFiltersChange: (filters: ExecutionListFiltersQueryParams) => void;
-  isLoading: boolean;
+  isInitialLoading: boolean;
+  isLoadingMore: boolean;
   error: Error | null;
   onExecutionClick: (executionId: string) => void;
   selectedId: string | null;
+  setPaginationObserver: (ref: HTMLDivElement | null) => void;
 }
 
 // TODO: use custom table? add pagination and search
@@ -44,17 +46,27 @@ const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSi
 export const WorkflowExecutionList = ({
   filters,
   onFiltersChange,
-  isLoading,
+  isInitialLoading,
+  isLoadingMore,
   error,
   executions,
   onExecutionClick,
   selectedId,
+  setPaginationObserver,
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
+  const scrollableContentRef = useRef<HTMLDivElement>(null);
+
+  // Reset scroll position when filters change
+  useEffect(() => {
+    if (scrollableContentRef.current) {
+      scrollableContentRef.current.scrollTop = 0;
+    }
+  }, [filters.statuses, filters.executionTypes]);
 
   let content: React.ReactNode = null;
 
-  if (isLoading) {
+  if (isInitialLoading) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -112,20 +124,42 @@ export const WorkflowExecutionList = ({
       />
     );
   } else {
+    const lastExecutionId = executions.results[executions.results.length - 1]?.id;
+
     content = (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {executions.results.map((execution) => (
-          <EuiFlexItem key={execution.id} grow={false}>
-            <WorkflowExecutionListItem
-              status={execution.status}
-              startedAt={new Date(execution.startedAt)}
-              duration={execution.duration}
-              selected={execution.id === selectedId}
-              onClick={() => onExecutionClick(execution.id)}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      <>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {executions.results.map((execution) => (
+            <React.Fragment key={execution.id}>
+              <EuiFlexItem grow={false}>
+                <WorkflowExecutionListItem
+                  status={execution.status}
+                  startedAt={new Date(execution.startedAt)}
+                  duration={execution.duration}
+                  selected={execution.id === selectedId}
+                  onClick={() => onExecutionClick(execution.id)}
+                />
+              </EuiFlexItem>
+              {/* Observer element for infinite scrolling - attached to last item */}
+              {execution.id === lastExecutionId && (
+                <div
+                  ref={setPaginationObserver}
+                  css={css`
+                    height: 1px;
+                  `}
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </EuiFlexGroup>
+        {isLoadingMore && (
+          <EuiFlexGroup justifyContent="center" css={css({ marginTop: '8px' })}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </>
     );
   }
 
@@ -153,8 +187,10 @@ export const WorkflowExecutionList = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </header>
-      <EuiFlexItem grow={true} css={styles.scrollableContent}>
-        {content}
+      <EuiFlexItem grow={true} css={styles.scrollableWrapper}>
+        <div ref={scrollableContentRef} css={styles.scrollableContent}>
+          {content}
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -167,9 +203,11 @@ const componentStyles = {
       height: '100%',
       overflow: 'hidden',
     }),
-  scrollableContent: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      overflowY: 'auto',
-      minHeight: 0, // This is important for flex items to shrink properly
-    }),
+  scrollableWrapper: css({
+    minHeight: 0,
+  }),
+  scrollableContent: css({
+    height: '100%',
+    overflowY: 'auto',
+  }),
 };

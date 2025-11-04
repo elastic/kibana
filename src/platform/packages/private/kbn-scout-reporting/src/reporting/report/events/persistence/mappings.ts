@@ -140,6 +140,23 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
   duration: {
     type: 'long',
   },
+  tests: {
+    type: 'object',
+    properties: {
+      passes: {
+        type: 'long',
+      },
+      failures: {
+        type: 'long',
+      },
+      pending: {
+        type: 'long',
+      },
+      total: {
+        type: 'long',
+      },
+    },
+  },
   config: {
     type: 'object',
     properties: {

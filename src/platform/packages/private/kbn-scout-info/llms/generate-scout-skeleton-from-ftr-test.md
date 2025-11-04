@@ -2,6 +2,10 @@
 
 Migrate existing FTR tests to Scout by creating empty test skeletons. Generate the complete test structure with TODO comments indicating what needs to be implemented, but without actual test logic.
 
+# Inputs
+
+The input will be either a single FTR file or a folder with multiple FTR files.
+
 # Core Requirements
 
 **IMPORTANT**: Do not modify the codebase. Instead, output the migrated code as explained in the Output Format section below.
@@ -11,6 +15,72 @@ Migrate existing FTR tests to Scout by creating empty test skeletons. Generate t
 - Keep any constants defined outside test cases and hooks in their original location
 - Remove all non-Scout imports
 - No syntax errors permitted
+- Try to infer the tag that the test suite will need by taking a look at the FTR files. The tag is mandatory. When in doubt, use `tags.ESS_ONLY`
+
+## Context on FTR loadTestFile Pattern
+
+A common pattern in FTR is to use a central test file (often index.ts) to group and orchestrate other test files using the loadTestFile function. This central file typically contains shared setup and teardown logic in hooks (before, beforeEach, etc.) that apply to all the loaded test files. Example:
+
+```ts
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const ARCHIVE = 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat';
+
+export default ({ loadTestFile, getService }: FtrProviderContext) => {
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const uptime = getService('uptime');
+
+  describe('Uptime app', function () {
+    beforeEach('delete settings', async () => {
+      await uptime.common.deleteUptimeSettingsObject();
+    });
+
+    describe('with generated data', () => {
+      beforeEach('load heartbeat data', async () => {
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+        );
+      });
+      afterEach('unload', async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+        );
+      });
+
+      loadTestFile(require.resolve('./settings'));
+      loadTestFile(require.resolve('./certificates'));
+    });
+
+    describe('with real-world data', () => {
+      before(async () => {
+        await esArchiver.unload(ARCHIVE);
+        await esArchiver.load(ARCHIVE);
+        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+        await uptime.navigation.goToUptime();
+      });
+      after(async () => await esArchiver.unload(ARCHIVE));
+
+      loadTestFile(require.resolve('./overview'));
+      loadTestFile(require.resolve('./ml_anomaly'));
+      loadTestFile(require.resolve('./feature_controls'));
+    });
+
+    describe('mappings error state', () => {
+      loadTestFile(require.resolve('./missing_mappings'));
+    });
+  });
+};
+```
+
+Scout does not support `loadTestFile`. Each test file in Scout must be standalone and independent. Therefore, when migrating this pattern, you must create a separate, self-contained Scout test file for each test originally loaded via `loadTestFile`.
 
 ### Import Selection
 
@@ -75,11 +145,9 @@ A test is a UI test if it:
  * 2.0.
  */
 
-import { expect, apiTest } from '@kbn/scout-oblt';
+import { expect, apiTest, tags } from '@kbn/scout-oblt';
 
-apiTest.describe('AddProjectMonitors', () => {
-  apiTest.describe.configure({ tag: 'skipCloud' });
-
+apiTest.describe('AddProjectMonitors', { tag: tags.ESS_ONLY }, () => {
   apiTest.beforeAll(async ({ kbnClient, apiClient }) => {
     // TODO: Implement test setup
     // 1. Clean standard saved objects list
@@ -249,12 +317,32 @@ test.describe('filter by map extent', () => {
 
 ## Output Format
 
-IMPORTANT. Don't make changes to the codebase. Simply present the code to the user. In most cases you won't need to search around in the codebase.
+### File creation
+
+You can create Scout files under the `<plugin-path>/test/scout/ui/tests` folder. You must also create a Playwright config at `<plugin-path>/test/scout/ui/playwright.config.ts`. The Playwright config will look like this:
+
+```ts
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// update Scout package import based on plugin's file path
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
+```
+
+IMPORTANT: you can make changes to the codebase if necessary. Create one or more files.
 
 Structure your response like this:
 
 1. Summary (one sentence describing the migration. Example: "Migrated 5 test cases from FTR to Scout")
-2. Code: complete Scout test file with license header
+2. Code: complete Scout test file(s) with license header
 3. Notes: brief explanation of decisions made. Keep explanations concise - focus on non-obvious decisions only:
 
 - Which Scout package was chosen and why

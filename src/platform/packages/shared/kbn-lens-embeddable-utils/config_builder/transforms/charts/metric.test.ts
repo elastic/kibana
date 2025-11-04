@@ -330,8 +330,13 @@ describe('metric chart transformations', () => {
             align: 'right',
           },
           color: {
-            type: 'static',
-            color: '#00FF00',
+            type: 'dynamic',
+            steps: [
+              { type: 'from', from: 0, color: '#00FF00' },
+              { type: 'exact', value: 300, color: '#FFFF00' },
+              { type: 'to', to: 300, color: '#FF0000' },
+            ],
+            range: 'absolute',
           },
           background_chart: {
             type: 'trend',

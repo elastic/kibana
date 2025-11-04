@@ -1,0 +1,374 @@
+{
+  "id": "automaticImportVTwo",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-server.AutomaticImportV2PluginSetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "AutomaticImportV2PluginSetupDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginSetupDependencies.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.PluginSetupContract",
+                "text": "PluginSetupContract"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginSetupDependencies.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginSetup",
+                "text": "SpacesPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-server.AutomaticImportV2PluginStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "AutomaticImportV2PluginStartDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginStartDependencies.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginStart",
+                "text": "SpacesPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginStartDependencies.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.PluginStartContract",
+                "text": "PluginStartContract"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginStartDependencies.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceServerStart",
+                "text": "InferenceServerStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginStartDependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginStartDependencies.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.SecurityPluginStart",
+                "text": "SecurityPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "automaticImportVTwo",
+      "id": "def-server.AutomaticImportV2PluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AutomaticImportV2PluginSetup",
+      "description": [
+        "The plugin setup interface"
+      ],
+      "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-server.AutomaticImportV2PluginSetup.actions",
+          "type": "Object",
+          "tags": [],
+          "label": "actions",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.PluginSetupContract",
+              "text": "PluginSetupContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-server.AutomaticImportV2PluginSetup.spaces",
+          "type": "Object",
+          "tags": [],
+          "label": "spaces",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "spaces",
+              "scope": "server",
+              "docId": "kibSpacesPluginApi",
+              "section": "def-server.SpacesPluginSetup",
+              "text": "SpacesPluginSetup"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "automaticImportVTwo",
+      "id": "def-server.AutomaticImportV2PluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AutomaticImportV2PluginStart",
+      "description": [
+        "The plugin start interface"
+      ],
+      "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-server.AutomaticImportV2PluginStart.actions",
+          "type": "Object",
+          "tags": [],
+          "label": "actions",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.PluginStartContract",
+              "text": "PluginStartContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-server.AutomaticImportV2PluginStart.inference",
+          "type": "Object",
+          "tags": [],
+          "label": "inference",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceServerStart",
+              "text": "InferenceServerStart"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-server.AutomaticImportV2PluginStart.licensing",
+          "type": "Object",
+          "tags": [],
+          "label": "licensing",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "licensing",
+              "scope": "server",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-server.LicensingPluginStart",
+              "text": "LicensingPluginStart"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-server.AutomaticImportV2PluginStart.spaces",
+          "type": "Object",
+          "tags": [],
+          "label": "spaces",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "spaces",
+              "scope": "server",
+              "docId": "kibSpacesPluginApi",
+              "section": "def-server.SpacesPluginStart",
+              "text": "SpacesPluginStart"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-server.AutomaticImportV2PluginStart.security",
+          "type": "Object",
+          "tags": [],
+          "label": "security",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "@kbn/security-plugin-types-server",
+              "scope": "server",
+              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+              "section": "def-server.SecurityPluginStart",
+              "text": "SecurityPluginStart"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

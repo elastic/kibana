@@ -1488,6 +1488,20 @@
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutReportEvent.process",
+            "type": "Object",
+            "tags": [],
+            "label": "process",
+            "description": [],
+            "signature": [
+              "{ uptime?: number | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1842,6 +1856,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestRunInfo.tests",
+            "type": "Object",
+            "tags": [],
+            "label": "tests",
+            "description": [],
+            "signature": [
+              "{ passes?: number | undefined; pending?: number | undefined; failures?: number | undefined; total?: number | undefined; } | undefined"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
             "deprecated": false,

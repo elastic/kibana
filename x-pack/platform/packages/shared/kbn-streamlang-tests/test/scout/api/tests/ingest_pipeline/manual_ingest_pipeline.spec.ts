@@ -102,8 +102,7 @@ apiTest.describe(
       }
     );
 
-    // TODO: `eq`/`neq` check for boolean fields is doesn't work for the following test. `shorthandBinaryToPainless` needs to be checked
-    apiTest.skip(
+    apiTest(
       'should process manual ingest pipeline with conditional where clause',
       async ({ testBed }) => {
         const indexName = 'stream-e2e-test-manual-ingest-conditional';

@@ -4320,6 +4320,10 @@ describe('Package policy service', () => {
         [{ id: idToDelete, type: 'ingest-package-policies' }],
         { force: true }
       );
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: `${idToDelete}:prev`, type: 'ingest-package-policies' }],
+        { force: true }
+      );
     });
     it('should allow to delete orphaned package policies from ES index', async () => {
       const soClient = createSavedObjectClientMock();
@@ -6745,6 +6749,80 @@ describe('Package policy service', () => {
         expect(result.inputs[0]?.streams[0]?.vars?.path.value).toEqual(['/var/log/test123.log']);
         expect(result.inputs[0]?.streams[0]?.vars?.path_2.value).toBe('/var/log/custom.log');
         expect(result.inputs[0]?.policy_template).toBe('template_1');
+      });
+    });
+
+    describe('when updating a limited package', () => {
+      it('should not add new inputs', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              enabled: true,
+              type: 'connectors-py',
+              policy_template: 'github',
+              streams: [],
+            },
+          ],
+        };
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              multiple: false,
+              name: 'github',
+              description: 'test',
+              title: 'github',
+              template_path: 'agent.yml.hbs',
+              type: 'connectors-py',
+              input: 'connectors-py',
+            },
+            {
+              multiple: false,
+              type: 'connectors-py',
+              name: 'gmail',
+              description: 'test',
+              title: 'gmail',
+              template_path: 'agent.yml.hbs',
+              input: 'connectors-py',
+            },
+          ],
+        } as any;
+
+        const inputsOverride: NewPackagePolicyInput[] = packageToPackagePolicyInputs(packageInfo);
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs.length).toBe(2);
+        const enabledInputs = result.inputs.filter((input) => input.enabled);
+        const disabledInputs = result.inputs.filter((input) => !input.enabled);
+        expect(enabledInputs.length).toBe(1);
+        expect(disabledInputs.length).toBe(1);
+        expect(enabledInputs[0]?.type).toBe('connectors-py');
+        expect(enabledInputs[0]?.policy_template).toBe('github');
+        expect(disabledInputs[0]?.type).toBe('connectors-py');
+        expect(disabledInputs[0]?.policy_template).toBe('gmail');
       });
     });
   });

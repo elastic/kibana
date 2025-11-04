@@ -2623,6 +2623,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
@@ -13181,6 +13185,49 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.rollbackPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "rollbackPackage",
+            "description": [],
+            "signature": [
+              "(options: { pkgName: string; }) => Promise<",
+              "RollbackPackageResponse",
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.rollbackPackage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.rollbackPackage.$1.pkgName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pkgName",
+                    "description": [],
+                    "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -21728,6 +21775,39 @@
         },
         {
           "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.runWithCache",
+          "type": "Function",
+          "tags": [],
+          "label": "runWithCache",
+          "description": [],
+          "signature": [
+            "<T = any>(cb: () => Promise<T>) => Promise<T>"
+          ],
+          "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "fleet",
+              "id": "def-server.FleetStartContract.runWithCache.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "cb",
+              "description": [],
+              "signature": [
+                "() => Promise<T>"
+              ],
+              "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/packages/cache.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": []
+            }
+          ]
+        },
+        {
+          "parentPluginId": "fleet",
           "id": "def-server.FleetStartContract.agentPolicyService",
           "type": "Object",
           "tags": [],
@@ -26814,6 +26894,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/fleet_api_integration/apis/package_policy/update.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -33051,6 +33135,54 @@
             "type": "Function",
             "tags": [],
             "label": "postBulkMigrateAgents",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.postChangeAgentPrivilegeLevel",
+            "type": "Function",
+            "tags": [],
+            "label": "postChangeAgentPrivilegeLevel",
+            "description": [],
+            "signature": [
+              "(agentId: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.postChangeAgentPrivilegeLevel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.postBulkChangeAgentPrivilegeLevel",
+            "type": "Function",
+            "tags": [],
+            "label": "postBulkChangeAgentPrivilegeLevel",
             "description": [],
             "signature": [
               "() => string"

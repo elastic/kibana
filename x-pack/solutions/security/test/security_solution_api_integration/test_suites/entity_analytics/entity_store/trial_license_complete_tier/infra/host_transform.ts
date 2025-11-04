@@ -9,9 +9,8 @@ import expect from 'expect';
 import type { EcsHost } from '@elastic/ecs';
 import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { TIMEOUT_MS } from './constants';
-
-const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
+import { HOST_TRANSFORM_ID, TIMEOUT_MS } from './constants';
+import { triggerTransform } from './transforms';
 
 export function buildHostTransformDocument(
   host: EcsHost & { timestamp?: string },
@@ -40,8 +39,8 @@ export async function createDocumentsAndTriggerTransform(
   docs: (EcsHost & { timestamp?: string })[],
   dataStream: string
 ): Promise<void> {
-  const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
+  const retry = providerContext.getService('retry');
 
   const { count, transforms } = await es.transform.getTransformStats({
     transform_id: HOST_TRANSFORM_ID,
@@ -58,11 +57,7 @@ export async function createDocumentsAndTriggerTransform(
   }
 
   // Trigger the transform manually
-  const { acknowledged } = await es.transform.scheduleNowTransform({
-    transform_id: HOST_TRANSFORM_ID,
-  });
-  expect(acknowledged).toBe(true);
-
+  await triggerTransform(providerContext, HOST_TRANSFORM_ID);
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
     const response = await es.transform.getTransformStats({
       transform_id: HOST_TRANSFORM_ID,

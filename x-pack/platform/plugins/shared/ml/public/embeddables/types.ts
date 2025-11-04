@@ -22,12 +22,12 @@ import type {
   PublishesDataViews,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
+import type { TypeOf } from '@kbn/config-schema/src/types';
 import { type BehaviorSubject } from 'rxjs';
 import type { SeverityThreshold } from '../../common/types/anomalies';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
-import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
@@ -43,6 +43,13 @@ import type {
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
+import type {
+  anomalySwimlaneEmbeddableCustomInputOverallSchema,
+  anomalySwimlaneEmbeddableCustomInputSchema,
+  anomalySwimlaneEmbeddableCustomInputViewBySchema,
+  anomalySwimlaneEmbeddableUserInputSchema,
+  anomalySwimlaneInitialInputSchema,
+} from '../../server/embeddable/schemas';
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -59,24 +66,23 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
 /** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
+export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
+  typeof anomalySwimlaneEmbeddableUserInputSchema
+>;
 
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
+export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
 
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
-}
+export type AnomalySwimlaneEmbeddableCustomInputViewBy = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
+>;
+
+export type AnomalySwimlaneEmbeddableCustomInputOverall = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
+>;
+
+export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputSchema
+>;
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;

@@ -60,7 +60,6 @@ export const createNavigationTree = async (
             sideNavVersion: 'v1',
           },
           defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
-
           {
             breadcrumbStatus: 'hidden',
             children: [

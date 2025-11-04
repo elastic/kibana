@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { flattenObject } from '@kbn/object-utils';
 import { useAIForSOCDetailsContext } from '../context';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
@@ -59,8 +60,17 @@ export const TakeActionButton = memo(() => {
     [togglePopover]
   );
 
+  const nonEcsData = useMemo(() => {
+    const flattened = flattenObject(dataAsNestedObject);
+    return Object.entries(flattened).map(([key, value]) => ({
+      field: key,
+      value: value as string[],
+    }));
+  }, [dataAsNestedObject]);
+
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: dataAsNestedObject,
+    nonEcsData,
     onMenuItemClick: closePopover,
     ariaLabel: ADD_TO_CASE_ARIA_LABEL,
   });

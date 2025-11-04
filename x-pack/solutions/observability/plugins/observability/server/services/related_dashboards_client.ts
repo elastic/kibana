@@ -69,7 +69,7 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let references = this.isLensVizAttributes(panel.config.attributes)
+      let references = this.isLensVizAttributes(panel.config)
         ? panel.config.attributes.references
         : undefined;
       if (!references && panel.uid) {
@@ -88,7 +88,7 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let state: unknown = this.isLensVizAttributes(panel.config.attributes)
+      let state: unknown = this.isLensVizAttributes(panel.config)
         ? panel.config.attributes.state
         : undefined;
       if (!state && panel.uid) {
@@ -181,7 +181,7 @@ export class RelatedDashboardsClient {
         if (
           isDashboardPanel(panel) &&
           isSuggestedDashboardsValidPanelType(panel.type) &&
-          (isEmpty(panel.config) || !panel.config.attributes)
+          (isEmpty(panel.config) || !(panel.config as Record<string, unknown>).attributes)
         ) {
           this.referencedPanelManager.addReferencedPanel({ dashboard, panel });
         }
@@ -293,7 +293,8 @@ export class RelatedDashboardsClient {
     return fields ?? new Set<string>();
   }
 
-  private isLensVizAttributes(attributes: unknown): attributes is LensAttributes {
+  private isLensVizAttributes(config: object): config is { attributes: LensAttributes } {
+    const { attributes } = (config ?? {}) as Record<string, unknown>;
     if (!attributes) {
       return false;
     }

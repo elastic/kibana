@@ -10,6 +10,7 @@ import {
   comprehensiveTestDSL,
   manualIngestPipelineTestDSL,
   notConditionsTestDSL,
+  typeCoercionsTestDSL,
 } from '../shared/mocks/test_dsls';
 
 describe('transpile - Streamlang DSL to ES|QL)', () => {
@@ -21,6 +22,11 @@ describe('transpile - Streamlang DSL to ES|QL)', () => {
   it('should handle not conditions', () => {
     const result = transpile(notConditionsTestDSL);
     expect(result.query).toMatchSnapshot();
+  });
+
+  it('should handle type coercions', () => {
+    const result = transpile(typeCoercionsTestDSL);
+    expect(result).toMatchSnapshot();
   });
 
   it('should warn when manual_ingest_pipeline is used', () => {

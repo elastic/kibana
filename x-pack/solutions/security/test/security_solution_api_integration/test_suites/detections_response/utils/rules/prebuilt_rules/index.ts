@@ -5,6 +5,7 @@
  * 2.0.
  */
 export * from './create_prebuilt_rule_saved_objects';
+export * from './customize_rule';
 export * from './delete_all_prebuilt_rule_assets';
 export * from './delete_all_timelines';
 export * from './delete_fleet_packages';

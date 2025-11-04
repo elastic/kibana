@@ -34,6 +34,12 @@ import {
   getAssigneesRemovedUserActions,
   getAssigneesAddedRemovedUserActions,
   getTagsAddedRemovedUserActions,
+  patchSyncAlertsCasesRequest,
+  patchExtractObservablesCasesRequest,
+  patchBothSettingsCasesRequest,
+  getSyncAlertsUserActions,
+  getExtractObservablesUserActions,
+  getBothSettingsUserActions,
 } from './mocks';
 import { CaseUserActionService } from '.';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
@@ -582,6 +588,33 @@ describe('CaseUserActionService', () => {
           })
         );
       });
+
+      it('creates the correct user actions when sync alerts settings is changed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchSyncAlertsCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getSyncAlertsUserActions({ isMock: false }));
+      });
+
+      it('creates the correct user actions when extract observables settings is changed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchExtractObservablesCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getExtractObservablesUserActions({ isMock: false }));
+      });
+
+      it('creates the correct user actions when both settings are changed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchBothSettingsCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getBothSettingsUserActions({ isMock: false }));
+      });
     });
 
     describe('bulkCreateUpdateCase', () => {
@@ -740,7 +773,7 @@ describe('CaseUserActionService', () => {
                 },
                 type: 'settings',
                 owner: 'securitySolution',
-                payload: { settings: { syncAlerts: false, extractObservables: false } },
+                payload: { settings: { syncAlerts: false } },
               },
               references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
               type: 'cases-user-actions',

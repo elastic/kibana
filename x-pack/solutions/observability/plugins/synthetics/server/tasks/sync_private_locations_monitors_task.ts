@@ -217,38 +217,40 @@ export class SyncPrivateLocationMonitorsTask {
         soClient,
       });
 
-    for (const spaceId of spaceIds) {
-      const privateConfigs: Array<{
-        config: HeartbeatConfig;
-        globalParams: Record<string, string>;
-      }> = [];
-      const monitors = configsBySpaces[spaceId];
-      this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
-      if (!monitors) {
-        continue;
-      }
-      for (const monitor of monitors) {
-        const { privateLocations } = this.parseLocations(monitor);
+    return this.serverSetup.fleet.runWithCache(async () => {
+      for (const spaceId of spaceIds) {
+        const privateConfigs: Array<{
+          config: HeartbeatConfig;
+          globalParams: Record<string, string>;
+        }> = [];
+        const monitors = configsBySpaces[spaceId];
+        this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
+        if (!monitors) {
+          continue;
+        }
+        for (const monitor of monitors) {
+          const { privateLocations } = this.parseLocations(monitor);
 
-        if (privateLocations.length > 0) {
-          privateConfigs.push({ config: monitor, globalParams: paramsBySpace[spaceId] });
+          if (privateLocations.length > 0) {
+            privateConfigs.push({ config: monitor, globalParams: paramsBySpace[spaceId] });
+          }
+        }
+        if (privateConfigs.length > 0) {
+          this.debugLog(
+            `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}`
+          );
+
+          await privateLocationAPI.editMonitors(
+            privateConfigs,
+            allPrivateLocations,
+            spaceId,
+            maintenanceWindows
+          );
+        } else {
+          this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
         }
       }
-      if (privateConfigs.length > 0) {
-        this.debugLog(
-          `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}`
-        );
-
-        await privateLocationAPI.editMonitors(
-          privateConfigs,
-          allPrivateLocations,
-          spaceId,
-          maintenanceWindows
-        );
-      } else {
-        this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
-      }
-    }
+    });
   }
 
   async getAllMonitorConfigs({

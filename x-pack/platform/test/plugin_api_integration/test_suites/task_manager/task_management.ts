@@ -208,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
 
-    function scheduleTaskIfNotExists(task: Partial<ConcreteTaskInstance>) {
+    function ensureTaskScheduled(task: Partial<ConcreteTaskInstance>) {
       return supertest
         .post('/api/sample_tasks/ensure_scheduled')
         .set('kbn-xsrf', 'xxx')
@@ -426,7 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow a task with a given ID to be scheduled multiple times', async () => {
-      const result = await scheduleTaskIfNotExists({
+      const result = await ensureTaskScheduled({
         id: 'test-task-to-reschedule-in-task-manager',
         taskType: 'sampleTask',
         params: {},
@@ -434,7 +434,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(result.id).to.be('test-task-to-reschedule-in-task-manager');
 
-      const rescheduleResult = await scheduleTaskIfNotExists({
+      const rescheduleResult = await ensureTaskScheduled({
         id: 'test-task-to-reschedule-in-task-manager',
         taskType: 'sampleTask',
         params: {},
@@ -918,6 +918,36 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(task.enabled).to.eql(true);
         expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(disabledTask.scheduledAt));
+      });
+    });
+
+    it('should update schedule for existing task when calling ensureScheduled with a different schedule', async () => {
+      // schedule the task
+      const taskId = 'sample-recurring-task-id';
+      await scheduleTask({
+        id: taskId,
+        taskType: 'sampleRecurringTask',
+        schedule: { interval: '1d' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+        const task = await currentTask(taskId);
+        expect(task.schedule?.interval).to.eql('1d');
+      });
+
+      // call ensureScheduled with a different schedule
+      await ensureTaskScheduled({
+        id: taskId,
+        taskType: 'sampleRecurringTask',
+        params: {},
+        schedule: { interval: '5m' },
+      });
+
+      await retry.try(async () => {
+        const task = await currentTask(taskId);
+        expect(task.schedule?.interval).to.eql('5m');
       });
     });
 
