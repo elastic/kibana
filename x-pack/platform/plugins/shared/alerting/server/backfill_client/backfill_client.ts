@@ -24,7 +24,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server';
-import { isNumber } from 'lodash';
+import { isNumber, chunk } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
 import type {
@@ -193,10 +193,10 @@ export class BackfillClient {
     const chunks: Array<{
       startIndex: number;
       items: Array<SavedObjectsBulkCreateObject<AdHocRunSO>>;
-    }> = [];
-    for (let i = 0; i < adHocSOsToCreate.length; i += chunkSize) {
-      chunks.push({ startIndex: i, items: adHocSOsToCreate.slice(i, i + chunkSize) });
-    }
+    }> = chunk(adHocSOsToCreate, chunkSize).map((items, index) => ({
+      startIndex: index * chunkSize,
+      items,
+    }));
 
     // Pre-size result array to preserve original order regardless of parallel completion order
     const orderedResults: Array<SavedObject<AdHocRunSO>> = new Array(adHocSOsToCreate.length);
@@ -327,9 +327,9 @@ export class BackfillClient {
       try {
         // Process backfills in chunks of 10 to manage resource usage
         for (let i = 0; i < backfillSOs.length; i += 10) {
-          const chunk = backfillSOs.slice(i, i + 10);
+          const backfillChunk = backfillSOs.slice(i, i + 10);
           await Promise.all(
-            chunk.map((backfill) => {
+            backfillChunk.map((backfill) => {
               const ruleGaps = gaps?.filter((gap) => gap.ruleId === backfill.rule.id);
               return updateGaps({
                 backfillSchedule: backfill.schedule,
