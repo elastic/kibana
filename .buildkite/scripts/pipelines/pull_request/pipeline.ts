@@ -15,6 +15,7 @@
             }
         ] */
 
+import { spawn } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
 import {
@@ -41,6 +42,36 @@ const getPipeline = (filename: string, removeSteps = true) => {
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
 
+// Executes pre_build.sh and streams its output to stderr so stdout stays clean for pipeline YAML.
+const runPreBuild = async () =>
+  new Promise<void>((resolve, reject) => {
+    const child = spawn('.buildkite/scripts/lifecycle/pre_build.sh', {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: process.env,
+    });
+
+    child.stdout.on('data', (chunk) => {
+      process.stderr.write(chunk);
+    });
+
+    child.stderr.on('data', (chunk) => {
+      process.stderr.write(chunk);
+    });
+
+    child.on('error', (error) => {
+      reject(error);
+    });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(new Error(`pre_build.sh exited with code ${code ?? 'null'}`));
+    });
+  });
+
 (async () => {
   const pipeline: string[] = [];
 
@@ -51,6 +82,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
       emitPipeline([emptyStep]);
       return;
     }
+
+    await runPreBuild();
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 

@@ -1,14 +1,4 @@
 steps:
-  - command: .buildkite/scripts/lifecycle/pre_build.sh
-    label: Pre-Build
-    timeout_in_minutes: 10
-    id: pre_build
-    agents:
-      machineType: n2-standard-2
-      diskSizeGb: 100
-
-  - wait
-
   - command: .buildkite/scripts/steps/store_cache.sh
     label: Store Cache for build
     timeout_in_minutes: 10
@@ -25,9 +15,7 @@ steps:
     agents:
       machineType: c3d-standard-16-lssd
       preemptible: true
-      spotZones:
-        - us-central1-a
-        - us-central1-b
+      spotZones: us-central1-a,us-central1-b
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
