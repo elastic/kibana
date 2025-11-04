@@ -21,11 +21,3 @@ export const PARAMETER_NOT_FOUND = i18n.translate(
       "This query hasn't been called due to parameter used and its value not found in the alert.",
   }
 );
-
-export const TOO_MANY_AGENT_IDS = i18n.translate(
-  'xpack.osquery.actionResults.error.tooManyAgentIds',
-  {
-    defaultMessage:
-      'Too many agent IDs in URL (max 100). Either reduce the list or omit agentIds to query all agents from the action.',
-  }
-);
