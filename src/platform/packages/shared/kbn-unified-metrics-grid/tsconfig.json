@@ -33,5 +33,6 @@
     "@kbn/field-utils",
     "@kbn/discover-utils",
     "@kbn/esql-utils"
+    "@kbn/react-query"
   ]
 }

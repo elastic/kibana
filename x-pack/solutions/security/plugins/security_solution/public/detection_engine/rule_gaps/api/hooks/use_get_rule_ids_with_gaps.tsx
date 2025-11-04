@@ -6,8 +6,8 @@
  */
 import { useCallback } from 'react';
 import type { GetRuleIdsWithGapResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { getRuleIdsWithGaps } from '../api';
 import type { GapRangeValue } from '../../constants';
 import { getGapRange } from './utils';

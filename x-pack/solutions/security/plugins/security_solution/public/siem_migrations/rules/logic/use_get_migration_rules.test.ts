@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { useGetMigrationRules, useInvalidateGetMigrationRules } from './use_get_migration_rules';
 import { migrationRules } from '../__mocks__';
 import { getMigrationRules } from '../api';
