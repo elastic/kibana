@@ -7,138 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
-import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import {
-  EuiFieldText,
-  EuiButtonEmpty,
-  EuiForm,
   useEuiTheme,
   findElementBySelectorOrRef,
+  EuiButtonEmpty,
   EuiPopover,
+  EuiFocusTrap,
+  EuiForm,
   EuiFormRow,
-  EuiText,
   EuiSuperSelect,
+  EuiPopoverFooter,
+  EuiFieldText,
   EuiFlexGroup,
   EuiButton,
-  EuiPopoverFooter,
-  EuiFocusTrap,
+  EuiText,
 } from '@elastic/eui';
-import type { HTMLAttributes, PropsWithChildren } from 'react';
-import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { isPlaceholderColumn } from '../../utils';
-import type { IndexUpdateService } from '../../index_update_service';
+import type { PropsWithChildren } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
+import { isPlaceholderColumn } from '../../utils';
 
-const COLUMN_INDEX_PROP = 'data-column-index';
-
-const options = [
-  {
-    value: 'integer',
-    inputDisplay: (
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
-        <FieldIcon type="number" label="Integer" />
-        <span>Number</span>
-      </EuiFlexGroup>
-    ),
-  },
-  {
-    value: 'keyword',
-    inputDisplay: (
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
-        <FieldIcon type="keyword" label="Keyword" />
-        <span>Keyword</span>
-      </EuiFlexGroup>
-    ),
-  },
-  {
-    value: 'text',
-    inputDisplay: (
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
-        <FieldIcon type="text" label="Text" />
-        <span>Text</span>
-      </EuiFlexGroup>
-    ),
-  },
-  {
-    value: 'boolean',
-    inputDisplay: (
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
-        <FieldIcon type="boolean" label="Boolean" />
-        <span>Boolean</span>
-      </EuiFlexGroup>
-    ),
-  },
-];
-
-export const getColumnInputRenderer = (
-  columnName: string,
-  columnType: string | undefined,
-  columnIndex: number,
-  isColumnInEditMode: boolean,
-  setEditingColumnIndex: (columnIndex: number | null) => void,
-  indexUpdateService: IndexUpdateService,
-  telemetryService: IndexEditorTelemetryService
-): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
-  return ({ column }) => ({
-    ...column,
-    display: (
-      <AddColumnHeader
-        isColumnInEditMode={isColumnInEditMode}
-        setEditingColumnIndex={setEditingColumnIndex}
-        initialColumnName={columnName}
-        initialColumnType={columnType}
-        columnIndex={columnIndex}
-        telemetryService={telemetryService}
-        originalColumnDisplay={column.display}
-      />
-    ),
-    displayHeaderCellProps: { [COLUMN_INDEX_PROP]: columnIndex } as HTMLAttributes<HTMLDivElement>,
-    actions: {
-      showHide: false,
-      showSortAsc: false,
-      showSortDesc: false,
-      showMoveLeft: false,
-      showMoveRight: false,
-      additional: [
-        {
-          'data-test-subj': 'indexEditorindexEditorEditColumnButton',
-          label: (
-            <FormattedMessage
-              id="indexEditor.flyout.grid.columnHeader.editAction"
-              defaultMessage="Edit column"
-            />
-          ),
-          size: 'xs',
-          iconType: 'pencil',
-          onClick: () => {
-            setEditingColumnIndex(columnIndex);
-          },
-        },
-        {
-          'data-test-subj': 'indexEditorindexEditorDeleteColumnButton',
-          label: (
-            <FormattedMessage
-              id="indexEditor.flyout.grid.columnHeader.deleteAction"
-              defaultMessage="Delete column and values"
-            />
-          ),
-          size: 'xs',
-          iconType: 'trash',
-          onClick: () => {
-            indexUpdateService.deleteColumn(columnName);
-          },
-        },
-      ],
-    },
-  });
-};
-
-interface AddColumnHeaderProps {
+interface ColumnHeaderPopoverProps {
   isColumnInEditMode: boolean;
   setEditingColumnIndex: (columnIndex: number | null) => void;
   initialColumnName: string;
@@ -148,7 +41,9 @@ interface AddColumnHeaderProps {
   originalColumnDisplay: React.ReactNode;
 }
 
-export const AddColumnHeader = ({
+export const COLUMN_INDEX_PROP = 'data-column-index';
+
+export const ColumnHeaderPopover = ({
   isColumnInEditMode,
   setEditingColumnIndex,
   initialColumnName,
@@ -156,7 +51,7 @@ export const AddColumnHeader = ({
   columnIndex,
   telemetryService,
   originalColumnDisplay,
-}: PropsWithChildren<AddColumnHeaderProps>) => {
+}: PropsWithChildren<ColumnHeaderPopoverProps>) => {
   const { euiTheme } = useEuiTheme();
 
   const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
@@ -188,7 +83,8 @@ export const AddColumnHeader = ({
       defaultMessage="Add a column…"
     />
   ) : (
-    originalColumnDisplay // The default column header display comming from UnifiedDataTable, the type icon + column name
+    // The default column header display comming from UnifiedDataTable, the type icon + column name
+    originalColumnDisplay
   );
 
   const errorMessage = useMemo(() => {
@@ -342,3 +238,42 @@ export const AddColumnHeader = ({
     </EuiPopover>
   );
 };
+
+const options = [
+  {
+    value: 'integer',
+    inputDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+        <FieldIcon type="number" label="Integer" />
+        <span>Number</span>
+      </EuiFlexGroup>
+    ),
+  },
+  {
+    value: 'keyword',
+    inputDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+        <FieldIcon type="keyword" label="Keyword" />
+        <span>Keyword</span>
+      </EuiFlexGroup>
+    ),
+  },
+  {
+    value: 'text',
+    inputDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+        <FieldIcon type="text" label="Text" />
+        <span>Text</span>
+      </EuiFlexGroup>
+    ),
+  },
+  {
+    value: 'boolean',
+    inputDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+        <FieldIcon type="boolean" label="Boolean" />
+        <span>Boolean</span>
+      </EuiFlexGroup>
+    ),
+  },
+];
