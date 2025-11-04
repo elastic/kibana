@@ -32,6 +32,7 @@ import type {
   LensRequestHandlersProps,
   LensApiCallbacks,
   LensHasEditPanel,
+  LensSerializedState,
 } from '@kbn/lens-common';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -55,6 +56,15 @@ export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
  * - other props from the embeddable
  */
 export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;
+
+export interface LegacyLensStateApi {
+  /**
+   * Returns legacy serialized state to avoid duplicate transformations
+   *
+   * @deprecated use `serializeState` instead
+   */
+  getLegacySerializedState: () => LensSerializedState;
+}
 
 export type LensApi = Simplify<
   DefaultEmbeddableApi<LensSerializedAPIConfig> &
@@ -89,7 +99,8 @@ export type LensApi = Simplify<
     LensInspectorAdapters &
     LensRequestHandlersProps &
     LensApiCallbacks &
-    LensHasEditPanel
+    LensHasEditPanel &
+    LegacyLensStateApi
 >;
 
 /**

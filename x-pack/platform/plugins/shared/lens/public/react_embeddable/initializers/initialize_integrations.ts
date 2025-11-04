@@ -12,8 +12,14 @@ import {
 } from '@kbn/es-query';
 import { omit } from 'lodash';
 import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
-import type { GetStateType, LensRuntimeState, IntegrationCallbacks } from '@kbn/lens-common';
 import type {
+  GetStateType,
+  LensRuntimeState,
+  IntegrationCallbacks,
+  LensSerializedState,
+} from '@kbn/lens-common';
+import type {
+  LegacyLensStateApi,
   LensSerializedAPIConfig,
   LensByRefSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
@@ -37,7 +43,8 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState<LensSerializedAPIConfig>;
+    HasSerializableState<LensSerializedAPIConfig> &
+    LegacyLensStateApi;
 } {
   return {
     api: {
@@ -63,6 +70,22 @@ export function initializeIntegrations(getLatestState: GetStateType): {
         return {
           rawState: transformedState,
         } satisfies SerializedPanelState<LensByValueSerializedAPIConfig>;
+      },
+      getLegacySerializedState: (): LensSerializedState => {
+        const currentState = cleanupSerializedState(getLatestState());
+        const { savedObjectId, attributes, ...state } = currentState;
+
+        if (savedObjectId) {
+          return {
+            ...state,
+            savedObjectId,
+          };
+        }
+
+        return {
+          ...state,
+          attributes,
+        };
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,
