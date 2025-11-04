@@ -13,22 +13,11 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
-
-// Create QueryClient instance for React Query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 export function AppRoot({
   coreStart,
@@ -56,18 +45,16 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      <QueryClientProvider client={queryClient}>
-        <RedirectAppLinks coreStart={coreStart}>
-          {/* @ts-expect-error upgrade typescript v5.4.5 */}
-          <RouterProvider history={history} router={streamsAppRouter}>
-            <KbnUrlStateStorageFromRouterProvider>
-              <BreadcrumbsContextProvider>
-                <RouteRenderer />
-              </BreadcrumbsContextProvider>
-            </KbnUrlStateStorageFromRouterProvider>
-          </RouterProvider>
-        </RedirectAppLinks>
-      </QueryClientProvider>
+      <RedirectAppLinks coreStart={coreStart}>
+        {/* @ts-expect-error upgrade typescript v5.4.5 */}
+        <RouterProvider history={history} router={streamsAppRouter}>
+          <KbnUrlStateStorageFromRouterProvider>
+            <BreadcrumbsContextProvider>
+              <RouteRenderer />
+            </BreadcrumbsContextProvider>
+          </KbnUrlStateStorageFromRouterProvider>
+        </RouterProvider>
+      </RedirectAppLinks>
     </StreamsAppContextProvider>
   );
 }

@@ -35,8 +35,6 @@ jest.mock('../../../../../../hooks/use_stream_data_view_field_types', () => ({
       ['service.name', 'keyword'],
       ['error.message', 'text'],
     ]),
-    isLoading: false,
-    isError: false,
     dataView: {} as any,
   })),
 }));
