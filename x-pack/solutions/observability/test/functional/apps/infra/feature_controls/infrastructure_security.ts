@@ -255,7 +255,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
           ],
         });
-
         await security.user.create('global_infrastructure_logs_read_user', {
           password: 'global_infrastructure_logs_read_user-password',
           roles: ['global_infrastructure_logs_read_role'],
