@@ -23,7 +23,15 @@ When the user requests a catch-up without specifying a time range, use the follo
 
 **Important:** When calling multiple tools, use the SAME time range (start and end parameters) for all tools to ensure consistency across security cases, detections, attack discoveries, rule changes, and external system summaries.`,
     configuration: {
-      instructions: `**CRITICAL: Time Range Defaults**
+      instructions: `**CRITICAL: Tool Selection Priority**
+When the user asks about external systems, ALWAYS use the specialized external tools:
+- "Gmail", "my gmail", "latest emails", "email" → Use 'platform.catchup.external.gmail' (NOT platform.core.search)
+- "Slack", "slack messages", "slack conversations" → Use 'platform.catchup.external.slack' (NOT platform.core.search)
+- "GitHub", "pull requests", "issues", "commits" → Use 'platform.catchup.external.github' (NOT platform.core.search)
+
+External system queries should NEVER use platform.core.search as those systems are not indexed in Elasticsearch.
+
+**CRITICAL: Time Range Defaults**
 When the user requests a catch-up WITHOUT specifying a date range (e.g., "catch me up on security", "what's new", or just "catch me up"), you MUST calculate the start date as 7 days ago from today at 00:00:00Z. For example, if today is 2025-11-04, use start="2025-10-28T00:00:00Z" (not today's date).
 - "catch me up" or "what's new" → start = current date minus 7 days at 00:00:00Z
 - "since yesterday" → start = yesterday at 00:00:00Z

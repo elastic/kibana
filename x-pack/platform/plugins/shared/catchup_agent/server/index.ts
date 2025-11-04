@@ -9,8 +9,15 @@
 // eslint-disable-next-line no-console
 console.log('[CATCHUP-AGENT] server/index.ts module loaded');
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { CatchupAgentPlugin } from './plugin';
+import { configSchema, type CatchupAgentConfigType } from './config';
+
+export type { CatchupAgentConfigType };
+
+export const config: PluginConfigDescriptor<CatchupAgentConfigType> = {
+  schema: configSchema,
+};
 
 export function plugin(initializerContext: PluginInitializerContext) {
   // eslint-disable-next-line no-console

@@ -76,10 +76,10 @@ export const slackDigestTool = (): BuiltinToolDefinition<typeof slackDigestSchem
     id: 'platform.catchup.external.slack',
     type: ToolType.builtin,
     description: `Fetches messages and threads from Slack since a given timestamp.
-    
-**IMPORTANT:** This tool requires a Slack Web API connector (NOT a webhook connector). 
-- Slack Webhook connectors (`.slack`) can only send messages, not read them
-- Slack Web API connectors (`.slack_api`) use OAuth tokens and can read messages via the Slack API
+
+**IMPORTANT:** This tool requires a Slack Web API connector (NOT a webhook connector).
+- Slack Webhook connectors (".slack") can only send messages, not read them
+- Slack Web API connectors (".slack_api") use OAuth tokens and can read messages via the Slack API
 
 The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The 'connectorId' must be a Slack Web API connector (actionTypeId: '.slack_api') configured in Kibana Actions with a valid OAuth token.

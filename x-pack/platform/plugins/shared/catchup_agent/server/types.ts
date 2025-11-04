@@ -13,6 +13,7 @@ import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { RuleRegistryPluginStart } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { CatchupAgentConfigType } from './config';
 
 export interface CatchupAgentPluginSetup {
   // Setup contract (empty for now)

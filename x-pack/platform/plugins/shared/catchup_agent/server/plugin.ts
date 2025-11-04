@@ -18,6 +18,7 @@ import type {
   CatchupAgentSetupDependencies,
   CatchupAgentStartDependencies,
 } from './types';
+import type { CatchupAgentConfigType } from './config';
 import { registerSecurityTools } from './tools/security/register_tools';
 // Temporarily disabled - focusing on Security and External tools first
 // import { registerObservabilityTool } from './tools/observability/register_tools';
@@ -38,11 +39,13 @@ export class CatchupAgentPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: CatchupAgentConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {
     // eslint-disable-next-line no-console
     console.log('[CATCHUP-AGENT] CatchupAgentPlugin constructor called');
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<CatchupAgentConfigType>();
     this.logger.info('CatchupAgentPlugin constructor called - plugin is being instantiated');
     // eslint-disable-next-line no-console
     console.log('[CATCHUP-AGENT] Logger obtained, plugin instance ready');
@@ -115,7 +118,7 @@ export class CatchupAgentPlugin
       actions: plugins.actions,
     };
     // Store services for tools to access
-    setPluginServices(core, pluginStart);
+    setPluginServices(core, pluginStart, this.config);
     return pluginStart;
   }
 

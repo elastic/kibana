@@ -7,16 +7,21 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CatchupAgentPluginStart } from '../types';
+import type { CatchupAgentPluginStart, CatchupAgentConfigType } from '../types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 let pluginServices: {
   core: CoreStart;
   plugin: CatchupAgentPluginStart;
+  config: CatchupAgentConfigType;
 } | null = null;
 
-export const setPluginServices = (core: CoreStart, plugin: CatchupAgentPluginStart) => {
-  pluginServices = { core, plugin };
+export const setPluginServices = (
+  core: CoreStart,
+  plugin: CatchupAgentPluginStart,
+  config: CatchupAgentConfigType
+) => {
+  pluginServices = { core, plugin, config };
 };
 
 export const getPluginServices = () => {
