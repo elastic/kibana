@@ -9,13 +9,13 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
+import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
 import { searchRequestBody, searchResponseBody } from './schemas';
 import { search } from './search';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
   const searchRoute = router.post({
-    path: PUBLIC_API_PATH,
+    path: '/api/dashboards/search',
     summary: `Search dashboards`,
     ...commonRouteConfig,
   });
