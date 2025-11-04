@@ -16,7 +16,6 @@ import type {
 } from '@kbn/core/server';
 import { typeA, typeB } from './saved_objects';
 import { registerSearchExampleRoutes } from './search_example_routes';
-import { setupData } from './saved_objects_data';
 
 export class SavedObjectsExamplePlugin implements Plugin {
   private readonly logger: Logger;
@@ -32,9 +31,7 @@ export class SavedObjectsExamplePlugin implements Plugin {
     registerSearchExampleRoutes(router, this.logger);
   }
 
-  public start(core: CoreStart) {
-    void setupData(core.savedObjects.getUnsafeInternalClient());
-  }
+  public start(core: CoreStart) {}
 
   public stop() {}
 }

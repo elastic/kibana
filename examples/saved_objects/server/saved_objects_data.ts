@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { TYPE_A, TYPE_B, type TypeAAttributes, type TypeBAttributes } from './saved_objects';
 
@@ -36,7 +37,9 @@ export const typeBData: ({ id: string } & TypeBAttributes)[] = [
   },
 ];
 
-export async function setupData(savedObjectsClient: SavedObjectsClientContract) {
+export const setupData = once(async function setupData(
+  savedObjectsClient: SavedObjectsClientContract
+) {
   await Promise.all([
     savedObjectsClient.bulkDelete(
       typeAData.map(({ id }) => ({
@@ -67,4 +70,4 @@ export async function setupData(savedObjectsClient: SavedObjectsClientContract) 
       }))
     ),
   ]);
-}
+});

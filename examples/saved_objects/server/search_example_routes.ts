@@ -11,6 +11,7 @@ import { AuthzDisabled } from '@kbn/core-security-server';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { TYPE_A, TYPE_B } from './saved_objects';
+import { setupData } from './saved_objects_data';
 
 export function registerSearchExampleRoutes(router: IRouter, log: Logger) {
   router.versioned
@@ -30,6 +31,7 @@ export function registerSearchExampleRoutes(router: IRouter, log: Logger) {
       async (ctx, req, res) => {
         log.info('Searching for saved objects');
         const core = await ctx.core;
+        await setupData(core.savedObjects.client);
         const savedObjectsClient = core.savedObjects.client;
         try {
           const result = await savedObjectsClient.search({
