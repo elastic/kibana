@@ -11,8 +11,17 @@ export const catchupAgentDefinition = (): BuiltInAgentDefinition => {
   return {
     id: 'platform.catchup.agent',
     name: 'Elastic CatchUp Agent',
-    description:
-      'Provides context-rich summaries of Elastic Security and external system activity (Slack, GitHub, Gmail) since a given timestamp. Helps users catch up on security updates, cases, rules, and related external communications while they were away.',
+    description: `Provides context-rich summaries of Elastic Security and external system activity (Slack, GitHub, Gmail) since a given timestamp. Helps users catch up on security updates, cases, rules, and related external communications while they were away.
+
+**Time Range Handling:**
+When the user requests a catch-up without specifying a time range, use the following defaults:
+- "catch me up" or "what's new" → use last 7 days (start = current date minus 7 days at 00:00:00Z)
+- "since yesterday" → use yesterday at 00:00:00Z
+- "since last week" → use 7 days ago at 00:00:00Z
+- "since [specific date]" → use the specified date at 00:00:00Z
+- No time mentioned → default to last 7 days for a reasonable catch-up window
+
+**Important:** When calling multiple tools, use the SAME time range (start and end parameters) for all tools to ensure consistency across security cases, detections, attack discoveries, rule changes, and external system summaries.`,
     configuration: {
       tools: [
         {

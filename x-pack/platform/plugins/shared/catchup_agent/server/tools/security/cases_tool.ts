@@ -10,8 +10,58 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
-import { getPluginServices } from '../../services/service_locator';
+import { getCaseViewPath } from '@kbn/cases-plugin/server/common/utils';
+import { getPluginServices, getSpaceId } from '../../services/service_locator';
 import { normalizeDateToCurrentYear } from '../utils/date_normalization';
+
+// Helper functions
+const parseAndValidateDate = (normalizedDateString: string, fieldName: string): Date => {
+  const date = new Date(normalizedDateString);
+  if (isNaN(date.getTime())) {
+    throw new Error(
+      `Invalid datetime format for ${fieldName}: ${normalizedDateString}. Expected ISO 8601 format.`
+    );
+  }
+  return date;
+};
+
+const getUsername = (user: any): string | null => {
+  return user?.username || null;
+};
+
+const getCaseTimestamp = (caseItem: any): number | null => {
+  const timestampValue = caseItem.updated_at ?? caseItem.created_at;
+  if (!timestampValue) return null;
+  const timestamp = new Date(timestampValue).getTime();
+  return isNaN(timestamp) ? null : timestamp;
+};
+
+const getAppRoute = (owner: string): string => {
+  const ownerToRoute: Record<string, string> = {
+    securitySolution: '/app/security/cases',
+    observability: '/app/observability/cases',
+  };
+  return ownerToRoute[owner] || '/app/management/insightsAndAlerting/cases';
+};
+
+const createEmptyResults = (
+  normalizedStart: string,
+  normalizedEnd: string | null,
+  message: string
+) => ({
+  results: [
+    {
+      type: ToolResultType.other,
+      data: {
+        cases: [],
+        total: 0,
+        start: normalizedStart,
+        end: normalizedEnd || null,
+        message,
+      },
+    },
+  ],
+});
 
 const casesSchema = z.object({
   start: z
@@ -35,109 +85,225 @@ export const casesTool = (): BuiltinToolDefinition<typeof casesSchema> => {
     
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get cases updated on November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
-Returns cases with id, title, status, owner, updated_by, and updated_at fields.`,
+Returns cases with detailed information including id, title, description, status, severity, tags, assignees, observables, total alerts/comments, and recent comments. Each case includes a URL for direct access.
+
+**IMPORTANT**: When presenting case results to the user, provide a short paragraph summary (2-3 sentences) describing the key details of each case, then include a clickable link to the case using the provided URL.`,
     schema: casesSchema,
     handler: async ({ start, end }, { request, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] Cases tool called with start: ${start}, end: ${end || 'now'}`);
-
-        // Normalize dates to current year if year is missing
+        // Normalize and validate dates
         const normalizedStart = normalizeDateToCurrentYear(start);
-        const startDate = new Date(normalizedStart);
-        if (isNaN(startDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
-        }
+        const startDate = parseAndValidateDate(normalizedStart, 'start');
 
         let endDate: Date | null = null;
         let normalizedEnd: string | null = null;
         if (end) {
           normalizedEnd = normalizeDateToCurrentYear(end);
-          endDate = new Date(normalizedEnd);
-          if (isNaN(endDate.getTime())) {
-            throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
-          }
+          endDate = parseAndValidateDate(normalizedEnd, 'end');
         }
 
-        const { plugin, core } = getPluginServices();
+        const { plugin } = getPluginServices();
 
         // Use Cases API to fetch cases updated since the given date
         if (!plugin.getCasesClient) {
-          logger.warn('Cases plugin not available, returning empty results');
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  cases: [],
-                  total: 0,
-                  since,
-                  message: 'Cases plugin not available',
-                },
-              },
-            ],
-          };
+          logger.warn('[CatchUp Agent] Cases plugin not available, returning empty results');
+          return createEmptyResults(normalizedStart, normalizedEnd, 'Cases plugin not available');
         }
 
         const casesClient = await plugin.getCasesClient(request);
 
-        // Search for cases updated after the 'since' date
-        // Cases API uses 'from' for created date, but we need updated date
-        // We'll fetch cases and filter by updatedAt client-side, or use sortField
-        const searchResult = await casesClient.cases.search({
+        // Use Cases API search
+        // Note: The 'from' and 'to' parameters filter by 'created_at', not 'updated_at'
+        // So we won't use them and will filter by updatedAt client-side instead
+        // We'll fetch multiple pages to ensure we get all cases that might have been updated
+        const searchParams: any = {
           sortField: 'updatedAt',
           sortOrder: 'desc',
-          perPage: 50,
+          perPage: 100, // Fetch 100 cases per page
           page: 1,
-        });
+        };
 
-        // Filter cases that were updated within the date range
+        // Fetch cases with pagination to ensure we get all cases
+        // Since we're filtering by updatedAt client-side, we need to fetch enough cases
+        // to cover the date range. We'll fetch pages until we've gone past the start date.
+        const allCases: any[] = [];
+        let currentPage = 1;
+        const maxPages = 10; // Limit to prevent infinite loops
+        let hasMorePages = true;
         const startTimestamp = startDate.getTime();
         const endTimestamp = endDate ? endDate.getTime() : null;
-        const filteredCases = searchResult.cases.filter((caseItem) => {
-          const updatedAt = new Date(caseItem.updatedAt ?? caseItem.updated_at ?? '').getTime();
-          const afterStart = updatedAt >= startTimestamp;
-          const beforeEnd = endTimestamp === null || updatedAt < endTimestamp;
-          return afterStart && beforeEnd;
+
+        while (hasMorePages && currentPage <= maxPages) {
+          searchParams.page = currentPage;
+          const searchResult = await casesClient.cases.search(searchParams);
+
+          if (searchResult.cases.length === 0) {
+            hasMorePages = false;
+            break;
+          }
+
+          // Filter cases by updatedAt date range
+          // Note: If a case has never been updated, updated_at will be null
+          // In that case, we should use created_at as the timestamp to check
+          const pageFilteredCases = searchResult.cases.filter((caseItem) => {
+            const timestamp = getCaseTimestamp(caseItem);
+
+            if (timestamp === null) {
+              logger.warn(
+                `[CatchUp Agent] Case ${caseItem.id} has no valid updated_at or created_at field`
+              );
+              return false;
+            }
+
+            return (
+              timestamp >= startTimestamp && (endTimestamp === null || timestamp < endTimestamp)
+            );
+          });
+
+          allCases.push(...pageFilteredCases);
+
+          // Check if we should continue fetching:
+          // - If we got fewer cases than perPage, we've reached the end
+          // - If the oldest case in this page is before our start date, we can stop
+          //   (since we're sorting by updatedAt desc)
+          if (searchResult.cases.length < searchParams.perPage) {
+            hasMorePages = false;
+          } else {
+            // Check if the last case in this page is before our start date
+            const lastCase = searchResult.cases[searchResult.cases.length - 1];
+            const lastCaseTimestamp = getCaseTimestamp(lastCase);
+            if (lastCaseTimestamp !== null && lastCaseTimestamp < startTimestamp) {
+              hasMorePages = false;
+            }
+          }
+
+          currentPage++;
+        }
+
+        // Fetch comments for each case in parallel
+        const casesWithComments = await Promise.all(
+          allCases.map(async (caseItem) => {
+            try {
+              // Fetch comments for this case
+              const commentsResponse = await casesClient.attachments.find({
+                caseID: caseItem.id,
+                findQueryParams: {
+                  page: 1,
+                  perPage: 10, // Limit to 10 most recent comments per case
+                  sortOrder: 'desc',
+                },
+              });
+
+              // The response has 'comments' field which is an array of Attachment objects
+              // Filter for user comments only and extract summaries
+              const commentSummaries = (commentsResponse.comments || [])
+                .filter((att: any) => att.type === 'user')
+                .slice(0, 5)
+                .map((comment: any) => ({
+                  id: comment.id,
+                  comment: comment.comment?.substring(0, 200) || '',
+                  created_by: getUsername(comment.createdBy || comment.created_by),
+                  created_at: comment.createdAt || comment.created_at || null,
+                }));
+
+              return {
+                case: caseItem,
+                comments: commentSummaries,
+                totalComments: commentsResponse.total || 0,
+              };
+            } catch (error) {
+              logger.warn(
+                `[CatchUp Agent] Failed to fetch comments for case ${caseItem.id}: ${error}`
+              );
+              return {
+                case: caseItem,
+                comments: [],
+                totalComments: 0,
+              };
+            }
+          })
+        );
+
+        // Get core services and space ID for generating case URLs
+        const { core } = getPluginServices();
+        const spaceId = getSpaceId(request);
+        const publicBaseUrl = core.http.basePath.publicBaseUrl;
+        const serverBasePath = core.http.basePath.serverBasePath;
+
+        // Helper function to construct case URL
+        const getCaseUrl = (caseId: string, owner: string): string | null => {
+          try {
+            // First try using publicBaseUrl if configured
+            if (publicBaseUrl) {
+              return getCaseViewPath({
+                publicBaseUrl,
+                spaceId,
+                caseId,
+                owner,
+              });
+            }
+
+            // Fallback: construct URL from request
+            // Get protocol and host from request headers
+            const protocol = request.headers['x-forwarded-proto'] || 'http';
+            const host = request.headers.host || 'localhost:5601';
+
+            // Build base URL
+            const baseUrl = `${protocol}://${host}`;
+
+            // Determine app route based on owner
+            const appRoute = getAppRoute(owner);
+
+            // Add space prefix if not default space
+            const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+            const casePath = `${spacePrefix}${serverBasePath}${appRoute}/${caseId}`;
+            const fullUrl = `${baseUrl}${casePath}`;
+
+            return fullUrl;
+          } catch (error) {
+            logger.warn(`[CatchUp Agent] Failed to generate URL for case ${caseId}: ${error}`);
+            return null;
+          }
+        };
+
+        // Format cases data with rich details, including URLs
+        const casesData = casesWithComments.map(({ case: caseItem, comments, totalComments }) => {
+          // Generate case URL
+          const caseUrl = getCaseUrl(caseItem.id, caseItem.owner);
+
+          return {
+            id: caseItem.id,
+            title: caseItem.title,
+            description: caseItem.description || null,
+            status: caseItem.status,
+            severity: caseItem.severity || null,
+            owner: caseItem.owner,
+            tags: caseItem.tags || [],
+            assignees: caseItem.assignees?.map((a: any) => a.uid || a.username || a) || [],
+            observables_count: caseItem.total_observables ?? caseItem.observables?.length ?? 0,
+            observables: (caseItem.observables || []).slice(0, 5).map((obs: any) => ({
+              type: obs.typeKey || obs.type || null,
+              value: obs.value || null,
+            })),
+            total_alerts: caseItem.totalAlerts || 0,
+            total_comments: totalComments,
+            created_by: getUsername(caseItem.createdBy || caseItem.created_by),
+            created_at: caseItem.created_at || null,
+            updated_by: getUsername(caseItem.updatedBy || caseItem.updated_by),
+            updated_at: caseItem.updated_at || caseItem.created_at || null,
+            comments_summary: comments,
+            url: caseUrl,
+          };
         });
 
-        // Format cases data
-        const casesData = filteredCases.map((caseItem) => ({
-          id: caseItem.id,
-          title: caseItem.title,
-          status: caseItem.status,
-          owner: caseItem.owner,
-          updated_by: caseItem.updatedBy?.username || caseItem.updated_by || null,
-          updated_at: caseItem.updatedAt || caseItem.updated_at || null,
-        }));
-
+        // Return detailed case information
         return {
           results: [
-            {
-              type: ToolResultType.tabularData,
-              data: {
-                source: 'cases_api',
-                columns: [
-                  { name: 'id', type: 'keyword' },
-                  { name: 'title', type: 'keyword' },
-                  { name: 'status', type: 'keyword' },
-                  { name: 'owner', type: 'keyword' },
-                  { name: 'updated_by', type: 'keyword' },
-                  { name: 'updated_at', type: 'date' },
-                ],
-                values: casesData.map((c) => [
-                  c.id,
-                  c.title,
-                  c.status,
-                  c.owner,
-                  c.updated_by,
-                  c.updated_at,
-                ]),
-              },
-            },
             {
               type: ToolResultType.other,
               data: {
                 total: casesData.length,
+                cases: casesData,
                 start: normalizedStart,
                 end: normalizedEnd || null,
               },
