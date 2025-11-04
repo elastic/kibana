@@ -14,7 +14,12 @@ import { URL } from 'url';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Mutex } from 'async-mutex';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { ScoutTestConfig, KibanaRole, ElasticsearchRoleDescriptor, ScoutPage } from '@kbn/scout';
+import type {
+  ScoutTestConfig,
+  KibanaRole,
+  ElasticsearchRoleDescriptor,
+  ScoutPage,
+} from '@kbn/scout';
 import type { SamlSessionManager, HostOptions } from '@kbn/test';
 import {
   SamlSessionManager as SamlSessionManagerClass,
@@ -49,7 +54,9 @@ function createKibanaUrlHelper(baseUrl: URL) {
       const spacePath = options?.space ? `s/${options.space}` : '';
       const appPath = `${spacePath}/app/${appName}`;
       const fullPath = options?.pathOptions?.path
-        ? `${appPath}${options.pathOptions.path.startsWith('/') ? '' : '/'}${options.pathOptions.path}`
+        ? `${appPath}${options.pathOptions.path.startsWith('/') ? '' : '/'}${
+            options.pathOptions.path
+          }`
         : appPath;
       return new URL(fullPath, baseUrl).href;
     },
@@ -63,7 +70,10 @@ function createKibanaUrlHelper(baseUrl: URL) {
  * Extend Playwright Page with Scout functionality
  * This replicates Scout's extendPlaywrightPage function for MCP usage
  */
-function extendPageWithScoutHelpers(page: Page, kbnUrl: ReturnType<typeof createKibanaUrlHelper>): ScoutPage {
+function extendPageWithScoutHelpers(
+  page: Page,
+  kbnUrl: ReturnType<typeof createKibanaUrlHelper>
+): ScoutPage {
   const scoutPage = page as ScoutPage;
 
   // Helper to create testSubj methods
@@ -110,7 +120,10 @@ function extendPageWithScoutHelpers(page: Page, kbnUrl: ReturnType<typeof create
   };
 
   // Add gotoApp method - matches Scout's signature
-  scoutPage.gotoApp = (appName: string, pathOptions?: { params?: Record<string, string>; hash?: string }) => {
+  scoutPage.gotoApp = (
+    appName: string,
+    pathOptions?: { params?: Record<string, string>; hash?: string }
+  ) => {
     return page.goto(kbnUrl.app(appName, { pathOptions }));
   };
 
@@ -122,11 +135,7 @@ function extendPageWithScoutHelpers(page: Page, kbnUrl: ReturnType<typeof create
   };
 
   // Add keyTo method (simplified - could be enhanced)
-  scoutPage.keyTo = async (
-    selector: string,
-    key: string,
-    maxElementsToTraverse: number = 1000
-  ) => {
+  scoutPage.keyTo = async (selector: string, key: string, maxElementsToTraverse: number = 1000) => {
     // Simplified implementation - Scout has a more complex version
     const locator = page.locator(selector);
     let attempts = 0;
