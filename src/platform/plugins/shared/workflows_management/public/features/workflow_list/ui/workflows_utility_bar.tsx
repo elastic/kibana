@@ -53,6 +53,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
     selectedWorkflows,
     onAction: closePopover,
     onActionSuccess,
+    deselectWorkflows,
   });
 
   const showBulkActions = selectedWorkflows.length > 0;

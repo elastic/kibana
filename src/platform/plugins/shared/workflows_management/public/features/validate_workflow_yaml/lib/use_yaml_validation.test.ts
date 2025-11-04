@@ -12,8 +12,10 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { useYamlValidation } from './use_yaml_validation';
+import { createStartServicesMock } from '../../../mocks';
+import { selectDetailState } from '../../../widgets/workflow_yaml_editor/lib/store';
 import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
-import { createWorkflowEditorStore } from '../../../widgets/workflow_yaml_editor/lib/store/store';
+import { createWorkflowDetailStore } from '../../../widgets/workflow_yaml_editor/lib/store/store';
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
@@ -72,7 +74,7 @@ const renderHookWithProviders = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   yamlContent: string
 ) => {
-  const store = createWorkflowEditorStore();
+  const store = createWorkflowDetailStore(createStartServicesMock());
 
   // Set the YAML content which will trigger computation via middleware
   store.dispatch(setYamlString(yamlContent));
@@ -124,12 +126,12 @@ steps:
     // Wait for the Redux state to have computed data
     await waitFor(
       () => {
-        const state = store.getState();
+        const state = selectDetailState(store.getState());
         // Debug: log the state to understand what's happening
         // console.log('Redux state:', JSON.stringify(state, null, 2));
-        expect(state.workflow.computed).toBeDefined();
-        expect(state.workflow.computed?.yamlDocument).toBeDefined();
-        expect(state.workflow.computed?.workflowDefinition).toBeDefined();
+        expect(state.computed).toBeDefined();
+        expect(state.computed?.yamlDocument).toBeDefined();
+        expect(state.computed?.workflowDefinition).toBeDefined();
       },
       { timeout: 2000 }
     );

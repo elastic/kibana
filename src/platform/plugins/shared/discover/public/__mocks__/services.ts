@@ -150,7 +150,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   };
 
   const { profilesManagerMock } = createContextAwarenessMocks();
-  const theme = themeServiceMock.createSetupContract({ darkMode: false, name: 'amsterdam' });
+  const theme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
@@ -266,7 +266,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
-    discoverShared: discoverSharedPluginMock.createStartContract().features,
+    discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {
       getTabsEnabled: () => true,
     },

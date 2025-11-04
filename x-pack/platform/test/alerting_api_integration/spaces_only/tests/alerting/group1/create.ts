@@ -11,10 +11,8 @@ import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import {
-  MAX_ARTIFACTS_DASHBOARDS_LENGTH,
-  MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH,
-} from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { MAX_ARTIFACTS_DASHBOARDS_LENGTH } from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';

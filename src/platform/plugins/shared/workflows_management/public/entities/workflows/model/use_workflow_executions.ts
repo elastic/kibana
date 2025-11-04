@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query';
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
