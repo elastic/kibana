@@ -203,7 +203,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     (action) => {
       switch (action.type) {
         case 'addProcessor':
-          setMode({ id: 'creatingProcessor', arg: { selector: action.payload.target } });
+          setMode({
+            id: 'creatingProcessor',
+            arg: { selector: action.payload.target, buttonRef: action.payload.buttonRef },
+          });
           break;
         case 'move':
           setMode({ id: 'idle' });
@@ -263,6 +266,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
         <ProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
           processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
+          buttonRef={mode.arg.buttonRef}
           onOpen={onFlyoutOpen}
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
