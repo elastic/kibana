@@ -8,7 +8,7 @@
 import Ajv, { type ValidateFunction } from 'ajv';
 import { compact, keyBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import { createFunctionArgsValidationError } from '../../../common/conversation_complete';
+import { createToolValidationError } from '@kbn/inference-plugin/common/chat_complete/errors';
 import { type FunctionResponse } from '../../../common/functions/types';
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
@@ -65,7 +65,12 @@ export class ChatFunctionClient {
 
     const result = validator(parameters);
     if (!result) {
-      throw createFunctionArgsValidationError(validator.errors!);
+      throw createToolValidationError(`Tool call arguments for ${name} were invalid`, {
+        name,
+        errorsText: validator.errors?.map((error) => error.message).join(', '),
+        arguments: JSON.stringify(parameters),
+        toolCalls: [],
+      });
     }
   }
 

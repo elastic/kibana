@@ -27,6 +27,7 @@ import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_compl
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { isToolValidationError } from '@kbn/inference-common';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ToolCallEvent } from '../../../analytics/tool_call';
 import { toolCallEventType } from '../../../analytics/tool_call';
@@ -37,10 +38,7 @@ import {
   StreamingChatResponseEventType,
 } from '../../../../common';
 import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
-import {
-  createFunctionLimitExceededError,
-  isFunctionArgsValidationError,
-} from '../../../../common/conversation_complete';
+import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
 import type { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
@@ -115,11 +113,11 @@ export function executeFunctionAndCatchError({
         span?.recordException(error);
         logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
 
-        if (isFunctionArgsValidationError(error)) {
+        if (isToolValidationError(error)) {
           return of(
             createFunctionResponseMessage({
               name,
-              content: { message: error.message, errors: error.meta.errors },
+              content: { message: error.message, errors: error.meta },
             })
           );
         }
