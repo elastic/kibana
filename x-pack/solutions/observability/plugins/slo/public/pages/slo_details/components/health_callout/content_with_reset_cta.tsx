@@ -17,7 +17,7 @@ export function ContentWithResetCta({
   textSize: 's' | 'xs';
   content: string;
   handleReset: () => void;
-}) {
+}): React.ReactElement {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
