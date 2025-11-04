@@ -13,9 +13,28 @@ paths:
       tags:
         - KnowledgeBase API
       parameters:
-        - $ref: '#/components/parameters/KnowledgeBaseResource'
-        - $ref: '#/components/parameters/KnowledgeBaseModelId'
-        - $ref: '#/components/parameters/KnowledgeBaseIgnoreLabs'
+        - name: resource
+          in: path
+          description: The KnowledgeBase `resource` value.
+          schema:
+            type: string
+          example: "kb12345"
+          required: true
+        - name: modelId
+          in: query
+          description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+          required: false
+          schema:
+            type: string
+          example: "elser-model-001"
+        - name: ignoreSecurityLabs
+          in: query
+          description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+          required: false
+          schema:
+            type: boolean
+            default: false
+          example: true
       responses:
         200:
           description: Indicates a successful call.
@@ -38,7 +57,13 @@ paths:
       tags:
         - KnowledgeBase API
       parameters:
-        - $ref: '#/components/parameters/KnowledgeBaseResource'
+        - name: resource
+          in: path
+          description: The KnowledgeBase `resource` value.
+          schema:
+            type: string
+          example: "kb12345"
+          required: true
       responses:
         200:
           description: Indicates a successful call.
@@ -62,8 +87,21 @@ paths:
       tags:
         - KnowledgeBase API
       parameters:
-        - $ref: '#/components/parameters/KnowledgeBaseModelId'
-        - $ref: '#/components/parameters/KnowledgeBaseIgnoreLabs'
+        - name: modelId
+          in: query
+          description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+          required: false
+          schema:
+            type: string
+          example: "elser-model-001"
+        - name: ignoreSecurityLabs
+          in: query
+          description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+          required: false
+          schema:
+            type: boolean
+            default: false
+          example: true
       responses:
         200:
           description: Indicates a successful call.
@@ -154,29 +192,4 @@ components:
           type: string
           description: The status of the product documentation in the KnowledgeBase.
           example: "complete"
-  parameters:
-    KnowledgeBaseResource:
-      name: resource
-      in: path
-      description: The KnowledgeBase `resource` value.
-      schema:
-        type: string
-      example: "kb12345"
-      required: true
-    KnowledgeBaseModelId:
-      name: modelId
-      in: query
-      description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
-      required: false
-      schema:
-        type: string
-      example: "elser-model-001"
-    KnowledgeBaseIgnoreLabs:
-      name: ignoreSecurityLabs
-      in: query
-      description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
-      required: false
-      schema:
-        type: boolean
-        default: false
-      example: true
+
