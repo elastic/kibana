@@ -677,12 +677,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           it('conversation has the correct messages', () => {
             expect(fullConversation.messages.length).to.be(6);
+            // user prompt
             expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
+            // context function call
             expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
+            // context function response
             expect(fullConversation.messages[2].message.name).to.be('context');
+            // unknown tool function call
             expect(fullConversation.messages[3].message.function_call?.name).to.be('unknown_tool');
+            // unknown tool function response with error message
             expect(fullConversation.messages[4].message.name).to.contain('unknown_tool');
             expect(fullConversation.messages[4].message.content).to.contain('toolNotFoundError');
+            // interaction with the LLM to fix the error
             expect(fullConversation.messages[5].message.content).to.be(
               'Hello from LLM Proxy, again!'
             );
@@ -797,14 +803,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           it('conversation has the correct messages', () => {
             expect(fullConversation.messages.length).to.be(6);
+            // user prompt
             expect(fullConversation.messages[0].message.content).to.be('user prompt test spec');
+            // context function call
             expect(fullConversation.messages[1].message.function_call?.name).to.be('context');
+            // context function response
             expect(fullConversation.messages[2].message.name).to.be('context');
+            // kibana function call
             expect(fullConversation.messages[3].message.function_call?.name).to.be('kibana');
+            // kibana function response with error message
             expect(fullConversation.messages[4].message.name).to.contain('kibana');
             expect(fullConversation.messages[4].message.content).to.contain(
               'Function arguments are invalid'
             );
+            // interaction with the LLM to fix the error
             expect(fullConversation.messages[5].message.content).to.be(
               'Hello from LLM Proxy, again!'
             );

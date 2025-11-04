@@ -190,6 +190,7 @@ export function isTokenLimitReachedError(
 export function isChatCompletionError(error: Error): error is ChatCompletionError<any> {
   return error instanceof ChatCompletionError;
 }
+
 export function createFunctionArgsValidationError(errors: ErrorObject[]) {
   return new ChatCompletionError(
     ChatCompletionErrorCode.FunctionArgsValidationError,
