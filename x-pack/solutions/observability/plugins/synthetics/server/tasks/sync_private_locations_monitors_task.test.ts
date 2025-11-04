@@ -273,7 +273,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasAnyDataChanged({
         taskState: taskState as any,
         soClient: mockSoClient as any,
-        lastStartedAt: expect.anything(),
+        lastStartedAt: new Date().toISOString(),
       });
 
       expect(res.hasDataChanged).toBe(true);
@@ -292,7 +292,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasAnyDataChanged({
         taskState: { lastTotalParams: 1, lastTotalMWs: 1 } as any,
         soClient: mockSoClient as any,
-        lastStartedAt: expect.anything(),
+        lastStartedAt: new Date().toISOString(),
       });
 
       expect(res.hasDataChanged).toBe(true);
@@ -311,7 +311,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasAnyDataChanged({
         taskState: taskState as any,
         soClient: mockSoClient as any,
-        lastStartedAt: expect.anything(),
+        lastStartedAt: new Date().toISOString(),
       });
 
       expect(res.hasDataChanged).toBe(false);
