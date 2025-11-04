@@ -170,7 +170,7 @@ export const getCloudFormationDefaultValue = (
   return cloudFormationTemplate;
 };
 
-const getDefaultAwsCredentialConfig = ({
+export const getDefaultAwsCredentialConfig = ({
   isAgentless,
   showCloudConnectors,
   packageInfo,
@@ -202,12 +202,10 @@ const getDefaultAwsCredentialConfig = ({
       value: credentialsType,
       type: 'text',
     },
-    ...(showCloudConnectors && {
-      'aws.supports_cloud_connectors': {
-        value: showCloudConnectors,
-        type: 'bool',
-      },
-    }),
+    'aws.supports_cloud_connectors': {
+      value: showCloudConnectors,
+      type: 'bool',
+    },
   };
 
   return config;
@@ -243,14 +241,12 @@ export const getDefaultCloudCredentialsType = (
         type: 'text',
       },
     },
-    azure: {
-      'azure.credentials.type': {
-        value: isAgentless
-          ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
-          : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
-        type: 'text',
-      },
-    },
+    azure: getDefaultAzureCredentialsConfig(
+      packageInfo,
+      templateName,
+      isAgentless,
+      showCloudConnectors
+    ),
   };
 
   return credentialsTypes[provider];
@@ -376,10 +372,10 @@ export const getInputHiddenVars = (
         templateName,
       });
     case AZURE_PROVIDER:
-      return getDefaultAzureCredentialsType(
+      return getDefaultAzureCredentialsConfig(
         packageInfo,
         templateName,
-        setupTechnology,
+        setupTechnology === SetupTechnology.AGENTLESS,
         showCloudConnectors
       );
     case GCP_PROVIDER:
@@ -433,10 +429,10 @@ export const getArmTemplateUrlFromPackage = (
   return armTemplateUrl;
 };
 
-export const getDefaultAzureCredentialsType = (
+export const getDefaultAzureCredentialsConfig = (
   packageInfo: PackageInfo,
   templateName: string,
-  setupTechnology: SetupTechnology,
+  isAgentless: boolean,
   showCloudConnectors: boolean
 ): {
   [key: string]: {
@@ -444,7 +440,6 @@ export const getDefaultAzureCredentialsType = (
     type: 'text' | 'bool';
   };
 } => {
-  const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
   const hasArmTemplateUrl = !!getArmTemplateUrlFromPackage(packageInfo, templateName);
 
   let credentialType: AzureCredentialsType = AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
@@ -467,12 +462,10 @@ export const getDefaultAzureCredentialsType = (
       value: credentialType,
       type: 'text',
     },
-    ...(showCloudConnectors && {
-      'azure.supports_cloud_connectors': {
-        value: showCloudConnectors,
-        type: 'bool',
-      },
-    }),
+    'azure.supports_cloud_connectors': {
+      value: showCloudConnectors,
+      type: 'bool',
+    },
   };
 
   return config;
