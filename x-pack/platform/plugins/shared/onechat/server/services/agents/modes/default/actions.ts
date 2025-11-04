@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// research phase actions
-
+import type { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
 import type { ToolCall, ToolCallResult } from '@kbn/onechat-genai-utils/langchain';
 
 export enum AgentActionType {
@@ -17,9 +16,12 @@ export enum AgentActionType {
   Answer = 'answer',
 }
 
+// research phase actions
+
 export interface AgentErrorAction {
   type: AgentActionType.Error;
-  error: Error;
+  err_code: AgentExecutionErrorCode;
+  err_message: string;
 }
 
 export interface ToolCallAction {
@@ -81,10 +83,14 @@ export function isAnswerAction(action: AgentAction): action is AnswerAction {
 
 // creation helpers
 
-export function createAgentErrorAction(error: Error): AgentErrorAction {
+export function createAgentErrorAction(
+  code: AgentExecutionErrorCode,
+  message: string
+): AgentErrorAction {
   return {
     type: AgentActionType.Error,
-    error,
+    err_code: code,
+    err_message: message,
   };
 }
 

@@ -25,6 +25,11 @@ export const StateAnnotation = Annotation.Root({
     reducer: (a, b) => b,
     default: () => 0,
   }),
+  // counter to keep track of the number of successive errors
+  errorCount: Annotation<number>({
+    reducer: (a, b) => b,
+    default: () => 0,
+  }),
   maxCycleReached: Annotation<boolean>(),
   mainActions: Annotation<ResearchAgentAction[]>({
     reducer: (a, b) => [...a, ...b],

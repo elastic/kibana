@@ -12,9 +12,11 @@ import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
+import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
 import type { ResolvedConfiguration } from '../types';
+import { categorizeError, isRecoverableErrorCode, createExecutionError } from '../utils/errors';
 import { getActPrompt, getAnswerPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
@@ -25,7 +27,15 @@ import {
   processToolNodeResponse,
   processAnswerResponse,
 } from './action_utils';
-import { isToolCallAction, isHandoverAction, isAgentErrorAction, isAnswerAction } from './actions';
+import {
+  isToolCallAction,
+  isHandoverAction,
+  isAgentErrorAction,
+  isAnswerAction,
+  createAgentErrorAction,
+} from './actions';
+
+const MAX_ERROR_COUNT = 3;
 
 export const createAgentGraph = ({
   chatModel,
@@ -49,7 +59,7 @@ export const createAgentGraph = ({
   });
 
   const researchAgent = async (state: StateType) => {
-    if (state.mainActions.length === 0) {
+    if (state.mainActions.length === 0 && state.errorCount === 0) {
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
     try {
@@ -65,38 +75,45 @@ export const createAgentGraph = ({
       const action = processResearchResponse(response);
 
       return {
-        currentCycle: state.currentCycle + 1,
         mainActions: [action],
+        currentCycle: state.currentCycle + 1,
+        errorCount: 0,
       };
     } catch (error) {
-      // TODO: handle this and add an error action
-      console.log('********');
-      console.log(error.code);
-      console.log(error.status);
-      console.log(error.message);
-      console.log(error.meta);
-      console.log('******');
-      //
-      throw error;
+      const errorCode = categorizeError(error);
+      if (isRecoverableErrorCode(errorCode)) {
+        return {
+          mainActions: [createAgentErrorAction(errorCode, error.message)],
+          errorCount: state.errorCount + 1,
+        };
+      } else {
+        throw createExecutionError(errorCode, error.message);
+      }
     }
   };
 
-  const shouldContinue = async (state: StateType) => {
+  const researchAgentEdge = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
 
-    const isToolCall = isToolCallAction(lastAction);
-    const isHandover = isHandoverAction(lastAction);
-    const isAgentError = isAgentErrorAction(lastAction);
-    const maxCycleReached = state.currentCycle > state.cycleLimit;
-
-    // TODO: handle error actions
-
-    if (isToolCall && !maxCycleReached) {
-      return steps.executeTool;
-    } else {
+    if (isAgentErrorAction(lastAction)) {
+      if (state.errorCount < MAX_ERROR_COUNT) {
+        return steps.researchAgent;
+      } else {
+        // max error count reached, stop execution by throwing
+        throw createExecutionError(lastAction.err_code, lastAction.err_message);
+      }
+    } else if (isToolCallAction(lastAction)) {
+      const maxCycleReached = state.currentCycle > state.cycleLimit;
+      if (maxCycleReached) {
+        return steps.prepareToAnswer;
+      } else {
+        return steps.executeTool;
+      }
+    } else if (isHandoverAction(lastAction)) {
       return steps.prepareToAnswer;
     }
-    //
+
+    throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
   };
 
   const executeTool = async (state: StateType) => {
@@ -144,16 +161,37 @@ export const createAgentGraph = ({
 
       return {
         answerActions: [action],
+        errorCount: 0,
       };
     } catch (error) {
-      console.log('********');
-      console.log(error.status);
-      console.log(error.message);
-      console.log(error.meta);
-      console.log('******');
-
-      throw error;
+      const errorCode = categorizeError(error);
+      if (isRecoverableErrorCode(errorCode)) {
+        return {
+          answerActions: [createAgentErrorAction(errorCode, error.message)],
+          errorCount: state.errorCount + 1,
+        };
+      } else {
+        throw createExecutionError(errorCode, error.message);
+      }
     }
+  };
+
+  const answerAgentEdge = async (state: StateType) => {
+    const lastAction = state.answerActions[state.answerActions.length - 1];
+
+    if (isAgentErrorAction(lastAction)) {
+      if (state.errorCount < MAX_ERROR_COUNT) {
+        return steps.researchAgent;
+      } else {
+        // max error count reached, stop execution by throwing
+        throw createExecutionError(lastAction.err_code, lastAction.err_message);
+      }
+    } else if (isAnswerAction(lastAction)) {
+      return steps.finalize;
+    }
+
+    // @ts-expect-error - lastAction.type is never because we cover all use cases.
+    throw invalidState(`[answerAgentEdge] last action type was ${lastAction.type}}`);
   };
 
   const finalize = async (state: StateType) => {
@@ -163,10 +201,7 @@ export const createAgentGraph = ({
         finalAnswer: answerAction.message,
       };
     } else {
-      return {
-        // TODO: throw probably
-        finalAnswer: '',
-      };
+      throw invalidState(`[finalize] expect answer action, got ${answerAction.type} instead.`);
     }
   };
 
@@ -181,14 +216,23 @@ export const createAgentGraph = ({
     // edges
     .addEdge(_START_, steps.researchAgent)
     .addEdge(steps.executeTool, steps.researchAgent)
-    .addConditionalEdges(steps.researchAgent, shouldContinue, {
+    .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
+      [steps.researchAgent]: steps.researchAgent,
       [steps.executeTool]: steps.executeTool,
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
     .addEdge(steps.answerAgent, steps.finalize)
+    .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
+      [steps.answerAgent]: steps.answerAgent,
+      [steps.finalize]: steps.finalize,
+    })
     .addEdge(steps.finalize, _END_)
     .compile();
 
   return graph;
+};
+
+const invalidState = (message: string) => {
+  return createExecutionError(ErrCodes.invalidState, message);
 };

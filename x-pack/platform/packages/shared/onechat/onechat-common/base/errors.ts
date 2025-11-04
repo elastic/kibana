@@ -6,6 +6,7 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
+import type { AgentExecutionErrorCode } from '../agents/execution_errors';
 
 /**
  * Code to identify onechat errors
@@ -16,6 +17,7 @@ export enum OnechatErrorCode {
   toolNotFound = 'toolNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
+  agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
 }
 
@@ -187,6 +189,28 @@ export const createRequestAbortedError = (
 };
 
 /**
+ * Represents an error related to agent execution
+ */
+export type OnechatAgentExecutionError = OnechatError<
+  OnechatErrorCode.agentExecutionError,
+  { code: AgentExecutionErrorCode }
+>;
+
+/**
+ * Checks if the given error is a {@link OnechatInternalError}
+ */
+export const isAgentExecutionError = (err: unknown): err is OnechatAgentExecutionError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.agentExecutionError;
+};
+
+export const createAgentExecutionError = (
+  message: string,
+  meta: { code: AgentExecutionErrorCode }
+): OnechatAgentExecutionError => {
+  return new OnechatError(OnechatErrorCode.agentExecutionError, message, meta ?? {});
+};
+
+/**
  * Global utility exposing all error utilities from a single export.
  */
 export const OnechatErrorUtils = {
@@ -195,8 +219,10 @@ export const OnechatErrorUtils = {
   isToolNotFoundError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isAgentExecutionError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createAgentExecutionError,
 };
