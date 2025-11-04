@@ -293,7 +293,7 @@ export class MonitorConfigRepository {
     return combineAndSortSavedObjects<T>(results, options, page, perPage);
   }
 
-  async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
+  async findDecryptedMonitors({ spaceIds, filter }: { spaceIds: string[]; filter?: string }) {
     const getDecrypted = async (soType: string) => {
       // Handle legacy filter if the type is legacy
       const legacyFilter =
@@ -304,7 +304,7 @@ export class MonitorConfigRepository {
             filter: legacyFilter,
             type: soType,
             perPage: 500,
-            namespaces: [spaceId],
+            namespaces: spaceIds,
           }
         );
 

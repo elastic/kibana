@@ -61,6 +61,11 @@ export class DeployPrivateLocationMonitors {
       });
 
     return this.serverSetup.fleet.runWithCache(async () => {
+      this.debugLog(
+        `Starting sync of private location monitors for spaces: ${Array.from(monitorSpaceIds).join(
+          ', '
+        )}`
+      );
       for (const spaceId of monitorSpaceIds) {
         const privateConfigs: Array<{
           config: HeartbeatConfig;
@@ -114,7 +119,7 @@ export class DeployPrivateLocationMonitors {
     );
 
     const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({
-      spaceId: ALL_SPACES_ID,
+      spaceIds,
     });
 
     const [paramsBySpace, monitors, maintenanceWindows] = await Promise.all([
