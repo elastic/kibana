@@ -226,6 +226,26 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
 
+  const JEST_UNIT_MAX_MINUTES = process.env.JEST_UNIT_MAX_MINUTES
+    ? parseFloat(process.env.JEST_UNIT_MAX_MINUTES)
+    : !process.env.JEST_MAX_MINUTES
+    ? (process.env.JEST_MAX_PARALLEL ?? 3 * 40)
+    : JEST_MAX_MINUTES;
+  if (Number.isNaN(JEST_UNIT_MAX_MINUTES)) {
+    throw new Error(`invalid JEST_UNIT_MAX_MINUTES: ${process.env.JEST_UNIT_MAX_MINUTES}`);
+  }
+
+  const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
+    ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
+    : !process.env.JEST_MAX_MINUTES
+    ? (process.env.JEST_MAX_PARALLEL ?? 1 * 40)
+    : JEST_MAX_MINUTES;
+  if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
+    throw new Error(
+      `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
+    );
+  }
+
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
     ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
     : 37;
@@ -407,14 +427,14 @@ export async function pickTestGroupRunOrder() {
       {
         type: UNIT_TYPE,
         defaultMin: 4,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_UNIT_MAX_MINUTES,
         overheadMin: 0.2,
         names: jestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
         defaultMin: 60,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_INTEGRATION_MAX_MINUTES,
         overheadMin: 0.2,
         names: jestIntegrationConfigs,
       },
