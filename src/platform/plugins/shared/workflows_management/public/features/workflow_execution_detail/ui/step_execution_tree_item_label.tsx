@@ -18,7 +18,7 @@ import { getStatusLabel } from '../../../shared/translations';
 
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;
-  status: ExecutionStatus | null;
+  status?: ExecutionStatus;
   executionIndex: number;
   executionTimeMs: number | null;
   stepType: string;
@@ -87,9 +87,11 @@ const componentStyles = {
     whiteSpace: 'nowrap',
     textAlign: 'left',
   }),
-  selectedStepName: css({
-    fontWeight: 'bold',
-  }),
+  selectedStepName: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: 'bold',
+      color: euiTheme.colors.textPrimary,
+    }),
   dangerousStepName: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.danger,

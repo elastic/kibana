@@ -29,7 +29,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
+import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
@@ -40,26 +40,25 @@ function convertTreeToEuiTreeViewItems(
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
   euiTheme: EuiThemeComputed,
   selectedId: string | null,
-  onClickHandler: (stepExecutionId: string) => void
+  onSelectStepExecution: (stepExecutionId: string) => void
 ): EuiTreeViewProps['items'] {
-  const onClickFn = onClickHandler;
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
-    const status = stepExecution?.status || null;
+    const status = stepExecution?.status;
     const selected = selectedId === stepExecution?.id;
 
-    const selectStepExecution = (e: React.MouseEvent<HTMLDivElement>) => {
+    const selectStepExecution: React.MouseEventHandler = (e) => {
       // Prevent the click event from bubbling up to the tree view item so that the tree view item is not expanded/collapsed when selected
       e.preventDefault();
       e.stopPropagation();
       if (stepExecution?.id) {
-        onClickFn(stepExecution.id);
+        onSelectStepExecution(stepExecution.id);
       }
     };
 
     return {
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      css: getStatusCss(euiTheme, selected),
+      css: getStatusCss({ status, selected }, euiTheme),
       icon: (
         <StepIcon stepType={item.stepType} executionStatus={status} onClick={selectStepExecution} />
       ),
@@ -81,18 +80,18 @@ function convertTreeToEuiTreeViewItems(
               stepExecutionMap,
               euiTheme,
               selectedId,
-              onClickFn
+              onSelectStepExecution
             )
           : undefined,
       callback:
         // collapse/expand the tree view item when the button is clicked
-        (e: React.MouseEvent<HTMLDivElement>) => {
+        () => {
           let toOpen = item.stepExecutionId;
           if (!toOpen && item.children.length) {
             toOpen = item.children[0].stepExecutionId;
           }
-          if (!toOpen) {
-            selectStepExecution(e);
+          if (toOpen) {
+            onSelectStepExecution(toOpen);
           }
           return toOpen ?? '';
         },
@@ -292,23 +291,32 @@ const componentStyles = {
   `,
 };
 
-const getStatusCss = (euiTheme: EuiThemeComputed, selected: boolean = false) => {
-  const backgroundLightPrimary = euiTheme.colors.backgroundLightPrimary;
+const getStatusCss = (
+  { status, selected }: { status?: ExecutionStatus; selected?: boolean },
+  euiTheme: EuiThemeComputed
+) => {
+  if (!status) {
+    return;
+  }
+  let background = euiTheme.colors.backgroundLightPrimary;
+  if (isDangerousStatus(status)) {
+    background = euiTheme.colors.backgroundBaseDanger;
+  }
+
   if (selected) {
     return css`
       &,
       &:active,
       &:focus,
       &:hover {
-        background-color: ${backgroundLightPrimary};
-        color: ${euiTheme.colors.textPrimary};
+        background-color: ${background};
       }
     `;
   }
 
   return css`
     &:hover {
-      background-color: ${transparentize(backgroundLightPrimary, 0.4)};
+      background-color: ${transparentize(background, 0.4)};
     }
   `;
 };

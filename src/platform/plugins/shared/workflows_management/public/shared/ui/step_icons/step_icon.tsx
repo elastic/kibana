@@ -17,11 +17,11 @@ import { getExecutionStatusColors } from '../status_badge';
 
 export function StepIcon({
   stepType,
-  executionStatus,
+  executionStatus = null,
   onClick,
 }: {
   stepType: string;
-  executionStatus: ExecutionStatus | null;
+  executionStatus?: ExecutionStatus | null;
   onClick?: React.MouseEventHandler;
 }) {
   const { euiTheme } = useEuiTheme();

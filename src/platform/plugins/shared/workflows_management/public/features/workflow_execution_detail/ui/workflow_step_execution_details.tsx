@@ -73,7 +73,11 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     }
 
     return (
-      <EuiPanel hasShadow={false} paddingSize="m" css={{ height: '100%' }}>
+      <EuiPanel
+        hasShadow={false}
+        paddingSize="m"
+        css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
+      >
         <EuiFlexGroup
           direction="column"
           gutterSize="m"
@@ -86,6 +90,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   onClick={() => setSelectedTabId(tab.id)}
                   isSelected={tab.id === selectedTabId}
                   key={tab.id}
+                  css={{ lineHeight: 'normal' }}
                 >
                   {tab.name}
                 </EuiTab>
