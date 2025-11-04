@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BackgroundTaskIcon } from '@kbn/background-search';
 import { AppMenuActionId, AppMenuActionType, type AppMenuItemPrimary } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export const getBackgroundSearchFlyout = ({
+  inProgressSearches,
   onClick,
 }: {
+  inProgressSearches: number | undefined;
   onClick: () => void;
 }): AppMenuItemPrimary => {
   return {
@@ -22,7 +26,7 @@ export const getBackgroundSearchFlyout = ({
       label: i18n.translate('discover.localMenu.localMenu.openBackgroundSearchFlyoutTitle', {
         defaultMessage: 'Background searches',
       }),
-      iconType: 'backgroundTask',
+      iconType: () => <BackgroundTaskIcon inProgressSearches={inProgressSearches} />,
       testId: 'openBackgroundSearchFlyoutButton',
       onClick,
     },

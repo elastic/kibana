@@ -346,6 +346,9 @@ export class SessionService {
         )
         .subscribe(() => {})
     );
+
+    // In case there was already in-progress background searches, start polling for them
+    this.pollInProgressBackgroundSearches(false);
   }
 
   /**
@@ -774,43 +777,49 @@ export class SessionService {
     };
   }
 
-  private async pollInProgressBackgroundSearches() {
+  private async pollInProgressBackgroundSearches(isNewSearch = true) {
+    if (isNewSearch) {
+      this.inProgressSearches$.next(this.inProgressSearches$.getValue() + 1);
+    }
+
     if (this.inProgressPollingInterval$) {
       return;
     }
 
     let previouslyRunningBackgroundsearches: SearchSessionsFindResponse['saved_objects'] = [];
-    this.inProgressPollingInterval$ = interval(5000).subscribe(async () => {
-      const response = await this.sessionsClient.find({
-        filter: 'search-session.attributes.status: "in_progress"',
-      });
-      this.inProgressSearches$.next(response.total);
-      const finishedBackgroundSearches = this.getFinishedBackgroundSearches(
-        previouslyRunningBackgroundsearches,
-        response.saved_objects
-      );
-
-      for (const finishedBackgroundSearch of finishedBackgroundSearches) {
-        this.toastService?.addInfo({
-          title: i18n.translate(
-            'data.searchSessions.sessionService.backgroundSearchCompletedTitle',
-            {
-              defaultMessage: 'Background search "{name}" has completed',
-              values: {
-                name: finishedBackgroundSearch.attributes.name || finishedBackgroundSearch.id,
-              },
-            }
-          ),
+    this.inProgressPollingInterval$ = interval(5000)
+      .pipe(startWith(0))
+      .subscribe(async () => {
+        const response = await this.sessionsClient.find({
+          filter: 'search-session.attributes.status: "in_progress"',
         });
-      }
+        this.inProgressSearches$.next(response.total);
+        const finishedBackgroundSearches = this.getFinishedBackgroundSearches(
+          previouslyRunningBackgroundsearches,
+          response.saved_objects
+        );
 
-      previouslyRunningBackgroundsearches = response.saved_objects;
+        for (const finishedBackgroundSearch of finishedBackgroundSearches) {
+          this.toastService?.addInfo({
+            title: i18n.translate(
+              'data.searchSessions.sessionService.backgroundSearchCompletedTitle',
+              {
+                defaultMessage: 'Background search "{name}" has completed',
+                values: {
+                  name: finishedBackgroundSearch.attributes.name || finishedBackgroundSearch.id,
+                },
+              }
+            ),
+          });
+        }
 
-      if (response.total === 0) {
-        this.inProgressPollingInterval$?.unsubscribe();
-        this.inProgressPollingInterval$ = null;
-      }
-    });
+        previouslyRunningBackgroundsearches = response.saved_objects;
+
+        if (response.total === 0) {
+          this.inProgressPollingInterval$?.unsubscribe();
+          this.inProgressPollingInterval$ = null;
+        }
+      });
   }
 
   private getFinishedBackgroundSearches(
