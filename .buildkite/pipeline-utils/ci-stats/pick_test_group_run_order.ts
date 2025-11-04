@@ -230,7 +230,7 @@ export async function pickTestGroupRunOrder() {
     ? parseFloat(process.env.JEST_UNIT_MAX_MINUTES)
     : !process.env.JEST_MAX_MINUTES
     ? process.env.JEST_MAX_PARALLEL
-      ? parseInt(process.env.JEST_MAX_PARALLEL) * 40
+      ? parseInt(process.env.JEST_MAX_PARALLEL, 10) * 40
       : 3 * 40
     : JEST_MAX_MINUTES;
   if (Number.isNaN(JEST_UNIT_MAX_MINUTES)) {
@@ -241,7 +241,7 @@ export async function pickTestGroupRunOrder() {
     ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
     : !process.env.JEST_MAX_MINUTES
     ? process.env.JEST_MAX_PARALLEL
-      ? parseInt(process.env.JEST_MAX_PARALLEL) * 40
+      ? parseInt(process.env.JEST_MAX_PARALLEL, 10) * 40
       : 40
     : JEST_MAX_MINUTES;
   if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
