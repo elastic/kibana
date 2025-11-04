@@ -42,6 +42,7 @@ export interface SampleDocumentWithUIAttributes {
 }
 
 export type SimulationEvent =
+  | { type: 'dataSources.add'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'dataSources.select'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }

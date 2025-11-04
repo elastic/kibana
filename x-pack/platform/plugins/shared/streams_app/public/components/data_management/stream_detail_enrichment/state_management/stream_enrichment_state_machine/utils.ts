@@ -39,7 +39,7 @@ export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
 export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   type: 'kql-samples',
   name: DATA_SOURCES_I18N.kqlDataSource.defaultName,
-  enabled: false,
+  enabled: true,
   timeRange: {
     from: 'now-15m',
     to: 'now',
@@ -54,7 +54,7 @@ export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
 export const defaultCustomSamplesDataSource: CustomSamplesDataSource = {
   type: 'custom-samples',
   name: DATA_SOURCES_I18N.customSamples.defaultName,
-  enabled: false,
+  enabled: true,
   documents: [],
 };
 
@@ -351,4 +351,17 @@ export function getActiveSimulationMode(
   const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
   if (!activeDataSourceRef) return 'partial';
   return activeDataSourceRef.getSnapshot().context.simulationMode;
+}
+
+export function selectDataSource(
+  dataSourcesRefs: StreamEnrichmentContextType['dataSourcesRefs'],
+  id: string
+) {
+  dataSourcesRefs.forEach((dataSourceRef) => {
+    if (dataSourceRef.id === id) {
+      dataSourceRef.send({ type: 'dataSource.enable' });
+    } else {
+      dataSourceRef.send({ type: 'dataSource.disable' });
+    }
+  });
 }

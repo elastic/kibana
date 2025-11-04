@@ -61,6 +61,7 @@ import {
   spawnStep,
   reorderSteps,
   getActiveSimulationMode,
+  selectDataSource,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -234,9 +235,10 @@ export const streamEnrichmentMachine = setup({
     addDataSource: assign((assignArgs, { dataSource }: { dataSource: EnrichmentDataSource }) => {
       const newDataSourceRef = spawnDataSource(dataSource, assignArgs);
 
-      return {
-        dataSourcesRefs: [newDataSourceRef, ...assignArgs.context.dataSourcesRefs],
-      };
+      const dataSourcesRefs = [newDataSourceRef, ...assignArgs.context.dataSourcesRefs];
+      selectDataSource(dataSourcesRefs, newDataSourceRef.id);
+
+      return { dataSourcesRefs };
     }),
     deleteDataSource: assign(({ context }, params: { id: string }) => ({
       dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
@@ -418,15 +420,7 @@ export const streamEnrichmentMachine = setup({
             },
             'dataSources.select': {
               actions: [
-                ({ context, event }) => {
-                  context.dataSourcesRefs.forEach((dataSourceRef) => {
-                    if (dataSourceRef.id === event.id) {
-                      dataSourceRef.send({ type: 'dataSource.enable' });
-                    } else {
-                      dataSourceRef.send({ type: 'dataSource.disable' });
-                    }
-                  });
-                },
+                ({ context, event }) => selectDataSource(context.dataSourcesRefs, event.id),
                 { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
               ],
             },
@@ -482,6 +476,7 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         { type: 'addDataSource', params: ({ event }) => event },
                         raise({ type: 'url.sync' }),
+                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                     'dataSource.delete': {
