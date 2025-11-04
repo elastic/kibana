@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
 import { findSLOGroupsResponseSchema, sloGroupWithSummaryResponseSchema } from '@kbn/slo-schema';
@@ -14,7 +13,7 @@ import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
-import type { StoredSLOSettings } from '../domain/models';
+import { excludeStaleSummaryFilter } from './summary_utils';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -31,32 +30,6 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
     perPage: !isNaN(perPage) && perPage >= 1 ? perPage : DEFAULT_SLO_GROUPS_PAGE_SIZE,
   };
-}
-
-function excludeStaleSummaryFilter(
-  settings: StoredSLOSettings,
-  kqlFilter: string,
-  hideStale?: boolean
-): estypes.QueryDslQueryContainer[] {
-  if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours || !hideStale) {
-    return [];
-  }
-  return [
-    {
-      bool: {
-        should: [
-          { term: { isTempDoc: true } },
-          {
-            range: {
-              summaryUpdatedAt: {
-                gte: `now-${settings.staleThresholdInHours}h`,
-              },
-            },
-          },
-        ],
-      },
-    },
-  ];
 }
 
 export class FindSLOGroups {
