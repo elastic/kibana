@@ -16,8 +16,6 @@ import {
   scoutWaitFor,
   scoutGetUrl,
   scoutGetTitle,
-  scoutGoBack,
-  scoutGoForward,
   scoutReload,
 } from '../browser';
 import type { ScoutSession } from '../../session';
@@ -344,32 +342,6 @@ describe('Browser Tools', () => {
       expect(result.success).toBe(true);
       expect(mockPage.title).toHaveBeenCalled();
       expect(result.data).toContain('Test Page');
-    });
-  });
-
-  describe('scoutGoBack', () => {
-    it('should navigate back', async () => {
-      const result = await scoutGoBack(mockSession);
-
-      expect(result.success).toBe(true);
-      expect(mockPage.goBack).toHaveBeenCalled();
-    });
-
-    it('should handle no previous page gracefully', async () => {
-      mockPage.goBack.mockRejectedValue(new Error('No previous page'));
-      const result = await scoutGoBack(mockSession);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Go back failed');
-    });
-  });
-
-  describe('scoutGoForward', () => {
-    it('should navigate forward', async () => {
-      const result = await scoutGoForward(mockSession);
-
-      expect(result.success).toBe(true);
-      expect(mockPage.goForward).toHaveBeenCalled();
     });
   });
 

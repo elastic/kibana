@@ -315,6 +315,11 @@ export class ScoutSession {
     kibanaUrl.username = config.auth.username;
     kibanaUrl.password = config.auth.password;
 
+    // Extract base path from the URL pathname
+    // Remove trailing slash if present, treat empty or "/" as no base path
+    const pathname = kibanaUrl.pathname.replace(/\/$/, '').trim();
+    const basePath = pathname && pathname !== '/' ? pathname : undefined;
+
     const hostOptions: HostOptions = {
       protocol: kibanaUrl.protocol.replace(':', '') as 'http' | 'https',
       hostname: kibanaUrl.hostname,
@@ -333,6 +338,7 @@ export class ScoutSession {
         sourcePath: rolesDefinitionPath,
       },
       cloudUsersFilePath: config.cloudUsersFilePath,
+      basePath,
     });
   }
 

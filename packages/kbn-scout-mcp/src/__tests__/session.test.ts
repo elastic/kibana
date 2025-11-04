@@ -76,7 +76,7 @@ describe('ScoutSession', () => {
       goto: jest.fn(),
       close: jest.fn(),
       title: jest.fn().mockResolvedValue('Test Page'),
-      url: jest.fn().mockReturnValue('http://localhost:5601'),
+      url: jest.fn().mockReturnValue('http://localhost:5620'),
       screenshot: jest.fn().mockResolvedValue(Buffer.from('fake-screenshot')),
       accessibility: {
         snapshot: jest.fn().mockResolvedValue({ role: 'main', name: 'Test' }),

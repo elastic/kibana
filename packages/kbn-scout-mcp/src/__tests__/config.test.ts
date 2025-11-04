@@ -33,7 +33,7 @@ describe('Scout MCP Configuration', () => {
   describe('loadScoutMcpConfig', () => {
     it('should load default configuration when no options provided', () => {
       const config = loadScoutMcpConfig();
-      expect(config.targetUrl).toBe('http://localhost:5601');
+      expect(config.targetUrl).toBe('http://localhost:5620');
       expect(config.mode).toBe('stateful');
       expect(config.projectType).toBeUndefined();
       expect(config.ignoreHTTPSErrors).toBe(false);
@@ -41,36 +41,36 @@ describe('Scout MCP Configuration', () => {
 
     it('should load configuration from options', () => {
       const config = loadScoutMcpConfig({
-        targetUrl: 'http://custom:5601',
+        targetUrl: 'http://custom:5620',
         mode: 'serverless',
         projectType: 'oblt',
       });
-      expect(config.targetUrl).toBe('http://custom:5601');
+      expect(config.targetUrl).toBe('http://custom:5620');
       expect(config.mode).toBe('serverless');
       expect(config.projectType).toBe('oblt');
     });
 
     it('should load configuration from environment variables', () => {
-      process.env.KIBANA_BASE_URL = 'http://env-kibana:5601';
+      process.env.KIBANA_BASE_URL = 'http://env-kibana:5620';
       process.env.SCOUT_MODE = 'serverless';
       process.env.SCOUT_PROJECT_TYPE = 'security';
 
       const config = loadScoutMcpConfig();
-      expect(config.targetUrl).toBe('http://env-kibana:5601');
+      expect(config.targetUrl).toBe('http://env-kibana:5620');
       expect(config.mode).toBe('serverless');
       expect(config.projectType).toBe('security');
     });
 
     it('should prioritize options over environment variables', () => {
-      process.env.KIBANA_BASE_URL = 'http://env:5601';
-      const config = loadScoutMcpConfig({ targetUrl: 'http://option:5601' });
-      expect(config.targetUrl).toBe('http://option:5601');
+      process.env.KIBANA_BASE_URL = 'http://env:5620';
+      const config = loadScoutMcpConfig({ targetUrl: 'http://option:5620' });
+      expect(config.targetUrl).toBe('http://option:5620');
     });
 
     it('should use TEST_KIBANA_URL as fallback', () => {
-      process.env.TEST_KIBANA_URL = 'http://test:5601';
+      process.env.TEST_KIBANA_URL = 'http://test:5620';
       const config = loadScoutMcpConfig();
-      expect(config.targetUrl).toBe('http://test:5601');
+      expect(config.targetUrl).toBe('http://test:5620');
     });
 
     it('should handle ignoreHTTPSErrors configuration', () => {
@@ -92,7 +92,7 @@ describe('Scout MCP Configuration', () => {
       const tempConfigPath = path.join(process.cwd(), 'temp-test-config.json');
       const scoutConfig: ScoutTestConfig = {
         hosts: {
-          kibana: 'http://custom:5601',
+          kibana: 'http://custom:5620',
           elasticsearch: 'http://custom:9200',
         },
         auth: {
@@ -141,7 +141,7 @@ describe('Scout MCP Configuration', () => {
   describe('validateConfig', () => {
     it('should validate a correct stateful configuration', () => {
       const config = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };
@@ -150,7 +150,7 @@ describe('Scout MCP Configuration', () => {
 
     it('should validate a correct serverless configuration', () => {
       const config = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'serverless' as const,
         projectType: 'oblt' as const,
         ignoreHTTPSErrors: false,
@@ -178,7 +178,7 @@ describe('Scout MCP Configuration', () => {
 
     it('should reject invalid mode', () => {
       const config = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'invalid' as any,
         ignoreHTTPSErrors: false,
       };
@@ -187,7 +187,7 @@ describe('Scout MCP Configuration', () => {
 
     it('should reject serverless mode without project type', () => {
       const config = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'serverless' as const,
         ignoreHTTPSErrors: false,
       };
@@ -196,7 +196,7 @@ describe('Scout MCP Configuration', () => {
 
     it('should reject invalid project type', () => {
       const config = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'serverless' as const,
         projectType: 'invalid' as any,
         ignoreHTTPSErrors: false,
@@ -208,7 +208,7 @@ describe('Scout MCP Configuration', () => {
       const projectTypes = ['es', 'oblt', 'security'] as const;
       projectTypes.forEach((projectType) => {
         const config = {
-          targetUrl: 'http://localhost:5601',
+          targetUrl: 'http://localhost:5620',
           mode: 'serverless' as const,
           projectType,
           ignoreHTTPSErrors: false,
@@ -232,15 +232,15 @@ describe('Scout MCP Configuration', () => {
 
     it('should create Scout config from MCP config for localhost', () => {
       const mcpConfig = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };
 
       const scoutConfig = createScoutTestConfig(mcpConfig, log);
 
-      expect(scoutConfig.hosts.kibana).toBe('http://localhost:5601');
-      expect(scoutConfig.hosts.elasticsearch).toContain('9200');
+      expect(scoutConfig.hosts.kibana).toBe('http://localhost:5620');
+      expect(scoutConfig.hosts.elasticsearch).toBe('http://localhost:9220');
       expect(scoutConfig.auth.username).toBe('elastic');
       expect(scoutConfig.auth.password).toBe('changeme');
       expect(scoutConfig.serverless).toBe(false);
@@ -252,7 +252,7 @@ describe('Scout MCP Configuration', () => {
       process.env.ELASTICSEARCH_PASSWORD = 'custom_pass';
 
       const mcpConfig = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };
@@ -265,7 +265,7 @@ describe('Scout MCP Configuration', () => {
 
     it('should require credentials for non-localhost deployments', () => {
       const mcpConfig = {
-        targetUrl: 'http://remote-kibana.com:5601',
+        targetUrl: 'http://remote-kibana.com:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };
@@ -275,7 +275,7 @@ describe('Scout MCP Configuration', () => {
 
     it('should accept credentials from URL for remote deployments', () => {
       const mcpConfig = {
-        targetUrl: 'http://user:pass@remote-kibana.com:5601',
+        targetUrl: 'http://user:pass@remote-kibana.com:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };
@@ -290,7 +290,7 @@ describe('Scout MCP Configuration', () => {
       process.env.ELASTICSEARCH_URL = 'http://custom-es:9200';
 
       const mcpConfig = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };
@@ -305,7 +305,7 @@ describe('Scout MCP Configuration', () => {
       process.env.ELASTICSEARCH_PASSWORD = 'pass';
 
       const mcpConfig = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'serverless' as const,
         projectType: 'oblt' as const,
         ignoreHTTPSErrors: false,
@@ -322,7 +322,7 @@ describe('Scout MCP Configuration', () => {
       process.env.TEST_CLOUD_HOST_NAME = 'cloud.elastic.co';
 
       const mcpConfig = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };
@@ -336,7 +336,7 @@ describe('Scout MCP Configuration', () => {
     it('should use provided Scout config if available', () => {
       const existingScoutConfig: ScoutTestConfig = {
         hosts: {
-          kibana: 'http://existing:5601',
+          kibana: 'http://existing:5620',
           elasticsearch: 'http://existing:9200',
         },
         auth: {
@@ -351,7 +351,7 @@ describe('Scout MCP Configuration', () => {
       };
 
       const mcpConfig = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'stateful' as const,
         scoutConfig: existingScoutConfig,
         ignoreHTTPSErrors: false,
@@ -366,7 +366,7 @@ describe('Scout MCP Configuration', () => {
       process.env.TEST_LICENSE = 'platinum';
 
       const mcpConfig = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };
@@ -378,7 +378,7 @@ describe('Scout MCP Configuration', () => {
 
     it('should default to basic license', () => {
       const mcpConfig = {
-        targetUrl: 'http://localhost:5601',
+        targetUrl: 'http://localhost:5620',
         mode: 'stateful' as const,
         ignoreHTTPSErrors: false,
       };

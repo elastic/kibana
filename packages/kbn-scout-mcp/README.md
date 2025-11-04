@@ -13,10 +13,30 @@ This MCP server allows you to use Scout (Kibana's browser test framework) direct
 
 ## Quick Setup for Cursor
 
-### 1. Configure Cursor MCP
+### 1. Start Scout Server
+
+**MCP requires SAML authentication to be configured.** Start Kibana using Scout's `start-server` command, which pre-configures SAML:
+
+```bash
+node scripts/scout.js start-server --stateful
+```
+
+This command:
+- Starts Elasticsearch and Kibana with SAML authentication pre-configured
+- Runs Kibana on port **5620** (default)
+- Sets up the mock IdP plugin for local SAML authentication
+- Configures the correct SAML realm for testing
+
+**Default URLs:**
+- Kibana: `http://localhost:5620`
+- Elasticsearch: `http://localhost:9220`
+
+### 2. Configure Cursor MCP
 
 Open Cursor Settings → Features → MCP Servers, or edit:
 - **macOS**: `~/Library/Application Support/Cursor/User/globalStorage/mcp.json`
+- **Windows**: `%APPDATA%\Cursor\User\globalStorage\mcp.json`
+- **Linux**: `~/.config/Cursor/User/globalStorage/mcp.json`
 
 Add this configuration:
 
@@ -27,24 +47,24 @@ Add this configuration:
       "command": "bash",
       "args": [
         "-c",
-        "cd /Users/enrique/workspace/kibana && npx tsx packages/kbn-scout-mcp/bin/cli.ts --target http://localhost:5601"
+        "cd /path/to/kibana && npx tsx packages/kbn-scout-mcp/bin/cli.ts --target http://localhost:5620"
       ]
     }
   }
 }
 ```
 
-**Important**:
-- Replace `/Users/enrique/workspace/kibana` with your actual Kibana path (appears twice in the command)
-- Use the full absolute path to your Kibana repository
-- Make sure Kibana is running on `http://localhost:5601` (or change the target URL)
+**Configuration Notes:**
+- Replace `/path/to/kibana` with your actual Kibana repository path (use absolute path)
+- The default target URL is `http://localhost:5620` (Scout's default port)
+- To use a different Kibana instance, change the `--target` URL, but ensure SAML is configured
 - The `bash -c` approach is required because Cursor's MCP implementation needs the explicit `cd` command
 
-### 2. Restart Cursor
+### 3. Restart Cursor
 
 Completely quit Cursor (Cmd+Q on Mac) and restart it.
 
-### 3. Start Using Scout
+### 4. Start Using Scout
 
 In Cursor chat, you can now ask:
 - "Navigate to the Discover app"

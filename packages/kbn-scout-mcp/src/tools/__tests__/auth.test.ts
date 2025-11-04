@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { scoutLogin, scoutLogout, scoutGetAuthStatus, scoutSetSessionCookie } from '../auth';
+import { scoutLogin, scoutLogout, scoutGetAuthStatus } from '../auth';
 import type { ScoutSession } from '../../session';
 import type { SamlSessionManager } from '@kbn/test';
 import type { BrowserContext } from 'playwright';
@@ -221,88 +221,11 @@ describe('Auth Tools', () => {
     });
   });
 
-  describe('scoutSetSessionCookie', () => {
-    it('should set session cookie', async () => {
-      const result = await scoutSetSessionCookie(mockSession, {
-        name: 'sid',
-        value: 'custom-session-id',
-      });
-
-      expect(result.success).toBe(true);
-      expect(mockContext.clearCookies).toHaveBeenCalled();
-      expect(mockContext.addCookies).toHaveBeenCalledWith([
-        expect.objectContaining({
-          name: 'sid',
-          value: 'custom-session-id',
-          domain: 'localhost',
-          path: '/',
-        }),
-      ]);
-    });
-
-    it('should set cookie with custom domain', async () => {
-      const result = await scoutSetSessionCookie(mockSession, {
-        name: 'sid',
-        value: 'value123',
-        domain: 'custom.domain.com',
-      });
-
-      expect(result.success).toBe(true);
-      expect(mockContext.addCookies).toHaveBeenCalledWith([
-        expect.objectContaining({
-          name: 'sid',
-          value: 'value123',
-          domain: 'localhost', // getKbnUrl() returns localhost
-        }),
-      ]);
-    });
-
-    it('should return error if not initialized', async () => {
-      mockSession.isInitialized.mockReturnValue(false);
-
-      const result = await scoutSetSessionCookie(mockSession, {
-        name: 'sid',
-        value: 'test',
-      });
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('not initialized');
-    });
-
-    it('should return success message', async () => {
-      const result = await scoutSetSessionCookie(mockSession, {
-        name: 'sid',
-        value: 'test-value',
-      });
-
-      expect(result.success).toBe(true);
-      expect(result.data).toContain('Session cookie set: sid');
-    });
-
-    it('should mark user as authenticated', async () => {
-      await scoutSetSessionCookie(mockSession, {
-        name: 'sid',
-        value: 'test-value',
-      });
-
-      expect(mockSession.setAuthenticated).toHaveBeenCalledWith(true, 'custom');
-    });
-  });
-
   describe('error handling', () => {
     it('should handle missing SAML manager gracefully', async () => {
       mockSession.getSamlSessionManager.mockRejectedValue(new Error('SAML manager not available'));
 
       const result = await scoutLogin(mockSession, { role: 'admin' });
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBeDefined();
-    });
-
-    it('should handle context not available errors', async () => {
-      mockSession.getContext.mockReturnValue(null);
-
-      const result = await scoutSetSessionCookie(mockSession, { name: 'sid', value: 'test' });
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();

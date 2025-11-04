@@ -162,23 +162,3 @@ export async function scoutListPageObjects(): Promise<ToolResult> {
     },
   });
 }
-
-/**
- * Get the current state of a page object
- */
-export async function scoutGetPageObjectState(
-  session: ScoutSession,
-  params: { pageObject: string }
-): Promise<ToolResult> {
-  if (!session.isInitialized()) {
-    return error('Session not initialized');
-  }
-
-  const pageObjectInstance = session.getPageObject(params.pageObject);
-
-  return success({
-    pageObject: params.pageObject,
-    instantiated: pageObjectInstance !== null,
-    cached: pageObjectInstance !== null,
-  });
-}

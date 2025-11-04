@@ -23,69 +23,6 @@ const PROJECT_DEFAULT_ROLES = new Map<string, string>([
 ]);
 
 /**
- * Validate custom role to prevent excessive permissions
- */
-function validateCustomRole(role: LoginParams['customRole']): void {
-  if (!role) {
-    return;
-  }
-
-  // Limit the number of Kibana spaces (prevent excessive access)
-  if (role.kibana && role.kibana.length > 10) {
-    throw new Error('Custom role cannot have more than 10 Kibana space entries');
-  }
-
-  // Validate each Kibana entry
-  for (const entry of role.kibana || []) {
-    // Limit spaces per entry
-    if (entry.spaces && entry.spaces.length > 20) {
-      throw new Error('Kibana role entry cannot have more than 20 spaces');
-    }
-
-    // Limit base privileges
-    if (entry.base && entry.base.length > 10) {
-      throw new Error('Kibana role entry cannot have more than 10 base privileges');
-    }
-
-    // Validate feature privileges are reasonable
-    if (entry.feature) {
-      const featureKeys = Object.keys(entry.feature);
-      if (featureKeys.length > 50) {
-        throw new Error('Kibana role entry cannot have more than 50 feature privilege entries');
-      }
-      for (const featurePrivs of Object.values(entry.feature)) {
-        if (featurePrivs.length > 20) {
-          throw new Error('Feature cannot have more than 20 privilege entries');
-        }
-      }
-    }
-  }
-
-  // Validate Elasticsearch role if present
-  if (role.elasticsearch) {
-    // Limit cluster privileges
-    if (role.elasticsearch.cluster && role.elasticsearch.cluster.length > 20) {
-      throw new Error('Elasticsearch role cannot have more than 20 cluster privileges');
-    }
-
-    // Limit indices entries
-    if (role.elasticsearch.indices && role.elasticsearch.indices.length > 100) {
-      throw new Error('Elasticsearch role cannot have more than 100 index entries');
-    }
-
-    // Validate each index entry
-    for (const indexEntry of role.elasticsearch.indices || []) {
-      if (indexEntry.names && indexEntry.names.length > 50) {
-        throw new Error('Index entry cannot cover more than 50 index patterns');
-      }
-      if (indexEntry.privileges && indexEntry.privileges.length > 20) {
-        throw new Error('Index entry cannot have more than 20 privileges');
-      }
-    }
-  }
-}
-
-/**
  * Login with a role using Scout's SAML authentication
  *
  * This follows the same pattern as Scout's browserAuth fixture:
@@ -104,47 +41,63 @@ export async function scoutLogin(session: ScoutSession, params: LoginParams): Pr
       throw new Error('Browser context not available');
     }
 
-    // Validate custom role before using it
-    if (params.customRole) {
-      validateCustomRole(params.customRole);
-    }
+    const kbnUrl = await session.getKbnUrl();
+    const samlSessionManager = await session.getSamlSessionManager();
 
-    // Determine the actual role to use
-    let roleToUse = params.role;
+    // Helper function to set session cookie (matches browserAuth pattern)
+    const setSessionCookie = async (cookieValue: string) => {
+      await context.clearCookies();
+      await context.addCookies([
+        {
+          name: 'sid',
+          value: cookieValue,
+          path: '/',
+          domain: kbnUrl.domain(),
+        },
+      ]);
+    };
 
-    // Handle custom role
+    // Determine the actual role to use (matches browserAuth pattern)
+    let roleToUse: string;
+
     if (params.customRole) {
+      // Handle custom role - set it first, then use the custom role name
       await session.setCustomRole(params.customRole as KibanaRole);
       roleToUse = session.getCustomRoleName();
     } else if (params.role === 'privileged') {
-      // Handle privileged role - resolve based on serverless mode
+      // Handle privileged role - resolve based on serverless mode (matches browserAuth)
       const scoutConfig = session.getScoutConfig();
-      if (scoutConfig?.serverless && scoutConfig.projectType) {
-        roleToUse = PROJECT_DEFAULT_ROLES.get(scoutConfig.projectType) || 'editor';
-      } else {
-        roleToUse = 'editor';
-      }
+      roleToUse =
+        scoutConfig?.serverless && scoutConfig.projectType
+          ? PROJECT_DEFAULT_ROLES.get(scoutConfig.projectType) || 'editor'
+          : 'editor';
+    } else {
+      // Use the role directly (admin, viewer, etc.)
+      roleToUse = params.role;
     }
 
-    // Get SAML session cookie for the role
-    const samlSessionManager = await session.getSamlSessionManager();
-    const cookieValue = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
-      roleToUse
-    );
-
-    // Get Kibana URL helper to get the domain
-    const kbnUrl = await session.getKbnUrl();
-
-    // Set the session cookie in the browser context (same as browserAuth fixture)
-    await context.clearCookies();
-    await context.addCookies([
-      {
-        name: 'sid',
-        value: cookieValue,
-        path: '/',
-        domain: kbnUrl.domain(),
-      },
-    ]);
+    // Get cookie and set it (matches browserAuth's loginAs pattern)
+    let cookie: string;
+    try {
+      cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleToUse);
+    } catch (samlError) {
+      // Provide detailed error message for SAML authentication failures
+      let errorDetails: string;
+      if (samlError instanceof Error) {
+        errorDetails = samlError.message || samlError.toString() || 'Unknown SAML error';
+        // If message is empty or just "Error", include stack trace
+        if (!errorDetails || errorDetails === 'Error') {
+          errorDetails = samlError.toString();
+          if (samlError.stack) {
+            errorDetails += `\nStack: ${samlError.stack}`;
+          }
+        }
+      } else {
+        errorDetails = String(samlError) || 'Unknown SAML error';
+      }
+      throw new Error(`SAML authentication failed for role '${roleToUse}': ${errorDetails}`);
+    }
+    await setSessionCookie(cookie);
 
     session.setAuthenticated(true, params.role);
 
@@ -197,50 +150,4 @@ export async function scoutGetAuthStatus(session: ScoutSession): Promise<ToolRes
     authenticated: session.isUserAuthenticated(),
     role: session.getCurrentRole(),
   });
-}
-
-/**
- * Set session cookie for authentication
- * This is useful when you have a pre-existing session cookie
- */
-export async function scoutSetSessionCookie(
-  session: ScoutSession,
-  params: { name: string; value: string; domain?: string }
-): Promise<ToolResult> {
-  if (!session.isInitialized()) {
-    return error('Session not initialized');
-  }
-
-  return executeSafely(async () => {
-    const context = session.getContext();
-    if (!context) {
-      throw new Error('Browser context not available');
-    }
-
-    // Get domain from Kibana URL helper if available, otherwise use base URL
-    let domain: string;
-    try {
-      const kbnUrl = await session.getKbnUrl();
-      domain = kbnUrl.domain();
-    } catch {
-      // Get baseURL from session config
-      const baseUrl = session.getTargetUrl();
-      const url = new URL(baseUrl);
-      domain = params.domain || url.hostname;
-    }
-
-    await context.clearCookies();
-    await context.addCookies([
-      {
-        name: params.name,
-        value: params.value,
-        domain,
-        path: '/',
-      },
-    ]);
-
-    session.setAuthenticated(true, 'custom');
-
-    return `Session cookie set: ${params.name}`;
-  }, 'Set session cookie failed');
 }

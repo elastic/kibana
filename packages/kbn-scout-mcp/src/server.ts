@@ -342,6 +342,8 @@ export class ScoutMcpServer {
             ],
           };
         } else {
+          // Log the error for debugging
+          this.log.error(`Tool returned error: ${result.error || 'No error message'}`);
           return {
             content: [
               {
@@ -354,11 +356,17 @@ export class ScoutMcpServer {
         }
       } catch (error) {
         this.log.error(`Tool execution error: ${error}`);
+        const errorMessage =
+          error instanceof Error
+            ? error.message || error.toString() || 'Unknown error'
+            : String(error) || 'Unknown error';
+        const errorDetails =
+          error instanceof Error && error.stack ? `\n\nStack:\n${error.stack}` : '';
         return {
           content: [
             {
               type: 'text',
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error: ${errorMessage}${errorDetails}`,
             },
           ],
           isError: true,

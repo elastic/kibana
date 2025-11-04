@@ -17,11 +17,13 @@ import { validateConfigPath } from './utils';
  * Load Scout MCP configuration from environment variables and options
  */
 export function loadScoutMcpConfig(options: Partial<ScoutMcpConfig> = {}): ScoutMcpConfig {
+  // Default to Scout's default port (5620) if no URL is specified
+  // Scout's start-server command starts Kibana on port 5620 with SAML pre-configured
   const targetUrl =
     options.targetUrl ||
     process.env.KIBANA_BASE_URL ||
     process.env.TEST_KIBANA_URL ||
-    'http://localhost:5601';
+    'http://localhost:5620';
 
   const mode = options.mode || (process.env.SCOUT_MODE as 'stateful' | 'serverless') || 'stateful';
 
@@ -152,13 +154,18 @@ export function createScoutTestConfig(config: ScoutMcpConfig, log: ToolingLog): 
     );
   }
 
-  // Determine Elasticsearch URL (usually Kibana URL without port or with different port)
-  // For local development, ES is typically on port 9200
+  // Determine Elasticsearch URL
+  // Scout uses port 9220 for Elasticsearch (vs 9200 for standard ES)
+  // Check if we're connecting to Scout's default port (5620) and use Scout's ES port (9220)
+  const kibanaPort = kibanaUrl.port || (kibanaUrl.protocol === 'https:' ? '443' : '80');
+  const isScoutPort = kibanaPort === '5620';
+  const esPort = isScoutPort ? '9220' : '9200';
+
   const esUrl =
     process.env.ELASTICSEARCH_URL ||
     (config.targetUrl.includes('localhost')
-      ? config.targetUrl.replace('5601', '9200').replace('/app', '')
-      : config.targetUrl.replace(/:\d+/, ':9200').replace('/app', ''));
+      ? config.targetUrl.replace(kibanaPort, esPort).replace('/app', '')
+      : config.targetUrl.replace(/:\d+/, `:${esPort}`).replace('/app', ''));
 
   const baseConfig: ScoutTestConfig = {
     hosts: {

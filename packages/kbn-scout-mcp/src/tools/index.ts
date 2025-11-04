@@ -17,16 +17,14 @@ export {
   scoutWaitFor,
   scoutGetUrl,
   scoutGetTitle,
-  scoutGoBack,
-  scoutGoForward,
   scoutReload,
 } from './browser';
 
 // Authentication tools
-export { scoutLogin, scoutLogout, scoutGetAuthStatus, scoutSetSessionCookie } from './auth';
+export { scoutLogin, scoutLogout, scoutGetAuthStatus } from './auth';
 
 // Page object tools
-export { scoutPageObject, scoutListPageObjects, scoutGetPageObjectState } from './page_objects';
+export { scoutPageObject, scoutListPageObjects } from './page_objects';
 
 // EUI component tools
 export { scoutEuiComponent, scoutListEuiComponents } from './eui';

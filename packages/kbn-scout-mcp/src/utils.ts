@@ -49,7 +49,25 @@ export async function executeSafely<T>(
     const result = await fn();
     return success(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    let message: string;
+    if (err instanceof Error) {
+      // Get the error message, falling back to toString if message is empty
+      message = err.message || err.toString() || 'Unknown error';
+      // If message is still empty or just "Error", try to get more details
+      if (!message || message === 'Error') {
+        message = err.toString();
+        // If toString also doesn't help, include constructor name
+        if (message === 'Error' || !message) {
+          message = `${err.constructor.name || 'Error'}: ${JSON.stringify(err)}`;
+        }
+      }
+      // Include stack trace in development/debugging scenarios
+      if (process.env.DEBUG && err.stack) {
+        message += `\nStack: ${err.stack}`;
+      }
+    } else {
+      message = String(err) || 'Unknown error';
+    }
     return error(`${errorPrefix}: ${message}`);
   }
 }
