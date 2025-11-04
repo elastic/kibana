@@ -47,15 +47,25 @@ export function StreamNameFormRow({
   const prefix = parentStreamName + '.';
   const partitionName = value.replace(prefix, '');
 
+  const isLengthValid = value.length >= prefix.length + 1 && value.length <= MAX_NAME_LENGTH;
+
   const helpText =
     value.length >= MAX_NAME_LENGTH && !readOnly
-      ? i18n.translate('xpack.streams.streamDetailRouting.nameHelpText', {
+      ? i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
           defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
           values: {
             maxLength: MAX_NAME_LENGTH,
           },
         })
+      : value.length <= prefix.length && !readOnly
+      ? i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
+          defaultMessage: `Stream name is required.`,
+          values: {
+            maxLength: MAX_NAME_LENGTH,
+          },
+        })
       : undefined;
+
   const isDotPresent = !readOnly && partitionName.includes('.');
   const dotErrorMessage = isDotPresent
     ? i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessage', {
@@ -77,11 +87,11 @@ export function StreamNameFormRow({
       })}
       helpText={helpText}
       describedByIds={[descriptionId]}
-      isInvalid={isInvalid || isDotPresent}
+      isInvalid={isInvalid || isDotPresent || !isLengthValid}
       error={error || dotErrorMessage}
     >
       <EuiFieldText
-        isInvalid={isInvalid || isDotPresent}
+        isInvalid={isInvalid || isDotPresent || !isLengthValid}
         data-test-subj="streamsAppRoutingStreamEntryNameField"
         value={partitionName}
         fullWidth

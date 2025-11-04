@@ -136,12 +136,16 @@ export const streamRoutingMachine = setup({
     isValidRouting: ({ context }) =>
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
     isValidEditedSuggestion: ({ context }) => {
+      console.log('context', JSON.stringify(context, null, 2));
       if (!context.editedSuggestion) return false;
       const { name, condition } = context.editedSuggestion;
       if (!name || name.trim() === '') return false;
       return isSchema(conditionSchema, condition);
     },
     isValidChild: ({ context }) => {
+      // If there's no current rule, skip validation (e.g., when editing suggestions)
+      if (!context.currentRuleId) return true;
+
       const currentRule = selectCurrentRule(context);
       const currentStream = context.definition.stream;
 
