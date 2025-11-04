@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ErrorObject } from 'ajv';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { DeanonymizationInput, DeanonymizationOutput } from './types';
 import { type Message } from './types';
@@ -114,7 +113,6 @@ export enum ChatCompletionErrorCode {
   NotFoundError = 'notFoundError',
   TokenLimitReachedError = 'tokenLimitReachedError',
   FunctionLimitExceededError = 'functionLimitExceededError',
-  FunctionArgsValidationError = 'functionArgsValidationError',
 }
 
 interface ErrorMetaAttributes {
@@ -125,9 +123,6 @@ interface ErrorMetaAttributes {
     tokenCount?: number;
   };
   [ChatCompletionErrorCode.FunctionLimitExceededError]: {};
-  [ChatCompletionErrorCode.FunctionArgsValidationError]: {
-    errors: ErrorObject[];
-  };
 }
 
 export class ChatCompletionError<T extends ChatCompletionErrorCode> extends Error {
