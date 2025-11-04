@@ -276,7 +276,6 @@ export class Authenticator {
               name,
               logger: options.loggers.get(type, name),
               urls: { loggedOut: (request: KibanaRequest) => this.getLoggedOutURL(request, type) },
-              origin: this.options.config.authc.providers[type]?.[name].origin,
             }),
             this.options.config.authc.providers[type]?.[name]
           ),
