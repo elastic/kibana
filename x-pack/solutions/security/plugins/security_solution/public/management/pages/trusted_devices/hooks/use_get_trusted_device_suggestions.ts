@@ -6,8 +6,8 @@
  */
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useHttp } from '../../../../common/lib/kibana/hooks';
 import { TrustedDevicesApiClient } from '../service/api_client';
 
