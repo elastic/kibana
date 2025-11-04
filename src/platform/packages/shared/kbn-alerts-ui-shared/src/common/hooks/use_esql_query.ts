@@ -16,7 +16,7 @@ export type UseEsqlQueryParams = FetchEsqlQueryParams;
 
 // Query key prefix MUST contain explicit strings, not fetchEsqlQuery.name
 // Production builds cannot guarantee a unique function name
-export const queryKeyPrefix = ['alerts', 'fetchEsqlQuery'];
+const queryKeyPrefix = ['alerts', 'fetchEsqlQuery'];
 
 /**
  * Execute an ES|QL query
