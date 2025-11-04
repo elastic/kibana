@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
@@ -75,6 +76,8 @@ export const useCasesAddToExistingCaseModal = ({
     });
   }, [dispatch]);
 
+  const trackAttachEvents = useAttachEventsEBT();
+
   const handleOnRowClick = useCallback(
     async (
       theCase: CaseUI | undefined,
@@ -110,6 +113,9 @@ export const useCasesAddToExistingCaseModal = ({
           attachments,
         });
 
+        // NOTE: this is where we add client side telemetry
+        trackAttachEvents('unknown', attachments);
+
         if (theCase.settings?.extractObservables && observables.length > 0) {
           await bulkPostObservables({ caseId: theCase.id, observables });
         }
@@ -129,18 +135,19 @@ export const useCasesAddToExistingCaseModal = ({
       }
     },
     [
-      appId,
-      casesToasts,
       closeModal,
-      createAttachments,
-      bulkPostObservables,
       openCreateNewCaseFlyout,
+      startTransaction,
+      appId,
+      createAttachments,
+      trackAttachEvents,
+      onSuccess,
+      casesToasts,
       successToaster?.title,
       successToaster?.content,
       noAttachmentsToaster?.title,
       noAttachmentsToaster?.content,
-      onSuccess,
-      startTransaction,
+      bulkPostObservables,
     ]
   );
 
