@@ -104,7 +104,7 @@ export const ValuesSelector = ({
     const count = selectedValues.length;
 
     return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           {count > 0 ? (
             <FormattedMessage
