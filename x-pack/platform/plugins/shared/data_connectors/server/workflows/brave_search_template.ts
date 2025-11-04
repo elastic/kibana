@@ -39,10 +39,15 @@ steps:
 /**
  * Get the workflow name for a given connector type
  */
-export function getWorkflowName(connectorType: string): string {
+export function getWorkflowName(connectorType: string, feature?: string): string {
   switch (connectorType) {
     case 'brave_search':
       return 'Brave Search';
+    case 'google_drive':
+      if (feature === 'search_files') return 'Google Drive - Search Files';
+      if (feature === 'download_file') return 'Google Drive - Download File';
+      if (feature === 'search_documents') return 'Google Drive - Search Documents';
+      return 'Google Drive';
     default:
       return `${connectorType} Workflow`;
   }
@@ -51,10 +56,18 @@ export function getWorkflowName(connectorType: string): string {
 /**
  * Get the workflow description for a given connector type
  */
-export function getWorkflowDescription(connectorType: string): string {
+export function getWorkflowDescription(connectorType: string, feature?: string): string {
   switch (connectorType) {
     case 'brave_search':
       return 'Search using Brave Search API with automatic secret resolution';
+    case 'google_drive':
+      if (feature === 'search_files')
+        return 'Search for files in Google Drive using OAuth authentication';
+      if (feature === 'download_file')
+        return 'Download files from Google Drive with OAuth authentication';
+      if (feature === 'search_documents')
+        return 'Search specifically for Google Docs in Google Drive';
+      return 'Federated search and access to Google Drive with automatic OAuth token management';
     default:
       return `Workflow for ${connectorType}`;
   }

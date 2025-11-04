@@ -11,6 +11,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/server';
 import { createBraveSearchWorkflowTemplate } from '../workflows/brave_search_template';
+import {
+  createGoogleDriveWorkflowTemplate,
+  // createGoogleDriveDownloadWorkflowTemplate,
+} from '../workflows/google_drive_template';
 
 export interface WorkflowCreatorService {
   createWorkflowForConnector(
@@ -61,6 +65,10 @@ export class WorkflowCreator implements WorkflowCreatorService {
     switch (connectorType) {
       case 'brave_search':
         workflowYaml = createBraveSearchWorkflowTemplate(connectorId, feature);
+        break;
+      case 'google_drive':
+        workflowYaml = createGoogleDriveWorkflowTemplate(connectorId, feature);
+        
         break;
       default:
         throw new Error(`Unsupported connector type: ${connectorType}`);

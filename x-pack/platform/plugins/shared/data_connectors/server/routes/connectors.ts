@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import axios from 'axios';
+import https from 'https';
+import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
@@ -25,6 +28,178 @@ export function registerConnectorRoutes(
   workflowCreator: WorkflowCreatorService,
   logger: Logger
 ) {
+  // Initiate Google Drive OAuth
+  router.post(
+    {
+      path: '/api/workplace_connectors/google/initiate',
+      validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+      try {
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const now = new Date().toISOString();
+
+        logger.info('HEYYYOOO');
+
+        const savedObject = await savedObjectsClient.create(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, {
+          name: 'Google Drive',
+          type: 'google_drive',
+          config: { status: 'pending_oauth' },
+          secrets: {},
+          features: ['search_files'],
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        const scope = [
+          'email',
+          'profile',
+          'https://www.googleapis.com/auth/drive.readonly',
+          'https://www.googleapis.com/auth/drive.metadata.readonly',
+        ];
+
+        const oauthUrl = `https://localhost:8052/oauth/start/google`;
+        const authresponse = await axios.post(oauthUrl, {
+          scope
+        }, {
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: false
+          })
+        });
+
+        const googleUrl = authresponse.data['auth_url']
+        const requestId = authresponse.data['request_id'];
+
+        logger.info(`Google URL: ${googleUrl}`);
+
+        return response.ok({
+          body: {
+            connectorId: savedObject.id,
+            requestId,
+            googleUrl,
+          },
+        });
+      } catch (error) {
+        logger.error(`Failed to initiate OAuth: ${error.message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to initiate OAuth: ${error.message}`,
+          },
+        });
+      }
+    }
+  );
+  
+  // Handle OAuth callback - fetches secrets and updates connector
+  router.get(
+    {
+      path: '/api/workplace_connectors/oauth/complete',
+      validate: {
+        query: schema.object({
+          request_id: schema.string(),
+          connector_id: schema.string(),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+      
+      try {
+        const { request_id, connector_id } = request.query;
+        const savedObjectsClient = coreContext.savedObjects.client;
+
+        // Fetch secrets from OAuth service
+        const secretsUrl = `https://localhost:8052/oauth/fetch_request_secrets?request_id=${request_id}`;
+        const secretsresponse = await axios.get(secretsUrl, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: false
+          })
+        });
+
+        const access_token = secretsresponse.data['access_token'];
+        const refresh_token = secretsresponse.data['refresh_token'];
+        const expires_in = secretsresponse.data['expires_in'];
+
+        logger.info(`Secrets fetched for connector ${connector_id}`);
+
+        logger.info(`Access Token: ${access_token}`);
+        logger.info(`Refresh Token: ${refresh_token}`);
+        logger.info(`Expires In: ${expires_in}`);
+
+        // Update connector with OAuth tokens
+        await savedObjectsClient.update(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, connector_id, {
+          secrets: {
+            access_token,
+            refresh_token: refresh_token || '',
+            expires_in: expires_in || '3600',
+          },
+          config: { status: 'connected' },
+          updatedAt: new Date().toISOString(),
+        });
+
+        // Create workflows for the connector
+        try {
+          const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+          const workflowIds: string[] = [];
+          const toolIds: string[] = [];
+
+          const features = ['search_files'];
+          for (const feature of features) {
+            const workflowId = await workflowCreator.createWorkflowForConnector(
+              connector_id,
+              'google_drive',
+              spaceId,
+              request,
+              feature
+            );
+            workflowIds.push(workflowId);
+            toolIds.push(`google_drive.${feature}`.slice(0, 64));
+          }
+
+          await savedObjectsClient.update(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, connector_id, {
+            workflowId: workflowIds[0],
+            workflowIds,
+            toolIds,
+          });
+        } catch (workflowError) {
+          logger.error(`Failed to create workflows: ${workflowError.message}`);
+        }
+
+        return response.ok({
+          body: {
+            success: true,
+            connector_id,
+          },
+        });
+      } catch (error) {
+        logger.error(`OAuth complete error: ${error.message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: error.message || 'Failed to complete OAuth',
+          },
+        });
+      }
+    }
+  );
+
   // Create connector
   router.post(
     {
@@ -53,7 +228,6 @@ export function registerConnectorRoutes(
         const savedObjectsClient = coreContext.savedObjects.client;
         const now = new Date().toISOString();
 
-        // Step 1: Create the connector
         const savedObject = await savedObjectsClient.create(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, {
           name,
           type,
@@ -63,13 +237,10 @@ export function registerConnectorRoutes(
           createdAt: now,
           updatedAt: now,
         });
-
-        // Step 2: Create the workflow(s) for this connector
         let workflowId: string | undefined;
         const workflowIds: string[] = [];
         const toolIds: string[] = [];
         try {
-          // Determine current space/namespace from the saved objects client
           const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
 
           const featuresToCreate = features.length > 0 ? features : ['search_web'];
@@ -84,8 +255,6 @@ export function registerConnectorRoutes(
             workflowIds.push(createdWorkflowId);
             toolIds.push(`${type}.${feature}`.slice(0, 64));
           }
-
-          // Step 3: Update the connector with workflow ids and tool ids
           workflowId = workflowIds[0];
           await savedObjectsClient.update(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id, {
             workflowId,
@@ -93,8 +262,6 @@ export function registerConnectorRoutes(
             toolIds,
           });
         } catch (workflowError) {
-          // Log the error but don't fail the connector creation
-          // The connector is still usable even without a workflow
           logger.error(
             `Failed to create workflow for connector ${savedObject.id}: ${
               (workflowError as Error).message
