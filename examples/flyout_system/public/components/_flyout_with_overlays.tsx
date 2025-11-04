@@ -84,9 +84,9 @@ interface FlyoutContentProps {
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
   childSize?: 's' | 'm' | 'fill';
-  isChildFlyoutOpen: boolean;
-  handleCloseChildFlyout: () => void;
-  openChildFlyout: () => void;
+  childMaxWidth?: number;
+  overlays: OverlayStart;
+  childFlyoutRef: React.MutableRefObject<OverlayRef | null>;
   handleCloseFlyout: () => void;
 }
 
@@ -98,11 +98,45 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
     mainSize,
     mainMaxWidth,
     childSize,
-    isChildFlyoutOpen,
-    handleCloseChildFlyout,
-    openChildFlyout,
+    childMaxWidth,
+    overlays,
+    childFlyoutRef,
     handleCloseFlyout,
   } = props;
+
+  const [isChildFlyoutOpen, setIsChildFlyoutOpen] = useState<boolean>(false);
+
+  const handleCloseChildFlyout = useCallback(() => {
+    if (childFlyoutRef.current) {
+      childFlyoutRef.current.close();
+      childFlyoutRef.current = null;
+      setIsChildFlyoutOpen(false);
+    }
+  }, [childFlyoutRef]);
+
+  const openChildFlyout = useCallback(() => {
+    if (childSize) {
+      childFlyoutRef.current = overlays.openSystemFlyout(
+        <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />,
+        {
+          id: `childFlyout-${title}`,
+          title: `Child flyout of ${title}`,
+          session: 'inherit',
+          size: childSize,
+          maxWidth: childMaxWidth,
+          onActive: () => {
+            console.log('activate child flyout', title); // eslint-disable-line no-console
+          },
+          onClose: () => {
+            console.log('close child flyout', title); // eslint-disable-line no-console
+            childFlyoutRef.current = null;
+            setIsChildFlyoutOpen(false);
+          },
+        }
+      );
+      setIsChildFlyoutOpen(true);
+    }
+  }, [childSize, childMaxWidth, overlays, title, childFlyoutRef]);
 
   return (
     <>
@@ -204,7 +238,6 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const [isChildFlyoutOpen, setIsChildFlyoutOpen] = useState<boolean>(false);
   const flyoutRef = useRef<OverlayRef | null>(null);
   const childFlyoutRef = useRef<OverlayRef | null>(null);
 
@@ -220,27 +253,17 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
     if (childFlyoutRef.current) {
       childFlyoutRef.current.close();
       childFlyoutRef.current = null;
-      setIsChildFlyoutOpen(false);
     }
 
     flyoutRef.current = null;
     setIsFlyoutOpen(false);
   }, [title]);
 
-  const handleCloseChildFlyout = useCallback(() => {
-    if (childFlyoutRef.current) {
-      childFlyoutRef.current.close();
-      childFlyoutRef.current = null;
-      setIsChildFlyoutOpen(false);
-    }
-  }, []);
-
   const handleCloseFlyout = useCallback(() => {
     // Close child flyout first if it's open
     if (childFlyoutRef.current) {
       childFlyoutRef.current.close();
       childFlyoutRef.current = null;
-      setIsChildFlyoutOpen(false);
     }
 
     // Then close main flyout
@@ -251,30 +274,6 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
     }
   }, []);
 
-  const openChildFlyout = useCallback(() => {
-    if (childSize) {
-      childFlyoutRef.current = overlays.openSystemFlyout(
-        <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />,
-        {
-          id: `childFlyout-${title}`,
-          title: `Child flyout of ${title}`,
-          session: 'inherit',
-          size: childSize,
-          maxWidth: childMaxWidth,
-          onActive: () => {
-            console.log('activate child flyout', title); // eslint-disable-line no-console
-          },
-          onClose: () => {
-            console.log('close child flyout', title); // eslint-disable-line no-console
-            childFlyoutRef.current = null;
-            setIsChildFlyoutOpen(false);
-          },
-        }
-      );
-      setIsChildFlyoutOpen(true);
-    }
-  }, [childSize, childMaxWidth, overlays, title]);
-
   const openFlyout = useCallback(() => {
     flyoutRef.current = overlays.openSystemFlyout(
       <FlyoutContent
@@ -284,9 +283,9 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
         mainSize={mainSize}
         mainMaxWidth={mainMaxWidth}
         childSize={childSize}
-        isChildFlyoutOpen={isChildFlyoutOpen}
-        handleCloseChildFlyout={handleCloseChildFlyout}
-        openChildFlyout={openChildFlyout}
+        childMaxWidth={childMaxWidth}
+        overlays={overlays}
+        childFlyoutRef={childFlyoutRef}
         handleCloseFlyout={handleCloseFlyout}
       />,
       {
@@ -309,9 +308,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
     mainSize,
     mainMaxWidth,
     childSize,
-    isChildFlyoutOpen,
-    handleCloseChildFlyout,
-    openChildFlyout,
+    childMaxWidth,
     handleCloseFlyout,
     overlays,
     mainFlyoutOnActive,
