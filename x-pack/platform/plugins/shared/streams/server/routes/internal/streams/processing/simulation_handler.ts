@@ -166,8 +166,8 @@ export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKe
  * Input: { "source.geo.location.lat": 41.9, "source.geo.location.lon": 42.0, "other": "value" }
  * Output: { "source.geo.location": { lat: 41.9, lon: 42.0 }, "other": "value" }
  */
-const regroupGeoPointFields = (flattenedDoc: FlattenRecord): Record<string, any> => {
-  const result: Record<string, any> = {};
+const regroupGeoPointFields = (flattenedDoc: FlattenRecord): FlattenRecord => {
+  const result: FlattenRecord = {};
   const processedGeoFields = new Set<string>();
 
   for (const [key, value] of Object.entries(flattenedDoc)) {
