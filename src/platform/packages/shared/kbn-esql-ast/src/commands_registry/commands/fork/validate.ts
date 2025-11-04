@@ -12,6 +12,7 @@ import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import { esqlCommandRegistry } from '../..';
 import { errors } from '../../../definitions/utils';
+import { isSubQuery } from '../../../ast/is';
 
 const MIN_BRANCHES = 2;
 const MAX_BRANCHES = 8;
@@ -50,6 +51,14 @@ export const validate = (
 
   if (forks.length > 1) {
     messages.push(errors.tooManyForks(forks[1]));
+  }
+
+  // FORK is not allowed when the query contains subqueries
+  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
+  const hasSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
+
+  if (hasSubqueries) {
+    messages.push(errors.forkNotAllowedWithSubqueries(command));
   }
 
   return messages;
