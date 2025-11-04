@@ -215,7 +215,7 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
       await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
 
       // Wait for submit button to be visible
-      expect(pageObjects.apiKeys.formFlyoutSubmitButton).toBeEnabled({ timeout: 10000 });
+      await expect(pageObjects.apiKeys.formFlyoutSubmitButton).toBeEnabled({ timeout: 10000 });
 
       // Verify flyout title
       const flyoutTitle = await pageObjects.apiKeys.getFlyoutTitleText();
@@ -263,7 +263,7 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
 
       // Get success toast text
       const toast = await pageObjects.apiKeys.getApiKeyUpdateSuccessToast();
-      expect(toast).toContainText(`Updated API key '${apiKeyName}'`);
+      await expect(toast).toContainText(`Updated API key '${apiKeyName}'`);
 
       // Verify URL contains api_keys path
       expect(page.url()).toContain('app/management/security/api_keys');
@@ -405,7 +405,7 @@ test.describe('Home page', { tag: tags.ESS_ONLY }, () => {
 
       // Refresh browser
       await page.reload();
-      expect(pageObjects.apiKeys.apiKeysTable).toBeVisible({ timeout: 10000 });
+      await expect(pageObjects.apiKeys.apiKeysTable).toBeVisible({ timeout: 10000 });
 
       // Click on API key to open flyout
       await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);

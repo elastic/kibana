@@ -183,7 +183,7 @@ export class ApiKeysPage {
    * Get the new API key creation message
    */
   async getNewApiKeyCreation() {
-    this.page.testSubj
+    await this.page.testSubj
       .locator('apiKeyCreatedCalloutSuccessDescription')
       .waitFor({ state: 'visible', timeout: 10000 });
     const euiCallOutHeader = this.page.locator('.euiCallOutHeader__title');
