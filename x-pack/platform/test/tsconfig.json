@@ -172,9 +172,10 @@
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
     "@kbn/alerting-types",
-    "@kbn/es-types",
     "@kbn/visualizations-common",
     "@kbn/test-subj-selector",
     "@kbn/onechat-server",
+    "@kbn/es-types",
+    "@kbn/connector-schemas",
   ]
 }
