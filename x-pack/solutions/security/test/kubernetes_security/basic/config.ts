@@ -6,7 +6,6 @@
  */
 
 import { createTestConfig } from '../common/config';
-import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 export default createTestConfig({
   license: 'basic',
