@@ -38,27 +38,62 @@ import { createScoutTestConfig } from './config';
 import type { ScoutMcpConfig } from './types';
 
 /**
+ * PathOptions interface matching Scout's KibanaUrl
+ */
+interface PathOptions {
+  /**
+   * Additional path segment to append to the app path
+   */
+  path?: string;
+  /**
+   * Query string parameters
+   */
+  params?: Record<string, string>;
+  /**
+   * The hash value of the URL
+   */
+  hash?: string;
+}
+
+/**
  * Kibana URL helper - simplified version of Scout's KibanaUrl
  * Using a simple object instead of class to avoid "too many classes" lint error
  * This matches the interface Scout expects for KibanaUrl
  */
 function createKibanaUrlHelper(baseUrl: URL) {
   return {
-    get(rel?: string): string {
-      return new URL(rel ?? '/', baseUrl).href;
+    get(rel?: string, options?: PathOptions): string {
+      const url = new URL(rel ?? '/', baseUrl);
+
+      if (options?.params) {
+        for (const [key, value] of Object.entries(options.params)) {
+          url.searchParams.set(key, value);
+        }
+      }
+
+      if (options?.hash !== undefined) {
+        url.hash = options.hash;
+      }
+
+      return url.href;
     },
     domain(): string {
       return baseUrl.hostname;
     },
-    app(appName: string, options?: { space?: string; pathOptions?: { path?: string } }): string {
+    app(appName: string, options?: { space?: string; pathOptions?: PathOptions }): string {
       const spacePath = options?.space ? `s/${options.space}` : '';
       const appPath = `${spacePath}/app/${appName}`;
-      const fullPath = options?.pathOptions?.path
-        ? `${appPath}${options.pathOptions.path.startsWith('/') ? '' : '/'}${
-            options.pathOptions.path
-          }`
-        : appPath;
-      return new URL(fullPath, baseUrl).href;
+
+      // Build the full path including any additional path segment
+      let fullPath = appPath;
+      if (options?.pathOptions?.path) {
+        const additionalPath = options.pathOptions.path;
+        fullPath = `${appPath}${additionalPath.startsWith('/') ? '' : '/'}${additionalPath}`;
+      }
+
+      // Extract params and hash for this.get(), excluding path
+      const { path: _, ...restOptions } = options?.pathOptions || {};
+      return this.get(fullPath, restOptions);
     },
     toString(): string {
       return baseUrl.href;
@@ -590,6 +625,10 @@ export class ScoutSession {
           const kbnUrl = await this.getKbnUrl();
           this.currentPage = extendPageWithScoutHelpers(page, kbnUrl);
         }
+      }
+      // After initialization or creation, currentPage should never be null
+      if (!this.currentPage) {
+        throw new Error('Failed to initialize ScoutPage');
       }
       return this.currentPage;
     });
