@@ -49,6 +49,10 @@
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-render",
     "@kbn/palettes",
+    "@kbn/visualizations-common",
+    "@kbn/lens-common",
+    "@kbn/expression-xy-plugin",
+    "@kbn/event-annotation-common",
   ],
   "exclude": [
     "target/**/*",

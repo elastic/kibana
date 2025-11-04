@@ -16,14 +16,14 @@ import type {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { LegendSize } from '@kbn/chart-expressions-common';
 
 import type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,
   CustomPaletteState,
 } from '@kbn/charts-plugin/common';
-import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import type {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,

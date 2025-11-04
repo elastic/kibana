@@ -7,7 +7,12 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MessageRole } from '@kbn/elastic-assistant-common';
+import type {
+  InterruptResumeValue,
+  InterruptValue,
+  MessageRole,
+} from '@kbn/elastic-assistant-common';
+import type { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
@@ -15,6 +20,7 @@ import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import { InterruptFactory } from '../typed_interrupt';
 
 interface Props {
   abortStream: () => void;
@@ -31,6 +37,10 @@ interface Props {
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
   messageRole: MessageRole;
+  interruptValue?: InterruptValue;
+  interruptResumeValue?: InterruptResumeValue;
+  resumeGraph: ResumeGraphFunction;
+  isLastInConversation: boolean;
 }
 
 export const StreamComment = ({
@@ -48,6 +58,10 @@ export const StreamComment = ({
   setIsStreaming,
   transformMessage,
   messageRole,
+  interruptValue,
+  interruptResumeValue,
+  resumeGraph,
+  isLastInConversation,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
@@ -113,6 +127,15 @@ export const StreamComment = ({
     );
   }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, stopStream]);
 
+  const footer = interruptValue && (
+    <InterruptFactory
+      interruptValue={interruptValue}
+      resumeGraph={resumeGraph}
+      interruptResumeValue={interruptResumeValue}
+      isLastInConversation={isLastInConversation}
+    />
+  );
+
   return (
     <MessagePanel
       body={
@@ -126,6 +149,7 @@ export const StreamComment = ({
           loading={isAnythingLoading}
         />
       }
+      footer={footer}
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

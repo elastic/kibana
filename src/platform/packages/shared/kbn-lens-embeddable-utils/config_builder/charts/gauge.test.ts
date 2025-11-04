@@ -26,13 +26,7 @@ test('generates gauge chart config', async () => {
   );
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "references": Array [
-        Object {
-          "id": "test",
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-      ],
+      "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
           "test": Object {},
@@ -63,7 +57,13 @@ test('generates gauge chart config', async () => {
           },
         },
         "filters": Array [],
-        "internalReferences": Array [],
+        "internalReferences": Array [
+          Object {
+            "id": "test",
+            "name": "indexpattern-datasource-layer-layer_0",
+            "type": "index-pattern",
+          },
+        ],
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -101,13 +101,7 @@ test('generates gauge chart config with goal and max', async () => {
   );
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "references": Array [
-        Object {
-          "id": "test",
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-      ],
+      "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
           "test": Object {},
@@ -154,7 +148,13 @@ test('generates gauge chart config with goal and max', async () => {
           },
         },
         "filters": Array [],
-        "internalReferences": Array [],
+        "internalReferences": Array [
+          Object {
+            "id": "test",
+            "name": "indexpattern-datasource-layer-layer_0",
+            "type": "index-pattern",
+          },
+        ],
         "query": Object {
           "language": "kuery",
           "query": "",

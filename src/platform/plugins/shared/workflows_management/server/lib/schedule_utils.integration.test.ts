@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  convertWorkflowScheduleToTaskSchedule,
-  convertRRuleToTaskSchedule,
-} from './schedule_utils';
 import { Frequency } from '@kbn/rrule';
+import {
+  convertRRuleToTaskSchedule,
+  convertWorkflowScheduleToTaskSchedule,
+} from './schedule_utils';
 
 /**
  * Integration test to verify RRule scheduling works end-to-end with TaskManager

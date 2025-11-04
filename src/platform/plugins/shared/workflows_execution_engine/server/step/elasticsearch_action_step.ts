@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments
+/* eslint-disable @typescript-eslint/no-explicit-any,  */
+
 import { buildRequestFromConnector } from '@kbn/workflows';
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './node_implementation';
-import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -31,33 +34,9 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
   }
 
   public getInput() {
-    // Get current context for templating
-    const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
-    return this.renderObjectTemplate(stepWith, context);
-  }
-
-  /**
-   * Recursively render the object template.
-   * @param obj - The object to render.
-   * @param context - The context to use for rendering.
-   * @returns The rendered object.
-   */
-  private renderObjectTemplate(obj: any, context: any): any {
-    if (Array.isArray(obj)) {
-      return obj.map((item) => this.renderObjectTemplate(item, context));
-    }
-    if (obj && typeof obj === 'object') {
-      return Object.entries(obj).reduce((acc, [key, value]) => {
-        acc[key] = this.renderObjectTemplate(value, context);
-        return acc;
-      }, {} as any);
-    }
-    if (typeof obj === 'string') {
-      return this.templatingEngine.render(obj, context);
-    }
-    return obj;
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -107,7 +86,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
           action_type: 'elasticsearch',
         },
       });
-      return await this.handleFailure(stepWith, error);
+      return this.handleFailure(stepWith, error);
     }
   }
 
@@ -120,19 +99,11 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
     if (params.request) {
       // Raw API format: { request: { method, path, body } } - like Dev Console
       const { method = 'GET', path, body } = params.request;
-      return await esClient.transport.request({
-        method,
-        path,
-        body,
-      });
+      return esClient.transport.request({ method, path, body });
     } else if (stepType === 'elasticsearch.request') {
       // Special case: elasticsearch.request type uses raw API format at top level
-      const { method = 'GET', path, body } = params;
-      return await esClient.transport.request({
-        method,
-        path,
-        body,
-      });
+      const { method = 'GET', path, body, headers } = params;
+      return esClient.transport.request({ method, path, body }, headers ? { headers } : {});
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {
@@ -155,12 +126,11 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         body: requestBody,
       };
 
-      // console.log('DEBUG - Sending to ES client:', JSON.stringify(requestOptions, null, 2));
+      // TODO: This is a hack to handle bulk requests. We should refactor this to use the bulk API properly.
       if (requestOptions.path.endsWith('/_bulk')) {
-        // console.log('DEBUG - Bulk request detected:', JSON.stringify(requestOptions.body, null, 2));
         // Further processing for bulk requests can be added here
         // SG: ugly hack cuz _bulk is special
-        const docs = requestOptions.body.operations; // your 3 doc objects
+        const docs = requestOptions.body?.operations as Array<Record<string, unknown>> | undefined; // your 3 doc objects
         // If the index is in the path `/tin-workflows/_bulk`, pass it explicitly:
         const pathIndex = requestOptions.path.split('/')[1]; // "tin-workflows"
 
@@ -168,33 +138,20 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         const refresh = queryParams?.refresh ?? false;
 
         // Turn each doc into an action+doc pair
-        const bulkBody = docs.flatMap((doc: any, i: number) => {
+        const bulkBody = docs?.flatMap((doc) => {
           // If you have ids, use: { index: { _id: doc._id } }
           return [{ index: {} }, doc];
         });
 
-        const resp = await esClient.bulk({
-          index: pathIndex, // default index for all actions
-          refresh, // true | false | 'wait_for'
-          body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
-        });
-
-        // Helpful: surface per-item errors if any
-        if (resp.errors) {
-          /*
-          const itemsWithErrors = resp.items
-            .map((it: any, idx: number) => ({
-              idx,
-              action: Object.keys(it)[0],
-              result: it[Object.keys(it)[0]],
-            }))
-            .filter((x: any) => x.result.error);
-          */
-          // console.error('Bulk had item errors:', itemsWithErrors);
+        if (bulkBody?.length) {
+          return esClient.bulk({
+            index: pathIndex, // default index for all actions
+            refresh, // true | false | 'wait_for'
+            body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
+          });
         }
-        return resp;
       }
-      return await esClient.transport.request(requestOptions);
+      return esClient.transport.request(requestOptions);
     }
   }
 }

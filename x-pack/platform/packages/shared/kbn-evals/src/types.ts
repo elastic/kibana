@@ -18,6 +18,7 @@ import type { ScoutWorkerFixtures } from '@kbn/scout';
 import type { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import type { EvaluationAnalysisService } from './utils/analysis';
+import { type EvaluationReporter } from './utils/report_model_score';
 
 export interface EvaluationDataset {
   name: string;
@@ -72,6 +73,7 @@ export interface EvaluationSpecificWorkerFixtures {
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
   evaluationAnalysisService: EvaluationAnalysisService;
+  reportModelScore: EvaluationReporter;
 }
 
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {

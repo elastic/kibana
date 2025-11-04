@@ -259,6 +259,13 @@
       "warning": []
     },
     {
+      "query": "FROM a_index | LEFT JOIN join_index ON textField == keywordField, booleanField",
+      "error": [
+        "JOIN ON clause must be a comma separated list of fields or a single expression"
+      ],
+      "warning": []
+    },
+    {
       "query": "from index | drop ",
       "error": [
         {
@@ -668,6 +675,26 @@
       "error": [
         {
           "sample": "SyntaxError:",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
+      "query": "SET time_zone = \"CEST\";",
+      "error": [
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
+      "query": "SET invalid_setting = \"_alias:_origin\"; FROM index",
+      "error": [
+        {
+          "sample": "Unknown setting invalid_setting",
           "inverse": false
         }
       ],

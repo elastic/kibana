@@ -90,6 +90,12 @@ spaceTest.describe(
           ...filterFieldAndValue,
           operator: 'is',
         });
+        expect(
+          await pageObjects.filterBar.hasFilter({
+            ...filterFieldAndValue,
+            enabled: true, // Filter is enabled by default
+          })
+        ).toBe(true);
         await page.testSubj.fill('queryInput', SEARCH_QUERY);
         await page.testSubj.click('querySubmitButton');
         await pageObjects.discover.waitForHistogramRendered();
@@ -100,7 +106,7 @@ spaceTest.describe(
         expect(
           await pageObjects.filterBar.hasFilter({
             ...filterFieldAndValue,
-            enabled: true, // Filter is enabled by default
+            enabled: true, // Filter is still enabled
           })
         ).toBe(true);
         await expect(page.testSubj.locator('queryInput')).toHaveText(SEARCH_QUERY);

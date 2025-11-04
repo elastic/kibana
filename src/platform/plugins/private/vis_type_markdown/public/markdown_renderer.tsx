@@ -10,7 +10,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';

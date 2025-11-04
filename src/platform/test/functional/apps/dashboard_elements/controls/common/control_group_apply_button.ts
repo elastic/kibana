@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await dashboard.navigateToApp();
-      await dashboard.loadSavedDashboard('Test Control Group Apply Button');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('Test Control Group Apply Button');
       await elasticChart.setNewChartUiDebugFlag();
     });
 

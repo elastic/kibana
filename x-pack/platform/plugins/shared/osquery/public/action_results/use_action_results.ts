@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { InspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
@@ -77,7 +77,7 @@ export const useActionResults = ({
           sortOrder: direction,
           ...(kuery && { kuery }),
           ...(startDate && { startDate }),
-          ...(agentIds?.length && { agentIds: agentIds.join(',') }),
+          // Note: agentIds NOT included - server fetches from action document
         },
       }),
     {
@@ -100,7 +100,7 @@ export const useActionResults = ({
       },
       refetchInterval: isLive ? 5000 : false,
       keepPreviousData: true,
-      enabled: !!agentIds?.length,
+      enabled: !!actionId && !!agentIds?.length,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {

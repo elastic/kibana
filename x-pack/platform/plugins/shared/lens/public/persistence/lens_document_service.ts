@@ -7,31 +7,17 @@
 
 import type { HttpStart } from '@kbn/core/public';
 
+import type {
+  LensDocument,
+  ILensDocumentService,
+  CheckDuplicateTitleOptions,
+} from '@kbn/lens-common';
 import { LensClient } from './lens_client';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
-import type { LensDocument } from './types';
 import type { LensSearchRequestQuery } from '../../server';
-
-export interface CheckDuplicateTitleOptions {
-  id?: string;
-  title: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-}
 
 interface LensSaveResult {
   savedObjectId: string;
-}
-
-interface ILensDocumentService {
-  save: (vis: LensDocument) => Promise<LensSaveResult>;
-  load: (savedObjectId: string) => Promise<unknown>;
-  checkForDuplicateTitle: (
-    options: CheckDuplicateTitleOptions,
-    onTitleDuplicate: () => void
-  ) => Promise<boolean>;
 }
 
 export class LensDocumentService implements ILensDocumentService {

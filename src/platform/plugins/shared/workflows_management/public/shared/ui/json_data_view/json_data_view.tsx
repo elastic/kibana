@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonGroup, EuiSpacer, EuiFieldSearch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { i18n } from '@kbn/i18n';
+import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import { JsonDataCode } from './json_data_code';
 import { JSONDataTable } from './json_data_table';
 
 const SearchTermStorageKey = 'workflows_management.step_execution.searchTerm';
-const ViewModeOptions = [
+
+const ViewModeOptions: EuiButtonGroupOptionProps[] = [
   {
     id: 'table',
     label: i18n.translate('workflows.jsonDataTable.viewMode.table', {
@@ -32,6 +35,10 @@ const ViewModeOptions = [
     iconType: 'code',
   },
 ];
+const TableDisabledTooltip = i18n.translate(
+  'workflows.jsonDataTable.viewMode.tableDisabledTooltip',
+  { defaultMessage: 'Primitive data cannot be rendered in a table view' }
+);
 
 export interface JSONDataViewProps {
   /**
@@ -39,7 +46,7 @@ export interface JSONDataViewProps {
    * If an array is provided, only the first object will be displayed.
    * If a primitive value is provided, it will be wrapped in an object.
    */
-  data: Record<string, unknown>;
+  data: JsonValue;
   /** Optional title for the data view. Defaults to 'JSON Data' */
   title?: string;
   /** Optional prefix for the field path actions, such as the copy the field path to the clipboard. */
@@ -48,7 +55,7 @@ export interface JSONDataViewProps {
 
 export const JSONDataView = React.memo<JSONDataViewProps>(
   ({ data, title, fieldPathActionsPrefix }) => {
-    const [viewMode, setViewMode] = useState<'table' | 'json'>('table');
+    const [selectedViewMode, setSelectedViewMode] = useState<'table' | 'json'>('table');
 
     const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(SearchTermStorageKey, '');
     const [searchTerm, setSearchTerm] = useState(storedSearchTerm ?? '');
@@ -58,6 +65,10 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
       [setStoredSearchTerm]
     );
 
+    const handleViewModeChange = useCallback((id: string) => {
+      setSelectedViewMode(id as 'table' | 'json');
+    }, []);
+
     const handleSearchTermChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
@@ -66,6 +77,35 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
       },
       [setStoredSearchTermDebounced]
     );
+
+    // This prevents data from being displayed as a table if it is not tabular.
+    const tabularData = useMemo<JsonArray | JsonObject | undefined>(() => {
+      if (data == null) {
+        return undefined;
+      }
+      if (Array.isArray(data) || typeof data === 'object') {
+        return data;
+      }
+      return undefined; // Data cannot be displayed as a table, so return undefined.
+    }, [data]);
+
+    const viewModeOptions = useMemo<EuiButtonGroupOptionProps[]>(() => {
+      if (tabularData) {
+        return ViewModeOptions;
+      }
+      // Data cannot be displayed as a table, so disable the table view mode and show a tooltip.
+      return ViewModeOptions.map<EuiButtonGroupOptionProps>((option) => ({
+        ...option,
+        ...(option.id === 'table' && { disabled: true, toolTipContent: TableDisabledTooltip }),
+      }));
+    }, [tabularData]);
+
+    const viewMode = useMemo(() => {
+      if (selectedViewMode === 'table' && tabularData) {
+        return 'table';
+      }
+      return 'json';
+    }, [selectedViewMode, tabularData]);
 
     return (
       <EuiFlexGroup
@@ -108,8 +148,8 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
                 legend={i18n.translate('workflows.jsonDataTable.viewMode', {
                   defaultMessage: 'View mode',
                 })}
-                onChange={(id) => setViewMode(id as 'table' | 'json')}
-                options={ViewModeOptions}
+                onChange={handleViewModeChange}
+                options={viewModeOptions}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -117,9 +157,9 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
 
         <EuiFlexItem grow={true}>
           <EuiSpacer size="s" />
-          {viewMode === 'table' && (
+          {viewMode === 'table' && tabularData && (
             <JSONDataTable
-              data={data}
+              data={tabularData}
               title={title}
               searchTerm={searchTerm}
               fieldPathActionsPrefix={fieldPathActionsPrefix}
@@ -131,3 +171,4 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
     );
   }
 );
+JSONDataView.displayName = 'JSONDataView';

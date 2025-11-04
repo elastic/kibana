@@ -49,8 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           exitFromEditMode: false,
           saveAsNew: true,
         });
-        await dashboard.loadSavedDashboard(DASHBOARD_NAME);
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode(DASHBOARD_NAME);
       });
 
       it('can not add an external link that violates externalLinks.policy', async () => {
@@ -132,8 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('editing', () => {
       it('can reorder links in an existing panel', async () => {
-        await dashboard.loadSavedDashboard('links 001');
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('links 001');
 
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
@@ -151,8 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can edit link in existing panel', async () => {
-        await dashboard.loadSavedDashboard('links 001');
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('links 001');
 
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
@@ -169,8 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can delete link from existing panel', async () => {
-        await dashboard.loadSavedDashboard('links 001');
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('links 001');
 
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();

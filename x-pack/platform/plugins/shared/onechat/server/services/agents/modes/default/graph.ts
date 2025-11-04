@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
-import { messagesStateReducer } from '@langchain/langgraph';
+import { StateGraph, START as _START_, END as _END_ } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
@@ -15,27 +13,12 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import type { ResolvedConfiguration } from '../types';
 import { getActPrompt, getAnswerPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
-import type { ResolvedConfiguration } from '../types';
-
-const StateAnnotation = Annotation.Root({
-  // inputs
-  initialMessages: Annotation<BaseMessageLike[]>({
-    reducer: messagesStateReducer,
-    default: () => [],
-  }),
-  // internals
-  nextMessage: Annotation<AIMessage>(),
-  handoverNote: Annotation<string>(),
-  // outputs
-  addedMessages: Annotation<BaseMessage[]>({
-    reducer: messagesStateReducer,
-    default: () => [],
-  }),
-});
-
-export type StateType = typeof StateAnnotation.State;
+import { steps, tags } from './constants';
+import type { StateType } from './state';
+import { StateAnnotation } from './state';
 
 export const createAgentGraph = ({
   chatModel,
@@ -54,15 +37,15 @@ export const createAgentGraph = ({
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
-  const model = chatModel.bindTools(tools).withConfig({
-    tags: ['onechat-agent'],
+  const researcherModel = chatModel.bindTools(tools).withConfig({
+    tags: [tags.agent, tags.researchAgent],
   });
 
-  const callModel = async (state: StateType) => {
+  const researchAgent = async (state: StateType) => {
     if (state.addedMessages.length === 0) {
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
-    const response = await model.invoke(
+    const response = await researcherModel.invoke(
       getActPrompt({
         customInstructions: configuration.research.instructions,
         capabilities,
@@ -70,44 +53,53 @@ export const createAgentGraph = ({
       })
     );
     return {
+      currentCycle: state.currentCycle + 1,
       nextMessage: response,
     };
   };
 
   const shouldContinue = async (state: StateType) => {
-    const lastMessage = state.nextMessage;
-    if (lastMessage && lastMessage.tool_calls?.length) {
-      return 'tools';
+    const hasToolCalls = state.nextMessage && (state.nextMessage.tool_calls ?? []).length > 0;
+    const maxCycleReached = state.currentCycle > state.cycleLimit;
+    if (hasToolCalls && !maxCycleReached) {
+      return steps.executeTool;
+    } else {
+      return steps.prepareToAnswer;
     }
-    return 'handoverToAnswer';
   };
 
-  const toolHandler = async (state: StateType) => {
+  const executeTool = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke([state.nextMessage], {});
     return {
       addedMessages: [state.nextMessage, ...toolNodeResult],
     };
   };
 
-  const handoverToAnswer = async (state: StateType) => {
-    const handoverMessage = state.nextMessage;
-    const messageContent = extractTextContent(handoverMessage);
+  const prepareToAnswer = async (state: StateType) => {
+    const maxCycleReached = state.currentCycle > state.cycleLimit;
+    let handoverNote: string | undefined;
+    if (!maxCycleReached) {
+      const handoverMessage = state.nextMessage;
+      handoverNote = extractTextContent(handoverMessage);
+    }
     return {
-      handoverNote: messageContent,
+      handoverNote,
+      maxCycleReached,
     };
   };
 
   const answeringModel = chatModel.withConfig({
-    tags: ['onechat-agent', 'answering-step'],
+    tags: [tags.agent, tags.answerAgent],
   });
 
-  const generateAnswer = async (state: StateType) => {
+  const answerAgent = async (state: StateType) => {
     events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     const response = await answeringModel.invoke(
       getAnswerPrompt({
         customInstructions: configuration.answer.instructions,
         capabilities,
         handoverNote: state.handoverNote,
+        searchInterrupted: state.maxCycleReached,
         discussion: [...state.initialMessages, ...state.addedMessages],
       })
     );
@@ -118,18 +110,20 @@ export const createAgentGraph = ({
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
-    .addNode('agent', callModel)
-    .addNode('tools', toolHandler)
-    .addNode('handoverToAnswer', handoverToAnswer)
-    .addNode('answer', generateAnswer)
-    .addEdge('__start__', 'agent')
-    .addEdge('tools', 'agent')
-    .addConditionalEdges('agent', shouldContinue, {
-      tools: 'tools',
-      handoverToAnswer: 'handoverToAnswer',
+    // nodes
+    .addNode(steps.researchAgent, researchAgent)
+    .addNode(steps.executeTool, executeTool)
+    .addNode(steps.prepareToAnswer, prepareToAnswer)
+    .addNode(steps.answerAgent, answerAgent)
+    // edges
+    .addEdge(_START_, steps.researchAgent)
+    .addEdge(steps.executeTool, steps.researchAgent)
+    .addConditionalEdges(steps.researchAgent, shouldContinue, {
+      [steps.executeTool]: steps.executeTool,
+      [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
-    .addEdge('handoverToAnswer', 'answer')
-    .addEdge('answer', '__end__')
+    .addEdge(steps.prepareToAnswer, steps.answerAgent)
+    .addEdge(steps.answerAgent, _END_)
     .compile();
 
   return graph;

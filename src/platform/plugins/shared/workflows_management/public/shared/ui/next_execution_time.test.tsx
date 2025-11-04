@@ -9,9 +9,9 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
 import { NextExecutionTime } from './next_execution_time';
 import { useGetFormattedDateTime } from './use_formatted_date';
+import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
 import { getWorkflowNextExecutionTime } from '../../lib/next_execution_time';
 
 // Mock the dependencies
@@ -39,7 +39,7 @@ describe('NextExecutionTime', () => {
     }));
   };
 
-  const TestChild = () => <div data-test-subj="test-child">Test Child</div>;
+  const TestChild = () => <div data-test-subj="test-child">{'Test Child'}</div>;
 
   describe('children rendering', () => {
     it('should always render children regardless of nextExecutionTime', () => {
@@ -87,10 +87,7 @@ describe('NextExecutionTime', () => {
     });
 
     it('should handle non-scheduled triggers only', () => {
-      const triggers = createMockTriggers([
-        { type: 'manual', enabled: true },
-        { type: 'alert', enabled: true },
-      ]);
+      const triggers = createMockTriggers([{ type: 'manual' }, { type: 'alert' }]);
       mockGetWorkflowNextExecutionTime.mockReturnValue(null);
 
       render(
@@ -103,9 +100,7 @@ describe('NextExecutionTime', () => {
     });
 
     it('should handle scheduled triggers only', () => {
-      const triggers = createMockTriggers([
-        { type: 'scheduled', enabled: true, with: { every: '5m' } },
-      ]);
+      const triggers = createMockTriggers([{ type: 'scheduled', with: { every: '5m' } }]);
       const nextExecutionTime = new Date('2025-01-15T11:00:00Z');
       mockGetWorkflowNextExecutionTime.mockReturnValue(nextExecutionTime);
       mockGetFormattedDateTime.mockReturnValue('Jan 15, 2025 11:00 AM');
@@ -123,9 +118,9 @@ describe('NextExecutionTime', () => {
 
     it('should handle mixed trigger types', () => {
       const triggers = createMockTriggers([
-        { type: 'manual', enabled: true },
-        { type: 'alert', enabled: true },
-        { type: 'scheduled', enabled: true, with: { every: '30m' } },
+        { type: 'manual' },
+        { type: 'alert' },
+        { type: 'scheduled', with: { every: '30m' } },
       ]);
       const nextExecutionTime = new Date('2025-01-15T10:30:00Z');
       mockGetWorkflowNextExecutionTime.mockReturnValue(nextExecutionTime);

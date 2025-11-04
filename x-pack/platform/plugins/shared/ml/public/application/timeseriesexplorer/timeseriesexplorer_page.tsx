@@ -58,7 +58,14 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
         ref={resizeRef}
         data-test-subj="mlPageSingleMetricViewer"
       >
-        <MlPageHeader leftSideItems={[<AnomalyResultsViewSelector viewId="timeseriesexplorer" />]}>
+        <MlPageHeader
+          leftSideItems={[
+            <AnomalyResultsViewSelector
+              key="anomaly-results-view-selector"
+              viewId="timeseriesexplorer"
+            />,
+          ]}
+        >
           <PageTitle
             title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
               defaultMessage: 'Single Metric Viewer',
