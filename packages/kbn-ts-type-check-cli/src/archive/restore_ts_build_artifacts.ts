@@ -38,9 +38,6 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
       return;
     }
 
-    log.info(`Checking ${candidateShas.length} shas`);
-    log.info(candidateShas.join(', '));
-
     const prNumber = getPullRequestNumber();
 
     const archiveCandidate = isCiEnvironment()

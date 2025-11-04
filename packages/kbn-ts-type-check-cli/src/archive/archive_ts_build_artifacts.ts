@@ -169,13 +169,7 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
             stderr: 'inherit',
           });
 
-          if (!tarProcess.stdout || !uploadProcess.stdin) {
-            tarProcess.kill();
-            uploadProcess.kill();
-            throw new Error('Failed to stream TypeScript cache archive to GCS.');
-          }
-
-          tarProcess.stdout.pipe(uploadProcess.stdin);
+          tarProcess.stdout!.pipe(uploadProcess.stdin!);
 
           await Promise.all([tarProcess, uploadProcess]);
 
