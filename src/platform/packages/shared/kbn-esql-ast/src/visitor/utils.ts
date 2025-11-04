@@ -86,5 +86,9 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
       }
       break;
     }
+    case 'parens': {
+      yield node.child;
+      break;
+    }
   }
 }

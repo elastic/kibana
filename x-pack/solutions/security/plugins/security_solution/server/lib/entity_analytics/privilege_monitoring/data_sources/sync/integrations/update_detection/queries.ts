@@ -6,6 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { memoize } from 'lodash';
+import hash from 'object-hash';
 import type {
   Matcher,
   MonitoringEntitySource,
@@ -17,68 +19,92 @@ import { makeIntegrationOpsBuilder } from '../../../bulk/upsert';
 import { errorsMsg, getErrorFromBulkResponse } from '../../utils';
 
 /**
- * Build painless script for matcher
- * @param matcher - matcher object containing fields and values to match against
- * @returns
+ * Build painless script for matchers
+ * If we create new matcher types in the future, I think we may need to abandon
+ * using painless due to script complexity and do the checking in TS code instead.
+ * @param matchers - matcher objects containing fields and values to match against
+ * @returns Painless script object
  */
-export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
-  if (!matcher || matcher.fields.length === 0 || matcher.values.length === 0) {
-    throw new Error('Invalid matcher: fields and values must be defined and non-empty');
+const buildMatcherScript = (matchers: Matcher[]): estypes.Script => {
+  if (matchers.length === 0) {
+    // if no matchers then everyone is privileged
+    return {
+      lang: 'painless',
+      source: 'true',
+    };
   }
+
+  const source = matchers.map(valuesMatcherToPainless).join(' || ');
 
   return {
     lang: 'painless',
-    params: {
-      matcher_fields: matcher.fields,
-      matcher_values: matcher.values,
-    },
-    source: `
-      for (def f : params.matcher_fields) {
-        if (doc.containsKey(f) && !doc[f].empty) {
-          for (def v : doc[f]) {
-            if (params.matcher_values.contains(v)) return true;
-          }
-        }
-      }
-      return false;
-    `,
+    source,
   };
+};
+
+/**
+ * Convert values matcher to painless script, this is currently the only supported matcher type.
+ * A values matcher looks for specific values in specified fields like:
+ * { fields: ['user.roles'], values: ['admin', 'superuser'] }
+ */
+const valuesMatcherToPainless = (matcher: Matcher): string => {
+  const valuesLiteral = matcher.values.map((value) => JSON.stringify(value)).join(', ');
+  const fieldChecks = matcher.fields
+    .map(
+      (field) =>
+        `(doc.containsKey('${field}') && doc['${field}'].size() > 0 && [${valuesLiteral}].contains(doc['${field}'].value))`
+    )
+    .join(' || ');
+  return `(${fieldChecks})`;
+};
+
+/**
+ * Extract unique matcher fields for _source includes
+ */
+const extractMatcherFields = (matchers: Matcher[]): string[] => {
+  const fields = matchers.flatMap((matcher) => matcher.fields);
+  return Array.from(new Set(fields));
 };
 
 /**
  * Building privileged search body for matchers
  */
 export const buildPrivilegedSearchBody = (
-  script: estypes.Script,
+  matchers: Matcher[],
   timeGte: string,
-  matchersField: string,
   afterKey?: AfterKey,
   pageSize: number = 100
-): Omit<estypes.SearchRequest, 'index'> => ({
-  size: 0,
-  query: {
-    range: { '@timestamp': { gte: timeGte, lte: 'now' } },
-  },
-  aggs: {
-    privileged_user_status_since_last_run: {
-      composite: {
-        size: pageSize,
-        sources: [{ username: { terms: { field: 'user.name' } } }],
-        ...(afterKey ? { after: afterKey } : {}),
-      },
-      aggs: {
-        latest_doc_for_user: {
-          top_hits: {
-            size: 1,
-            sort: [{ '@timestamp': { order: 'desc' as estypes.SortOrder } }],
-            script_fields: { 'user.is_privileged': { script } },
-            _source: { includes: ['user', matchersField, '@timestamp'] },
+): Omit<estypes.SearchRequest, 'index'> => {
+  // this will get called multiple times with the same matchers during pagination
+  const script = memoize(buildMatcherScript, (v) => hash(v))(matchers);
+  return {
+    size: 0,
+    query: {
+      range: { '@timestamp': { gte: timeGte, lte: 'now' } },
+    },
+    aggs: {
+      privileged_user_status_since_last_run: {
+        composite: {
+          size: pageSize,
+          sources: [{ username: { terms: { field: 'user.name' } } }],
+          ...(afterKey ? { after: afterKey } : {}),
+        },
+        aggs: {
+          latest_doc_for_user: {
+            top_hits: {
+              size: 1,
+              sort: [{ '@timestamp': { order: 'desc' as estypes.SortOrder } }],
+              script_fields: { 'user.is_privileged': { script } },
+              _source: {
+                includes: ['@timestamp', 'user.name', ...extractMatcherFields(matchers)],
+              },
+            },
           },
         },
       },
     },
-  },
-});
+  };
+};
 
 export const applyPrivilegedUpdates = async ({
   dataClient,
