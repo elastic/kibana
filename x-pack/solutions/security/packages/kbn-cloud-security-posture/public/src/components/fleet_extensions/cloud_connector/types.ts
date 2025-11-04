@@ -12,7 +12,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { CloudConnectorSecretReference } from '@kbn/fleet-plugin/public/types';
+import type { CloudConnectorSecretReference, CloudProvider } from '@kbn/fleet-plugin/public/types';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '@kbn/fleet-plugin/common/types';
 import type { UpdatePolicy } from '../types';
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
@@ -51,7 +51,7 @@ export interface NewCloudConnectorFormProps {
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
   templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
@@ -89,7 +89,7 @@ export interface CloudConnectorFormProps {
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
   isOrganization?: boolean;
   templateName?: string;
   credentials?: CloudConnectorCredentials;
@@ -107,7 +107,7 @@ export type CloudSetupForCloudConnector = Pick<
 >;
 
 export interface CloudFormationCloudCredentialsGuideProps {
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
 }
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {

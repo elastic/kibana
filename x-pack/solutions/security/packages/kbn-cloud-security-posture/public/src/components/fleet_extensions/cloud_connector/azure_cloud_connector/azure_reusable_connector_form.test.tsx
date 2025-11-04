@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { CloudProvider } from '@kbn/fleet-plugin/public';
 import { AzureReusableConnectorForm } from './azure_reusable_connector_form';
 import type { AzureCloudConnectorCredentials } from '../types';
 
@@ -27,7 +28,9 @@ interface UseGetCloudConnectorsReturn {
 }
 
 const mockUseGetCloudConnectors = jest.requireMock('../hooks/use_get_cloud_connectors')
-  .useGetCloudConnectors as jest.MockedFunction<(provider?: string) => UseGetCloudConnectorsReturn>;
+  .useGetCloudConnectors as jest.MockedFunction<
+  (provider?: CloudProvider) => UseGetCloudConnectorsReturn
+>;
 
 // Helper to render with I18n provider
 const renderWithIntl = (component: React.ReactElement) => {

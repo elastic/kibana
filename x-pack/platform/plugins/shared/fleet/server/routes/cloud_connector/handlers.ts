@@ -22,6 +22,7 @@ import type {
   UpdateCloudConnectorResponse,
   DeleteCloudConnectorResponse,
   CreateAgentPolicyWithCloudConnectorResponse,
+  UpdateCloudConnectorRequest,
 } from '../../../common/types/rest_spec/cloud_connector';
 import type {
   CreateCloudConnectorRequestSchema,
@@ -78,16 +79,12 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
     const cloudConnectors = await cloudConnectorService.getList(internalSoClient, {
       page: page ? parseInt(page, 10) : undefined,
       perPage: perPage ? parseInt(perPage, 10) : undefined,
+      cloudProvider,
     });
-
-    // Filter by cloudProvider if provided
-    const filteredConnectors = cloudProvider
-      ? cloudConnectors.filter((connector) => connector.cloudProvider === cloudProvider)
-      : cloudConnectors;
 
     logger.info('Successfully retrieved cloud connectors list');
     const body: GetCloudConnectorsResponse = {
-      items: filteredConnectors,
+      items: cloudConnectors,
     };
     return response.ok({ body });
   } catch (error) {
@@ -148,7 +145,8 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
     const result = await cloudConnectorService.update(
       internalSoClient,
       cloudConnectorId,
-      request.body as any // Schema validation already passed
+      // Type cast is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
+      request.body as Partial<UpdateCloudConnectorRequest>
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
     const body: UpdateCloudConnectorResponse = {

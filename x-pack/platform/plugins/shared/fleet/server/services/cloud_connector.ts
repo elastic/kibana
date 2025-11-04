@@ -12,6 +12,8 @@ import type {
   CloudConnector,
   CloudConnectorListOptions,
   CloudConnectorSecretReference,
+  AwsCloudConnectorVars,
+  AzureCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../../common/services';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
@@ -31,7 +33,6 @@ import {
   CloudConnectorGetListError,
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
-  CloudConnectorUpdateError,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -96,17 +97,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const useSpaceAwareness = await isSpaceAwarenessEnabled();
       const namespace = useSpaceAwareness ? '*' : undefined;
 
-      // Validate cloud connector vars based on provider
-      const isValidVars =
-        (cloudProvider === 'aws' && isAwsCloudConnectorVars(vars)) ||
-        (cloudProvider === 'azure' && isAzureCloudConnectorVars(vars));
-
-      if (!isValidVars) {
-        throw new CloudConnectorCreateError(
-          `CloudConnectorService Missing required variables for ${cloudProvider} cloud connector`
-        );
-      }
-
       const cloudConnectorAttributes: CloudConnectorSOAttributes = {
         name,
         namespace,
@@ -144,13 +134,20 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     logger.debug('Getting cloud connectors list');
 
     try {
-      const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>({
+      const findOptions: any = {
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: options?.page || 1,
         perPage: options?.perPage || 20,
         sortField: 'created_at',
         sortOrder: 'desc',
-      });
+      };
+
+      // Add cloudProvider filter if specified
+      if (options?.cloudProvider) {
+        findOptions.filter = `${CLOUD_CONNECTOR_SAVED_OBJECT_TYPE}.attributes.cloudProvider: "${options.cloudProvider}"`;
+      }
+
+      const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>(findOptions);
 
       logger.debug('Successfully retrieved cloud connectors list');
 
@@ -230,18 +227,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       }
 
       if (cloudConnectorUpdate.vars) {
-        const cloudProvider = existingCloudConnector.attributes.cloudProvider;
-
-        const isValidVars =
-          (cloudProvider === 'aws' && isAwsCloudConnectorVars(cloudConnectorUpdate.vars)) ||
-          (cloudProvider === 'azure' && isAzureCloudConnectorVars(cloudConnectorUpdate.vars));
-
-        if (!isValidVars) {
-          throw new CloudConnectorUpdateError(
-            `CloudConnectorService Missing required variables for ${cloudProvider} cloud connector update`
-          );
-        }
-
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }
 
@@ -329,19 +314,17 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const vars = cloudConnector.vars;
 
     if (cloudConnector.cloudProvider === 'aws') {
-      if (!isAwsCloudConnectorVars(vars)) {
-        logger.error('Package policy must contain valid AWS cloud connector variables');
-        throw new CloudConnectorInvalidVarsError(
-          'Package policy must contain role_arn and external_id'
-        );
+      // Type assertion is safe here because we perform runtime validation below
+      const awsVars = vars as AwsCloudConnectorVars;
+      const roleArn = awsVars.role_arn?.value;
+      if (!roleArn) {
+        logger.error('Package policy must contain role_arn variable');
+        throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
       }
 
-      const roleArn = vars.role_arn.value;
-      const externalId: CloudConnectorSecretReference = vars.external_id.value;
-
-      // Validate both role_arn and external_id together
-      if (!roleArn || !externalId) {
-        logger.error('Package policy must contain both role_arn and external_id');
+      const externalId: CloudConnectorSecretReference = awsVars.external_id?.value;
+      if (!externalId) {
+        logger.error('Package policy must contain valid external_id secret reference');
         throw new CloudConnectorInvalidVarsError(
           'Package policy must contain role_arn and external_id'
         );
@@ -357,17 +340,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         throw new CloudConnectorInvalidVarsError('External ID secret reference is not valid');
       }
     } else if (cloudConnector.cloudProvider === 'azure') {
-      if (!isAzureCloudConnectorVars(vars)) {
-        logger.error('Package policy must contain valid Azure cloud connector variables');
-        throw new CloudConnectorInvalidVarsError(
-          `Package policy must contain ${TENANT_ID_VAR_NAME}, ${CLIENT_ID_VAR_NAME}, and ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID}`
-        );
-      }
-
-      // Validate that all required Azure fields have valid secret references together
-      const tenantId = vars.tenant_id;
-      const clientId = vars.client_id;
-      const azureCredentials = vars.azure_credentials_cloud_connector_id;
+      // Type assertion is safe here because we perform runtime validation below
+      const azureVars = vars as AzureCloudConnectorVars;
+      // Validate that all required Azure fields have valid secret references
+      const tenantId = azureVars.tenant_id;
+      const clientId = azureVars.client_id;
+      const azureCredentials = azureVars.azure_credentials_cloud_connector_id;
 
       const isValidTenantId = tenantId?.value?.id && tenantId?.value?.isSecretRef;
       const isValidClientId = clientId?.value?.id && clientId?.value?.isSecretRef;

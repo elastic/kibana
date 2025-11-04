@@ -6,14 +6,18 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { CloudConnector, CloudConnectorListOptions } from '@kbn/fleet-plugin/public';
+import type {
+  CloudConnector,
+  CloudConnectorListOptions,
+  CloudProvider,
+} from '@kbn/fleet-plugin/public';
 import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/public';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 const fetchCloudConnectors = async (
   http: HttpStart,
-  options?: CloudConnectorListOptions & { cloudProvider?: string }
+  options?: CloudConnectorListOptions
 ): Promise<CloudConnector[]> => {
   const query: Record<string, string> = {};
 
@@ -36,7 +40,7 @@ const fetchCloudConnectors = async (
     .then((res: { items: CloudConnector[] }) => res.items);
 };
 
-export const useGetCloudConnectors = (cloudProvider?: string) => {
+export const useGetCloudConnectors = (cloudProvider?: CloudProvider) => {
   const CLOUD_CONNECTOR_QUERY_KEY = 'get-cloud-connectors';
   const { http } = useKibana<CoreStart>().services;
   return useQuery(

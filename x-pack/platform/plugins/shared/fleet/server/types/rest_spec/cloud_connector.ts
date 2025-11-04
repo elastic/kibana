@@ -84,12 +84,14 @@ export const CreateCloudConnectorRequestSchema = {
     name: schema.string({
       minLength: 1,
       maxLength: 255,
+      meta: { description: 'The name of the cloud connector.' },
     }),
-    cloudProvider: schema.oneOf([
-      schema.literal('aws'),
-      schema.literal('azure'),
-      schema.literal('gcp'),
-    ]),
+    cloudProvider: schema.oneOf(
+      [schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')],
+      {
+        meta: { description: 'The cloud provider type: aws, azure, or gcp.' },
+      }
+    ),
     vars: CloudConnectorVarsSchema,
   }),
 };
@@ -113,9 +115,21 @@ export const CreateCloudConnectorResponseSchema = schema.object({
 
 export const GetCloudConnectorsRequestSchema = {
   query: schema.object({
-    page: schema.maybe(schema.string()),
-    perPage: schema.maybe(schema.string()),
-    cloudProvider: schema.maybe(schema.oneOf([schema.literal('aws'), schema.literal('azure')])),
+    page: schema.maybe(
+      schema.string({
+        meta: { description: 'The page number for pagination.' },
+      })
+    ),
+    perPage: schema.maybe(
+      schema.string({
+        meta: { description: 'The number of items per page.' },
+      })
+    ),
+    cloudProvider: schema.maybe(
+      schema.oneOf([schema.literal('aws'), schema.literal('azure')], {
+        meta: { description: 'Filter by cloud provider: aws or azure.' },
+      })
+    ),
   }),
 };
 
@@ -136,7 +150,9 @@ export const GetCloudConnectorsResponseSchema = schema.object({
 
 export const GetCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string(),
+    cloudConnectorId: schema.string({
+      meta: { description: 'The unique identifier of the cloud connector.' },
+    }),
   }),
 };
 
@@ -155,10 +171,16 @@ export const GetCloudConnectorResponseSchema = schema.object({
 
 export const DeleteCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string(),
+    cloudConnectorId: schema.string({
+      meta: { description: 'The unique identifier of the cloud connector to delete.' },
+    }),
   }),
   query: schema.object({
-    force: schema.maybe(schema.boolean()),
+    force: schema.maybe(
+      schema.boolean({
+        meta: { description: 'If true, forces deletion even if the cloud connector is in use.' },
+      })
+    ),
   }),
 };
 
@@ -168,13 +190,16 @@ export const DeleteCloudConnectorResponseSchema = schema.object({
 
 export const UpdateCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string(),
+    cloudConnectorId: schema.string({
+      meta: { description: 'The unique identifier of the cloud connector to update.' },
+    }),
   }),
   body: schema.object({
     name: schema.maybe(
       schema.string({
         minLength: 1,
         maxLength: 255,
+        meta: { description: 'The name of the cloud connector.' },
       })
     ),
     // For updates, we accept either AWS or Azure vars structure

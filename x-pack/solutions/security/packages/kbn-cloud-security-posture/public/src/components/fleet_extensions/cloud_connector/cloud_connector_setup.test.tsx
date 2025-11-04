@@ -594,4 +594,94 @@ describe('CloudConnectorSetup', () => {
       );
     });
   });
+
+  describe('supports_cloud_connector initialization', () => {
+    it('should set supports_cloud_connector to true when component renders with false value', () => {
+      setupMocks([]);
+
+      const mockPolicyWithoutSupport = {
+        ...mockPolicy,
+        supports_cloud_connector: false, // Start with false
+      };
+
+      renderComponent({ newPolicy: mockPolicyWithoutSupport });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: true,
+        }),
+      });
+    });
+
+    it('should not call updatePolicy when supports_cloud_connector is already true', () => {
+      setupMocks([]);
+
+      const mockPolicyWithSupport = {
+        ...mockPolicy,
+        supports_cloud_connector: true, // Already true
+      };
+
+      renderComponent({ newPolicy: mockPolicyWithSupport });
+
+      expect(mockUpdatePolicy).not.toHaveBeenCalled();
+    });
+
+    it('should set supports_cloud_connector to true for AWS provider', () => {
+      setupMocks([]);
+
+      const mockPolicyWithoutSupport = {
+        ...mockPolicy,
+        supports_cloud_connector: false,
+      };
+
+      renderComponent({
+        newPolicy: mockPolicyWithoutSupport,
+        cloudProvider: AWS_PROVIDER,
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: true,
+        }),
+      });
+    });
+
+    it('should set supports_cloud_connector to true for Azure provider', () => {
+      const AZURE_PROVIDER = 'azure';
+      setupMocks([]);
+
+      const mockPolicyWithoutSupport = {
+        ...mockPolicy,
+        supports_cloud_connector: false,
+      };
+
+      renderComponent({
+        newPolicy: mockPolicyWithoutSupport,
+        cloudProvider: AZURE_PROVIDER,
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: true,
+        }),
+      });
+    });
+
+    it('should set supports_cloud_connector to true even when undefined', () => {
+      setupMocks([]);
+
+      const mockPolicyWithUndefined = {
+        ...mockPolicy,
+        supports_cloud_connector: undefined,
+      };
+
+      renderComponent({ newPolicy: mockPolicyWithUndefined });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: true,
+        }),
+      });
+    });
+  });
 });

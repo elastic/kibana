@@ -14,6 +14,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
+import type { CloudProvider } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
@@ -32,7 +33,7 @@ export interface CloudConnectorSetupProps {
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
   templateName: string;
 }
 
@@ -72,6 +73,16 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
   } = useCloudConnectorSetup(input, newPolicy, updatePolicy);
+
+  // Ensure root-level supports_cloud_connector is true when this component is rendered
+  if (!newPolicy.supports_cloud_connector) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: true,
+      },
+    });
+  }
 
   const tabs: CloudConnectorTab[] = [
     {
