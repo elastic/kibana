@@ -44,11 +44,11 @@ import type {
   BulkActionsDryRunErrCode,
   BulkActionType,
   BulkDuplicateRules,
+  BulkManualRuleFillGaps,
   BulkManualRuleRun,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
   ImportRulesResponse,
-  BulkManualRuleFillGaps,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -450,13 +450,6 @@ export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExpor
     version: '2023-10-31',
     body: JSON.stringify(params),
   });
-}
-
-export interface CreatePrepackagedRulesResponse {
-  rules_installed: number;
-  rules_updated: number;
-  timelines_installed: number;
-  timelines_updated: number;
 }
 
 /**

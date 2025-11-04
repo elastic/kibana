@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const GENERATE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.header.generateButton',
-  {
-    defaultMessage: 'Generate',
-  }
-);
-
 export const CANCEL = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.header.cancelButton',
   {

@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SingleRangeChangeEvent } from '@kbn/elastic-assistant';
 import { AlertsRange } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
@@ -16,7 +15,6 @@ import * as i18n from '../translations';
 export const MAX_ALERTS = 500;
 export const MIN_ALERTS = 50;
 export const STEP = 50;
-export const NO_INDEX_PATTERNS: DataView[] = [];
 
 interface Props {
   maxAlerts: number;

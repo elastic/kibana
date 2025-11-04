@@ -42,9 +42,6 @@ interface OwnProps {
 
 type Props = OwnProps & PropsFromRedux;
 
-export const isDataView = (obj: unknown): obj is DataView =>
-  obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
-
 const StatefulSearchOrFilterComponent = React.memo<Props>(
   ({
     dataProviders,

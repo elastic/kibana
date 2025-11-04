@@ -8,5 +8,3 @@
 export const useExecuteBulkAction = jest.fn(() => ({
   executeBulkAction: jest.fn(),
 }));
-
-export const goToRuleEditPage = jest.fn();

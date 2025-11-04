@@ -31,13 +31,6 @@ export interface FetchParams {
   indicatorId: string;
 }
 
-type ReactQueryKey = [string, FetchParams];
-
-export interface IndicatorsQueryParams {
-  signal?: AbortSignal;
-  queryKey: ReactQueryKey;
-}
-
 export const createFetchIndicatorById =
   ({ searchService, inspectorAdapter }: FetchIndicatorsDependencies) =>
   async ({ indicatorId }: FetchParams, signal?: AbortSignal): Promise<Indicator | undefined> => {

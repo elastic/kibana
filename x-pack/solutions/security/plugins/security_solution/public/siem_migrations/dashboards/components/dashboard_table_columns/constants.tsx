@@ -9,5 +9,3 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 export type TableColumn = EuiBasicTableColumn<DashboardMigrationDashboard>;
-
-export const COLUMN_EMPTY_VALUE = '-';

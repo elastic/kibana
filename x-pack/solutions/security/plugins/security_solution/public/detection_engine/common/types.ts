@@ -44,10 +44,10 @@ import type {
   RuleLicense,
   RuleNameOverride,
   SetupGuide,
-  ThresholdAlertSuppression,
-  TimestampOverride,
   ThreatIndex,
   ThreatMapping,
+  ThresholdAlertSuppression,
+  TimestampOverride,
 } from '../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../common/api/detection_engine';
 import type { EqlOptions } from '../../../common/search_strategy';
@@ -174,18 +174,6 @@ export interface DefineStepRule {
   [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: Duration;
   [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: AlertSuppressionMissingFieldsStrategy;
   [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: boolean;
-}
-
-export interface QueryDefineStep {
-  ruleType: 'query' | 'saved_query';
-  index: string[];
-  indexPattern?: DataViewBase;
-  queryBar: FieldValueQueryBar;
-  dataViewId?: string;
-  dataViewTitle?: string;
-  timeline: FieldValueTimeline;
-  dataSourceType: DataSourceType;
-  shouldLoadQueryDynamically: boolean;
 }
 
 export interface Duration {

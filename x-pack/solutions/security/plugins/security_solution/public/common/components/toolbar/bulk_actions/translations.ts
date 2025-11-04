@@ -265,14 +265,12 @@ export const CLOSING_REASON_TRUE_POSITIVE = i18n.translate(
   'xpack.securitySolution.defaultAlertClosingReason.true_positive',
   { defaultMessage: 'True positive' }
 );
+
 export const CLOSING_REASON_BENIGN_POSITIVE = i18n.translate(
   'xpack.securitySolution.defaultAlertClosingReason.benign_positive',
   { defaultMessage: 'Benign positive' }
 );
-export const CLOSING_REASON_AUTOMATED_CLOSURE = i18n.translate(
-  'xpack.securitySolution.defaultAlertClosingReason.automated_closure',
-  { defaultMessage: 'Automated closure' }
-);
+
 export const CLOSING_REASON_OTHER = i18n.translate(
   'xpack.securitySolution.defaultAlertClosingReason.other',
   {

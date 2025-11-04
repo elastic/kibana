@@ -11,6 +11,7 @@ import { loadPage, request } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import {
   ACTION_DETAILS_ROUTE,
+  CANCEL_ROUTE,
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
@@ -21,7 +22,6 @@ import {
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
-  CANCEL_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
@@ -126,43 +126,6 @@ export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
     force: true,
   });
   cy.getByTestSubj(`response-actions-list-item-${itemNumber}`).should('not.exist');
-};
-
-/**
- * Continuously checks an Response Action until it completes (or timeout is reached)
- * @param actionId
- * @param timeout
- */
-export const waitForActionToComplete = (
-  actionId: string,
-  timeout = 120000
-): Cypress.Chainable<ActionDetails> => {
-  let action: ActionDetails | undefined;
-
-  return cy
-    .waitUntil(
-      () => {
-        return request<ActionDetailsApiResponse>({
-          method: 'GET',
-          url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
-        }).then((response) => {
-          if (response.body.data.isCompleted) {
-            action = response.body.data;
-            return true;
-          }
-
-          return false;
-        });
-      },
-      { timeout, interval: 2000 }
-    )
-    .then(() => {
-      if (!action) {
-        throw new Error(`Failed to retrieve completed action`);
-      }
-
-      return action;
-    });
 };
 
 export const waitForActionToSucceed = (

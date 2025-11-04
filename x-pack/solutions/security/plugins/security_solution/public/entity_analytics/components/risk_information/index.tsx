@@ -6,7 +6,6 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import styled from '@emotion/styled';
 import {
   EuiBasicTable,
   EuiButton,
@@ -22,6 +21,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import styled from '@emotion/styled';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -97,9 +97,6 @@ const getCriticalityLevelTableColumns = (): Array<
     name: i18n.INFORMATION_WEIGHT_HEADER,
   },
 ];
-
-export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
-export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
 
 export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: EntityType }) => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();

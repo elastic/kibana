@@ -7,24 +7,11 @@
 
 import type { CasesMetricsResponse } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
-
-export interface UseCasesByStatusProps {
-  skip?: boolean;
-}
-
-export interface UseCasesByStatusResults {
-  closed: number;
-  inProgress: number;
-  isLoading: boolean;
-  open: number;
-  totalCounts: number;
-  updatedAt: number;
-}
 
 export const useCasesByStatus = ({ skip = false }) => {
   const {

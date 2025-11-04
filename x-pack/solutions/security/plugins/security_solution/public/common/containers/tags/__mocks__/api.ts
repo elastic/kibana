@@ -18,30 +18,3 @@ export const DEFAULT_TAGS_RESPONSE = [
     },
   },
 ];
-
-export const DEFAULT_CREATE_TAGS_RESPONSE = [
-  {
-    id: MOCK_TAG_ID,
-    name: MOCK_TAG_NAME,
-    description: 'test tag description',
-    color: '#2c7b82',
-  },
-];
-
-export const getTagsByName = jest
-  .fn()
-  .mockImplementation(() => Promise.resolve(DEFAULT_TAGS_RESPONSE));
-export const createTag = jest
-  .fn()
-  .mockImplementation(() => Promise.resolve(DEFAULT_CREATE_TAGS_RESPONSE[0]));
-
-export const fetchTags = jest.fn().mockImplementation(({ tagIds }: { tagIds: string[] }) =>
-  Promise.resolve(
-    tagIds.map((id, i) => ({
-      id,
-      name: `${MOCK_TAG_NAME}-${i}`,
-      description: 'test tag description',
-      color: '#2c7b8',
-    }))
-  )
-);

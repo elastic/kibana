@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, useQueryClient } from '@kbn/react-query';
-import { useCallback } from 'react';
+import { useQuery } from '@kbn/react-query';
 import { SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -25,17 +24,4 @@ export const useGetMigrationMissingPrivileges = () => {
       },
     }
   );
-};
-
-/**
- * We should use this hook to invalidate the migration privileges cache.
- * @returns A migration privileges cache invalidation callback
- */
-export const useInvalidateGetMigrationPrivileges = () => {
-  const queryClient = useQueryClient();
-  return useCallback(() => {
-    queryClient.invalidateQueries(['GET', SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH], {
-      refetchType: 'active',
-    });
-  }, [queryClient]);
 };

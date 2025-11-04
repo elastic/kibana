@@ -105,14 +105,6 @@ export const toggleRuleOffAndOn = (ruleName: string): void => {
     });
 };
 
-export const filterOutEndpoints = (endpointHostname: string): void => {
-  cy.getByTestSubj('filters-global-container').within(() => {
-    cy.getByTestSubj('queryInput').click();
-    cy.getByTestSubj('queryInput').type(`host.name: ${endpointHostname}`);
-    cy.getByTestSubj('querySubmitButton').click();
-  });
-};
-
 export const filterOutIsolatedHosts = (): void => {
   cy.getByTestSubj('adminSearchBar').type('united.endpoint.Endpoint.state.isolation: true');
   cy.getByTestSubj('querySubmitButton').click();

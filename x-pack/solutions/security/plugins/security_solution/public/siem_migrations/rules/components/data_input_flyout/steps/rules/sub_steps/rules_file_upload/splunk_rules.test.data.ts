@@ -49,18 +49,3 @@ export const splunkTestRules = [
     },
   },
 ];
-
-export const invalidTestRulesFormat = [
-  {
-    result: {
-      some: 'key',
-    },
-  },
-  {
-    result: {
-      description: {
-        some: 'key',
-      },
-    },
-  },
-];

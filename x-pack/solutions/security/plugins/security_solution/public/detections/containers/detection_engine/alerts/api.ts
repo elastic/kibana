@@ -8,30 +8,26 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';
+import type { ResponseActionApiResponse } from '../../../../../common/endpoint/types';
 import {
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  ALERTS_AS_DATA_FIND_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
-  ALERTS_AS_DATA_FIND_URL,
-  DETECTION_ENGINE_ALERTS_INDEX_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
-import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import type {
-  BasicSignals,
-  Privilege,
-  QueryAlerts,
   AlertSearchResponse,
   AlertsIndex,
-  UpdateAlertStatusByQueryProps,
+  BasicSignals,
   CasesFromAlertsResponse,
-  CheckSignalIndex,
+  Privilege,
+  QueryAlerts,
   UpdateAlertStatusByIdsProps,
+  UpdateAlertStatusByQueryProps,
 } from './types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint/endpoint_isolation';
-import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 /**
  * Fetch Alerts by providing a query
@@ -137,20 +133,6 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIn
   });
 
 /**
- * Check Signal Index
- *
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
-export const checkSignalIndex = async ({ signal }: BasicSignals): Promise<CheckSignalIndex> =>
-  KibanaServices.get().http.fetch<CheckSignalIndex>(DETECTION_ENGINE_ALERTS_INDEX_URL, {
-    version: '1',
-    method: 'GET',
-    signal,
-  });
-
-/**
  * Get User Privileges
  *
  * @param signal AbortSignal for cancelling request
@@ -248,20 +230,3 @@ export const getCaseIdsFromAlertId = async ({
     method: 'get',
     query: { ...(owner.length > 0 ? { owner } : {}) },
   });
-
-/**
- * Get Host metadata
- *
- * @param host id
- */
-export const getHostMetadata = async ({
-  agentId,
-  signal,
-}: {
-  agentId: string;
-  signal?: AbortSignal;
-}): Promise<HostInfo> =>
-  KibanaServices.get().http.fetch<HostInfo>(
-    resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
-    { method: 'GET', signal, version: '2023-10-31' }
-  );

@@ -16,12 +16,6 @@ export const CHARTS_ID = 'charts';
 
 export type AlertViewSelection = 'trend' | 'table' | 'treemap' | 'charts';
 
-export interface ButtonProperties {
-  'data-test-subj': string;
-  icon: string;
-  name: string;
-}
-
 export const getOptionProperties = (
   alertViewSelection: AlertViewSelection
 ): EuiButtonGroupOptionProps => {

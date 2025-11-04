@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -18,7 +19,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
-import { useHttp, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -60,19 +61,6 @@ jest.mock('../../../../common/hooks/use_app_toasts', () => ({
 jest.mock('../../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
 }));
-
-jest.mock(
-  '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
-  () => {
-    return {
-      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
-        loading: false,
-        isIsolated: false,
-        agentStatus: 'healthy',
-      }),
-    };
-  }
-);
 
 describe('take action dropdown', () => {
   let defaultProps: TakeActionDropdownProps;
@@ -120,8 +108,6 @@ describe('take action dropdown', () => {
         },
       };
     });
-
-    (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
   });
 
   afterEach(() => {

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { TOGGLE_NAVIGATION_BTN } from '../screens/navigation';
 import { loadPage } from './common';
 
 export const INTEGRATIONS = 'app/integrations#/';
 export const FLEET = 'app/fleet/';
-export const FLEET_AGENT_POLICIES = 'app/fleet/policies';
+
 export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) => {
   loadPage(page, opts);
   cy.contains('Loading Elastic').should('exist');
@@ -18,8 +17,4 @@ export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) =
 
   // There's a security warning toast that seemingly makes ui elements in the bottom right unavailable, so we close it
   cy.get('[data-test-subj="toastCloseButton"]', { timeout: 30000 }).click();
-};
-
-export const openNavigationFlyout = () => {
-  cy.get(TOGGLE_NAVIGATION_BTN).click();
 };

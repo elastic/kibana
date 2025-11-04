@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './use_responder_action_data';
 export * from './use_responder_action_item';
