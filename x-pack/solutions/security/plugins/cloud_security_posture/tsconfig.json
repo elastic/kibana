@@ -67,6 +67,7 @@
     "@kbn/cloud-security-posture",
     "@kbn/analytics",
     "@kbn/management-settings-ids",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

@@ -53,6 +53,7 @@
     "@kbn/file-upload-common",
     "@kbn/logging-mocks",
     "@kbn/inference-plugin",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",
