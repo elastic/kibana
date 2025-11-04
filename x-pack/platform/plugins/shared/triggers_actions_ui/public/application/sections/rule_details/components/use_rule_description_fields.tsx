@@ -9,7 +9,6 @@ import React, { Suspense, useMemo } from 'react';
 import { EuiBadge, EuiCodeBlock, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
-import type { HttpSetup } from '@kbn/core/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common/data_views/data_view';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -100,13 +99,7 @@ const CodeBlock = ({ children, border }: { children: React.ReactNode; border: st
   );
 };
 
-export const createPrebuildFields = ({
-  border,
-  http,
-}: {
-  border: string;
-  http: HttpSetup | undefined;
-}): PrebuildFieldsMap => {
+export const createPrebuildFields = ({ border }: { border: string }): PrebuildFieldsMap => {
   return {
     [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: (patterns: string[]) => ({
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.indexPatternTitle', {
@@ -139,7 +132,7 @@ export const createPrebuildFields = ({
           defaultMessage: 'Filters',
         }),
         description: (
-          <AsyncField<DataView | undefined>
+          <AsyncField<DataView>
             queryKey={[RULE_DESCRIPTION_GET_DATA_VIEW_QUERY_KEY]}
             queryFn={() => {
               return dataViews.get(dataViewId);
@@ -150,15 +143,16 @@ export const createPrebuildFields = ({
                 return <div data-test-subj="description-detail-query-filter-error">-</div>;
               }
 
-              try {
-                return (
-                  <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-                    <FilterItems filters={filters} indexPatterns={[dataView]} readOnly />
-                  </EuiFlexGroup>
-                );
-              } catch (e) {
-                return <div data-test-subj="description-detail-query-filter-pattern-error">-</div>;
-              }
+              return (
+                <EuiFlexGroup
+                  wrap
+                  responsive={false}
+                  gutterSize="xs"
+                  data-test-subj="description-detail-query-filter"
+                >
+                  <FilterItems filters={filters} indexPatterns={[dataView]} readOnly />
+                </EuiFlexGroup>
+              );
             }}
           </AsyncField>
         ),
@@ -182,16 +176,12 @@ export const createPrebuildFields = ({
                 return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
               }
 
-              try {
-                return (
-                  <IndexPattern
-                    patterns={[dataView.getIndexPattern()]}
-                    data-test-subj="description-detail-data-view-pattern"
-                  />
-                );
-              } catch (e) {
-                return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
-              }
+              return (
+                <IndexPattern
+                  patterns={[dataView.getIndexPattern()]}
+                  data-test-subj="description-detail-data-view-pattern"
+                />
+              );
             }}
           </AsyncField>
         ),
@@ -207,7 +197,6 @@ export const useRuleDescriptionFields = ({
   rule: RuleDefinitionProps['rule'];
   ruleTypeRegistry: RuleDefinitionProps['ruleTypeRegistry'];
 }) => {
-  const { http } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
   const getDescriptionFields = useMemo(() => {
@@ -224,15 +213,14 @@ export const useRuleDescriptionFields = ({
 
     const prebuildFields = createPrebuildFields({
       border: euiTheme.border.thin as string,
-      http,
     });
 
     if (!prebuildFields) {
       return [];
     }
 
-    return getDescriptionFields({ rule, prebuildFields, http });
-  }, [getDescriptionFields, euiTheme.border.thin, http, rule]);
+    return getDescriptionFields({ rule, prebuildFields });
+  }, [getDescriptionFields, euiTheme.border.thin, rule]);
 
   return { descriptionFields };
 };
