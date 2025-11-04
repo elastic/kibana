@@ -110,6 +110,9 @@ const createConversationActions = ({
             input: { message: userMessage },
             response: { message: '' },
             steps: [],
+            started_at: new Date().toISOString(),
+            time_to_first_token: 0,
+            time_to_last_token: 0,
           };
 
           if (!draft) {
