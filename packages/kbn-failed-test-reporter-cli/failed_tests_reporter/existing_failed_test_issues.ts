@@ -84,24 +84,46 @@ export class ExistingFailedTestIssues {
     this.log.debug('loaded', this.results.size - initialResultSize, 'existing test issues');
   }
 
+  isScoutFailure(failure: TestFailure): boolean {
+    return 'id' in failure && 'target' in failure && 'location' in failure;
+  }
+
+  getExistingIssueForScout(failure: TestFailure, issue: ExistingFailedTestIssue) {
+    // For Scout failures, match by test name only. We don't create a new issue for each target where the same test fails, but only one + adding comments for each target failure.
+    if (this.isScoutFailure(failure) && failure.name === issue.name) {
+      return issue;
+    }
+  }
+
+  getExistingIssueForFTR(failure: TestFailure, issue: ExistingFailedTestIssue) {
+    if (failure.classname === issue.classname && failure.name === issue.name) {
+      return issue;
+    }
+  }
+
   getForFailure(failure: TestFailure) {
     // Check if this is a Scout failure
-    const isScout = 'id' in failure && 'target' in failure && 'location' in failure;
+    const isScout = this.isScoutFailure(failure);
 
-    for (const [f, issue] of this.results) {
+    for (const [, issue] of this.results) {
+      if (!issue) {
+        continue;
+      }
+
       if (isScout) {
-        // For Scout failures, match by test name only. We don't create a new issue for each target where the same test fails, but only one + adding comments for each target failure.
-        const isExistingScoutFailure = 'id' in f && 'target' in f && 'location' in f;
-        if (isExistingScoutFailure && f.name === failure.name) {
-          return issue;
+        const matchedIssue = this.getExistingIssueForScout(failure, issue);
+        if (matchedIssue) {
+          return matchedIssue;
         }
       } else {
-        // For FTR failures, use original matching logic
-        if (f.classname === failure.classname && f.name === failure.name) {
-          return issue;
+        const matchedIssue = this.getExistingIssueForFTR(failure, issue);
+        if (matchedIssue) {
+          return matchedIssue;
         }
       }
     }
+
+    return undefined;
   }
 
   addNewlyCreated(failure: TestFailure, newIssue: GithubIssueMini) {
@@ -161,12 +183,12 @@ export class ExistingFailedTestIssues {
 
   private isFailureSeen(failure: TestFailure) {
     // Check if this is a Scout failure
-    const isScout = 'id' in failure && 'target' in failure && 'location' in failure;
+    const isScout = this.isScoutFailure(failure);
 
     for (const seen of this.results.keys()) {
       if (isScout) {
         // For Scout failures, match by test name only (ignore target)
-        const isExistingScoutFailure = 'id' in seen && 'target' in seen && 'location' in seen;
+        const isExistingScoutFailure = this.isScoutFailure(seen);
         if (isExistingScoutFailure && seen.name === failure.name) {
           return true;
         }
