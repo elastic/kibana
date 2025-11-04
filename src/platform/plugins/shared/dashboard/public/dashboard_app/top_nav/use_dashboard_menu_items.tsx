@@ -83,10 +83,10 @@ export const useDashboardMenuItems = ({
    */
   const [isResetting, setIsResetting] = useState(false);
   const isQuickSaveButtonDisabled = useMemo(() => {
-    if (disableTopNav || !hasUnsavedChanges || isResetting) return true;
+    if (!hasUnsavedChanges) return true;
     if (canManageAccessControl) return false;
     return !isInEditAccessMode;
-  }, [disableTopNav, hasUnsavedChanges, canManageAccessControl, isInEditAccessMode, isResetting]);
+  }, [hasUnsavedChanges, canManageAccessControl, isInEditAccessMode]);
 
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
@@ -238,7 +238,6 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         fill: true,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: isQuickSaveButtonDisabled,
         run: () => quickSaveDashboard(),
         splitButtonProps: {
           run: (anchorElement: HTMLElement) => {
@@ -253,7 +252,7 @@ export const useDashboardMenuItems = ({
             });
           },
           isMainButtonLoading: isSaveInProgress,
-          isMainButtonDisabled: !hasUnsavedChanges,
+          isMainButtonDisabled: isQuickSaveButtonDisabled,
           secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
           secondaryButtonIcon: 'arrowDown',
           secondaryButtonFill: true,
@@ -346,7 +345,6 @@ export const useDashboardMenuItems = ({
   }, [
     disableTopNav,
     isSaveInProgress,
-    hasUnsavedChanges,
     isCreatingNewDashboard,
     lastSavedId,
     dashboardInteractiveSave,
@@ -359,10 +357,10 @@ export const useDashboardMenuItems = ({
     resetChanges,
     isResetting,
     isEditButtonDisabled,
-    isQuickSaveButtonDisabled,
     getEditTooltip,
     getShareTooltip,
     appId,
+    isQuickSaveButtonDisabled,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
