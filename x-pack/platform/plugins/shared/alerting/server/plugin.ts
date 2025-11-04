@@ -405,8 +405,7 @@ export class AlertingPlugin {
       this.ruleTypeRegistry,
       this.logger,
       plugins.actions.isPreconfiguredConnector,
-      getSearchSourceMigrations,
-      { enableGapAutoFillScheduler: this?.config?.gapAutoFillScheduler?.enabled ?? false }
+      getSearchSourceMigrations
     );
 
     initializeApiKeyInvalidator(

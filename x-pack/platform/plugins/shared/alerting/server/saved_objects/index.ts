@@ -108,8 +108,7 @@ export function setupSavedObjects(
   ruleTypeRegistry: RuleTypeRegistry,
   logger: Logger,
   isPreconfigured: (connectorId: string) => boolean,
-  getSearchSourceMigrations: () => MigrateFunctionsObject,
-  options?: { enableGapAutoFillScheduler?: boolean }
+  getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
     name: RULE_SAVED_OBJECT_TYPE,
