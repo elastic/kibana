@@ -121,7 +121,7 @@ const getModelVersionsHashes = (soType: SavedObjectsType): string[] => {
 const getModelVersionHash = (
   modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion
 ) => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha256');
   const modelVersionData = JSON.stringify(modelVersion);
   return `${hash.update(modelVersionData).digest('hex')}`;
 };
@@ -129,7 +129,7 @@ const getModelVersionHash = (
 export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigrationHash => {
   const migInfo = extractMigrationInfo(soType);
 
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha256');
 
   const hashParts = [
     migInfo.name,
