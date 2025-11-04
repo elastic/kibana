@@ -22,7 +22,7 @@ JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-8192}"
 if [[ "$1" == 'jest.config.js' ]]; then
   # unit tests
   TEST_TYPE="unit"
-  JEST_MAX_PARALLEL=3 # unit tests run in parallel by default. When adjusting Buildkite resources, dont forget to update this value.
+  JEST_MAX_PARALLEL=24 # unit tests run in parallel by default. When adjusting Buildkite resources, dont forget to update this value.
 else
   TEST_TYPE="integration"
   JEST_MAX_PARALLEL=1 # integration tests should not run in parallel by default.
