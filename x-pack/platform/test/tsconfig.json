@@ -173,7 +173,8 @@
     "@kbn/reporting-test-routes",
     "@kbn/access-control-test-plugin",
     "@kbn/alerting-types",
-    "@kbn/es-types",
     "@kbn/visualizations-common",
+    "@kbn/es-types",
+    "@kbn/connector-schemas",
   ]
 }

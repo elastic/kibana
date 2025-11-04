@@ -44,6 +44,7 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  history: AppMountParameters['history'];
 }
 
 export interface HomePluginSetupDependencies {
@@ -114,6 +115,7 @@ export class HomePublicPlugin
           theme: core.theme,
           i18nStart: coreStart.i18n,
           shareStart,
+          history: params.history,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
