@@ -1075,6 +1075,15 @@ const ESQLEditorInternal = function ESQLEditor({
                       await addLookupIndicesDecorator();
                     }
 
+                    monaco.editor.addKeybindingRule({
+                      // Unbinds Tab key from accepting the *selected* suggestion in the widget
+                      // when inline suggestions are visible, so Tab can accept inline suggestions instead
+                      keybinding: monaco.KeyCode.Tab,
+                      command: '-acceptSelectedSuggestion',
+                      // Only unbind when both suggestion widget and inline suggestions are visible
+                      when: 'suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && inlineSuggestionVisible',
+                    });
+
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
