@@ -12,8 +12,10 @@ import type { IndexThresholdRuleParams } from './types';
 
 describe('index_threshold getDescriptionFields', () => {
   const mockPrebuildField = jest.fn();
+  const mockPrebuildKqlField = jest.fn();
   const mockPrebuildFields = {
     indexPattern: mockPrebuildField,
+    kqlExpression: mockPrebuildKqlField,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
@@ -60,7 +62,7 @@ describe('index_threshold getDescriptionFields', () => {
     expect(result).toEqual([]);
   });
 
-  it('should call prebuildField with index wrapped in array', () => {
+  it('should call index prebuildField with index wrapped in array', () => {
     const mockRule = {
       params: {
         index: 'logs-*',
@@ -82,5 +84,28 @@ describe('index_threshold getDescriptionFields', () => {
 
     expect(mockPrebuildField).toHaveBeenCalledWith(['logs-*']);
     expect(result).toEqual([mockReturnValue]);
+  });
+
+  it('should call kql prebuild field when filter is present', () => {
+    const mockRule = {
+      params: {
+        index: 'logs-*',
+        filterKuery: 'host.name: "my-host"',
+      },
+    } as unknown as Rule<IndexThresholdRuleParams>;
+
+    const mockReturnValue = { type: 'index_pattern', value: 'logs-*' };
+    const mockKqlReturnValue = { type: 'kql_expression', value: 'host.name: "my-host"' };
+    mockPrebuildField.mockReturnValue(mockReturnValue);
+    mockPrebuildKqlField.mockReturnValue(mockKqlReturnValue);
+
+    const result = getDescriptionFields({
+      rule: mockRule,
+      prebuildFields: mockPrebuildFields,
+      http: {} as HttpSetup,
+    });
+
+    expect(mockPrebuildField).toHaveBeenCalledWith(['logs-*']);
+    expect(result).toEqual([mockReturnValue, mockKqlReturnValue]);
   });
 });

@@ -45,7 +45,13 @@ export const getDescriptionFields: GetDescriptionFieldsFn<ValidateOptions> = ({
 }) => {
   if (!rule || !prebuildFields) return [];
 
-  return [prebuildFields.indexPattern([rule.params.indexPattern])];
+  const fields = [prebuildFields.indexPattern([rule.params.indexPattern])];
+
+  if (rule.params.filterQueryText && typeof rule.params.filterQueryText === 'string') {
+    fields.push(prebuildFields.customQuery(rule.params.filterQueryText));
+  }
+
+  return fields;
 };
 
 export function createLargeShardSizeAlertType(

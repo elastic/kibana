@@ -14,6 +14,13 @@ export const getDescriptionFields: GetDescriptionFieldsFn<IndexThresholdRulePara
 }) => {
   if (!rule || !prebuildFields) return [];
 
+  const fields = [];
   const index = rule.params.index;
-  return [prebuildFields.indexPattern(Array.isArray(index) ? index : [index])];
+  fields.push(prebuildFields.indexPattern(Array.isArray(index) ? index : [index]));
+
+  if (rule.params.filterKuery) {
+    fields.push(prebuildFields.customQuery(rule.params.filterKuery));
+  }
+
+  return fields;
 };
