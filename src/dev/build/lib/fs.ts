@@ -11,6 +11,7 @@ import fs from 'fs';
 import Fsp from 'fs/promises';
 import * as Rx from 'rxjs';
 import { createHash } from 'crypto';
+import { spawn } from 'child_process';
 import { pipeline } from 'stream/promises';
 import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
@@ -22,6 +23,12 @@ import cpy from 'cpy';
 import del from 'del';
 import * as tar from 'tar';
 import type { ToolingLog } from '@kbn/tooling-log';
+
+interface ProcessWaitOptions {
+  child: import('child_process').ChildProcess;
+  processName: string;
+  errorChunks: Buffer[];
+}
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {
@@ -226,6 +233,195 @@ export async function gunzip(source: string, destination: string) {
   await pipeline(fs.createReadStream(source), createGunzip(), fs.createWriteStream(destination));
 }
 
+let cachedPigzAvailability: boolean | undefined;
+
+function waitForProcess({ child, processName, errorChunks }: ProcessWaitOptions) {
+  return new Promise<void>((onResolve, reject) => {
+    child.on('error', (error) => {
+      reject(error);
+    });
+
+    child.on('close', (code, signal) => {
+      if (code === 0) {
+        onResolve();
+        return;
+      }
+
+      if (signal) {
+        reject(new Error(`${processName} terminated with signal ${signal}`));
+        return;
+      }
+
+      const stderrOutput = errorChunks.length ? Buffer.concat(errorChunks).toString().trim() : '';
+      const message = stderrOutput
+        ? `${processName} exited with code ${code}: ${stderrOutput}`
+        : `${processName} exited with code ${code}`;
+      reject(new Error(message));
+    });
+  });
+}
+
+function waitForStream(stream: fs.WriteStream) {
+  return new Promise<void>((onResolve, reject) => {
+    stream.on('finish', onResolve);
+    stream.on('error', reject);
+  });
+}
+
+async function isPigzAvailable() {
+  if (cachedPigzAvailability !== undefined) {
+    return cachedPigzAvailability;
+  }
+
+  if (process.platform === 'win32') {
+    cachedPigzAvailability = false;
+    return cachedPigzAvailability;
+  }
+
+  cachedPigzAvailability = await new Promise<boolean>((onResolve) => {
+    const probe = spawn('pigz', ['--version'], { stdio: 'ignore' });
+
+    probe.on('error', () => {
+      onResolve(false);
+    });
+
+    probe.on('close', (code) => {
+      onResolve(code === 0);
+    });
+  });
+
+  return cachedPigzAvailability;
+}
+
+function normalizeCompressionLevel(level: number | undefined) {
+  if (typeof level !== 'number' || Number.isNaN(level)) {
+    return undefined;
+  }
+
+  const rounded = Math.round(level);
+  const lowerBounded = Math.max(1, rounded);
+  return Math.min(9, lowerBounded);
+}
+
+interface PigzCompressOptions {
+  source: string;
+  destination: string;
+  createRootDirectory: boolean;
+  rootDirectoryName?: string;
+  compressionLevel?: number;
+}
+
+// Use system tar piped through pigz to take advantage of multi-threaded compression when available.
+async function compressTarWithPigz(options: PigzCompressOptions) {
+  const { source, destination, createRootDirectory, rootDirectoryName, compressionLevel } = options;
+  const folderName = rootDirectoryName ?? source.split(sep).slice(-1)[0];
+
+  const tarArgs = ['-cf', '-', '.'];
+  if (createRootDirectory) {
+    tarArgs.unshift(`--transform=s,^\\.,${folderName},`);
+  }
+
+  const pigzArgs = ['-c'];
+  if (typeof compressionLevel === 'number') {
+    pigzArgs.push(`-${compressionLevel}`);
+  }
+
+  const tarProcess = spawn('tar', tarArgs, {
+    cwd: source,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+
+  const pigzProcess = spawn('pigz', pigzArgs, {
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+
+  if (!tarProcess.stdout || !pigzProcess.stdin || !pigzProcess.stdout) {
+    tarProcess.kill('SIGTERM');
+    pigzProcess.kill('SIGTERM');
+    throw new Error('Failed to initialize compression pipeline');
+  }
+
+  tarProcess.stdout.pipe(pigzProcess.stdin);
+
+  const outputStream = fs.createWriteStream(destination);
+  pigzProcess.stdout.pipe(outputStream);
+
+  const tarErrorChunks: Buffer[] = [];
+  const pigzErrorChunks: Buffer[] = [];
+
+  tarProcess.stderr?.on('data', (chunk) => {
+    tarErrorChunks.push(chunk instanceof Buffer ? chunk : Buffer.from(chunk));
+  });
+
+  pigzProcess.stderr?.on('data', (chunk) => {
+    pigzErrorChunks.push(chunk instanceof Buffer ? chunk : Buffer.from(chunk));
+  });
+
+  const tarPromise = waitForProcess({
+    child: tarProcess,
+    processName: 'tar',
+    errorChunks: tarErrorChunks,
+  });
+
+  const pigzPromise = waitForProcess({
+    child: pigzProcess,
+    processName: 'pigz',
+    errorChunks: pigzErrorChunks,
+  });
+
+  const streamPromise = waitForStream(outputStream);
+
+  try {
+    await tarPromise;
+  } catch (error) {
+    pigzProcess.kill('SIGTERM');
+    outputStream.destroy();
+    try {
+      await pigzPromise;
+    } catch {
+      // ignore pigz failures triggered by tar termination
+    }
+    await streamPromise.catch(() => {});
+    throw error;
+  }
+
+  try {
+    await pigzPromise;
+  } catch (error) {
+    outputStream.destroy();
+    await streamPromise.catch(() => {});
+    throw error;
+  }
+
+  await streamPromise;
+}
+
+interface NodeTarCompressOptions {
+  source: string;
+  destination: string;
+  createRootDirectory: boolean;
+  rootDirectoryName?: string;
+  gzipOptions?: Record<string, unknown>;
+}
+
+async function compressTarWithNodeTar(options: NodeTarCompressOptions) {
+  const { source, destination, createRootDirectory, rootDirectoryName, gzipOptions } = options;
+  const folderName = rootDirectoryName ?? source.split(sep).slice(-1)[0];
+
+  await tar.create(
+    {
+      cwd: source,
+      file: destination,
+      gzip: true,
+      portable: true,
+      sync: false,
+      ...(createRootDirectory ? { prefix: `${folderName}/` } : {}),
+      ...(gzipOptions ? { gzipOptions } : {}),
+    },
+    ['.']
+  );
+}
+
 interface CompressTarOptions {
   createRootDirectory: boolean;
   rootDirectoryName?: string;
@@ -240,20 +436,51 @@ export async function compressTar({
   createRootDirectory,
   rootDirectoryName,
 }: CompressTarOptions) {
-  const output = fs.createWriteStream(destination);
-  const archive = archiver('tar', archiverOptions);
-  const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
-  const name = createRootDirectory ? folder : false;
-  archive.pipe(output);
+  await mkdirp(dirname(destination));
 
-  let fileCount = 0;
-  archive.on('entry', (entry) => {
-    if (entry.stats?.isFile()) {
-      fileCount += 1;
-    }
+  const fileEntries = await globby('**/*', {
+    cwd: source,
+    dot: true,
+    followSymbolicLinks: false,
+    onlyFiles: true,
   });
+  const fileCount = fileEntries.length;
 
-  await archive.directory(source, name).finalize();
+  const requestedCompressionLevel = normalizeCompressionLevel(archiverOptions?.gzipOptions?.level);
+  const gzipOptions = (() => {
+    if (!archiverOptions?.gzipOptions && typeof requestedCompressionLevel === 'undefined') {
+      return undefined;
+    }
+
+    const options = {
+      ...(archiverOptions?.gzipOptions ?? {}),
+    };
+
+    if (typeof requestedCompressionLevel === 'number') {
+      options.level = requestedCompressionLevel;
+    }
+
+    return options;
+  })();
+
+  if (await isPigzAvailable()) {
+    await compressTarWithPigz({
+      source,
+      destination,
+      createRootDirectory,
+      rootDirectoryName,
+      compressionLevel: requestedCompressionLevel,
+    });
+    return fileCount;
+  }
+
+  await compressTarWithNodeTar({
+    source,
+    destination,
+    createRootDirectory,
+    rootDirectoryName,
+    gzipOptions,
+  });
 
   return fileCount;
 }

@@ -42,19 +42,20 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     await del(['**/*.map'], { cwd: assetDir });
 
     log.debug('Minify CSS');
-    await asyncPipeline(
-      vfs.src(['**/*.css'], { cwd: assetDir }),
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      gulpPostCSS(require('@kbn/optimizer/postcss.config').plugins),
-      vfs.dest(assetDir)
-    );
-
     log.debug('Minify JS');
-    await asyncPipeline(
-      vfs.src(['**/*.js'], { cwd: assetDir }),
-      gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
-      vfs.dest(assetDir)
-    );
+    await Promise.all([
+      asyncPipeline(
+        vfs.src(['**/*.css'], { cwd: assetDir }),
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        gulpPostCSS(require('@kbn/optimizer/postcss.config').plugins),
+        vfs.dest(assetDir)
+      ),
+      asyncPipeline(
+        vfs.src(['**/*.js'], { cwd: assetDir }),
+        gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
+        vfs.dest(assetDir)
+      ),
+    ]);
 
     log.debug('Brotli compress');
     await asyncPipeline(
@@ -148,10 +149,8 @@ export const GeneratePackagesOptimizedAssets: Task = {
     );
     const assetDirs = [npmAssetDir, srcAssetDir];
 
-    // process assets in each ui-shared-deps package
-    for (const assetDir of assetDirs) {
-      await optimizeAssets(log, assetDir);
-    }
+    // process assets in each ui-shared-deps package concurrently for faster completion
+    await Promise.all(assetDirs.map(async (assetDir) => await optimizeAssets(log, assetDir)));
 
     // analyze assets to produce metrics.json file
     const groups = categorizeAssets(assetDirs);
