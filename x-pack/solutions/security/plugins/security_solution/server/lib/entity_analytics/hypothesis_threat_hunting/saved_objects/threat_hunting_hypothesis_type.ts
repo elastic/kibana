@@ -8,16 +8,16 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
-export const threatHuntingHypothesesTypeName = 'hypotheses-threat-hunting';
+export const threatHuntingHypothesisTypeName = 'threat-hunting-hypothesis';
 
-export const threatHuntingHypothesesTypeNameMappings: SavedObjectsType['mappings'] = {
+export const threatHuntingHypothesisTypeNameMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
     title: { type: 'text' },
     summary: { type: 'text' },
     managed: { type: 'boolean' },
     // where the hypothesis came from: pre_built | ai_generated
-    source_type: { type: 'keyword' },
+    sourceType: { type: 'keyword' },
     version: { type: 'keyword' },
     // A selection of the ECS threat fields used by rules
     threat: {
@@ -57,9 +57,9 @@ export const threatHuntingHypothesesTypeNameMappings: SavedObjectsType['mappings
 };
 
 export const threatHuntingHypothesesType: SavedObjectsType = {
-  name: threatHuntingHypothesesTypeName,
+  name: threatHuntingHypothesisTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
-  mappings: threatHuntingHypothesesTypeNameMappings,
+  mappings: threatHuntingHypothesisTypeNameMappings,
 };
