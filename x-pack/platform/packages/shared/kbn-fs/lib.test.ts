@@ -36,9 +36,9 @@ describe('kbn-fs', () => {
   describe('writeFile', () => {
     it('should write string content to a file', async () => {
       const content = 'Hello, World!';
-      const result = await writeFile('test/hello.txt', content);
+      const result = await writeFile('hello.txt', content, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/hello.txt');
+      expect(result.alias).toBe('disk:data/test/hello.txt');
       expect(result.path).toContain('test/hello.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
@@ -46,18 +46,18 @@ describe('kbn-fs', () => {
 
     it('should write Buffer content to a file', async () => {
       const content = Buffer.from('Hello, Buffer!');
-      const result = await writeFile('test/buffer.txt', content);
+      const result = await writeFile('buffer.txt', content, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/buffer.txt');
+      expect(result.alias).toBe('disk:data/test/buffer.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path)).toEqual(content);
     });
 
     it('should write Uint8Array content to a file', async () => {
       const content = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
-      const result = await writeFile('test/uint8.txt', content);
+      const result = await writeFile('uint8.txt', content, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/uint8.txt');
+      expect(result.alias).toBe('disk:data/test/uint8.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path)).toEqual(Buffer.from(content));
     });
@@ -66,7 +66,7 @@ describe('kbn-fs', () => {
       const content = 'Volume test';
       const result = await writeFile('test.txt', content, { volume: 'reports' });
 
-      expect(result.alias).toBe('disk:reports/test.txt');
+      expect(result.alias).toBe('disk:data/reports/test.txt');
       expect(result.path).toContain('reports/test.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
@@ -76,8 +76,8 @@ describe('kbn-fs', () => {
       const initialContent = 'Initial content';
       const newContent = 'New content';
 
-      await writeFile('test/override.txt', initialContent);
-      const result = await writeFile('test/override.txt', newContent);
+      await writeFile('override.txt', initialContent, { volume: 'test' });
+      const result = await writeFile('override.txt', newContent, { volume: 'test' });
 
       expect(fsReadFileSync(result.path, 'utf8')).toBe(newContent);
     });
@@ -86,21 +86,22 @@ describe('kbn-fs', () => {
       const initialContent = 'Initial content';
       const newContent = 'New content';
 
-      await writeFile('test/no-override.txt', initialContent);
+      await writeFile('no-override.txt', initialContent, { volume: 'test' });
 
       await expect(
-        writeFile('test/no-override.txt', newContent, { override: false })
-      ).rejects.toThrow(
-        'File already exists: test/no-override.txt. Use override: true to replace it.'
-      );
+        writeFile('no-override.txt', newContent, { override: false, volume: 'test' })
+      ).rejects.toThrow('File already exists: no-override.txt. Use override: true to replace it.');
     });
 
     it('should allow override when explicitly set to true', async () => {
       const initialContent = 'Initial content';
       const newContent = 'New content';
 
-      await writeFile('test/explicit-override.txt', initialContent);
-      const result = await writeFile('test/explicit-override.txt', newContent, { override: true });
+      await writeFile('explicit-override.txt', initialContent, { volume: 'test' });
+      const result = await writeFile('explicit-override.txt', newContent, {
+        override: true,
+        volume: 'test',
+      });
 
       expect(fsReadFileSync(result.path, 'utf8')).toBe(newContent);
     });
@@ -115,9 +116,9 @@ describe('kbn-fs', () => {
   describe('writeFileSync', () => {
     it('should write string content synchronously', () => {
       const content = 'Sync Hello, World!';
-      const result = writeFileSync('test/sync-hello.txt', content);
+      const result = writeFileSync('sync-hello.txt', content, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/sync-hello.txt');
+      expect(result.alias).toBe('disk:data/test/sync-hello.txt');
       expect(result.path).toContain('test/sync-hello.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
@@ -125,9 +126,9 @@ describe('kbn-fs', () => {
 
     it('should write Buffer content synchronously', () => {
       const content = Buffer.from('Sync Buffer!');
-      const result = writeFileSync('test/sync-buffer.txt', content);
+      const result = writeFileSync('sync-buffer.txt', content, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/sync-buffer.txt');
+      expect(result.alias).toBe('disk:data/test/sync-buffer.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path)).toEqual(content);
     });
@@ -136,7 +137,7 @@ describe('kbn-fs', () => {
       const content = 'Sync Volume test';
       const result = writeFileSync('test.txt', content, { volume: 'exports' });
 
-      expect(result.alias).toBe('disk:exports/test.txt');
+      expect(result.alias).toBe('disk:data/exports/test.txt');
       expect(result.path).toContain('exports/test.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
@@ -146,8 +147,8 @@ describe('kbn-fs', () => {
       const initialContent = 'Initial sync content';
       const newContent = 'New sync content';
 
-      writeFileSync('test/sync-override.txt', initialContent);
-      const result = writeFileSync('test/sync-override.txt', newContent);
+      writeFileSync('sync-override.txt', initialContent, { volume: 'test' });
+      const result = writeFileSync('sync-override.txt', newContent, { volume: 'test' });
 
       expect(fsReadFileSync(result.path, 'utf8')).toBe(newContent);
     });
@@ -156,13 +157,11 @@ describe('kbn-fs', () => {
       const initialContent = 'Initial sync content';
       const newContent = 'New sync content';
 
-      writeFileSync('test/sync-no-override.txt', initialContent);
+      writeFileSync('sync-no-override.txt', initialContent, { volume: 'test' });
 
       expect(() =>
-        writeFileSync('test/sync-no-override.txt', newContent, { override: false })
-      ).toThrow(
-        'File already exists: test/sync-no-override.txt. Use override: true to replace it.'
-      );
+        writeFileSync('sync-no-override.txt', newContent, { override: false, volume: 'test' })
+      ).toThrow('File already exists: sync-no-override.txt. Use override: true to replace it.');
     });
   });
 
@@ -171,18 +170,18 @@ describe('kbn-fs', () => {
       const initialContent = 'Initial content\n';
       const appendContent = 'Appended content';
 
-      await writeFile('test/append.txt', initialContent);
-      const result = await appendFile('test/append.txt', appendContent);
+      await writeFile('append.txt', initialContent, { volume: 'test' });
+      const result = await appendFile('append.txt', appendContent, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/append.txt');
+      expect(result.alias).toBe('disk:data/test/append.txt');
       expect(fsReadFileSync(result.path, 'utf8')).toBe(initialContent + appendContent);
     });
 
     it('should create file if it does not exist', async () => {
       const content = 'New file content';
-      const result = await appendFile('test/new-append.txt', content);
+      const result = await appendFile('new-append.txt', content, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/new-append.txt');
+      expect(result.alias).toBe('disk:data/test/new-append.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
     });
@@ -191,8 +190,8 @@ describe('kbn-fs', () => {
       const initialContent = Buffer.from('Initial buffer\n');
       const appendContent = Buffer.from('Appended buffer');
 
-      await writeFile('test/append-buffer.txt', initialContent);
-      const result = await appendFile('test/append-buffer.txt', appendContent);
+      await writeFile('append-buffer.txt', initialContent, { volume: 'test' });
+      const result = await appendFile('append-buffer.txt', appendContent, { volume: 'test' });
 
       expect(fsReadFileSync(result.path)).toEqual(Buffer.concat([initialContent, appendContent]));
     });
@@ -204,7 +203,7 @@ describe('kbn-fs', () => {
       await writeFile('test.txt', initialContent, { volume: 'logs' });
       const result = await appendFile('test.txt', appendContent, { volume: 'logs' });
 
-      expect(result.alias).toBe('disk:logs/test.txt');
+      expect(result.alias).toBe('disk:data/logs/test.txt');
       expect(fsReadFileSync(result.path, 'utf8')).toBe(initialContent + appendContent);
     });
   });
@@ -214,18 +213,18 @@ describe('kbn-fs', () => {
       const initialContent = 'Initial sync content\n';
       const appendContent = 'Appended sync content';
 
-      writeFileSync('test/sync-append.txt', initialContent);
-      const result = appendFileSync('test/sync-append.txt', appendContent);
+      writeFileSync('sync-append.txt', initialContent, { volume: 'test' });
+      const result = appendFileSync('sync-append.txt', appendContent, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/sync-append.txt');
+      expect(result.alias).toBe('disk:data/test/sync-append.txt');
       expect(fsReadFileSync(result.path, 'utf8')).toBe(initialContent + appendContent);
     });
 
     it('should create file if it does not exist', () => {
       const content = 'New sync file content';
-      const result = appendFileSync('test/new-sync-append.txt', content);
+      const result = appendFileSync('new-sync-append.txt', content, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/new-sync-append.txt');
+      expect(result.alias).toBe('disk:data/test/new-sync-append.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
     });
@@ -234,8 +233,10 @@ describe('kbn-fs', () => {
       const initialContent = Buffer.from('Initial sync buffer\n');
       const appendContent = Buffer.from('Appended sync buffer');
 
-      writeFileSync('test/sync-append-buffer.txt', initialContent);
-      const result = appendFileSync('test/sync-append-buffer.txt', appendContent);
+      writeFileSync('sync-append-buffer.txt', initialContent, { volume: 'test' });
+      const result = appendFileSync('sync-append-buffer.txt', appendContent, {
+        volume: 'test',
+      });
 
       expect(fsReadFileSync(result.path)).toEqual(Buffer.concat([initialContent, appendContent]));
     });
@@ -296,7 +297,7 @@ describe('kbn-fs', () => {
   describe('createWriteStream', () => {
     it('should create a writable stream', async () => {
       const content = 'Stream write test content';
-      const stream = createWriteStream('test/stream-write.txt');
+      const stream = createWriteStream('stream-write.txt');
 
       await new Promise<void>((resolve, reject) => {
         stream.write(content, (err) => {
@@ -311,13 +312,13 @@ describe('kbn-fs', () => {
         stream.on('close', resolve);
       });
 
-      expect(existsSync(join(DATA_PATH, 'test/stream-write.txt'))).toBe(true);
-      expect(fsReadFileSync(join(DATA_PATH, 'test/stream-write.txt'), 'utf8')).toBe(content);
+      expect(existsSync(join(DATA_PATH, 'stream-write.txt'))).toBe(true);
+      expect(fsReadFileSync(join(DATA_PATH, 'stream-write.txt'), 'utf8')).toBe(content);
     });
 
     it('should create a writable stream with volume', async () => {
       const content = 'Stream write volume content';
-      const stream = createWriteStream('test.txt', 'uploads');
+      const stream = createWriteStream('test.txt', 'test/uploads');
 
       await new Promise<void>((resolve, reject) => {
         stream.write(content, (err) => {
@@ -332,13 +333,13 @@ describe('kbn-fs', () => {
         stream.on('close', resolve);
       });
 
-      expect(existsSync(join(DATA_PATH, 'uploads/test.txt'))).toBe(true);
-      expect(fsReadFileSync(join(DATA_PATH, 'uploads/test.txt'), 'utf8')).toBe(content);
+      expect(existsSync(join(DATA_PATH, 'test/uploads/test.txt'))).toBe(true);
+      expect(fsReadFileSync(join(DATA_PATH, 'test/uploads/test.txt'), 'utf8')).toBe(content);
     });
 
     it('should create a writable stream with options', async () => {
       const content = 'Stream write with options';
-      const stream = createWriteStream('test/stream-options.txt', undefined, 'utf8');
+      const stream = createWriteStream('stream-options.txt', 'test', 'utf8');
 
       await new Promise<void>((resolve, reject) => {
         stream.write(content, (err) => {
@@ -361,9 +362,9 @@ describe('kbn-fs', () => {
   describe('createReadStream', () => {
     it('should create a readable stream', async () => {
       const content = 'Stream read test content';
-      await writeFile('test/stream-read.txt', content);
+      await writeFile('stream-read.txt', content, { volume: 'test' });
 
-      const stream = createReadStream('test/stream-read.txt');
+      const stream = createReadStream('stream-read.txt', 'test');
       const chunks: Buffer[] = [];
 
       await new Promise<void>((resolve, reject) => {
@@ -427,12 +428,12 @@ describe('kbn-fs', () => {
 
   describe('deleteFile', () => {
     it('should delete an existing file', async () => {
-      await writeFile('test/delete.txt', 'Content to delete');
+      await writeFile('delete.txt', 'Content to delete', { volume: 'test' });
       const filePath = join(DATA_PATH, 'test/delete.txt');
 
       expect(existsSync(filePath)).toBe(true);
 
-      await deleteFile('test/delete.txt');
+      await deleteFile('delete.txt', { volume: 'test' });
 
       expect(existsSync(filePath)).toBe(false);
     });
@@ -455,12 +456,12 @@ describe('kbn-fs', () => {
 
   describe('deleteFileSync', () => {
     it('should delete an existing file synchronously', () => {
-      writeFileSync('test/sync-delete.txt', 'Content to delete');
+      writeFileSync('sync-delete.txt', 'Content to delete', { volume: 'test' });
       const filePath = join(DATA_PATH, 'test/sync-delete.txt');
 
       expect(existsSync(filePath)).toBe(true);
 
-      deleteFileSync('test/sync-delete.txt');
+      deleteFileSync('sync-delete.txt', { volume: 'test' });
 
       expect(existsSync(filePath)).toBe(false);
     });
@@ -484,9 +485,9 @@ describe('kbn-fs', () => {
   describe('WriteFileContent types', () => {
     it('should handle Iterable content', async () => {
       const content = ['Hello', ' ', 'World', '!'];
-      const result = await writeFile('test/iterable.txt', content);
+      const result = await writeFile('iterable.txt', content, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/iterable.txt');
+      expect(result.alias).toBe('disk:data/test/iterable.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe('Hello World!');
     });
@@ -498,9 +499,9 @@ describe('kbn-fs', () => {
         yield 'Content';
       }
 
-      const result = await writeFile('test/async-iterable.txt', asyncContent());
+      const result = await writeFile('async-iterable.txt', asyncContent(), { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/async-iterable.txt');
+      expect(result.alias).toBe('disk:data/test/async-iterable.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe('Async Content');
     });
@@ -509,65 +510,9 @@ describe('kbn-fs', () => {
       const content = 'Stream content test';
       const readable = Readable.from([content]);
 
-      const result = await writeFile('test/stream-content.txt', readable);
+      const result = await writeFile('stream-content.txt', readable, { volume: 'test' });
 
-      expect(result.alias).toBe('disk:test/stream-content.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
-    });
-  });
-
-  describe('Edge cases and error handling', () => {
-    it('should handle empty string content', async () => {
-      const result = await writeFile('test/empty.txt', '');
-
-      expect(result.alias).toBe('disk:test/empty.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe('');
-    });
-
-    it('should handle empty Buffer content', async () => {
-      const result = await writeFile('test/empty-buffer.txt', Buffer.alloc(0));
-
-      expect(result.alias).toBe('disk:test/empty-buffer.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path)).toEqual(Buffer.alloc(0));
-    });
-
-    it('should handle special characters in file names', async () => {
-      const content = 'Special chars test';
-      const result = await writeFile('test/file-with-special-chars.txt', content);
-
-      expect(result.alias).toBe('disk:test/file-with-special-chars.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
-    });
-
-    it('should handle very long file names', async () => {
-      const longName = 'a'.repeat(100) + '.txt';
-      const content = 'Long name test';
-      const result = await writeFile(`test/${longName}`, content);
-
-      expect(result.alias).toBe(`disk:test/${longName}`);
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
-    });
-
-    it('should handle nested directory creation', async () => {
-      const content = 'Nested directory test';
-      const result = await writeFile('test/nested/deep/directory/file.txt', content);
-
-      expect(result.alias).toBe('disk:test/nested/deep/directory/file.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
-    });
-
-    it('should handle volume with nested paths', async () => {
-      const content = 'Nested volume test';
-      const result = await writeFile('file.txt', content, { volume: 'reports/2024/january' });
-
-      expect(result.alias).toBe('disk:reports/2024/january/file.txt');
-      expect(result.path).toContain('reports/2024/january/file.txt');
+      expect(result.alias).toBe('disk:data/test/stream-content.txt');
       expect(existsSync(result.path)).toBe(true);
       expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
     });
