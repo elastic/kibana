@@ -15,7 +15,12 @@ import {
 } from '@kbn/onechat-genai-utils/langchain/messages';
 import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
-import type { AgentErrorAction, HandoverAction, ResearchAgentAction } from '../actions';
+import type {
+  AgentErrorAction,
+  HandoverAction,
+  ResearchAgentAction,
+  AnswerAgentAction,
+} from '../actions';
 import {
   isAgentErrorAction,
   isHandoverAction,
@@ -56,6 +61,25 @@ export const formatResearcherActionHistory = ({
       // returns a single [AI, user] tuple
       formatted.push(...formatErrorAction(action));
     }
+  }
+
+  return formatted;
+};
+
+export const formatAnswerActionHistory = ({
+  actions,
+}: {
+  actions: AnswerAgentAction[];
+}): BaseMessageLike[] => {
+  const formatted: BaseMessageLike[] = [];
+
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i];
+    if (isAgentErrorAction(action)) {
+      // returns a single [AI, user] tuple
+      formatted.push(...formatErrorAction(action));
+    }
+    // [...] we don't need to format AnswerAction because it will terminate the execution
   }
 
   return formatted;

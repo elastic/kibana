@@ -16,7 +16,7 @@ import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 import type { ResearchAgentAction, AnswerAgentAction } from './actions';
-import { formatResearcherActionHistory } from './prompts/format_actions';
+import { formatResearcherActionHistory, formatAnswerActionHistory } from './prompts/format_actions';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -143,6 +143,7 @@ export const getAnswerPrompt = ({
   customInstructions,
   initialMessages,
   actions,
+  answerActions,
   capabilities,
 }: {
   customInstructions?: string;
@@ -201,6 +202,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
     ],
     ...initialMessages,
     ...formatResearcherActionHistory({ actions }),
+    ...formatAnswerActionHistory({ actions: answerActions }),
   ];
 };
 
