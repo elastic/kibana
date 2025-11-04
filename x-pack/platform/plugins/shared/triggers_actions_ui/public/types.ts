@@ -140,9 +140,11 @@ export interface PrebuildFieldsMap {
 export type GetDescriptionFieldsFn<Params extends RuleTypeParams = RuleTypeParams> = ({
   rule,
   prebuildFields,
+  http,
 }: {
   rule: Rule<Params>;
   prebuildFields: PrebuildFieldsMap | undefined;
+  http?: HttpSetup;
 }) => { title: string; description: NonNullable<ReactNode> }[];
 
 export {
