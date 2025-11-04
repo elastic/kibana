@@ -125,6 +125,35 @@ export const createPrebuildFields = ({ border }: { border: string }): PrebuildFi
       }),
       description: <span>{id}</span>,
     }),
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: (dataViewIndexId: string) => {
+      const { dataViews } = useKibana().services;
+      return {
+        title: i18n.translate('xpack.triggersActionsUI.ruleDetails.dataViewIndexPatternTitle', {
+          defaultMessage: 'Data view index patterns',
+        }),
+        description: (
+          <AsyncField<DataView>
+            queryKey={[RULE_DESCRIPTION_GET_DATA_VIEW_QUERY_KEY]}
+            queryFn={() => {
+              return dataViews.get(dataViewIndexId);
+            }}
+          >
+            {(dataView) => {
+              if (!dataView) {
+                return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
+              }
+
+              return (
+                <IndexPattern
+                  patterns={[dataView.getIndexPattern()]}
+                  data-test-subj="description-detail-data-view-pattern"
+                />
+              );
+            }}
+          </AsyncField>
+        ),
+      };
+    },
     [RULE_PREBUILD_DESCRIPTION_FIELDS.QUERY_FILTERS]: ({ filters, dataViewId }) => {
       const { dataViews } = useKibana().services;
       return {
@@ -152,35 +181,6 @@ export const createPrebuildFields = ({ border }: { border: string }): PrebuildFi
                 >
                   <FilterItems filters={filters} indexPatterns={[dataView]} readOnly />
                 </EuiFlexGroup>
-              );
-            }}
-          </AsyncField>
-        ),
-      };
-    },
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: (dataViewIndexId: string) => {
-      const { dataViews } = useKibana().services;
-      return {
-        title: i18n.translate('xpack.triggersActionsUI.ruleDetails.dataViewIndexPatternTitle', {
-          defaultMessage: 'Data view index patterns',
-        }),
-        description: (
-          <AsyncField<DataView>
-            queryKey={[RULE_DESCRIPTION_GET_DATA_VIEW_QUERY_KEY]}
-            queryFn={() => {
-              return dataViews.get(dataViewIndexId);
-            }}
-          >
-            {(dataView) => {
-              if (!dataView) {
-                return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
-              }
-
-              return (
-                <IndexPattern
-                  patterns={[dataView.getIndexPattern()]}
-                  data-test-subj="description-detail-data-view-pattern"
-                />
               );
             }}
           </AsyncField>
