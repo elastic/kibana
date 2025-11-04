@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskInstance,
@@ -18,10 +18,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
-import { MaintenanceWindowClient } from '@kbn/alerting-plugin/server/maintenance_window_client';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
-import { isEmpty } from 'lodash';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import type { SyntheticsServerSetup } from '../types';
 import {
@@ -55,6 +52,7 @@ import {
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
+import { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -83,10 +81,13 @@ export class SyntheticsService {
 
   public invalidApiKeyError?: boolean;
 
+  private readonly maintenanceWindows?: MaintenanceWindowsServerStart;
+
   constructor(server: SyntheticsServerSetup) {
     this.logger = server.logger;
     this.server = server;
     this.config = server.config.service ?? {};
+    this.maintenanceWindows = server.maintenanceWindows;
 
     // set isAllowed to false if manifestUrl is not set
     this.isAllowed = this.config.manifestUrl ? false : true;
@@ -651,14 +652,25 @@ export class SyntheticsService {
 
   async getMaintenanceWindows() {
     const { savedObjects } = this.server.coreStart;
-    const soClient = savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
+    // const soClient = savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
 
-    const maintenanceWindowClient = new MaintenanceWindowClient({
-      savedObjectsClient: soClient,
-      getUserName: async () => '',
-      uiSettings: this.server.coreStart.uiSettings.asScopedToClient(soClient),
-      logger: this.logger,
-    });
+    const getMaintenanceWindowClientWithRequest = async (request: KibanaRequest) => {
+      const temp = this.maintenanceWindows!.getMaintenanceWindowClientWithRequest(request);
+      console.log('synthetics setup service', { temp, mw: this.maintenanceWindows, request });
+      return temp;
+    };
+
+    // const maintenanceWindowClient = new MaintenanceWindowClient({
+    //   savedObjectsClient: soClient,
+    //   getUserName: async () => '',
+    //   uiSettings: this.server.coreStart.uiSettings.asScopedToClient(soClient),
+    //   logger: this.logger,
+    // });
+
+    const maintenanceWindowClient = await getMaintenanceWindowClientWithRequest(
+      {} as KibanaRequest
+    );
+
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,

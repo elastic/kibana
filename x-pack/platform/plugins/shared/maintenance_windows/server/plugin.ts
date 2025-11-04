@@ -21,11 +21,15 @@ import {
   initializeMaintenanceWindowEventsGenerator,
   scheduleMaintenanceWindowEventsGenerator,
 } from './tasks/events_generation_task';
-import { MaintenanceWindowRequestHandlerContext } from './types';
+import type { MaintenanceWindowRequestHandlerContext, MaintenanceWindowClientApi } from './types';
 import { LicenseState, type ILicenseState } from './lib';
 import { ReplaySubject, Subject } from 'rxjs';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
-import type { MaintenanceWindowsPluginsSetup, MaintenanceWindowsPluginsStart } from './types';
+import type {
+  MaintenanceWindowsPluginsSetup,
+  MaintenanceWindowsPluginsStart,
+  MaintenanceWindowsServerStart,
+} from './types';
 import { defineRoutes } from './routes';
 
 export class MaintenanceWindowsPlugin
@@ -87,7 +91,10 @@ export class MaintenanceWindowsPlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: MaintenanceWindowsPluginsStart) {
+  public start(
+    core: CoreStart,
+    plugins: MaintenanceWindowsPluginsStart
+  ): MaintenanceWindowsServerStart {
     const { maintenanceWindowClientFactory, licenseState } = this;
 
     this.logger.debug('maintenanceWindows: Started');
@@ -98,7 +105,9 @@ export class MaintenanceWindowsPlugin
       uiSettings: core.uiSettings,
     });
 
-    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
+    const getMaintenanceWindowClientWithRequest = async (
+      request: KibanaRequest
+    ): Promise<MaintenanceWindowClientApi> => {
       return maintenanceWindowClientFactory!.create(request);
     };
 

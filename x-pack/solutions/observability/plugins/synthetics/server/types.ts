@@ -36,6 +36,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
@@ -61,6 +62,7 @@ export interface SyntheticsServerSetup {
   alerting: AlertingServerSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
   isElasticsearchServerless: boolean;
+  maintenanceWindows: MaintenanceWindowsServerStart;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
@@ -75,6 +77,7 @@ export interface SyntheticsPluginsSetupDependencies {
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
   share: SharePluginSetup;
+  maintenanceWindows: MaintenanceWindowsServerStart;
 }
 
 export interface SyntheticsPluginsStartDependencies {
