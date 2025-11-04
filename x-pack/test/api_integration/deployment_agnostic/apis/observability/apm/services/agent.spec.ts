@@ -19,7 +19,23 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Agent name', () => {
     describe('when data is not loaded', () => {
-      it('handles the empty state', async () => {
+      it('entity api handles the empty state', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/entities/services/{serviceName}/agent',
+          params: {
+            path: { serviceName: 'opbeans-node' },
+            query: {
+              start,
+              end,
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body).to.eql({});
+      });
+
+      it('non-entity api handles the empty state', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/services/{serviceName}/agent',
           params: {
@@ -47,6 +63,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('returns the agent name', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/services/{serviceName}/agent',
+          params: {
+            path: { serviceName: 'opbeans-node' },
+            query: {
+              start,
+              end,
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+
+        expect(response.body).to.eql({
+          agentName: 'nodejs',
+          runtimeName: 'node',
+        });
+      });
+      it('entity api returns the agent name', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/entities/services/{serviceName}/agent',
           params: {
             path: { serviceName: 'opbeans-node' },
             query: {
