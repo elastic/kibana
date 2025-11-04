@@ -31,7 +31,10 @@ export const createRuleNameAndDescriptionNode = ({
         rule: { ...state.rule, ...baseRuleParams },
       };
     } catch (e) {
-      return { error: e.message };
+      return {
+        ...state,
+        errors: [...state.errors, `Failed to create rule name and description: ${e.message}`],
+      };
     }
   };
 };

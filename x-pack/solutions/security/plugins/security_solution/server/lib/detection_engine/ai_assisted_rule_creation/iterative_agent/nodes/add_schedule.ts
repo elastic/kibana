@@ -94,7 +94,7 @@ export const addScheduleNode = ({ model, logger }: ComputeScheduleParams) => {
           ...state.rule,
           ...defaultSchedule,
         },
-        error: `${state.error} \n Schedule computation failed: ${error.message}`,
+        errors: [...state.errors, `Failed to fetch and process tags: ${error.message}`],
       };
     }
   };

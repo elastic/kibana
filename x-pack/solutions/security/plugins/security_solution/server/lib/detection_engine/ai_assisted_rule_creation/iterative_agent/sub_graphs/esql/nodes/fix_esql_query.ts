@@ -67,7 +67,7 @@ export const fixEsqlQueryNode = async ({
       };
     } catch (err) {
       logger.debug(`Error fixing ESQL query: ${err}`);
-      return { ...state, error: err.message };
+      return { ...state, errors: [...state.errors, `Failed to fix ESQL query: ${err.message}`] };
     }
   };
 };

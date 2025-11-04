@@ -80,7 +80,7 @@ export const nlToEsqlQueryNode = async ({
 
       return { ...state, rule: { query: content, language: 'esql', type: 'esql' } };
     } catch (e) {
-      return { ...state, error: e.message };
+      return { ...state, errors: [...state.errors, `Failed to create ESQL query: ${e.message}`] };
     }
   };
 };

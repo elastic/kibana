@@ -131,10 +131,6 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             const ruleCreationAgent = getRuleCreationAgent({ model, logger });
             const result = await ruleCreationAgent.invoke({ userQuery: userQuery.slice(3) });
 
-            if (result.error) {
-              throw new Error(result.error);
-            }
-
             return response.ok({
               body: {
                 rule: result.rule,
@@ -160,8 +156,8 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
 
           //  console.log('toolAgentResult result', JSON.stringify(result, null, 2));
 
-          if (result.error) {
-            throw new Error(result.error);
+          if (result.errors.length) {
+            throw new Error(result.errors.join('; '));
           }
 
           return response.ok({
@@ -176,31 +172,6 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             statusCode: error.statusCode,
           });
         }
-        // const siemResponse = buildSiemResponse(response);
-        // const [_, { security }] = await getStartServices();
-        // const securitySolution = await context.securitySolution;
-        // const spaceId = securitySolution.getSpaceId();
-
-        // try {
-        //   const users = await security.userProfiles.suggest({
-        //     name: searchTerm,
-        //     dataPath: 'avatar',
-        //     requiredPrivileges: {
-        //       spaceId,
-        //       privileges: {
-        //         kibana: [security.authz.actions.login],
-        //       },
-        //     },
-        //   });
-
-        //   return response.ok({ body: users });
-        // } catch (err) {
-        //   const error = transformError(err);
-        //   return siemResponse.error({
-        //     body: error.message,
-        //     statusCode: error.statusCode,
-        //   });
-        // }
       }
     );
 };

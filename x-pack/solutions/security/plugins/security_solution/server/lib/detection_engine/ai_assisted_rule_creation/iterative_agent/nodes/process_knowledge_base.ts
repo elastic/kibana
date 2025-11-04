@@ -75,7 +75,7 @@ export const processKnowledgeBaseNode = ({
       logger.debug('Error processing knowledge base:', error);
       return {
         ...state,
-        error: `Knowledge base processing failed: ${error.message}`,
+        errors: [...state.errors, `Knowledge base processing failed: ${error.message}`],
       };
     }
   };

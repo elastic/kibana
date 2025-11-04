@@ -15,6 +15,8 @@ import { getPrebuiltRulesAssets } from '../../utils/get_prebuilt_rules_assets';
 import { getCustomRulesTags } from '../../utils/get_custom_rules_tags';
 import { TAGS_SELECTION_PROMPT } from './prompts';
 
+const AI_ASSISTED_RULE_CREATION_TAG = 'AI assisted rule creation';
+
 interface GetTagsNodeParams {
   savedObjectsClient: SavedObjectsClientContract;
   rulesClient: RulesClient;
@@ -22,7 +24,7 @@ interface GetTagsNodeParams {
 }
 
 export const getTagsNode = ({ savedObjectsClient, model, rulesClient }: GetTagsNodeParams) => {
-  const jsonParser = new JsonOutputParser();
+  const jsonParser = new JsonOutputParser<{ relevant_tags: string[] }>();
 
   return async (state: typeof RuleCreationAnnotation.State) => {
     try {
@@ -56,7 +58,7 @@ export const getTagsNode = ({ savedObjectsClient, model, rulesClient }: GetTagsN
 
       const suggestedTags = Array.isArray(tagsSelectionResult.relevant_tags)
         ? tagsSelectionResult.relevant_tags.filter(
-            (tag: unknown): tag is string => typeof tag === 'string' && availableTags.includes(tag)
+            (tag): tag is string => typeof tag === 'string' && availableTags.includes(tag)
           )
         : [];
 
@@ -64,13 +66,13 @@ export const getTagsNode = ({ savedObjectsClient, model, rulesClient }: GetTagsN
         ...state,
         rule: {
           ...state.rule,
-          tags: suggestedTags,
+          tags: [...suggestedTags, AI_ASSISTED_RULE_CREATION_TAG],
         },
       };
     } catch (error) {
       return {
         ...state,
-        error: `Failed to fetch and process tags: ${error.message}`,
+        errors: [...state.errors, `Failed to fetch and process tags: ${error.message}`],
       };
     }
   };
