@@ -23,7 +23,7 @@ const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : pat
 /**
  * @type {import('@kbn/projects-solutions-groups').KibanaSolution[]}
  */
-const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplace_ai'];
+const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'chat'];
 
 /**
  * Representation of a Package in the Kibana repository
