@@ -31,7 +31,7 @@ function checkLicense(xpackLicenseInfo: XPackInfo){
       showLinks: true,
      }
   }
-  if (!xpackLicenseInfo.feature('name').isEnabled()) {
+  if (!xpackLicenseInfo.feature('id').isEnabled()) {
     return {
       isAvailable: false,
       showLinks: false,
@@ -72,7 +72,7 @@ class MyPlugin {
     deps.licensing.license$.subscribe(license => {
       const { state, message } = license.check('myPlugin', 'gold')
       const hasRequiredLicense = state === 'valid';
-      if (hasRequiredLicense && license.getFeature('name').isAvailable) {
+      if (hasRequiredLicense && license.getFeature('id').isAvailable) {
         // enable some server side logic 
       } else {
         log(message);
@@ -95,7 +95,7 @@ class MyPlugin {
     deps.licensing.license$.subscribe(license => {
       const { state, message } = license.check('myPlugin', 'gold')
       const hasRequiredLicense = state === 'valid';
-      const showLinks = hasRequiredLicense && license.getFeature('name').isAvailable;
+      const showLinks = hasRequiredLicense && license.getFeature('id').isAvailable;
 
       appUpdater$.next(() => {
         status: showLinks ? AppStatus.accessible : AppStatus.inaccessible,

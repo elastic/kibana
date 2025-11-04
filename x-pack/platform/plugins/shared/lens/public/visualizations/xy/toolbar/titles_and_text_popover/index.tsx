@@ -11,6 +11,11 @@ import type { FramePublicAPI } from '@kbn/lens-common';
 import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
 import type { XYState } from '../../types';
 
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
+
 export interface TextPopoverProps {
   state: XYState;
   setState: (newState: XYState) => void;
