@@ -63,7 +63,6 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
     <div css={wrapperStyle}>
       <SideNav.PrimaryMenuItem
         id={id}
-        isHorizontal
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
         onClick={handleClick}
