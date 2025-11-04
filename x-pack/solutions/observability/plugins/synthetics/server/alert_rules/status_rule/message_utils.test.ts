@@ -93,7 +93,7 @@ describe('message_utils', () => {
         stateId: undefined,
         checks: undefined,
         monitorTags: undefined,
-        stepInfo: '',
+        failedStepInfo: '',
       });
     });
 
@@ -146,7 +146,7 @@ describe('message_utils', () => {
         stateId: undefined,
         checks: undefined,
         monitorTags: undefined,
-        stepInfo: '',
+        failedStepInfo: '',
       });
     });
   });
@@ -289,12 +289,6 @@ describe('message_utils', () => {
   });
 
   describe('formatStepInformation', () => {
-    const mockContext = {
-      monitorName: 'Test Monitor',
-      locationName: 'US Central',
-      timestamp: '2024-05-13T12:33:37.000Z',
-    };
-
     it('returns empty string for null step info', () => {
       const result = formatStepInformation(null);
       expect(result).toBe('');
@@ -319,7 +313,7 @@ describe('message_utils', () => {
       expect(result).toContain('- Script: await page.click("button")');
     });
 
-    it('formats enhanced step information with full context', () => {
+    it('formats complete step information with all fields', () => {
       const stepInfo = {
         stepName: 'Click button',
         stepAction: 'locator.click',
@@ -327,15 +321,11 @@ describe('message_utils', () => {
         stepNumber: 3,
       };
 
-      const result = formatStepInformation(stepInfo, mockContext);
+      const result = formatStepInformation(stepInfo);
 
-      // Check enhanced header
-      expect(result).toContain(
-        '[Test Monitor] has failed on step [3] [Click button] in [US Central] at [12:33:37] on [13/05/2024]'
-      );
-
-      // Check detailed information
+      // Check that it includes step details
       expect(result).toContain('- Step name: Click button');
+      expect(result).toContain('- Step number: 3');
       expect(result).toContain('- Step action: locator.click');
       expect(result).toContain('- Script: await page.click("button")');
     });
@@ -346,14 +336,11 @@ describe('message_utils', () => {
         stepNumber: 3,
       };
 
-      const result = formatStepInformation(stepInfo, {
-        monitorName: 'Test Monitor',
-        // Missing locationName and timestamp
-      });
+      const result = formatStepInformation(stepInfo);
 
-      // Should not include enhanced header but should include basic info
+      // Should include available info
       expect(result).toContain('- Step name: Click button');
-      expect(result).not.toContain('[Test Monitor] has failed on step');
+      expect(result).toContain('- Step number: 3');
     });
 
     it('handles partial step information', () => {
@@ -362,7 +349,7 @@ describe('message_utils', () => {
         // Missing stepAction and scriptSource
       };
 
-      const result = formatStepInformation(stepInfo, mockContext);
+      const result = formatStepInformation(stepInfo);
 
       expect(result).toContain('- Step name: Click button');
       expect(result).not.toContain('- Step action:');
@@ -379,20 +366,6 @@ describe('message_utils', () => {
       const result = formatStepInformation(stepInfo);
 
       expect(result).toContain('- Script: ' + 'a'.repeat(200) + '...');
-    });
-
-    it('formats time and date correctly', () => {
-      const stepInfo = {
-        stepName: 'Click button',
-        stepNumber: 1,
-      };
-
-      const result = formatStepInformation(stepInfo, mockContext);
-
-      // Check time format (HH:MM:SS)
-      expect(result).toContain('at [12:33:37]');
-      // Check date format (DD/MM/YYYY)
-      expect(result).toContain('on [13/05/2024]');
     });
 
     it('handles step action extraction from error message', () => {

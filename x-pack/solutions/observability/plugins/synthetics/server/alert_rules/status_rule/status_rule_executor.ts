@@ -102,22 +102,17 @@ export class StatusRuleExecutor {
     this.logger.debug(`[Status Rule Executor][${this.ruleName}] ${message}`);
   }
 
-  async getStepInfoForBrowserMonitor(
+  async getFailedStepInfoForBrowserMonitor(
     checkGroup: string,
-    monitorType: string,
-    context?: {
-      monitorName?: string;
-      locationName?: string;
-      timestamp?: string;
-    }
+    monitorType: string
   ): Promise<string> {
-    if (monitorType !== 'browser' || !checkGroup) {
+    if (monitorType !== 'browser') {
       return '';
     }
 
     try {
       const stepInfo = await getStepInformation(this.esClient, checkGroup, monitorType);
-      return formatStepInformation(stepInfo, context);
+      return formatStepInformation(stepInfo);
     } catch (error) {
       this.debug(`Failed to fetch step information for check group ${checkGroup}: ${error}`);
       return '';
@@ -640,7 +635,7 @@ export class StatusRuleExecutor {
     }
 
     // Fetch step information for browser monitors synchronously before creating alert
-    let stepInfo = '';
+    let failedStepInfo = '';
     // Get monitor type directly from saved object attributes
     const monitor = this.monitors.find((m) => m.id === configId);
     const monitorType = monitor?.attributes.type;
@@ -653,33 +648,35 @@ export class StatusRuleExecutor {
         allConfigs = getConfigsByIds(params.downConfigs).get(params.configId) || [];
       }
 
+      this.debug(`Fetching step info for browser monitor. Found ${allConfigs.length} configs`);
+
       const stepInfoPromises = allConfigs.map(async (config) => {
         if ('latestPing' in config && config.latestPing) {
           const checkGroup = config.latestPing.monitor?.check_group;
           if (checkGroup) {
+            this.debug(`Fetching step info for check group: ${checkGroup}`);
             try {
-              const stepContext = {
-                monitorName: monitorSummary.monitorName,
-                locationName: config.latestPing.observer.geo?.name ?? config.locationId,
-                timestamp: config.latestPing['@timestamp'],
-              };
-              return await this.getStepInfoForBrowserMonitor(checkGroup, 'browser', stepContext);
+              return await this.getFailedStepInfoForBrowserMonitor(checkGroup, 'browser');
             } catch (error) {
               this.debug(`Failed to fetch step information for alert ${alertId}: ${error}`);
             }
+          } else {
+            this.debug(`No check group found in config for alert ${alertId}`);
           }
         }
         return '';
       });
       const stepInfos = await Promise.all(stepInfoPromises);
-      stepInfo = stepInfos.filter((info) => info).join('\n');
-      this.debug(`Step information for alert ${alertId}: "${stepInfo}"`);
+      failedStepInfo = stepInfos.filter((info) => info).join('\n');
+      this.debug(`Step information for alert ${alertId}: "${failedStepInfo}"`);
+    } else {
+      this.debug(`Monitor type is not browser (${monitorType}), skipping step info fetch`);
     }
 
     // Update monitor summary with step info
     const updatedMonitorSummary = {
       ...monitorSummary,
-      stepInfo,
+      failedStepInfo,
     };
 
     const alertDocument = getMonitorAlertDocument(
@@ -694,7 +691,7 @@ export class StatusRuleExecutor {
     // Update context with step info if available
     const updatedContext = {
       ...context,
-      ...(stepInfo ? { stepInfo } : {}),
+      ...(failedStepInfo ? { failedStepInfo } : {}),
     };
 
     alertsClient.setAlertData({

@@ -63,7 +63,7 @@ export const getMonitorAlertDocument = (
   'kibana.alert.evaluation.value':
     (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
-  'monitor.step_info': monitorSummary.stepInfo,
+  'monitor.failed_step_info': monitorSummary.failedStepInfo,
   ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
 });
 
@@ -99,7 +99,7 @@ export interface MonitorSummaryData {
     down: number;
   };
   params?: StatusRuleParams;
-  stepInfo?: string;
+  failedStepInfo?: string;
 }
 
 export const getMonitorSummary = ({
@@ -111,7 +111,7 @@ export const getMonitorSummary = ({
   reason,
   checks,
   params,
-  stepInfo = '',
+  failedStepInfo = '',
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
   const { downThreshold } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
@@ -178,7 +178,7 @@ export const getMonitorSummary = ({
     downThreshold,
     timestamp,
     monitorTags: monitorInfo.tags,
-    stepInfo,
+    failedStepInfo,
   };
 };
 
@@ -400,12 +400,7 @@ export const formatStepInformation = (
     stepAction?: string;
     scriptSource?: string;
     stepNumber?: number;
-  } | null,
-  context?: {
-    monitorName?: string;
-    locationName?: string;
-    timestamp?: string;
-  }
+  } | null
 ): string => {
   if (!stepInfo) {
     return '';
@@ -413,41 +408,39 @@ export const formatStepInformation = (
 
   const parts: string[] = [];
 
-  if (
-    context?.monitorName &&
-    stepInfo.stepNumber &&
-    stepInfo.stepName &&
-    context?.locationName &&
-    context?.timestamp
-  ) {
-    const date = new Date(context.timestamp);
-    const timeStr = date.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'UTC',
-    });
-    const dateStr = date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      timeZone: 'UTC',
-    });
-
+  if (stepInfo.stepName) {
     parts.push(
-      `\n[${context.monitorName}] has failed on step [${stepInfo.stepNumber}] [${stepInfo.stepName}] in [${context.locationName}] at [${timeStr}] on [${dateStr}].`
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepName', {
+        defaultMessage: '\n- Step name: {stepName}  ',
+        values: {
+          stepName: stepInfo.stepName,
+        },
+      })
     );
   }
 
-  if (stepInfo.stepName) {
-    parts.push(`\n- Step name: ${stepInfo.stepName}  `);
+  if (stepInfo.stepNumber !== undefined) {
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepNumber', {
+        defaultMessage: '\n- Step number: {stepNumber}  ',
+        values: {
+          stepNumber: stepInfo.stepNumber,
+        },
+      })
+    );
   }
 
   if (stepInfo.stepAction) {
     const extractedAction = extractStepActionFromError(stepInfo.stepAction);
     if (extractedAction) {
-      parts.push(`\n- Step action: ${extractedAction}  `);
+      parts.push(
+        i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepAction', {
+          defaultMessage: '\n- Step action: {stepAction}  ',
+          values: {
+            stepAction: extractedAction,
+          },
+        })
+      );
     }
   }
 
@@ -456,7 +449,14 @@ export const formatStepInformation = (
     const truncatedScript = stepInfo.scriptSource.substring(0, MAX_SCRIPT_LENGTH);
     const script =
       stepInfo.scriptSource.length > MAX_SCRIPT_LENGTH ? `${truncatedScript}...` : truncatedScript;
-    parts.push(`\n- Script: ${script}  `);
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.script', {
+        defaultMessage: '\n- Script: {script}  ',
+        values: {
+          script,
+        },
+      })
+    );
   }
 
   return parts.join('');

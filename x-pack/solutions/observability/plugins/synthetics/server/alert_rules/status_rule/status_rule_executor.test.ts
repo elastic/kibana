@@ -379,7 +379,7 @@ describe('StatusRuleExecutor', () => {
           serviceName: undefined,
           stateId: undefined,
           status: 'down',
-          stepInfo: '',
+          failedStepInfo: '',
           timestamp: '2024-05-13T12:33:37.000Z',
         },
         statusConfig: {
@@ -537,7 +537,7 @@ describe('StatusRuleExecutor', () => {
             'Monitor "test monitor" is down 1 time from Test location and 1 time from Test location. Alert when down 1 time out of the last 1 checks from at least 1 location.',
           serviceName: undefined,
           status: 'down',
-          stepInfo: '',
+          failedStepInfo: '',
           timestamp: '2024-05-13T12:33:37.000Z',
         },
         configId: 'id1',
@@ -909,7 +909,7 @@ describe('StatusRuleExecutor', () => {
             lastErrorStack: undefined,
             serviceName: undefined,
             stateId: undefined,
-            stepInfo: '',
+            failedStepInfo: '',
             timestamp: undefined,
           },
         });
@@ -941,7 +941,7 @@ describe('StatusRuleExecutor', () => {
             lastErrorStack: undefined,
             serviceName: undefined,
             stateId: undefined,
-            stepInfo: '',
+            failedStepInfo: '',
             timestamp: undefined,
           },
         });
@@ -1011,7 +1011,7 @@ describe('StatusRuleExecutor', () => {
             lastErrorStack: undefined,
             serviceName: undefined,
             stateId: undefined,
-            stepInfo: '',
+            failedStepInfo: '',
             timestamp: undefined,
           },
         });
@@ -1043,7 +1043,7 @@ describe('StatusRuleExecutor', () => {
             lastErrorStack: undefined,
             serviceName: undefined,
             stateId: undefined,
-            stepInfo: '',
+            failedStepInfo: '',
             timestamp: undefined,
           },
         });

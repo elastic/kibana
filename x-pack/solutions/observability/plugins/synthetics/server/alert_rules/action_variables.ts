@@ -14,6 +14,7 @@ export const ALERT_REASON_MSG = 'reason';
 export const ALERT_DETAILS_URL = 'alertDetailsUrl';
 export const VIEW_IN_APP_URL = 'viewInAppUrl';
 export const RECOVERY_REASON = 'recoveryReason';
+export const FAILED_STEP_INFO = 'failedStepInfo';
 const GROUPING = 'grouping';
 
 export const getActionVariables = ({
@@ -30,6 +31,7 @@ export const getActionVariables = ({
       ACTION_VARIABLES[ALERT_REASON_MSG],
       ACTION_VARIABLES[VIEW_IN_APP_URL],
       ACTION_VARIABLES[RECOVERY_REASON],
+      ACTION_VARIABLES[FAILED_STEP_INFO],
       ACTION_VARIABLES[GROUPING],
       ...commonMonitorStateI18,
     ],
@@ -82,6 +84,15 @@ export const ACTION_VARIABLES = {
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.recoveryReason.description',
       {
         defaultMessage: 'A concise description of the reason for the recovery',
+      }
+    ),
+  },
+  [FAILED_STEP_INFO]: {
+    name: FAILED_STEP_INFO,
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.failedStepInfo.description',
+      {
+        defaultMessage: 'Detailed information about the failed step for browser monitors',
       }
     ),
   },

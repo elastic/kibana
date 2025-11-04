@@ -327,7 +327,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorTags: undefined,
         monitorType: undefined,
         serviceName: undefined,
-        stepInfo: '',
+        failedStepInfo: '',
       },
     });
   });
@@ -429,7 +429,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorTags: undefined,
         monitorType: undefined,
         serviceName: undefined,
-        stepInfo: '',
+        failedStepInfo: '',
       },
     });
   });
@@ -527,7 +527,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorTags: undefined,
         monitorType: undefined,
         serviceName: undefined,
-        stepInfo: '',
+        failedStepInfo: '',
       },
     });
   });
@@ -610,7 +610,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorTags: undefined,
         serviceName: undefined,
         stateId: undefined,
-        stepInfo: '',
+        failedStepInfo: '',
       },
     });
   });
@@ -695,7 +695,7 @@ describe('setRecoveredAlertsContext', () => {
         lastErrorStack: undefined,
         monitorTags: undefined,
         serviceName: undefined,
-        stepInfo: '',
+        failedStepInfo: '',
       },
     });
   });
@@ -780,7 +780,7 @@ describe('setRecoveredAlertsContext', () => {
         lastErrorStack: undefined,
         monitorTags: undefined,
         serviceName: undefined,
-        stepInfo: '',
+        failedStepInfo: '',
       },
     });
   });

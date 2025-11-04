@@ -11358,6 +11358,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
@@ -11369,10 +11373,6 @@ Object {
     "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
-    },
-    "monitor.step_info": Object {
-      "required": false,
-      "type": "text",
     },
     "monitor.tags": Object {
       "array": true,
@@ -11524,6 +11524,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
@@ -11535,10 +11539,6 @@ Object {
     "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
-    },
-    "monitor.step_info": Object {
-      "required": false,
-      "type": "text",
     },
     "monitor.tags": Object {
       "array": true,
@@ -11690,6 +11690,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
@@ -11701,10 +11705,6 @@ Object {
     "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
-    },
-    "monitor.step_info": Object {
-      "required": false,
-      "type": "text",
     },
     "monitor.tags": Object {
       "array": true,
@@ -11856,6 +11856,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
@@ -11867,10 +11871,6 @@ Object {
     "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
-    },
-    "monitor.step_info": Object {
-      "required": false,
-      "type": "text",
     },
     "monitor.tags": Object {
       "array": true,
@@ -12028,6 +12028,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
@@ -12039,10 +12043,6 @@ Object {
     "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
-    },
-    "monitor.step_info": Object {
-      "required": false,
-      "type": "text",
     },
     "monitor.tags": Object {
       "array": true,
