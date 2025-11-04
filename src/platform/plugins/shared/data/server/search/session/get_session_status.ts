@@ -40,7 +40,7 @@ export async function getSessionStatus(
     return { status: SearchSessionStatus.EXPIRED };
   }
 
-  if (session.completed) {
+  if (session.status === SearchSessionStatus.COMPLETE) {
     return { status: SearchSessionStatus.COMPLETE };
   }
 

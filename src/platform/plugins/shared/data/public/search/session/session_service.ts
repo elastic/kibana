@@ -11,6 +11,7 @@ import type { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import {
   distinctUntilChanged,
   filter,
+  interval,
   map,
   mapTo,
   mergeMap,
@@ -32,6 +33,7 @@ import moment from 'moment';
 import type { ISearchOptions } from '@kbn/search-types';
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
+import type { SearchSessionsFindResponse } from '../../../common';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type { SessionMeta, SessionStateContainer } from './search_session_state';
@@ -172,6 +174,9 @@ export class SessionService {
 
   public readonly sessionMeta$: Observable<SessionMeta>;
 
+  public inProgressSearches$: BehaviorSubject<number>;
+  private inProgressPollingInterval$: Subscription | null = null;
+
   /**
    * Emits `true` when session completes and `config.search.sessions.notTouchedTimeout` duration has passed.
    * Used to stop keeping searches alive after some times and disabled "save session" button
@@ -216,6 +221,8 @@ export class SessionService {
     this.state$ = sessionState$;
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
+
+    this.inProgressSearches$ = new BehaviorSubject<number>(0);
 
     this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
     this.logger = initializerContext.logger.get();
@@ -621,6 +628,7 @@ export class SessionService {
       initialState,
       sessionId,
     });
+    this.pollInProgressBackgroundSearches();
 
     // if we are still interested in this result
     if (this.isCurrentSession(sessionId)) {
@@ -764,6 +772,54 @@ export class SessionService {
       isDisabled: () => ({ disabled: false }),
       ...this.searchSessionIndicatorUiConfig,
     };
+  }
+
+  private async pollInProgressBackgroundSearches() {
+    if (this.inProgressPollingInterval$) {
+      return;
+    }
+
+    let previouslyRunningBackgroundsearches: SearchSessionsFindResponse['saved_objects'] = [];
+    this.inProgressPollingInterval$ = interval(5000).subscribe(async () => {
+      const response = await this.sessionsClient.find({
+        filter: 'search-session.attributes.status: "in_progress"',
+      });
+      this.inProgressSearches$.next(response.total);
+      const finishedBackgroundSearches = this.getFinishedBackgroundSearches(
+        previouslyRunningBackgroundsearches,
+        response.saved_objects
+      );
+
+      for (const finishedBackgroundSearch of finishedBackgroundSearches) {
+        this.toastService?.addInfo({
+          title: i18n.translate(
+            'data.searchSessions.sessionService.backgroundSearchCompletedTitle',
+            {
+              defaultMessage: 'Background search "{name}" has completed',
+              values: {
+                name: finishedBackgroundSearch.attributes.name || finishedBackgroundSearch.id,
+              },
+            }
+          ),
+        });
+      }
+
+      previouslyRunningBackgroundsearches = response.saved_objects;
+
+      if (response.total === 0) {
+        this.inProgressPollingInterval$?.unsubscribe();
+        this.inProgressPollingInterval$ = null;
+      }
+    });
+  }
+
+  private getFinishedBackgroundSearches(
+    previouslyRunningBackgroundsearches: SearchSessionsFindResponse['saved_objects'],
+    currentlyRunningBackgroundSearches: SearchSessionsFindResponse['saved_objects']
+  ) {
+    // The background searches that have finished are the ones that were in progress before but are not anymore
+    const currentlyRunningIds = new Set(currentlyRunningBackgroundSearches.map((so) => so.id));
+    return previouslyRunningBackgroundsearches.filter((so) => !currentlyRunningIds.has(so.id));
   }
 
   private async refreshSearchSessionSavedObject() {

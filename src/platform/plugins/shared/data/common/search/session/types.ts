@@ -14,6 +14,7 @@ import type { SearchSessionStatus, SearchStatus } from './status';
 export const SEARCH_SESSION_TYPE = 'search-session';
 export interface SearchSessionSavedObjectAttributes {
   sessionId: string;
+  status?: SearchSessionStatus;
   /**
    * User-facing session name to be displayed in session management
    */

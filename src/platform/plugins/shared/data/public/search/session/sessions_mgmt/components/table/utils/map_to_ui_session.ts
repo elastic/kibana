@@ -49,9 +49,10 @@ export const mapToUISession = ({
     restoreState,
     idMapping,
     version,
+    status: soStatus,
   } = savedObject.attributes;
 
-  const status = sessionStatuses[savedObject.id]?.status;
+  const status = soStatus ?? sessionStatuses[savedObject.id]?.status;
   const errors = sessionStatuses[savedObject.id]?.errors;
   const actions = getActions(status).filter((action) => {
     if (!filteredActions?.length) return true; // if no actions are provided, return all

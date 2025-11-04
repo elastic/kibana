@@ -136,6 +136,7 @@ export class SearchSessionService implements ISearchSessionService {
       SEARCH_SESSION_TYPE,
       {
         sessionId,
+        status: SearchSessionStatus.IN_PROGRESS,
         expires: new Date(
           Date.now() + this.sessionConfig.defaultExpiration.asMilliseconds()
         ).toISOString(),
@@ -321,6 +322,7 @@ export class SearchSessionService implements ISearchSessionService {
             this.update(queue[0].deps, queue[0].user, sessionId, {
               idMapping: batchedIdMapping,
               completed: undefined,
+              status: SearchSessionStatus.IN_PROGRESS,
             })
               .then(() => {
                 queue.forEach((q) => q.resolve());
@@ -487,6 +489,7 @@ export class SearchSessionService implements ISearchSessionService {
       await this.update(searchSessionDeps, user, savedObject.id, {
         idMapping: updatedIdMapping,
         completed: hasUpdatedToComplete ? moment().toISOString() : undefined,
+        status: sessionStatus.status,
       });
     }
 

@@ -20,6 +20,7 @@ const serializeableSchema = schema.mapOf(schema.string(), schema.any());
 const searchSessionAttrSchema = () =>
   schema.object({
     sessionId: schema.string(),
+    status: schema.maybe(schema.string()),
     name: schema.maybe(schema.string()),
     appId: schema.maybe(schema.string()),
     created: schema.string(),
