@@ -6,21 +6,33 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switchMap } from 'rxjs';
-import { ESQLVariableType } from '@kbn/esql-types';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  filter,
+  map,
+  merge,
+  of,
+  switchMap,
+} from 'rxjs';
+
+import type { OptionsListSearchTechnique, OptionsListSelection } from '@kbn/controls-schemas';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { apiHasSections } from '@kbn/presentation-containers';
 import {
   fetch$,
   type PublishingSubject,
   type StateComparators,
 } from '@kbn/presentation-publishing';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
-import type { OptionsListSearchTechnique, OptionsListSelection } from '@kbn/controls-schemas';
-import { EsqlControlType } from '@kbn/esql-types';
+
+import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
-import type { OptionsListSuggestions } from '../../../common/options_list';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -59,10 +71,13 @@ export const selectionComparators: StateComparators<
 };
 
 export function initializeESQLControlSelections(
+  uuid: string,
   parentApi: unknown,
   initialState: ESQLControlState,
   setDataLoading: (loading: boolean) => void
 ) {
+  const sectionId$ = apiHasSections(parentApi) ? parentApi.getPanelSection$(uuid) : of(undefined);
+
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
@@ -94,7 +109,7 @@ export function initializeESQLControlSelections(
   }
 
   // For Values From Query controls, update values on dashboard load/reload
-  const fetchSubscription = fetch$({ parentApi })
+  const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
       switchMap(async ({ timeRange }) => {
@@ -126,7 +141,7 @@ export function initializeESQLControlSelections(
     });
 
   // derive ESQL control variable from state.
-  const getEsqlVariable = () => {
+  const getEsqlVariable = (sectionId?: string) => {
     const isSingleSelect = singleSelect$.value;
     const selectedValues = selectedOptions$.value;
 
@@ -150,16 +165,21 @@ export function initializeESQLControlSelections(
       key: variableName$.value,
       value,
       type: variableType$.value,
+      meta: {
+        controlledBy: uuid,
+        ...(sectionId && { group: sectionId }),
+      },
     };
   };
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
   const variableSubscriptions = combineLatest([
+    sectionId$,
     variableName$,
     variableType$,
     selectedOptions$,
     availableOptions$,
     singleSelect$,
-  ]).subscribe(() => esqlVariable$.next(getEsqlVariable()));
+  ]).subscribe(([sectionId]) => esqlVariable$.next(getEsqlVariable(sectionId)));
 
   return {
     cleanup: () => {

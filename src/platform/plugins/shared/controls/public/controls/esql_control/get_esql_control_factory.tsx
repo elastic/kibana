@@ -46,6 +46,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
 
       // TODO Rename this; this is actually the state manager for all non-default control state params, "selections" is a confusing name
       const selections = initializeESQLControlSelections(
+        uuid,
         parentApi,
         state,
         defaultControlManager.api.setDataLoading
