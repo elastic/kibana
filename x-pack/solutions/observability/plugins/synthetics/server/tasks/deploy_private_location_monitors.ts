@@ -12,7 +12,6 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type {
@@ -180,47 +179,6 @@ export class DeployPrivateLocationMonitors {
     }
 
     return { configsBySpaces, monitorSpaceIds };
-  }
-
-  async hasMWsChanged({
-    soClient,
-    lastStartedAt,
-    lastTotalMWs,
-  }: {
-    soClient: SavedObjectsClientContract;
-    lastStartedAt: string;
-    lastTotalMWs: number;
-  }) {
-    const { logger } = this.serverSetup;
-
-    const [editedMWs, totalMWs] = await Promise.all([
-      soClient.find({
-        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        perPage: 0,
-        namespaces: [ALL_SPACES_ID],
-        filter: `${MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE}.updated_at > "${lastStartedAt}"`,
-        fields: [],
-      }),
-      soClient.find({
-        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        perPage: 0,
-        namespaces: [ALL_SPACES_ID],
-        fields: [],
-      }),
-    ]);
-    logger.debug(
-      `Found ${editedMWs.total} maintenance windows updated and ${totalMWs.total} total maintenance windows`
-    );
-    const updatedMWs = editedMWs.total;
-    const noOfMWs = totalMWs.total;
-
-    const hasMWsChanged = updatedMWs > 0 || noOfMWs !== lastTotalMWs;
-
-    return {
-      hasMWsChanged,
-      updatedMWs,
-      totalMWs: noOfMWs,
-    };
   }
 
   debugLog = (message: string) => {

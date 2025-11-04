@@ -239,8 +239,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...getMockTaskInstance({ lastStartedAt: initialLastStartedAt }),
         startedAt,
       };
-      jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
-        hasDataChanged: false,
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: false,
       });
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
