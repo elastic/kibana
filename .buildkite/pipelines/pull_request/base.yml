@@ -23,9 +23,10 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: c4-standard-16-lssd
+      machineType: c2-standard-16
       preemptible: true
       diskSizeGb: 150
+      diskType: pd-ssd
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
@@ -34,7 +35,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/quick_checks.sh
+  - command: .buildkite/scripts/steps.sh
     label: 'Quick Checks'
     agents:
       machineType: n2-highcpu-8
