@@ -33,9 +33,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('./index.feature_flags.ts')],
     apps: {
       ...baseConfig.get('apps'),
-      searchGettingStarted: {
-        pathname: '/app/elasticsearch/getting_started',
-      },
     },
   };
 }

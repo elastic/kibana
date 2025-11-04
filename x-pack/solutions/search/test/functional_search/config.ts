@@ -47,6 +47,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       searchHomepage: {
         pathname: '/app/elasticsearch/home',
       },
+      searchGettingStarted: {
+        pathname: '/app/elasticsearch/getting_started',
+      },
     },
   };
 }
