@@ -12,4 +12,5 @@ export const RULE_PREBUILD_DESCRIPTION_FIELDS = {
   DATA_VIEW_ID: 'dataViewId',
   DATA_VIEW_INDEX_PATTERN: 'dataViewIndexPattern',
   QUERY_FILTERS: 'queryFilters',
+  KQL_FILTERS: 'kqlFilters',
 } as const;

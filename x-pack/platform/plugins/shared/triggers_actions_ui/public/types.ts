@@ -135,6 +135,7 @@ export interface PrebuildFieldsMap {
     filters: Filter[];
     dataViewId: string;
   }>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.KQL_FILTERS]: PrebuildField<string>;
 }
 
 export type GetDescriptionFieldsFn<Params extends RuleTypeParams = RuleTypeParams> = ({

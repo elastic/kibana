@@ -187,6 +187,12 @@ export const createPrebuildFields = ({ border }: { border: string }): PrebuildFi
         ),
       };
     },
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.KQL_FILTERS]: (kql: string) => ({
+      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.kqlFiltersTitle', {
+        defaultMessage: 'Filter',
+      }),
+      description: <CodeBlock border={border}>{kql}</CodeBlock>,
+    }),
   };
 };
 
