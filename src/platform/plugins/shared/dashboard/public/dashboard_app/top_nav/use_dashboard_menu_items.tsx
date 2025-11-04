@@ -82,11 +82,21 @@ export const useDashboardMenuItems = ({
    * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
   const [isResetting, setIsResetting] = useState(false);
+
   const isQuickSaveButtonDisabled = useMemo(() => {
-    if (!hasUnsavedChanges) return true;
-    if (canManageAccessControl) return false;
-    return !isInEditAccessMode;
-  }, [hasUnsavedChanges, canManageAccessControl, isInEditAccessMode]);
+    if (disableTopNav || isResetting) return true;
+    if (dashboardApi.isAccessControlEnabled) {
+      if (canManageAccessControl) return false;
+      return !isInEditAccessMode;
+    }
+    return false;
+  }, [
+    canManageAccessControl,
+    isInEditAccessMode,
+    isResetting,
+    dashboardApi.isAccessControlEnabled,
+    disableTopNav,
+  ]);
 
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
@@ -238,6 +248,7 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         fill: true,
         testId: 'dashboardQuickSaveMenuItem',
+        disableButton: isQuickSaveButtonDisabled,
         run: () => quickSaveDashboard(),
         splitButtonProps: {
           run: (anchorElement: HTMLElement) => {
@@ -252,7 +263,7 @@ export const useDashboardMenuItems = ({
             });
           },
           isMainButtonLoading: isSaveInProgress,
-          isMainButtonDisabled: isQuickSaveButtonDisabled,
+          isMainButtonDisabled: !hasUnsavedChanges,
           secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
           secondaryButtonIcon: 'arrowDown',
           secondaryButtonFill: true,
@@ -361,6 +372,7 @@ export const useDashboardMenuItems = ({
     getShareTooltip,
     appId,
     isQuickSaveButtonDisabled,
+    hasUnsavedChanges,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
