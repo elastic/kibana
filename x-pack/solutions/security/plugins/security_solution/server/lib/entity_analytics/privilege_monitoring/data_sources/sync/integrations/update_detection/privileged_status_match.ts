@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import moment from 'moment';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
+import { buildPrivilegedSearchBody } from './queries';
 import type { PrivMonBulkUser } from '../../../../types';
 import { createSearchService } from '../../../../users/search';
 import { generateMonitoringLabels } from '../../generate_monitoring_labels';
@@ -86,7 +86,6 @@ export const createPatternMatcherService = (
     }
 
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
-    const script = buildMatcherScript(source.matchers[0]);
     // the last processed user from previous task run.
     const lastProcessedTimeStamp = await syncMarkerService.getLastProcessedMarker(source);
 
@@ -102,13 +101,7 @@ export const createPatternMatcherService = (
       while (fetchMore) {
         const response = await esClient.search<never, PrivMatchersAggregation>({
           index: source.indexPattern,
-          ...buildPrivilegedSearchBody(
-            script,
-            lastProcessedTimeStamp,
-            source.matchers[0].fields[0],
-            afterKey,
-            pageSize
-          ),
+          ...buildPrivilegedSearchBody(source.matchers, lastProcessedTimeStamp, afterKey, pageSize),
         });
 
         const aggregations = response.aggregations;

@@ -260,6 +260,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               </EuiFormRow>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 iconType="info"
                 title={
                   <FormattedMessage
@@ -423,6 +424,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
 
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyCalloutText"
