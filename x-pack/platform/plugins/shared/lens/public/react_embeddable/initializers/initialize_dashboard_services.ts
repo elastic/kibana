@@ -25,9 +25,9 @@ import type {
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
-  LensApi,
-  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
+import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
 import { isTextBasedLanguage, transformOutputState } from '../helper';
 
 import type { LensEmbeddableStartServices } from '../types';

@@ -13,9 +13,9 @@ import type {
   SharingSavedObjectProps,
   LensPublicCallbacks,
   VisualizationContextHelper,
-  LensApi,
   LensInternalApi,
 } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,

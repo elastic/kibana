@@ -12,14 +12,12 @@ import {
 } from '@kbn/es-query';
 import { omit } from 'lodash';
 import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { GetStateType, LensRuntimeState, IntegrationCallbacks } from '@kbn/lens-common';
 import type {
-  GetStateType,
-  LensRuntimeState,
-  IntegrationCallbacks,
+  LensSerializedAPIConfig,
   LensByRefSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
-  LensSerializedAPIConfig,
-} from '@kbn/lens-common';
+} from '@kbn/lens-common-2';
 import { isTextBasedLanguage, transformOutputState } from '../helper';
 
 function cleanupSerializedState(state: LensRuntimeState) {

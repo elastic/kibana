@@ -12,10 +12,12 @@ import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
+} from '@kbn/lens-common';
+import type {
   LensSerializedAPIConfig,
   LensByRefSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
-} from '@kbn/lens-common';
+} from '@kbn/lens-common-2';
 
 export type LensTransforms = Required<
   EmbeddableTransforms<LensSerializedState, LensSerializedAPIConfig>,

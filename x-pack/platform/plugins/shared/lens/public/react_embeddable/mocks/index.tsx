@@ -29,12 +29,12 @@ import type {
   Visualization,
   VisualizationMap,
   ExpressionWrapperProps,
-  LensApi,
   LensInternalApi,
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
 } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';

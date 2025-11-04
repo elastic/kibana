@@ -7,12 +7,8 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type {
-  LensByRefSerializedState,
-  LensSerializedState,
-  LensByRefSerializedAPIConfig,
-  LensSerializedAPIConfig,
-} from '@kbn/lens-common';
+import type { LensByRefSerializedState, LensSerializedState } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig, LensByRefSerializedAPIConfig } from '@kbn/lens-common-2';
 import { DOC_TYPE } from '../constants';
 
 export const LENS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';

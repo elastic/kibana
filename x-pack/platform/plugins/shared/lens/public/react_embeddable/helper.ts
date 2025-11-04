@@ -27,9 +27,9 @@ import type {
   GeneralDatasourceStates,
   FormBasedPersistedState,
   TextBasedPersistedState,
-  LensByValueSerializedAPIConfig,
-  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
+import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';

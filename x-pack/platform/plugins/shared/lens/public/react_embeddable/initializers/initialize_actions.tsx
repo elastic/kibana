@@ -29,8 +29,8 @@ import type {
   LensRuntimeState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
-  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 
 import { getMergedSearchContext } from '../expressions/merged_search_context';
