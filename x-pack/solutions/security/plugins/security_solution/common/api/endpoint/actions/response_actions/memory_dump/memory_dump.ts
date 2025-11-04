@@ -16,7 +16,16 @@ export const MemoryDumpActionRequestSchema = {
       {
         type: schema.oneOf([schema.literal('process'), schema.literal('kernel')]),
         pid: schema.maybe(schema.number({ min: 1 })),
-        entity_id: schema.maybe(schema.string({ minLength: 1 })),
+        entity_id: schema.maybe(
+          schema.string({
+            minLength: 1,
+            validate: (value) => {
+              if (!value.trim().length) {
+                return `entity_id cannot be an empty string`;
+              }
+            },
+          })
+        ),
       },
       {
         validate: (parameters) => {
