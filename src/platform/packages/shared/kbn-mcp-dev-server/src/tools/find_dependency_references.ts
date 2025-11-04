@@ -19,18 +19,16 @@ const SUPPORTED_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.d.ts'];
 
 interface UsageResult {
   found: boolean;
-  imports: string[];
   apis: string[];
 }
 
 interface FileUsage {
   filePath: string;
-  imports: string[];
   apis: string[];
 }
 
-interface DirectoryGroup {
-  directory: string;
+interface TeamGroup {
+  team: string;
   fileCount: number;
   files: FileUsage[];
 }
@@ -40,18 +38,19 @@ interface AnalysisResult {
   totalScannedFiles: number;
   totalMatchingFiles: number;
   uniqueApis: string[];
-  matchingFilesByDirectory: DirectoryGroup[];
+  matchingFilesByTeam: TeamGroup[];
   matchingFiles: string[];
   analysisTimeMs: number;
 }
 
+interface CodeOwnerRule {
+  pattern: string;
+  teams: string[];
+  specificity: number; // Higher = more specific
+}
+
 const findDependencyReferencesInputSchema = z.object({
   dependencyName: z.string().describe('The name of the dependency to search for (e.g., "enzyme")'),
-  verbose: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe('Include detailed information about each file'),
 });
 
 function loadGitignore(): Set<string> {
@@ -148,29 +147,56 @@ function getAllFiles(dir: string, gitignorePatterns: Set<string>): string[] {
 function findDependencyUsage(content: string, dependencyName: string): UsageResult {
   const result: UsageResult = {
     found: false,
-    imports: [],
     apis: [],
   };
 
-  // Import patterns to match
-  const importPatterns = [
-    // ES6 imports (multiline support with [\s\S]*?)
-    new RegExp(`import\\s+[\\s\\S]*?from\\s+['"\`]${dependencyName}['"\`]`, 'g'),
-    new RegExp(`import\\s+['"\`]${dependencyName}['"\`]`, 'g'),
+  // Escape special regex characters in dependency name
+  const escapedDep = dependencyName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    // CommonJS require
-    new RegExp(`require\\s*\\(\\s*['"\`]${dependencyName}['"\`]\\s*\\)`, 'g'),
+  // Split content into lines for more precise matching
+  const lines = content.split('\n');
 
-    // Dynamic imports
-    new RegExp(`import\\s*\\(\\s*['"\`]${dependencyName}['"\`]\\s*\\)`, 'g'),
-  ];
+  // Find ES6/CommonJS imports
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
 
-  // Check for imports
-  for (const pattern of importPatterns) {
-    const matches = content.match(pattern);
-    if (matches) {
+    // Check for ES6 imports (can be multiline)
+    if (line.startsWith('import') && !line.startsWith('import(')) {
+      let fullImport = lines[i];
+      let endLine = i;
+
+      // Handle multiline imports - keep collecting lines until we find 'from'
+      if (!line.includes('from')) {
+        for (let j = i + 1; j < lines.length; j++) {
+          fullImport += '\n' + lines[j];
+          endLine = j;
+          if (lines[j].includes('from')) {
+            break;
+          }
+        }
+      }
+
+      // Only add if it's importing from our specific dependency
+      const fromPattern = new RegExp(`from\\s+['"\`]${escapedDep}['"\`]`);
+      if (fromPattern.test(fullImport)) {
+        result.found = true;
+      }
+
+      // Skip the lines we've already processed (whether matched or not)
+      i = endLine;
+      continue;
+    }
+
+    // Check for CommonJS require (only the line with our dependency)
+    const requirePattern = new RegExp(`require\\s*\\(\\s*['"\`]${escapedDep}['"\`]\\s*\\)`);
+    if (requirePattern.test(line)) {
       result.found = true;
-      result.imports.push(...matches);
+    }
+
+    // Check for dynamic imports
+    const dynamicImportPattern = new RegExp(`import\\s*\\(\\s*['"\`]${escapedDep}['"\`]\\s*\\)`);
+    if (dynamicImportPattern.test(line)) {
+      result.found = true;
     }
   }
 
@@ -258,6 +284,95 @@ function extractApiUsage(content: string, dependencyName: string): string[] {
   return Array.from(apis);
 }
 
+function loadCodeOwners(): CodeOwnerRule[] {
+  const codeownersPath = path.join(REPO_ROOT, '.github', 'CODEOWNERS');
+  const rules: CodeOwnerRule[] = [];
+
+  try {
+    const content = fs.readFileSync(codeownersPath, 'utf8');
+    const lines = content.split('\n');
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      // Skip empty lines and comments
+      if (!trimmed || trimmed.startsWith('#')) {
+        continue;
+      }
+
+      // Parse line: pattern @team1 @team2 ...
+      const parts = trimmed.split(/\s+/);
+      if (parts.length < 2) {
+        continue;
+      }
+
+      const pattern = parts[0];
+      const teams = parts.slice(1).filter((part) => part.startsWith('@'));
+
+      if (teams.length > 0) {
+        // Calculate specificity: more path segments = more specific
+        const specificity = pattern.split('/').filter((seg) => seg && seg !== '*').length;
+
+        rules.push({
+          pattern,
+          teams,
+          specificity,
+        });
+      }
+    }
+  } catch (error) {
+    // If CODEOWNERS doesn't exist or can't be read, return empty array
+    // Silently fail - files will be marked as @unowned
+  }
+
+  return rules;
+}
+
+function matchPathToPattern(filePath: string, pattern: string): boolean {
+  // Normalize paths
+  const normalizedPath = filePath.replace(/\\/g, '/');
+  let normalizedPattern = pattern.replace(/\\/g, '/');
+
+  // Handle leading slash in pattern
+  if (normalizedPattern.startsWith('/')) {
+    normalizedPattern = normalizedPattern.substring(1);
+  }
+
+  // Convert glob pattern to regex
+  let regexPattern = normalizedPattern
+    .replace(/\./g, '\\.') // Escape dots
+    .replace(/\*\*/g, '___DOUBLESTAR___') // Placeholder for **
+    .replace(/\*/g, '[^/]*') // Single * matches anything except /
+    .replace(/___DOUBLESTAR___/g, '.*'); // ** matches anything including /
+
+  // If pattern doesn't end with /, it should match the exact path or paths within it
+  if (!normalizedPattern.endsWith('/') && !normalizedPattern.includes('*')) {
+    regexPattern = `^${regexPattern}(/.*)?$`;
+  } else {
+    regexPattern = `^${regexPattern}`;
+  }
+
+  const regex = new RegExp(regexPattern);
+  return regex.test(normalizedPath);
+}
+
+function getTeamForFile(filePath: string, rules: CodeOwnerRule[]): string[] {
+  const relativePath = path.relative(REPO_ROOT, filePath);
+
+  // Find all matching rules
+  const matchingRules = rules.filter((rule) => matchPathToPattern(relativePath, rule.pattern));
+
+  if (matchingRules.length === 0) {
+    return ['@unowned'];
+  }
+
+  // Sort by specificity (most specific last) and return the most specific rule's teams
+  matchingRules.sort((a, b) => a.specificity - b.specificity);
+  const mostSpecificRule = matchingRules[matchingRules.length - 1];
+
+  return mostSpecificRule.teams;
+}
+
 function analyzeFileForDependency(filePath: string, dependencyName: string): UsageResult | null {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
@@ -273,9 +388,10 @@ function analyzeFileForDependency(filePath: string, dependencyName: string): Usa
   return null;
 }
 
-function analyzeDependency(dependencyName: string, isVerbose: boolean): AnalysisResult {
+function analyzeDependency(dependencyName: string): AnalysisResult {
   const startTime = Date.now();
   const gitignorePatterns = loadGitignore();
+  const codeOwnerRules = loadCodeOwners();
 
   const allFiles = getAllFiles(REPO_ROOT, gitignorePatterns);
   const usageResults = new Map<string, UsageResult>();
@@ -289,36 +405,34 @@ function analyzeDependency(dependencyName: string, isVerbose: boolean): Analysis
     }
   }
 
-  // Group files by top-level directory
-  const filesByTopLevel = new Map<string, string[]>();
+  // Group files by team ownership
+  const filesByTeam = new Map<string, string[]>();
   const sortedFiles = Array.from(usageResults.keys()).sort();
 
   for (const filePath of sortedFiles) {
-    const relativePath = path.relative(REPO_ROOT, filePath);
-    const topLevelDir = relativePath.split(path.sep)[0];
+    const teams = getTeamForFile(filePath, codeOwnerRules);
+    // Use the primary (first) team for grouping
+    const primaryTeam = teams[0];
 
-    if (!filesByTopLevel.has(topLevelDir)) {
-      filesByTopLevel.set(topLevelDir, []);
+    if (!filesByTeam.has(primaryTeam)) {
+      filesByTeam.set(primaryTeam, []);
     }
-    filesByTopLevel.get(topLevelDir)!.push(filePath);
+    filesByTeam.get(primaryTeam)!.push(filePath);
   }
 
-  // Build directory groups
-  const filesByDirectory: DirectoryGroup[] = Array.from(filesByTopLevel.entries())
+  // Build team groups with full file details
+  const filesByTeamResult: TeamGroup[] = Array.from(filesByTeam.entries())
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([directory, files]) => ({
-      directory,
+    .map(([team, files]) => ({
+      team,
       fileCount: files.length,
-      files: isVerbose
-        ? files.map((filePath) => {
-            const usage = usageResults.get(filePath)!;
-            return {
-              filePath: path.relative(REPO_ROOT, filePath),
-              imports: usage.imports,
-              apis: usage.apis,
-            };
-          })
-        : [],
+      files: files.map((filePath) => {
+        const usage = usageResults.get(filePath)!;
+        return {
+          filePath: path.relative(REPO_ROOT, filePath),
+          apis: usage.apis,
+        };
+      }),
     }));
 
   const endTime = Date.now();
@@ -328,7 +442,7 @@ function analyzeDependency(dependencyName: string, isVerbose: boolean): Analysis
     totalScannedFiles: allFiles.length,
     totalMatchingFiles: usageResults.size,
     uniqueApis: Array.from(apiUsage).sort(),
-    matchingFilesByDirectory: filesByDirectory,
+    matchingFilesByTeam: filesByTeamResult,
     matchingFiles: sortedFiles.map((file) => path.relative(REPO_ROOT, file)),
     analysisTimeMs: endTime - startTime,
   };
@@ -338,10 +452,11 @@ export const findDependencyReferencesTool: ToolDefinition<
   typeof findDependencyReferencesInputSchema
 > = {
   name: 'find_dependency_references',
-  description: 'Find all files that import or use a specific dependency in the codebase',
+  description:
+    'Find all files that import or use a specific dependency in the codebase, grouped by team ownership from CODEOWNERS',
   inputSchema: findDependencyReferencesInputSchema,
   handler: async (input) => {
-    const result = analyzeDependency(input.dependencyName, input.verbose ?? false);
+    const result = analyzeDependency(input.dependencyName);
     return {
       content: [
         {

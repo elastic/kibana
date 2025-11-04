@@ -20,7 +20,11 @@ describe('findDependencyReferencesTool', () => {
     jest.clearAllMocks();
   });
 
-  const setupMockFileSystem = (files: Record<string, string>) => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const setupMockFileSystem = (files: Record<string, string>, codeowners?: string) => {
     const fileMap = new Map(Object.entries(files));
 
     // Mock readFileSync to return file contents
@@ -32,6 +36,15 @@ describe('findDependencyReferencesTool', () => {
         }
         if (relativePath === '.gitignore') {
           return 'node_modules\n.git\ntarget\nbuild\n';
+        }
+        if (relativePath === '.github/CODEOWNERS') {
+          return (
+            codeowners ||
+            `
+/src @elastic/kibana-core
+/x-pack @elastic/kibana-platform
+          `.trim()
+          );
         }
       }
       throw new Error(`File not found: ${filePath}`);
@@ -76,7 +89,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -97,7 +109,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -114,7 +125,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -131,7 +141,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -142,28 +151,33 @@ describe('findDependencyReferencesTool', () => {
       expect(parsedResult.uniqueApis).toContain('render');
     });
 
-    it('groups files by top-level directory', async () => {
-      setupMockFileSystem({
-        'src/file1.ts': `import { shallow } from 'enzyme';`,
-        'src/file2.tsx': `import { mount } from 'enzyme';`,
-        'x-pack/file4.ts': `import { render } from 'enzyme';`,
-      });
+    it('groups files by team ownership', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': `import { shallow } from 'enzyme';`,
+          'src/file2.tsx': `import { mount } from 'enzyme';`,
+          'x-pack/file4.ts': `import { render } from 'enzyme';`,
+        },
+        `
+/src @elastic/kibana-core
+/x-pack @elastic/kibana-platform
+        `.trim()
+      );
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
 
-      expect(parsedResult.matchingFilesByDirectory).toHaveLength(2);
-      expect(parsedResult.matchingFilesByDirectory[0].directory).toBe('src');
-      expect(parsedResult.matchingFilesByDirectory[0].fileCount).toBe(2);
-      expect(parsedResult.matchingFilesByDirectory[1].directory).toBe('x-pack');
-      expect(parsedResult.matchingFilesByDirectory[1].fileCount).toBe(1);
+      expect(parsedResult.matchingFilesByTeam).toHaveLength(2);
+      expect(parsedResult.matchingFilesByTeam[0].team).toBe('@elastic/kibana-core');
+      expect(parsedResult.matchingFilesByTeam[0].fileCount).toBe(2);
+      expect(parsedResult.matchingFilesByTeam[1].team).toBe('@elastic/kibana-platform');
+      expect(parsedResult.matchingFilesByTeam[1].fileCount).toBe(1);
     });
 
-    it('includes detailed file information when verbose is true', async () => {
+    it('always includes detailed file information', async () => {
       setupMockFileSystem({
         'src/file1.ts': `import { shallow, mount } from 'enzyme';`,
         'src/file2.tsx': `import { render } from 'enzyme';`,
@@ -171,31 +185,14 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: true,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
 
-      expect(parsedResult.matchingFilesByDirectory[0].files).toHaveLength(2);
-      expect(parsedResult.matchingFilesByDirectory[0].files[0].filePath).toBe('src/file1.ts');
-      expect(parsedResult.matchingFilesByDirectory[0].files[0].imports).toHaveLength(1);
-      expect(parsedResult.matchingFilesByDirectory[0].files[0].apis).toContain('shallow');
-      expect(parsedResult.matchingFilesByDirectory[0].files[0].apis).toContain('mount');
-    });
-
-    it('does not include detailed file information when verbose is false', async () => {
-      setupMockFileSystem({
-        'src/file1.ts': `import { shallow } from 'enzyme';`,
-      });
-
-      const result = await findDependencyReferencesTool.handler({
-        dependencyName: 'enzyme',
-        verbose: false,
-      });
-
-      const parsedResult = JSON.parse(result.content[0].text as string);
-
-      expect(parsedResult.matchingFilesByDirectory[0].files).toHaveLength(0);
+      expect(parsedResult.matchingFilesByTeam[0].files).toHaveLength(2);
+      expect(parsedResult.matchingFilesByTeam[0].files[0].filePath).toBe('src/file1.ts');
+      expect(parsedResult.matchingFilesByTeam[0].files[0].apis).toContain('shallow');
+      expect(parsedResult.matchingFilesByTeam[0].files[0].apis).toContain('mount');
     });
 
     it('returns zero usage when dependency is not found', async () => {
@@ -206,7 +203,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -227,7 +223,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -257,7 +252,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -273,7 +267,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -290,7 +283,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: '@kbn/resizable-layout',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -307,7 +299,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
@@ -362,7 +353,6 @@ describe('findDependencyReferencesTool', () => {
 
       const result = await findDependencyReferencesTool.handler({
         dependencyName: 'enzyme',
-        verbose: false,
       });
 
       const parsedResult = JSON.parse(result.content[0].text as string);
