@@ -195,5 +195,3 @@ docker_with_retry () {
     fi
   done
 }
-
-
