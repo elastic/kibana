@@ -9,6 +9,7 @@ import { useMemo, useCallback } from 'react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 
 export const useESQLVariables = ({
@@ -38,7 +39,7 @@ export const useESQLVariables = ({
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {
-      if (!panelId || !isApiESQLVariablesCompatible(parentApi)) {
+      if (!panelId || !isApiESQLVariablesCompatible(parentApi) || !apiCanAddNewPanel(parentApi)) {
         return;
       }
 

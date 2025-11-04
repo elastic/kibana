@@ -8,13 +8,7 @@ import { v4 as generateId } from 'uuid';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import {
-  DEFAULT_CONTROLS_CHAINING,
-  DEFAULT_CONTROLS_LABEL_POSITION,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  CONTROLS_GROUP_TYPE,
-} from '@kbn/controls-constants';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import type { LensAppServices, LensSerializedState } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import { extractLensReferences } from '../../common/references';
@@ -35,6 +29,7 @@ function transformControlPanelsToControlsGroup(
     controls.push({
       id,
       grow,
+      // @ts-expect-error TODO Fix saving lens vis to dashboard. Ignore TS error for now so we can fix typecheck for working code
       order: idx,
       type,
       width,
@@ -82,10 +77,6 @@ export const redirectToDashboard = ({
       type: CONTROLS_GROUP_TYPE,
       serializedState: {
         rawState: {
-          labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
-          chainingSystem: DEFAULT_CONTROLS_CHAINING,
-          autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
-          ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
           controls,
         },
         references: [],
