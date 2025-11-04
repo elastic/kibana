@@ -96,8 +96,15 @@ describe('Tagcloud Schema', () => {
           operation: 'terms',
           fields: ['category'],
           color: {
-            type: 'static',
-            color: '#green',
+            mode: 'categorical',
+            palette: 'kibana_palette',
+            mapping: [
+              {
+                values: ['value1', 'value2', 'value3'],
+                color: { type: 'from_palette', palette: 'default', index: 0 },
+              },
+            ],
+            unassignedColor: { type: 'colorCode', value: '#cccccc' },
           },
         },
       };
@@ -281,6 +288,28 @@ describe('Tagcloud Schema', () => {
       };
       expect(() => tagcloudStateSchema.validate(input)).toThrow();
     });
+
+    it('throws when tag_by color is not a palette mapping', () => {
+      const input = {
+        ...baseTagcloudConfig,
+        metric: {
+          operation: 'sum',
+          field: 'revenue',
+          show_metric_label: false,
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        tag_by: {
+          operation: 'terms',
+          fields: ['category'],
+          color: {
+            type: 'static',
+            color: '#00ff00',
+          },
+        },
+      };
+
+      expect(() => tagcloudStateSchema.validate(input)).toThrow();
+    });
   });
 
   describe('complex configurations', () => {
@@ -304,11 +333,11 @@ describe('Tagcloud Schema', () => {
           operation: 'terms',
           fields: ['category'],
           color: {
-            type: 'dynamic',
-            range: 'absolute',
-            steps: [
-              { type: 'from', from: 0, color: '#red' },
-              { type: 'to', to: 1000, color: '#green' },
+            mode: 'gradient',
+            palette: 'kibana_palette',
+            gradient: [
+              { type: 'colorCode', value: '#ff0000' },
+              { type: 'colorCode', value: '#00ff00' },
             ],
           },
         },
