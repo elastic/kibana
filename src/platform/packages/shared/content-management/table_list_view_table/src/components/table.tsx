@@ -306,7 +306,7 @@ export function Table<T extends UserContentCommonSchema>({
     />
   );
 
-  const { data: favorites, isError: favoritesError } = useFavorites();
+  const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
 
   const visibleItems = React.useMemo(() => {
     let filteredItems = items;
