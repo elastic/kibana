@@ -172,8 +172,7 @@ export class NodesFactory {
           return new EnterWorkflowTimeoutZoneNodeImpl(
             node,
             this.workflowRuntime,
-            this.stepExecutionRuntimeFactory,
-            stepExecutionRuntime
+            this.stepExecutionRuntimeFactory
           );
         }
 
@@ -182,7 +181,7 @@ export class NodesFactory {
         }
       case 'exit-timeout-zone':
         if (isExitWorkflowTimeoutZone(node)) {
-          return new ExitWorkflowTimeoutZoneNodeImpl(stepExecutionRuntime, this.workflowRuntime);
+          return new ExitWorkflowTimeoutZoneNodeImpl(this.workflowRuntime);
         }
 
         if (isExitStepTimeoutZone(node)) {

@@ -212,7 +212,6 @@
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
-        "@types/react-test-renderer",
         "babel-plugin-istanbul",
         "lighthouse",
         "nyc",
@@ -222,7 +221,6 @@
         "playwright",
         "pngjs",
         "qs",
-        "react-test-renderer",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -513,9 +511,11 @@
         "prop-types",
         "react",
         "react-dom",
+        "react-test-renderer",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
+        "@types/react-test-renderer",
         "csstype"
       ],
       "reviewers": [
