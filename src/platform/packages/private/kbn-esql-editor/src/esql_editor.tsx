@@ -1084,6 +1084,13 @@ const ESQLEditorInternal = function ESQLEditor({
                       when: 'suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && inlineSuggestionVisible',
                     });
 
+                    // Add explicit binding for Tab to accept inline suggestions when they're visible
+                    monaco.editor.addKeybindingRule({
+                      keybinding: monaco.KeyCode.Tab,
+                      command: 'editor.action.inlineSuggest.commit',
+                      when: 'inlineSuggestionVisible && textInputFocus',
+                    });
+
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
