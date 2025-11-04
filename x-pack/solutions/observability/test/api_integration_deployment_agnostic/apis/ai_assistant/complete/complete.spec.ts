@@ -585,7 +585,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             actionId: connectorId,
           });
         });
-        describe('when invoking the chat complete with the function request', function () {
+        describe('when invoking the chat complete with the tool request', function () {
           let events: MessageAddEvent[];
 
           before(async () => {
@@ -622,7 +622,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
         });
 
-        describe('when the LLM calls a function that is not available', function () {
+        describe('when the LLM calls a tool that is not available', function () {
           let messageAddedEvents: MessageAddEvent[];
           let fullConversation: Conversation;
           before(async () => {
@@ -739,7 +739,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           it('the first message add event has the tool name and an error', () => {
             expect(events[0].message.message.name).to.be('kibana');
-            expect(events[0].message.message.content).to.contain('Function arguments are invalid');
+            expect(events[0].message.message.content).to.contain(
+              'Tool call arguments for kibana were invalid'
+            );
           });
 
           it('the second message add event interact with the LLM to fix the error', () => {
@@ -747,7 +749,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
         });
 
-        describe('when the LLM calls a function with invalid arguments', function () {
+        describe('when the LLM calls a tool with invalid arguments', function () {
           let messageAddedEvents: MessageAddEvent[];
           let fullConversation: Conversation;
           before(async () => {
@@ -814,7 +816,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             // kibana function response with error message
             expect(fullConversation.messages[4].message.name).to.contain('kibana');
             expect(fullConversation.messages[4].message.content).to.contain(
-              'Function arguments are invalid'
+              'Tool call arguments for kibana were invalid'
             );
             // interaction with the LLM to fix the error
             expect(fullConversation.messages[5].message.content).to.be(
