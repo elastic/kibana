@@ -16,12 +16,8 @@ export const getActionResultsRequestQuerySchema = t.type({
   sort: t.union([t.string, t.undefined]),
   sortOrder: t.union([t.literal(Direction.asc), t.literal(Direction.desc), t.undefined]),
   kuery: t.union([t.string, t.undefined]),
-  /**
-   * Optional comma-separated list of agent IDs to filter results.
-   * For external API consumers only. Limited to 100 agents max.
-   * Internal UI does not use this parameter - server fetches agents from action document.
-   */
   agentIds: t.union([t.string, t.undefined]),
+  totalAgents: t.union([toNumberRt, t.undefined]),
 });
 
 export type GetActionResultsRequestQuerySchema = t.OutputOf<

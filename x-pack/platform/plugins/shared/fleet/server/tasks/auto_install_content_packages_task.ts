@@ -28,9 +28,10 @@ import * as Registry from '../services/epm/registry';
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
 import { getInstalledPackages } from '../services/epm/packages';
+import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.3';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
@@ -64,6 +65,7 @@ export class AutoInstallContentPackagesTask {
   private taskInterval: string;
   private discoveryMap?: DiscoveryMap;
   private discoveryMapLastFetched: number = 0;
+  private lastPrerelease: boolean = false;
 
   constructor(setupContract: AutoInstallContentPackagesTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
@@ -150,13 +152,17 @@ export class AutoInstallContentPackagesTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
+    const prerelease = await getPrereleaseFromSettings(soClient);
+
     try {
       if (
         !this.discoveryMap ||
-        this.discoveryMapLastFetched < Date.now() - CONTENT_PACKAGES_CACHE_TTL
+        this.discoveryMapLastFetched < Date.now() - CONTENT_PACKAGES_CACHE_TTL ||
+        this.lastPrerelease !== prerelease
       ) {
+        this.lastPrerelease = prerelease;
         this.discoveryMapLastFetched = Date.now();
-        this.discoveryMap = await this.getContentPackagesDiscoveryMap();
+        this.discoveryMap = await this.getContentPackagesDiscoveryMap(prerelease);
         this.logger.info(
           `[AutoInstallContentPackagesTask] Fetched content packages discovery map: ${JSON.stringify(
             this.discoveryMap
@@ -297,10 +303,10 @@ export class AutoInstallContentPackagesTask {
     return datasetsWithData;
   }
 
-  private async getContentPackagesDiscoveryMap(): Promise<DiscoveryMap> {
+  private async getContentPackagesDiscoveryMap(prerelease: boolean): Promise<DiscoveryMap> {
     const type = 'content';
     const discoveryMap: DiscoveryMap = {};
-    const registryItems = await Registry.fetchList({ prerelease: true, type });
+    const registryItems = await Registry.fetchList({ prerelease, type });
 
     registryItems.forEach((item) => {
       if (item.discovery?.datasets) {

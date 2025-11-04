@@ -142,12 +142,12 @@ const filterPackageListDeploymentModes = (packages: PackageList, isAgentlessEnab
 
 export type AvailablePackagesHookType = typeof useAvailablePackages;
 
-export const useAvailablePackages = (
-  { prereleaseIntegrationsEnabled }: { prereleaseIntegrationsEnabled: boolean } = {
-    prereleaseIntegrationsEnabled: true,
-  }
-) => {
-  const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
+export const useAvailablePackages = ({
+  prereleaseIntegrationsEnabled,
+}: {
+  prereleaseIntegrationsEnabled: boolean;
+}) => {
+  const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
   const { isAgentlessEnabled } = useAgentless();
 

@@ -7,9 +7,14 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { AppearanceSettingsPopover } from './appearance_settings_popover';
 import type { MetricVisualizationState } from '../types';
+
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 
 export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const { state, setState } = props;

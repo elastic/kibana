@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Connector } from '@kbn/search-connectors';
 import { ConnectorConfigurationComponent } from '@kbn/search-connectors';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { docLinks } from '../../../../../common/doc_links';
 import { useConnector } from '../../../hooks/api/use_connector';

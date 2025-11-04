@@ -15,7 +15,6 @@ import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
 import type { ClientOptions } from '@elastic/elasticsearch';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-
 import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
@@ -70,7 +69,7 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'workplace_ai']);
+export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'workplaceai']);
 export const serverlessProductTiers = new Set<string>([
   'essentials',
   'logs_essentials',
@@ -81,7 +80,7 @@ export const isServerlessProjectType = (value: string): value is ServerlessProje
   return serverlessProjectTypes.has(value);
 };
 
-export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'workplace_ai';
+export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'workplaceai';
 export type ServerlessProductTier =
   | 'essentials'
   | 'logs_essentials'
@@ -92,7 +91,7 @@ export const esServerlessProjectTypes = new Map<string, string>([
   ['es', 'elasticsearch'],
   ['oblt', 'observability'],
   ['security', 'security'],
-  ['workplace_ai', 'elasticsearch'],
+  ['workplaceai', 'elasticsearch'],
 ]);
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
@@ -138,6 +137,9 @@ interface ServerlessEsNodeArgs {
 
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
+
+const ES_REFRESH_INTERVAL_OVERRIDE_FLAG =
+  '-Des.stateless.allow.index.refresh_interval.override=true';
 
 const DOCKER_BASE_CMD = [
   'run',
@@ -654,6 +656,16 @@ export function resolveEsArgs(
       esArgs.set('serverless.universal_iam_service.enabled', 'true');
       esArgs.set('serverless.universal_iam_service.url', 'http://uiam-cosmosdb-gateway:8080');
     }
+  }
+
+  const javaOptions = esArgs.get('ES_JAVA_OPTS');
+  if (javaOptions) {
+    // Ensure the serverless refresh interval override flag is always present alongside any custom ES_JAVA_OPTS.
+    if (!javaOptions.includes(ES_REFRESH_INTERVAL_OVERRIDE_FLAG)) {
+      esArgs.set('ES_JAVA_OPTS', `${javaOptions} ${ES_REFRESH_INTERVAL_OVERRIDE_FLAG}`.trim());
+    }
+  } else {
+    esArgs.set('ES_JAVA_OPTS', ES_REFRESH_INTERVAL_OVERRIDE_FLAG);
   }
 
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);

@@ -7,10 +7,10 @@
 
 import { LegendValue } from '@elastic/charts';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { PieChartType, PieLayerState } from '../../../common/types';
+import type { PartitionChartType as PieChartType, LensPartitionLayerState } from '@kbn/lens-common';
 import { PartitionChartsMeta } from './partition_charts_meta';
 
-export const getLegendStats = (layer: PieLayerState, shape: PieChartType) => {
+export const getLegendStats = (layer: LensPartitionLayerState, shape: PieChartType) => {
   if ('defaultLegendStats' in PartitionChartsMeta[shape]?.legend) {
     return (
       layer.legendStats ??

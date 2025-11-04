@@ -29,6 +29,7 @@ import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
 import type { FormattedZodError, MockZodError } from './errors/invalid_yaml_schema';
 import { getCompactTypeDescription, getDetailedTypeDescription } from './zod/zod_type_description';
 import { getSchemaAtPath } from './zod/zod_utils';
+import type { WorkflowZodSchemaLooseType } from '../schema';
 
 interface FormatValidationErrorResult {
   message: string;
@@ -250,7 +251,7 @@ const schemaCache = new Map<string, any>();
  * or by looking up the connector schema directly
  */
 function generateUnionErrorMessage(
-  schema: z.ZodType,
+  schema: WorkflowZodSchemaLooseType,
   path: (string | number)[],
   fieldName: string,
   yamlDocument?: any

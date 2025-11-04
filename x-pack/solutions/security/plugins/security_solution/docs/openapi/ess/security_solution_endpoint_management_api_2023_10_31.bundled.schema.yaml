@@ -2054,6 +2054,8 @@ components:
         wasSuccessful:
           description: Whether the response action was successful
           type: boolean
+      required:
+        - command
     RunningProcesses:
       allOf:
         - $ref: '#/components/schemas/ResponseActionDetails'

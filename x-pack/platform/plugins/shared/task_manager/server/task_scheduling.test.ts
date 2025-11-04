@@ -261,6 +261,35 @@ describe('TaskScheduling', () => {
     expect(result.id).toEqual('my-foo-id');
   });
 
+  test('handles NOT_FOUND_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({
+        tasks: [],
+        errors: [
+          {
+            id: 'my-foo-id',
+            type: 'task',
+            error: {
+              error: 'Not Found',
+              message: 'Saved object [task/my-foo-id] not found',
+              statusCode: 404,
+            },
+          },
+        ],
+      });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    const result = await taskScheduling.ensureScheduled(task);
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(result.id).toEqual('my-foo-id');
+  });
+
   test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     mockTaskStore.schedule.mockRejectedValueOnce({
