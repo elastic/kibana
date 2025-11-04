@@ -10,6 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { startServers, stopServers } from './util/servers';
 import { assertValidUpdates, fetchSnapshot, takeSnapshot } from './snapshots';
+import { handleRemovedTypes } from './removed_types';
 
 interface CheckSavedObjectsParams {
   shas: string[];
@@ -17,11 +18,16 @@ interface CheckSavedObjectsParams {
 }
 
 export async function checkSavedObjects({ shas, log }: CheckSavedObjectsParams) {
-  log.info(`Starting ES + Kibana to capture current SO type definitions`);
+  log.info(`Starting ES + Kib
+    na to capture current SO type definitions`);
   const serverHandles = await startServers();
 
   try {
+    const from = await fetchSnapshot({ gitRev: shas[0], log });
+    const current = await takeSnapshot({ log, serverHandles });
+
     await assertValidUpdatesFromBaselines({ serverHandles, baselines: shas, log });
+    await handleRemovedTypes({ log, from, current }); // TODO: pass in the fix flag eventually
   } finally {
     try {
       log.info(`Stopping ES + Kibana after the verifications`);
