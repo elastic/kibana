@@ -24,15 +24,52 @@ interface FindOptions {
 
 export class EcsFieldsRepository {
   private readonly ecsFields: Record<EcsFieldName, FieldMetadata>;
+  private readonly attributesPrefixedFields: Record<string, FieldMetadata>;
+  private readonly resourceAttributesPrefixedFields: Record<string, FieldMetadata>;
 
   private constructor(ecsFields: Record<EcsFieldName, FieldMetadataPlain>) {
     this.ecsFields = mapValues(ecsFields, (field) =>
       FieldMetadata.create({ ...field, source: 'ecs' })
     );
+
+    // Create indexes for prefixed variants
+    this.attributesPrefixedFields = {};
+    this.resourceAttributesPrefixedFields = {};
+
+    Object.entries(this.ecsFields).forEach(([fieldName, fieldMetadata]) => {
+      // Create attributes.* prefixed variant
+      const attributesPrefixedName = `attributes.${fieldName}`;
+      this.attributesPrefixedFields[attributesPrefixedName] = FieldMetadata.create({
+        ...fieldMetadata.toPlain(),
+        name: attributesPrefixedName,
+        flat_name: attributesPrefixedName,
+      });
+
+      // Create resource.attributes.* prefixed variant
+      const resourceAttributesPrefixedName = `resource.attributes.${fieldName}`;
+      this.resourceAttributesPrefixedFields[resourceAttributesPrefixedName] = FieldMetadata.create({
+        ...fieldMetadata.toPlain(),
+        name: resourceAttributesPrefixedName,
+        flat_name: resourceAttributesPrefixedName,
+      });
+    });
   }
 
   getByName(fieldName: EcsFieldName | AnyFieldName): FieldMetadata | undefined {
-    return this.ecsFields[fieldName as EcsFieldName];
+    // Try direct lookup first
+    let field = this.ecsFields[fieldName as EcsFieldName];
+
+    // If not found and field starts with "resource.attributes.", look up from the prefixed index
+    if (!field && fieldName.startsWith('resource.attributes.')) {
+      field = this.resourceAttributesPrefixedFields[fieldName];
+    }
+
+    // If still not found and field starts with "attributes.", look up from the prefixed index
+    if (!field && fieldName.startsWith('attributes.')) {
+      field = this.attributesPrefixedFields[fieldName];
+    }
+
+    return field;
   }
 
   find({ fieldNames }: FindOptions = {}): FieldsMetadataDictionary {
