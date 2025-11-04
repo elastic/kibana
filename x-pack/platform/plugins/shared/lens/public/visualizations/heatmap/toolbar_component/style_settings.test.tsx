@@ -7,14 +7,14 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { HeatmapToolbar } from './toolbar_component';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { FramePublicAPI, HeatmapVisualizationState } from '@kbn/lens-common';
 import type { HeatmapGridConfigResult } from '@kbn/expression-heatmap-plugin/common';
+import { HeatmapStyleSettings } from './style_settings';
 
-type Props = ComponentProps<typeof HeatmapToolbar>;
+type Props = ComponentProps<typeof HeatmapStyleSettings>;
 
 const defaultProps: Props = {
   state: {
@@ -38,7 +38,7 @@ const defaultProps: Props = {
 };
 
 const renderComponent = (props: Partial<Props> = {}) => {
-  return render(<HeatmapToolbar {...defaultProps} {...props} />);
+  return render(<HeatmapStyleSettings {...defaultProps} {...props} />);
 };
 
 const clickButtonByName = async (name: string | RegExp, container?: HTMLElement) => {
@@ -46,20 +46,15 @@ const clickButtonByName = async (name: string | RegExp, container?: HTMLElement)
   await userEvent.click(query.getByRole('button', { name }));
 };
 
-const clickHorizontalAxisButton = async () => {
-  await clickButtonByName(/horizontal axis/i);
-};
-
-describe('HeatmapToolbar', () => {
+describe('heatmap style settings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should have called setState with the proper value of xAxisLabelRotation', async () => {
     renderComponent();
-    await clickHorizontalAxisButton();
 
-    const orientationGroup = screen.getByRole('group', { name: /orientation/i });
+    const orientationGroup = screen.getByRole('group', { name: 'Orientation' });
     await clickButtonByName(/vertical/i, orientationGroup);
     expect(defaultProps.setState).toBeCalledTimes(1);
     expect(defaultProps.setState).toBeCalledWith({
@@ -70,13 +65,13 @@ describe('HeatmapToolbar', () => {
 
   it('should hide the orientation group if isXAxisLabelVisible it set to not visible', async () => {
     const { rerender } = renderComponent();
-    await clickHorizontalAxisButton();
 
-    const orientationGroup = screen.getByRole('group', { name: /orientation/i });
+    const orientationGroup = screen.getByRole('group', { name: 'Orientation' });
+
     expect(orientationGroup).toBeInTheDocument();
 
     rerender(
-      <HeatmapToolbar
+      <HeatmapStyleSettings
         {...defaultProps}
         state={{
           ...defaultProps.state,
@@ -84,9 +79,8 @@ describe('HeatmapToolbar', () => {
         }}
       />
     );
-    await clickHorizontalAxisButton();
 
-    const updatedOrientationGroup = screen.queryByRole('group', { name: /orientation/i });
+    const updatedOrientationGroup = screen.queryByRole('group', { name: 'Orientation' });
     expect(updatedOrientationGroup).not.toBeInTheDocument();
   });
 });

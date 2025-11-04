@@ -17,18 +17,10 @@ import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { type GaugeVisualizationState } from '../constants';
 import { AppearanceSettings } from './appearance_settings';
 import { TitlesAndTextSettings } from './titles_and_text_settings';
-import { FlyoutToolbar, type ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 
 type GaugeToolbarProps = VisualizationToolbarProps<GaugeVisualizationState>;
 
-export function GaugeFlyoutToolbar(props: GaugeToolbarProps) {
-  const gaugeToolbarContentMap: ToolbarContentMap<GaugeVisualizationState> = {
-    style: GaugeStyleSettings,
-  };
-  return <FlyoutToolbar {...props} contentMap={gaugeToolbarContentMap} />;
-}
-
-function GaugeStyleSettings(props: GaugeToolbarProps) {
+export function GaugeStyleSettings(props: GaugeToolbarProps) {
   const { state, setState } = props;
 
   const [subtitleMode, setSubtitleMode] = useState<GaugeLabelMajorMode>(() =>
