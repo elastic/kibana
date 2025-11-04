@@ -30,6 +30,7 @@ export interface AutocompleteSelectorProps {
   suggestions?: Suggestion[];
   autoFocus?: boolean;
   hideSuggestions?: boolean;
+  labelAppend?: React.ReactNode;
 }
 
 /**
@@ -50,6 +51,7 @@ export const AutocompleteSelector = ({
   suggestions = [],
   autoFocus,
   hideSuggestions = false,
+  labelAppend,
 }: AutocompleteSelectorProps) => {
   const comboBoxOptions = useMemo(
     () =>
@@ -102,6 +104,7 @@ export const AutocompleteSelector = ({
         isInvalid={isInvalid}
         error={error}
         fullWidth={fullWidth}
+        labelAppend={labelAppend}
       >
         <EuiComboBox
           data-test-subj={dataTestSubj}

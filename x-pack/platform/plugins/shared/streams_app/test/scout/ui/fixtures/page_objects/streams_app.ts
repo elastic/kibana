@@ -10,13 +10,13 @@
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout';
 import { EuiComboBoxWrapper } from '@kbn/scout';
-import type { ProcessorType } from '@kbn/streamlang';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
   public readonly conditionEditorValueComboBox;
+  public readonly processorTypeComboBox;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -30,6 +30,10 @@ export class StreamsApp {
     this.conditionEditorValueComboBox = new EuiComboBoxWrapper(
       this.page,
       'streamsAppConditionEditorValueText'
+    );
+    this.processorTypeComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppProcessorTypeSelector'
     );
   }
 
@@ -495,9 +499,8 @@ export class StreamsApp {
     await expect(this.getModal()).toBeHidden();
   }
 
-  async selectProcessorType(value: ProcessorType) {
-    await this.page.getByTestId('streamsAppProcessorTypeSelector').click();
-    await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
+  async selectProcessorType(value: string) {
+    await this.processorTypeComboBox.selectSingleOption(value);
   }
 
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
