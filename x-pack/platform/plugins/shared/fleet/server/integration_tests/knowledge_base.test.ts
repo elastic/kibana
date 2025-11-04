@@ -184,6 +184,60 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     expect(INTEGRATION_KNOWLEDGE_INDEX).toBe('.integration_knowledge');
   });
 
+  it('should index README.md along with knowledge_base files', async () => {
+    // Mock knowledge base content including README.md
+    const knowledgeBaseContent: KnowledgeBaseItem[] = [
+      {
+        fileName: 'README.md',
+        content: '# Package Overview\n\nThis is the main package documentation from README.md.',
+        version: '1.0.0',
+        installed_at: new Date().toISOString(),
+        path: '/docs/README.md',
+      },
+      {
+        fileName: 'setup-guide.md',
+        content: '# Setup Guide\n\nDetailed setup instructions.',
+        version: '1.0.0',
+        installed_at: new Date().toISOString(),
+        path: '/knowledge_base/setup-guide.md',
+      },
+    ];
+
+    // Save knowledge base content with README.md
+    await saveKnowledgeBaseContentToIndex({
+      esClient,
+      pkgName: 'test-readme-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent,
+    });
+
+    // Wait for indexing
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
+    // Retrieve knowledge base content
+    const retrievedKnowledgeBase = await getPackageKnowledgeBase({
+      esClient,
+      pkgName: 'test-readme-package',
+    });
+
+    // Verify that both README.md and knowledge_base files are present
+    expect(retrievedKnowledgeBase).toBeDefined();
+    expect(retrievedKnowledgeBase?.items).toHaveLength(2);
+
+    // Check that README.md is included
+    const readme = retrievedKnowledgeBase?.items.find((item) => item.fileName === 'README.md');
+    expect(readme).toBeDefined();
+    expect(readme?.content).toContain('Package Overview');
+    expect(readme?.content).toContain('main package documentation from README.md');
+
+    // Check that knowledge_base file is also included
+    const setupGuide = retrievedKnowledgeBase?.items.find(
+      (item) => item.fileName === 'setup-guide.md'
+    );
+    expect(setupGuide).toBeDefined();
+    expect(setupGuide?.content).toContain('Setup Guide');
+  });
+
   it('should handle package version upgrades correctly', async () => {
     // Mock knowledge base content for version 1.0.0
     const knowledgeBaseContentV1: KnowledgeBaseItem[] = [

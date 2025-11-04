@@ -25,9 +25,11 @@ import type { KnowledgeBaseItem } from '../../../../../../common/types/models/ep
 import { licenseService } from '../../../../license';
 import { appContextService } from '../../../../app_context';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
+export const README_PATH_PATTERN = '/docs/README.md';
 
 /**
  * Extract knowledge base files directly from the package archive
+ * This includes both files from docs/knowledge_base/ and the main docs/README.md
  */
 async function extractKnowledgeBaseFromArchive(
   archiveIterator: ArchiveIterator,
@@ -40,12 +42,21 @@ async function extractKnowledgeBaseFromArchive(
     async (entry: ArchiveEntry) => {
       if (entry.buffer) {
         const content = entry.buffer.toString('utf8');
+
+        // Determine the filename based on the path
+        let fileName: string;
         const knowledgeBaseIndex = entry.path.indexOf(KNOWLEDGE_BASE_PATH);
-        // remove the leading path (docs/knowledge_base/) so we aren't storing it in the field in ES
-        const fileName =
-          knowledgeBaseIndex >= 0
-            ? entry.path.substring(knowledgeBaseIndex + KNOWLEDGE_BASE_PATH.length)
-            : path.basename(entry.path);
+
+        if (knowledgeBaseIndex >= 0) {
+          // Remove the leading path (docs/knowledge_base/) so we aren't storing it in the field in ES
+          fileName = entry.path.substring(knowledgeBaseIndex + KNOWLEDGE_BASE_PATH.length);
+        } else if (entry.path.endsWith(README_PATH_PATTERN)) {
+          // For README.md, use a simple filename
+          fileName = 'README.md';
+        } else {
+          // Fallback to basename
+          fileName = path.basename(entry.path);
+        }
 
         knowledgeBaseItems.push({
           fileName,
@@ -53,7 +64,9 @@ async function extractKnowledgeBaseFromArchive(
         });
       }
     },
-    (entryPath: string) => entryPath.includes(KNOWLEDGE_BASE_PATH) && entryPath.endsWith('.md')
+    (entryPath: string) =>
+      (entryPath.includes(KNOWLEDGE_BASE_PATH) && entryPath.endsWith('.md')) ||
+      entryPath.endsWith(README_PATH_PATTERN)
   );
 
   return knowledgeBaseItems;

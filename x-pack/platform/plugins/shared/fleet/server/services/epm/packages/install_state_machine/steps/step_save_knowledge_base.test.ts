@@ -154,7 +154,42 @@ describe('stepSaveKnowledgeBase', () => {
     });
   });
 
-  it('should not save anything when no knowledge base files exist in archive', async () => {
+  it('should include README.md from docs folder in knowledge base', async () => {
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/docs/README.md',
+        buffer: Buffer.from('# Package README\n\nThis is the main package documentation.', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+        buffer: Buffer.from('# User Guide', 'utf8'),
+      },
+    ];
+
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    // Verify that both README.md and knowledge_base files are included
+    expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: [
+        {
+          fileName: 'README.md',
+          content: '# Package README\n\nThis is the main package documentation.',
+        },
+        {
+          fileName: 'guide.md',
+          content: '# User Guide',
+        },
+      ],
+    });
+  });
+
+  it('should include README.md even when no knowledge_base folder exists', async () => {
     const entries: ArchiveEntry[] = [
       {
         path: 'test-package-1.0.0/manifest.yml',
@@ -162,7 +197,38 @@ describe('stepSaveKnowledgeBase', () => {
       },
       {
         path: 'test-package-1.0.0/docs/README.md',
-        buffer: Buffer.from('# README', 'utf8'),
+        buffer: Buffer.from('# README\n\nPackage overview.', 'utf8'),
+      },
+    ];
+
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    // Verify that README.md is included even without knowledge_base folder
+    expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: [
+        {
+          fileName: 'README.md',
+          content: '# README\n\nPackage overview.',
+        },
+      ],
+    });
+  });
+
+  it('should not save anything when no knowledge base files or README exist in archive', async () => {
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/manifest.yml',
+        buffer: Buffer.from('name: test-package', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/docs/other-file.md',
+        buffer: Buffer.from('# Other File', 'utf8'),
       },
     ];
 

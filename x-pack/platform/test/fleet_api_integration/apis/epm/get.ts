@@ -486,7 +486,7 @@ export default function (providerContext: FtrProviderContext) {
 
         // Should have knowledge base items indexed
         expect(knowledgeBaseItems.length).to.be.greaterThan(0);
-        expect(knowledgeBaseItems.length).to.equal(3); // overview, troubleshooting, configuration
+        expect(knowledgeBaseItems.length).to.equal(4); // README, overview, troubleshooting, configuration
 
         // Verify knowledge base items have correct structure with packageName-fileName IDs
         // IDs follow the format: packageName-fileName (e.g., "knowledge_base_test-overview.md")
@@ -502,8 +502,9 @@ export default function (providerContext: FtrProviderContext) {
           expect(item.id).to.match(/^knowledge_base_test-.+\.md$/);
         });
 
-        // Verify specific expected document IDs
+        // Verify specific expected document IDs (including README.md)
         const expectedDocumentIds = [
+          'knowledge_base_test-README.md',
           'knowledge_base_test-overview.md',
           'knowledge_base_test-troubleshooting.md',
           'knowledge_base_test-configuration.md',

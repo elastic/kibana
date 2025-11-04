@@ -667,13 +667,25 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     // Handle knowledge base assets specially - they use docs/knowledge_base/ path structure
-    if (path.includes('docs/knowledge_base/')) {
-      // Extract package info and filename from the docs/knowledge_base/ path
+    // or are the main README.md file
+    if (path.includes('docs/knowledge_base/') || path.endsWith('/docs/README.md')) {
+      // Extract package info and filename from the path
       const pathWithoutPrefix = path.replace(/^\/package\//, '');
       const [pkgkey, ...rest] = pathWithoutPrefix.split('/');
       const docsIndex = rest.indexOf('docs');
-      if (docsIndex >= 0 && rest[docsIndex + 1] === 'knowledge_base') {
-        const fileName = rest.slice(docsIndex + 2).join('/');
+      
+      if (docsIndex >= 0) {
+        let fileName: string;
+        
+        // Check if this is a knowledge_base file or README.md
+        if (rest[docsIndex + 1] === 'knowledge_base') {
+          fileName = rest.slice(docsIndex + 2).join('/');
+        } else if (rest[docsIndex + 1] === 'README.md') {
+          fileName = 'README.md';
+        } else {
+          // Not a knowledge base asset, skip
+          return map;
+        }
 
         // Create KB asset parts with elasticsearch service but keep original file reference
         const kbParts = {
