@@ -74,7 +74,8 @@ function createRawEventLoopDelaysDailyDocs() {
   return { rawEventLoopDelaysDaily, outdatedRawEventLoopDelaysDaily };
 }
 
-describe(`daily rollups integration test`, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/231367
+describe.skip(`daily rollups integration test`, () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
