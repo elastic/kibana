@@ -191,10 +191,46 @@ export async function executeSchema(
               // Determine if this transaction should fail based on error rate
               const shouldFail = Math.random() < errorRate;
 
+              // Calculate transaction duration from spans if available, otherwise use default
+              let transactionDuration = 1000; // Default duration
+              const spanDurations: number[] = [];
+
+              // Pre-calculate span durations to determine transaction duration
+              if (traceConfig.spans && traceConfig.spans.length > 0) {
+                for (const spanConfig of traceConfig.spans) {
+                  let durationMs = 100; // default
+                  if (spanConfig.durationMs !== undefined) {
+                    if (typeof spanConfig.durationMs === 'number') {
+                      durationMs = spanConfig.durationMs;
+                    } else if (
+                      typeof spanConfig.durationMs === 'object' &&
+                      spanConfig.durationMs !== null &&
+                      'type' in spanConfig.durationMs
+                    ) {
+                      // It's a distribution - evaluate it based on timestamp
+                      durationMs = evaluateDistribution(
+                        spanConfig.durationMs as Distribution,
+                        timestamp,
+                        from,
+                        to
+                      );
+                    } else {
+                      durationMs = spanConfig.durationMs as number;
+                    }
+                  } else if ((spanConfig as any).duration) {
+                    const dur = (spanConfig as any).duration;
+                    durationMs = dur.unit === 's' ? dur.value * 1000 : dur.value;
+                  }
+                  spanDurations.push(durationMs);
+                }
+                // Transaction duration is sum of all span durations plus some overhead
+                transactionDuration = spanDurations.reduce((sum, d) => sum + d, 0) + 50; // 50ms overhead
+              }
+
               let transaction = instance
                 .transaction({ transactionName: traceConfig.name })
                 .timestamp(timestamp)
-                .duration(1000) // Default duration
+                .duration(transactionDuration)
                 .success();
 
               if (shouldFail) {
@@ -203,15 +239,9 @@ export async function executeSchema(
 
               // Add spans if defined
               if (traceConfig.spans && traceConfig.spans.length > 0) {
-                const spans = traceConfig.spans.map((spanConfig) => {
-                  // Support both durationMs (direct) and duration object format
-                  let durationMs = 100; // default
-                  if (spanConfig.durationMs !== undefined) {
-                    durationMs = spanConfig.durationMs;
-                  } else if ((spanConfig as any).duration) {
-                    const dur = (spanConfig as any).duration;
-                    durationMs = dur.unit === 's' ? dur.value * 1000 : dur.value;
-                  }
+                const spans = traceConfig.spans.map((spanConfig, index) => {
+                  // Use pre-calculated duration
+                  const durationMs = spanDurations[index];
 
                   return instance
                     .span({
