@@ -51,7 +51,7 @@ const useValueSuggestions = (previewRecords: FlattenRecord[], field?: string): S
 
   useEffect(() => {
     setRecords((prevRecords) => {
-      const combined = [...previewRecords, ...prevRecords]; 
+      const combined = [...previewRecords, ...prevRecords];
 
       return combined.slice(0, MAX_RECORDS_STORED);
     });
