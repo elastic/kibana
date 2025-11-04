@@ -157,7 +157,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'name',
         name: 'Name',
         dataType: 'string',
-        width: '45%',
         render: (name: string, item) => (
           <div
             css={css`
