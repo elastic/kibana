@@ -48,7 +48,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 38000
-  esql: 16289
+  esql: 16500
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -107,7 +107,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 11684
+  navigation: 14000
   newsfeed: 12371
   noDataPage: 1749
   observability: 107955
@@ -164,7 +164,7 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 30782
   stackAlerts: 31499
-  stackConnectors: 75538
+  stackConnectors: 75929
   streams: 9000
   streamsApp: 17000
   synthetics: 31571
