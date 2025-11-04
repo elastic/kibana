@@ -573,24 +573,32 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     dateRange: TimeRange;
     query?: QT | Query | undefined;
   }) => {
-    if (!this.isDirty()) {
-      const searchSession = await this.services.data.search.session.save();
-      this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      return;
-    }
-
-    const currentSessionId = this.services.data.search.session.getSessionId();
-
-    const subscription = this.services.data.search.session
-      .getSession$()
-      .subscribe(async (newSessionId) => {
-        if (currentSessionId === newSessionId) return;
-        subscription.unsubscribe();
+    try {
+      if (!this.isDirty()) {
         const searchSession = await this.services.data.search.session.save();
         this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      });
+        return;
+      }
 
-    this.onQueryBarSubmit(payload);
+      const currentSessionId = this.services.data.search.session.getSessionId();
+
+      const subscription = this.services.data.search.session
+        .getSession$()
+        .subscribe(async (newSessionId) => {
+          if (currentSessionId === newSessionId) return;
+          subscription.unsubscribe();
+          const searchSession = await this.services.data.search.session.save();
+          this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
+        });
+
+      this.onQueryBarSubmit(payload);
+    } catch (e) {
+      this.services.notifications.toasts.addError(e, {
+        title: i18n.translate('unifiedSearch.search.searchBar.backgroundSearch.errorToast.title', {
+          defaultMessage: 'There was a problem backgrounding your search',
+        }),
+      });
+    }
   };
 
   private shouldShowDatePickerAsBadge() {
