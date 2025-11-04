@@ -67,7 +67,7 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
                 <div>
                   <FormattedMessage
                     id="xpack.securitySolution.endpointResponseActions.memoryDumpAction.successTitle"
-                    defaultMessage="Memory dump file as created on host:"
+                    defaultMessage="Memory dump file was created on host:"
                   />
                 </div>
                 <EuiSpacer size="xs" />
