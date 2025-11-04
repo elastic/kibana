@@ -21,7 +21,8 @@ type StepProcessingStatus =
   | 'successful'
   | 'disabled.processorBeforePersisted'
   | 'skipped.followsProcessorBeingEdited'
-  | 'skipped.createdInPreviousSimulation';
+  | 'skipped.createdInPreviousSimulation'
+  | 'condition';
 
 export const useStepsProcessingSummary = () => {
   const stepsContext = useStreamEnrichmentSelector((state) => {
@@ -77,6 +78,8 @@ export const useStepsProcessingSummary = () => {
         } else {
           summaryMap.set(stepId, 'successful');
         }
+      } else {
+        summaryMap.set(stepId, 'condition');
       }
     });
     return summaryMap;

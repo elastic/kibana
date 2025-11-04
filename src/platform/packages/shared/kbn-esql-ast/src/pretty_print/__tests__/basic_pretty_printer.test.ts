@@ -1098,3 +1098,14 @@ describe('unary operator precedence and grouping', () => {
     assertReprint('ROW (a + b) * (c + d)');
   });
 });
+
+describe('subqueries (parens)', () => {
+  test('can print complex subqueries with processing', () => {
+    const src =
+      'FROM index1, (FROM index2 | WHERE a > 10 | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10), index3, (FROM index4 | STATS count(*)) | WHERE d > 10 | STATS max = max(*) BY e | SORT max DESC';
+    const expected =
+      'FROM index1, (FROM index2 | WHERE a > 10 | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10), index3, (FROM index4 | STATS COUNT(*)) | WHERE d > 10 | STATS max = MAX(*) BY e | SORT max DESC';
+
+    assertReprint(src, expected);
+  });
+});

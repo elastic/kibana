@@ -38,8 +38,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
     });
   });
-
-  registry.when('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/229299
+  registry.when.skip('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
     before(async () => {
       await setupFleet(bettertest);
     });
