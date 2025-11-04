@@ -15,18 +15,13 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import globby from 'globby';
 import normalize from 'normalize-path';
-import { addMessagesToReport } from './add_messages_to_report';
 import { getBuildkiteMetadata } from './buildkite_metadata';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
-import { getFailures } from './get_failures';
-import { getScoutFailures, type ScoutTestFailureExtended } from './get_scout_failures';
 import { GithubApi } from './github_api';
-import { createFailureIssue, updateFailureIssue } from './report_failure';
-import { reportFailuresToEs } from './report_failures_to_es';
-import { reportFailuresToFile } from './report_failures_to_file';
-import { getReportMessageIter } from './report_metadata';
-import { getRootMetadata, readTestReport } from './test_report';
+import { processJUnitReports } from './process_junit_reports';
+import type { ProcessReportsParams } from './process_reports_types';
+import { processScoutReports } from './process_scout_reports';
 
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 const DISABLE_MISSING_TEST_REPORT_ERRORS =
@@ -34,9 +29,10 @@ const DISABLE_MISSING_TEST_REPORT_ERRORS =
 
 run(
   async ({ log, flags }) => {
-    const indexInEs = flags['index-errors'];
+    const indexInEs = Boolean(flags['index-errors']);
+    const reportUpdate = Boolean(flags['report-update']);
 
-    let updateGithub = flags['github-update'];
+    let updateGithub = Boolean(flags['github-update']);
     if (updateGithub && !process.env.GITHUB_TOKEN) {
       throw createFailError(
         'GITHUB_TOKEN environment variable must be set, otherwise use --no-github-update flag'
@@ -122,148 +118,25 @@ run(
 
         const existingIssues = new ExistingFailedTestIssues(log);
 
+        const processParams: ProcessReportsParams = {
+          log,
+          existingIssues,
+          buildUrl,
+          githubApi,
+          branch,
+          pipeline,
+          prependTitle,
+          updateGithub,
+          indexInEs,
+          reportUpdate,
+          bkMeta,
+        };
+
         // Process FTR JUnit reports
-        for (const reportPath of junitReports) {
-          const report = await readTestReport(reportPath);
-          const messages = Array.from(getReportMessageIter(report));
-          const failures = getFailures(report);
-
-          await existingIssues.loadForFailures(failures);
-
-          if (indexInEs) {
-            await reportFailuresToEs(log, failures);
-          }
-
-          for (const failure of failures) {
-            const pushMessage = (msg: string) => {
-              messages.push({
-                classname: failure.classname,
-                name: failure.name,
-                message: msg,
-              });
-            };
-
-            if (failure.likelyIrrelevant) {
-              pushMessage(
-                'Failure is likely irrelevant' +
-                  (updateGithub ? ', so an issue was not created or updated' : '')
-              );
-              continue;
-            }
-
-            const existingIssue = existingIssues.getForFailure(failure);
-            if (existingIssue) {
-              const { newBody, newCount } = await updateFailureIssue(
-                buildUrl,
-                existingIssue,
-                githubApi,
-                branch,
-                pipeline,
-                failure
-              );
-              const url = existingIssue.github.htmlUrl;
-              existingIssue.github.body = newBody;
-              failure.githubIssue = url;
-              failure.failureCount = updateGithub ? newCount : newCount - 1;
-              pushMessage(`Test has failed ${newCount - 1} times on tracked branches: ${url}`);
-              if (updateGithub) {
-                pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
-              }
-              continue;
-            }
-
-            const newIssue = await createFailureIssue(
-              buildUrl,
-              failure,
-              githubApi,
-              branch,
-              pipeline,
-              prependTitle
-            );
-            existingIssues.addNewlyCreated(failure, newIssue);
-            pushMessage('Test has not failed recently on tracked branches');
-            if (updateGithub) {
-              pushMessage(`Created new issue: ${newIssue.html_url}`);
-              failure.githubIssue = newIssue.html_url;
-            }
-            failure.failureCount = updateGithub ? 1 : 0;
-          }
-
-          // mutates report to include messages and writes updated report to disk
-          await addMessagesToReport({
-            report,
-            messages,
-            log,
-            reportPath,
-            dryRun: !flags['report-update'],
-          });
-
-          await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
-        }
+        await processJUnitReports(junitReports, processParams);
 
         // Process Scout reports
-        for (const reportPath of scoutReports) {
-          log.info('Processing Scout report:', reportPath);
-          const failures: ScoutTestFailureExtended[] = await getScoutFailures(reportPath);
-
-          if (failures.length === 0) {
-            log.info('No Scout failures found in:', reportPath);
-            continue;
-          }
-
-          log.info('Found', failures.length, 'Scout failures in:', reportPath);
-
-          await existingIssues.loadForFailures(failures);
-
-          if (indexInEs) {
-            await reportFailuresToEs(log, failures);
-          }
-
-          for (const failure of failures) {
-            if (failure.likelyIrrelevant) {
-              log.info(
-                `Scout failure is likely irrelevant: ${failure.classname} - ${failure.name}`
-              );
-              continue;
-            }
-
-            const existingIssue = existingIssues.getForFailure(failure);
-            if (existingIssue) {
-              const { newBody, newCount } = await updateFailureIssue(
-                buildUrl,
-                existingIssue,
-                githubApi,
-                branch,
-                pipeline,
-                failure
-              );
-              const url = existingIssue.github.htmlUrl;
-              existingIssue.github.body = newBody;
-              failure.githubIssue = url;
-              failure.failureCount = updateGithub ? newCount : newCount - 1;
-              log.info(`Updated existing Scout issue: ${url} (fail count: ${newCount})`);
-              continue;
-            }
-
-            const newIssue = await createFailureIssue(
-              buildUrl,
-              failure,
-              githubApi,
-              branch,
-              pipeline,
-              prependTitle
-            );
-            existingIssues.addNewlyCreated(failure, newIssue);
-            if (updateGithub) {
-              log.info(`Created new Scout issue: ${newIssue.html_url}`);
-              failure.githubIssue = newIssue.html_url;
-            }
-            failure.failureCount = updateGithub ? 1 : 0;
-          }
-
-          // Generate Scout failure artifacts (similar to JUnit report processing)
-          await reportFailuresToFile(log, failures, bkMeta, {});
-        }
+        await processScoutReports(scoutReports, processParams);
       }
     } finally {
       await CiStatsReporter.fromEnv(log).metrics([
