@@ -76,7 +76,7 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
     ];
 
     // Cloud ECH data
-    // TODO check why it is different
+    // TODO check why it is different: https://github.com/elastic/kibana/issues/241822
     // const indexData = [
     //   { indexName: 'stackframes', docSize: '15,232' },
     //   { indexName: 'stacktraces', docSize: '4,434' },
