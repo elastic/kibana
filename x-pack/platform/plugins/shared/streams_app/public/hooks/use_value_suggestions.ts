@@ -16,6 +16,8 @@ import {
   useStreamSamplesSelector,
 } from '../components/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 
+const MAX_RECORDS_STORED = 1000;
+
 /**
  * Create field suggestions from accumulated simulation records
  * @param previewRecords array of flattened records
@@ -48,7 +50,11 @@ const useValueSuggestions = (previewRecords: FlattenRecord[], field?: string): S
   const [records, setRecords] = useState<FlattenRecord[]>([]);
 
   useEffect(() => {
-    setRecords((prevRecords) => [...prevRecords, ...previewRecords]);
+    setRecords((prevRecords) => {
+      const combined = [...previewRecords, ...prevRecords]; 
+
+      return combined.slice(0, MAX_RECORDS_STORED);
+    });
   }, [previewRecords]);
 
   return useMemo(() => {
