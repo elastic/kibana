@@ -9,7 +9,6 @@
 
 export { runKibanaServer } from './run_kibana_server';
 export { runElasticsearch, cleanupElasticsearch } from './run_elasticsearch';
-export * from './run_ftr';
 export {
   parseRawFlags,
   getArgValue,
