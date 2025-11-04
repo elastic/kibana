@@ -96,21 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // flaky
-      it.skip('should go to line number when Ctrl+L is pressed', async () => {
-        await PageObjects.console.enterText(
-          '\nGET _search/foo\n{\n  "query": {\n    "match_all": {} \n} \n}'
-        );
-        await PageObjects.console.pressCtrlL();
-        // Sleep to allow the line number input to be focused
-        await PageObjects.common.sleep(1000);
-        const alert = await browser.getAlert();
-        await alert?.sendKeys('4');
-        await alert?.accept();
-        await PageObjects.common.sleep(1000);
-        expect(await PageObjects.console.getCurrentLineNumber()).to.be(4);
-      });
-
       describe('open documentation', () => {
         const requests = ['GET _search', 'GET test_index/_search', 'GET /_search'];
         requests.forEach((request) => {
@@ -250,16 +235,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         unlinkSync(filePath);
       });
 
-      // It seems that the downloadPath is not being resolved correctly in the CI anymore?
-      // Also doesnt seem to work locally either.
-      it.skip('can export input as file', async () => {
+      it('can export input as file', async () => {
         await PageObjects.console.enterText('GET _search');
         await PageObjects.console.clickExportButton();
 
         // Wait for download to trigger
         await PageObjects.common.sleep(1000);
 
-        const downloadPath = resolve(REPO_ROOT, `target/functional-tests/downloads/console_export`);
+        const downloadPath = resolve(REPO_ROOT, `target/functional-tests/downloads/console_export.txt`);
         await retry.try(async () => {
           const fileExists = existsSync(downloadPath);
           expect(fileExists).to.be(true);
