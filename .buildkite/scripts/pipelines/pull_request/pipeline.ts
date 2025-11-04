@@ -17,6 +17,7 @@
 
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
+import { runPreBuild } from './pre_build';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -52,6 +53,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
+    await runPreBuild();
+
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
@@ -63,7 +66,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
