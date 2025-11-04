@@ -88,37 +88,29 @@ export class ExistingFailedTestIssues {
     return 'id' in failure && 'target' in failure && 'location' in failure;
   }
 
-  getExistingIssueForScout(failure: TestFailure, issue: ExistingFailedTestIssue) {
-    // For Scout failures, match by test name only. We don't create a new issue for each target where the same test fails, but only one + adding comments for each target failure.
-    if (this.isScoutFailure(failure) && failure.name === issue.name) {
-      return issue;
-    }
-  }
-
-  getExistingIssueForFTR(failure: TestFailure, issue: ExistingFailedTestIssue) {
-    if (failure.classname === issue.classname && failure.name === issue.name) {
-      return issue;
-    }
-  }
-
   getForFailure(failure: TestFailure) {
     // Check if this is a Scout failure
     const isScout = this.isScoutFailure(failure);
 
-    for (const [, issue] of this.results) {
+    for (const [f, issue] of this.results) {
       if (!issue) {
         continue;
       }
 
+      // Verify both input and key are the same type (both Scout or both FTR)
+      const isKeyScoutFailure = this.isScoutFailure(f);
+
       if (isScout) {
-        const matchedIssue = this.getExistingIssueForScout(failure, issue);
-        if (matchedIssue) {
-          return matchedIssue;
+        // For Scout failures, match by test name only (ignore target)
+        // Both must be Scout failures and names must match
+        if (isKeyScoutFailure && f.name === failure.name) {
+          return issue;
         }
       } else {
-        const matchedIssue = this.getExistingIssueForFTR(failure, issue);
-        if (matchedIssue) {
-          return matchedIssue;
+        // For FTR failures, match by classname and name
+        // Both must be FTR failures (not Scout) and classname+name must match
+        if (!isKeyScoutFailure && f.classname === failure.classname && f.name === failure.name) {
+          return issue;
         }
       }
     }
