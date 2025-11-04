@@ -517,121 +517,140 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             throw new Error(errorMessage);
           }
 
-          const { jobtype: jobType, attempts } = report;
-          const logger = this.logger.get(jobId);
+          const ctx = {
+            type: report.scheduled_report_id ? 'scheduled report' : 'single report',
+            name: `run ${report.jobtype} report`,
+            id: jobId,
+            description: `run report`,
+          };
 
-          const maxAttempts = this.getMaxAttempts();
-          if (maxAttempts) {
-            logger.debug(
-              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`
-            );
-          } else {
-            logger.debug(`Starting ${jobType} report ${jobId}.`);
-          }
+          const executionContext = await this.opts.reporting.getExecutionContext();
 
-          logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+          await executionContext.withContext(ctx, async () => {
+            // we've already checked above that report is defined, this is to get around type issues
+            const thisReport = report!;
+            const { jobtype: jobType, attempts } = thisReport;
+            const logger = this.logger.get(jobId);
 
-          const eventLog = this.opts.reporting.getEventLogger(
-            new Report({ ...task, _id: task.id, _index: task.index })
-          );
-
-          try {
-            const retries = maxAttempts.maxRetries;
-            let atmpts: number | undefined = retries > 0 ? 0 : undefined;
-            await retryOnError({
-              logger: this.logger,
-              retries,
-              report,
-              operation: async (rep: SavedReport) => {
-                // keep track of the number of times we try within the task
-                atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
-                const jobContentEncoding = this.getJobContentEncoding(jobType);
-                const stream = await getContentStream(
-                  this.opts.reporting,
-                  {
-                    id: rep._id,
-                    index: rep._index,
-                    if_primary_term: rep._primary_term,
-                    if_seq_no: rep._seq_no,
-                  },
-                  {
-                    encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
-                  }
-                );
-                eventLog.logExecutionStart();
-
-                const output = await Promise.race<TaskRunResult>([
-                  this.performJob({
-                    task,
-                    fakeRequest,
-                    taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
-                    cancellationToken,
-                    stream,
-                  }),
-                  this.throwIfKibanaShutsDown(),
-                ]);
-
-                stream.end();
-
-                logger.debug(`Begin waiting for the stream's pending callbacks...`);
-                await finishedWithNoPendingCallbacks(stream);
-                logger.info(`The stream's pending callbacks have completed.`);
-
-                rep._seq_no = stream.getSeqNo()!;
-                rep._primary_term = stream.getPrimaryTerm()!;
-
-                const byteSize = stream.bytesWritten;
-                eventLog.logExecutionComplete({ ...(output.metrics ?? {}), byteSize });
-
-                if (output) {
-                  logger.debug(`Job output size: ${byteSize} bytes.`);
-                  // Update the job status to "completed"
-                  report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
-                    ...output,
-                    size: byteSize,
-                  });
-
-                  await this.notify(
-                    report,
-                    taskInstance,
-                    output,
-                    byteSize,
-                    scheduledReport,
-                    task.payload.spaceId
-                  );
-                }
-
-                // untrack the report for concurrency awareness
-                logger.debug(`Stopping ${jobId}.`);
-              },
-            });
-          } catch (failedToExecuteErr) {
-            const isLastAttempt = taskAttempts ? taskAttempts >= maxAttempts.maxTaskAttempts : true;
-            eventLog.logError(failedToExecuteErr);
-
-            await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
-              (failedToSaveError) => {
-                errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
-              }
-            );
-
-            cancellationToken.cancel();
-
-            if (isLastAttempt) {
-              this.logger.info(
-                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`
+            const maxAttempts = this.getMaxAttempts();
+            if (maxAttempts) {
+              logger.debug(
+                `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`
               );
             } else {
-              this.logger.info(
-                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`
-              );
+              logger.debug(`Starting ${jobType} report ${jobId}.`);
             }
 
-            throwRetryableError(failedToExecuteErr, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
-          } finally {
-            this.opts.reporting.untrackReport(jobId);
             logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
-          }
+
+            const eventLog = this.opts.reporting.getEventLogger(
+              new Report({ ...task, _id: task.id, _index: task.index })
+            );
+
+            try {
+              const retries = maxAttempts.maxRetries;
+              let atmpts: number | undefined = retries > 0 ? 0 : undefined;
+              await retryOnError({
+                logger: this.logger,
+                retries,
+                report: thisReport,
+                operation: async (rep: SavedReport) => {
+                  // keep track of the number of times we try within the task
+                  atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
+                  const jobContentEncoding = this.getJobContentEncoding(jobType);
+                  const stream = await getContentStream(
+                    this.opts.reporting,
+                    {
+                      id: rep._id,
+                      index: rep._index,
+                      if_primary_term: rep._primary_term,
+                      if_seq_no: rep._seq_no,
+                    },
+                    {
+                      encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
+                    }
+                  );
+                  eventLog.logExecutionStart();
+
+                  const output = await Promise.race<TaskRunResult>([
+                    this.performJob({
+                      task,
+                      fakeRequest,
+                      taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                      cancellationToken,
+                      stream,
+                    }),
+                    this.throwIfKibanaShutsDown(),
+                  ]);
+
+                  stream.end();
+
+                  logger.debug(`Begin waiting for the stream's pending callbacks...`);
+                  await finishedWithNoPendingCallbacks(stream);
+                  logger.info(`The stream's pending callbacks have completed.`);
+
+                  rep._seq_no = stream.getSeqNo()!;
+                  rep._primary_term = stream.getPrimaryTerm()!;
+
+                  const byteSize = stream.bytesWritten;
+                  eventLog.logExecutionComplete({ ...(output.metrics ?? {}), byteSize });
+
+                  if (output) {
+                    logger.debug(`Job output size: ${byteSize} bytes.`);
+                    // Update the job status to "completed"
+                    report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
+                      ...output,
+                      size: byteSize,
+                    });
+
+                    await this.notify(
+                      report,
+                      taskInstance,
+                      output,
+                      byteSize,
+                      scheduledReport,
+                      task.payload.spaceId
+                    );
+                  }
+
+                  // untrack the report for concurrency awareness
+                  logger.debug(`Stopping ${jobId}.`);
+                },
+              });
+            } catch (failedToExecuteErr) {
+              const isLastAttempt = taskAttempts
+                ? taskAttempts >= maxAttempts.maxTaskAttempts
+                : true;
+              eventLog.logError(failedToExecuteErr);
+
+              await this.saveExecutionError(thisReport, failedToExecuteErr, isLastAttempt).catch(
+                (failedToSaveError) => {
+                  errorLogger(
+                    logger,
+                    `Error in saving execution error ${jobId}`,
+                    failedToSaveError
+                  );
+                }
+              );
+
+              cancellationToken.cancel();
+
+              if (isLastAttempt) {
+                this.logger.info(
+                  `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`
+                );
+              } else {
+                this.logger.info(
+                  `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`
+                );
+              }
+
+              throwRetryableError(failedToExecuteErr, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
+            } finally {
+              this.opts.reporting.untrackReport(jobId);
+              logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+            }
+          });
         },
 
         /*
