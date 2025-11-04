@@ -69,7 +69,10 @@ export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
   );
 
   return dataSources
-    .filter((dataSource) => dataSource.type !== 'custom-samples') // Custom samples are not stored in the URL
+    .map((dataSource) =>
+      // Don't persist custom samples documents
+      dataSource.type === 'custom-samples' ? { ...dataSource, documents: [] } : dataSource
+    )
     .map(dataSourceConverter.toUrlSchema);
 }
 

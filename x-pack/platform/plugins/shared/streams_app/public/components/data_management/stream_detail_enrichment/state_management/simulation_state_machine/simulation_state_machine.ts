@@ -215,18 +215,6 @@ export const simulationMachine = setup({
       target: '.assertingRequirements',
       actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
-    'step.cancel': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
-    'step.edit': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
-    'step.save': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
     'step.change': {
       target: '.debouncingChanges',
       reenter: true,

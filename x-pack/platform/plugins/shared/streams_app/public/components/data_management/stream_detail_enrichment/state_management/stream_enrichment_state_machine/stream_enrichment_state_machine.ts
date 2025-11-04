@@ -16,6 +16,7 @@ import {
   and,
   raise,
   stateIn,
+  cancel,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
@@ -425,7 +426,10 @@ export const streamEnrichmentMachine = setup({
               ],
             },
             'dataSource.change': {
-              actions: raise({ type: 'url.sync' }),
+              actions: [
+                cancel('sync-on-change'),
+                raise({ type: 'url.sync' }, { id: 'sync-on-change', delay: 300 }),
+              ],
             },
             'dataSource.dataChange': {
               actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
