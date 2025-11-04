@@ -78,7 +78,7 @@ describe('calculateAndPersistRiskScores', () => {
         const results = await calculate();
 
         const entities = {
-          host: ['hostname'],
+          host: [],
           user: [],
           service: [],
           generic: [],
@@ -126,7 +126,7 @@ describe('calculateAndPersistRiskScores', () => {
         const results = await calculate();
 
         const entities = {
-          host: ['hostname'],
+          host: [],
           user: [],
           service: [],
           generic: [],

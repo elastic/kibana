@@ -7,8 +7,9 @@
 
 import type {
   AgentCapabilities,
+  Conversation,
   ConversationRound,
-  RoundInput,
+  RawRoundInput,
   AgentConfiguration,
 } from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
@@ -18,11 +19,11 @@ export interface RunAgentParams {
   /**
    * The next message in this conversation that the agent should respond to.
    */
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   /**
-   * Previous rounds of conversation.
+   * Current conversation.
    */
-  conversation: ConversationRound[];
+  conversation?: Conversation;
   /**
    * Configuration of the agent to run
    */

@@ -58,7 +58,6 @@
     "@kbn/logging",
     "@kbn/core-execution-context-server",
     "@kbn/data-service-server",
-    "@kbn/css-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/field-formats-common",
   ],

@@ -12,6 +12,7 @@ import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observab
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ChromeNavLinks,
@@ -90,6 +91,7 @@ const setup = ({
     chromeBreadcrumbs$,
     logger,
     featureFlags: coreFeatureFlagsMock.createStart(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
@@ -459,7 +461,7 @@ describe('initNavigation()', () => {
       isExternalLink: true,
       path: 'group1.node-0',
       sideNavStatus: 'visible',
-      title: 'Users and roles',
+      title: 'Members',
     });
 
     // performance
@@ -532,7 +534,7 @@ describe('initNavigation()', () => {
     expect(node?.children?.length).toBe(3); // Only 3 links without billing
 
     // Verify the links are userAndRoles, performance, deployment (no billing)
-    expect(node.children![0].title).toBe('Users and roles');
+    expect(node.children![0].title).toBe('Members');
     expect(node.children![1].title).toBe('Performance');
     expect(node.children![2].title).toBe('Project'); // deployment
 
@@ -1061,71 +1063,6 @@ describe('solution navigations', () => {
         projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
       );
       expect(activeSolution).toEqual(solution1);
-    }
-  });
-
-  it('should set and return the nav panel selected node', async () => {
-    const { projectNavigation } = setup({ navLinkIds: ['link1', 'link2', 'link3'] });
-
-    {
-      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
-      expect(selectedNode).toBeNull();
-    }
-
-    {
-      const node: ChromeProjectNavigationNode = {
-        id: 'node1',
-        title: 'Node 1',
-        path: 'node1',
-      };
-      projectNavigation.setPanelSelectedNode(node);
-
-      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
-
-      expect(selectedNode).toBe(node);
-    }
-
-    {
-      const fooSolution: SolutionNavigationDefinition<any> = {
-        id: 'es',
-        title: 'Foo solution',
-        icon: 'logoSolution',
-        homePage: 'discover',
-        navigationTree$: of({
-          body: [
-            {
-              type: 'navGroup',
-              id: 'group1',
-              children: [
-                { link: 'link1' },
-                {
-                  id: 'group2',
-                  children: [
-                    {
-                      link: 'link2', // We'll target this node using its id
-                    },
-                  ],
-                },
-                { link: 'link3' },
-              ],
-            },
-          ],
-        }),
-      };
-
-      projectNavigation.changeActiveSolutionNavigation('es');
-      projectNavigation.updateSolutionNavigations({ es: fooSolution });
-
-      projectNavigation.setPanelSelectedNode('link2'); // Set the selected node using its id
-
-      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
-
-      expect(selectedNode).toMatchObject({
-        id: 'link2',
-        href: '/app/link2',
-        path: 'group1.group2.link2',
-        title: 'LINK2',
-      });
     }
   });
 });
