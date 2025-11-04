@@ -82,11 +82,9 @@ export const useIntegrationActions = () => {
     (dashboard: Dashboard) =>
       wrapLinkPropsForTelemetry(
         getRouterLinkProps({
-          // @ts-expect-error upgrade typescript v5.9.3
-          href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id } || ''),
+          href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id ?? '' }),
           onClick: () => {
-            // @ts-expect-error upgrade typescript v5.9.3
-            return dashboardLocator?.navigate({ dashboardId: dashboard?.id } || '');
+            return dashboardLocator?.navigate({ dashboardId: dashboard?.id ?? '' });
           },
         }),
         navigationTargets.Dashboard,
