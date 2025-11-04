@@ -14,7 +14,6 @@ import {
   dashboardCreateOptionsSchema,
   dashboardUpdateOptionsSchema,
   getDashboardUpdateRequestAttributesSchema,
-  dashboardSearchOptionsSchema,
   getDashboardItemSchema,
   getDashboardStateSchema,
 } from './schema';
@@ -52,13 +51,6 @@ export function getServiceDefinition(): ServicesDefinition {
           schema: getDashboardUpdateRequestAttributesSchema(),
         },
       },
-    },
-    search: {
-      in: {
-        options: {
-          schema: dashboardSearchOptionsSchema,
-        },
-      },
-    },
+    }
   };
 }

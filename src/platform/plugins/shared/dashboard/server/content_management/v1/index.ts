@@ -27,6 +27,6 @@ export type {
   DashboardQuery,
 } from './types';
 export { getServiceDefinition } from './cm_services';
-export { getDashboardAPIGetResultSchema, getDashboardSearchResultsSchema } from './schema';
+export { getDashboardAPIGetResultSchema } from './schema';
 export { savedObjectToItem } from './transform_utils';
 export { transformDashboardIn } from './transforms';
