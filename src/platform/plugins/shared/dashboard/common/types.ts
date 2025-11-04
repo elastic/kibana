@@ -9,9 +9,9 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardState } from '../server';
+import type { DashboardState, DashboardControlsState } from '../server';
 
-export type { DashboardState };
+export type { DashboardState, DashboardControlsState };
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;

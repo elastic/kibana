@@ -11,24 +11,6 @@ import { extractDashboardState } from './extract_dashboard_state';
 
 describe('extractDashboardState', () => {
   describe('>= 8.19 state', () => {
-    test('should extract labelPosition', () => {
-      const dashboardState = extractDashboardState({
-        controlGroupInput: {
-          labelPosition: 'twoLine',
-        },
-      });
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
-    });
-
-    test('should extract autoApplySelections', () => {
-      const dashboardState = extractDashboardState({
-        controlGroupInput: {
-          autoApplySelections: false,
-        },
-      });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
-    });
-
     test('should extract controls', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
@@ -79,8 +61,7 @@ describe('extractDashboardState', () => {
           labelPosition: 'twoLine',
         },
       });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
+
       expect(dashboardState.controlGroupInput?.controls).toEqual([
         {
           controlConfig: {
@@ -96,24 +77,6 @@ describe('extractDashboardState', () => {
   });
 
   describe('< 8.16 state', () => {
-    test('should convert controlStyle to labelPosition', () => {
-      const dashboardState = extractDashboardState({
-        controlGroupInput: {
-          controlStyle: 'twoLine',
-        },
-      });
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
-    });
-
-    test('should convert showApplySelections to autoApplySelections', () => {
-      const dashboardState = extractDashboardState({
-        controlGroupInput: {
-          showApplySelections: true,
-        },
-      });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
-    });
-
     test('should convert panels to controls', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
