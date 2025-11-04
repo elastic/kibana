@@ -337,16 +337,13 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       }
 
       const roleArn = vars.role_arn.value;
-      if (!roleArn) {
-        logger.error('Package policy must contain role_arn variable');
-        throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
-      }
-
       const externalId: CloudConnectorSecretReference = vars.external_id.value;
-      if (!externalId) {
-        logger.error('Package policy must contain valid external_id secret reference');
+
+      // Validate both role_arn and external_id together
+      if (!roleArn || !externalId) {
+        logger.error('Package policy must contain both role_arn and external_id');
         throw new CloudConnectorInvalidVarsError(
-          'Package policy must contain valid external_id secret reference'
+          'Package policy must contain role_arn and external_id'
         );
       }
 
@@ -367,31 +364,19 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
-      // Validate that all required Azure fields have valid secret references
+      // Validate that all required Azure fields have valid secret references together
       const tenantId = vars.tenant_id;
       const clientId = vars.client_id;
       const azureCredentials = vars.azure_credentials_cloud_connector_id;
 
-      if (!tenantId?.value?.id || !tenantId?.value?.isSecretRef) {
-        logger.error(`Package policy must contain valid ${TENANT_ID_VAR_NAME} secret reference`);
-        throw new CloudConnectorInvalidVarsError(
-          `${TENANT_ID_VAR_NAME} must be a valid secret reference`
-        );
-      }
+      const isValidTenantId = tenantId?.value?.id && tenantId?.value?.isSecretRef;
+      const isValidClientId = clientId?.value?.id && clientId?.value?.isSecretRef;
+      const isValidAzureCredentials = azureCredentials?.value;
 
-      if (!clientId?.value?.id || !clientId?.value?.isSecretRef) {
-        logger.error(`Package policy must contain valid ${CLIENT_ID_VAR_NAME} secret reference`);
+      if (!isValidTenantId || !isValidClientId || !isValidAzureCredentials) {
+        logger.error('Package policy must contain valid Azure cloud connector variables');
         throw new CloudConnectorInvalidVarsError(
-          `${CLIENT_ID_VAR_NAME} must be a valid secret reference`
-        );
-      }
-
-      if (!azureCredentials?.value) {
-        logger.error(
-          `Package policy must contain valid ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} value`
-        );
-        throw new CloudConnectorInvalidVarsError(
-          `${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid string`
+          `Package policy must contain ${TENANT_ID_VAR_NAME}, ${CLIENT_ID_VAR_NAME}, and ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID}`
         );
       }
     } else {

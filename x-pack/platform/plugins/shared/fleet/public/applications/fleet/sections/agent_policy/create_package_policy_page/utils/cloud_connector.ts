@@ -141,8 +141,8 @@ export function extractCloudConnectorVars(
           external_id: {
             type: 'password',
             value: {
-              isSecretRef: true,
               id: externalId,
+              isSecretRef: true,
             },
           },
         },
@@ -170,15 +170,15 @@ export function extractCloudConnectorVars(
           tenant_id: {
             type: 'password',
             value: {
-              isSecretRef: true,
               id: tenantId,
+              isSecretRef: true,
             },
           },
           client_id: {
             type: 'password',
             value: {
-              isSecretRef: true,
               id: clientId,
+              isSecretRef: true,
             },
           },
           azure_credentials_cloud_connector_id: {
