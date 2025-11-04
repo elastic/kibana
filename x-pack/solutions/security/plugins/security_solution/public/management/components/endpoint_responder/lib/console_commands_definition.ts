@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
-import { wrapWithNotice } from './get_not_supported_arg_about_info';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { isCancelFeatureAvailable } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
@@ -281,19 +280,19 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         ...commandCommentArgument(),
-        pid: {
-          required: false,
-          allowMultiples: false,
-          exclusiveOr: true,
-          about: CONSOLE_COMMANDS.killProcess.args.pid.about,
-          validate: pidValidator,
-        },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
           about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
           validate: emptyArgumentValidator,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
+          about: CONSOLE_COMMANDS.killProcess.args.pid.about,
+          validate: pidValidator,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -316,19 +315,19 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         ...commandCommentArgument(),
-        pid: {
-          required: false,
-          allowMultiples: false,
-          exclusiveOr: true,
-          about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
-          validate: pidValidator,
-        },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
           about: CONSOLE_COMMANDS.suspendProcess.args.entityId.about,
           validate: emptyArgumentValidator,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
+          about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
+          validate: pidValidator,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -589,14 +588,18 @@ export const getEndpointConsoleCommands = ({
     const endpointSupportsKernelDump = (endpointCapabilities as EndpointCapabilities[]).includes(
       'memdump_kernel'
     );
-    const memoryDumpKernelNotSupportedMessage = i18n.translate(
-      'xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported',
-      {
-        defaultMessage:
-          '"kernel" memory dump type is not currently supported for this host OS type ({osType})',
-        values: { osType: platform },
-      }
+    const endpointSupportsProcessDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_process'
     );
+    const getMemoryDumpTypeNotSupportedMessage = (type: 'process' | 'kernel') =>
+      i18n.translate(
+        'xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported',
+        {
+          defaultMessage:
+            '"{type}" memory dump type is not currently supported for this host OS type ({osType})',
+          values: { osType: platform, type },
+        }
+      );
 
     consoleCommands.push({
       name: 'memory-dump',
@@ -606,7 +609,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: MemoryDumpActionResult,
       meta: commandMeta,
-      exampleUsage: 'memory-dump --type="process" --pid=123 --comment="dump process 123"',
+      exampleUsage: 'memory-dump --process --pid=123 --comment="dump process 123"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: (enteredCommand) => {
         const standardValidation = capabilitiesAndPrivilegesValidator(agentType)(enteredCommand);
@@ -622,7 +625,7 @@ export const getEndpointConsoleCommands = ({
           return true;
         }
 
-        const memoryDumpType = argsInterface.args.type.at(0);
+        const memoryDumpType = argsInterface.hasArg('kernel') ? 'kernel' : 'process';
 
         // PID and Entity ID are only supported for process memory dumps
         if (
@@ -656,46 +659,45 @@ export const getEndpointConsoleCommands = ({
       },
       mustHaveArgs: true,
       args: {
-        type: {
-          required: true,
+        kernel: {
+          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          required: false,
           allowMultiples: false,
-          mustHaveValue: 'truthy',
-          about: !endpointSupportsKernelDump
-            ? wrapWithNotice(
-                CONSOLE_COMMANDS.memoryDump.typeArgAbout,
-                memoryDumpKernelNotSupportedMessage
-              )
-            : CONSOLE_COMMANDS.memoryDump.typeArgAbout,
-          validate: (argValue) => {
-            if (
-              argValue.some((memDumpType) => {
-                return memDumpType !== 'kernel' && memDumpType !== 'process';
-              })
-            ) {
-              return i18n.translate(
-                'xpack.securitySolution.consoleCommandsDefinition.memoryDumpTypeInvalidMessage',
-                { defaultMessage: 'Valid types are: kernel, process' }
-              );
-            }
-
-            if (argValue.at(0) === 'kernel' && !endpointSupportsKernelDump) {
-              return memoryDumpKernelNotSupportedMessage;
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsKernelDump) {
+              return getMemoryDumpTypeNotSupportedMessage('kernel');
             }
 
             return true;
           },
         },
-        pid: {
+        process: {
+          about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
           required: false,
           allowMultiples: false,
-          mustHaveValue: 'number-greater-than-zero',
-          about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsProcessDump) {
+              return getMemoryDumpTypeNotSupportedMessage('process');
+            }
+
+            return true;
+          },
         },
         entityId: {
           required: false,
           allowMultiples: false,
           mustHaveValue: 'non-empty-string',
           about: CONSOLE_COMMANDS.memoryDump.entityIdArgAbout,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'number-greater-than-zero',
+          about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
         },
         ...commandCommentArgument(),
       },

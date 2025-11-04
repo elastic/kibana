@@ -294,9 +294,18 @@ export const CONSOLE_COMMANDS = {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
       defaultMessage: 'Generate a memory dump on the host',
     }),
-    typeArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.typeArgAbout', {
-      defaultMessage: 'Type of memory dump to generate. Valid values are "kernel" or "process"',
-    }),
+    kernelArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.kernelArgAbout',
+      {
+        defaultMessage: 'Generates a kernel memory dump',
+      }
+    ),
+    processArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.processArgAbout',
+      {
+        defaultMessage: 'Generates memory dump for a process',
+      }
+    ),
     pidArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.pidArgAbout', {
       defaultMessage:
         'Process ID to generate a memory dump for. Valid only when "type" is "process"',

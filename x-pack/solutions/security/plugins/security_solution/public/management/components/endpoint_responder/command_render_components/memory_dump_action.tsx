@@ -18,7 +18,8 @@ import type {
 } from '../../../../../common/endpoint/types';
 
 export interface MemoryDumpActionConsoleArguments extends SupportedArguments {
-  type: 'kernel' | 'process';
+  kernel: boolean;
+  process: boolean;
   pid: number;
   entityId: string;
 }
@@ -34,7 +35,7 @@ export const MemoryDumpActionResult = memo<
   const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
 
   const actionRequestBody = useMemo<undefined | MemoryDumpActionRequestBody>(() => {
-    const { comment, type, pid, entityId } = command.args.args;
+    const { comment, kernel, pid, entityId } = command.args.args;
 
     if (!endpointId) {
       return;
@@ -45,7 +46,7 @@ export const MemoryDumpActionResult = memo<
       endpoint_ids: [endpointId],
       ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters: {
-        type: type[0],
+        type: kernel?.[0] ? 'kernel' : 'process',
         ...(pid ? { pid: pid[0] } : {}),
         ...(entityId ? { entity_id: entityId[0] } : {}),
       },
