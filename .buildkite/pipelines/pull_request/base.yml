@@ -23,9 +23,9 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: c2-standard-16
+      machineType: c2d-standard-16
       preemptible: true
-      localSsds: 2
+      localSsds: 1
       localSsdInterface: nvme
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
