@@ -7,22 +7,46 @@
 
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
-import type { ESQLMapEntry } from '@kbn/esql-ast/src/types';
+import type { ESQLFunction, ESQLMapEntry, FunctionSubtype } from '@kbn/esql-ast/src/types';
 import type { CommonDatePreset } from '../../../../types/formats';
 import type { DateProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 
 const buildDateParseNamedParamEntries = (timezone?: string, locale?: string): ESQLMapEntry[] => {
   const dateParseNamedParamsEntries: ESQLMapEntry[] = [];
-  if (timezone !== undefined)
+  if (timezone)
     dateParseNamedParamsEntries.push(
       Builder.expression.entry('time_zone', Builder.expression.literal.string(timezone))
     );
-  if (locale !== undefined)
+  if (locale)
     dateParseNamedParamsEntries.push(
       Builder.expression.entry('locale', Builder.expression.literal.string(locale))
     );
   return dateParseNamedParamsEntries;
+};
+
+const buildDateParseExpressions = (
+  inputFormats: string[],
+  fromAsString: ESQLFunction<FunctionSubtype, string>,
+  timezone?: string,
+  locale?: string
+): ESQLFunction<FunctionSubtype, string>[] => {
+  if (timezone || locale) {
+    const dateParseNamedParams = Builder.expression.map({
+      entries: buildDateParseNamedParamEntries(timezone, locale),
+    });
+    return inputFormats.map((f) =>
+      Builder.expression.func.call('DATE_PARSE', [
+        Builder.expression.literal.string(f),
+        fromAsString,
+        dateParseNamedParams,
+      ])
+    );
+  }
+
+  return inputFormats.map((f) =>
+    Builder.expression.func.call('DATE_PARSE', [Builder.expression.literal.string(f), fromAsString])
+  );
 };
 
 export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCommand[] {
@@ -40,9 +64,6 @@ export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCom
   const fromAsString = Builder.expression.func.call('TO_STRING', [fromColumn]);
   const targetDateField = to ?? '@timestamp'; // As with Ingest Date Processor, default to @timestamp
   const toColumn = Builder.expression.column(targetDateField);
-  const dateParseNamedParams = Builder.expression.map({
-    entries: buildDateParseNamedParamEntries(timezone, locale),
-  });
 
   const resolvedInputFormats = formats.map((f) =>
     resolveCommonDatePresetsForESQL(f as CommonDatePreset)
@@ -51,12 +72,11 @@ export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCom
     ? resolveCommonDatePresetsForESQL(output_format as CommonDatePreset)
     : undefined;
 
-  const dateParseExpressions = resolvedInputFormats.map((f) =>
-    Builder.expression.func.call('DATE_PARSE', [
-      Builder.expression.literal.string(f),
-      fromAsString,
-      dateParseNamedParams,
-    ])
+  const dateParseExpressions = buildDateParseExpressions(
+    resolvedInputFormats,
+    fromAsString,
+    timezone,
+    locale
   );
 
   const coalesceDateParse = Builder.expression.func.call('COALESCE', dateParseExpressions);

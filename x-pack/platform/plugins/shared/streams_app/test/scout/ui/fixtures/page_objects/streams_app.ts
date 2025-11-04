@@ -489,7 +489,7 @@ export class StreamsApp {
     await expect(this.getModal()).toBeHidden();
   }
 
-  async selectProcessorType(value: ProcessorType) {
+  async selectProcessorType(value: Capitalize<ProcessorType>) {
     await this.page.getByTestId('streamsAppProcessorTypeSelector').click();
     await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
   }
