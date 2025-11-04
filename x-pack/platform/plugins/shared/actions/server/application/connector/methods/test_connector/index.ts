@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { axiosTestRoute } from './axios_test';
+export { testConnector } from './test_connector';

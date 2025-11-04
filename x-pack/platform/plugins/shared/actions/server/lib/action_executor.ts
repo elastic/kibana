@@ -21,7 +21,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import type { AxiosInstance } from 'axios';
+import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import axios from 'axios';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
@@ -96,6 +96,8 @@ export interface ExecuteOptions<Source = unknown> {
 export interface GetAxiosParams {
   actionId: string;
 }
+
+export type TestConnectorParams = GetAxiosParams;
 
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
@@ -178,17 +180,26 @@ export class ActionExecutor {
     }
 
     try {
-      logger.debug('validated config and secret');
       let auth;
-      if (validatedConfig.hasAuth) {
+      let headers;
+
+      if (!validatedConfig.hasAuth) {
+        auth = undefined;
+      } else if (validatedSecrets.authType === 'basicAuth') {
         auth = {
           username: validatedSecrets.username as unknown as string,
           password: validatedSecrets.password as unknown as string,
         };
+      } else if (validatedSecrets.authType === 'Authorization') {
+        headers = {
+          Authorization: validatedSecrets.bearerToken as AxiosHeaderValue,
+        };
       }
+
       return axios.create({
         baseURL: validatedConfig.url as unknown as string,
         method: validatedConfig.method as unknown as string,
+        headers,
         auth,
       });
     } catch (error) {
@@ -196,6 +207,27 @@ export class ActionExecutor {
     }
 
     return axios.create();
+  }
+
+  public async testConnector({
+    actionId,
+    request,
+  }: TestConnectorParams & { request: KibanaRequest }) {
+    const { actionTypeRegistry, spaces } = this.actionExecutorContext!;
+
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+    const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
+
+    const { actionTypeId } = actionInfo;
+
+    const { test } = actionTypeRegistry.get(actionTypeId);
+
+    const axiosInstance = await this.getAxiosInstance({ actionId, request });
+
+    if (test) {
+      await test(axiosInstance);
+    }
   }
 
   public async execute({

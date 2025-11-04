@@ -15,18 +15,18 @@ import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
-export const axiosTestRoute = (
+export const testConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/connector/{id}/_axios_test`,
+      path: `${BASE_ACTION_API_PATH}/connector/{id}/_test`,
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
-        summary: `Foobar`,
-        description: 'Foobar',
+        description:
+          'This connector runs the test function defined when registering a connector with a dedicated axios instance',
         tags: ['oas-tag:connectors'],
       },
       validate: {
@@ -40,7 +40,7 @@ export const axiosTestRoute = (
           }),
         },
         response: {
-          204: {
+          200: {
             description: 'Indicates a successful call.',
             body: () => connectorResponseSchemaV1,
           },
@@ -53,14 +53,11 @@ export const axiosTestRoute = (
         const { id } = req.params;
 
         try {
-          const axiosInstance = await actionsClient.getAxiosInstance({
+          await actionsClient.testConnector({
             actionId: id,
           });
 
-          // @ts-ignore
-          await axiosInstance();
-
-          return res.noContent();
+          return res.ok();
         } catch (error) {
           return error;
         }

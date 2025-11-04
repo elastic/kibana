@@ -18,6 +18,7 @@ import type {
   ISavedObjectsRepository,
   IScopedClusterClient,
 } from '@kbn/core/server';
+import type { AxiosInstance } from 'axios';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -221,6 +222,7 @@ export interface ActionType<
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
+  test?: (axiosInstance: AxiosInstance) => Promise<void>;
 }
 
 export interface RawAction extends Record<string, unknown> {

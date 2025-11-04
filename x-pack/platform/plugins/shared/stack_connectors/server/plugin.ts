@@ -23,7 +23,7 @@ import {
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
-import { registerYAMLConnectors } from './connector_types/register_yaml_connectors';
+import { registerSingleFileConnectors } from './connector_types/register_single_file_connectors';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
   usageCollection?: UsageCollectionSetup;
@@ -64,7 +64,7 @@ export class StackConnectorsPlugin
       experimentalFeatures: this.experimentalFeatures,
     });
 
-    registerYAMLConnectors({
+    registerSingleFileConnectors({
       actions,
     });
 
