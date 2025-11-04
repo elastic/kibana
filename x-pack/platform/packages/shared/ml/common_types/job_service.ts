@@ -6,9 +6,11 @@
  */
 
 import type { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import type { ErrorType } from '@kbn/ml-error-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { Job, JobStats, IndicesOptions } from './anomaly_detection_jobs';
+import type { Job } from './anomaly_detection_jobs/job';
+import type { JobStats } from './anomaly_detection_jobs/job_stats';
+import type { IndicesOptions } from './anomaly_detection_jobs/datafeed';
+import type { ErrorType } from './errors';
 
 export interface MlJobsResponse {
   jobs: Job[];

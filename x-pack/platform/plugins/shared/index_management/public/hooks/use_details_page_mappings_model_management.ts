@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ModelDownloadState,
-  TrainedModelStat,
-} from '@kbn/ml-plugin/common/types/trained_models';
+import type { ModelDownloadState, TrainedModelStat } from '@kbn/ml-common-types/trained_models';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { ElserVersion } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {

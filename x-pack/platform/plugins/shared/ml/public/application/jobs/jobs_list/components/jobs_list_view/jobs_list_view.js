@@ -38,7 +38,7 @@ import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_moda
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
 import { jobCloningService } from '../../../../services/job_cloning_service';
-import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
+import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
 import { DatePicker } from '../../../../components/ml_page/date_picker';
 

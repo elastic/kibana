@@ -13,7 +13,7 @@ import type { MlFeatures } from '../../../common/constants/app';
 import { mlLog } from '../../lib/log';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { ExistingModelBase } from '../../../common/types/trained_models';
+import type { ExistingModelBase } from '@kbn/ml-common-types/trained_models';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../lib/log');

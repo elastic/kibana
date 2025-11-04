@@ -8,8 +8,9 @@
 import expect from '@kbn/expect';
 import { sample } from 'lodash';
 import { duration } from 'moment';
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '@kbn/ml-plugin/server/lib/alerts/register_anomaly_detection_alert_type';
 import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';

@@ -13,33 +13,35 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import {
-  getSingleMetricViewerJobErrorMessage,
-  parseTimeIntervalForJob,
-  isJobWithGeoData,
-  createDatafeedId,
-} from '../../../common/util/job_utils';
-import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
-import type { JobAction } from '../../../common/constants/job_actions';
+import type {
+  DatafeedWithStats,
+  CombinedJobWithStats,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type {
+  MlSummaryJob,
+  AuditMessage,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type {
+  JobsExistResponse,
+  BulkCreateResults,
+  ResetJobsResponse,
+} from '@kbn/ml-common-types/job_service';
 import {
   getJobActionString,
   JOB_ACTION_TASK,
   JOB_ACTION_TASKS,
   JOB_ACTION,
 } from '../../../common/constants/job_actions';
-import type {
-  MlSummaryJob,
-  AuditMessage,
-  DatafeedWithStats,
-  CombinedJobWithStats,
-  Datafeed,
-  Job,
-} from '../../../common/types/anomaly_detection_jobs';
-import type {
-  JobsExistResponse,
-  BulkCreateResults,
-  ResetJobsResponse,
-} from '../../../common/types/job_service';
+import type { JobAction } from '../../../common/constants/job_actions';
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import {
+  getSingleMetricViewerJobErrorMessage,
+  parseTimeIntervalForJob,
+  isJobWithGeoData,
+  createDatafeedId,
+} from '../../../common/util/job_utils';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';

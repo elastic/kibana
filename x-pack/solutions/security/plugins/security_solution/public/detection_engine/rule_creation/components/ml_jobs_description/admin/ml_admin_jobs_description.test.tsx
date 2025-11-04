@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
 import { MlAdminJobsDescription } from './ml_admin_jobs_description';
 

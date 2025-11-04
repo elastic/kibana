@@ -51,16 +51,14 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { FocusTrapProps } from '../../../../util/create_focus_trap_props';
-import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
+import type { LineAnnotationDatumWithModelSnapshot } from '@kbn/ml-common-types/results';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import type {
-  CombinedJobWithStats,
-  MlSummaryJob,
-  ModelSnapshot,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import type { JobMessage } from '../../../../../../common/types/audit_message';
-import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
+import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
+import type { FocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';

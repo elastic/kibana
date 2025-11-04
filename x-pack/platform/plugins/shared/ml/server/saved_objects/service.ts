@@ -19,11 +19,11 @@ import type {
   TrainedModelType,
   SavedObjectResult,
   MlSavedObjectType,
-} from '../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-} from '../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
 import { MLJobNotFound, MLModelNotFound } from '../lib/ml_client';
 import { getSavedObjectClientError } from './util';
 import { authorizationProvider } from './authorization';

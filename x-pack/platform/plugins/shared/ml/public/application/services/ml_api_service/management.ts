@@ -6,23 +6,15 @@
  */
 
 import { useMemo } from 'react';
+import type { ManagementListResponse } from '@kbn/ml-common-types/management';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
-import type { ManagementListResponse } from '../../../../common/types/management';
-
-import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 
 export interface InferenceStatsQueryParams {
   from?: number;
   size?: number;
-}
-
-export interface IngestStats {
-  count: number;
-  time_in_millis: number;
-  current: number;
-  failed: number;
 }
 
 /**

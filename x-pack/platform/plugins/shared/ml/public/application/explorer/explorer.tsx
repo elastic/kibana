@@ -35,7 +35,8 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import { ML_ANOMALY_EXPLORER_PANELS } from '@kbn/ml-common-types/storage';
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -75,7 +76,6 @@ import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
 import { useMlIndexUtils } from '../util/index_service';
 import { useJobSelection } from './hooks/use_job_selection';

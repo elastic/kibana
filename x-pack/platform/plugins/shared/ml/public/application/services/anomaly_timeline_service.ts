@@ -13,7 +13,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { MlApi } from './ml_api_service';
 import type {
   ExplorerJob,

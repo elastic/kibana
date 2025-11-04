@@ -5,17 +5,14 @@
  * 2.0.
  */
 
+import type {
+  CloudInfo,
+  MlServerDefaults,
+  MlServerLimits,
+} from '@kbn/ml-common-types/ml_server_info';
 import type { MlApi } from './ml_api_service';
-import type { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_server_info';
 
-export interface CloudInfo {
-  cloudId: string | null;
-  isCloud: boolean;
-  isCloudTrial: boolean;
-  deploymentId: string | null;
-  cloudUrl: string | null;
-  isMlAutoscalingEnabled: boolean;
-}
+export type { CloudInfo };
 
 let defaults: MlServerDefaults = {
   anomaly_detectors: {},

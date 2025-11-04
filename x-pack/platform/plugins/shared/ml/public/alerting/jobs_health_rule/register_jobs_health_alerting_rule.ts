@@ -9,8 +9,8 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-common-types/alerts';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
-import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { validateLookbackInterval } from '../validators';
 

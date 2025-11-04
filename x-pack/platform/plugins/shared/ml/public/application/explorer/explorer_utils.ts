@@ -28,6 +28,8 @@ import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Annotations, AnnotationsTable } from '@kbn/ml-common-types/annotations';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -43,8 +45,6 @@ import type { MlJobService } from '../services/job_service';
 
 import type { SwimlaneType } from './explorer_constants';
 import { MAX_CATEGORY_EXAMPLES, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';

@@ -21,9 +21,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { TrainedModelItem, TrainedModelUIItem } from '../../../common/types/trained_models';
-import { isExistingModel } from '../../../common/types/trained_models';
-import { type WithRequired } from '../../../common/types/common';
+import type { TrainedModelItem, TrainedModelUIItem } from '@kbn/ml-common-types/trained_models';
+import { isExistingModel } from '@kbn/ml-common-types/trained_models';
+import { type WithRequired } from '@kbn/ml-common-types/common';
 import { DeleteSpaceAwareItemCheckModal } from '../components/delete_space_aware_item_check_modal';
 import { useMlKibana } from '../contexts/kibana';
 

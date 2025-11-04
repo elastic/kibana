@@ -18,11 +18,6 @@ export interface ModelPlotOutputResults {
   results: Record<Time, { actual: number; modelUpper: number | null; modelLower: number | null }>;
 }
 
-export interface CriteriaField {
-  fieldName: string;
-  fieldValue: any;
-}
-
 // This is to retain the singleton behavior of the previous direct instantiation and export.
 let mlResultsService: MlResultsService;
 export function mlResultsServiceProvider(mlApi: MlApi) {

@@ -53,6 +53,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSections } from './application/management';
@@ -74,7 +75,6 @@ import {
 } from '../common/constants/app';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApi } from './application/services/ml_api_service';
-import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';

@@ -60,7 +60,11 @@
 // }
 
 import type { MlPartitionFieldsType } from '@kbn/ml-anomaly-utils';
-import { ANNOTATION_TYPE } from '../constants/annotations';
+
+export enum ANNOTATION_TYPE {
+  ANNOTATION = 'annotation',
+  COMMENT = 'comment',
+}
 
 export type AnnotationFieldName = 'partition_field_name' | 'over_field_name' | 'by_field_name';
 export type AnnotationFieldValue = 'partition_field_value' | 'over_field_value' | 'by_field_value';

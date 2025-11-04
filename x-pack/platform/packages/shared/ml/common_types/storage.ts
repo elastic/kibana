@@ -7,7 +7,7 @@
 
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import type { FrozenTierPreference } from '@kbn/ml-date-picker';
-import type { StartAllocationParams } from '../../public/application/services/ml_api_service/trained_models';
+import type { StartAllocationParams } from './trained_models';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields' as const;
 export const ML_APPLY_TIME_RANGE_CONFIG = 'ml.jobSelectorFlyout.applyTimeRange';
