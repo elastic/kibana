@@ -140,6 +140,7 @@ export const streamRoutingMachine = setup({
       const { name, condition } = context.editedSuggestion;
       if (!name || name.trim() === '') return false;
       return isSchema(conditionSchema, condition);
+    },
     isValidChild: ({ context }) => {
       const currentRule = selectCurrentRule(context);
       const currentStream = context.definition.stream;
