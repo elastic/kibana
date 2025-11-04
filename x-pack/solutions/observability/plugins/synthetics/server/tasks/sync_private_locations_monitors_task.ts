@@ -25,7 +25,7 @@ import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '15m';
+const TASK_SCHEDULE = '60m';
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -55,7 +55,7 @@ export class SyncPrivateLocationMonitorsTask {
         title: 'Synthetics Sync Global Params Task',
         description:
           'This task is executed so that we can sync private location monitors for example when global params are updated',
-        timeout: '10m',
+        timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {
           return {
