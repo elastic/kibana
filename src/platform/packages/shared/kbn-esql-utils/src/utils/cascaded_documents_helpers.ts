@@ -391,8 +391,15 @@ function handleStatsByCategorizeLeafOperation(
           return null;
         }
 
+        let matchField = (arg as ESQLColumn).text;
+
+        if (isFunctionExpression(arg)) {
+          // this assumes that the function invoked is accepts a column as its first argument
+          matchField = ((arg as ESQLFunction).args[0] as ESQLColumn).text;
+        }
+
         return Builder.expression.func.call('match', [
-          Builder.identifier({ name: (arg as ESQLColumn).text }),
+          Builder.identifier({ name: matchField }),
           Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
           Builder.expression.map({
             entries: [
