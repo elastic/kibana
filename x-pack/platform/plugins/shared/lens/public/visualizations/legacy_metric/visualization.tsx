@@ -22,19 +22,21 @@ import type {
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
 import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
-import { getSuggestions } from './metric_suggestions';
 import type {
   Visualization,
   OperationMetadata,
   DatasourceLayers,
   FramePublicAPI,
-} from '../../types';
-import type { LegacyMetricState } from '../../../common/types';
+  LegacyMetricState,
+} from '@kbn/lens-common';
+import { getSuggestions } from './metric_suggestions';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
 import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
 import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
 import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { LegacyMetricTitlesAndTextSettings } from './metric_config_panel/appearance_settings';
 
 interface MetricConfig extends Omit<LegacyMetricState, 'palette' | 'colorMode'> {
   title: string;
@@ -299,6 +301,10 @@ export const getLegacyMetricVisualization = ({
 
   ToolbarComponent(props) {
     return <MetricToolbar state={props.state} setState={props.setState} frame={props.frame} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: LegacyMetricTitlesAndTextSettings }} />;
   },
 
   DimensionEditorComponent(props) {

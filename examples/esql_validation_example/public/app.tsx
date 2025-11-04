@@ -77,7 +77,7 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
     if (currentQuery === '') {
       return;
     }
-    validateQuery(currentQuery, { ignoreOnMissingCallbacks: ignoreErrors }, callbacks).then(
+    validateQuery(currentQuery, ignoreErrors ? undefined : callbacks).then(
       ({ errors: validationErrors, warnings: validationWarnings }) => {
         // syntax errors come with a slight different format than other validation errors
         setErrors(validationErrors.map((e) => ('severity' in e ? e.message : e.text)));
@@ -147,7 +147,12 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
               />
             </EuiFormRow>
             {currentWarnings.length ? (
-              <EuiCallOut title="Validation warnings" color="warning" iconType="warning">
+              <EuiCallOut
+                announceOnMount
+                title="Validation warnings"
+                color="warning"
+                iconType="warning"
+              >
                 <p>Here the list of warnings:</p>
                 <ul>
                   {currentWarnings.map((message) => (

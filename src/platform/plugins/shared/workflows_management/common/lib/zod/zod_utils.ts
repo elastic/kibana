@@ -10,6 +10,7 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
 import { z } from '@kbn/zod';
+import type { WorkflowZodSchemaLooseType } from '../../schema';
 
 export function parsePath(path: string) {
   const segments = path
@@ -27,7 +28,7 @@ export function parsePath(path: string) {
  * @returns The schema at the given path or null if the path is invalid.
  */
 export function getSchemaAtPath(
-  schema: z.ZodType,
+  schema: WorkflowZodSchemaLooseType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
 ): z.ZodType | null {
@@ -96,7 +97,7 @@ export function getSchemaAtPath(
       return current.unwrap();
     }
 
-    return current;
+    return current as z.ZodType;
   } catch {
     return null;
   }
@@ -168,7 +169,16 @@ export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
 }
 
 export function getZodTypeName(schema: z.ZodType) {
-  const typedSchema = schema as ZodFirstPartySchemaTypes;
+  // Unwrap ZodOptional and ZodDefault to get the actual schema type
+  let unwrappedSchema = schema;
+  if (unwrappedSchema instanceof z.ZodOptional) {
+    unwrappedSchema = unwrappedSchema.unwrap();
+  }
+  if (unwrappedSchema instanceof z.ZodDefault) {
+    unwrappedSchema = unwrappedSchema.removeDefault();
+  }
+
+  const typedSchema = unwrappedSchema as ZodFirstPartySchemaTypes;
   const def = typedSchema._def;
   switch (def.typeName) {
     case 'ZodString':
@@ -191,6 +201,17 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'unknown';
     case 'ZodLiteral':
       return 'literal';
+    case 'ZodUnion': {
+      // Check if all union members are arrays - if so, treat as array type
+      const unionSchema = unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
+      const allMembersAreArrays = unionSchema.options.every(
+        (option: z.ZodType) => option instanceof z.ZodArray
+      );
+      if (allMembersAreArrays) {
+        return 'array';
+      }
+      return 'union';
+    }
     default:
       return 'unknown';
   }

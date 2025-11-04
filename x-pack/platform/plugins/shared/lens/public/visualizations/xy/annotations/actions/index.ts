@@ -14,9 +14,9 @@ import { ANNOTATIONS_LISTING_VIEW_ID } from '@kbn/event-annotation-plugin/common
 import type {
   LayerAction,
   RegisterLibraryAnnotationGroupFunction,
-  StartServices,
+  LensStartServices as StartServices,
   StateSetter,
-} from '../../../../types';
+} from '@kbn/lens-common';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 import { getSaveLayerAction } from './save_action';

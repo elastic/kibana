@@ -31,10 +31,11 @@ fi
 
 run_check() {
   eval "$cmd"
-  node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 }
 
 retry 5 15 run_check
+
+node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 
 check_for_changed_files "$cmd" true
 

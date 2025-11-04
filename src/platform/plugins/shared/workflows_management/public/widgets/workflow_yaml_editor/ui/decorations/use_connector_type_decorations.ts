@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml_utils';
 import { getCachedAllConnectorsMap } from '../../../../../common/schema';
@@ -158,6 +158,7 @@ export const useConnectorTypeDecorations = ({
               },
               options: {
                 inlineClassName: `type-inline-highlight type-${baseConnectorType}`,
+                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
               },
             },
           ];

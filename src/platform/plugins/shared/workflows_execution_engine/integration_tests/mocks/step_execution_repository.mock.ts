@@ -20,43 +20,14 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     );
   }
 
-  public createStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
-    if (!stepExecution.id) {
-      throw new Error('Step execution ID is required for creation');
-    }
-
-    this.stepExecutions.set(stepExecution.id, stepExecution as EsWorkflowStepExecution);
-    return Promise.resolve();
-  }
-
-  public updateStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
-    if (!stepExecution.id) {
-      throw new Error('Step execution ID is required for update');
-    }
-
-    if (!this.stepExecutions.has(stepExecution.id)) {
-      throw new Error(`Step execution with ID ${stepExecution.id} does not exist`);
-    }
-
-    this.stepExecutions.set(stepExecution.id, {
-      ...this.stepExecutions.get(stepExecution.id),
-      ...(stepExecution as EsWorkflowStepExecution),
-    });
-    return Promise.resolve();
-  }
-
-  public updateStepExecutions(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {
+  public bulkUpsert(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {
     for (const stepExecution of stepExecutions) {
       if (!stepExecution.id) {
-        throw new Error('Step execution ID is required for update');
-      }
-
-      if (!this.stepExecutions.has(stepExecution.id)) {
-        throw new Error(`Step execution with ID ${stepExecution.id} does not exist`);
+        throw new Error('Step execution ID is required for upsert');
       }
 
       this.stepExecutions.set(stepExecution.id, {
-        ...this.stepExecutions.get(stepExecution.id),
+        ...(this.stepExecutions.get(stepExecution.id) || {}),
         ...(stepExecution as EsWorkflowStepExecution),
       });
     }

@@ -27,6 +27,8 @@ import { RerankFieldContext } from "./esql_parser.js";
 import { FromCommandContext } from "./esql_parser.js";
 import { TimeSeriesCommandContext } from "./esql_parser.js";
 import { IndexPatternAndMetadataFieldsContext } from "./esql_parser.js";
+import { IndexPatternOrSubqueryContext } from "./esql_parser.js";
+import { SubqueryContext } from "./esql_parser.js";
 import { IndexPatternContext } from "./esql_parser.js";
 import { ClusterStringContext } from "./esql_parser.js";
 import { SelectorStringContext } from "./esql_parser.js";
@@ -304,6 +306,26 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitIndexPatternAndMetadataFields?: (ctx: IndexPatternAndMetadataFieldsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.indexPatternOrSubquery`.
+	 * @param ctx the parse tree
+	 */
+	enterIndexPatternOrSubquery?: (ctx: IndexPatternOrSubqueryContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.indexPatternOrSubquery`.
+	 * @param ctx the parse tree
+	 */
+	exitIndexPatternOrSubquery?: (ctx: IndexPatternOrSubqueryContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.subquery`.
+	 * @param ctx the parse tree
+	 */
+	enterSubquery?: (ctx: SubqueryContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.subquery`.
+	 * @param ctx the parse tree
+	 */
+	exitSubquery?: (ctx: SubqueryContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.indexPattern`.
 	 * @param ctx the parse tree

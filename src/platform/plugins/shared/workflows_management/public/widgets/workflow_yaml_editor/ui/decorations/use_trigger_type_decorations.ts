@@ -10,7 +10,7 @@
 import { useEffect, useRef } from 'react';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 import { getTriggerNodesWithType } from '../../../../../common/lib/yaml_utils';
 
 interface UseTriggerTypeDecorationsProps {
@@ -150,6 +150,7 @@ export const useTriggerTypeDecorations = ({
               },
               options: {
                 inlineClassName: `type-inline-highlight type-${className}`,
+                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
               },
             },
           ];

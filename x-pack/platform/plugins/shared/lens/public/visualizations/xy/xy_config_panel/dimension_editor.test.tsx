@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import { DataDimensionEditor } from './dimension_editor';
-import type { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
+import type { FramePublicAPI, DatasourcePublicAPI } from '@kbn/lens-common';
 import type { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';

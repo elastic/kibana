@@ -91,6 +91,7 @@ enabled:
   - src/platform/test/functional/apps/discover/observability/config.ts
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
+  - src/platform/test/functional/apps/discover/tabs3/config.ts
   - src/platform/test/functional/apps/discover/tabs_disabled/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
@@ -197,6 +198,7 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.rules.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
