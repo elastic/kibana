@@ -13,7 +13,7 @@ import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'GET /api/console/api_server',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch', 'esGate'] },
+  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     apiTest.beforeAll(async ({ requestAuth }) => {
