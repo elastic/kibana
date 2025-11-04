@@ -196,6 +196,11 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       kind: 'Issue',
       detail: query.description,
       sortText: query?.sortText ?? 'E',
+      command: {
+        id: 'esql.recommendedQuery.accept',
+        title: 'Accept recommended query',
+        arguments: [{ queryLabel: query.label }],
+      },
     };
   });
 
