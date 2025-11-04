@@ -85,6 +85,12 @@ export class SyncPrivateLocationMonitorsTask {
   }: {
     taskInstance: CustomTaskInstance;
   }): Promise<{ state: TaskState; error?: Error; schedule?: IntervalSchedule | RruleSchedule }> {
+    this.debugLog(
+      `Syncing private location monitors, current task state is ${JSON.stringify(
+        taskInstance.state
+      )}`
+    );
+
     const {
       coreStart: { savedObjects },
       encryptedSavedObjects,
@@ -103,9 +109,6 @@ export class SyncPrivateLocationMonitorsTask {
     };
 
     try {
-      this.debugLog(
-        `Syncing private location monitors, current task state is ${JSON.stringify(taskState)}`
-      );
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
