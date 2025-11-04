@@ -226,8 +226,7 @@ export function InternalDashboardTopNav({
       ? false
       : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
-    const showSearchBar = showQueryBar || showFilterBar;
+    const showSearchBar = showQueryInput || showDatePicker || showFilterBar;
     return {
       showTopNavMenu,
       showSearchBar,
