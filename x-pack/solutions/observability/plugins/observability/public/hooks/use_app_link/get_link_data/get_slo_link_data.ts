@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { sloDetailsLocatorID } from '../../..';
 
 const getSLOLinkData = (rule: Rule) => {
   return typeof rule.params.sloId === 'string'
@@ -15,8 +16,9 @@ const getSLOLinkData = (rule: Rule) => {
         buttonText: i18n.translate('xpack.observability.ruleDetails.viewLinkedSLOButton', {
           defaultMessage: 'View linked SLO',
         }),
+        locatorId: sloDetailsLocatorID,
       }
-    : { urlParams: undefined, buttonText: '' };
+    : { urlParams: undefined, buttonText: '', locatorId: '' };
 };
 
 export { getSLOLinkData };

@@ -7,15 +7,14 @@
 
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { getSLOLinkData } from './get_link_data/get_slo_link_data';
+import { useKibana } from '../../utils/kibana_react';
 
 type ViewLinkedObjectSupportedRuleType = (typeof viewLinkedObjectSupportedRuleTypes)[number];
 
 interface Props {
   rule?: Rule;
-  locator?: LocatorPublic<SerializableRecord>;
 }
 
 const viewLinkedObjectSupportedRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID] as const;
@@ -30,16 +29,28 @@ const isViewLinkedObjectSupportedRuleType = (
 };
 
 const getLocatorParamsMap: Record<
-  (typeof viewLinkedObjectSupportedRuleTypes)[number],
-  (rule: Rule) => { urlParams: SerializableRecord | undefined; buttonText: string }
+  ViewLinkedObjectSupportedRuleType,
+  (rule: Rule) => {
+    urlParams: SerializableRecord | undefined;
+    buttonText: string;
+    locatorId: string;
+  }
 > = {
   [SLO_BURN_RATE_RULE_TYPE_ID]: getSLOLinkData,
 };
 
-export function useAppLink({ rule, locator }: Props) {
-  const { urlParams, buttonText } = isViewLinkedObjectSupportedRuleType(rule?.ruleTypeId)
+export function useAppLink({ rule }: Props) {
+  const { services } = useKibana();
+  const {
+    share: {
+      url: { locators },
+    },
+  } = services;
+  const { urlParams, buttonText, locatorId } = isViewLinkedObjectSupportedRuleType(rule?.ruleTypeId)
     ? getLocatorParamsMap[rule.ruleTypeId](rule)
-    : { urlParams: undefined, buttonText: '' };
+    : { urlParams: undefined, buttonText: '', locatorId: '' };
+
+  const locator = locators.get(locatorId);
 
   if (urlParams && locator) {
     return {

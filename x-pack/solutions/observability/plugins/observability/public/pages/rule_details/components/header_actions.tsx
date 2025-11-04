@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { sloDetailsLocatorID } from '../../..';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { useKibana } from '../../../utils/kibana_react';
 import { useEnableRule } from '../../../hooks/use_enable_rule';
@@ -44,11 +43,6 @@ export function HeaderActions({
   onEditRule,
 }: HeaderActionsProps) {
   const { services } = useKibana();
-  const {
-    share: {
-      url: { locators },
-    },
-  } = services;
   const {
     triggersActionsUi: {
       getRuleSnoozeModal: RuleSnoozeModal,
@@ -128,9 +122,7 @@ export function HeaderActions({
     ruleId,
   });
 
-  const locator = locators.get(sloDetailsLocatorID);
-
-  const { linkUrl, buttonText } = useAppLink({ rule, locator });
+  const { linkUrl, buttonText } = useAppLink({ rule });
 
   if (!isRuleEditable || !rule) {
     return null;
@@ -239,7 +231,6 @@ export function HeaderActions({
             <EuiButtonEmpty
               color={'primary'}
               href={linkUrl}
-              className="ruleViewLinkedObjectButton"
               data-test-subj="ruleViewLinkedObjectButton"
               iconType={'eye'}
               aria-label={buttonText}
