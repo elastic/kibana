@@ -201,4 +201,111 @@ describe('AwsCredentialsFormAgentless', () => {
       }).not.toThrow();
     });
   });
+
+  describe('updatePolicyCloudConnectorSupport', () => {
+    beforeEach(() => {
+      mockUseCloudSetup.mockReturnValue(
+        createAwsCloudSetupMock({
+          shortName: 'Test',
+          isAwsCloudConnectorEnabled: true,
+        })
+      );
+    });
+
+    it('should only set supports_cloud_connector to false when NOT using cloud_connectors', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithSupport = {
+        ...mockPackagePolicy,
+        supports_cloud_connector: true,
+      };
+
+      const inputWithDirectAccessKeys = {
+        ...mockInput,
+        streams: [
+          {
+            ...mockInput.streams[0],
+            vars: {
+              'aws.account_type': { value: 'single-account' },
+              'aws.credentials.type': { value: 'direct_access_keys' },
+            },
+          },
+        ],
+      };
+
+      renderComponent({
+        newPolicy: mockPolicyWithSupport,
+        input: inputWithDirectAccessKeys,
+        updatePolicy: mockUpdatePolicyFn,
+      });
+
+      expect(mockUpdatePolicyFn).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: false,
+        }),
+      });
+    });
+
+    it('should NOT set supports_cloud_connector to true when using cloud_connectors (handled by CloudConnectorSetup)', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithoutSupport = {
+        ...mockPackagePolicy,
+        supports_cloud_connector: false, // Start false
+      };
+
+      const inputWithCloudConnectors = {
+        ...mockInput,
+        streams: [
+          {
+            ...mockInput.streams[0],
+            vars: {
+              'aws.account_type': { value: 'single-account' },
+              'aws.credentials.type': { value: 'cloud_connectors' },
+            },
+          },
+        ],
+      };
+
+      renderComponent({
+        newPolicy: mockPolicyWithoutSupport,
+        input: inputWithCloudConnectors,
+        updatePolicy: mockUpdatePolicyFn,
+      });
+
+      // Should not try to set to true - that's CloudConnectorSetup's job
+      // The component should not call updatePolicy for this case
+      const cloudConnectorCalls = mockUpdatePolicyFn.mock.calls.filter(
+        (call) => call[0]?.updatedPolicy?.supports_cloud_connector === true
+      );
+      expect(cloudConnectorCalls).toHaveLength(0);
+    });
+
+    it('should not call updatePolicy when supports_cloud_connector is already false with non-cloud_connectors credential', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithoutSupport = {
+        ...mockPackagePolicy,
+        supports_cloud_connector: false, // Already correct
+      };
+
+      const inputWithDirectAccessKeys = {
+        ...mockInput,
+        streams: [
+          {
+            ...mockInput.streams[0],
+            vars: {
+              'aws.account_type': { value: 'single-account' },
+              'aws.credentials.type': { value: 'direct_access_keys' },
+            },
+          },
+        ],
+      };
+
+      renderComponent({
+        newPolicy: mockPolicyWithoutSupport,
+        input: inputWithDirectAccessKeys,
+        updatePolicy: mockUpdatePolicyFn,
+      });
+
+      expect(mockUpdatePolicyFn).not.toHaveBeenCalled();
+    });
+  });
 });

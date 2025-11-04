@@ -74,6 +74,16 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     updatePolicyWithExistingCredentials,
   } = useCloudConnectorSetup(input, newPolicy, updatePolicy);
 
+  // Ensure root-level supports_cloud_connector is true when this component is rendered
+  if (!newPolicy.supports_cloud_connector) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: true,
+      },
+    });
+  }
+
   const tabs: CloudConnectorTab[] = [
     {
       id: TABS.NEW_CONNECTION,
