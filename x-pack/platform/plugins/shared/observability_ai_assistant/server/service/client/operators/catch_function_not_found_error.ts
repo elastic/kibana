@@ -7,6 +7,7 @@
 
 import type { OperatorFunction } from 'rxjs';
 import { catchError, filter, of, share, throwError } from 'rxjs';
+import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { isToolNotFoundError } from '@kbn/inference-common';
 import { MessageRole } from '../../../../common';
@@ -83,7 +84,7 @@ export function catchFunctionNotFoundError(
           // Instead of throwing error, return a message with the function name, to be handled by the function client
           const simpleMessage: MessageAddEvent = {
             type: StreamingChatResponseEventType.MessageAdd as const,
-            id: 'error_recovery_message',
+            id: v4(),
             message: {
               '@timestamp': new Date().toISOString(),
               message: {
