@@ -116,6 +116,7 @@ export function registerSetupRoute({
             soClient: core.savedObjects.client,
             spaceId:
               dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+            isServerless: dependencies.esCapabilities.serverless,
           });
 
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
