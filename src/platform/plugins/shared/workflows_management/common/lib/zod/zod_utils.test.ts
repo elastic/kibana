@@ -131,6 +131,13 @@ describe('getSchemaAtPath', () => {
     expect(getSchemaAtPath(z.object({ a: z.string() }), 'a[1]').schema).toBeNull();
     expect(getSchemaAtPath(z.object({ a: z.string() }), 'a[0].b').schema).toBeNull();
   });
+
+  it('should return any for optional any in nested object', () => {
+    const schema = z.object({ a: z.object({ b: z.any().optional() }) });
+    const result = getSchemaAtPath(schema, 'a.b');
+    expectZodSchemaEqual(result.schema as z.ZodType, z.any());
+    expect(result.scopedToPath).toBe('a.b');
+  });
 });
 
 describe('getZodTypeName', () => {

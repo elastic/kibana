@@ -73,12 +73,13 @@ steps:
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label).sort()).toEqual(
-      ['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'].sort()
+      ['consts', 'event', 'kibanaUrl', 'now', 'workflow', 'steps', 'execution', 'inputs'].sort()
     );
     expect(suggestions.map((s) => s.insertText).sort()).toEqual(
       [
         '"{{ event$0 }}"',
         '"{{ execution$0 }}"',
+        '"{{ kibanaUrl$0 }}"',
         '"{{ workflow$0 }}"',
         '"{{ inputs$0 }}"',
         '"{{ consts$0 }}"',
@@ -318,6 +319,27 @@ steps:
     type: console
     with: 
       message: "{{ consts.docs.a|<- }}"
+`.trim();
+
+    const suggestions = await getSuggestions(yamlContent);
+    expect(suggestions.map((s) => s.label)).toEqual([]);
+  });
+
+  it('should not give completions for valid path with a trailing dot if schema of current path is any', async () => {
+    const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: httpStep
+    type: http
+    with:
+      url: https://google.com
+  - name: step1
+    type: console
+    with:
+      message: "{{steps.httpStep.output.|<-}}"
 `.trim();
 
     const suggestions = await getSuggestions(yamlContent);

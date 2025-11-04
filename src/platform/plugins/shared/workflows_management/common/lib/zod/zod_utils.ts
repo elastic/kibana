@@ -110,7 +110,7 @@ export function getSchemaAtPath(
     }
 
     if (current instanceof z.ZodOptional) {
-      return current.unwrap();
+      return { schema: current.unwrap(), scopedToPath: segments.join('.') };
     }
 
     return { schema: current as z.ZodType, scopedToPath: segments.join('.') };
