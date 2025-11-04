@@ -62,8 +62,23 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
+    // Insert pick_test_groups before the final wait so functional jobs are enqueued sooner.
+    const basePipeline = getPipeline('.buildkite/pipelines/pull_request/base.yml', false);
+    const pickTestGroupsPipeline = getPipeline(
+      '.buildkite/pipelines/pull_request/pick_test_groups.yml'
+    );
+    const finalWaitMarker = '\n  - wait\n';
+    const finalWaitIndex = basePipeline.lastIndexOf(finalWaitMarker);
+    if (finalWaitIndex === -1) {
+      throw new Error('Unable to locate final wait step in PR base pipeline definition');
+    }
+
+    const baseBeforeFinalWait = basePipeline.slice(0, finalWaitIndex);
+    const baseAfterFinalWait = basePipeline.slice(finalWaitIndex);
+
+    pipeline.push(baseBeforeFinalWait);
+    pipeline.push(pickTestGroupsPipeline);
+    pipeline.push(baseAfterFinalWait);
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
