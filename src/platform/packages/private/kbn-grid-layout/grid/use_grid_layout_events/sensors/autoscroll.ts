@@ -22,28 +22,25 @@ const EDGE_SLOWDOWN_THRESHOLD = 500; // how many pixels from the bottom or top o
 
 let shouldAutoScroll = false;
 let latestMouseEvent: UserMouseEvent | null = null;
-let scrollContainer: ScrollContainer | null = null;
 
 export const stopAutoScroll = () => {
   shouldAutoScroll = false;
-  scrollContainer = null;
 };
 
 export const startAutoScroll = (container: ScrollContainer) => {
   if (shouldAutoScroll) return;
   shouldAutoScroll = true;
-  scrollContainer = container;
 
   let lastFrameTime: number = +(document?.timeline?.currentTime ?? 0);
 
   const autoScroll: FrameRequestCallback = (now: number) => {
-    if (!shouldAutoScroll || !scrollContainer) return;
+    if (!shouldAutoScroll) return;
 
     const deltaTime = (now - lastFrameTime) / 1000;
 
-    if (latestMouseEvent && scrollContainer) {
+    if (latestMouseEvent) {
       // Scroll faster depending on how far the user's drag is from the center of the screen.
-      const clientHeight = getClientHeight(scrollContainer);
+      const clientHeight = getClientHeight(container);
       const distanceFromCenterOfScreen = clientHeight / 2 - latestMouseEvent.clientY;
       const scrollDirection = distanceFromCenterOfScreen > 0 ? 'up' : 'down';
       const distanceFromCenterOfScreenPercentage = distanceFromCenterOfScreen / clientHeight;
@@ -57,7 +54,7 @@ export const startAutoScroll = (container: ScrollContainer) => {
       );
 
       // scroll slower as we approach the bottom or the top of the page.
-      const { scrollTop, scrollHeight } = getScrollDimensions(scrollContainer);
+      const { scrollTop, scrollHeight } = getScrollDimensions(container);
       const distanceToTop = scrollDirection === 'up' ? scrollTop : Number.MAX_VALUE;
       const distanceToBottom =
         scrollDirection === 'down' ? scrollHeight - clientHeight - scrollTop : Number.MAX_VALUE;
@@ -72,10 +69,7 @@ export const startAutoScroll = (container: ScrollContainer) => {
         PIXELS_PER_SECOND * (dragDistanceSpeedMultiplier * edgeSlowdownMultiplier) * deltaTime;
 
       if (pixelsToScroll > 0) {
-        scrollByContainer(
-          scrollContainer,
-          scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll
-        );
+        scrollByContainer(container, scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll);
       }
     }
 
