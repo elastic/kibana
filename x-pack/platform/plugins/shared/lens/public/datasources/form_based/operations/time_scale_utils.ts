@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { TimeScaleUnit } from '@kbn/lens-common';
 import { unitSuffixesLong } from '../../../../common/suffix_formatter';
-import type { TimeScaleUnit } from '../../../../common/expressions';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 

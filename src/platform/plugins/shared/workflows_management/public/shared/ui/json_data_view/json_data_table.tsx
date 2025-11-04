@@ -7,35 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { EuiDataGridColumnCellAction, EuiDataGridRefProps } from '@elastic/eui';
-import {
-  EuiDataGrid,
-  type UseEuiTheme,
-  type EuiDataGridProps,
-  useResizeObserver,
-  EuiEmptyPrompt,
-  copyToClipboard,
+import type {
+  EuiDataGridColumnCellAction,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { copyToClipboard, EuiDataGrid, EuiEmptyPrompt, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { TableFieldValue } from './table_field_value';
-import { kibanaFlatten } from '../../lib/kibana_flatten';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { JsonArray, JsonObject } from '@kbn/utility-types';
 import { FieldName } from './field_name';
-import { inferFieldType } from './infer_field_type';
 import { formatValue } from './format_value';
+import { inferFieldType } from './infer_field_type';
+import { TableFieldValue } from './table_field_value';
+import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
 import { useGetFormattedDateTime } from '../use_formatted_date';
 
 const MIN_NAME_COLUMN_WIDTH = 120;
 const MAX_NAME_COLUMN_WIDTH = 300;
 
+interface JSONDataTableRecord {
+  field: string;
+  value: string | number | boolean | null;
+  fieldType: string;
+  searchableValue: string;
+}
+
 export interface JSONDataTableProps {
   /** The JSON data object to display as a table */
-  data: Record<string, unknown>;
+  data: JsonArray | JsonObject;
   /** Optional title for the data view. Defaults to 'JSON Data' */
   title?: string;
   /** Optional search term to filter the data */
@@ -43,18 +48,6 @@ export interface JSONDataTableProps {
   /** Optional prefix for the field path actions, such as the copy the field path to the clipboard. */
   fieldPathActionsPrefix?: string;
 }
-
-interface JSONDataTableRecord extends DataTableRecord {
-  flattened: {
-    field: string;
-    value: string;
-    fieldType: string;
-  };
-}
-
-/**
- * JSONDataTable component that displays arbitrary JSON data using Kibana's unified data table.
- */
 export const JSONDataTable = React.memo<JSONDataTableProps>(
   ({ data: jsonObject, title = 'JSON Data', searchTerm, fieldPathActionsPrefix }) => {
     const styles = useMemoCss(componentStyles);
@@ -63,13 +56,13 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
     const getFormattedDateTime = useGetFormattedDateTime();
 
     // Create DataTableRecord from JSON - each field becomes a row
-    const dataTableRecords = useMemo((): JSONDataTableRecord[] => {
+    const records = useMemo((): JSONDataTableRecord[] => {
       // Flatten nested objects for better display
-      const flattened = kibanaFlatten(jsonObject);
+      const flattened = flattenKeyPaths(jsonObject);
 
       // Create a row for each field-value pair
-      return Object.keys(flattened).map((fieldName, index) => {
-        const value = flattened[fieldName];
+      return Object.keys(flattened).map((fieldPath) => {
+        const value = flattened[fieldPath];
         const fieldType = inferFieldType(value);
         const displayValue =
           fieldType === 'date'
@@ -77,49 +70,39 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
             : formatValue(value);
 
         return {
-          id: `field-${index}`,
-          raw: {
-            _id: `field-${index}`,
-            _index: title.toLowerCase().replace(/\s+/g, '_'),
-            _source: { field: fieldName, value: displayValue, fieldType },
-          },
-          flattened: {
-            field: fieldName,
-            value: displayValue,
-            fieldType, // Store the field type for the cell renderer
-          },
+          field: fieldPath, // Each field path is unique
+          value: displayValue,
+          fieldType, // Store the field type for the cell renderer
+          searchableValue: `${fieldPath.toLowerCase()} ${displayValue.toLowerCase()}`,
         };
       });
-    }, [jsonObject, getFormattedDateTime, title]);
+    }, [jsonObject, getFormattedDateTime]);
 
-    const filteredDataTableRecords = useMemo(() => {
+    const filteredRecords = useMemo(() => {
       if (!searchTerm) {
-        return dataTableRecords;
+        return records;
       }
-      return dataTableRecords.filter((record) => {
-        return (
-          record.flattened.field.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          record.flattened.value.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      });
-    }, [dataTableRecords, searchTerm]);
+      return records.filter(({ searchableValue }) =>
+        searchableValue.includes(searchTerm.toLowerCase())
+      );
+    }, [records, searchTerm]);
 
     const { width: containerWidth } = useResizeObserver(containerRef.current);
     const { curPageIndex, pageSize, changePageIndex, changePageSize } = usePager({
       initialPageSize: 20,
-      totalItems: filteredDataTableRecords.length,
+      totalItems: filteredRecords.length,
     });
 
-    const fieldCellActions: EuiDataGridColumnCellAction[] = useMemo(() => {
-      const cellActions = [];
+    const fieldCellActions = useMemo(() => {
+      const cellActions: EuiDataGridColumnCellAction[] = [];
       const closePopover = () => dataGridRef.current?.closeCellPopover();
       if (fieldPathActionsPrefix != null) {
         cellActions.push(
-          getCopyCellActionComponent(filteredDataTableRecords, fieldPathActionsPrefix, closePopover)
+          getCopyCellActionComponent(filteredRecords, fieldPathActionsPrefix, closePopover)
         );
       }
       return cellActions;
-    }, [filteredDataTableRecords, fieldPathActionsPrefix]);
+    }, [filteredRecords, fieldPathActionsPrefix]);
 
     // Grid columns configuration
     const gridColumns: EuiDataGridProps['columns'] = useMemo(
@@ -145,25 +128,23 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     // Cell renderer for the data grid
     const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(() => {
-      return ({ rowIndex, columnId }) => {
-        const row = filteredDataTableRecords[rowIndex];
-        if (!row) return null;
+      return function RenderCellValue({ rowIndex, columnId }) {
+        const record = filteredRecords[rowIndex];
+        if (!record) return null;
+        const { value, field, fieldType } = record;
 
         if (columnId === 'name') {
-          const fieldName = row.flattened.field as string;
-          const fieldType = row.flattened.fieldType as string;
-
-          return <FieldName fieldName={fieldName} fieldType={fieldType} highlight={searchTerm} />;
+          return <FieldName fieldName={field} fieldType={fieldType} highlight={searchTerm} />;
         }
 
         if (columnId === 'value') {
           return (
             <TableFieldValue
-              formattedValue={row.flattened.value as string}
-              field={row.flattened.field as string}
-              rawValue={row.flattened.value}
+              formattedValue={value?.toString() ?? ''}
+              field={field}
+              rawValue={value}
               isHighlighted={Boolean(
-                searchTerm && row.flattened.value.toLowerCase().includes(searchTerm.toLowerCase())
+                searchTerm && value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
               )}
             />
           );
@@ -171,7 +152,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
         return null;
       };
-    }, [filteredDataTableRecords, searchTerm]);
+    }, [filteredRecords, searchTerm]);
 
     const staticDataGridSettings: Pick<
       EuiDataGridProps,
@@ -203,7 +184,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
       [curPageIndex, pageSize, changePageSize, changePageIndex]
     );
 
-    if (filteredDataTableRecords.length === 0) {
+    if (filteredRecords.length === 0) {
       return (
         <EuiEmptyPrompt
           title={
@@ -225,7 +206,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
         css={styles.fieldsGrid}
         aria-label={title}
         columns={gridColumns}
-        rowCount={filteredDataTableRecords.length}
+        rowCount={filteredRecords.length}
         renderCellValue={renderCellValue}
         toolbarVisibility={false}
         pagination={pagination}
@@ -234,6 +215,8 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
     );
   }
 );
+JSONDataTable.displayName = 'JSONDataTable';
+
 const componentStyles = {
   fieldsGrid: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
@@ -257,12 +240,12 @@ const getCopyCellActionComponent = (
   fieldPathPrefix: string,
   closePopover: () => void
 ): EuiDataGridColumnCellAction =>
-  React.memo(({ rowIndex, Component }) => {
-    const row = records[rowIndex];
+  React.memo(function CopyCellAction({ rowIndex, Component }) {
+    const record = records[rowIndex];
     const copy = useCallback(() => {
-      copyToClipboard(`${fieldPathPrefix}.${row.flattened.field}`);
+      copyToClipboard(appendKeyPath(fieldPathPrefix, record.field));
       closePopover();
-    }, [row.flattened.field]);
+    }, [record.field]);
 
     return (
       <Component onClick={copy} iconType="copyClipboard" aria-label={CopyFieldPathText}>

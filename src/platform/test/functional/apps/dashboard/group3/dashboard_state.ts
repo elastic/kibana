@@ -105,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
 
-      await dashboard.gotoDashboardLandingPage();
       await dashboard.loadSavedDashboard(dashboardName);
 
       await enableNewChartLibraryDebug(true);

@@ -43,6 +43,11 @@ export type SynthTemplateHole =
   | string
 
   /**
+   * A boolean will be converted to a boolean literal (TRUE/FALSE) AST node.
+   */
+  | boolean
+
+  /**
    * A literal fragment can be used to insert raw strings into the query.
    * Use it for inserting keywords or other query elements that are "smaller"
    * than a full AST node.

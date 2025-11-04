@@ -61,10 +61,7 @@ export const requestEndpointFieldsSearch = async (
     throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
   }
 
-  if (
-    parsedRequest.indices[0] === eventsIndexPattern &&
-    context.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-  ) {
+  if (parsedRequest.indices[0] === eventsIndexPattern) {
     const { id: spaceId } = await context.getActiveSpace(deps.request);
     const integrationNamespaces = await context
       .getInternalFleetServices(spaceId)

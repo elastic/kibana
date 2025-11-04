@@ -26,6 +26,7 @@ import type {
   ScoutTestConfig,
 } from '../../fixtures/scope/worker';
 import {
+  pageContextFixture,
   scoutPageParallelFixture,
   browserAuthFixture,
   pageObjectsParallelFixture,
@@ -39,6 +40,7 @@ export const scoutParallelFixtures = mergeTests(
   scoutSpaceParallelFixture,
   apiServicesFixture,
   // test scope fixtures
+  pageContextFixture,
   browserAuthFixture,
   scoutPageParallelFixture,
   pageObjectsParallelFixture,

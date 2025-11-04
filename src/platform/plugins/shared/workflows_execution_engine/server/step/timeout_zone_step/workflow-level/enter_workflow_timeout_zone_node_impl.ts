@@ -8,30 +8,28 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
-import type { NodeImplementation, MonitorableNode } from '../../node_implementation';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-
 import { parseDuration } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { MonitorableNode, NodeImplementation } from '../../node_implementation';
 
 export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
-    private stepExecutionRuntime: StepExecutionRuntime
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
   ) {}
 
   public async run(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   public async monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
-    const stepExecution = this.stepExecutionRuntime.stepExecution!;
-    const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
+    const whenStepStartedTime = new Date(
+      this.wfExecutionRuntimeManager.getWorkflowExecution().startedAt
+    ).getTime();
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
@@ -43,6 +41,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
       let stack = monitoredStepExecutionRuntime.scopeStack;
 
       while (!stack.isEmpty()) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const currentScope = stack.getCurrentScope()!;
         stack = stack.exitScope();
         const scopeStepExecutionRuntime =

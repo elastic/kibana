@@ -6,14 +6,14 @@
  */
 
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type { z } from '@kbn/zod';
+import { validateKeysAllowed } from '@kbn/connector-schemas/common/utils';
 import type {
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
   ExternalServiceValidation,
 } from './types';
-
 import * as i18n from './translations';
-import { validateKeysAllowed } from '../validators';
 import { commonIncidentSchemaObjectProperties } from './schema';
 
 export const validateCommonConfig = (
@@ -123,9 +123,10 @@ export const validate: ExternalServiceValidation = {
   connector: validateCommonConnector,
 };
 
-export const validateOtherFieldsKeys = (key: string): string | undefined => {
-  return validateKeysAllowed({
+export const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
+  validateKeysAllowed({
     key,
+    ctx,
     disallowList: commonIncidentSchemaObjectProperties,
     fieldName: 'additional_fields',
   });

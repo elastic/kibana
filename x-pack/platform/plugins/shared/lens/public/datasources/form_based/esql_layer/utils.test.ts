@@ -17,7 +17,7 @@ import {
   getAllColumns,
   canColumnBeUsedBeInMetricDimension,
 } from './utils';
-import type { TextBasedLayerColumn } from './types';
+import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { type AggregateQuery } from '@kbn/es-query';
 
 jest.mock('./fetch_data_from_aggregate_query', () => ({

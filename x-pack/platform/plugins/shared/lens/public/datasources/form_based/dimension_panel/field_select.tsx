@@ -16,10 +16,10 @@ import type {
 } from '@kbn/visualization-ui-components';
 import { FieldPicker } from '@kbn/visualization-ui-components';
 import { getFieldIconType } from '@kbn/field-utils';
+import type { IndexPattern } from '@kbn/lens-common';
 import type { OperationType } from '../form_based';
 import type { OperationSupportMatrix } from './operation_support';
 import { fieldContainsData } from '../../../shared_components';
-import type { IndexPattern } from '../../../types';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;
