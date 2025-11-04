@@ -9,7 +9,11 @@ import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DEFAULT_ANOMALY_SCORE } from '@kbn/security-solution-plugin/common/constants';
 import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
-import { deleteAllRules } from '../../../../config/services/detections_response/rules';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service/rules';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+} from '@kbn/security-solution-detections-response-service/alerts';
 import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -21,10 +25,6 @@ import {
   riskEngineRouteHelpersFactory,
   waitForRiskScoresToBePresent,
 } from '../../utils';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-} from '../../../../config/services/detections_response/alerts';
 import {
   dataGeneratorFactory,
   forceStartDatafeeds,

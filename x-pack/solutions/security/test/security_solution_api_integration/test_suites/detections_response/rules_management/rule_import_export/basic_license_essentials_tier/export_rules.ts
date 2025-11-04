@@ -8,7 +8,7 @@
 import expect from 'expect';
 
 import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { binaryToString, getCustomQueryRuleParams, parseNdJson } from '../../../utils';
 

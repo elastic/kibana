@@ -13,7 +13,7 @@ import {
   CoverageOverviewRuleSource,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
+import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,

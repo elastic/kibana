@@ -27,7 +27,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   createRule,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import {
   getPreviewAlerts,
   previewRule,

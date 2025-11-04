@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { dataGeneratorFactory } from '../../../../detections_response/utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
+import { dataGeneratorFactory } from '../../../../detections_response/utils';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,

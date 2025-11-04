@@ -30,7 +30,7 @@ import {
   waitForRuleSuccess,
   waitForAlertsToBePresent,
   getRuleForAlertTesting,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import {
   finalizeAlertsMigration,
   getEqlRuleForAlertTesting,

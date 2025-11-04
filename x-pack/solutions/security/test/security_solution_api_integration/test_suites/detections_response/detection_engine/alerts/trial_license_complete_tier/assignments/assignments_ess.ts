@@ -17,7 +17,7 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../config/services/common';
 import { setAlertAssignees } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';

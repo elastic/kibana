@@ -18,7 +18,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import { createRuleWithExceptionEntries } from '../../../../utils';
 import {
   createListsIndex,

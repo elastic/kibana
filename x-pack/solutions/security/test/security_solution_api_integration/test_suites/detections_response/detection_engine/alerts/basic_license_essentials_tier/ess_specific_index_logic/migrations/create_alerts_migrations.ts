@@ -19,7 +19,7 @@ import type { Signal } from '@kbn/security-solution-plugin/server/lib/detection_
 import {
   createAlertsIndex,
   deleteAllAlerts,
-} from '../../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import {
   deleteMigrations,
   getIndexNameFromLoad,

@@ -12,7 +12,7 @@ import type { CreateRuleProps } from '@kbn/security-solution-test-api-clients/su
 import {
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import { dataGeneratorFactory } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { moveIndexToFrozenDataTier } from '../../../../utils/frozen_data_tier';

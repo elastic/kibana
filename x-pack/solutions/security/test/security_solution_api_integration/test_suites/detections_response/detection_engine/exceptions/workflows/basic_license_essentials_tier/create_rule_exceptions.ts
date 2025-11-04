@@ -19,7 +19,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import { fetchRule, getSimpleRule, createExceptionList } from '../../../../utils';
 import {
   deleteAllExceptions,

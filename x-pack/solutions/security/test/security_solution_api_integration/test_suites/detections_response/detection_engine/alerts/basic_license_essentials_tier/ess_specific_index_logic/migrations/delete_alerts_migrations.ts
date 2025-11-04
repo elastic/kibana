@@ -17,7 +17,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   waitFor,
-} from '../../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import { deleteMigrationsIfExistent, getIndexNameFromLoad } from '../../../../../utils';
 import { createUserAndRole } from '../../../../../../../config/services/common';
 

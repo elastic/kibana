@@ -10,7 +10,7 @@ import {
   deleteAllRules,
   createRule,
   deleteRule,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,

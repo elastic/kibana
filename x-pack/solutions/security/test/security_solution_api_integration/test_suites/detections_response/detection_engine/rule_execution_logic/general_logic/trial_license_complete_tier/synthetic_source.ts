@@ -13,7 +13,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import { getPreviewAlerts, previewRule, dataGeneratorFactory } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 

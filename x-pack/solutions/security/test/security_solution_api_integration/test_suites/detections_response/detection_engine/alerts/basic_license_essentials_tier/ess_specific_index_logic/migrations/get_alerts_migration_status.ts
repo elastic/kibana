@@ -12,7 +12,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   createAlertsIndex,
   deleteAllAlerts,
-} from '../../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import { getIndexNameFromLoad } from '../../../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../../config/services/common';
 

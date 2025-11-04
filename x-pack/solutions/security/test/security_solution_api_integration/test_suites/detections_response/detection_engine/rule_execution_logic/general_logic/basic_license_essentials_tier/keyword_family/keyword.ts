@@ -23,7 +23,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service';
 import { getEqlRuleForAlertTesting, getThresholdRuleForAlertTesting } from '../../../../../utils';
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
