@@ -47,6 +47,8 @@ export type ChatCompletionToolNotFoundError = InferenceTaskError<
   {
     /** The name of the tool that got called */
     name: string;
+    /** (unparsed) arguments the tool was called with*/
+    arguments: string;
   }
 >;
 

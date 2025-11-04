@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,34 +10,42 @@ import {
   isToolValidationError,
   isContextLengthExceededError,
 } from '@kbn/inference-common/src/chat_complete/errors';
+import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents';
-import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
+import { createAgentExecutionError, isAgentExecutionError } from '@kbn/onechat-common/base/errors';
 
-const recoverableErrorCodes = [ErrCodes.toolNotFound, ErrCodes.toolValidationError];
+const recoverableErrorCodes = [
+  ErrCodes.toolNotFound,
+  ErrCodes.toolValidationError,
+  ErrCodes.emptyResponse,
+];
 
 /**
  * Converts an error which occurred during the execution of the agent to our error format.
  * Also categories the error to identifiable error codes.
- * @param error
  */
-export const categorizeError = (error: Error): ErrCodes => {
+export const convertError = (error: Error): OnechatAgentExecutionError => {
   if (isToolNotFoundError(error)) {
-    return ErrCodes.toolNotFound;
+    return createAgentExecutionError(error.message, ErrCodes.toolNotFound, {
+      toolName: error.meta.name,
+      toolArgs: error.meta.arguments,
+    });
   } else if (isToolValidationError(error)) {
-    return ErrCodes.toolValidationError;
+    return createAgentExecutionError(error.message, ErrCodes.toolValidationError, {
+      toolName: error.meta.name ?? 'unknown',
+      toolArgs: error.meta.arguments ?? '',
+      validationError: error.meta.errorsText,
+    });
   } else if (isContextLengthExceededError(error)) {
-    return ErrCodes.contextLengthExceeded;
+    return createAgentExecutionError(error.message, ErrCodes.contextLengthExceeded, {});
   } else {
-    return ErrCodes.unknownError;
+    return createAgentExecutionError(error.message, ErrCodes.unknownError, {});
   }
 };
 
-export const isRecoverableErrorCode = (code: ErrCodes): boolean => {
-  return recoverableErrorCodes.includes(code);
-};
-
-export const createExecutionError = (code: ErrCodes, message: string) => {
-  return createAgentExecutionError(message, {
-    code,
-  });
+export const isRecoverableError = (error: OnechatAgentExecutionError): boolean => {
+  if (!isAgentExecutionError(error)) {
+    return false;
+  }
+  return recoverableErrorCodes.includes(error.meta.errCode);
 };

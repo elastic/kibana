@@ -43,12 +43,19 @@ export function createTokenLimitReachedError(
   );
 }
 
-export function createToolNotFoundError(name: string): ChatCompletionToolNotFoundError {
+export function createToolNotFoundError({
+  name,
+  args,
+}: {
+  name: string;
+  args: string;
+}): ChatCompletionToolNotFoundError {
   return new InferenceTaskError(
     ChatCompletionErrorCode.ToolNotFoundError,
     `Tool "${name}" called but was not available`,
     {
       name,
+      arguments: args,
     }
   );
 }

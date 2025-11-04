@@ -8,6 +8,8 @@
 import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { extractTextContent, extractToolCalls } from '@kbn/onechat-genai-utils/langchain';
+import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
+import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
 import type {
   ToolCallAction,
   HandoverAction,
@@ -15,7 +17,13 @@ import type {
   ExecuteToolAction,
   AnswerAction,
 } from './actions';
-import { toolCallAction, handoverAction, executeToolAction, answerAction } from './actions';
+import {
+  toolCallAction,
+  handoverAction,
+  executeToolAction,
+  answerAction,
+  errorAction,
+} from './actions';
 
 export const processResearchResponse = (
   message: AIMessageChunk
@@ -23,7 +31,18 @@ export const processResearchResponse = (
   if (message.tool_calls?.length) {
     return toolCallAction(extractToolCalls(message));
   } else {
-    return handoverAction(extractTextContent(message));
+    const textContent = extractTextContent(message);
+    if (textContent) {
+      return handoverAction(textContent);
+    } else {
+      return errorAction(
+        createAgentExecutionError(
+          'agent returned an empty response',
+          AgentExecutionErrorCode.emptyResponse,
+          {}
+        )
+      );
+    }
   }
 };
 
@@ -44,9 +63,16 @@ export const processToolNodeResponse = (toolNodeResult: BaseMessage[]): ExecuteT
 };
 
 export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | AgentErrorAction => {
-  if (message.tool_calls?.length) {
-    // TODO: error handling
-  } else {
+  const textContent = extractTextContent(message);
+  if (textContent) {
     return answerAction(extractTextContent(message));
+  } else {
+    return errorAction(
+      createAgentExecutionError(
+        'agent returned an empty response',
+        AgentExecutionErrorCode.emptyResponse,
+        {}
+      )
+    );
   }
 };

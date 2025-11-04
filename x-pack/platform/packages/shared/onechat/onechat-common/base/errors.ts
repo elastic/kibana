@@ -6,7 +6,7 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import type { AgentExecutionErrorCode } from '../agents/execution_errors';
+import type { AgentExecutionErrorCode, ExecutionErrorMetaOf } from '../agents/execution_errors';
 
 /**
  * Code to identify onechat errors
@@ -191,9 +191,11 @@ export const createRequestAbortedError = (
 /**
  * Represents an error related to agent execution
  */
-export type OnechatAgentExecutionError = OnechatError<
+export type OnechatAgentExecutionError<
+  ErrCode extends AgentExecutionErrorCode = AgentExecutionErrorCode
+> = OnechatError<
   OnechatErrorCode.agentExecutionError,
-  { code: AgentExecutionErrorCode }
+  { errCode: ErrCode } & ExecutionErrorMetaOf<ErrCode>
 >;
 
 /**
@@ -203,11 +205,15 @@ export const isAgentExecutionError = (err: unknown): err is OnechatAgentExecutio
   return isOnechatError(err) && err.code === OnechatErrorCode.agentExecutionError;
 };
 
-export const createAgentExecutionError = (
+export const createAgentExecutionError = <ErrCode extends AgentExecutionErrorCode>(
   message: string,
-  meta: { code: AgentExecutionErrorCode }
-): OnechatAgentExecutionError => {
-  return new OnechatError(OnechatErrorCode.agentExecutionError, message, meta ?? {});
+  code: ErrCode,
+  meta: ExecutionErrorMetaOf<ErrCode>
+): OnechatAgentExecutionError<ErrCode> => {
+  return new OnechatError(OnechatErrorCode.agentExecutionError, message, {
+    ...(meta ?? {}),
+    errCode: code,
+  });
 };
 
 /**

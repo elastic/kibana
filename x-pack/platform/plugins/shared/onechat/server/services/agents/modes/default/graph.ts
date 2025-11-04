@@ -13,10 +13,11 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents';
+import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
 import type { ResolvedConfiguration } from '../types';
-import { categorizeError, isRecoverableErrorCode, createExecutionError } from '../utils/errors';
+import { convertError, isRecoverableError } from '../utils/errors';
 import { getActPrompt, getAnswerPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
@@ -32,7 +33,8 @@ import {
   isHandoverAction,
   isAgentErrorAction,
   isAnswerAction,
-  createAgentErrorAction,
+  errorAction,
+  handoverAction,
 } from './actions';
 
 const MAX_ERROR_COUNT = 3;
@@ -80,14 +82,14 @@ export const createAgentGraph = ({
         errorCount: 0,
       };
     } catch (error) {
-      const errorCode = categorizeError(error);
-      if (isRecoverableErrorCode(errorCode)) {
+      const executionError = convertError(error);
+      if (isRecoverableError(executionError)) {
         return {
-          mainActions: [createAgentErrorAction(errorCode, error.message)],
+          mainActions: [errorAction(executionError)],
           errorCount: state.errorCount + 1,
         };
       } else {
-        throw createExecutionError(errorCode, error.message);
+        throw executionError;
       }
     }
   };
@@ -100,7 +102,7 @@ export const createAgentGraph = ({
         return steps.researchAgent;
       } else {
         // max error count reached, stop execution by throwing
-        throw createExecutionError(lastAction.err_code, lastAction.err_message);
+        throw lastAction.error;
       }
     } else if (isToolCallAction(lastAction)) {
       const maxCycleReached = state.currentCycle > state.cycleLimit;
@@ -133,10 +135,16 @@ export const createAgentGraph = ({
   };
 
   const prepareToAnswer = async (state: StateType) => {
+    const lastAction = state.mainActions[state.mainActions.length - 1];
     const maxCycleReached = state.currentCycle > state.cycleLimit;
-    return {
-      maxCycleReached,
-    };
+
+    if (maxCycleReached && !isHandoverAction(lastAction)) {
+      return {
+        actions: [handoverAction('', true)],
+      };
+    } else {
+      return {};
+    }
   };
 
   const answeringModel = chatModel.withConfig({
@@ -150,7 +158,6 @@ export const createAgentGraph = ({
         getAnswerPrompt({
           customInstructions: configuration.answer.instructions,
           capabilities,
-          searchInterrupted: state.maxCycleReached,
           initialMessages: state.initialMessages,
           actions: state.mainActions,
           answerActions: state.answerActions,
@@ -164,14 +171,14 @@ export const createAgentGraph = ({
         errorCount: 0,
       };
     } catch (error) {
-      const errorCode = categorizeError(error);
-      if (isRecoverableErrorCode(errorCode)) {
+      const executionError = convertError(error);
+      if (isRecoverableError(executionError)) {
         return {
-          answerActions: [createAgentErrorAction(errorCode, error.message)],
+          answerActions: [errorAction(executionError)],
           errorCount: state.errorCount + 1,
         };
       } else {
-        throw createExecutionError(errorCode, error.message);
+        throw executionError;
       }
     }
   };
@@ -181,10 +188,10 @@ export const createAgentGraph = ({
 
     if (isAgentErrorAction(lastAction)) {
       if (state.errorCount < MAX_ERROR_COUNT) {
-        return steps.researchAgent;
+        return steps.answerAgent;
       } else {
         // max error count reached, stop execution by throwing
-        throw createExecutionError(lastAction.err_code, lastAction.err_message);
+        throw lastAction.error;
       }
     } else if (isAnswerAction(lastAction)) {
       return steps.finalize;
@@ -234,5 +241,5 @@ export const createAgentGraph = ({
 };
 
 const invalidState = (message: string) => {
-  return createExecutionError(ErrCodes.invalidState, message);
+  return createAgentExecutionError(message, ErrCodes.invalidState, {});
 };

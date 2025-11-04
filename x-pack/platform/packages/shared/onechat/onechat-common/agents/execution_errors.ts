@@ -11,4 +11,33 @@ export enum AgentExecutionErrorCode {
   toolValidationError = 'tool_validation_error',
   unknownError = 'unknown_error',
   invalidState = 'invalid_state',
+  emptyResponse = 'empty_response',
 }
+
+export interface ToolNotFoundErrorMeta {
+  /** name of the tool which was called */
+  toolName: string;
+  /** arguments the tool was called with */
+  toolArgs: string | Record<string, any>;
+}
+
+export interface TooValidationErrorMeta {
+  /** name of the tool which was called */
+  toolName: string;
+  /** arguments the tool was called with */
+  toolArgs: string | Record<string, any>;
+  /** schema validation error, if any */
+  validationError?: string;
+}
+
+interface ExecutionErrorMetaMap {
+  [AgentExecutionErrorCode.toolNotFound]: ToolNotFoundErrorMeta;
+  [AgentExecutionErrorCode.toolValidationError]: TooValidationErrorMeta;
+  [AgentExecutionErrorCode.contextLengthExceeded]: {};
+  [AgentExecutionErrorCode.unknownError]: {};
+  [AgentExecutionErrorCode.invalidState]: {};
+  [AgentExecutionErrorCode.emptyResponse]: {};
+}
+
+export type ExecutionErrorMetaOf<ErrCode extends AgentExecutionErrorCode> =
+  ExecutionErrorMetaMap[ErrCode];

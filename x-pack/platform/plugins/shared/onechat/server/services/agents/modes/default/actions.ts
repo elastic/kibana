@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
+import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type { ToolCall, ToolCallResult } from '@kbn/onechat-genai-utils/langchain';
 
 export enum AgentActionType {
@@ -20,8 +20,7 @@ export enum AgentActionType {
 
 export interface AgentErrorAction {
   type: AgentActionType.Error;
-  err_code: AgentExecutionErrorCode;
-  err_message: string;
+  error: OnechatAgentExecutionError;
 }
 
 export interface ToolCallAction {
@@ -37,7 +36,10 @@ export interface ExecuteToolAction {
 
 export interface HandoverAction {
   type: AgentActionType.HandOver;
+  /** message of the agent for the handover */
   message: string;
+  /** was the handover forced (budget limit) or not */
+  forceful: boolean;
 }
 
 export type ResearchAgentAction =
@@ -83,14 +85,10 @@ export function isAnswerAction(action: AgentAction): action is AnswerAction {
 
 // creation helpers
 
-export function createAgentErrorAction(
-  code: AgentExecutionErrorCode,
-  message: string
-): AgentErrorAction {
+export function errorAction(error: OnechatAgentExecutionError): AgentErrorAction {
   return {
     type: AgentActionType.Error,
-    err_code: code,
-    err_message: message,
+    error,
   };
 }
 
@@ -109,10 +107,11 @@ export function executeToolAction(toolResults: ToolCallResult[]): ExecuteToolAct
   };
 }
 
-export function handoverAction(message: string): HandoverAction {
+export function handoverAction(message: string, forceful: boolean = false): HandoverAction {
   return {
     type: AgentActionType.HandOver,
     message,
+    forceful,
   };
 }
 

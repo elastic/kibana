@@ -30,11 +30,12 @@ export const StateAnnotation = Annotation.Root({
     reducer: (a, b) => b,
     default: () => 0,
   }),
-  maxCycleReached: Annotation<boolean>(),
+  // list of actions/steps performed by the main agent
   mainActions: Annotation<ResearchAgentAction[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
   }),
+  // list of actions/steps performed by the answer agent
   answerActions: Annotation<AnswerAgentAction[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
