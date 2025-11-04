@@ -25,6 +25,11 @@ import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createObservabilityGetDataSourcesTool,
 } from './tools/get_data_sources';
+import { createObservabilityAlertsTool, OBSERVABILITY_ALERTS_TOOL_ID } from './tools/alerts/alerts';
+import {
+  createObservabilityGetAlertsDatasourceFieldsTool,
+  OBSERVABILITY_GET_ALERTS_DATASOURCE_FIELDS_TOOL_ID,
+} from './tools/alerts/get_alerts_datasource_fields';
 import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 
 export const OBSERVABILITY_AGENT_ID = 'platform.core.observability';
@@ -45,6 +50,8 @@ const OBSERVABILITY_AGENT_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
+  OBSERVABILITY_GET_ALERTS_DATASOURCE_FIELDS_TOOL_ID,
+  OBSERVABILITY_ALERTS_TOOL_ID,
 ];
 
 export async function registerObservabilityAgent({
@@ -81,10 +88,23 @@ export async function registerObservabilityAgent({
     logger,
   });
 
+  const observabilityGetAlertsDatasetInfoTool =
+    await createObservabilityGetAlertsDatasourceFieldsTool({
+      core,
+      logger,
+    });
+
+  const observabilityAlertsTool = await createObservabilityAlertsTool({
+    core,
+    logger,
+  });
+
   // register tools
   plugins.onechat.tools.register(observabilityGetServicesTool);
   plugins.onechat.tools.register(observabilityGetDataSourcesTool);
   plugins.onechat.tools.register(observabilityRecallKnowledgeBaseTool);
+  plugins.onechat.tools.register(observabilityGetAlertsDatasetInfoTool);
+  plugins.onechat.tools.register(observabilityAlertsTool);
 
   // register agent
   plugins.onechat.agents.register({
@@ -93,7 +113,13 @@ export async function registerObservabilityAgent({
     description: OBSERVABILITY_AGENT_DESCRIPTION,
     avatar_icon: 'logoObservability',
     configuration: {
-      instructions: 'You are a observability specialist agent',
+      // TODO: explore whether a workflow can be used to enforce the tool execution order instead of relying on the instructions
+      instructions:
+        'You are an observability specialist agent.\n' +
+        '\n' +
+        'Tool usage rules (critical):\n' +
+        '1) Alerts workflow: ALWAYS call observability.get_alerts_datasource_fields FIRST to discover relevant fields, then call observability.alerts AFTER it returns. Never call observability.alerts before observability.get_alerts_datasource_fields in a conversation unless the fields have already been retrieved in this conversation.\n' +
+        "2) If the user didn't specify a time range for alerts, assume start=now-15m and end=now, and inform the user in the response.\n",
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
