@@ -27,7 +27,7 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
-import { registerFeatures } from './features';
+import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
@@ -124,7 +124,10 @@ export class WorkflowsPlugin
         'workflow:scheduled': {
           title: 'Scheduled Workflow Execution',
           description: 'Executes workflows on a scheduled basis',
-          timeout: '5m',
+          // Set high timeout for long-running workflows.
+          // This is high value to allow long-running workflows.
+          // The workflow timeout logic defined in workflow execution engine logic is the primary control.
+          timeout: '365d',
           maxAttempts: 3,
           createTaskRunner: ({ taskInstance, fakeRequest }) => {
             // Capture the plugin instance in a closure
@@ -154,9 +157,8 @@ export class WorkflowsPlugin
       });
     }
 
-    // Register saved object types
-
-    registerFeatures(plugins);
+    // Register the workflows management feature and its privileges
+    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter();

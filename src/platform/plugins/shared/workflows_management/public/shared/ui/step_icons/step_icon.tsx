@@ -17,10 +17,12 @@ import { getExecutionStatusColors } from '../status_badge';
 
 export function StepIcon({
   stepType,
-  executionStatus,
+  executionStatus = null,
+  onClick,
 }: {
   stepType: string;
-  executionStatus: ExecutionStatus | null;
+  executionStatus?: ExecutionStatus | null;
+  onClick?: React.MouseEventHandler;
 }) {
   const { euiTheme } = useEuiTheme();
   if (executionStatus === ExecutionStatus.RUNNING) {
@@ -41,6 +43,7 @@ export function StepIcon({
         size="s"
         color={getExecutionStatusColors(euiTheme, executionStatus).tokenColor}
         fill="light"
+        onClick={onClick}
       />
     );
   }
@@ -59,6 +62,7 @@ export function StepIcon({
           }
         `
       }
+      onClick={onClick}
     />
   );
 }
