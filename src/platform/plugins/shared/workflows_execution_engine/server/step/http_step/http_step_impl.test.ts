@@ -125,6 +125,7 @@ describe('HttpStepImpl', () => {
         body: {
           id: '{{userId}}',
         },
+        fetcher: undefined,
       });
     });
 
@@ -470,6 +471,128 @@ describe('HttpStepImpl', () => {
         expect.objectContaining({
           url: 'https://any-host.com/test',
           method: 'GET',
+        })
+      );
+    });
+  });
+
+  describe('Fetcher configuration', () => {
+    beforeEach(() => {
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue({
+        url: 'https://api.example.com/users',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { name: 'John Doe' },
+      });
+    });
+
+    it('should apply skip_ssl_verification option', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { name: 'John Doe' },
+        fetcher: {
+          skip_ssl_verification: true,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          httpsAgent: expect.objectContaining({
+            options: expect.objectContaining({
+              rejectUnauthorized: false,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should apply keep_alive option', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          keep_alive: true,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          httpsAgent: expect.objectContaining({
+            options: expect.objectContaining({
+              keepAlive: true,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should apply max_redirects option', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          max_redirects: 5,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxRedirects: 5,
+        })
+      );
+    });
+
+    it('should disable redirects when follow_redirects is false', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          follow_redirects: false,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxRedirects: 0,
+        })
+      );
+    });
+
+    it('should work without fetcher options', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          httpsAgent: expect.anything(),
         })
       );
     });
