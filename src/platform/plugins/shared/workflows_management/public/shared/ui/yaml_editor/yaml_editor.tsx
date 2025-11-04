@@ -22,7 +22,7 @@ const defaultMonacoYamlOptions: MonacoYamlOptions = {
   validate: true, // Keep validation
 };
 
-const monacoYamlSingletonObj: { singleton: MonacoYaml | null } = { singleton: null };
+export const monacoYamlSingletonObj: { singleton: MonacoYaml | null } = { singleton: null };
 
 export interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
   onChange: (value: string) => void;

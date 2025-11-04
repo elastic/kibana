@@ -9,23 +9,39 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { YamlEditor } from '.'; // Import from index.ts which exports from yaml_editor
+import { monacoYamlSingletonObj, YamlEditor } from './yaml_editor';
 
 // Mock the CodeEditor component
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ languageId, value, onChange, ...props }: any) => {
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      if (onChange) {
-        onChange(e.target.value);
-      }
-    };
-    return (
-      <div data-testid="code-editor">
-        <textarea data-testid="code-editor-textarea" value={value || ''} onChange={handleChange} />
-      </div>
-    );
-  },
-}));
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
+  return {
+    ...original,
+    CodeEditor: (props: any) => {
+      // Use React from the outer scope
+      const { useEffect } = jest.requireActual('react');
+      const { editorWillUnmount, value, onChange } = props;
+
+      // Store the editorWillUnmount callback so we can call it in tests
+      useEffect(() => {
+        return () => {
+          if (editorWillUnmount) {
+            editorWillUnmount();
+          }
+        };
+      }, [editorWillUnmount]);
+
+      return (
+        <div data-testid="code-editor">
+          <textarea
+            data-testid="code-editor-textarea"
+            value={value || ''}
+            onChange={(e) => onChange && onChange(e.target.value)}
+          />
+        </div>
+      );
+    },
+  };
+});
 
 // Mock lodash debounce to execute immediately in tests
 jest.mock('lodash', () => ({
@@ -33,7 +49,7 @@ jest.mock('lodash', () => ({
   debounce: (fn: any) => fn,
 }));
 
-// Create a mock for monacoYaml with a dispose spy
+// Create a mock for monacoYaml
 const mockDispose = jest.fn();
 const mockUpdate = jest.fn();
 
@@ -52,10 +68,12 @@ describe('YamlEditor', () => {
     jest.clearAllMocks();
     mockDispose.mockClear();
     mockUpdate.mockClear();
+    // Reset singleton
+    monacoYamlSingletonObj.singleton = null;
   });
 
-  describe('monacoYaml disposal', () => {
-    it('should dispose monacoYaml instance when component unmounts', async () => {
+  describe('monacoYaml singleton behavior', () => {
+    it('should create singleton on mount and clear schemas on unmount', async () => {
       const onChange = jest.fn();
       const schemas = [
         {
@@ -84,17 +102,28 @@ describe('YamlEditor', () => {
         })
       );
 
-      // Verify dispose hasn't been called yet
-      expect(mockDispose).not.toHaveBeenCalled();
+      // Verify singleton was created
+      expect(monacoYamlSingletonObj.singleton).not.toBeNull();
 
       // Unmount the component
       unmount();
 
-      // Verify that dispose was called on unmount
-      expect(mockDispose).toHaveBeenCalledTimes(1);
+      // Verify that update was called to clear schemas
+      expect(mockUpdate).toHaveBeenCalledWith({
+        completion: true,
+        hover: false,
+        validate: true,
+        schemas: [],
+      });
+
+      // Verify singleton was cleared
+      expect(monacoYamlSingletonObj.singleton).toBeNull();
+
+      // Verify dispose was NOT called (singleton doesn't dispose on unmount)
+      expect(mockDispose).not.toHaveBeenCalled();
     });
 
-    it('should not call dispose if monacoYaml was never initialized', () => {
+    it('should not update schemas if singleton was never initialized', () => {
       const onChange = jest.fn();
 
       // Mock configureMonacoYamlSchema to never resolve
@@ -109,8 +138,9 @@ describe('YamlEditor', () => {
       // Unmount the component immediately
       unmount();
 
-      // Verify that dispose was not called since monacoYaml was never initialized
-      expect(mockDispose).not.toHaveBeenCalled();
+      // Verify that update was not called since singleton was never initialized
+      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(monacoYamlSingletonObj.singleton).toBeNull();
 
       // Restore the mock
       (monaco.configureMonacoYamlSchema as jest.Mock).mockImplementation(() =>
@@ -121,7 +151,7 @@ describe('YamlEditor', () => {
       );
     });
 
-    it('should dispose and recreate monacoYaml when remounting', async () => {
+    it('should recreate singleton after unmount and remount', async () => {
       const onChange = jest.fn();
       const schemas = [
         {
@@ -138,33 +168,133 @@ describe('YamlEditor', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      // Unmount
+      // Verify monacoYaml was configured
+      const monaco = jest.requireMock('@kbn/monaco');
+      expect(monaco.configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
+      const firstSingleton = monacoYamlSingletonObj.singleton;
+      expect(firstSingleton).not.toBeNull();
+
+      // Unmount - this clears the singleton
       unmount();
 
-      expect(mockDispose).toHaveBeenCalledTimes(1);
-      mockDispose.mockClear();
+      // Verify singleton was cleared
+      expect(monacoYamlSingletonObj.singleton).toBeNull();
+      expect(mockUpdate).toHaveBeenCalledWith({
+        completion: true,
+        hover: false,
+        validate: true,
+        schemas: [],
+      });
 
-      // Remount
+      // Clear mocks
+      mockUpdate.mockClear();
+      monaco.configureMonacoYamlSchema.mockClear();
+
+      // Remount - should create new singleton since previous was cleared
       const { unmount: unmount2 } = render(
         <YamlEditor value="test: value2" onChange={onChange} schemas={schemas} />
       );
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      // Verify monacoYaml was configured again
-      const monaco = jest.requireMock('@kbn/monaco');
-      expect(monaco.configureMonacoYamlSchema).toHaveBeenCalledTimes(2);
+      // Verify new singleton was created
+      expect(monaco.configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
+      expect(monacoYamlSingletonObj.singleton).not.toBeNull();
+      expect(monacoYamlSingletonObj.singleton).not.toBe(firstSingleton); // Different instance
 
       // Unmount again
       unmount2();
 
-      // Verify dispose was called again
-      expect(mockDispose).toHaveBeenCalledTimes(1);
+      // Verify singleton cleared again
+      expect(monacoYamlSingletonObj.singleton).toBeNull();
+    });
+
+    it('should clear singleton when any component unmounts', async () => {
+      const onChange1 = jest.fn();
+      const onChange2 = jest.fn();
+      const schemas = [
+        {
+          uri: 'http://example.com/schema.json',
+          schema: {},
+          fileMatch: ['*.yaml', '*.yml'],
+        },
+      ];
+
+      // Mount first component
+      const { unmount: unmount1 } = render(
+        <YamlEditor value="value1" onChange={onChange1} schemas={schemas} />
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const firstSingleton = monacoYamlSingletonObj.singleton;
+      expect(firstSingleton).not.toBeNull();
+
+      // Mount second component while first is still mounted
+      const { unmount: unmount2 } = render(
+        <YamlEditor value="value2" onChange={onChange2} schemas={schemas} />
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Both should use same singleton
+      expect(monacoYamlSingletonObj.singleton).toBe(firstSingleton);
+      expect(jest.requireMock('@kbn/monaco').configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
+
+      // Unmount first component - singleton is cleared immediately
+      unmount1();
+      expect(monacoYamlSingletonObj.singleton).toBeNull();
+
+      // The second component still exists but singleton was already cleared
+      // This is the current behavior - first unmount clears the singleton
+
+      // Unmount second component
+      unmount2();
+      // Singleton remains null
+      expect(monacoYamlSingletonObj.singleton).toBeNull();
+    });
+
+    it('should handle custom editorWillUnmount callback', async () => {
+      const onChange = jest.fn();
+      const customUnmount = jest.fn();
+      const schemas = [
+        {
+          uri: 'http://example.com/schema.json',
+          schema: {},
+          fileMatch: ['*.yaml', '*.yml'],
+        },
+      ];
+
+      // Render with custom unmount callback
+      const { unmount } = render(
+        <YamlEditor
+          value="test: value"
+          onChange={onChange}
+          schemas={schemas}
+          editorWillUnmount={customUnmount}
+        />
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Unmount
+      unmount();
+
+      // Verify custom callback was called
+      expect(customUnmount).toHaveBeenCalled();
+
+      // And schemas were cleared
+      expect(mockUpdate).toHaveBeenCalledWith({
+        completion: true,
+        hover: false,
+        validate: true,
+        schemas: [],
+      });
     });
   });
 
   describe('schema updates', () => {
-    it('should update monacoYaml when schemas change', async () => {
+    it('should update singleton when schemas change', async () => {
       const onChange = jest.fn();
       const initialSchemas = [
         {
@@ -188,11 +318,10 @@ describe('YamlEditor', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Verify initial configuration
-      const monaco = jest.requireMock('@kbn/monaco');
-      expect(monaco.configureMonacoYamlSchema).toHaveBeenCalledWith(
-        initialSchemas,
-        expect.any(Object)
-      );
+      expect(monacoYamlSingletonObj.singleton).not.toBeNull();
+
+      // Clear mocks to track new calls
+      mockUpdate.mockClear();
 
       // Update schemas
       rerender(<YamlEditor value="test: value" onChange={onChange} schemas={updatedSchemas} />);
