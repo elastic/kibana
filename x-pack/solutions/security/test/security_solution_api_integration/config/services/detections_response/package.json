@@ -1,5 +1,6 @@
 {
   "name": "@kbn/security-solution-detections-response-service",
   "version": "1.0.0",
+  "license": "Elastic License 2.0",
   "private": true
 }
