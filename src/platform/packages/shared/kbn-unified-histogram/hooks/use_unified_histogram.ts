@@ -17,13 +17,11 @@ import useMount from 'react-use/lib/useMount';
 import { cloneDeep } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramServices,
-  UnifiedHistogramSuggestionContext,
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
 } from '../types';
@@ -110,11 +108,6 @@ export type UseUnifiedHistogramResult =
       layoutProps: UnifiedHistogramPartialLayoutProps;
     };
 
-const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = of({
-  suggestion: undefined,
-  type: UnifiedHistogramSuggestionType.unsupported,
-});
-
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [lensVisService, setLensVisService] = useState<LensVisService>();
 
@@ -173,13 +166,13 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     stateProps.onVisContextChanged,
   ]);
 
-  const lensVisServiceCurrentSuggestionContext = useObservable(
-    lensVisService?.currentSuggestionContext$ ?? EMPTY_SUGGESTION_CONTEXT
-  );
+  const lensVisServiceState = useObservable(lensVisService?.state$ ?? of(undefined));
+  const lensVisServiceCurrentSuggestionContextType =
+    lensVisServiceState?.currentSuggestionContext?.type;
 
   const chart =
-    !lensVisServiceCurrentSuggestionContext?.type ||
-    lensVisServiceCurrentSuggestionContext.type === UnifiedHistogramSuggestionType.unsupported
+    !lensVisServiceCurrentSuggestionContextType ||
+    lensVisServiceCurrentSuggestionContextType === UnifiedHistogramSuggestionType.unsupported
       ? undefined
       : stateProps.chart;
 
@@ -190,7 +183,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   });
 
   const chartProps = useMemo<UnifiedHistogramChartProps | undefined>(() => {
-    return lensVisService && fetchParams?.dataView
+    return lensVisService && lensVisServiceState && fetchParams?.dataView
       ? {
           ...props,
           ...stateProps,
@@ -199,9 +192,19 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
           chart,
           isChartAvailable,
           lensVisService,
+          lensVisServiceState,
         }
       : undefined;
-  }, [fetch$, fetchParams, lensVisService, props, stateProps, chart, isChartAvailable]);
+  }, [
+    fetch$,
+    fetchParams,
+    lensVisService,
+    lensVisServiceState,
+    props,
+    stateProps,
+    chart,
+    isChartAvailable,
+  ]);
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({

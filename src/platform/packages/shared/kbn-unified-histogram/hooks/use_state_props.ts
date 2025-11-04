@@ -103,7 +103,6 @@ export const useStateProps = ({
     };
   }, [chartHidden, isESQLQuery, isTimeBased, timeInterval]);
 
-  // TODO: double check that it's used correctly versus fetchParams.breakdownField
   const breakdown = useMemo(() => {
     if (!isTimeBased) {
       return undefined;

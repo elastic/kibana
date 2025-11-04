@@ -9,9 +9,8 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiProgress, EuiDelayRender, EuiSpacer } from '@elastic/eui';
+import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -45,7 +44,7 @@ import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
 import { useEditVisualization } from './hooks/use_edit_visualization';
-import type { LensVisService } from '../../services/lens_vis_service';
+import type { LensVisService, LensVisServiceState } from '../../services/lens_vis_service';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
 import { useStableCallback } from '../../hooks/use_stable_callback';
@@ -57,6 +56,7 @@ export interface UnifiedHistogramChartProps {
   hiddenPanel?: boolean;
   services: UnifiedHistogramServices;
   lensVisService: LensVisService;
+  lensVisServiceState: LensVisServiceState;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
@@ -90,6 +90,7 @@ export function UnifiedHistogramChart({
   chart,
   breakdown,
   lensVisService,
+  lensVisServiceState,
   renderCustomChartToggleActions,
   fetch$,
   fetchParams,
@@ -103,10 +104,8 @@ export function UnifiedHistogramChart({
   onChartLoad,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
-  const lensVisServiceCurrentSuggestionContext = useObservable(
-    lensVisService.currentSuggestionContext$
-  );
-  const visContext = useObservable(lensVisService.visContext$);
+  const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
+  const visContext = lensVisServiceState.visContext;
   const currentSuggestion = lensVisServiceCurrentSuggestionContext?.suggestion;
 
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);

@@ -116,6 +116,7 @@ async function mountComponent({
 
   const props: UnifiedHistogramChartProps = {
     lensVisService,
+    lensVisServiceState: lensVisService.getStateValue(),
     services,
     hits: noHits
       ? undefined

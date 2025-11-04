@@ -72,13 +72,10 @@ export const getLensVisMock = async ({
   });
 
   let visContext: UnifiedHistogramVisContext | undefined;
-  lensService.visContext$.subscribe((nextAttributesContext) => {
-    visContext = nextAttributesContext;
-  });
-
   let currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
-  lensService.currentSuggestionContext$.subscribe((nextSuggestionContext) => {
-    currentSuggestionContext = nextSuggestionContext;
+  lensService.state$.subscribe((state) => {
+    visContext = state.visContext;
+    currentSuggestionContext = state.currentSuggestionContext;
   });
 
   lensService.update({

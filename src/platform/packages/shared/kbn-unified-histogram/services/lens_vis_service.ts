@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import {
   removeDropCommandsFromESQLQuery,
@@ -55,17 +54,12 @@ import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
-const stateSelectorFactory =
-  <S>(state$: Observable<S>) =>
-  <R>(selector: (state: S) => R, equalityFn?: (arg0: R, arg1: R) => boolean) =>
-    state$.pipe(map(selector), distinctUntilChanged(equalityFn));
-
 export enum LensVisServiceStatus {
   'initial' = 'initial',
   'completed' = 'completed',
 }
 
-interface LensVisServiceState {
+export interface LensVisServiceState {
   status: LensVisServiceStatus;
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -82,12 +76,9 @@ interface LensVisServiceParams {
 
 export class LensVisService {
   private state: LensVisServiceState;
-  private state$: BehaviorSubject<LensVisServiceState>;
+  state$: BehaviorSubject<LensVisServiceState>;
   private services: Services;
   private lensSuggestionsApi: LensSuggestionsApi;
-  status$: Observable<LensVisServiceState['status']>;
-  currentSuggestionContext$: Observable<LensVisServiceState['currentSuggestionContext']>;
-  visContext$: Observable<LensVisServiceState['visContext']>;
   prevUpdateContext:
     | {
         queryParams: QueryParams;
@@ -119,13 +110,6 @@ export class LensVisService {
     this.state$ = new BehaviorSubject<LensVisServiceState>(initialState);
     this.state = initialState;
 
-    const stateSelector = stateSelectorFactory(this.state$);
-    this.status$ = stateSelector((state) => state.status);
-    this.currentSuggestionContext$ = stateSelector(
-      (state) => state.currentSuggestionContext,
-      isEqual
-    );
-    this.visContext$ = stateSelector((state) => state.visContext, isEqual);
     this.prevUpdateContext = undefined;
   }
 
