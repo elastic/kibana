@@ -88,7 +88,9 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
         instrument,
         placeholderName: 'metricField',
       })} BY ${createTimeBucketAggregation({})}${
-        dimensions.length > 0 ? `, ${dimensions.map((dim) => sanitazeESQLInput(dim)).join(',')}` : ''
+        dimensions.length > 0
+          ? `, ${dimensions.map((dim) => sanitazeESQLInput(dim)).join(',')}`
+          : ''
       }`,
       {
         metricField,
