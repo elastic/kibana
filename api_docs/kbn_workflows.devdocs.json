@@ -5352,7 +5352,7 @@
         "label": "CreateWorkflowCommand",
         "description": [],
         "signature": [
-          "{ yaml: string; }"
+          "{ yaml: string; id?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -5367,7 +5367,7 @@
         "label": "DynamicStepContext",
         "description": [],
         "signature": [
-          "{ inputs: {}; steps: {}; execution: { id: string; startedAt: Date; isTestRun: boolean; }; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }"
+          "{ inputs: {}; steps: {}; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -5382,7 +5382,7 @@
         "label": "DynamicWorkflowContext",
         "description": [],
         "signature": [
-          "{ inputs: {}; execution: { id: string; startedAt: Date; isTestRun: boolean; }; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }"
+          "{ inputs: {}; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -5666,7 +5666,7 @@
         "label": "StepContext",
         "description": [],
         "signature": [
-          "{ steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: unknown[]; item?: unknown; } | undefined; }"
+          "{ steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: unknown[]; item?: unknown; } | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -5848,7 +5848,7 @@
         "label": "WorkflowContext",
         "description": [],
         "signature": [
-          "{ execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; }"
+          "{ execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -5878,7 +5878,7 @@
         "label": "WorkflowExecutionContext",
         "description": [],
         "signature": [
-          "{ id: string; startedAt: Date; isTestRun: boolean; }"
+          "{ id: string; url: string; startedAt: Date; isTestRun: boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -6230,9 +6230,13 @@
           "ZodObject",
           "<{ yaml: ",
           "ZodString",
-          "; }, \"strip\", ",
+          "; id: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { yaml: string; }, { yaml: string; }>"
+          ", { yaml: string; id?: string | undefined; }, { yaml: string; id?: string | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -6415,9 +6419,11 @@
           "ZodBoolean",
           "; startedAt: ",
           "ZodDate",
+          "; url: ",
+          "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>; workflow: ",
+          ", { id: string; url: string; startedAt: Date; isTestRun: boolean; }, { id: string; url: string; startedAt: Date; isTestRun: boolean; }>; workflow: ",
           "ZodObject",
           "<{ id: ",
           "ZodString",
@@ -6429,7 +6435,9 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; now: ",
+          ", { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; kibanaUrl: ",
+          "ZodString",
+          "; now: ",
           "ZodOptional",
           "<",
           "ZodDate",
@@ -6447,7 +6455,7 @@
           "ZodTypeAny",
           ", {}, {}>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { inputs: {}; steps: {}; execution: { id: string; startedAt: Date; isTestRun: boolean; }; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }, { inputs: {}; steps: {}; execution: { id: string; startedAt: Date; isTestRun: boolean; }; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }>"
+          ", { inputs: {}; steps: {}; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }, { inputs: {}; steps: {}; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -6615,9 +6623,11 @@
           "ZodBoolean",
           "; startedAt: ",
           "ZodDate",
+          "; url: ",
+          "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>; workflow: ",
+          ", { id: string; url: string; startedAt: Date; isTestRun: boolean; }, { id: string; url: string; startedAt: Date; isTestRun: boolean; }>; workflow: ",
           "ZodObject",
           "<{ id: ",
           "ZodString",
@@ -6629,7 +6639,9 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; now: ",
+          ", { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; kibanaUrl: ",
+          "ZodString",
+          "; now: ",
           "ZodOptional",
           "<",
           "ZodDate",
@@ -6643,7 +6655,7 @@
           "ZodTypeAny",
           ", {}, {}>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { inputs: {}; execution: { id: string; startedAt: Date; isTestRun: boolean; }; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }, { inputs: {}; execution: { id: string; startedAt: Date; isTestRun: boolean; }; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }>"
+          ", { inputs: {}; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }, { inputs: {}; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; consts: {}; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -7795,9 +7807,11 @@
           "ZodBoolean",
           "; startedAt: ",
           "ZodDate",
+          "; url: ",
+          "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>; workflow: ",
+          ", { id: string; url: string; startedAt: Date; isTestRun: boolean; }, { id: string; url: string; startedAt: Date; isTestRun: boolean; }>; workflow: ",
           "ZodObject",
           "<{ id: ",
           "ZodString",
@@ -7809,7 +7823,9 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; inputs: ",
+          ", { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; kibanaUrl: ",
+          "ZodString",
+          "; inputs: ",
           "ZodOptional",
           "<",
           "ZodRecord",
@@ -7883,7 +7899,7 @@
           "ZodTypeAny",
           ", { index: number; total: number; items: unknown[]; item?: unknown; }, { index: number; total: number; items: unknown[]; item?: unknown; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: unknown[]; item?: unknown; } | undefined; }, { steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: unknown[]; item?: unknown; } | undefined; }>"
+          ", { steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: unknown[]; item?: unknown; } | undefined; }, { steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: unknown[]; item?: unknown; } | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -8353,9 +8369,11 @@
           "ZodBoolean",
           "; startedAt: ",
           "ZodDate",
+          "; url: ",
+          "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>; workflow: ",
+          ", { id: string; url: string; startedAt: Date; isTestRun: boolean; }, { id: string; url: string; startedAt: Date; isTestRun: boolean; }>; workflow: ",
           "ZodObject",
           "<{ id: ",
           "ZodString",
@@ -8367,7 +8385,9 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; inputs: ",
+          ", { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; kibanaUrl: ",
+          "ZodString",
+          "; inputs: ",
           "ZodOptional",
           "<",
           "ZodRecord",
@@ -8409,7 +8429,7 @@
           "ZodDate",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; }, { execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; }>"
+          ", { execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; }, { execution: { id: string; url: string; startedAt: Date; isTestRun: boolean; }; kibanaUrl: string; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: { spaceId: string; rule: { id: string; consumer: string; name: string; tags: string[]; ruleTypeId: string; producer: string; }; alerts: { new: { count: number; data: any[]; }; recovered: { count: number; data: any[]; }; all: { count: number; data: any[]; }; ongoing: { count: number; data: any[]; }; }; params?: any; } | undefined; now?: Date | undefined; inputs?: Record<string, string | number | boolean | string[] | boolean[] | number[]> | undefined; consts?: Record<string, any> | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -8457,9 +8477,11 @@
           "ZodBoolean",
           "; startedAt: ",
           "ZodDate",
+          "; url: ",
+          "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>"
+          ", { id: string; url: string; startedAt: Date; isTestRun: boolean; }, { id: string; url: string; startedAt: Date; isTestRun: boolean; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
