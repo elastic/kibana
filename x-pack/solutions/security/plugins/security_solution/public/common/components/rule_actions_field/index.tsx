@@ -295,7 +295,7 @@ export const RuleActionsField: React.FC<Props> = ({
       {fieldErrors ? (
         <>
           <FieldErrorsContainer>
-            <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="warning">
+            <EuiCallOut announceOnMount title={FORM_ERRORS_TITLE} color="danger" iconType="warning">
               <ReactMarkdown>{fieldErrors}</ReactMarkdown>
             </EuiCallOut>
           </FieldErrorsContainer>

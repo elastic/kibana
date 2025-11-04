@@ -482,6 +482,11 @@ paths:
           description: Indicates if the API returns only outdated SLO or all SLO definitions
           schema:
             type: boolean
+        - name: includeHealth
+          in: query
+          description: Indicates if the API returns SLO health data with definitions
+          schema:
+            type: boolean
           example: true
         - name: tags
           in: query
@@ -1614,7 +1619,7 @@ components:
           example: Bad Request
         message:
           type: string
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
     401_response:
       title: Unauthorized
       type: object
@@ -1666,6 +1671,22 @@ components:
         message:
           type: string
           example: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+    artifacts:
+      title: Artifacts
+      description: Links to related assets for the SLO
+      type: object
+      properties:
+        dashboards:
+          description: Array of dashboard references
+          type: array
+          items:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                description: Dashboard saved-object id
+                type: string
     create_slo_request:
       title: Create SLO request
       description: |
@@ -1712,6 +1733,8 @@ components:
           type: array
           items:
             type: string
+        artifacts:
+          $ref: '#/components/schemas/artifacts'
     create_slo_response:
       title: Create SLO response
       type: object
@@ -1773,6 +1796,8 @@ components:
           type: array
           items:
             type: string
+        artifacts:
+          $ref: '#/components/schemas/artifacts'
     slo_definition_response:
       title: SLO definition response
       type: object
@@ -1845,6 +1870,8 @@ components:
           type: array
           items:
             type: string
+        artifacts:
+          $ref: '#/components/schemas/artifacts'
         createdAt:
           description: The creation date
           type: string

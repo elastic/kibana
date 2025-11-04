@@ -64,7 +64,11 @@ import {
 } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 
-import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
+import {
+  InvalidYamlSchemaError,
+  WorkflowConflictError,
+  WorkflowValidationError,
+} from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
@@ -215,7 +219,19 @@ export class WorkflowsService {
       updated_at: now.toISOString(),
     };
 
-    const id = this.generateWorkflowId();
+    const id = workflow.id || this.generateWorkflowId();
+
+    if (workflow.id) {
+      this.validateWorkflowId(workflow.id);
+
+      const existingWorkflow = await this.getWorkflow(workflow.id, spaceId);
+      if (existingWorkflow) {
+        throw new WorkflowConflictError(
+          `Workflow with id '${workflow.id}' already exists`,
+          workflow.id
+        );
+      }
+    }
 
     await this.workflowStorage.getClient().index({
       id,
@@ -1064,6 +1080,15 @@ export class WorkflowsService {
       createdAt: source.created_at,
       lastUpdatedAt: source.updated_at,
     };
+  }
+
+  private validateWorkflowId(id: string): void {
+    const uuidRegex = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      throw new WorkflowValidationError(
+        `Invalid workflow ID format. Expected format: workflow-{uuid}, received: ${id}`
+      );
+    }
   }
 
   private generateWorkflowId(): string {
