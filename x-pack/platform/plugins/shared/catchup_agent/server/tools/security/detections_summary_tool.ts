@@ -14,6 +14,7 @@ import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { getSpaceId, getPluginServices } from '../../services/service_locator';
 import { normalizeDateToCurrentYear } from '../utils/date_normalization';
+import { getAlertsPageUrl } from '../utils/kibana_urls';
 
 const detectionsSummarySchema = z.object({
   start: z
@@ -208,6 +209,10 @@ Returns aggregated statistics including total count, counts by severity, and top
             )}`
           );
 
+          // Generate URL to alerts page with time range
+          const { core } = getPluginServices();
+          const alertsPageUrl = getAlertsPageUrl(request, core, normalizedStart, normalizedEnd);
+
           // Return both the grouped results and a summary
           return {
             results: [
@@ -226,6 +231,7 @@ Returns aggregated statistics including total count, counts by severity, and top
                   by_severity: severityCounts,
                   start: normalizedStart,
                   end: normalizedEnd || null,
+                  alerts_page_url: alertsPageUrl,
                 },
               },
             ],

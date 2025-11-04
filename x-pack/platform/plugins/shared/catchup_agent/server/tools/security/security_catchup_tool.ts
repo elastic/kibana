@@ -66,12 +66,30 @@ This tool calls all security sub-tools in parallel and aggregates their results.
           }),
         ]);
 
-        // Aggregate results
+        // Aggregate results - merge all result types (tabular and other)
+        // For each tool, find both tabular and other results
+        // The 'other' type result contains URLs and metadata, while tabular has structured data
+        const getTabularResult = (toolResults: any[]) =>
+          toolResults.find((r: any) => r.type === ToolResultType.tabularData)?.data || null;
+        const getOtherResult = (toolResults: any[]) =>
+          toolResults.find((r: any) => r.type === ToolResultType.other)?.data || null;
+
+        // Merge tabular and other results for each tool
+        const mergeToolResults = (toolResults: any[]) => {
+          const tabular = getTabularResult(toolResults);
+          const other = getOtherResult(toolResults);
+          // If we have both, merge them; otherwise return whichever is available
+          if (tabular && other) {
+            return { ...tabular, ...other };
+          }
+          return tabular || other || null;
+        };
+
         const aggregatedData = {
-          attackDiscoveries: attackDiscoveries.results[0]?.data || null,
-          detections: detections.results[0]?.data || null,
-          cases: cases.results[0]?.data || null,
-          ruleChanges: ruleChanges.results[0]?.data || null,
+          attackDiscoveries: mergeToolResults(attackDiscoveries.results),
+          detections: mergeToolResults(detections.results),
+          cases: mergeToolResults(cases.results),
+          ruleChanges: mergeToolResults(ruleChanges.results),
         };
 
         return {

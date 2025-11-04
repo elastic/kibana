@@ -10,8 +10,8 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
-import { getCaseViewPath } from '@kbn/cases-plugin/server/common/utils';
-import { getPluginServices, getSpaceId } from '../../services/service_locator';
+import { getCaseUrl } from '../utils/kibana_urls';
+import { getPluginServices } from '../../services/service_locator';
 import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 
 // Helper functions
@@ -35,18 +35,6 @@ const getCaseTimestamp = (caseItem: any): number | null => {
   const timestamp = new Date(timestampValue).getTime();
   return isNaN(timestamp) ? null : timestamp;
 };
-
-const getAppRoute = (owner: string): string => {
-  // Match OWNER_INFO appRoute values (without /cases suffix)
-  // getCaseViewPath will append /cases automatically
-  const ownerToRoute: Record<string, string> = {
-    securitySolution: '/app/security',
-    observability: '/app/observability',
-    cases: '/app/management/insightsAndAlerting',
-  };
-  return ownerToRoute[owner] || '/app/management/insightsAndAlerting';
-};
-
 const createEmptyResults = (
   normalizedStart: string,
   normalizedEnd: string | null,
@@ -235,53 +223,13 @@ Returns cases with detailed information including id, title, description, status
           })
         );
 
-        // Get core services and space ID for generating case URLs
+        // Get core services for generating case URLs
         const { core } = getPluginServices();
-        const spaceId = getSpaceId(request);
-        const publicBaseUrl = core.http.basePath.publicBaseUrl;
-        const serverBasePath = core.http.basePath.serverBasePath;
-
-        // Helper function to construct case URL
-        const getCaseUrl = (caseId: string, caseOwner: string): string | null => {
-          try {
-            // First try using publicBaseUrl if configured
-            if (publicBaseUrl) {
-              return getCaseViewPath({
-                publicBaseUrl,
-                spaceId,
-                caseId,
-                owner: caseOwner,
-              });
-            }
-
-            // Fallback: construct URL from request
-            // Get protocol and host from request headers
-            const protocol = request.headers['x-forwarded-proto'] || 'http';
-            const host = request.headers.host || 'localhost:5601';
-
-            // Build base URL
-            const baseUrl = `${protocol}://${host}`;
-
-            // Determine app route based on case owner
-            const appRoute = getAppRoute(caseOwner);
-
-            // Add space prefix if not default space
-            const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-            // Append /cases to match the pattern used by getCaseViewPath
-            const casePath = `${spacePrefix}${serverBasePath}${appRoute}/cases/${caseId}`;
-            const fullUrl = `${baseUrl}${casePath}`;
-
-            return fullUrl;
-          } catch (error) {
-            logger.warn(`[CatchUp Agent] Failed to generate URL for case ${caseId}: ${error}`);
-            return null;
-          }
-        };
 
         // Format cases data with rich details, including URLs
         const casesData = casesWithComments.map(({ case: caseItem, comments, totalComments }) => {
           // Generate case URL using the case's owner
-          const caseUrl = getCaseUrl(caseItem.id, caseItem.owner);
+          const caseUrl = getCaseUrl(request, core, caseItem.id, caseItem.owner);
 
           return {
             id: caseItem.id,

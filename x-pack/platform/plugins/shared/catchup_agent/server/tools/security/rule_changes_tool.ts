@@ -12,6 +12,7 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { getPluginServices } from '../../services/service_locator';
 import { normalizeDateToCurrentYear } from '../utils/date_normalization';
+import { getRuleUrl } from '../utils/kibana_urls';
 
 const ruleChangesSchema = z.object({
   start: z
@@ -105,13 +106,14 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
           return afterStart && beforeEnd;
         });
 
-        // Format rules data
+        // Format rules data with URLs
         const rulesData = filteredRules.map((rule) => ({
           id: rule.id,
           name: rule.name,
           updated_by: rule.updatedBy || rule.updated_by || null,
           enabled: rule.enabled ?? false,
           updated_at: rule.updatedAt || rule.updated_at || null,
+          url: getRuleUrl(request, core, rule.id),
         }));
 
         return {
@@ -136,6 +138,7 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
                 total: rulesData.length,
                 start: normalizedStart,
                 end: normalizedEnd || null,
+                rules: rulesData,
               },
             },
           ],

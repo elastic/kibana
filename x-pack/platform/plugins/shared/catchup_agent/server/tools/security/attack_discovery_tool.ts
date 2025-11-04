@@ -11,8 +11,9 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
-import { getSpaceId } from '../../services/service_locator';
+import { getSpaceId, getPluginServices } from '../../services/service_locator';
 import { normalizeDateToCurrentYear } from '../utils/date_normalization';
+import { getAttackDiscoveryUrl } from '../utils/kibana_urls';
 
 const attackDiscoverySchema = z.object({
   start: z
@@ -74,9 +75,10 @@ Returns attack discoveries with metadata including attack name, severity, status
         }
 
         // Use space-aware index pattern for attack discoveries
-        const query = `FROM .alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*
+        // Include _id for generating URLs using METADATA directive
+        const query = `FROM .alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}* METADATA _id
 | WHERE ${dateFilter}
-| KEEP kibana.alert.attack_discovery.title, kibana.alert.severity, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp
+| KEEP _id, kibana.alert.attack_discovery.title, kibana.alert.severity, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp
 | SORT @timestamp DESC
 | LIMIT 100`;
 
@@ -95,6 +97,7 @@ Returns attack discoveries with metadata including attack name, severity, status
             logger.debug(`Attack discovery indices not found, returning empty results`);
             result = {
               columns: [
+                { name: '_id', type: 'keyword' },
                 { name: 'kibana.alert.attack_discovery.title', type: 'text' },
                 { name: 'kibana.alert.severity', type: 'keyword' },
                 { name: 'kibana.alert.workflow_status', type: 'keyword' },
@@ -108,6 +111,26 @@ Returns attack discoveries with metadata including attack name, severity, status
             throw esqlError;
           }
         }
+
+        // Get core services for generating URLs
+        const { core } = getPluginServices();
+
+        // Find _id column index
+        const idColumnIndex = result.columns.findIndex((col) => col.name === '_id');
+        const titleColumnIndex = result.columns.findIndex(
+          (col) => col.name === 'kibana.alert.attack_discovery.title'
+        );
+
+        // Generate URLs for each attack discovery
+        const attackDiscoveries = result.values.map((row) => {
+          const id = idColumnIndex >= 0 ? (row[idColumnIndex] as string) : null;
+          const url = id ? getAttackDiscoveryUrl(request, core, id) : null;
+          return {
+            id,
+            title: titleColumnIndex >= 0 ? (row[titleColumnIndex] as string) : null,
+            url,
+          };
+        });
 
         return {
           results: [
@@ -126,6 +149,7 @@ Returns attack discoveries with metadata including attack name, severity, status
                 total: result.values.length,
                 start: normalizedStart,
                 end: normalizedEnd || null,
+                attack_discoveries: attackDiscoveries,
               },
             },
           ],
