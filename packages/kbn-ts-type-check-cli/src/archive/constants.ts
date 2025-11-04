@@ -25,9 +25,12 @@ export const CACHE_IGNORE_GLOBS = [
 ];
 
 export const ARCHIVE_FILE_NAME = 'ts-build-artifacts.tar';
+export const ARCHIVE_METADATA_FILE_NAME = 'ts-build-artifacts.meta.json';
 
 const GCS_BUCKET_NAME = 'ci-artifacts.kibana.dev/ts_type_check';
 export const GCS_BUCKET_URI = `gs://${GCS_BUCKET_NAME}`;
+export const GCS_COMMITS_PREFIX = `${GCS_BUCKET_URI}/commits`;
+export const GCS_PULL_REQUESTS_PREFIX = `${GCS_BUCKET_URI}/prs`;
 
 export const GCLOUD_ACTIVATE_SCRIPT = Path.resolve(
   REPO_ROOT,
@@ -35,6 +38,11 @@ export const GCLOUD_ACTIVATE_SCRIPT = Path.resolve(
 );
 
 export const LOCAL_CACHE_ROOT = Path.resolve(Os.tmpdir(), 'kibana-ts-type-check-cache');
+export const LOCAL_METADATA_RELATIVE_DIR = Path.join('target', '.ts-type-check-cache');
+export const LOCAL_METADATA_RELATIVE_PATH = Path.join(
+  LOCAL_METADATA_RELATIVE_DIR,
+  ARCHIVE_METADATA_FILE_NAME
+);
 export const MAX_COMMITS_TO_CHECK = 50;
 
 export const TYPES_DIRECTORY_GLOB = '**/target/types';

@@ -18,9 +18,11 @@ import {
   isCiEnvironment,
   locateLocalArchive,
   locateRemoteArchive,
+  getPullRequestNumber,
   readRecentCommitShas,
   resolveCurrentCommitSha,
   withGcsAuth,
+  writeRestoreMetadataDocument,
 } from './utils';
 import { MAX_COMMITS_TO_CHECK } from './constants';
 
@@ -39,8 +41,10 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     log.info(`Checking ${candidateShas.length} shas`);
     log.info(candidateShas.join(', '));
 
+    const prNumber = getPullRequestNumber();
+
     const archiveCandidate = isCiEnvironment()
-      ? await locateRemoteArchive(log, candidateShas)
+      ? await locateRemoteArchive(log, candidateShas, { prNumber })
       : await locateLocalArchive(candidateShas);
 
     if (!archiveCandidate) {
@@ -53,11 +57,15 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     log.info(`Cleaned artifacts`);
 
     if (archiveCandidate.kind === 'remote') {
-      log.info(`Streaming TypeScript build artifacts from ${archiveCandidate.remotePath}`);
+      log.info(
+        `Streaming TypeScript build artifacts from ${archiveCandidate.remotePath} (${archiveCandidate.source})`
+      );
       await withRemoteTarExtraction(archiveCandidate.remotePath, log);
     } else {
       await extractLocalArchive(archiveCandidate.archivePath);
     }
+
+    await writeRestoreMetadataDocument(archiveCandidate);
 
     log.info(`Restored TypeScript build artifacts from commit ${archiveCandidate.sha}.`);
   } catch (error) {
