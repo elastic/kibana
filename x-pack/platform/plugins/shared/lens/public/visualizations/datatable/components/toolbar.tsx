@@ -9,13 +9,15 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup } from '@elastic/eui';
-
+import type { VisualizationToolbarProps, DatatableVisualizationState } from '@kbn/lens-common';
 import { ToolbarPopover } from '../../../shared_components';
 
-import type { VisualizationToolbarProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
+import { DatatableAppearanceSettings } from './appearance_settings';
 
-import { DatatableAppearanceSettings } from './toolbar/appearance_settings';
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   return (

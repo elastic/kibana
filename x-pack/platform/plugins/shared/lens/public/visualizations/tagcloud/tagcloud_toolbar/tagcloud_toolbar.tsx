@@ -9,10 +9,15 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { ToolbarPopover } from '../../../shared_components';
 import type { TagcloudState } from '../types';
 import { TagcloudAppearanceSettings } from './appearance_settings';
+
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 
 export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>) {
   return (

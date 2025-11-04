@@ -21,6 +21,7 @@ export {
 export { isESClientError } from './utils';
 export {
   FleetError as FleetError,
+  FleetVersionConflictError,
   OutputInvalidError as OutputInvalidError,
   AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
@@ -241,7 +242,7 @@ export class ArtifactsElasticsearchError extends FleetError {
   }
 }
 
-export class FleetElasticsearchValidationError extends FleetErrorWithStatusCode {
+export class FleetElasticsearchError extends FleetErrorWithStatusCode {
   constructor(esError: Error) {
     let statusCode: number | undefined;
     const message = esError.message;

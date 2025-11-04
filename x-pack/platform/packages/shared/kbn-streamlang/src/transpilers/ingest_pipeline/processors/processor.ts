@@ -13,6 +13,9 @@ import type {
   IngestPipelineManualIngestPipelineProcessor,
   IngestPipelineRenameProcessor,
   IngestPipelineSetProcessor,
+  IngestPipelineConvertProcessor,
+  IngestPipelineRemoveByPrefixProcessor,
+  IngestPipelineRemoveProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
 type WithOptionalTracingTag<T> = T & { tag?: string };
@@ -24,5 +27,8 @@ export interface ActionToIngestType {
   rename: WithOptionalTracingTag<IngestPipelineRenameProcessor>;
   set: WithOptionalTracingTag<IngestPipelineSetProcessor>;
   append: WithOptionalTracingTag<IngestPipelineAppendProcessor>;
+  convert: WithOptionalTracingTag<IngestPipelineConvertProcessor>;
+  remove_by_prefix: WithOptionalTracingTag<IngestPipelineRemoveByPrefixProcessor>;
+  remove: WithOptionalTracingTag<IngestPipelineRemoveProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }

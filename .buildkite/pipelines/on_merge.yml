@@ -640,21 +640,20 @@ steps:
       provider: gcp
       machineType: n2-standard-2
 
-#  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
-#    label: 'Build Storybooks'
-#    agents:
-#      image: family/kibana-ubuntu-2404
-#      imageProject: elastic-images-prod
-#      provider: gcp
-#      machineType: n2-standard-8
-#      preemptible: true
-#    key: storybooks
-#    timeout_in_minutes: 80
-#    soft_fail: true
-#    retry:
-#      automatic:
-#        - exit_status: '-1'
-#          limit: 3
+  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+    label: 'Build Storybooks'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+      preemptible: true
+    key: storybooks
+    timeout_in_minutes: 80
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/openapi_publishing/publish_oas_docs.sh
     label: 'Publish OAS docs to bump.sh'

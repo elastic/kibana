@@ -8,7 +8,14 @@
  */
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { type ESQLCommand, type FunctionDefinition, Walker, Builder } from '@kbn/esql-ast';
+import {
+  type ESQLCommand,
+  type FunctionDefinition,
+  Walker,
+  Builder,
+  isSubQuery,
+} from '@kbn/esql-ast';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { expandEvals } from '../shared/expand_evals';
 
 /**
@@ -36,7 +43,7 @@ export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
  * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
  * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
  */
-export const getEnrichCommands = (commands: ESQLCommand[]): ESQLCommand[] =>
+export const getEnrichCommands = (commands: ESQLAstAllCommands[]): ESQLCommand[] =>
   Walker.matchAll(commands, { type: 'command', name: 'enrich' }) as ESQLCommand[];
 
 /**
@@ -54,6 +61,15 @@ export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
       const branchSubqueries = getForkBranchSubqueries(command as ESQLCommand<'fork'>);
       for (const subquery of branchSubqueries) {
         subsequences.push([...expandedCommands.slice(0, i), ...subquery]);
+      }
+    }
+
+    // every command within FROM's subqueries is its own subquery to be validated
+    if (command.name.toLowerCase() === 'from') {
+      const fromSubqueries = getFromSubqueries(command as ESQLCommand<'from'>);
+
+      for (const subquery of fromSubqueries) {
+        subsequences.push(subquery);
       }
     }
 
@@ -83,4 +99,40 @@ function getForkBranchSubqueries(command: ESQLCommand<'fork'>): ESQLCommand[][] 
     }
   }
   return expanded;
+}
+
+/**
+ * Expands a FROM command into flat subqueries for each command in each subquery.
+ *
+ * E.g. FROM index1, (FROM index2 | WHERE x > 10), (FROM index3, (FROM index4) | KEEP a)
+ *
+ * becomes [
+ *   [FROM index2],
+ *   [FROM index2 | WHERE x > 10],
+ *   [FROM index4],
+ *   [FROM index3, (FROM index4)],
+ *   [FROM index3, (FROM index4) | KEEP a]
+ * ]
+ *
+ * @param command a FROM command
+ * @returns an array of expanded subqueries
+ */
+function getFromSubqueries(command: ESQLCommand<'from'>): ESQLCommand[][] {
+  return command.args.filter(isSubQuery).flatMap((arg) => {
+    const subquery = arg.child;
+
+    return subquery.commands.flatMap((currentCommand, k) => {
+      const results: ESQLCommand[][] = [];
+
+      // If this command is a FROM with nested subqueries, expand recursively first
+      if (currentCommand.name.toLowerCase() === 'from') {
+        results.push(...getFromSubqueries(currentCommand as ESQLCommand<'from'>));
+      }
+
+      // Always add the partial query (includes current command and all previous ones)
+      results.push(subquery.commands.slice(0, k + 1));
+
+      return results;
+    });
+  });
 }

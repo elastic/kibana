@@ -32,7 +32,6 @@ import {
   ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE,
   NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE,
 } from '../../common/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -84,9 +83,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({ item, description, onChange, disabled = false, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
-      'endpointManagementSpaceAwarenessEnabled'
-    );
     const canManageGlobalArtifacts =
       useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
@@ -100,15 +96,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     }, [artifactRestrictedPolicyIds.policyIds, selectedPolicyIds]);
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const selectedAssignmentType = useMemo(() => {
-      if (isSpaceAwarenessEnabled) {
-        return canManageGlobalArtifacts && isGlobal ? 'globalPolicy' : 'perPolicy';
-      }
-
-      return isGlobal ? 'globalPolicy' : 'perPolicy';
-    }, [canManageGlobalArtifacts, isGlobal, isSpaceAwarenessEnabled]);
+      return canManageGlobalArtifacts && isGlobal ? 'globalPolicy' : 'perPolicy';
+    }, [canManageGlobalArtifacts, isGlobal]);
 
     const toggleGlobal: EuiButtonGroupOptionProps[] = useMemo(() => {
-      const isGlobalButtonDisabled = !isSpaceAwarenessEnabled ? false : !canManageGlobalArtifacts;
+      const isGlobalButtonDisabled = !canManageGlobalArtifacts;
 
       return [
         {
@@ -132,7 +124,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           'data-test-subj': getTestId('perPolicy'),
         },
       ];
-    }, [canManageGlobalArtifacts, getTestId, isSpaceAwarenessEnabled, selectedAssignmentType]);
+    }, [canManageGlobalArtifacts, getTestId, selectedAssignmentType]);
 
     const unAccessiblePolicies: PolicySelectorProps['additionalListItems'] = useMemo(() => {
       const additionalPolicyItems: PolicySelectorProps['additionalListItems'] = [];
@@ -259,7 +251,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         {artifactRestrictedPolicyIds.policyIds.length > 0 && !isGlobal && (
           <>
             <EuiSpacer />
-            <EuiCallOut size="s" data-test-subj={getTestId('unAccessiblePoliciesCallout')}>
+            <EuiCallOut
+              announceOnMount={false}
+              size="s"
+              data-test-subj={getTestId('unAccessiblePoliciesCallout')}
+            >
               {ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE(
                 artifactRestrictedPolicyIds.policyIds.length
               )}

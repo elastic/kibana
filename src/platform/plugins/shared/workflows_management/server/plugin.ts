@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-this-alias, @typescript-eslint/no-non-null-assertion */
+
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -16,29 +19,28 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 
-import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import type { WorkflowsManagementConfig } from './config';
 
-import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
-import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
-import type {
-  WorkflowsServerPluginSetupDeps,
-  WorkflowsServerPluginStartDeps,
-  WorkflowsServerPluginSetup,
-  WorkflowsServerPluginStart,
-} from './types';
-import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { defineRoutes } from './workflows_management/routes';
-import { WorkflowsService } from './workflows_management/workflows_management_service';
-// Import the workflows connector
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
-import { registerFeatures } from './features';
+import { WorkflowsManagementFeatureConfig } from './features';
+import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
+import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
+import type {
+  WorkflowsServerPluginSetup,
+  WorkflowsServerPluginSetupDeps,
+  WorkflowsServerPluginStart,
+  WorkflowsServerPluginStartDeps,
+} from './types';
 import { registerUISettings } from './ui_settings';
+import { defineRoutes } from './workflows_management/routes';
+import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
+import { WorkflowsService } from './workflows_management/workflows_management_service';
+// Import the workflows connector
 
 export class WorkflowsPlugin
   implements
@@ -103,7 +105,7 @@ export class WorkflowsPlugin
           };
 
           // Run the workflow, @tb: maybe switch to scheduler?
-          return await this.api.runWorkflow(workflowToRun, spaceId, inputs, request);
+          return this.api.runWorkflow(workflowToRun, spaceId, inputs, request);
         };
       };
 
@@ -122,11 +124,14 @@ export class WorkflowsPlugin
         'workflow:scheduled': {
           title: 'Scheduled Workflow Execution',
           description: 'Executes workflows on a scheduled basis',
-          timeout: '5m',
+          // Set high timeout for long-running workflows.
+          // This is high value to allow long-running workflows.
+          // The workflow timeout logic defined in workflow execution engine logic is the primary control.
+          timeout: '365d',
           maxAttempts: 3,
           createTaskRunner: ({ taskInstance, fakeRequest }) => {
             // Capture the plugin instance in a closure
-            const plugin = this;
+            const pluginInstance = this;
             // Use a factory pattern to get dependencies when the task runs
             return {
               async run() {
@@ -135,10 +140,10 @@ export class WorkflowsPlugin
 
                 // Create the actual task runner with dependencies
                 const taskRunner = createWorkflowTaskRunner({
-                  logger: plugin.logger,
-                  workflowsService: plugin.workflowsService!,
+                  logger: pluginInstance.logger,
+                  workflowsService: pluginInstance.workflowsService!,
                   workflowsExecutionEngine: pluginsStart.workflowsExecutionEngine,
-                  actionsClient: plugin.unsecureActionsClient!,
+                  actionsClient: pluginInstance.unsecureActionsClient!,
                 })({ taskInstance, fakeRequest });
 
                 return taskRunner.run();
@@ -152,9 +157,8 @@ export class WorkflowsPlugin
       });
     }
 
-    // Register saved object types
-
-    registerFeatures(plugins);
+    // Register the workflows management feature and its privileges
+    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter();

@@ -36,15 +36,16 @@ import {
 } from 'rxjs';
 import { dataService } from '../services/kibana_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
 import { cleanFiltersForSerialize } from '../../common';
 
+export const COMPARE_DEBOUNCE = 100;
+
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
-  timeRestore$: PublishingSubject<boolean | undefined>,
+  timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
   creationOptions?: DashboardCreationOptions
@@ -55,9 +56,8 @@ export function initializeUnifiedSearchManager(
     timefilter: { timefilter: timefilterService },
   } = dataService.query;
 
-  const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  const panelsReload$ = new Subject<void>();
+  const reload$ = new Subject<void>();
   const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
   function setQuery(query: Query) {
@@ -256,8 +256,7 @@ export function initializeUnifiedSearchManager(
         .getAutoRefreshFetch$()
         .pipe(
           tap(() => {
-            controlGroupReload$.next();
-            panelsReload$.next();
+            reload$.next();
           }),
           switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))
         )
@@ -288,27 +287,42 @@ export function initializeUnifiedSearchManager(
 
   const getState = (): Pick<
     DashboardState,
-    'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+    'filters' | 'query' | 'refreshInterval' | 'timeRange'
   > => {
     // pinned filters are not serialized when saving the dashboard
     const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
 
+    const timeRange =
+      timeRestore$.value && timeRange$.value
+        ? {
+            from: timeRange$.value.from,
+            to: timeRange$.value.to,
+          }
+        : undefined;
+
+    const refreshInterval =
+      timeRestore$.value && refreshInterval$.value
+        ? {
+            pause: refreshInterval$.value.pause,
+            value: refreshInterval$.value.value,
+          }
+        : undefined;
+
     return {
-      filters: serializableFilters,
       query: query$.value,
-      refreshInterval: refreshInterval$.value,
-      timeRange: timeRange$.value,
-      timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
+      ...(serializableFilters?.length && { filters: serializableFilters }),
+      ...(refreshInterval && { refreshInterval }),
+      ...(timeRange && { timeRange }),
     };
   };
 
   return {
     api: {
+      reload$,
       filters$,
       esqlVariables$,
       forceRefresh: () => {
-        controlGroupReload$.next();
-        panelsReload$.next();
+        reload$.next();
       },
       query$,
       refreshInterval$,
@@ -320,10 +334,15 @@ export function initializeUnifiedSearchManager(
       unifiedSearchFilters$,
     },
     internalApi: {
-      controlGroupReload$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([unifiedSearchFilters$, query$, refreshInterval$, timeRange$]).pipe(
-          debounceTime(100),
+        return combineLatest([
+          unifiedSearchFilters$,
+          query$,
+          refreshInterval$,
+          timeRange$,
+          timeRestore$,
+        ]).pipe(
+          debounceTime(COMPARE_DEBOUNCE),
           map(([filters, query, refreshInterval, timeRange]) => ({
             filters,
             query,
@@ -336,7 +355,6 @@ export function initializeUnifiedSearchManager(
           )
         );
       },
-      panelsReload$,
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
@@ -345,9 +363,11 @@ export function initializeUnifiedSearchManager(
         if (lastSavedState.query) {
           setQuery(lastSavedState.query);
         }
-        if (lastSavedState.timeRestore) {
-          setAndSyncRefreshInterval(lastSavedState.refreshInterval);
+        if (lastSavedState.timeRange) {
           setAndSyncTimeRange(lastSavedState.timeRange);
+        }
+        if (lastSavedState.refreshInterval) {
+          setAndSyncRefreshInterval(lastSavedState.refreshInterval);
         }
       },
       getState,
