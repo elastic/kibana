@@ -175,7 +175,7 @@ describe('FieldSelector', () => {
       expect(screen.getByTestId('field-icon-text')).toBeInTheDocument();
     });
 
-    it('does not render icons for fields without type information', async () => {
+    it('renders unknown icons for fields without type information', async () => {
       const suggestionsWithoutTypes = [{ name: '@timestamp' }, { name: 'log.level' }];
 
       render(<FieldSelector {...defaultProps} suggestions={suggestionsWithoutTypes} />);
@@ -183,8 +183,8 @@ describe('FieldSelector', () => {
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
 
-      // Verify that no field icons are rendered
-      expect(screen.queryByTestId(/field-icon-/)).not.toBeInTheDocument();
+      // Verify that unknown field icons are rendered for fields without types
+      expect(screen.getAllByTestId('field-icon-unknown')).toHaveLength(2);
     });
 
     it('shows icon for selected field when type is available', () => {
@@ -199,6 +199,17 @@ describe('FieldSelector', () => {
 
       // Icon should be visible in the selected value
       expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
+    });
+
+    it('shows unknown icon for selected field when type is not available', () => {
+      const suggestionsWithoutTypes = [{ name: 'log.level' }, { name: 'message' }];
+
+      render(
+        <FieldSelector {...defaultProps} value="log.level" suggestions={suggestionsWithoutTypes} />
+      );
+
+      // Unknown icon should be visible in the selected value
+      expect(screen.getByTestId('field-icon-unknown')).toBeInTheDocument();
     });
   });
 });

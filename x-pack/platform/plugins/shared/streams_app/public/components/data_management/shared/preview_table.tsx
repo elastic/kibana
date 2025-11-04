@@ -284,11 +284,9 @@ export function PreviewTable({
         id: column,
         display: (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {fieldType && (
-              <EuiFlexItem grow={false}>
-                <FieldIcon type={fieldType} size="s" />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <FieldIcon type={fieldType || 'unknown'} size="s" />
+            </EuiFlexItem>
             <EuiFlexItem>
               <ColumnHeaderTruncateContainer wordBreak="normal">
                 {interleavedColumnParts}

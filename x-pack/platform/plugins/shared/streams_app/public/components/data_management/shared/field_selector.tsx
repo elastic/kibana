@@ -57,9 +57,9 @@ export const FieldSelector = ({
       suggestions.map((suggestion) => ({
         label: suggestion.name,
         value: suggestion.name,
-        prepend: suggestion.type ? (
-          <FieldIcon type={suggestion.type} size="s" className="eui-alignMiddle" />
-        ) : undefined,
+        prepend: (
+          <FieldIcon type={suggestion.type || 'unknown'} size="s" className="eui-alignMiddle" />
+        ),
         'data-test-subj': `field-suggestion-${suggestion.name}`,
       })),
     [suggestions]
@@ -79,9 +79,13 @@ export const FieldSelector = ({
       {
         label: value,
         value,
-        prepend: suggestionWithType?.type ? (
-          <FieldIcon type={suggestionWithType.type} size="s" className="eui-alignMiddle" />
-        ) : undefined,
+        prepend: (
+          <FieldIcon
+            type={suggestionWithType?.type || 'unknown'}
+            size="s"
+            className="eui-alignMiddle"
+          />
+        ),
       },
     ];
   }, [value, comboBoxOptions, suggestions]);
