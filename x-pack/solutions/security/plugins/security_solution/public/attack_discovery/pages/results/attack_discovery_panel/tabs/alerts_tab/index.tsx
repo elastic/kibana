@@ -78,10 +78,10 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
     () => [
       ...globalFilters,
       ...timeRangeFilter,
-      {
-        query: { terms: { _id: originalAlertIds } },
-        meta: {},
-      },
+      // {
+      //   query: { terms: { _id: originalAlertIds } },
+      //   meta: {},
+      // },
     ],
     [globalFilters, originalAlertIds, timeRangeFilter]
   );
@@ -104,8 +104,12 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
 
     try {
       const filter = JSON.parse(combinedQuery?.filterQuery);
+      filter.bool.filter.push({
+        terms: { _id: originalAlertIds },
+      });
       return { bool: { filter } };
-    } catch {
+    } catch (error) {
+      console.error(`[TEST] error: ${JSON.stringify(error)}`);
       return { bool: {} };
     }
   }, [browserFields, dataView, dataViewSpec, filters, globalQuery, uiSettings]);

@@ -21,7 +21,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildEsQuery, type EsQueryConfig } from '@kbn/es-query';
 import type { AIAssistantDataClientParams } from '../../../ai_assistant_data_clients';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
-import { findDocuments, getQueryFilter } from '../../../ai_assistant_data_clients/find';
+import { findDocuments } from '../../../ai_assistant_data_clients/find';
 import { combineFindAttackDiscoveryFilters } from './combine_find_attack_discovery_filters';
 import { createAttackDiscoveryAlerts } from './create_attack_discovery_alerts';
 import { getAttackDiscoveryGenerations } from './get_attack_discovery_generations';
@@ -302,7 +302,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       uniqueAlertIds,
     } = transformSearchResponseToAlerts({
       logger,
-      response: result1.data,
+      response: result.data,
       includeUniqueAlertIds: includeUniqueAlertIds2,
       enableFieldRendering,
       withReplacements,
