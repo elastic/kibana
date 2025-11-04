@@ -335,7 +335,7 @@ export const identifyFeaturesRoute = createServerRoute({
           stream,
           start: start.getTime(),
           end: end.getTime(),
-          esClient: scopedClusterClient.asCurrentUser,
+          esClient,
           inferenceClient: boundInferenceClient,
           feature: {
             ...feature,
