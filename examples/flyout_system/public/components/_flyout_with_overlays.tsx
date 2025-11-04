@@ -64,7 +64,7 @@ const ChildFlyoutContent: React.FC<Pick<FlyoutSessionProps, 'childSize' | 'child
             <EuiCode>openSystemFlyout</EuiCode> method.
           </p>
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiDescriptionList
           type="column"
           listItems={createChildFlyoutDescriptionItems(
@@ -106,19 +106,14 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
 
   return (
     <>
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 id={`flyoutHeading-${title}`}>Flyout {title}</h2>
+          <h2 id={`flyoutHeading-${title}`}>
+            Flyout with <EuiCode>openSystemFlyout</EuiCode>: {title}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
-          <p>
-            This flyout uses the <EuiCode>openSystemFlyout</EuiCode> service with full EUI Flyout
-            Manager integration.
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
         <EuiDescriptionList
           type="column"
           listItems={createMainFlyoutDescriptionItems(
@@ -129,6 +124,60 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
             <EuiCode>openSystemFlyout</EuiCode>
           )}
         />
+        <EuiSpacer size="m" />
+        <EuiText>
+          <p>
+            Below is some filler content to demonstrate scrolling behavior.
+            {childSize && (
+              <>
+                {' '}
+                Scroll down to access the button to <strong>open the child flyout</strong>.
+              </>
+            )}
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+          <p>
+            Sed vel lacus id magna laoreet aliquam. Praesent aliquam in tellus eu pellentesque.
+            Nulla facilisi. Sed pulvinar, massa vitae interdum pulvinar, risus lectus porta nunc,
+            vel efficitur turpis odio nec nisi. Donec nec justo eget felis facilisis fermentum.
+            Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque felis, non
+            volutpat arcu. Morbi a enim in magna semper bibendum. Etiam scelerisque, nunc ac egestas
+            consequat, odio nibh euismod nulla, eget auctor orci nibh vel nisi. Aliquam erat
+            volutpat. Mauris vel neque sit amet nunc gravida congue sed sit amet purus. Quisque
+            lacus quam, egestas ac tincidunt a, lacinia vel velit. Aenean facilisis nulla vitae urna
+            tincidunt congue sed ut dui. Morbi malesuada nulla nec purus convallis consequat.
+            Vivamus id mollis quam. Morbi ac commodo nulla.
+          </p>
+          <p>
+            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+            nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+            officia deserunt mollit anim id est laborum.
+          </p>
+          <p>
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
+            laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+            architecto beatae vitae dicta sunt explicabo.
+          </p>
+          <p>
+            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia
+            consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+          </p>
+          <p>
+            Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci
+            velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam
+            aliquam quaerat voluptatem. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+            do eiusmod tempor incididunt ut labore et dolore magna aliqua. Aliquam quaerat
+            voluptatem.
+          </p>
+          <p>
+            Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit
+            laboriosam, nisi ut aliquid ex ea commodi consequatur?
+          </p>
+        </EuiText>
         <EuiSpacer />
         {childSize && (
           <EuiButton onClick={isChildFlyoutOpen ? handleCloseChildFlyout : openChildFlyout}>
@@ -412,7 +461,6 @@ export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays
         <EuiSpacer size="s" />
         <EuiDescriptionList
           type="column"
-          columnGutterSize="m"
           listItems={[
             {
               title: 'Session X: main size = s, child size = s',
@@ -448,7 +496,6 @@ export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays
         <EuiSpacer size="s" />
         <EuiDescriptionList
           type="column"
-          columnGutterSize="m"
           listItems={[
             {
               title: 'Non-session flyout: size = m',
@@ -465,5 +512,3 @@ export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays
     </>
   );
 };
-
-FlyoutWithOverlays.displayName = 'FlyoutFromOverlays';

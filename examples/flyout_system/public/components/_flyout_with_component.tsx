@@ -127,35 +127,81 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
           flyoutMenuProps={{ title }}
         >
           <EuiFlyoutHeader hasBorder>
-            <EuiText>
-              <h2 id="sessionFlyoutTitle">{title}</h2>
-            </EuiText>
+            <EuiTitle>
+              <h2 id="sessionFlyoutTitle">
+                Flyout with <EuiCode>EuiFlyout</EuiCode>: {title}
+              </h2>
+            </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
+            <EuiDescriptionList
+              type="column"
+              listItems={createMainFlyoutDescriptionItems(
+                flyoutType,
+                flyoutOwnFocus,
+                mainSize,
+                mainMaxWidth,
+                <>
+                  <EuiCode>EuiFlyout</EuiCode> component
+                </>
+              )}
+            />
+            <EuiSpacer size="m" />
             <EuiText>
               <p>
-                This flyout is rendered using <EuiCode>EuiFlyout</EuiCode> directly.
-              </p>
-              <p>This is the content of {title}.</p>
-              <EuiSpacer size="s" />
-              <EuiDescriptionList
-                type="column"
-                listItems={createMainFlyoutDescriptionItems(
-                  flyoutType,
-                  flyoutOwnFocus,
-                  mainSize,
-                  mainMaxWidth,
+                Below is some filler content to demonstrate scrolling behavior.
+                {childSize && (
                   <>
-                    <EuiCode>EuiFlyout</EuiCode> component
+                    {' '}
+                    Scroll down to see the button to <strong>open the child flyout</strong>.
                   </>
                 )}
-              />
-              {childSize && (
+              </p>
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, pulvinar
+                facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. Donec
+                scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, in pretium
+                orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent per conubia
+                nostra, per inceptos himenaeos. Duis pharetra luctus lacus ut vestibulum. Maecenas
+                ipsum lacus, lacinia quis posuere ut, pulvinar vitae dolor. Integer eu nibh at nisi
+                ullamcorper sagittis id vel leo. Integer feugiat faucibus libero, at maximus nisl
+                suscipit posuere. Morbi nec enim nunc. Phasellus bibendum turpis ut ipsum egestas,
+                sed sollicitudin elit convallis. Cras pharetra mi tristique sapien vestibulum
+                lobortis. Nam eget bibendum metus, non dictum mauris. Nulla at tellus sagittis,
+                viverra est a, bibendum metus.
+              </p>
+              <p>
+                Sed non neque elit. Sed ut imperdiet nisi. Proin condimentum fermentum nunc. Etiam
+                pharetra, erat sed fermentum feugiat, velit mauris egestas quam, ut aliquam massa
+                nisl quis neque. Suspendisse in orci enim.
+              </p>
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, pulvinar
+                facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. Donec
+                scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, in pretium
+                orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent per conubia
+                nostra, per inceptos himenaeos. Duis pharetra luctus lacus ut vestibulum. Maecenas
+                ipsum lacus, lacinia quis posuere ut, pulvinar vitae dolor. Integer eu nibh at nisi
+                ullamcorper sagittis id vel leo. Integer feugiat faucibus libero, at maximus nisl
+                suscipit posuere. Morbi nec enim nunc. Phasellus bibendum turpis ut ipsum egestas,
+                sed sollicitudin elit convallis. Cras pharetra mi tristique sapien vestibulum
+                lobortis. Nam eget bibendum metus, non dictum mauris. Nulla at tellus sagittis,
+                viverra est a, bibendum metus.
+              </p>
+              <p>
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+                fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                qui officia deserunt mollit anim id est laborum.
+              </p>
+            </EuiText>
+            {childSize && (
+              <>
+                <EuiSpacer size="m" />
                 <EuiButton onClick={handleOpenChildFlyout} disabled={isChildFlyoutVisible}>
                   Open child Flyout
                 </EuiButton>
-              )}
-            </EuiText>
+              </>
+            )}
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
@@ -182,18 +228,18 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
               <EuiFlyoutBody>
                 <EuiText>
                   <p>This is a child flyout.</p>
-                  <EuiSpacer size="s" />
-                  <EuiDescriptionList
-                    type="column"
-                    listItems={createChildFlyoutDescriptionItems(
-                      childSize,
-                      childMaxWidth,
-                      <>
-                        <EuiCode>EuiFlyout</EuiCode> component
-                      </>
-                    )}
-                  />
+                  <EuiSpacer size="m" />
                 </EuiText>
+                <EuiDescriptionList
+                  type="column"
+                  listItems={createChildFlyoutDescriptionItems(
+                    childSize,
+                    childMaxWidth,
+                    <>
+                      <EuiCode>EuiFlyout</EuiCode> component
+                    </>
+                  )}
+                />
               </EuiFlyoutBody>
               <EuiFlyoutFooter>
                 <EuiFlexGroup justifyContent="flexEnd">
@@ -319,7 +365,6 @@ export const FlyoutWithComponent: React.FC = () => {
         <EuiSpacer size="s" />
         <EuiDescriptionList
           type="column"
-          columnGutterSize="m"
           listItems={[
             {
               title: 'Session J: main size = s, child size = s',
@@ -355,7 +400,6 @@ export const FlyoutWithComponent: React.FC = () => {
         <EuiSpacer size="s" />
         <EuiDescriptionList
           type="column"
-          columnGutterSize="m"
           listItems={[
             {
               title: 'Non-session flyout: size = m',
@@ -372,5 +416,3 @@ export const FlyoutWithComponent: React.FC = () => {
     </>
   );
 };
-
-FlyoutWithComponent.displayName = 'FlyoutFromComponents';
