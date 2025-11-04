@@ -23,6 +23,7 @@ export interface CatchupAgentPluginStart {
   getRulesClient: AlertingServerStart['getRulesClientWithRequest'] | undefined;
   spaces: SpacesPluginStart | undefined;
   ruleRegistry: RuleRegistryPluginStart | undefined;
+  actions: ActionsPluginStart | undefined;
 }
 
 export interface CatchupAgentSetupDependencies {
