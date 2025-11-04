@@ -33,7 +33,7 @@ import {
   FlyoutTypeSwitch,
 } from '../utils';
 
-interface FlyoutSessionFromComponents {
+interface SessionFlyoutProps {
   title: string;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
@@ -41,7 +41,7 @@ interface FlyoutSessionFromComponents {
   childMaxWidth?: number;
 }
 
-const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React.memo((props) => {
+const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth } = props;
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
@@ -258,9 +258,9 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
   );
 });
 
-FlyoutSessionFromComponents.displayName = 'FlyoutSessionFromComponents';
+SessionFlyout.displayName = 'SessionFlyoutFromComponents';
 
-const NonSessionFlyout: React.FC = () => {
+const NonSessionFlyout: React.FC = React.memo(() => {
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -345,74 +345,70 @@ const NonSessionFlyout: React.FC = () => {
       )}
     </>
   );
-};
+});
 
-export const FlyoutWithComponent: React.FC = () => {
-  return (
-    <>
-      <EuiTitle>
-        <h2>
-          Flyouts with <EuiCode>EuiFlyout</EuiCode>
-        </h2>
+NonSessionFlyout.displayName = 'NonSessionFlyoutFromComponents';
+
+export const FlyoutWithComponent: React.FC = () => (
+  <>
+    <EuiTitle>
+      <h2>
+        Flyouts with <EuiCode>EuiFlyout</EuiCode>
+      </h2>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiPanel>
+      <EuiTitle size="s">
+        <h3>
+          With <EuiCode>{'session="start"'}</EuiCode>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h3>
-            With <EuiCode>{'session="start"'}</EuiCode>
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiDescriptionList
-          type="column"
-          listItems={[
-            {
-              title: 'Session J: main size = s, child size = s',
-              description: (
-                <FlyoutSessionFromComponents title="Session J" mainSize="s" childSize="s" />
-              ),
-            },
-            {
-              title: 'Session K: main size = m, child size = s',
-              description: (
-                <FlyoutSessionFromComponents title="Session K" mainSize="m" childSize="s" />
-              ),
-            },
-            {
-              title: 'Session L: main size = fill',
-              description: <FlyoutSessionFromComponents title="Session L" mainSize="fill" />,
-            },
-          ]}
-          css={css`
-            dt {
-              min-width: 25em;
-            }
-          `}
-        />
+      <EuiDescriptionList
+        type="column"
+        listItems={[
+          {
+            title: 'Session J: main size = s, child size = s',
+            description: <SessionFlyout title="Session J" mainSize="s" childSize="s" />,
+          },
+          {
+            title: 'Session K: main size = m, child size = s',
+            description: <SessionFlyout title="Session K" mainSize="m" childSize="s" />,
+          },
+          {
+            title: 'Session L: main size = fill',
+            description: <SessionFlyout title="Session L" mainSize="fill" />,
+          },
+        ]}
+        css={css`
+          dt {
+            min-width: 25em;
+          }
+        `}
+      />
 
-        <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-        <EuiTitle size="s">
-          <h3>
-            With <EuiCode>{'session="never"'}</EuiCode>
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiDescriptionList
-          type="column"
-          listItems={[
-            {
-              title: 'Non-session flyout: size = m',
-              description: <NonSessionFlyout />,
-            },
-          ]}
-          css={css`
-            dt {
-              min-width: 25em;
-            }
-          `}
-        />
-      </EuiPanel>
-    </>
-  );
-};
+      <EuiTitle size="s">
+        <h3>
+          With <EuiCode>{'session="never"'}</EuiCode>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList
+        type="column"
+        listItems={[
+          {
+            title: 'Non-session flyout: size = m',
+            description: <NonSessionFlyout />,
+          },
+        ]}
+        css={css`
+          dt {
+            min-width: 25em;
+          }
+        `}
+      />
+    </EuiPanel>
+  </>
+);

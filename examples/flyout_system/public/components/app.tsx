@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiPageTemplate, EuiText, type EuiPageTemplateProps } from '@elastic/eui';
+import { EuiCode, EuiPageTemplate, EuiText, type EuiPageTemplateProps } from '@elastic/eui';
 import type { OverlayStart } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -53,6 +53,10 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
 
       <EuiPageTemplate.Section grow={true} alignment="top">
         <EuiText>
+          <p>
+            The following filler text is used to test the scroll lock behavior of flyouts that have{' '}
+            <EuiCode>{'ownFocus="true"'}</EuiCode>.
+          </p>
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque aliquam odio
             et faucibus. Nulla rhoncus feugiat eros quis consectetur. Morbi neque ex, condimentum

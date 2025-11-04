@@ -43,7 +43,7 @@ export interface FlyoutFromOverlaysProps {
   rendering: RenderingService;
 }
 
-interface FlyoutSessionProps {
+interface SessionFlyoutProps {
   title: string;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
@@ -52,7 +52,7 @@ interface FlyoutSessionProps {
   overlays: OverlayStart;
 }
 
-const ChildFlyoutContent: React.FC<Pick<FlyoutSessionProps, 'childSize' | 'childMaxWidth'>> =
+const ChildFlyoutContent: React.FC<Pick<SessionFlyoutProps, 'childSize' | 'childMaxWidth'>> =
   React.memo((props) => {
     const { childSize, childMaxWidth } = props;
 
@@ -232,7 +232,7 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
   );
 });
 
-const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
+const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, overlays } = props;
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
@@ -347,7 +347,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
   );
 });
 
-FlyoutSession.displayName = 'FlyoutSession';
+SessionFlyout.displayName = 'SessionFlyoutFromOverlaysService';
 
 const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
   ({ overlays, rendering }) => {
@@ -438,74 +438,72 @@ const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
   }
 );
 
-NonSessionFlyout.displayName = 'NonSessionFlyout';
+NonSessionFlyout.displayName = 'NonSessionFlyoutFromOverlaysService';
 
-export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays, rendering }) => {
-  return (
-    <>
-      <EuiTitle>
-        <h2>
-          Flyouts with <EuiCode>core.overlays</EuiCode> services
-        </h2>
+export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays, rendering }) => (
+  <>
+    <EuiTitle>
+      <h2>
+        Flyouts with <EuiCode>core.overlays</EuiCode> services
+      </h2>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiPanel>
+      <EuiTitle size="s">
+        <h3>
+          With <EuiCode>core.overlays.openSystemFlyout</EuiCode>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h3>
-            With <EuiCode>core.overlays.openSystemFlyout</EuiCode>
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiDescriptionList
-          type="column"
-          listItems={[
-            {
-              title: 'Session X: main size = s, child size = s',
-              description: (
-                <FlyoutSession title="Session X" mainSize="s" childSize="s" overlays={overlays} />
-              ),
-            },
-            {
-              title: 'Session Y: main size = m, child size = s',
-              description: (
-                <FlyoutSession title="Session Y" mainSize="m" childSize="s" overlays={overlays} />
-              ),
-            },
-            {
-              title: 'Session Z: main size = fill',
-              description: <FlyoutSession title="Session Z" mainSize="fill" overlays={overlays} />,
-            },
-          ]}
-          css={css`
-            dt {
-              min-width: 25em;
-            }
-          `}
-        />
+      <EuiDescriptionList
+        type="column"
+        listItems={[
+          {
+            title: 'Session X: main size = s, child size = s',
+            description: (
+              <SessionFlyout title="Session X" mainSize="s" childSize="s" overlays={overlays} />
+            ),
+          },
+          {
+            title: 'Session Y: main size = m, child size = s',
+            description: (
+              <SessionFlyout title="Session Y" mainSize="m" childSize="s" overlays={overlays} />
+            ),
+          },
+          {
+            title: 'Session Z: main size = fill',
+            description: <SessionFlyout title="Session Z" mainSize="fill" overlays={overlays} />,
+          },
+        ]}
+        css={css`
+          dt {
+            min-width: 25em;
+          }
+        `}
+      />
 
-        <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-        <EuiTitle size="s">
-          <h3>
-            With <EuiCode>core.overlays.openFlyout</EuiCode>
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiDescriptionList
-          type="column"
-          listItems={[
-            {
-              title: 'Non-session flyout: size = m',
-              description: <NonSessionFlyout overlays={overlays} rendering={rendering} />,
-            },
-          ]}
-          css={css`
-            dt {
-              min-width: 25em;
-            }
-          `}
-        />
-      </EuiPanel>
-    </>
-  );
-};
+      <EuiTitle size="s">
+        <h3>
+          With <EuiCode>core.overlays.openFlyout</EuiCode>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList
+        type="column"
+        listItems={[
+          {
+            title: 'Non-session flyout: size = m',
+            description: <NonSessionFlyout overlays={overlays} rendering={rendering} />,
+          },
+        ]}
+        css={css`
+          dt {
+            min-width: 25em;
+          }
+        `}
+      />
+    </EuiPanel>
+  </>
+);
