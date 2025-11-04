@@ -14,12 +14,12 @@
  *   version: Bundle (no version)
  */
 
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import type SuperTest from 'supertest';
 
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
@@ -61,7 +61,7 @@ import type { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/c
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-const buildSecuritySolutionApis = (supertest: SuperTest.Agent) => ({
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
   /**
       * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
 the migration process. A successful migration will result in both the old and new indices being present.
@@ -533,11 +533,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const superTestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
-    ...buildSecuritySolutionApis(supertest),
-    createScopedApiInstance: (supertestInstance: SuperTest.Agent) =>
-      buildSecuritySolutionApis(supertestInstance),
+    ...securitySolutionApiServiceFactory(supertest),
+    withUser: (user: { username: string; password: string }) =>
+      securitySolutionApiServiceFactory(supertestWithoutAuth.auth(user.username, user.password)),
   };
 }
 

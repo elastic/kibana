@@ -14,11 +14,11 @@
  *   version: Bundle (no version)
  */
 
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type SuperTest from 'supertest';
 
 import type { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import type { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
@@ -44,7 +44,7 @@ import type { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-pl
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-const buildSecuritySolutionApis = (supertest: SuperTest.Agent) => ({
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
   /**
       * Create a clean draft Timeline or Timeline template for the current user.
 > info
@@ -241,11 +241,12 @@ const buildSecuritySolutionApis = (supertest: SuperTest.Agent) => ({
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const superTestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
-    ...buildSecuritySolutionApis(supertest),
-    createScopedApiInstance: (supertestInstance: SuperTest.Agent) =>
-      buildSecuritySolutionApis(supertestInstance),
+    ...securitySolutionApiServiceFactory(supertest),
+    withUser: (user: { username: string; password: string }) =>
+      securitySolutionApiServiceFactory(supertestWithoutAuth.auth(user.username, user.password)),
   };
 }
 

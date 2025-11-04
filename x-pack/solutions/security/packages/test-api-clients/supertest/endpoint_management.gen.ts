@@ -14,12 +14,12 @@
  *   version: Bundle (no version)
  */
 
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import type SuperTest from 'supertest';
 
 import type { CancelActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/cancel/cancel.gen';
 import type {
@@ -55,7 +55,7 @@ import type { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plu
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-const buildSecuritySolutionApis = (supertest: SuperTest.Agent) => ({
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
   /**
    * Cancel a running or pending response action (Applies only to some agent types).
    */
@@ -331,11 +331,12 @@ const buildSecuritySolutionApis = (supertest: SuperTest.Agent) => ({
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const superTestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
-    ...buildSecuritySolutionApis(supertest),
-    createScopedApiInstance: (supertestInstance: SuperTest.Agent) =>
-      buildSecuritySolutionApis(supertestInstance),
+    ...securitySolutionApiServiceFactory(supertest),
+    withUser: (user: { username: string; password: string }) =>
+      securitySolutionApiServiceFactory(supertestWithoutAuth.auth(user.username, user.password)),
   };
 }
 
