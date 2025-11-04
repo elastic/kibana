@@ -589,11 +589,22 @@ export const createUtmHostVmClient = (
 /**
  * Generates a unique Virtual Machine name using the current user's `username`
  * @param identifier
+ * @param os Optional OS name to include in the VM name (e.g., 'windows', 'darwin', 'ubuntu')
  */
-export const generateVmName = (identifier: string = baseGenerator.randomUser()): string => {
-  return `${userInfo().username.toLowerCase().replaceAll('.', '-')}-${identifier
-    .toLowerCase()
-    .replace('.', '-')}-${Math.random().toString().substring(2, 6)}`;
+export const generateVmName = (
+  identifier: string = baseGenerator.randomUser(),
+  os?: string
+): string => {
+  const username = userInfo().username.toLowerCase().replaceAll('.', '-');
+  const cleanIdentifier = identifier.toLowerCase().replace('.', '-');
+  const randomSuffix = Math.random().toString().substring(2, 6);
+
+  if (os) {
+    const cleanOs = os.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return `${username}-${cleanIdentifier}-${cleanOs}-${randomSuffix}`;
+  }
+
+  return `${username}-${cleanIdentifier}-${randomSuffix}`;
 };
 
 /**

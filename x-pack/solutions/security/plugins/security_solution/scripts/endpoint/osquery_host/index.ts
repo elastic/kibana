@@ -123,7 +123,7 @@ Use --verbose to see detailed logs for every operation.`,
                           Downloads from staging.elastic.co for pre-release testing
                           Example: --staging --version 9.2.0
       --vmName            Optional. Custom prefix for VM names
-                          Default: [username]-osquery-[index]-[random]
+                          Default: [username]-osquery-[index]-[os]-[random]
       --verbose           Optional. Show detailed logs for every operation (Default: false)
                           By default, only summary logs are shown. Use this flag to see individual
                           VM names, policy IDs, and detailed operation logs.
@@ -194,8 +194,9 @@ const runCli: RunFn = async ({ log, flags }) => {
     log.info(`${EMOJIS.CLOCK} Checking for existing Osquery VMs...`);
     const allVmNames = await findVm(vmType, undefined, log);
 
-    // Filter VMs that match our naming pattern: {username}-osquery-{number}(-{random})?
-    const osqueryVmPattern = new RegExp(`^${systemUsername}-osquery-\\d+(-\\d+)?$`);
+    const osqueryVmPattern = new RegExp(
+      `^${systemUsername}-osquery-\\d+(?:-(?:ubuntu|macos|windows|linux|darwin)-\\d+|-\\d+)?$`
+    );
     const matchingVmNames = allVmNames.data.filter((vmName) => osqueryVmPattern.test(vmName));
 
     if (matchingVmNames.length > 0) {
@@ -311,7 +312,10 @@ const runCli: RunFn = async ({ log, flags }) => {
 
         // Create new VM
         const vmIdentifier = `osquery-${vmIndex}`;
-        const vmName = vmNamePrefix ? `${vmNamePrefix}-${vmIndex}` : generateVmName(vmIdentifier);
+        const osNameForVm = vmOs === 'linux' ? 'ubuntu' : vmOs === 'darwin' ? 'macos' : vmOs;
+        const vmName = vmNamePrefix
+          ? `${vmNamePrefix}-${vmIndex}`
+          : generateVmName(vmIdentifier, osNameForVm);
 
         if (verbose) {
           log.info(`${EMOJIS.VM} VM ${vmIndex}/${vmCount}: Creating new VM: ${vmName}`);
