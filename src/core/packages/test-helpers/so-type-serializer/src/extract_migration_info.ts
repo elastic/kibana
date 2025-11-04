@@ -80,8 +80,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
       return {
         version,
         modelVersionHash: getModelVersionHash(modelVersion),
-        // modelVersion hash, reuse getMigrationHash from src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts
-        changeTypes: [...new Set(changes.map((change) => change.type))].sort(), // changes is an array of objects
+        changeTypes: [...new Set(changes.map((change) => change.type))].sort(),
         hasTransformation: hasTransformation(changes),
         newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(changes))),
         schemas: { ...getSchemaPropertiesHashes(schemas) },
