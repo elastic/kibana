@@ -134,4 +134,51 @@ describe('inlineSuggest', () => {
     const templateCacheCall = calls.find((call) => Array.isArray(call[1]));
     expect(templateCacheCall).toBeDefined();
   });
+
+  it('should remove duplicate suggestions', async () => {
+    mockGetRecommendedQueriesTemplates.mockReturnValue([
+      {
+        label: 'Search all fields',
+        description: 'Use WHERE to filter/search data',
+        queryString: 'FROM logs* | WHERE KQL("term")',
+        sortText: 'D',
+      },
+      {
+        label: 'Search ...',
+        description: '',
+        queryString: 'FROM logs* | WHERE KQL("term")',
+        sortText: 'D',
+      },
+    ]);
+    const result = await inlineSuggest('FROM logs*', 'FROM logs*', mockRange, mockCallbacks);
+
+    const suggestions = result.items.map((item) => item.insertText);
+    expect(suggestions.filter((text) => text.includes('WHERE KQL("term")')).length).toBe(1);
+  });
+
+  it('should not suggest same text as the query', async () => {
+    mockGetRecommendedQueriesTemplates.mockReturnValue([
+      {
+        label: 'Search all fields',
+        description: 'Use WHERE to filter/search data',
+        queryString: 'FROM logs* | WHERE KQL("term")',
+        sortText: 'D',
+      },
+      {
+        label: 'Aggregate with STATS',
+        description: '',
+        queryString: 'FROM logs* | STATS count = COUNT(*)',
+        sortText: 'D',
+      },
+    ]);
+    const result = await inlineSuggest(
+      'FROM logs* | WHERE KQL("term")',
+      'FROM logs* | WHERE KQL("term")',
+      mockRange,
+      mockCallbacks
+    );
+
+    const suggestions = result.items.map((item) => item.insertText);
+    expect(suggestions.filter((text) => text.includes('WHERE KQL("term")')).length).toBe(0);
+  });
 });
