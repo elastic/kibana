@@ -523,14 +523,13 @@ export class IndexUpdateService {
       this._flush$
         .pipe(
           withLatestFrom(this.bufferState$, this._pendingColumnsToBeSaved$),
-          map(([, updates, newColumns]) => ({ updates, newColumns })),
           skipWhile(() => !this.isIndexCreated()),
-          filter(({ updates }) => updates.length > 0),
-          map(({ updates, newColumns }) => ({
+          map(([, updates, newColumns]) => ({
             updates,
             newColumns,
             startTime: Date.now(),
           })),
+          filter(({ updates }) => updates.length > 0),
           tap(() => {
             this._isSaving$.next(true);
           }),
@@ -550,7 +549,7 @@ export class IndexUpdateService {
                 : Promise.resolve();
 
             return from(updateMappingPromise).pipe(
-              // Then save all updates using a bulk request
+              // Then save all updates using a bulk request (this code will not execute if updateMapping fails)
               switchMap(() => from(this.bulkUpdate(updates))),
               catchError((errors) => {
                 return of({
