@@ -138,6 +138,19 @@ export default ({ getService }: FtrProviderContext) => {
       expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
     });
 
+    it('generates alerts from Threshold rules when threshold is met and no field is defined', async () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
+        threshold: {
+          field: [],
+          value: 100,
+        },
+      };
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+      expect(previewAlerts.length).toEqual(1);
+    });
+
     it('generates 2 alerts from Threshold rules when threshold is met', async () => {
       const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForAlertTesting(['auditbeat-*']),

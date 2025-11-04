@@ -102,7 +102,10 @@
     "@types/react-dom": "~18.2.0",
     "@xstate5/react/**/xstate": "^5.19.2",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "^3.3.2"
+    "globby/fast-glob": "^3.3.2",
+    "vega-expression": "5.2.1",
+    "vega-interpreter": "1.2.1",
+    "vega-util": "1.17.4"
   },
   "dependencies": {
     "@appland/sql-parser": "^1.5.1",
@@ -1314,7 +1317,7 @@
     "suricata-sid-db": "^1.0.2",
     "swr": "^2.3.3",
     "symbol-observable": "^4.0.0",
-    "tar": "^7.4.3",
+    "tar": "^7.5.1",
     "textarea-caret": "^3.1.0",
     "tinycolor2": "1.4.1",
     "tinygradient": "0.4.3",
@@ -1331,7 +1334,7 @@
     "utility-types": "^3.10.0",
     "uuid": "10.0.0",
     "vega": "^5.33.0",
-    "vega-interpreter": "^1.0.4",
+    "vega-interpreter": "1.2.1",
     "vega-lite": "^5.21.0",
     "vega-schema-url-parser": "^2.2.0",
     "vega-spec-injector": "^0.0.2",
@@ -1887,7 +1890,7 @@
     "rxjs-marbles": "^7.0.1",
     "sass-embedded": "^1.79.6",
     "sass-loader": "^10.5.2",
-    "selenium-webdriver": "^4.36.0",
+    "selenium-webdriver": "^4.37.0",
     "sharp": "0.32.6",
     "simple-git": "^3.27.0",
     "sinon": "^19.0.2",

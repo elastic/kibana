@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React, { Fragment, useEffect, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -32,116 +31,129 @@ import {
 } from '@elastic/eui';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
+import type { ApiStatus, FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
 import { routing } from '../../../../../services/routing';
 import { API_STATUS } from '../../../../../constants';
 import { ContextMenu } from '../context_menu';
+import { usePolling } from '../../../../../hooks';
 
-export class DetailPanel extends Component {
-  static propTypes = {
-    apiStatus: PropTypes.string,
-    followerIndexId: PropTypes.string,
-    followerIndex: PropTypes.object,
-    closeDetailPanel: PropTypes.func.isRequired,
-  };
+const POLL_INTERVAL_MS = 1000;
+const POLL_TIMEOUT_MS = 5000;
 
-  renderFollowerIndex() {
-    const {
-      followerIndex: {
-        remoteCluster,
-        leaderIndex,
-        isPaused,
-        shards,
-        maxReadRequestOperationCount,
-        maxOutstandingReadRequests,
-        maxReadRequestSize,
-        maxWriteRequestOperationCount,
-        maxWriteRequestSize,
-        maxOutstandingWriteRequests,
-        maxWriteBufferCount,
-        maxWriteBufferSize,
-        maxRetryDelay,
-        readPollTimeout,
-      },
-    } = this.props;
+interface FollowerIndexDetailsProps {
+  followerIndex: FollowerIndexWithPausedStatus;
+  isPollingStatus: boolean;
+}
 
-    return (
-      <Fragment>
-        <EuiFlyoutBody>
-          <section>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionList>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.statusLabel"
-                        defaultMessage="Status"
-                      />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
+const FollowerIndexDetails = ({ followerIndex, isPollingStatus }: FollowerIndexDetailsProps) => {
+  const {
+    remoteCluster,
+    leaderIndex,
+    isPaused,
+    shards,
+    maxReadRequestOperationCount,
+    maxOutstandingReadRequests,
+    maxReadRequestSize,
+    maxWriteRequestOperationCount,
+    maxWriteRequestSize,
+    maxOutstandingWriteRequests,
+    maxWriteBufferCount,
+    maxWriteBufferSize,
+    maxRetryDelay,
+    readPollTimeout,
+  } = followerIndex;
 
-                  <EuiDescriptionListDescription data-test-subj="status">
-                    {isPaused ? (
+  return (
+    <Fragment>
+      <EuiFlyoutBody>
+        <section>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.statusLabel"
+                      defaultMessage="Status"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="status">
+                  {isPaused ? (
+                    isPollingStatus ? (
+                      <EuiFlexGroup gutterSize="xs" alignItems="center">
+                        <EuiLoadingSpinner size="s" />
+                        <EuiText size="s" color="subdued">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexDetailPanel.checkingStatus"
+                            defaultMessage="Checking status..."
+                          />
+                        </EuiText>
+                      </EuiFlexGroup>
+                    ) : (
                       <EuiHealth color="subdued">
                         <FormattedMessage
                           id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
                           defaultMessage="Paused"
                         />
                       </EuiHealth>
-                    ) : (
-                      <EuiHealth color="success">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.activeStatus"
-                          defaultMessage="Active"
-                        />
-                      </EuiHealth>
-                    )}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionList>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
+                    )
+                  ) : (
+                    <EuiHealth color="success">
                       <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.remoteClusterLabel"
-                        defaultMessage="Remote cluster"
+                        id="xpack.crossClusterReplication.followerIndexDetailPanel.activeStatus"
+                        defaultMessage="Active"
                       />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
+                    </EuiHealth>
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-                  <EuiDescriptionListDescription data-test-subj="remoteCluster">
-                    {remoteCluster}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
+          <EuiSpacer size="s" />
 
-              <EuiFlexItem>
-                <EuiDescriptionList>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.leaderIndexLabel"
-                        defaultMessage="Leader index"
-                      />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.remoteClusterLabel"
+                      defaultMessage="Remote cluster"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
 
-                  <EuiDescriptionListDescription data-test-subj="leaderIndex">
-                    {leaderIndex}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </section>
+                <EuiDescriptionListDescription data-test-subj="remoteCluster">
+                  {remoteCluster}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
 
-          <EuiSpacer size="l" />
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.leaderIndexLabel"
+                      defaultMessage="Leader index"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
 
+                <EuiDescriptionListDescription data-test-subj="leaderIndex">
+                  {leaderIndex}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+
+        <EuiSpacer size="l" />
+
+        {!isPollingStatus && (
           <section
             aria-labelledby="ccrFollowerIndexDetailSettingsTitle"
             data-test-subj="settingsSection"
@@ -359,40 +371,114 @@ export class DetailPanel extends Component {
               </>
             )}
           </section>
+        )}
 
-          <EuiSpacer size="l" />
+        <EuiSpacer size="l" />
 
-          <section data-test-subj="shardsStatsSection">
-            {shards &&
-              shards.map((shard, i) => (
-                <Fragment key={i}>
-                  <EuiSpacer size="m" />
-                  <EuiTitle size="xs">
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.shardStatsTitle"
-                        defaultMessage="Shard {id} stats"
-                        values={{
-                          id: shard.id,
-                        }}
-                      />
-                    </h3>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
-                  <EuiCodeBlock language="json" data-test-subj="shardsStats">
-                    {JSON.stringify(shard, null, 2)}
-                  </EuiCodeBlock>
-                </Fragment>
-              ))}
-          </section>
-        </EuiFlyoutBody>
-      </Fragment>
-    );
-  }
+        <section data-test-subj="shardsStatsSection">
+          {shards &&
+            shards.map((shard, i) => (
+              <Fragment key={i}>
+                <EuiSpacer size="m" />
+                <EuiTitle size="xs">
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.shardStatsTitle"
+                      defaultMessage="Shard {id} stats"
+                      values={{
+                        id: shard.id,
+                      }}
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock language="json" data-test-subj="shardsStats">
+                  {JSON.stringify(shard, null, 2)}
+                </EuiCodeBlock>
+              </Fragment>
+            ))}
+        </section>
+      </EuiFlyoutBody>
+    </Fragment>
+  );
+};
 
-  renderContent() {
-    const { apiStatus, followerIndex } = this.props;
+export interface DetailPanelProps {
+  apiStatus?: ApiStatus;
+  followerIndexId?: string;
+  followerIndex?: FollowerIndexWithPausedStatus;
+  closeDetailPanel: () => void;
+  getFollowerIndex: (id: string) => void;
+}
 
+export const DetailPanel = ({
+  followerIndexId,
+  closeDetailPanel,
+  followerIndex,
+  apiStatus,
+  getFollowerIndex,
+}: DetailPanelProps) => {
+  const [isInitialLoad, setInitialLoad] = useState(true);
+  const { isPolling, startPolling, stopPolling } = usePolling();
+
+  const shouldPollStatus = useCallback((): boolean => {
+    const params = new URLSearchParams(window.location.search);
+    return !isPolling && params.get('waitForActive') === 'true';
+  }, [isPolling]);
+
+  const clearWaitForActiveParam = useCallback(() => {
+    if (followerIndexId) {
+      routing.navigate(`/follower_indices`, {
+        name: encodeURIComponent(followerIndexId),
+      });
+    }
+  }, [followerIndexId]);
+
+  // Start polling once data is loaded
+  useEffect(() => {
+    const shouldPoll =
+      isInitialLoad &&
+      followerIndexId &&
+      followerIndex &&
+      !!followerIndex?.isPaused &&
+      shouldPollStatus();
+
+    if (shouldPoll) {
+      const onPoll = () => {
+        getFollowerIndex(followerIndexId);
+      };
+
+      const onTimeout = () => {
+        stopPolling();
+        clearWaitForActiveParam();
+      };
+
+      startPolling(POLL_INTERVAL_MS, onPoll, POLL_TIMEOUT_MS, onTimeout);
+      setInitialLoad(false);
+    }
+  }, [
+    clearWaitForActiveParam,
+    followerIndex,
+    followerIndexId,
+    getFollowerIndex,
+    isInitialLoad,
+    isPolling,
+    shouldPollStatus,
+    startPolling,
+    stopPolling,
+  ]);
+
+  // Stop polling when status becomes active
+  useEffect(() => {
+    const shouldStopPolling = isPolling && followerIndex && !followerIndex.isPaused;
+
+    if (shouldStopPolling) {
+      stopPolling();
+      clearWaitForActiveParam();
+    }
+  }, [followerIndex, isPolling, stopPolling, clearWaitForActiveParam]);
+
+  const renderContent = () => {
     if (apiStatus === API_STATUS.LOADING) {
       return (
         <EuiFlyoutBody>
@@ -439,12 +525,10 @@ export class DetailPanel extends Component {
       );
     }
 
-    return this.renderFollowerIndex();
-  }
+    return <FollowerIndexDetails followerIndex={followerIndex} isPollingStatus={isPolling} />;
+  };
 
-  renderFooter() {
-    const { followerIndexId, followerIndex, closeDetailPanel } = this.props;
-
+  const renderFooter = () => {
     // Use ID instead of followerIndex, because followerIndex may not be loaded yet.
     const indexManagementUri = getIndexListUri(`name:${followerIndexId}`);
 
@@ -495,6 +579,7 @@ export class DetailPanel extends Component {
                     }
                     followerIndices={[followerIndex]}
                     testSubj="manageButton"
+                    isPollingStatus={isPolling}
                   />
                 </EuiFlexItem>
               )}
@@ -503,28 +588,24 @@ export class DetailPanel extends Component {
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     );
-  }
+  };
 
-  render() {
-    const { followerIndexId, closeDetailPanel } = this.props;
+  return (
+    <EuiFlyout
+      data-test-subj="followerIndexDetail"
+      onClose={closeDetailPanel}
+      aria-labelledby="followerIndexDetailsFlyoutTitle"
+      size="m"
+      maxWidth={600}
+    >
+      <EuiFlyoutHeader>
+        <EuiTitle size="m" id="followerIndexDetailsFlyoutTitle" data-test-subj="title">
+          <h2>{followerIndexId}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
 
-    return (
-      <EuiFlyout
-        data-test-subj="followerIndexDetail"
-        onClose={closeDetailPanel}
-        aria-labelledby="followerIndexDetailsFlyoutTitle"
-        size="m"
-        maxWidth={600}
-      >
-        <EuiFlyoutHeader>
-          <EuiTitle size="m" id="followerIndexDetailsFlyoutTitle" data-test-subj="title">
-            <h2>{followerIndexId}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-
-        {this.renderContent()}
-        {this.renderFooter()}
-      </EuiFlyout>
-    );
-  }
-}
+      {renderContent()}
+      {renderFooter()}
+    </EuiFlyout>
+  );
+};
