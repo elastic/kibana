@@ -92,6 +92,57 @@ export interface SavedObjectsModelVersion {
  * @public
  */
 export interface SavedObjectsFullModelVersion {
+  /**
+   * The list of changes associated with this version.
+   *
+   * Model version changes are defined via low-level components, allowing to use composition
+   * to describe the list of changes bound to a given version.
+   *
+   * @remark Having multiple changes of the same type in a version's list of change is supported
+   *         by design to allow merging different sources.
+   *
+   * @example Adding a new indexed field with a default value
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *     {
+   *       type: 'data_backfill',
+   *       backfillFn: (doc) => {
+   *         return { attributes: { someNewField: 'some default value' } };
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * @example A version with multiple mappings addition coming from different changes
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *    {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         anotherNewField: { type: 'text' },
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * See {@link SavedObjectsModelChange | changes} for more information and examples.
+   */
   changes: SavedObjectsModelChange[];
   /**
    * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
@@ -101,6 +152,7 @@ export interface SavedObjectsFullModelVersion {
    */
   schemas: SavedObjectsFullModelVersionSchemaDefinitions;
 }
+
 /**
  * A record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.
  * The record's keys must be integers, starting with 1 for the first entry, and there shouldn't be gaps.
