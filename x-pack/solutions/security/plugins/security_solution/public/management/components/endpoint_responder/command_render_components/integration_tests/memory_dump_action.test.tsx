@@ -108,18 +108,18 @@ describe('Memory dump response action', () => {
       });
       mockedContext.setExperimentalFlag({ responseActionsEndpointMemoryDump: false });
       await render();
-      await enterConsoleCommand(renderResult, user, 'memory-dump --type="kernel"');
+      await enterConsoleCommand(renderResult, user, 'memory-dump --kernel');
 
       expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
         'Unsupported text/command' +
-          'The text you entered memory-dump --type="kernel" is unsupported! ' +
+          'The text you entered memory-dump --kernel is unsupported! ' +
           'Click  Help or type help for assistance.'
       );
     });
 
     it('should call memory dump api with expected payload', async () => {
       await render();
-      await enterConsoleCommand(renderResult, user, 'memory-dump --type="kernel"');
+      await enterConsoleCommand(renderResult, user, 'memory-dump --kernel');
 
       await waitFor(() => {
         expect(apiMocks.responseProvider.memoryDump).toHaveBeenCalledWith({
@@ -138,7 +138,7 @@ describe('Memory dump response action', () => {
         }),
       });
       await render();
-      await enterConsoleCommand(renderResult, user, 'memory-dump --type="kernel"');
+      await enterConsoleCommand(renderResult, user, 'memory-dump --kernel');
 
       await waitFor(() => {
         expect(renderResult.getByTestId('memoryDumpResult').textContent).toBeTruthy();
@@ -151,11 +151,7 @@ describe('Memory dump response action', () => {
       ${'entityId'} | ${'some-entity-id'}
     `('should error when $arg is used with --type=kernel', async ({ arg, value }) => {
       await render();
-      await enterConsoleCommand(
-        renderResult,
-        user,
-        `memory-dump --type="kernel" --${arg}=${value}`
-      );
+      await enterConsoleCommand(renderResult, user, `memory-dump --kernel --${arg}=${value}`);
 
       expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
         '"pid" and "entityId" arguments are not supported for "kernel" memory dumps'
@@ -164,7 +160,7 @@ describe('Memory dump response action', () => {
 
     it('should error when type is process but no pid or entity id entered', async () => {
       await render();
-      await enterConsoleCommand(renderResult, user, `memory-dump --type="process"`);
+      await enterConsoleCommand(renderResult, user, `memory-dump --process`);
 
       expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
         '"pid" or "entityId argument is required for "process" memory dumps'
@@ -175,40 +171,28 @@ describe('Memory dump response action', () => {
       hostPlatform = 'macos';
       capabilities = capabilities.filter((value) => value !== 'memdump_kernel');
       await render();
-      await enterConsoleCommand(renderResult, user, `memory-dump --type="kernel"`);
+      await enterConsoleCommand(renderResult, user, `memory-dump --kernel`);
 
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'Invalid argument value: --type. "kernel" memory dump type is not currently supported for this host OS type (macos)'
+        'Invalid argument value: --kernel. "kernel" memory dump type is not currently supported for this host OS type (macos)'
       );
     });
 
     it('should disable command if endpoint does not support memory dump', async () => {
-      capabilities = capabilities.filter((value) => value !== 'memdump_process');
-      await render();
-      await enterConsoleCommand(renderResult, user, `memory-dump --type="process" --pid=123`);
-
-      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-        'The current version of the Elastic Defend Agent does not support memory-dump. ' +
-          'Upgrade your Elastic Agent through Fleet to the latest version to enable this response action.'
+      capabilities = capabilities.filter(
+        (value) => value !== 'memdump_process' && value !== 'memdump_kernel'
       );
-    });
-
-    it('should error if type is not kernel or process', async () => {
       await render();
-      await enterConsoleCommand(renderResult, user, `memory-dump --type="unknown-value"`);
+      await enterConsoleCommand(renderResult, user, `memory-dump --process --pid=123`);
 
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'Invalid argument value: --type. Valid types are: kernel, process'
+        'Invalid argument value: --process. "process" memory dump type is not currently supported for this host OS type (linux)'
       );
     });
 
     it('should error if PID is not a number', async () => {
       await render();
-      await enterConsoleCommand(
-        renderResult,
-        user,
-        `memory-dump --type="process" --pid="some-number"`
-      );
+      await enterConsoleCommand(renderResult, user, `memory-dump --process --pid="some-number"`);
 
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'Argument --pid value must be a number'
@@ -217,11 +201,7 @@ describe('Memory dump response action', () => {
 
     it('should error is entity id is empty string', async () => {
       await render();
-      await enterConsoleCommand(
-        renderResult,
-        user,
-        `memory-dump --type="process" --entityId="    "`
-      );
+      await enterConsoleCommand(renderResult, user, `memory-dump --process --entityId="    "`);
 
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'Argument --entityId must have a value'

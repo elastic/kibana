@@ -80,7 +80,7 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test').textContent).toEqual(
-      'Memory dump file as created on host:' +
+      'Memory dump file was created on host:' +
         `File: /home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip` +
         'Size: 22.79MB' +
         'Disk free space: 1.15GB'
@@ -123,7 +123,7 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test').textContent).toEqual(
-      'Memory dump file as created on host:' +
+      'Memory dump file was created on host:' +
         'File: /home/user/agent-2/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip' +
         'Size: 22.26KB' +
         'Disk free space: 1.10MB'
