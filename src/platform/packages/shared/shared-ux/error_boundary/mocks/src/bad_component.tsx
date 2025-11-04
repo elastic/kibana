@@ -25,8 +25,8 @@ export const BadComponent = () => {
   };
 
   return (
-    <EuiButton onClick={handleClick} data-test-subj="clickForErrorBtn">
-      Click for error
+    <EuiButton color="danger" onClick={handleClick} data-test-subj="clickForErrorBtn">
+      Throw error
     </EuiButton>
   );
 };
