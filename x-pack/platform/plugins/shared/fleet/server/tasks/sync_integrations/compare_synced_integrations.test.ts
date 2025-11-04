@@ -1025,6 +1025,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
               },
             },
           ],
+          created_date_millis: 1762258252589,
         },
       });
       (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({

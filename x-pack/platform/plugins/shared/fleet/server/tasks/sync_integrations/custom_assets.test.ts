@@ -890,6 +890,51 @@ describe('custom assets', () => {
       expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
     });
 
+    it('should not update ingest pipeline if not changed except timestamps', async () => {
+      esClientMock = {
+        ingest: {
+          getPipeline: jest.fn().mockResolvedValue({
+            'logs-system.auth@custom': {
+              processors: [
+                {
+                  user_agent: {
+                    field: 'user_agent',
+                  },
+                },
+              ],
+              created_date_millis: 1762258252589,
+            },
+          }),
+          putPipeline: jest.fn().mockResolvedValue({}),
+        },
+      };
+
+      await installCustomAsset(
+        {
+          is_deleted: false,
+          name: 'logs-system.auth@custom',
+          package_name: 'system',
+          package_version: '0.1.0',
+          pipeline: {
+            processors: [
+              {
+                user_agent: {
+                  field: 'user_agent',
+                },
+              },
+            ],
+            created_date_millis: 1762258252588,
+          },
+          type: 'ingest_pipeline',
+        },
+        esClientMock,
+        new AbortController(),
+        { debug: jest.fn() } as any
+      );
+
+      expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
+    });
+
     it('should not create ingest pipeline if has enrich processor', async () => {
       esClientMock = {
         ingest: {
