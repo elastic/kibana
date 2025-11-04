@@ -9,9 +9,7 @@
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { getAccessControlClient } from '../../services/access_control_service';
-import type { DashboardState } from '../../../common';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardApi } from '../get_dashboard_api';
@@ -19,6 +17,8 @@ import { startQueryPerformanceTracking } from '../performance/query_performance_
 import type { DashboardCreationOptions } from '../types';
 import { transformPanels } from './transform_panels';
 import { getUserAccessControlData } from './get_user_access_control_data';
+import { dashboardClient } from '../../dashboard_client';
+import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -30,17 +30,14 @@ export async function loadDashboardApi({
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  const [savedObjectResult, user, isAccessControlEnabled] = await Promise.all([
-    getDashboardContentManagementService().loadDashboardState({
-      id: savedObjectId,
-    }),
-    getUserAccessControlData(),
-    getAccessControlClient().isAccessControlEnabled(),
-  ]);
+  const [savedObjectResult, user, isAccessControlEnabled] = savedObjectId
+    ? await Promise.all([
+        dashboardClient.get(savedObjectId),
+        getUserAccessControlData(),
+        getAccessControlClient().isAccessControlEnabled(),
+      ])
+    : [undefined, undefined, undefined];
 
-  // --------------------------------------------------------------------------------------
-  // Run validation.
-  // --------------------------------------------------------------------------------------
   const validationResult =
     savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
   if (validationResult === 'invalid') {
@@ -50,25 +47,10 @@ export async function loadDashboardApi({
     return;
   }
 
-  // --------------------------------------------------------------------------------------
-  // Combine saved object state and session storage state
-  // --------------------------------------------------------------------------------------
-  const sessionStorageInput = ((): Partial<DashboardState> | undefined => {
-    if (!creationOptions?.useSessionStorageIntegration) return;
-    return getDashboardBackupService().getState(savedObjectResult.dashboardId);
-  })();
+  const unsavedChanges = creationOptions?.useSessionStorageIntegration
+    ? getDashboardBackupService().getState(savedObjectId)
+    : undefined;
 
-  const combinedSessionState: DashboardState = {
-    ...(savedObjectResult?.dashboardInput ?? {}),
-    ...sessionStorageInput,
-  };
-  combinedSessionState.references = sessionStorageInput?.references?.length
-    ? sessionStorageInput?.references
-    : savedObjectResult?.references;
-
-  // --------------------------------------------------------------------------------------
-  // Combine state with overrides.
-  // --------------------------------------------------------------------------------------
   const { viewMode, ...overrideState } = creationOptions?.getInitialInput?.() ?? {};
   if (overrideState.panels) {
     overrideState.panels = await transformPanels(overrideState.panels, overrideState.references);
@@ -79,14 +61,13 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
-  // --------------------------------------------------------------------------------------
-  // get dashboard Api
-  // --------------------------------------------------------------------------------------
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddables,
     initialState: {
-      ...combinedSessionState,
+      ...DEFAULT_DASHBOARD_STATE,
+      ...savedObjectResult?.data,
+      ...unsavedChanges,
       ...overrideState,
     },
     savedObjectResult,
