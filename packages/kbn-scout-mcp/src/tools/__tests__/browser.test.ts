@@ -101,7 +101,7 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(mockPage.gotoApp).toHaveBeenCalledWith('discover', undefined);
+      expect(mockPage.gotoApp).toHaveBeenCalledWith('discover');
     });
 
     it('should navigate to an app with path', async () => {
