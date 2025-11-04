@@ -889,18 +889,22 @@ export class SearchSource {
     }
 
     // Evaluate filters if they are functions
-    const filters = typeof searchRequest.filters === 'function'
-      ? searchRequest.filters()
-      : searchRequest.filters;
+    const filters =
+      typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters;
 
-    const nonHighlightingFilters = typeof searchRequest.nonHighlightingFilters === 'function'
-      ? searchRequest.nonHighlightingFilters()
-      : searchRequest.nonHighlightingFilters;
+    const nonHighlightingFilters =
+      typeof searchRequest.nonHighlightingFilters === 'function'
+        ? searchRequest.nonHighlightingFilters()
+        : searchRequest.nonHighlightingFilters;
 
     // Merge filters and nonHighlightingFilters for the main query
     const allFilters = [
       ...(Array.isArray(filters) ? filters : filters ? [filters] : []),
-      ...(Array.isArray(nonHighlightingFilters) ? nonHighlightingFilters : nonHighlightingFilters ? [nonHighlightingFilters] : []),
+      ...(Array.isArray(nonHighlightingFilters)
+        ? nonHighlightingFilters
+        : nonHighlightingFilters
+        ? [nonHighlightingFilters]
+        : []),
     ];
 
     const builtQuery = this.getBuiltEsQuery({
