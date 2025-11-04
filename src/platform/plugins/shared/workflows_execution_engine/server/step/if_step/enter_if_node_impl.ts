@@ -99,7 +99,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
       return false;
     }
 
-    if (typeof condition !== 'string') {
+    if (typeof condition === 'string') {
       try {
         return evaluateKql(condition, this.stepExecutionRuntime.contextManager.getContext());
       } catch (error) {
