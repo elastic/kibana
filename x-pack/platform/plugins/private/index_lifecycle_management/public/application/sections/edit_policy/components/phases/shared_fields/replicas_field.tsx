@@ -31,7 +31,7 @@ export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
         'xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription',
         {
           defaultMessage:
-            'Set the number of replicas. Remains the same as the previous phase by default.',
+            'Set the number of replicas. Remains the same as the previous phase by default, unless Convert to fully-mounted index is enabled.',
         }
       )}
       switchProps={{
