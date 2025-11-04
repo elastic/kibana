@@ -112,16 +112,16 @@ const capabilitiesAndPrivilegesValidator = (
     const agentCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
     const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
     const responderCapability =
-      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName] ?? [];
     let errorMessage = '';
 
     // We only validate Agent capabilities for the command for Endpoint agents
     if (agentType === 'endpoint') {
-      if (!responderCapability) {
+      if (!responderCapability.length) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
-      }
-
-      if (responderCapability && !agentCapabilities.includes(responderCapability)) {
+      } else if (
+        !responderCapability.some((capability) => agentCapabilities.includes(capability))
+      ) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       }
     }
@@ -210,11 +210,12 @@ export const getEndpointConsoleCommands = ({
       return true;
     }
 
-    const responderCapability =
-      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+    const responderCapability: EndpointCapabilities[] = [
+      ...(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName] ?? []),
+    ];
 
-    if (responderCapability) {
-      return endpointCapabilities.includes(responderCapability);
+    if (responderCapability.length) {
+      return responderCapability.some((capability) => endpointCapabilities.includes(capability));
     }
 
     return false;
