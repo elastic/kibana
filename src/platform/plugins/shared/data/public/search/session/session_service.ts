@@ -631,7 +631,6 @@ export class SessionService {
       initialState,
       sessionId,
     });
-    this.pollInProgressBackgroundSearches();
 
     // if we are still interested in this result
     if (this.isCurrentSession(sessionId)) {
@@ -672,6 +671,7 @@ export class SessionService {
       await extendSearchesPromise;
     }
 
+    this.pollInProgressBackgroundSearches();
     return searchSessionSavedObject;
   }
 
