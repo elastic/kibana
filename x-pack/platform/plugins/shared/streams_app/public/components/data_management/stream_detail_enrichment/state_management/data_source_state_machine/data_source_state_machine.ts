@@ -67,7 +67,7 @@ export const dataSourceMachine = setup({
     },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcUGUD2BXATgMZgDEqGOBxAdBGADZhpgDaADALqKgAO2sASzQDsAO24gAHogCcMgMzUZAdlUAmNcpkBWACwBGfQBoQAT0S6AbIrYAOW5pn7ry2-rbKAvp5PkseIlI-SkDqNGwoKEYAQUJhADchU3YuJBA+QWExCWkENQNqZQ8ZNQUithldE3MEXTVLamttfRk3S202Uo9vX3R-KiC+kJpwyJi4gUS0ZP1U3n4hEXE03OtbajV5W11leTr9eWU1aot6xvlm1ucO0p6QYICaOmZ8AFsBUQ+oEhSJDMXsitEABafRqahsfS2eRsSz6ZTaaEIzYnBCI5TUeQySH6XQXEpwrw+e5DR5gWhMMBvD5fH6zP4LLLLUC5ZzrXH2WwySw6KHaZRVMyIRENLRqbSVWGWIpqO4PAbUMCiFAAI0YEDIpIV+DAADMdbAABa-NL-Jk5RDuNjUDm6Wwi3YVfTaVFIiH83TNTryUpqfRyrWhJWq9Waihk6iEQ0oUQwE3zTJLC1ojqFZS49MeXYdF1ChAlfQ2uoVG5aOQyAPhhXBtWQMP9UJRmNx+mmxlJoEIK3aG2tBE7O0HPGogtFtQlzq2SsNmg19UUlV4USEL4AYWjsbgJEksAwzGoKF1LwAFPLAuvm2AACJgRe4ZdgAAqAleYAAlPXhuS55AF0uV7GF6brA8bpO2gIsog8jQRCVh4jC456LYyiWKi7gOEo8jwkhKjuK405foqyq1hA1D0NgKAQF8V59CQVL4Ng+DUDw9DoLqjGvLQfSrtg9CMHEjGxOE+CgWaHaQQg0I2to1gIZ0zjSsoaFsDBbCdCplwwgc3jEqI2B0PAaRnsQDKJhBUggnC1C2Gp0qWDsOibChqLQTINoXOOyFFPClgERGzxUu8nyxqZALMhZCCgjY8KuDJGZOChxx5p6hbtNoFzpR0dTjrofnVsR6qheanZRdZtkoQ52hORKqIytQ2genCMKqPy2h5UGBW-gIECMEV4kRc6GJYh44oOLsliaGhGjgnYpTws4nTtESvRVh1Ia-nQd7LmuG4wIZCZhcmE1uc6dQ7DJRSejIykCpiDhsJ6dq6E41jtbOnWkeRlHUX0fXmbkey9gomxVQ9iWCjUJTWnizSGItMnbG95JUbA60QH94UA9YGyGPaOzOs6kIQ8K9pFkTHQoQ42nEsZyMMJS6NtmZmOWip6ytRcWJ2viqF5jJ1rDWCmhsIilQVjpQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcUGUD2BXATgMZgB0EYaY+AtgJYB2DUAxANoAMAuoqAA7axaaWtno8QAD0QBaAIwAmEu1kAOAMzsAbLIDsAVnX75agDQgAnogM6SagJzLNmlXYAsRtQF9PZ1BhwExGQUVHSM9CysstxIIPyCwqLiUgiyziSyrirZdpp2eqp6Oq5mlggGmiQ6dvJ6blqaOuzy3r7oWHhEpGD0KABGADaQzH4dgaRo2FBQQwCChMIAbkLmHDF8AkIiYrEpdZWqafI6asdqeux6pYia7iTOddWushfydq0gowFdJD39QxARu1vkF8GAAGZg2AACzW4niWySu0Q+SUdh0TVc2hO7DsL2uCBcdhI+wK52Mb3ksg+X06QT+g2GtPGJEI0JQETAcNiCMSO1AKSxrgyeQcKiKJwuVwsKKaSip7Cyenkmj0zlcNOBdO6vUZgOZPzZHJgUXWcU2fOSiBcKhJpzU4tkdnUdWlZXR7HlskV4pVavFmv82t+uoBJAG2BQECYABF2swqPhsPgSLwBuhwcnqGR2gBhbADIYLZPzSb4bkbBLbK0IHS2716PRZfJUpwYgne1FNzs6PIaWReHyfLUs6Owf5Mkc-SbTOYLWjLNCrLjwi3V5EIDRqEmZPLPE54tQlGUIW42B7otwvZrvIcGoJjif6qcPsBDSgV81VpECqyabf5E8KhYgUFyyASBSKLkOjyG8zyvLeQ70Ng5DwLE95gKu378pIMhOCQjquBKbzKmovYEs8nryM8ThFG8djnERgZjD85CUDQDBMFhiI4Sk0h6CQrjsC4W6nLI4nKPIEGKrYW6NLUInHMxII6k+3GWhuci2oRxEtmRmgEioChorcmjsGoLwuHoynBgyYa0BAQzqeuv6pMqsl2G4REYmomjHB28jAfcVKXk4zSqjoNksnZkDhpG0YRHGGDOT+uEIG8GRKq4sGYr21EEs6UHFLo5KquqUWsbQ456ilvGIL525UoU7gvNemQQeKmXKER7C9ioVKDm0Qajm+IQQLVNbATY2V5GkrhZOcuQUeiVQ0b6lwuK4iGeEAA */
   id: 'dataSource',
   context: ({ input }) => ({
     parentRef: input.parentRef,
@@ -76,31 +76,6 @@ export const dataSourceMachine = setup({
     data: [],
   }),
   initial: 'determining',
-  on: {
-    'dataSource.change': {
-      actions: [
-        { type: 'storeDataSource', params: ({ event }) => event },
-        { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
-      ],
-    },
-    'dataSource.toggleActivity': [
-      {
-        guard: 'isEnabled',
-        target: '.disabled',
-        actions: [
-          { type: 'toggleDataSourceActivity' },
-          { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
-        ],
-      },
-      {
-        target: '.enabled',
-        actions: [
-          { type: 'toggleDataSourceActivity' },
-          { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
-        ],
-      },
-    ],
-  },
   states: {
     determining: {
       always: [{ target: 'enabled', guard: 'isEnabled' }, { target: 'disabled' }],
@@ -108,7 +83,14 @@ export const dataSourceMachine = setup({
     enabled: {
       initial: 'loadingData',
       on: {
-        'dataSource.refresh': '.loadingData',
+        'dataSource.toggleActivity': {
+          target: 'disabled',
+          actions: [
+            { type: 'toggleDataSourceActivity' },
+            { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+          ],
+        },
+        'dataSource.refresh': { target: '.loadingData', reenter: true },
         'dataSource.change': [
           {
             guard: 'shouldCollectData',
@@ -165,6 +147,13 @@ export const dataSourceMachine = setup({
     },
     disabled: {
       on: {
+        'dataSource.toggleActivity': {
+          target: 'enabled',
+          actions: [
+            { type: 'toggleDataSourceActivity' },
+            { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+          ],
+        },
         'dataSource.delete': 'deleted',
       },
     },
