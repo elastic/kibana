@@ -12,7 +12,7 @@ paths:
       parameters:
         - name: entityTypes
           in: query
-          required: true
+          required: false
           schema:
             type: array
             items:

@@ -118,7 +118,7 @@ export const deleteEntityEnginesRoute = (
         try {
           const secSol = await context.securitySolution;
           let engines = request.query.entityTypes;
-          if (engines.length === 0) {
+          if (engines === undefined || engines.length === 0) {
             engines = [EntityType.user, EntityType.host, EntityType.service, EntityType.generic];
           }
 

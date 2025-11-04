@@ -46,7 +46,7 @@ export const DeleteEntityEnginesRequestQuery = z.object({
   /**
    * The entity type of the engine ('user', 'host', 'service', 'generic').
    */
-  entityTypes: ArrayFromString(EntityType),
+  entityTypes: ArrayFromString(EntityType).optional(),
   /**
    * Control flag to also delete the entity data.
    */
