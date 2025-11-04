@@ -63,7 +63,6 @@ export const secAll: Role = {
       {
         feature: {
           siemV5: ['all'],
-          rules: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -102,7 +101,6 @@ export const secReadCasesAll: Role = {
       {
         feature: {
           siemV5: ['read'],
-          rules: ['read'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -140,7 +138,6 @@ export const secAllCasesOnlyReadDelete: Role = {
       {
         feature: {
           siemV5: ['all'],
-          rules: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -178,7 +175,6 @@ export const secAllCasesNoDelete: Role = {
       {
         feature: {
           siemV5: ['all'],
-          rules: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -199,6 +195,63 @@ export const secAllCasesNoDeleteUser: User = {
   username: 'sec_all_cases_no_delete_user',
   password: 'password',
   roles: [secAllCasesNoDelete.name],
+};
+
+export const rulesAll: Role = {
+  name: 'rules_all_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionRulesV1: ['all'],
+          actions: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const rulesRead: Role = {
+  name: 'rules_read_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionRulesV1: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const rulesAllUser: User = {
+  username: 'rules_all_user',
+  password: 'password',
+  roles: [rulesAll.name],
+};
+
+export const rulesReadUser: User = {
+  username: 'rules_read_user',
+  password: 'password',
+  roles: [rulesRead.name],
 };
 
 const getUserInfo = (user: User): UserInfo => ({
