@@ -23,7 +23,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: c2d-highcpu-16
+      machineType: c4d-standard-16-lssd
       preemptible: true
       diskSizeGb: 150
     key: build
