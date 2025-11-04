@@ -14,11 +14,15 @@ import * as dbscanModule from './dbscan';
 
 // mock ai-tools heavy functions to keep test deterministic and focused
 jest.mock('@kbn/ai-tools', () => {
+  const module = jest.requireActual('@kbn/ai-tools');
+
   return {
+    formatDocumentAnalysis: module.formatDocumentAnalysis,
     mergeSampleDocumentsWithFieldCaps: jest.fn().mockImplementation(({ hits }) => {
       return {
         total: hits.length,
-        analyzedFields: hits.length > 0 ? Object.keys(hits[0]._source || {}) : [],
+        sampled: hits.length > 0 ? Object.keys(hits[0]._source || {}) : [],
+        fields: [],
       };
     }),
   };
