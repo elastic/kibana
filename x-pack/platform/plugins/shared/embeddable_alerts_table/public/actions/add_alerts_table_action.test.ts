@@ -5,15 +5,20 @@
  * 2.0.
  */
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 
 import { getAddAlertsTableAction } from './add_alerts_table_action';
 import { ALERTS_FEATURE_ID } from '@kbn/alerts-ui-shared/src/common/constants';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const core = coreMock.createStart();
 const mockPresentationContainer = getMockPresentationContainer();
+
+const data = dataPluginMock.createStartContract();
+const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
 jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
 const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
@@ -25,7 +30,7 @@ describe('getAddAlertsTableAction', () => {
     ] as unknown as InternalRuleType[];
     mockGetInternalRuleTypes.mockResolvedValue(ruleTypes);
 
-    const action = getAddAlertsTableAction(core);
+    const action = getAddAlertsTableAction(core, unifiedSearch, data);
 
     const isCompatible = await action.isCompatible!({
       embeddable: mockPresentationContainer,
@@ -38,7 +43,7 @@ describe('getAddAlertsTableAction', () => {
     const ruleTypes = [] as unknown as InternalRuleType[];
     mockGetInternalRuleTypes.mockResolvedValue(ruleTypes);
 
-    const action = getAddAlertsTableAction(core);
+    const action = getAddAlertsTableAction(core, unifiedSearch, data);
 
     const isCompatible = await action.isCompatible!({
       embeddable: mockPresentationContainer,

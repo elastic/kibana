@@ -31,7 +31,8 @@
       "ruleRegistry",
       "files",
       "contentManagement",
-      "uiActions"
+      "uiActions",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "cloud",
