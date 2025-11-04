@@ -6,18 +6,15 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import type { AppMountParameters, CoreSetup, AppUpdater } from '@kbn/core/public';
-import type { Observable } from 'rxjs';
+import type { AppMountParameters, CoreSetup } from '@kbn/core/public';
 import { DATA_CONNECTORS_ROUTE } from '../common';
-import type { DataConnectorsPluginStart, DataConnectorsPluginStartDependencies } from './types';
 import { DATA_CONNECTORS_APP_ID, DATA_CONNECTORS_FULL_TITLE } from '../common/constants';
+import type { DataConnectorsPluginStart, DataConnectorsPluginStartDependencies } from './types';
 
 export const registerApp = ({
   core,
-  updater$,
 }: {
   core: CoreSetup<DataConnectorsPluginStartDependencies, DataConnectorsPluginStart>;
-  updater$: Observable<AppUpdater>;
 }) => {
   core.application.register({
     id: DATA_CONNECTORS_APP_ID,
@@ -25,8 +22,7 @@ export const registerApp = ({
     category: DEFAULT_APP_CATEGORIES.workplaceAI,
     appRoute: DATA_CONNECTORS_ROUTE,
     euiIconType: 'logoElasticsearch', // TODO: Workplace AI solution icon
-    visibleIn: [],
-    updater$,
+    visibleIn: ['sideNav', 'globalSearch'],
     mount: async (params: AppMountParameters) => {
       const { renderApp } = await import('./application');
       const [coreStart, pluginsStart, services] = await core.getStartServices();

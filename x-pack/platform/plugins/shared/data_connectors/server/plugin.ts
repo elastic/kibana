@@ -12,6 +12,7 @@ import type {
   DataConnectorsServerStart,
   DataConnectorsServerStartDependencies,
 } from './types';
+import { registerUISettings } from './register';
 
 export class DataConnectorsServerPlugin
   implements
@@ -24,6 +25,8 @@ export class DataConnectorsServerPlugin
 {
   constructor(context: PluginInitializerContext) {}
   setup(core: CoreSetup): DataConnectorsServerSetup {
+    const { uiSettings } = core;
+    registerUISettings({ uiSettings });
     return {};
   }
   start(core: CoreStart): DataConnectorsServerStart {
