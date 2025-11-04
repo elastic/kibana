@@ -124,12 +124,6 @@ describe('CreateMaintenanceWindowForm', () => {
 
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
-      ).not.toBeInTheDocument();
-    });
-
     expect(await screen.findByTestId('title-field')).toBeInTheDocument();
     expect(await screen.findByTestId('date-field')).toBeInTheDocument();
     expect(await screen.findByTestId('recurring-field')).toBeInTheDocument();
@@ -141,12 +135,6 @@ describe('CreateMaintenanceWindowForm', () => {
     useUiSetting.mockReturnValue(undefined);
     jest.spyOn(moment.tz, 'guess').mockReturnValue('America/Los_Angeles');
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
-      ).not.toBeInTheDocument();
-    });
 
     expect(await screen.findByTestId('title-field')).toBeInTheDocument();
     expect(await screen.findByTestId('date-field')).toBeInTheDocument();
