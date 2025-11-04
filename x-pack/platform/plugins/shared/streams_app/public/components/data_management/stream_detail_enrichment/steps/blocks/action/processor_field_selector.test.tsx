@@ -62,10 +62,14 @@ jest.mock('../../../../shared/field_selector', () => ({
       compressed,
       fullWidth,
       suggestions,
-      ...restProps
+      labelAppend,
+      autoFocus,
     }) => (
       <div>
-        <label htmlFor="mock-field-selector">{label}</label>
+        <label htmlFor="mock-field-selector">
+          {label}
+          {labelAppend && <span>{labelAppend}</span>}
+        </label>
         {helpText && <div>{helpText}</div>}
         <input
           id="mock-field-selector"
@@ -74,7 +78,7 @@ jest.mock('../../../../shared/field_selector', () => ({
           onChange={(e) => onChange?.(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          {...restProps}
+          autoFocus={autoFocus}
         />
         {isInvalid && error && <div role="alert">{error}</div>}
       </div>
