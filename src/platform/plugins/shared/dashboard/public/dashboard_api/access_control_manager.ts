@@ -9,17 +9,17 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { DashboardAPIGetOut } from '../../server/content_management';
 import { getAccessControlClient } from '../services/access_control_service';
 import { CONTENT_ID } from '../../common/content_management';
-import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 
 export function initializeAccessControlManager(
-  savedObjectResult?: LoadDashboardReturn,
+  savedObjectResult?: DashboardAPIGetOut,
   savedObjectId$?: BehaviorSubject<string | undefined>
 ) {
   const accessControl$ = new BehaviorSubject<Partial<SavedObjectAccessControl>>({
-    owner: savedObjectResult?.accessControl?.owner,
-    accessMode: savedObjectResult?.accessControl?.accessMode,
+    owner: savedObjectResult?.data?.accessControl?.owner,
+    accessMode: savedObjectResult?.data?.accessControl?.accessMode,
   });
 
   async function changeAccessMode(accessMode: SavedObjectAccessControl['accessMode']) {
