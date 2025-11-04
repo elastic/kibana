@@ -14,7 +14,7 @@ import { URL } from 'url';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Mutex } from 'async-mutex';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { ScoutTestConfig, KibanaRole, ElasticsearchRoleDescriptor } from '@kbn/scout';
+import type { ScoutTestConfig, KibanaRole, ElasticsearchRoleDescriptor, ScoutPage } from '@kbn/scout';
 import type { SamlSessionManager, HostOptions } from '@kbn/test';
 import {
   SamlSessionManager as SamlSessionManagerClass,
@@ -35,6 +35,7 @@ import type { ScoutMcpConfig } from './types';
 /**
  * Kibana URL helper - simplified version of Scout's KibanaUrl
  * Using a simple object instead of class to avoid "too many classes" lint error
+ * This matches the interface Scout expects for KibanaUrl
  */
 function createKibanaUrlHelper(baseUrl: URL) {
   return {
@@ -44,14 +45,101 @@ function createKibanaUrlHelper(baseUrl: URL) {
     domain(): string {
       return baseUrl.hostname;
     },
-    app(appName: string, options?: { space?: string }): string {
-      const relPath = options?.space ? `s/${options.space}/app/${appName}` : `/app/${appName}`;
-      return new URL(relPath, baseUrl).href;
+    app(appName: string, options?: { space?: string; pathOptions?: { path?: string } }): string {
+      const spacePath = options?.space ? `s/${options.space}` : '';
+      const appPath = `${spacePath}/app/${appName}`;
+      const fullPath = options?.pathOptions?.path
+        ? `${appPath}${options.pathOptions.path.startsWith('/') ? '' : '/'}${options.pathOptions.path}`
+        : appPath;
+      return new URL(fullPath, baseUrl).href;
     },
     toString(): string {
       return baseUrl.href;
     },
   };
+}
+
+/**
+ * Extend Playwright Page with Scout functionality
+ * This replicates Scout's extendPlaywrightPage function for MCP usage
+ */
+function extendPageWithScoutHelpers(page: Page, kbnUrl: ReturnType<typeof createKibanaUrlHelper>): ScoutPage {
+  const scoutPage = page as ScoutPage;
+
+  // Helper to create testSubj methods
+  const createTestSubjMethod = (methodName: keyof Page) => {
+    return (...args: any[]) => {
+      const selector = args[0];
+      const testSubjSelector = subj(selector);
+      return (page[methodName] as Function)(testSubjSelector, ...args.slice(1));
+    };
+  };
+
+  // Create testSubj object with all the methods
+  scoutPage.testSubj = {
+    check: createTestSubjMethod('check'),
+    click: createTestSubjMethod('click'),
+    dblclick: createTestSubjMethod('dblclick'),
+    fill: createTestSubjMethod('fill'),
+    focus: createTestSubjMethod('focus'),
+    getAttribute: createTestSubjMethod('getAttribute'),
+    hover: createTestSubjMethod('hover'),
+    innerText: createTestSubjMethod('innerText'),
+    isEnabled: createTestSubjMethod('isEnabled'),
+    isChecked: createTestSubjMethod('isChecked'),
+    isHidden: createTestSubjMethod('isHidden'),
+    isVisible: createTestSubjMethod('isVisible'),
+    locator: createTestSubjMethod('locator'),
+    waitForSelector: createTestSubjMethod('waitForSelector'),
+
+    // Custom methods
+    typeWithDelay: async (selector: string, text: string, options?: { delay: number }) => {
+      const { delay = 25 } = options || {};
+      const testSubjSelector = subj(selector);
+      await page.locator(testSubjSelector).click();
+      for (const char of text) {
+        await page.keyboard.insertText(char);
+        await page.waitForTimeout(delay);
+      }
+    },
+
+    clearInput: async (selector: string) => {
+      const testSubjSelector = subj(selector);
+      await page.locator(testSubjSelector).fill('');
+    },
+  };
+
+  // Add gotoApp method - matches Scout's signature
+  scoutPage.gotoApp = (appName: string, pathOptions?: { params?: Record<string, string>; hash?: string }) => {
+    return page.goto(kbnUrl.app(appName, { pathOptions }));
+  };
+
+  // Add waitForLoadingIndicatorHidden method
+  scoutPage.waitForLoadingIndicatorHidden = () => {
+    return scoutPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
+      state: 'attached',
+    });
+  };
+
+  // Add keyTo method (simplified - could be enhanced)
+  scoutPage.keyTo = async (
+    selector: string,
+    key: string,
+    maxElementsToTraverse: number = 1000
+  ) => {
+    // Simplified implementation - Scout has a more complex version
+    const locator = page.locator(selector);
+    let attempts = 0;
+    while (attempts < maxElementsToTraverse) {
+      const focused = await locator.evaluate((el) => document.activeElement === el);
+      if (focused) return;
+      await page.keyboard.press(key);
+      attempts++;
+    }
+    throw new Error(`Could not navigate to element with selector: ${selector}`);
+  };
+
+  return scoutPage;
 }
 
 /**
@@ -88,44 +176,43 @@ async function createElasticsearchCustomRole(
 }
 
 /**
- * Helper to resolve selector to Playwright locator
+ * Helper to resolve selector to ScoutPage locator
  */
 function resolveEuiSelector(
-  page: Page,
+  scoutPage: ScoutPage,
   selector: string | { dataTestSubj?: string; locator?: string }
 ) {
   if (typeof selector === 'string') {
-    return page.locator(subj(selector));
+    return scoutPage.testSubj.locator(selector);
   }
   if (selector.dataTestSubj) {
-    return page.locator(subj(selector.dataTestSubj));
+    return scoutPage.testSubj.locator(selector.dataTestSubj);
   }
-  return page.locator(selector.locator!);
+  return scoutPage.locator(selector.locator!);
 }
 
 /**
- * Simplified EUI component wrappers that work with Playwright Page directly
- * These are simplified versions that don't require ScoutPage
+ * Simplified EUI component wrappers that work with ScoutPage
  * Using factory functions instead of classes to avoid "too many classes" lint error
  */
 function createSimplifiedEuiComboBoxWrapper(
-  page: Page,
+  scoutPage: ScoutPage,
   selector: string | { dataTestSubj?: string; locator?: string }
 ) {
-  const getLocator = () => resolveEuiSelector(page, selector);
+  const getLocator = () => resolveEuiSelector(scoutPage, selector);
 
   return {
     async selectSingleOption(value: string) {
       const locator = getLocator();
       await locator.locator(subj('comboBoxInput')).click();
       await locator.locator(subj('comboBoxSearchInput')).fill(value);
-      await page.locator(`[title="${value}"]`).click();
+      await scoutPage.locator(`[title="${value}"]`).click();
     },
     async selectMultiOption(value: string) {
       const locator = getLocator();
       await locator.locator(subj('comboBoxInput')).click();
       await locator.locator(subj('comboBoxSearchInput')).fill(value);
-      await page.locator(`[title="${value}"]`).click();
+      await scoutPage.locator(`[title="${value}"]`).click();
     },
     async clear() {
       const locator = getLocator();
@@ -135,10 +222,10 @@ function createSimplifiedEuiComboBoxWrapper(
 }
 
 function createSimplifiedEuiCheckBoxWrapper(
-  page: Page,
+  scoutPage: ScoutPage,
   selector: string | { dataTestSubj?: string; locator?: string }
 ) {
-  const getLocator = () => resolveEuiSelector(page, selector);
+  const getLocator = () => resolveEuiSelector(scoutPage, selector);
 
   return {
     async check() {
@@ -154,10 +241,10 @@ function createSimplifiedEuiCheckBoxWrapper(
 }
 
 function createSimplifiedEuiDataGridWrapper(
-  page: Page,
+  scoutPage: ScoutPage,
   selector: string | { dataTestSubj?: string; locator?: string }
 ) {
-  const getLocator = () => resolveEuiSelector(page, selector);
+  const getLocator = () => resolveEuiSelector(scoutPage, selector);
 
   return {
     async getRowCount(): Promise<number> {
@@ -180,10 +267,10 @@ function createSimplifiedEuiDataGridWrapper(
 }
 
 function createSimplifiedEuiSelectableWrapper(
-  page: Page,
+  scoutPage: ScoutPage,
   selector: string | { dataTestSubj?: string; locator?: string }
 ) {
-  const getLocator = () => resolveEuiSelector(page, selector);
+  const getLocator = () => resolveEuiSelector(scoutPage, selector);
 
   return {
     async selectOption(value: string) {
@@ -206,13 +293,12 @@ function createSimplifiedEuiSelectableWrapper(
 }
 
 /**
- * Manages the Scout session including browser context, page objects, and fixtures
+ * Manages the Scout session including browser context and EUI components
  */
 export class ScoutSession {
   private browser: Browser | null = null;
   private context: BrowserContext | null = null;
-  private currentPage: Page | null = null;
-  private pageObjectsCache: Map<string, any> = new Map();
+  private currentPage: ScoutPage | null = null;
   private euiComponentsCache: Map<string, any> = new Map();
   private isAuthenticated: boolean = false;
   private currentRole: string | null = null;
@@ -466,27 +552,35 @@ export class ScoutSession {
         ignoreHTTPSErrors,
       });
 
-      this.currentPage = await this.context.newPage();
+      const page = await this.context.newPage();
 
       // Initialize Scout services for authentication
       await this.initializeScoutServices();
+
+      // Extend page with Scout functionality
+      const kbnUrl = await this.getKbnUrl();
+      this.currentPage = extendPageWithScoutHelpers(page, kbnUrl);
 
       this.log.success('Scout session initialized');
     });
   }
 
   /**
-   * Get the current page, creating one if needed
+   * Get the current ScoutPage, creating one if needed
    * Thread-safe: Uses mutex to prevent race conditions
    */
-  async getPage(): Promise<Page> {
+  async getPage(): Promise<ScoutPage> {
     return await this.mutex.runExclusive(async () => {
       if (!this.currentPage) {
         if (!this.context) {
           await this.initialize();
+        } else {
+          // If context exists but page doesn't, create and extend it
+          this.log.debug('Creating new page...');
+          const page = await this.context.newPage();
+          const kbnUrl = await this.getKbnUrl();
+          this.currentPage = extendPageWithScoutHelpers(page, kbnUrl);
         }
-        this.log.debug('Creating new page...');
-        this.currentPage = await this.context!.newPage();
       }
       return this.currentPage;
     });
@@ -538,33 +632,6 @@ export class ScoutSession {
   }
 
   /**
-   * Get or create a page object
-   */
-  getPageObject(name: string): any {
-    if (this.pageObjectsCache.has(name)) {
-      return this.pageObjectsCache.get(name);
-    }
-
-    // Page objects will be created on demand with the current page
-    // The actual implementation depends on Scout's page object structure
-    return null;
-  }
-
-  /**
-   * Set a page object in the cache
-   */
-  setPageObject(name: string, pageObject: any): void {
-    this.pageObjectsCache.set(name, pageObject);
-  }
-
-  /**
-   * Clear page objects cache
-   */
-  clearPageObjects(): void {
-    this.pageObjectsCache.clear();
-  }
-
-  /**
    * Get or create an EUI component wrapper
    */
   getEuiComponent(component: string, selector: string): any {
@@ -577,23 +644,23 @@ export class ScoutSession {
 
   /**
    * Create an EUI component wrapper
-   * Uses simplified local wrappers that work with Playwright Page directly
+   * Uses simplified local wrappers that work with ScoutPage
    */
   async createEuiComponent(
     component: string,
     selector: string | { dataTestSubj?: string; locator?: string }
   ): Promise<any> {
-    const page = await this.getPage();
+    const scoutPage = await this.getPage();
 
     switch (component) {
       case 'comboBox':
-        return createSimplifiedEuiComboBoxWrapper(page, selector);
+        return createSimplifiedEuiComboBoxWrapper(scoutPage, selector);
       case 'checkBox':
-        return createSimplifiedEuiCheckBoxWrapper(page, selector);
+        return createSimplifiedEuiCheckBoxWrapper(scoutPage, selector);
       case 'dataGrid':
-        return createSimplifiedEuiDataGridWrapper(page, selector);
+        return createSimplifiedEuiDataGridWrapper(scoutPage, selector);
       case 'selectable':
-        return createSimplifiedEuiSelectableWrapper(page, selector);
+        return createSimplifiedEuiSelectableWrapper(scoutPage, selector);
       default:
         throw new Error(`Unknown EUI component: ${component}`);
     }
@@ -647,7 +714,7 @@ export class ScoutSession {
   async getAriaSnapshot(): Promise<string> {
     const page = await this.getPage();
     try {
-      // Use Playwright's ariaSnapshot() API for AI-optimized output
+      // Use browser's ariaSnapshot() API for AI-optimized output
       const snapshot = await page.locator('body').ariaSnapshot();
       return snapshot;
     } catch (err) {
@@ -663,7 +730,6 @@ export class ScoutSession {
   async close(): Promise<void> {
     this.log.info('Closing Scout session...');
 
-    this.clearPageObjects();
     this.clearEuiComponents();
 
     // Clean up custom role if it was created

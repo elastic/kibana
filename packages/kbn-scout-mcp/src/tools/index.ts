@@ -23,15 +23,8 @@ export {
 // Authentication tools
 export { scoutLogin, scoutLogout, scoutGetAuthStatus } from './auth';
 
-// Page object tools
-export { scoutPageObject, scoutListPageObjects } from './page_objects';
-
 // EUI component tools
 export { scoutEuiComponent, scoutListEuiComponents } from './eui';
 
 // API service tools
 export { scoutListApiServices } from './api';
-
-// Note: Fixture tools (scoutEsQuery, scoutKibanaApi, scoutEsArchiver, scoutGetConfig, scoutListFixtures)
-// are not exported as they reference test infrastructure and are not yet implemented.
-// They are available in './fixtures' but should not be used until properly implemented.

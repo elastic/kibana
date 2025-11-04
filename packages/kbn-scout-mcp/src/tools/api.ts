@@ -14,7 +14,7 @@ import { success } from '../utils';
  * List available API services (reference guide)
  *
  * Note: API tools (ES query, Kibana API) are not yet registered in the MCP server.
- * They require Scout fixture initialization. See fixtures.ts for placeholder implementations.
+ * They require Scout fixture initialization which is not yet implemented for MCP usage.
  */
 export async function scoutListApiServices(): Promise<ToolResult> {
   return success({

@@ -73,18 +73,6 @@ export async function executeSafely<T>(
 }
 
 /**
- * Validate required parameters
- */
-export function validateParams(params: Record<string, any>, required: string[]): string | null {
-  for (const key of required) {
-    if (params[key] === undefined || params[key] === null) {
-      return `Missing required parameter: ${key}`;
-    }
-  }
-  return null;
-}
-
-/**
  * Validate and sanitize screenshot filename to prevent path traversal
  */
 export function formatScreenshotFilename(filename?: string, extension: string = 'png'): string {
@@ -200,16 +188,9 @@ interface CodeBlock {
   language: string;
 }
 
-interface ConsoleMessage {
-  type: 'log' | 'info' | 'warn' | 'error';
-  message: string;
-  timestamp?: number;
-}
-
 /**
  * Builder for structured tool responses
  * Generates consistent markdown format optimized for AI consumption
- * Inspired by microsoft/playwright-mcp patterns
  */
 export class ResponseBuilder {
   private resultMessage: string = '';
@@ -217,9 +198,6 @@ export class ResponseBuilder {
   private pageUrl?: string;
   private pageTitle?: string;
   private pageSnapshot?: string;
-  private consoleMessages: ConsoleMessage[] = [];
-  private authUser?: string;
-  private authRole?: string;
   private kibanaApp?: string;
   private kibanaRoute?: string;
   private kibanaContext?: Record<string, unknown>;
@@ -257,31 +235,6 @@ export class ResponseBuilder {
     this.pageUrl = url;
     this.pageTitle = title;
     this.pageSnapshot = snapshot;
-    return this;
-  }
-
-  /**
-   * Add console messages from the browser
-   */
-  addConsoleMessage(type: ConsoleMessage['type'], message: string): this {
-    this.consoleMessages.push({ type, message, timestamp: Date.now() });
-    return this;
-  }
-
-  /**
-   * Add multiple console messages
-   */
-  addConsoleMessages(messages: ConsoleMessage[]): this {
-    this.consoleMessages.push(...messages);
-    return this;
-  }
-
-  /**
-   * Set authentication status
-   */
-  setAuthStatus(username?: string, role?: string): this {
-    this.authUser = username;
-    this.authRole = role;
     return this;
   }
 
@@ -350,23 +303,6 @@ export class ResponseBuilder {
         kibanaLines.push('```');
       }
       sections.push(kibanaLines.join('\n'));
-    }
-
-    // Authentication status section
-    if (this.authUser || this.authRole) {
-      const authLines: string[] = ['### Authentication status'];
-      if (this.authUser) authLines.push(`- User: ${this.authUser}`);
-      if (this.authRole) authLines.push(`- Role: ${this.authRole}`);
-      sections.push(authLines.join('\n'));
-    }
-
-    // Console messages section (if any new messages)
-    if (this.consoleMessages.length > 0) {
-      const consoleLines: string[] = ['### New console messages'];
-      for (const msg of this.consoleMessages) {
-        consoleLines.push(`- [${msg.type}] ${msg.message}`);
-      }
-      sections.push(consoleLines.join('\n'));
     }
 
     // Additional custom sections

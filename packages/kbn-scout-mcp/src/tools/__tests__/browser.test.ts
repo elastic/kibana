@@ -19,11 +19,11 @@ import {
   scoutReload,
 } from '../browser';
 import type { ScoutSession } from '../../session';
-import type { Page } from 'playwright';
+import type { ScoutPage } from '@kbn/scout';
 
 describe('Browser Tools', () => {
   let mockSession: jest.Mocked<ScoutSession>;
-  let mockPage: jest.Mocked<Page>;
+  let mockPage: jest.Mocked<ScoutPage>;
 
   beforeEach(() => {
     mockPage = {
@@ -56,6 +56,23 @@ describe('Browser Tools', () => {
       accessibility: {
         snapshot: jest.fn().mockResolvedValue({ role: 'main', name: 'Test' }),
       },
+      // ScoutPage extensions
+      testSubj: {
+        click: jest.fn().mockResolvedValue(null),
+        fill: jest.fn().mockResolvedValue(null),
+        locator: jest.fn().mockReturnValue({
+          click: jest.fn().mockResolvedValue(null),
+          fill: jest.fn().mockResolvedValue(null),
+          press: jest.fn().mockResolvedValue(null),
+          screenshot: jest.fn().mockResolvedValue(Buffer.from('fake-screenshot')),
+        }),
+        waitForSelector: jest.fn().mockResolvedValue(null),
+        typeWithDelay: jest.fn().mockResolvedValue(null),
+        clearInput: jest.fn().mockResolvedValue(null),
+      },
+      gotoApp: jest.fn().mockResolvedValue(null),
+      waitForLoadingIndicatorHidden: jest.fn().mockResolvedValue(null),
+      keyTo: jest.fn().mockResolvedValue(null),
     } as any;
 
     mockSession = {
@@ -84,7 +101,7 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(mockPage.goto).toHaveBeenCalledWith('http://localhost:5601/app/discover');
+      expect(mockPage.gotoApp).toHaveBeenCalledWith('discover', undefined);
     });
 
     it('should navigate to an app with path', async () => {
@@ -137,7 +154,7 @@ describe('Browser Tools', () => {
       const result = await scoutClick(mockSession, { testSubj: 'myButton' });
 
       expect(result.success).toBe(true);
-      expect(mockPage.locator).toHaveBeenCalledWith('[data-test-subj="myButton"]');
+      expect(mockPage.testSubj.click).toHaveBeenCalledWith('myButton');
     });
 
     it('should click element by selector', async () => {
@@ -155,8 +172,9 @@ describe('Browser Tools', () => {
     });
 
     it('should handle click failures with helpful message', async () => {
-      const locator = mockPage.locator('[data-test-subj="missing"]');
-      (locator.click as jest.Mock).mockRejectedValue(new Error('Timeout 30000ms exceeded'));
+      (mockPage.testSubj.click as jest.Mock).mockRejectedValue(
+        new Error('Timeout 30000ms exceeded')
+      );
 
       const result = await scoutClick(mockSession, { testSubj: 'missing' });
 
@@ -174,9 +192,7 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      const locator = mockPage.locator('[data-test-subj="searchInput"]');
-      expect(locator.clear).toHaveBeenCalled();
-      expect(locator.fill).toHaveBeenCalledWith('test query');
+      expect(mockPage.testSubj.fill).toHaveBeenCalledWith('searchInput', 'test query');
     });
 
     it('should type text slowly if requested', async () => {
@@ -187,8 +203,9 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      const locator = mockPage.locator('[data-test-subj="searchInput"]');
-      expect(locator.pressSequentially).toHaveBeenCalledWith('test query', { delay: 100 });
+      expect(mockPage.testSubj.typeWithDelay).toHaveBeenCalledWith('searchInput', 'test query', {
+        delay: 100,
+      });
     });
 
     it('should submit after typing if requested', async () => {
@@ -199,8 +216,8 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      const locator = mockPage.locator('[data-test-subj="searchInput"]');
-      expect(locator.press).toHaveBeenCalledWith('Enter');
+      expect(mockPage.testSubj.fill).toHaveBeenCalledWith('searchInput', 'test query');
+      expect(mockPage.testSubj.locator).toHaveBeenCalledWith('searchInput');
     });
 
     it('should require text parameter', async () => {
@@ -273,7 +290,7 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(mockPage.locator).toHaveBeenCalledWith('[data-test-subj="dashboard"]');
+      expect(mockPage.testSubj.locator).toHaveBeenCalledWith('dashboard');
     });
 
     it('should generate filename if not provided', async () => {
@@ -306,15 +323,18 @@ describe('Browser Tools', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(mockPage.locator).toHaveBeenCalledWith('[data-test-subj="dataLoaded"]');
+      expect(mockPage.testSubj.waitForSelector).toHaveBeenCalledWith('dataLoaded', {
+        state: 'visible',
+      });
     });
 
     it('should default to visible state', async () => {
       const result = await scoutWaitFor(mockSession, { testSubj: 'element' });
 
       expect(result.success).toBe(true);
-      const locator = mockPage.locator('[data-test-subj="element"]');
-      expect(locator.waitFor).toHaveBeenCalledWith({ state: 'visible' });
+      expect(mockPage.testSubj.waitForSelector).toHaveBeenCalledWith('element', {
+        state: 'visible',
+      });
     });
 
     it('should require a wait condition', async () => {
@@ -364,8 +384,7 @@ describe('Browser Tools', () => {
     });
 
     it('should provide helpful suggestions for timeout errors', async () => {
-      const locator = mockPage.locator('[data-test-subj="button"]');
-      (locator.click as jest.Mock).mockRejectedValue(new Error('Timeout exceeded'));
+      (mockPage.testSubj.click as jest.Mock).mockRejectedValue(new Error('Timeout exceeded'));
 
       const result = await scoutClick(mockSession, { testSubj: 'button' });
 

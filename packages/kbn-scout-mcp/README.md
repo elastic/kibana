@@ -6,8 +6,7 @@ Model Context Protocol (MCP) server that exposes Scout's browser testing capabil
 
 This MCP server allows you to use Scout (Kibana's browser test framework) directly from Cursor to:
 - Navigate Kibana and interact with the UI
-- Use Scout page objects (Discover, Dashboard, etc.)
-- Test UI components and user flows
+- Test UI components and user flows using browser automation
 - Take screenshots and debug tests
 - Run test scenarios interactively
 
@@ -69,8 +68,7 @@ Completely quit Cursor (Cmd+Q on Mac) and restart it.
 In Cursor chat, you can now ask:
 - "Navigate to the Discover app"
 - "Take a screenshot of the dashboard"
-- "Use Scout to test the filter bar"
-- "List available Scout page objects"
+- "Use Scout to interact with the filter bar"
 
 ## Available Tools
 
@@ -83,10 +81,6 @@ The MCP server provides these capabilities:
 - `scout_wait_for` - Wait for elements or conditions
 - `scout_screenshot` - Take screenshots
 - `scout_snapshot` - Get page structure
-
-**Scout Page Objects**
-- `scout_page_object` - Use high-level Scout page objects
-- `scout_list_page_objects` - See available page objects
 
 **EUI Components**
 - `scout_eui_component` - Interact with Elastic UI components
@@ -104,7 +98,7 @@ You: Navigate to Discover and add a filter for field "status" equals "200"
 
 Cursor will use Scout MCP to:
 1. Navigate to the Discover app
-2. Use the filterBar page object to add the filter
+2. Click the add filter button and fill in the filter details
 3. Verify the filter is applied
 ```
 

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { subj } from '@kbn/test-subj-selector';
 import type { ScoutSession } from '../session';
 import type {
   NavigateParams,
@@ -39,16 +38,14 @@ export async function scoutNavigate(
   }
 
   try {
-    const page = await session.getPage();
+    const scoutPage = await session.getPage();
     const baseUrl = session.getTargetUrl();
-    let targetUrl: string;
     let codeSnippet: string;
 
     if (params.url) {
       // Validate URL to prevent SSRF
       const sanitizedUrl = validateAndSanitizeUrl(params.url, baseUrl);
-      await page.goto(sanitizedUrl);
-      targetUrl = sanitizedUrl;
+      await scoutPage.goto(sanitizedUrl);
       codeSnippet = `await page.goto('${sanitizedUrl}');`;
       response.setResult(`Successfully navigated to ${sanitizedUrl}`);
     } else if (params.app) {
@@ -70,9 +67,17 @@ export async function scoutNavigate(
         }
       }
 
-      targetUrl = `${baseUrl}/app/${params.app}${safePath}`;
-      await page.goto(targetUrl);
-      codeSnippet = `await page.goto('${baseUrl}/app/${params.app}${safePath}');`;
+      // Use Scout's gotoApp method
+      // Note: PathOptions doesn't support direct path, so if path is provided, use goto
+      // Otherwise use gotoApp for cleaner code
+      if (safePath) {
+        const appUrl = `${baseUrl}/app/${params.app}${safePath}`;
+        await scoutPage.goto(appUrl);
+        codeSnippet = `await page.goto('${appUrl}');`;
+      } else {
+        await scoutPage.gotoApp(params.app);
+        codeSnippet = `await page.gotoApp('${params.app}');`;
+      }
       response.setResult(`Successfully navigated to Kibana app: ${params.app}${safePath}`);
       response.setKibanaState(params.app, safePath);
     } else {
@@ -83,8 +88,8 @@ export async function scoutNavigate(
     response.addCode(codeSnippet);
 
     // Add current page state with ARIA snapshot
-    const title = await page.title();
-    const url = page.url();
+    const title = await scoutPage.title();
+    const url = scoutPage.url();
     const snapshot = await session.getAriaSnapshot();
     response.setPageState(url, title, snapshot);
 
@@ -113,18 +118,18 @@ export async function scoutClick(session: ScoutSession, params: ClickParams): Pr
   }
 
   try {
-    const page = await session.getPage();
+    const scoutPage = await session.getPage();
     let targetDescription: string;
     let codeSnippet: string;
 
     if (params.testSubj) {
-      const selector = subj(params.testSubj);
-      await page.locator(selector).click();
+      // Use Scout's testSubj.click() method
+      await scoutPage.testSubj.click(params.testSubj);
       targetDescription = params.element || `element with test subject: ${params.testSubj}`;
-      codeSnippet = `await page.locator('[data-test-subj="${params.testSubj}"]').click();`;
+      codeSnippet = `await page.testSubj.click('${params.testSubj}');`;
       response.setResult(`Successfully clicked ${targetDescription}`);
     } else if (params.selector) {
-      await page.locator(params.selector).click();
+      await scoutPage.locator(params.selector).click();
       targetDescription = params.element || `element with selector: ${params.selector}`;
       codeSnippet = `await page.locator('${params.selector}').click();`;
       response.setResult(`Successfully clicked ${targetDescription}`);
@@ -134,8 +139,8 @@ export async function scoutClick(session: ScoutSession, params: ClickParams): Pr
     response.addCode(codeSnippet!);
 
     // Add updated page state
-    const title = await page.title();
-    const url = page.url();
+    const title = await scoutPage.title();
+    const url = scoutPage.url();
     const snapshot = await session.getAriaSnapshot();
     response.setPageState(url, title, snapshot);
 
@@ -189,42 +194,50 @@ export async function scoutType(session: ScoutSession, params: TypeParams): Prom
   }
 
   try {
-    const page = await session.getPage();
+    const scoutPage = await session.getPage();
     let targetDescription: string = '';
     let codeSnippet: string = '';
-    let locator;
 
     if (params.testSubj) {
-      const selector = subj(params.testSubj);
-      locator = page.locator(selector);
       targetDescription = params.element || `element with test subject: ${params.testSubj}`;
+
+      // Use Scout's testSubj methods
+      if (params.slowly) {
+        await scoutPage.testSubj.typeWithDelay(params.testSubj, params.text, { delay: 100 });
+        codeSnippet = `await page.testSubj.typeWithDelay('${params.testSubj}', '${params.text}', { delay: 100 });`;
+      } else {
+        await scoutPage.testSubj.fill(params.testSubj, params.text);
+        codeSnippet = `await page.testSubj.fill('${params.testSubj}', '${params.text}');`;
+      }
+
+      // Submit if requested
+      if (params.submit) {
+        await scoutPage.testSubj.locator(params.testSubj).press('Enter');
+        codeSnippet += `\nawait page.testSubj.locator('${params.testSubj}').press('Enter');`;
+      }
     } else if (params.selector) {
-      locator = page.locator(params.selector);
+      const locator = scoutPage.locator(params.selector);
       targetDescription = params.element || `element with selector: ${params.selector}`;
-    }
 
-    if (!locator) {
-      throw new Error('Locator not found');
-    }
+      // Clear existing content first
+      await locator.clear();
 
-    // Clear existing content first
-    await locator.clear();
+      // Type the text
+      if (params.slowly) {
+        await locator.pressSequentially(params.text, { delay: 100 });
+        codeSnippet = `await page.locator('${params.selector}').pressSequentially('${params.text}', { delay: 100 });`;
+      } else {
+        await locator.fill(params.text);
+        codeSnippet = `await page.locator('${params.selector}').fill('${params.text}');`;
+      }
 
-    const locatorStr = params.selector || `[data-test-subj="${params.testSubj}"]`;
-
-    // Type the text
-    if (params.slowly) {
-      await locator.pressSequentially(params.text, { delay: 100 });
-      codeSnippet = `await page.locator('${locatorStr}').pressSequentially('${params.text}', { delay: 100 });`;
+      // Submit if requested
+      if (params.submit) {
+        await locator.press('Enter');
+        codeSnippet += `\nawait page.keyboard.press('Enter');`;
+      }
     } else {
-      await locator.fill(params.text);
-      codeSnippet = `await page.locator('${locatorStr}').fill('${params.text}');`;
-    }
-
-    // Submit if requested
-    if (params.submit) {
-      await locator.press('Enter');
-      codeSnippet += `\nawait page.keyboard.press('Enter');`;
+      throw new Error('Either testSubj or selector parameter must be provided');
     }
 
     response.setResult(
@@ -233,8 +246,8 @@ export async function scoutType(session: ScoutSession, params: TypeParams): Prom
     response.addCode(codeSnippet);
 
     // Add updated page state
-    const title = await page.title();
-    const url = page.url();
+    const title = await scoutPage.title();
+    const url = scoutPage.url();
     const snapshot = await session.getAriaSnapshot();
     response.setPageState(url, title, snapshot);
 
@@ -271,7 +284,7 @@ export async function scoutSnapshot(
   }
 
   try {
-    const page = await session.getPage();
+    const scoutPage = await session.getPage();
 
     // Get ARIA snapshot with element references
     const ariaSnapshot = await session.getAriaSnapshot();
@@ -293,8 +306,8 @@ export async function scoutSnapshot(
     }
 
     // Add page context
-    const title = await page.title();
-    const url = page.url();
+    const title = await scoutPage.title();
+    const url = scoutPage.url();
     response.setPageState(url, title);
 
     return response.buildAsToolResult();
@@ -321,25 +334,25 @@ export async function scoutScreenshot(
   }
 
   try {
-    const page = await session.getPage();
+    const scoutPage = await session.getPage();
     const filename = formatScreenshotFilename(params.filename);
     let screenshot: Buffer;
     let codeSnippet: string;
     let targetDescription: string;
 
     if (params.testSubj) {
-      const selector = subj(params.testSubj);
-      const element = page.locator(selector);
+      // Use Scout's testSubj.locator() method
+      const element = scoutPage.testSubj.locator(params.testSubj);
       screenshot = await element.screenshot({ path: filename });
       targetDescription = `element with test subject: ${params.testSubj}`;
-      codeSnippet = `await page.locator('[data-test-subj="${params.testSubj}"]').screenshot({ path: '${filename}' });`;
+      codeSnippet = `await page.testSubj.locator('${params.testSubj}').screenshot({ path: '${filename}' });`;
     } else if (params.selector) {
-      const element = page.locator(params.selector);
+      const element = scoutPage.locator(params.selector);
       screenshot = await element.screenshot({ path: filename });
       targetDescription = `element with selector: ${params.selector}`;
       codeSnippet = `await page.locator('${params.selector}').screenshot({ path: '${filename}' });`;
     } else {
-      screenshot = await page.screenshot({
+      screenshot = await scoutPage.screenshot({
         path: filename,
         fullPage: params.fullPage || false,
       });
@@ -358,8 +371,8 @@ export async function scoutScreenshot(
     );
 
     // Add page context
-    const title = await page.title();
-    const url = page.url();
+    const title = await scoutPage.title();
+    const url = scoutPage.url();
     response.setPageState(url, title);
 
     return response.buildAsToolResult();
@@ -395,13 +408,13 @@ export async function scoutWaitFor(
   }
 
   try {
-    const page = await session.getPage();
+    const scoutPage = await session.getPage();
     let codeSnippet: string;
     let resultMessage: string;
 
     // Wait for time
     if (params.time) {
-      await page.waitForTimeout(params.time * 1000);
+      await scoutPage.waitForTimeout(params.time * 1000);
       resultMessage = `Successfully waited for ${params.time} seconds`;
       codeSnippet = `await page.waitForTimeout(${params.time * 1000});`;
       response.setResult(resultMessage);
@@ -412,22 +425,21 @@ export async function scoutWaitFor(
     // Wait for text
     if (params.text) {
       validateTextInput(params.text);
-      await page.getByText(params.text).waitFor({ state: 'visible' });
+      await scoutPage.getByText(params.text).waitFor({ state: 'visible' });
       resultMessage = `Successfully waited for text: "${params.text}"`;
       codeSnippet = `await page.getByText('${params.text}').waitFor({ state: 'visible' });`;
     }
-    // Wait for element by test subject
+    // Wait for element by test subject - use Scout's testSubj.waitForSelector
     else if (params.testSubj) {
-      const selector = subj(params.testSubj);
       const state = params.state || 'visible';
-      await page.locator(selector).waitFor({ state });
+      await scoutPage.testSubj.waitForSelector(params.testSubj, { state });
       resultMessage = `Successfully waited for element (${params.testSubj}) to be ${state}`;
-      codeSnippet = `await page.locator('[data-test-subj="${params.testSubj}"]').waitFor({ state: '${state}' });`;
+      codeSnippet = `await page.testSubj.waitForSelector('${params.testSubj}', { state: '${state}' });`;
     }
     // Wait for element by selector
     else if (params.selector) {
       const state = params.state || 'visible';
-      await page.locator(params.selector).waitFor({ state });
+      await scoutPage.locator(params.selector).waitFor({ state });
       resultMessage = `Successfully waited for element (${params.selector}) to be ${state}`;
       codeSnippet = `await page.locator('${params.selector}').waitFor({ state: '${state}' });`;
     } else {
@@ -442,8 +454,8 @@ export async function scoutWaitFor(
     response.addCode(codeSnippet);
 
     // Add page state after wait (element may now be visible)
-    const title = await page.title();
-    const url = page.url();
+    const title = await scoutPage.title();
+    const url = scoutPage.url();
     const snapshot = await session.getAriaSnapshot();
     response.setPageState(url, title, snapshot);
 
@@ -457,7 +469,7 @@ export async function scoutWaitFor(
         .setError(`Wait failed: Timeout exceeded - ${message}`)
         .addSection(
           'Suggestion',
-          'The element may never appear or take longer than expected. Try:\n- Increasing timeout in Playwright config\n- Checking if element selector is correct\n- Using snapshot tool to verify page state'
+          'The element may never appear or take longer than expected. Try:\n- Checking if element selector is correct\n- Using snapshot tool to verify page state\n- Waiting longer or checking if the page is still loading'
         )
         .buildAsToolResult();
     }
@@ -477,15 +489,15 @@ export async function scoutGetUrl(session: ScoutSession): Promise<ToolResult> {
   }
 
   try {
-    const page = await session.getPage();
-    const url = page.url();
+    const scoutPage = await session.getPage();
+    const url = scoutPage.url();
 
     response.setResult(`Current page URL: ${url}`);
     response.addCode('const url = page.url();');
     response.addSection('URL', url);
 
     // Add minimal context
-    const title = await page.title();
+    const title = await scoutPage.title();
     response.setPageState(url, title);
 
     return response.buildAsToolResult();
@@ -506,9 +518,9 @@ export async function scoutGetTitle(session: ScoutSession): Promise<ToolResult> 
   }
 
   try {
-    const page = await session.getPage();
-    const title = await page.title();
-    const url = page.url();
+    const scoutPage = await session.getPage();
+    const title = await scoutPage.title();
+    const url = scoutPage.url();
 
     response.setResult(`Current page title: ${title}`);
     response.addCode('const title = await page.title();');
@@ -535,15 +547,15 @@ export async function scoutReload(session: ScoutSession): Promise<ToolResult> {
   }
 
   try {
-    const page = await session.getPage();
-    await page.reload();
+    const scoutPage = await session.getPage();
+    await scoutPage.reload();
 
     response.setResult('Successfully reloaded the page');
     response.addCode('await page.reload();');
 
     // Add updated page state
-    const title = await page.title();
-    const url = page.url();
+    const title = await scoutPage.title();
+    const url = scoutPage.url();
     const snapshot = await session.getAriaSnapshot();
     response.setPageState(url, title, snapshot);
 

@@ -98,45 +98,10 @@ export interface LoginParams {
   };
 }
 
-export interface PageObjectParams {
-  pageObject:
-    | 'discover'
-    | 'dashboard'
-    | 'filterBar'
-    | 'datePicker'
-    | 'maps'
-    | 'collapsibleNav'
-    | 'toasts';
-  method: string;
-  args?: any[];
-}
-
 export interface EuiComponentParams {
   component: 'comboBox' | 'dataGrid' | 'checkBox' | 'toast' | 'selectable';
   testSubj?: string;
   selector?: string;
   action: string;
   params?: any;
-}
-
-export interface ApiServiceParams {
-  service: 'alerting' | 'cases' | 'fleet' | 'streams';
-  method: string;
-  args?: any[];
-}
-
-export interface EsQueryParams {
-  index: string;
-  body: any;
-}
-
-export interface KibanaApiParams {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  path: string;
-  body?: any;
-}
-
-export interface EsArchiverParams {
-  action: 'load' | 'unload';
-  archiveName: string;
 }

@@ -176,38 +176,6 @@ export class ScoutMcpServer {
             inputSchema: { type: 'object', properties: {} },
           },
 
-          // Page object tools
-          {
-            name: 'scout_page_object',
-            description: 'Use Scout page objects for high-level interactions',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                pageObject: {
-                  type: 'string',
-                  enum: [
-                    'discover',
-                    'dashboard',
-                    'filterBar',
-                    'datePicker',
-                    'maps',
-                    'collapsibleNav',
-                    'toasts',
-                  ],
-                  description: 'Page object name',
-                },
-                method: { type: 'string', description: 'Method to call' },
-                args: { type: 'array', description: 'Method arguments' },
-              },
-              required: ['pageObject', 'method'],
-            },
-          },
-          {
-            name: 'scout_list_page_objects',
-            description: 'List available page objects and their methods',
-            inputSchema: { type: 'object', properties: {} },
-          },
-
           // EUI component tools
           {
             name: 'scout_eui_component',
@@ -293,14 +261,6 @@ export class ScoutMcpServer {
             break;
           case 'scout_get_auth_status':
             result = await tools.scoutGetAuthStatus(this.session);
-            break;
-
-          // Page objects
-          case 'scout_page_object':
-            result = await tools.scoutPageObject(this.session, params);
-            break;
-          case 'scout_list_page_objects':
-            result = await tools.scoutListPageObjects();
             break;
 
           // EUI components

@@ -98,7 +98,7 @@ INTEGRATION:
   - Write Scout tests with guidance
   - Debug tests by inspecting page state
   - Execute test actions and verify behavior
-  - Access Scout page objects and EUI components
+  - Access Scout EUI components and browser automation tools
 
 AVAILABLE TOOLS:
   Browser Automation:
@@ -107,9 +107,6 @@ AVAILABLE TOOLS:
 
   Authentication:
     - scout_login, scout_logout, scout_get_auth_status
-
-  Page Objects:
-    - scout_page_object, scout_list_page_objects
 
   EUI Components:
     - scout_eui_component, scout_list_eui_components

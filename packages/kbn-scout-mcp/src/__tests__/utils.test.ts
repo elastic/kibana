@@ -317,37 +317,6 @@ describe('ResponseBuilder', () => {
     });
   });
 
-  describe('authentication status', () => {
-    it('should include auth information', () => {
-      builder.setAuthStatus('elastic', 'admin');
-      const response = builder.build();
-      expect(response).toContain('### Authentication status');
-      expect(response).toContain('elastic');
-      expect(response).toContain('admin');
-    });
-  });
-
-  describe('console messages', () => {
-    it('should include console messages', () => {
-      builder.addConsoleMessage('error', 'Failed to load resource');
-      builder.addConsoleMessage('warn', 'Deprecated API used');
-      const response = builder.build();
-      expect(response).toContain('### New console messages');
-      expect(response).toContain('[error] Failed to load resource');
-      expect(response).toContain('[warn] Deprecated API used');
-    });
-
-    it('should support adding multiple console messages at once', () => {
-      builder.addConsoleMessages([
-        { type: 'log', message: 'Info message' },
-        { type: 'error', message: 'Error message' },
-      ]);
-      const response = builder.build();
-      expect(response).toContain('[log] Info message');
-      expect(response).toContain('[error] Error message');
-    });
-  });
-
   describe('custom sections', () => {
     it('should include custom sections', () => {
       builder.addSection('Debug Info', 'Detailed debugging information');

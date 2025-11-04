@@ -117,7 +117,7 @@ export async function scoutLogout(session: ScoutSession): Promise<ToolResult> {
   }
 
   return executeSafely(async () => {
-    const page = await session.getPage();
+    const scoutPage = await session.getPage();
     const context = session.getContext();
 
     if (context) {
@@ -128,7 +128,7 @@ export async function scoutLogout(session: ScoutSession): Promise<ToolResult> {
 
     // Navigate to logout or home
     const baseUrl = session.getTargetUrl();
-    await page.goto(`${baseUrl}/logout`).catch(() => {
+    await scoutPage.goto(`${baseUrl}/logout`).catch(() => {
       // Logout endpoint might not exist, that's ok
     });
 

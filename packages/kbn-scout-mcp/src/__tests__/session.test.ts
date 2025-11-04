@@ -10,7 +10,8 @@
 import { ScoutSession } from '../session';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutMcpConfig } from '../types';
-import type { Browser, BrowserContext, Page } from 'playwright';
+import type { Browser, BrowserContext } from 'playwright';
+import type { ScoutPage } from '@kbn/scout';
 import * as playwright from 'playwright';
 
 // Mock playwright
@@ -57,7 +58,7 @@ describe('ScoutSession', () => {
   let log: ToolingLog;
   let mockBrowser: jest.Mocked<Browser>;
   let mockContext: jest.Mocked<BrowserContext>;
-  let mockPage: jest.Mocked<Page>;
+  let mockPage: jest.Mocked<ScoutPage>;
 
   beforeEach(() => {
     log = new ToolingLog({
@@ -71,7 +72,7 @@ describe('ScoutSession', () => {
       ignoreHTTPSErrors: false,
     };
 
-    // Setup mocks
+    // Setup mocks - mock ScoutPage with testSubj and gotoApp
     mockPage = {
       goto: jest.fn(),
       close: jest.fn(),
@@ -83,6 +84,9 @@ describe('ScoutSession', () => {
       },
       locator: jest.fn().mockReturnValue({
         ariaSnapshot: jest.fn().mockResolvedValue('button "Click me"'),
+        click: jest.fn(),
+        fill: jest.fn(),
+        press: jest.fn(),
       }),
       goBack: jest.fn(),
       goForward: jest.fn(),
@@ -91,6 +95,23 @@ describe('ScoutSession', () => {
       getByText: jest.fn().mockReturnValue({
         waitFor: jest.fn(),
       }),
+      // ScoutPage extensions
+      testSubj: {
+        click: jest.fn(),
+        fill: jest.fn(),
+        locator: jest.fn().mockReturnValue({
+          click: jest.fn(),
+          fill: jest.fn(),
+          press: jest.fn(),
+          screenshot: jest.fn().mockResolvedValue(Buffer.from('fake-screenshot')),
+        }),
+        waitForSelector: jest.fn(),
+        typeWithDelay: jest.fn(),
+        clearInput: jest.fn(),
+      },
+      gotoApp: jest.fn(),
+      waitForLoadingIndicatorHidden: jest.fn(),
+      keyTo: jest.fn(),
     } as any;
 
     mockContext = {
@@ -440,24 +461,6 @@ describe('ScoutSession', () => {
   });
 
   describe('cache management', () => {
-    it('should cache and retrieve page objects', async () => {
-      await session.initialize();
-      const mockPageObject = { someMethod: jest.fn() };
-
-      session.setPageObject('discover', mockPageObject);
-      const retrieved = session.getPageObject('discover');
-
-      expect(retrieved).toBe(mockPageObject);
-    });
-
-    it('should clear page objects cache', async () => {
-      await session.initialize();
-      session.setPageObject('discover', { someMethod: jest.fn() });
-      session.clearPageObjects();
-
-      expect(session.getPageObject('discover')).toBeNull();
-    });
-
     it('should cache and retrieve EUI components', async () => {
       await session.initialize();
       const mockComponent = { click: jest.fn() };
