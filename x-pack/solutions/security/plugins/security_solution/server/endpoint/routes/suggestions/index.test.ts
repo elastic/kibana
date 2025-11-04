@@ -38,6 +38,7 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import {
   eventsIndexPattern,
+  DEVICE_EVENTS_INDEX_PATTERN,
   SUGGESTIONS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
@@ -910,6 +911,81 @@ describe('when calling the Suggestions route handler', () => {
       });
     });
 
+    describe('when suggestion_type is trustedDevices', () => {
+      beforeEach(() => {
+        mockEndpointContext.experimentalFeatures = {
+          ...mockEndpointContext.experimentalFeatures,
+        };
+        suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
+          config$,
+          mockEndpointContext
+        );
+      });
+
+      it('should use space-aware device events index pattern', async () => {
+        const spaceId = 'custom-space';
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
+        const mockIndexPattern = 'logs-endpoint.events.device-*-custom-namespace';
+
+        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
+
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
+        );
+
+        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+        };
+        mockEndpointContext.service.getInternalFleetServices = jest
+          .fn()
+          .mockReturnValue(mockFleetServices);
+
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
+
+        const fieldName = 'device.manufacturer';
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'trustedDevices' },
+          body: {
+            field: fieldName,
+            query: 'test-query',
+            filters: [{ term: { 'test.field': 'test-value' } }],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
+        expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
+          DEVICE_EVENTS_INDEX_PATTERN,
+          'custom-namespace',
+          { preserveWildcard: true }
+        );
+        expect(termsEnumSuggestionsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.any(Object),
+          expect.any(Object),
+          expect.any(Object),
+          mockIndexPattern,
+          fieldName,
+          'test-query',
+          [{ term: { 'test.field': 'test-value' } }],
+          'test-field-meta',
+          expect.any(Object)
+        );
+
+        expect(mockResponse.ok).toHaveBeenCalled();
+      });
+    });
+
     it('should respond with bad request if wrong suggestion type', async () => {
       // Set up context without space awareness for this test
       mockEndpointContext.experimentalFeatures = {
@@ -991,6 +1067,7 @@ describe('when calling the Suggestions route handler', () => {
             canWriteEventFilters: false,
             canReadTrustedApplications: true,
             canWriteTrustedApplications: false,
+            canWriteTrustedDevices: false,
           },
         });
 
@@ -1004,6 +1081,22 @@ describe('when calling the Suggestions route handler', () => {
             canWriteEventFilters: false,
             canReadTrustedApplications: true,
             canWriteTrustedApplications: false,
+            canWriteTrustedDevices: false,
+          },
+        });
+
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+      it('should respond with forbidden for trusted devices', async () => {
+        await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
+          params: { suggestion_type: 'trustedDevices' },
+          authz: {
+            canReadEventFilters: true,
+            canWriteEventFilters: false,
+            canReadTrustedApplications: true,
+            canWriteTrustedApplications: false,
+            canReadTrustedDevices: true,
+            canWriteTrustedDevices: false,
           },
         });
 
