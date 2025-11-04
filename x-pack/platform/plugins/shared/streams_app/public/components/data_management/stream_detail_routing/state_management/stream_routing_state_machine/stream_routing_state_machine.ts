@@ -136,7 +136,6 @@ export const streamRoutingMachine = setup({
     isValidRouting: ({ context }) =>
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
     isValidEditedSuggestion: ({ context }) => {
-      console.log('context', JSON.stringify(context, null, 2));
       if (!context.editedSuggestion) return false;
       const { name, condition } = context.editedSuggestion;
       if (!name || name.trim() === '') return false;

@@ -47,7 +47,7 @@ export function StreamNameFormRow({
   const prefix = parentStreamName + '.';
   const partitionName = value.replace(prefix, '');
 
-  const isLengthValid = value.length >= prefix.length + 1 && value.length <= MAX_NAME_LENGTH;
+  const isLengthValid = value.length > prefix.length && value.length <= MAX_NAME_LENGTH;
 
   const helpText =
     value.length >= MAX_NAME_LENGTH && !readOnly
@@ -60,9 +60,6 @@ export function StreamNameFormRow({
       : value.length <= prefix.length && !readOnly
       ? i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
           defaultMessage: `Stream name is required.`,
-          values: {
-            maxLength: MAX_NAME_LENGTH,
-          },
         })
       : undefined;
 
