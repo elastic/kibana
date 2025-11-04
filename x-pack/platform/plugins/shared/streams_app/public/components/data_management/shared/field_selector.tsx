@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field';
 
 export interface FieldSuggestion {
   name: string;
@@ -56,6 +57,7 @@ export const FieldSelector = ({
       suggestions.map((suggestion) => ({
         label: suggestion.name,
         value: suggestion.name,
+        prepend: suggestion.type ? <FieldIcon type={suggestion.type} size="s" /> : undefined,
         'data-test-subj': `field-suggestion-${suggestion.name}`,
       })),
     [suggestions]
@@ -65,8 +67,22 @@ export const FieldSelector = ({
     if (!value) return [];
 
     const matchingSuggestion = comboBoxOptions.find((option) => option.value === value);
-    return matchingSuggestion ? [matchingSuggestion] : [{ label: value, value }];
-  }, [value, comboBoxOptions]);
+    if (matchingSuggestion) {
+      return [matchingSuggestion];
+    }
+
+    // For custom values not in suggestions, try to find the type
+    const suggestionWithType = suggestions.find((s) => s.name === value);
+    return [
+      {
+        label: value,
+        value,
+        prepend: suggestionWithType?.type ? (
+          <FieldIcon type={suggestionWithType.type} size="s" />
+        ) : undefined,
+      },
+    ];
+  }, [value, comboBoxOptions, suggestions]);
 
   const handleSelectionChange = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {

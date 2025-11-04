@@ -37,6 +37,7 @@
     "@kbn/i18n-react",
     "@kbn/react-hooks",
     "@kbn/react-kibana-mount",
+    "@kbn/react-query",
     "@kbn/react-field",
     "@kbn/object-utils",
     "@kbn/shared-ux-utility",
