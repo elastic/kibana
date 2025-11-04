@@ -25,6 +25,10 @@ import {
   fromAPItoLensState as fromLegacyMetricAPItoLensState,
   fromLensStateToAPI as fromLegacyMetricLensStateToAPI,
 } from './transforms/charts/legacy_metric';
+import {
+  fromAPItoLensState as fromGaugeAPItoLensState,
+  fromLensStateToAPI as fromGaugeLensStateToAPI,
+} from './transforms/charts/gauge';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 
@@ -53,6 +57,10 @@ export class LensConfigBuilder {
     legacy_metric: {
       fromAPItoLensState: fromLegacyMetricAPItoLensState,
       fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
+    },
+    gauge: {
+      fromAPItoLensState: fromGaugeAPItoLensState,
+      fromLensStateToAPI: fromGaugeLensStateToAPI,
     },
   } as const;
   private dataViewsAPI: DataViewsCommon | undefined;
