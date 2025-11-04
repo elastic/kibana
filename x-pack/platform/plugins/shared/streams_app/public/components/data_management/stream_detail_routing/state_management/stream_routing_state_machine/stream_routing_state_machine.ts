@@ -8,7 +8,7 @@ import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
 import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
-import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
@@ -125,7 +125,7 @@ export const streamRoutingMachine = setup({
     })),
   },
   guards: {
-    canForkStream: and(['hasManagePrivileges', 'isValidRouting']),
+    canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
     canReorderRules: and(['hasManagePrivileges', 'hasMultipleRoutingRules']),
     canUpdateStream: and(['hasManagePrivileges', 'isValidRouting']),
     canSaveSuggestion: and(['hasManagePrivileges', 'isValidEditedSuggestion']),
@@ -140,6 +140,11 @@ export const streamRoutingMachine = setup({
       const { name, condition } = context.editedSuggestion;
       if (!name || name.trim() === '') return false;
       return isSchema(conditionSchema, condition);
+    isValidChild: ({ context }) => {
+      const currentRule = selectCurrentRule(context);
+      const currentStream = context.definition.stream;
+
+      return isChildOf(currentStream.name, currentRule.destination);
     },
   },
 }).createMachine({

@@ -204,7 +204,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           definition={{
             ...baseWorkflowDefinition,
-            triggers: [{ type: 'manual', enabled: true }],
+            triggers: [{ type: 'manual' }],
           }}
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
@@ -220,7 +220,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           definition={{
             ...baseWorkflowDefinition,
-            triggers: [{ type: 'alert', enabled: true }],
+            triggers: [{ type: 'alert' }],
           }}
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
@@ -256,7 +256,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           definition={{
             ...baseWorkflowDefinition,
-            triggers: [{ type: 'alert', enabled: true }],
+            triggers: [{ type: 'alert' }],
           }}
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
@@ -275,7 +275,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           definition={{
             ...baseWorkflowDefinition,
-            triggers: [{ type: 'manual', enabled: true }],
+            triggers: [{ type: 'manual' }],
             inputs: [{ name: 'test-input', type: 'string', required: true }],
           }}
           onClose={mockOnClose}

@@ -18,6 +18,7 @@ export interface StepInfo {
   lineStart: number;
   lineEnd: number;
   propInfos: Record<string, StepPropInfo>;
+  parentStepId?: string;
 }
 
 export interface StepPropInfo {
@@ -83,13 +84,20 @@ export function buildWorkflowLookup(
   };
 }
 
-function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepInfo> {
+const NESTED_STEP_KEYS = ['steps', 'else', 'fallback'];
+
+export function inspectStep(
+  node: any,
+  lineCounter: LineCounter,
+  parentStepId?: string
+): Record<string, StepInfo> {
   const result: Record<string, StepInfo> = {};
 
   let stepId: string | undefined;
   let stepType: string | undefined;
 
   if (YAML.isMap(node)) {
+    // First pass: collect stepId and stepType, and handle non-nested step properties
     node.items.forEach((item) => {
       if (YAML.isPair(item)) {
         if (YAML.isScalar(item.key)) {
@@ -101,12 +109,30 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
             }
           }
         }
-        Object.assign(result, inspectStep(item.value, lineCounter));
+        // For non-nested step keys (steps, else, fallback), we'll handle them in a second pass
+        // after we know the stepId. For other values, recurse with current stepId as parent.
+        const keyValue = YAML.isScalar(item.key) ? (item.key.value as string) : undefined;
+        if (!keyValue || !NESTED_STEP_KEYS.includes(keyValue)) {
+          const currentParentStepId = stepId ?? parentStepId;
+          Object.assign(result, inspectStep(item.value, lineCounter, currentParentStepId));
+        }
       }
     });
+
+    // Second pass: handle nested step keys (steps, else, fallback) with stepId as parentStepId
+    if (stepId) {
+      node.items.forEach((item) => {
+        if (YAML.isPair(item) && YAML.isScalar(item.key)) {
+          const keyValue = item.key.value as string;
+          if (NESTED_STEP_KEYS.includes(keyValue)) {
+            Object.assign(result, inspectStep(item.value, lineCounter, stepId));
+          }
+        }
+      });
+    }
   } else if (YAML.isSeq(node)) {
     node.items.forEach((subItem) => {
-      Object.assign(result, inspectStep(subItem, lineCounter));
+      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId));
     });
   }
 
@@ -114,7 +140,7 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
     const propNodes: Record<string, StepPropInfo> = {};
     node.items.forEach((innerNode) => {
       if (YAML.isPair(innerNode) && YAML.isScalar(innerNode.key)) {
-        if (!['steps', 'else', 'fallback'].includes(innerNode.key.value as string)) {
+        if (!NESTED_STEP_KEYS.includes(innerNode.key.value as string)) {
           Object.assign(propNodes, visitStepProps(innerNode));
         }
       }
@@ -128,6 +154,7 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
       lineStart,
       lineEnd,
       propInfos: propNodes,
+      parentStepId,
     };
   }
 

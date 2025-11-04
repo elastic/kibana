@@ -8,6 +8,11 @@
  */
 
 /**
+ * Feature ID for the workflows management feature
+ */
+export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
+
+/**
  * UI Setting ID for enabling / disabling the workflows management UI
  */
 export const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
