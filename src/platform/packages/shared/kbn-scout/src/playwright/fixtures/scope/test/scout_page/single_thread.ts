@@ -10,6 +10,7 @@
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
+import { logger } from 'elastic-apm-node';
 import { keyTo } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
@@ -40,6 +41,7 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   const extendedMethods: Partial<Record<keyof Page, Function>> & {
     typeWithDelay?: ScoutPage['testSubj']['typeWithDelay'];
     clearInput?: ScoutPage['testSubj']['clearInput'];
+    checkVisibility?: ScoutPage['testSubj']['checkVisibility'];
   } = {};
 
   for (const method of methods) {
@@ -71,6 +73,23 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   extendedMethods.clearInput = async (selector: string) => {
     const testSubjSelector = subj(selector);
     await page.locator(testSubjSelector).fill('');
+  };
+
+  extendedMethods.checkVisibility = async (
+    selector: string,
+    options?: { state?: 'visible' | 'hidden'; timeout?: number }
+  ): Promise<boolean> => {
+    const { state = 'visible', timeout = 5000 } = options || {};
+    const testSubjSelector = subj(selector);
+    const locator = page.locator(testSubjSelector);
+
+    try {
+      await locator.waitFor({ state, timeout });
+      const visResult = await locator.isVisible();
+      return state === 'visible' ? visResult : !visResult;
+    } catch (error: any) {
+      throw error;
+    }
   };
 
   return extendedMethods as ScoutPage['testSubj'];

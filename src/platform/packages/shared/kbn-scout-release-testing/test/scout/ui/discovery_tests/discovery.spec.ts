@@ -137,7 +137,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
       from: defaultStartTime,
       to: endTimeNoResults,
     });
-    await expect.poll(async () => await pageObjects.discover.hasNoResults()).toBe(true);
+    expect(await pageObjects.discover.hasNoResults('visible')).toBe(true);
   });
 
   test('should suggest a new time range is picked', async ({ pageObjects, uiSettings }) => {
@@ -146,7 +146,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
       to: endTimeNoResults,
     });
     await pageObjects.discover.goto();
-    await expect.poll(async () => await pageObjects.discover.hasNoResultsTimepicker()).toBe(true);
+    expect(await pageObjects.discover.hasNoResultsTimepicker('visible')).toBe(true);
   });
 
   test('should show matches when time range is expanded', async ({ pageObjects, uiSettings }) => {
@@ -157,7 +157,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await pageObjects.discover.goto();
     await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
-    await expect.poll(async () => await pageObjects.discover.hasNoResults()).toBe(false);
+    expect(await pageObjects.discover.hasNoResults('hidden')).toBe(true);
     await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
   });
 });

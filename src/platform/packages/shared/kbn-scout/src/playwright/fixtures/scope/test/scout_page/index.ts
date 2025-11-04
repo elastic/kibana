@@ -107,6 +107,16 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the text has been cleared.
      */
     clearInput: (selector: string) => Promise<void>;
+    /**
+     * Checks if element is visible, optionally waits for it
+     * @param selector - data-test-subj value
+     * @param options - Optional timeout to wait for visibility
+     * @returns true if visible, false otherwise (never throws)
+     */
+    checkVisibility: (
+      selector: string,
+      options?: { state?: 'visible' | 'hidden'; timeout?: number }
+    ) => Promise<boolean>;
   };
 };
 

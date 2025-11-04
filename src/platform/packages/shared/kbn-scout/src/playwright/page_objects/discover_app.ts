@@ -65,7 +65,7 @@ export class DiscoverApp {
     // Click the saved search
     const savedSearchId = searchName.split(' ').join('-');
     await this.page.testSubj.click(`savedObjectTitle${savedSearchId}`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitUntilSearchingHasFinished();
   }
 
   async getHitCountInt(): Promise<number> {
@@ -89,7 +89,7 @@ export class DiscoverApp {
   }
 
   async waitUntilSearchingHasFinished() {
-    await this.page.testSubj.waitForSelector('loadingSpinner', {
+    await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
       state: 'hidden',
       timeout: 30000,
     });
@@ -115,12 +115,18 @@ export class DiscoverApp {
     return (await button.getAttribute('data-selected-value')) || '';
   }
 
-  async hasNoResults(): Promise<boolean> {
-    return await this.page.testSubj.isVisible('discoverNoResults');
+  async hasNoResults(state?: 'visible' | 'hidden'): Promise<boolean> {
+    return await this.page.testSubj.checkVisibility('discoverNoResults', {
+      state: state ?? 'visible',
+      timeout: 5000,
+    });
   }
 
-  async hasNoResultsTimepicker(): Promise<boolean> {
-    return await this.page.testSubj.isVisible('discoverNoResultsTimefilter');
+  async hasNoResultsTimepicker(state?: 'visible' | 'hidden'): Promise<boolean> {
+    return await this.page.testSubj.checkVisibility('discoverNoResultsTimefilter', {
+      state: state ?? 'visible',
+      timeout: 5000,
+    });
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
