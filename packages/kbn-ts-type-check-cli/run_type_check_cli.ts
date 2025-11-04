@@ -21,7 +21,6 @@ import {
   cleanupRootRefsConfig,
   ROOT_REFS_CONFIG_PATH,
 } from './root_refs_config';
-import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
 
 const rel = (from: string, to: string) => {
