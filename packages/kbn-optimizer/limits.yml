@@ -21,7 +21,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 574609
+  core: 572422
   cps: 1580
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -29,7 +29,7 @@ pageLoadAssetSize:
   dashboardEnhanced: 12500
   dashboardMarkdown: 5056
   data: 453742
-  dataConnectors: 5531
+  dataConnectors: 7214
   dataQuality: 11469
   datasetQuality: 49315
   dataSourcesRegistry: 4162
@@ -89,7 +89,7 @@ pageLoadAssetSize:
   interactiveSetup: 36654
   intercepts: 19011
   kibanaOverview: 6339
-  kibanaReact: 23031
+  kibanaReact: 22503
   kibanaUsageCollection: 1736
   kibanaUtils: 54848
   lens: 65189
