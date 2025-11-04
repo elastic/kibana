@@ -74,11 +74,14 @@ export function createVegaRequestHandler(
 
     timeCache.setTimeRange(timeRange);
 
-    let dataView: DataView;
+    let dataView: DataView | undefined;
     const firstFilterIndex = filters[0]?.meta.index;
     if (firstFilterIndex) {
-      // @ts-expect-error upgrade typescript v5.9.3
-      dataView = await dataViews.get(firstFilterIndex).catch(() => undefined);
+      try {
+        dataView = await dataViews.get(firstFilterIndex);
+      } catch {
+        // silently catch
+      }
     }
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);

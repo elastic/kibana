@@ -19,7 +19,7 @@ describe('query', () => {
   let req: AnnotationsRequestProcessorsParams['req'];
   let panel: AnnotationsRequestProcessorsParams['panel'];
   let annotation: AnnotationsRequestProcessorsParams['annotation'];
-  let esQueryConfig: AnnotationsRequestProcessorsParams['esQueryConfig'];
+  let esQueryConfig: AnnotationsRequestProcessorsParams['esQueryConfig'] | undefined;
   let annotationIndex: AnnotationsRequestProcessorsParams['annotationIndex'];
   let capabilities: AnnotationsRequestProcessorsParams['capabilities'];
   let uiSettings: AnnotationsRequestProcessorsParams['uiSettings'];
@@ -59,7 +59,6 @@ describe('query', () => {
       req,
       panel,
       annotation,
-      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -83,7 +82,6 @@ describe('query', () => {
       req,
       panel,
       annotation,
-      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -131,7 +129,6 @@ describe('query', () => {
       req,
       panel,
       annotation,
-      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -199,7 +196,6 @@ describe('query', () => {
       req,
       panel,
       annotation,
-      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -254,7 +250,6 @@ describe('query', () => {
       req,
       panel,
       annotation,
-      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -356,7 +351,6 @@ describe('query', () => {
       req,
       panel,
       annotation,
-      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -395,7 +389,6 @@ describe('query', () => {
       req,
       panel,
       annotation,
-      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,

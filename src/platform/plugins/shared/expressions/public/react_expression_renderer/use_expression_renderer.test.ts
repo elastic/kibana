@@ -40,9 +40,8 @@ describe('useExpressionRenderer', () => {
     } as unknown as typeof expressionLoader;
 
     expressionLoaderSpy.mockImplementation(() => expressionLoader);
-    // @ts-expect-error upgrade typescript v5.9.3
-    hook = renderHook(
-      (params: ExpressionRendererParams) => useExpressionRenderer(nodeRef, params),
+    hook = renderHook<ReturnType<typeof useExpressionRenderer>, ExpressionRendererParams>(
+      (params) => useExpressionRenderer(nodeRef, params),
       { initialProps: { expression: 'something' } }
     );
   });

@@ -278,8 +278,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 const field =
                   column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
                     ? currentIndexPattern.getFieldByName(column.sourceField)
-                    : possibleFieldNames?.size === 1 // @ts-expect-error upgrade typescript v5.9.3
-                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
+                    : possibleFieldNames?.size === 1
+                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value!) // valid due to prev check
                     : undefined;
 
                 onChooseFunction(operationType, field);

@@ -261,8 +261,7 @@ export const AnnotationRow = ({
                   />
                 }
               >
-                {/* @ts-expect-error upgrade typescript v5.9.3 */}
-                <IconSelect value={model.icon} onChange={handleChange('icon')} />
+                <IconSelect value={model.icon ?? 'fa-tag'} onChange={handleChange('icon')} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>

@@ -498,12 +498,12 @@ export const termsOperation: OperationDefinition<
           const termsSupported = possibleOperations?.has('terms');
           if (!termsSupported) {
             const newFieldOp = possibleOperations?.values().next().value;
+            if (!newFieldOp) return;
             return updateLayer(
               insertOrReplaceColumn({
                 layer,
                 columnId,
                 indexPattern,
-                // @ts-expect-error upgrade typescript v5.9.3
                 op: newFieldOp,
                 field: mainField,
                 visualizationGroups: dimensionGroups,
