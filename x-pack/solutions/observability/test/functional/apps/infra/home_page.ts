@@ -353,7 +353,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('sort nodes by descending value', async () => {
+      // skipping until tests are migrated to Scout, covered by unit tests
+      it.skip('sort nodes by descending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
@@ -369,7 +370,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('sort nodes by ascending value', async () => {
+      // skipping until tests are migrated to Scout, covered by unit tests
+      it.skip('sort nodes by ascending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
