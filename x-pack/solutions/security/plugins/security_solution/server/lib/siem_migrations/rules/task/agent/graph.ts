@@ -30,7 +30,7 @@ export function getRuleMigrationAgent({
     telemetryClient,
   });
 
-  const toolNode = new ToolNode(tools);
+  const resolveDepsToolNode = new ToolNode([tools.getRulesByName]);
 
   const translationSubGraph = getTranslateRuleGraph({
     model,
@@ -40,13 +40,13 @@ export function getRuleMigrationAgent({
     logger,
   });
   const resolveDependenciesNode = getResolveDepsNode({ model });
-  const createSemanticQueryNode = getCreateSemanticQueryNode({ model, toolMap: tools });
+  const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
 
   const siemMigrationAgentGraph = new StateGraph(migrateRuleState, migrateRuleConfigSchema)
     // Nodes
     .addNode('resolveDependencies', resolveDependenciesNode)
     .addNode('createSemanticQuery', createSemanticQueryNode)
-    .addNode('tools', toolNode)
+    .addNode('tools', resolveDepsToolNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges

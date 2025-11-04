@@ -6,14 +6,12 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ChatPromptTemplate, ChatPromptTemplateInput } from '@langchain/core/prompts';
-import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
-import type { GraphNode, ToolsMap } from '../../types';
+import type { ChatPromptTemplate } from '@langchain/core/prompts';
+import type { GraphNode, MigrateRuleGraphParams } from '../../types';
 import { QRADAR_SEMANTIC_QUERY_PROMPT, SEMANTIC_QUERY_PROMPT_MAP } from './prompts';
 
 interface GetCreateSemanticQueryNodeParams {
-  model: ChatModel;
-  toolMap: ToolsMap;
+  model: MigrateRuleGraphParams['model'];
 }
 
 interface GetSemanticQueryResponse {
@@ -22,7 +20,6 @@ interface GetSemanticQueryResponse {
 
 export const getCreateSemanticQueryNode = ({
   model,
-  toolMap,
 }: GetCreateSemanticQueryNodeParams): GraphNode => {
   const jsonParser = new JsonOutputParser();
   return async (state) => {

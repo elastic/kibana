@@ -37,6 +37,7 @@ interface ParsedQradarXml {
 }
 
 export interface QradarRule {
+  id: string;
   rule_data: string;
   rule_type: string;
   description: string;

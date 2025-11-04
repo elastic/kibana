@@ -6,7 +6,7 @@
  */
 
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { QradarRule } from '../../../../../../common/siem_migrations/parsers/qradar/rules_xml';
+import type { QradarRule } from '../../../../../../common/siem_migrations/parsers/qradar/types';
 
 /**
  * Transforms a QRadar rule from the parsed XML to the OriginalRule format.

@@ -21,11 +21,7 @@ import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
-import {
-  getRulesByNameGetter,
-  getRulesByNameTool,
-  getRulesTools,
-} from '../../common/task/agent/tools/qradar/rules';
+import { getRulesMigrationTools } from './agent/tools';
 
 export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
 export type RuleMigrationTaskOutput = MigrateRuleState;
@@ -67,10 +63,11 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       abortController: this.abortController,
     });
 
-    const toolsMap = getRulesTools(this.migrationId, this.data);
-    const rulesNameTool = getRulesByNameTool(this.migrationId, this.data);
-    const tools = [rulesNameTool];
-    const modelWithTools = model.bindTools(tools);
+    const toolMap = getRulesMigrationTools(this.migrationId, {
+      rulesClient: this.data,
+    });
+
+    const modelWithTools = model.bindTools(Object.values(toolMap));
 
     const modelName = this.actionsClientChat.getModelName(model);
 
@@ -94,7 +91,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       ruleMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,
-      tools,
+      tools: toolMap,
     });
 
     this.telemetry = telemetryClient;

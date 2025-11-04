@@ -29,6 +29,7 @@ export class QradarRulesXmlParser extends XmlParser {
 
       const parsedRuleData = await this.parseRuleData(decodedRuleData);
 
+      const id = this.findDeepValue(parsedRuleData, 'rule', 'id') as string;
       const name = this.findDeep(parsedRuleData, 'name') as string | Array<string>;
       const notes = this.findDeep(parsedRuleData, 'notes') as string | Array<string>;
       const isBuildingBlockVal =
@@ -36,10 +37,12 @@ export class QradarRulesXmlParser extends XmlParser {
 
       if (name && notes && isBuildingBlockVal) {
         const title = this.getStrValue(name);
+
         const description = this.getStrValue(notes) as string;
         const isBuildingBlock = isBuildingBlockVal === 'true';
 
         parsedRules.push({
+          id: id as string,
           title,
           description,
           rule_type: isBuildingBlock ? 'building_block' : 'default',
@@ -48,7 +51,7 @@ export class QradarRulesXmlParser extends XmlParser {
       }
     }
 
-    return Array.isArray(parsedRules) ? parsedRules.slice(0) : [];
+    return Array.isArray(parsedRules) ? parsedRules : [];
   }
 
   private async parseRuleData(ruleData: string): Promise<XmlElement> {

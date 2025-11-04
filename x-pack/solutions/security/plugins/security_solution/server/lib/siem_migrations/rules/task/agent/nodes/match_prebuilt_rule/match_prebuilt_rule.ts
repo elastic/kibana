@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
@@ -20,7 +19,7 @@ import {
 } from '../../../../constants';
 
 interface GetMatchPrebuiltRuleNodeParams {
-  model: ChatModel;
+  model: MigrateRuleGraphParams['model'];
   logger: Logger;
   telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;

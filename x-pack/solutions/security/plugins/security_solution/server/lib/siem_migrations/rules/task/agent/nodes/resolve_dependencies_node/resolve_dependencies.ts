@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
-import type { BaseMessage } from '@langchain/core/messages';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
-import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
-import type { GraphNode, ToolsMap } from '../../types';
+import type { GraphNode, MigrateRuleGraphParams } from '../../types';
 import { QRADAR_DEPENDENCIES_RESOLVE_PROMPT } from './prompts';
 
 interface GetCreateResolveDepsNodeParams {
-  model: ChatModel;
+  model: MigrateRuleGraphParams['model'];
 }
 
 export const getResolveDepsNode = ({ model }: GetCreateResolveDepsNodeParams): GraphNode => {

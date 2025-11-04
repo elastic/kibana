@@ -6,15 +6,16 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { RunnableConfig } from '@langchain/core/runnables';
-import type { MessagesAnnotation } from '@langchain/langgraph';
-import type { DynamicStructuredTool, StructuredTool } from '@langchain/core/tools';
+import type { Runnable, RunnableConfig } from '@langchain/core/runnables';
+import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
 import type { RuleMigrationsRetriever } from '../retrievers';
 import type { EsqlKnowledgeBase } from '../../../common/task/util/esql_knowledge_base';
 import type { ChatModel } from '../../../common/task/util/actions_client_chat';
 import type { migrateRuleConfigSchema, migrateRuleState } from './state';
 import type { RuleMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
-import type { getRulesTools } from '../../../common/task/agent/tools/qradar/rules';
+import type { RulesMigrationTools } from './tools';
 
 export type MigrateRuleState = typeof migrateRuleState.State;
 export type MigrateRuleConfigSchema = (typeof migrateRuleConfigSchema)['State'];
@@ -28,13 +29,13 @@ export interface RuleMigrationAgentRunOptions {
   skipPrebuiltRulesMatching: boolean;
 }
 
-export type Tools = DynamicStructuredTool[];
-
 export interface MigrateRuleGraphParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;
-  model: ChatModel;
+  model:
+    | ChatModel
+    | Runnable<BaseLanguageModelInput, AIMessageChunk, InferenceChatModelCallOptions>;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;
   telemetryClient: RuleMigrationTelemetryClient;
-  tools: Tools;
+  tools: RulesMigrationTools;
 }
