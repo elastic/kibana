@@ -12,8 +12,8 @@ import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface TabbedTableFilterProps {
-  onSelectedTabChanged: (tabId: 'all' | 'favorite') => void;
-  selectedTabId: 'all' | 'favorite';
+  onSelectedTabChanged: (tabId: 'dashboards' | 'visualizations' | 'annotation-groups') => void;
+  selectedTabId: 'dashboards' | 'visualizations' | 'annotation-groups';
 }
 
 export const TabbedTableFilter = (props: TabbedTableFilterProps) => {
@@ -27,23 +27,33 @@ export const TabbedTableFilter = (props: TabbedTableFilterProps) => {
         }}
       >
         <EuiTab
-          onClick={() => props.onSelectedTabChanged('all')}
-          isSelected={props.selectedTabId === 'all'}
-          data-test-subj="allTab"
+          onClick={() => props.onSelectedTabChanged('dashboards')}
+          isSelected={props.selectedTabId === 'dashboards'}
+          data-test-subj="dashboardsTab"
         >
           <FormattedMessage
-            id="contentManagement.tableList.tabsFilter.allTabLabel"
-            defaultMessage="All"
+            id="contentManagement.tableList.tabsFilter.dashboardsTabLabel"
+            defaultMessage="Dashboards"
           />
         </EuiTab>
         <EuiTab
-          onClick={() => props.onSelectedTabChanged('favorite')}
-          isSelected={props.selectedTabId === 'favorite'}
-          data-test-subj="favoriteTab"
+          onClick={() => props.onSelectedTabChanged('visualizations')}
+          isSelected={props.selectedTabId === 'visualizations'}
+          data-test-subj="visualizationsTab"
         >
           <FormattedMessage
-            id="contentManagement.tableList.tabsFilter.favoriteTabLabel"
-            defaultMessage="Starred"
+            id="contentManagement.tableList.tabsFilter.visualizationsTabLabel"
+            defaultMessage="Visualizations"
+          />
+        </EuiTab>
+        <EuiTab
+          onClick={() => props.onSelectedTabChanged('annotation-groups')}
+          isSelected={props.selectedTabId === 'annotation-groups'}
+          data-test-subj="annotationGroupsTab"
+        >
+          <FormattedMessage
+            id="contentManagement.tableList.tabsFilter.annotationGroupsTabLabel"
+            defaultMessage="Annotation Groups"
           />
         </EuiTab>
       </EuiTabs>

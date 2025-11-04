@@ -88,6 +88,7 @@ export const useDashboardListingTable = ({
   urlStateEnabled,
   useSessionStorageIntegration,
   showCreateDashboardButton = true,
+  contentTypeTabsEnabled = true,
 }: {
   dashboardListingId?: string;
   disableCreateDashboardButton?: boolean;
@@ -98,6 +99,7 @@ export const useDashboardListingTable = ({
   urlStateEnabled?: boolean;
   useSessionStorageIntegration?: boolean;
   showCreateDashboardButton?: boolean;
+  contentTypeTabsEnabled?: boolean;
 }): UseDashboardListingTableReturnType => {
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
   const title = getTableListTitle();
@@ -313,6 +315,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
+      contentTypeTabsEnabled: true,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
     };
   }, [

@@ -84,6 +84,8 @@ export interface TableListViewTableProps<
   customSortingOptions?: CustomSortingOptions;
   urlStateEnabled?: boolean;
   createdByEnabled?: boolean;
+  /** Enable content type tabs filter (dashboards, visualizations, annotation-groups). Only used in dashboards app. */
+  contentTypeTabsEnabled?: boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -167,6 +169,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   tableFilter: {
     createdBy: string[];
     favorites: boolean;
+    contentTypeTab?: string;
   };
 }
 
@@ -178,7 +181,7 @@ export interface URLState {
   };
   filter?: {
     createdBy?: string[];
-    favorites?: boolean;
+    contentTypeTab?: string;
   };
 
   [key: string]: unknown;
@@ -190,7 +193,7 @@ interface URLQueryParams {
   sort?: string;
   sortdir?: string;
   created_by?: string[];
-  favorites?: 'true';
+  contentTypeTab?: string;
 
   [key: string]: unknown;
 }
@@ -250,10 +253,12 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     stateFromURL.filter = { createdBy: [] };
   }
 
-  if (sanitizedParams.favorites === 'true') {
-    stateFromURL.filter.favorites = true;
-  } else {
-    stateFromURL.filter.favorites = false;
+  if (sanitizedParams.contentTypeTab === 'dashboards') {
+    stateFromURL.filter.contentTypeTab = 'dashboards';
+  } else if (sanitizedParams.contentTypeTab === 'visualizations') {
+    stateFromURL.filter.contentTypeTab = 'visualizations';
+  } else if (sanitizedParams.contentTypeTab === 'annotation-groups') {
+    stateFromURL.filter.contentTypeTab = 'annotation-groups';
   }
 
   return stateFromURL;
@@ -268,7 +273,10 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
-  filter?: { createdBy?: string[]; favorites?: boolean };
+  filter?: {
+    createdBy?: string[];
+    contentTypeTab?: 'dashboards' | 'visualizations' | 'annotation-groups';
+  };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
@@ -291,8 +299,8 @@ const urlStateSerializer = (updated: {
     updatedQueryParams.created_by = updated.filter.createdBy;
   }
 
-  if (updated?.filter && 'favorites' in updated.filter) {
-    updatedQueryParams.favorites = updated.filter.favorites ? 'true' : undefined;
+  if (updated?.filter?.contentTypeTab) {
+    updatedQueryParams.contentTypeTab = updated.filter.contentTypeTab;
   }
 
   return updatedQueryParams;
@@ -339,6 +347,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   refreshListBouncer,
   setPageDataTestSubject,
   createdByEnabled = false,
+  contentTypeTabsEnabled = false,
   recentlyAccessed,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
@@ -428,6 +437,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       tableFilter: {
         createdBy: [],
         favorites: false,
+        contentTypeTab: 'dashboards',
       },
     };
   }, [initialPageSize, entityName, recentlyAccessed]);
@@ -1102,7 +1112,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: {
           filter: {
             createdBy: filter.createdBy ?? [],
-            favorites: filter.favorites ?? false,
+            contentTypeTab: filter.contentTypeTab ?? 'dashboards',
           },
         },
       });
@@ -1203,6 +1213,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
+          contentTypeTabsEnabled={contentTypeTabsEnabled}
         />
 
         {/* Delete modal */}

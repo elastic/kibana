@@ -86,6 +86,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
+  contentTypeTabsEnabled?: boolean;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -117,6 +118,7 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
+  contentTypeTabsEnabled,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
@@ -350,16 +352,13 @@ export function Table<T extends UserContentCommonSchema>({
     tableSort.field === 'accessedAt' // "accessedAt" is a special case with a custom sorting
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
-
-  const favoritesFilter =
-    favoritesEnabled && !favoritesError ? (
-      <TabbedTableFilter
-        selectedTabId={tableFilter.favorites ? 'favorite' : 'all'}
-        onSelectedTabChanged={(newTab) => {
-          onFilterChange({ favorites: newTab === 'favorite' });
-        }}
-      />
-    ) : undefined;
+  // Content type tabs filter (only shown in dashboards app)
+  const contentTypeTabsFilter = contentTypeTabsEnabled ? (
+    <TabbedTableFilter
+      selectedTabId={tableFilter.contentTypeTab ?? 'dashboards'}
+      onSelectedTabChanged={(newTab) => onFilterChange({ contentTypeTab: newTab })}
+    />
+  ) : undefined;
 
   return (
     <UserFilterContextProvider
@@ -398,7 +397,7 @@ export function Table<T extends UserContentCommonSchema>({
           rowHeader="attributes.title"
           tableCaption={tableCaption}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          childrenBetween={favoritesFilter}
+          childrenBetween={contentTypeTabsFilter}
         />
       </TagFilterContextProvider>
     </UserFilterContextProvider>
