@@ -647,6 +647,14 @@ export class SearchSource {
           'filters',
           (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
         );
+      case 'nonHighlightingFilters':
+        return addToRoot(
+          'nonHighlightingFilters',
+          (typeof data.nonHighlightingFilters === 'function'
+            ? data.nonHighlightingFilters()
+            : data.nonHighlightingFilters || []
+          ).concat(val)
+        );
       case 'query':
         return addToRoot(key, (data.query ?? []).concat(val));
       case 'fields':
@@ -791,6 +799,7 @@ export class SearchSource {
     const bodyParams = omit(searchRequest, [
       'index',
       'filters',
+      'nonHighlightingFilters',
       'highlightAll',
       'fieldsFromSource',
       'body',
@@ -879,10 +888,20 @@ export class SearchSource {
       });
     }
 
-    const allFilters =
-      typeof searchRequest.filters === 'function'
-        ? searchRequest.filters()
-        : searchRequest.filters ?? [];
+    // Evaluate filters if they are functions
+    const filters = typeof searchRequest.filters === 'function'
+      ? searchRequest.filters()
+      : searchRequest.filters;
+
+    const nonHighlightingFilters = typeof searchRequest.nonHighlightingFilters === 'function'
+      ? searchRequest.nonHighlightingFilters()
+      : searchRequest.nonHighlightingFilters;
+
+    // Merge filters and nonHighlightingFilters for the main query
+    const allFilters = [
+      ...(Array.isArray(filters) ? filters : filters ? [filters] : []),
+      ...(Array.isArray(nonHighlightingFilters) ? nonHighlightingFilters : nonHighlightingFilters ? [nonHighlightingFilters] : []),
+    ];
 
     const builtQuery = this.getBuiltEsQuery({
       index: searchRequest.index,
@@ -892,14 +911,18 @@ export class SearchSource {
       sort: body.sort,
     });
 
-    const highlightQuery = searchRequest.highlightAll
-      ? this.buildHighlightQuery({
-          index: searchRequest.index,
-          query: searchRequest.query,
-          filters: allFilters,
-          getConfig,
-        })
-      : undefined;
+    // Build highlight query using only filters (not nonHighlightingFilters)
+    const filterArray = Array.isArray(filters) ? filters : filters ? [filters] : [];
+    const highlightQuery =
+      searchRequest.highlightAll && filterArray.length > 0
+        ? this.getBuiltEsQuery({
+            index: searchRequest.index,
+            query: searchRequest.query,
+            filters: filterArray,
+            getConfig,
+            sort: body.sort,
+          })
+        : undefined;
 
     const bodyToReturn = {
       ...body,
@@ -933,7 +956,7 @@ export class SearchSource {
     };
 
     return omitByIsNil({
-      ...omit(searchRequest, ['query', 'filters', 'fieldsFromSource']),
+      ...omit(searchRequest, ['query', 'filters', 'nonHighlightingFilters', 'fieldsFromSource']),
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(searchRequest.index),
       highlightAll:
@@ -995,26 +1018,6 @@ export class SearchSource {
       typeof filters === 'function' ? filters() : filters,
       esQueryConfigs
     );
-  }
-
-  /**
-   * Build a highlight query excluding filters with skipHighlight metadata.
-   * Used to prevent non-highlighting filters (context filters) from being highlighted.
-   */
-  private buildHighlightQuery({
-    index,
-    query = [],
-    filters = [],
-    getConfig,
-  }: SearchRequest & { filters: Filter[] }) {
-    const highlightFilters = filters.filter((f) => !f.meta?.skipHighlight);
-
-    if (highlightFilters.length === 0 && (!query || query.length === 0)) {
-      return undefined;
-    }
-
-    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
-    return buildEsQuery(this.getDataView(index), query, highlightFilters, esQueryConfigs);
   }
 
   private getRemainingFields({
@@ -1130,6 +1133,7 @@ export class SearchSource {
   public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
+      nonHighlightingFilters: originalNonHighlightingFilters,
       aggs: searchSourceAggs,
       parent,
       size: _size, // omit it
@@ -1152,6 +1156,13 @@ export class SearchSource {
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
         filter: filters,
+      };
+    }
+    if (originalNonHighlightingFilters) {
+      const nonHighlightingFilters = this.getFilters(originalNonHighlightingFilters);
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        nonHighlightingFilters,
       };
     }
     if (searchSourceAggs) {

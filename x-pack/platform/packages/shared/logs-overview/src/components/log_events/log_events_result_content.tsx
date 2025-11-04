@@ -16,7 +16,7 @@ import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_
 
 export interface LogEventsResultContentProps {
   dependencies: LogEventsResultContentDependencies;
-  documentFilters?: QueryDslQueryContainer[];
+  documentFilters: QueryDslQueryContainer[];
   nonHighlightingFilters?: QueryDslQueryContainer[];
   logsSource: ResolvedIndexNameLogsSourceConfiguration;
   timeRange: {
@@ -32,7 +32,7 @@ export interface LogEventsResultContentDependencies {
 }
 
 export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
-  ({ dependencies, documentFilters = [], nonHighlightingFilters = [], logsSource, timeRange }) => {
+  ({ dependencies, documentFilters, nonHighlightingFilters = [], logsSource, timeRange }) => {
     const savedSearchDependencies = React.useMemo(
       () => ({
         embeddable: dependencies.embeddable,
@@ -51,33 +51,33 @@ export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
     );
 
     const savedSearchFilters = React.useMemo(
-      () => [
-        // Document filters (will be highlighted)
-        ...documentFilters.map((filter) =>
+      () =>
+        documentFilters.map((filter) =>
           buildCustomFilter(
             logsSource.indexName,
             filter,
             false,
             false,
             'Document Filters',
-            FilterStateStore.APP_STATE,
-            false
+            FilterStateStore.APP_STATE
           )
         ),
-        // Non-highlighting filters (won't be highlighted)
-        ...nonHighlightingFilters.map((filter) =>
+      [documentFilters, logsSource.indexName]
+    );
+
+    const savedSearchNonHighlightingFilters = React.useMemo(
+      () =>
+        nonHighlightingFilters.map((filter) =>
           buildCustomFilter(
             logsSource.indexName,
             filter,
             false,
             false,
             'Context Filters',
-            FilterStateStore.APP_STATE,
-            true
+            FilterStateStore.APP_STATE
           )
         ),
-      ],
-      [documentFilters, nonHighlightingFilters, logsSource.indexName]
+      [nonHighlightingFilters, logsSource.indexName]
     );
 
     return (
@@ -87,6 +87,7 @@ export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
         timestampField={logsSource.timestampField}
         timeRange={savedSearchTimeRange}
         filters={savedSearchFilters}
+        nonHighlightingFilters={savedSearchNonHighlightingFilters}
         displayOptions={{
           solutionNavIdOverride: 'oblt',
           enableDocumentViewer: true,

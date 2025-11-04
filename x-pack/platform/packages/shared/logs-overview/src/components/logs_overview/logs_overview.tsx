@@ -43,7 +43,7 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
   ({
     dependencies,
     documentFilters = defaultDocumentFilters,
-    nonHighlightingFilters = defaultDocumentFilters,
+    nonHighlightingFilters = defaultNonHighlightingFilters,
     featureFlags = defaultFeatureFlags,
     height,
     logsSource = defaultLogsSource,
@@ -84,10 +84,10 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
 
 export type LogsOverviewContentProps = Pick<
   LogCategoriesProps,
-  'height' | 'timeRange' | 'documentFilters'
+  'height' | 'timeRange' | 'documentFilters' | 'nonHighlightingFilters'
 > &
   Pick<LogEventsProps, 'height' | 'timeRange' | 'documentFilters' | 'nonHighlightingFilters'> & {
-    dependencies: LogsOverviewContentDependencies;
+    dependencies: LogsOverviewDependencies;
   };
 
 export type LogsOverviewContentDependencies = LogCategoriesDependencies & LogEventsDependencies;
@@ -173,6 +173,8 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
 );
 
 const defaultDocumentFilters: QueryDslQueryContainer[] = [];
+
+const defaultNonHighlightingFilters: QueryDslQueryContainer[] = [];
 
 const defaultFeatureFlags: LogsOverviewFeatureFlags = {
   isPatternsEnabled: true,
