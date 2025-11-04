@@ -54755,7 +54755,13 @@ paths:
                                                                 type: string
                                                               ignore_failure:
                                                                 type: boolean
+                                                              locale:
+                                                                minLength: 1
+                                                                type: string
                                                               output_format:
+                                                                minLength: 1
+                                                                type: string
+                                                              timezone:
                                                                 minLength: 1
                                                                 type: string
                                                               to:
@@ -56966,7 +56972,13 @@ paths:
                                                             type: string
                                                           ignore_failure:
                                                             type: boolean
+                                                          locale:
+                                                            minLength: 1
+                                                            type: string
                                                           output_format:
+                                                            minLength: 1
+                                                            type: string
+                                                          timezone:
                                                             minLength: 1
                                                             type: string
                                                           to:
@@ -58973,7 +58985,13 @@ paths:
                                                                 type: string
                                                               ignore_failure:
                                                                 type: boolean
+                                                              locale:
+                                                                minLength: 1
+                                                                type: string
                                                               output_format:
+                                                                minLength: 1
+                                                                type: string
+                                                              timezone:
                                                                 minLength: 1
                                                                 type: string
                                                               to:
@@ -61034,7 +61052,13 @@ paths:
                                                             type: string
                                                           ignore_failure:
                                                             type: boolean
+                                                          locale:
+                                                            minLength: 1
+                                                            type: string
                                                           output_format:
+                                                            minLength: 1
+                                                            type: string
+                                                          timezone:
                                                             minLength: 1
                                                             type: string
                                                           to:
@@ -63414,7 +63438,13 @@ paths:
                                                 type: string
                                               ignore_failure:
                                                 type: boolean
+                                              locale:
+                                                minLength: 1
+                                                type: string
                                               output_format:
+                                                minLength: 1
+                                                type: string
+                                              timezone:
                                                 minLength: 1
                                                 type: string
                                               to:
@@ -65398,7 +65428,13 @@ paths:
                                                 type: string
                                               ignore_failure:
                                                 type: boolean
+                                              locale:
+                                                minLength: 1
+                                                type: string
                                               output_format:
+                                                minLength: 1
+                                                type: string
+                                              timezone:
                                                 minLength: 1
                                                 type: string
                                               to:
