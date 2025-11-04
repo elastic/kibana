@@ -104,7 +104,7 @@ export function getStepsForSimulation({
 
   // Find if any processor is currently being edited
   const editingProcessorIndex = newStepSnapshots.findIndex(
-    (snapshot) => isActionBlock(snapshot.context) && isStepUnderEdit(snapshot)
+    (snapshot) => isActionBlock(snapshot.context.step) && isStepUnderEdit(snapshot)
   );
 
   // If a processor is being edited, set new processors up to and including the one being edited
