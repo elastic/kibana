@@ -79,6 +79,7 @@ function getDefaultLensApiMock() {
     checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     serializeState: jest.fn(),
+    getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
     getEditPanel: jest.fn(async () => <div data-test-subj="editLensFlyout" />),
