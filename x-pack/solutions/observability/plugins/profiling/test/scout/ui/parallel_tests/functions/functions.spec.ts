@@ -22,36 +22,15 @@ test.describe('Functions page', { tag: ['@ess'] }, () => {
     await expect(functionsPage.page).toHaveURL(/.*\/app\/profiling\/functions\/topn/);
   });
 
-  test('shows TopN functions and Differential TopN functions', async ({
+  test('validates and interacts with TopN functions table and its content and actions', async ({
     pageObjects: { functionsPage },
-    page,
   }) => {
-    await functionsPage.goto();
-    await expect(page.getByRole('tab', { name: 'TopN functions', exact: true })).toBeVisible();
+    await functionsPage.gotoWithTimeRange(rangeFrom, rangeTo);
+
+    // Verify the tab is active
     await expect(
-      page.getByRole('tab', { name: 'Differential TopN functions', exact: true })
-    ).toBeVisible();
-  });
-
-  test('validates table has data', async ({ pageObjects: { functionsPage } }) => {
-    await functionsPage.gotoWithTimeRange(rangeFrom, rangeTo);
-
-    // Use page object methods to verify table has data
-    const firstRow = await functionsPage.getTopNFunctionsRow(0);
-    await expect(firstRow).toBeVisible();
-
-    // Verify table has data by checking cells contain expected content
-    const rankCell = await functionsPage.getTopNFunctionsCell(0, 1);
-    await expect(rankCell).toContainText('1');
-
-    const frameCell = await functionsPage.getTopNFunctionsCell(0, 2);
-    await expect(frameCell).toContainText('vmlinux');
-  });
-
-  test('can interact with TopN functions table using page object methods', async ({
-    pageObjects: { functionsPage },
-  }) => {
-    await functionsPage.gotoWithTimeRange(rangeFrom, rangeTo);
+      functionsPage.page.getByRole('tab', { name: 'TopN functions', exact: true })
+    ).toHaveAttribute('aria-selected', 'true');
 
     // Use page object methods to get table elements
     const firstRow = await functionsPage.getTopNFunctionsRow(0);
@@ -133,7 +112,7 @@ test.describe('Functions page', { tag: ['@ess'] }, () => {
     await expect(frameCell).toContainText('vmlinux');
   });
 
-  test('can access settings page', async ({ pageObjects: { functionsPage } }) => {
+  test('accesses settings page', async ({ pageObjects: { functionsPage } }) => {
     await functionsPage.gotoWithTimeRange(rangeFrom, rangeTo);
 
     // Click settings button
@@ -143,7 +122,7 @@ test.describe('Functions page', { tag: ['@ess'] }, () => {
     await expect(functionsPage.page.getByText('Advanced Settings')).toBeVisible();
   });
 
-  test('can navigate to differential functions tab', async ({ pageObjects: { functionsPage } }) => {
+  test('navigates to differential functions tab', async ({ pageObjects: { functionsPage } }) => {
     await functionsPage.gotoWithTimeRange(rangeFrom, rangeTo);
 
     // Navigate to differential functions tab
@@ -158,7 +137,7 @@ test.describe('Functions page', { tag: ['@ess'] }, () => {
     ).toHaveAttribute('aria-selected', 'true');
   });
 
-  test('can access frame information window', async ({ pageObjects: { functionsPage } }) => {
+  test('accesses frame information window', async ({ pageObjects: { functionsPage } }) => {
     await functionsPage.gotoWithTimeRange(rangeFrom, rangeTo);
 
     // Use page object method to click action button
@@ -169,7 +148,7 @@ test.describe('Functions page', { tag: ['@ess'] }, () => {
     await expect(functionsPage.page.getByText('Impact estimates')).toBeVisible();
   });
 
-  test('can access settings modal and update CO2 settings', async ({
+  test('accesses settings modal and updates CO2 settings', async ({
     pageObjects: { functionsPage },
   }) => {
     await functionsPage.gotoWithTimeRange(rangeFrom, rangeTo);

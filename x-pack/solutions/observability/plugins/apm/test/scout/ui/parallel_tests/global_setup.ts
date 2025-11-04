@@ -14,11 +14,13 @@ import { testData } from '../fixtures';
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apmSynthtraceEsClient, apiServices, log }) => {
-    await apiServices.fleet.internal.setup();
-    log.info('Fleet infrastructure setup completed');
-    await apiServices.fleet.agent.setup();
-    log.info('Fleet agents setup completed');
+  async ({ apmSynthtraceEsClient, apiServices, log, config }) => {
+    if (!config.isCloud) {
+      await apiServices.fleet.internal.setup();
+      log.info('Fleet infrastructure setup completed');
+      await apiServices.fleet.agent.setup();
+      log.info('Fleet agents setup completed');
+    }
     const opbeansDataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
       from: new Date(testData.OPBEANS_START_DATE).getTime(),
       to: new Date(testData.OPBEANS_END_DATE).getTime(),
