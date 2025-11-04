@@ -188,7 +188,7 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
       values: ['Secrets', 'Keys', 'API Keys', 'Encryption Keys', 'Access Keys'],
     },
     {
-      icon: 'database',
+      icon: 'magnifyWithExclamation',
       shape: 'rectangle',
       values: ['Entities', 'Entity'],
     },
