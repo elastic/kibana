@@ -156,6 +156,7 @@ export const PrivilegedAccessDetectionHeatmap: React.FC<PrivilegedAccessDetectio
       )}
       {isError && (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.anomalyDetectionDataError',
             {
