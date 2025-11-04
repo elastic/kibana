@@ -2362,13 +2362,7 @@
             "signature": [
               "{ getIsCollapsed$(): ",
               "Observable",
-              "<boolean>; setIsCollapsed(isCollapsed: boolean): void; getPanelSelectedNode$: () => ",
-              "Observable",
-              "<",
-              "PanelSelectedNode",
-              " | null>; setPanelSelectedNode(node: string | ",
-              "PanelSelectedNode",
-              " | null): void; getIsFeedbackBtnVisible$: () => ",
+              "<boolean>; setIsCollapsed(isCollapsed: boolean): void; getIsFeedbackBtnVisible$: () => ",
               "Observable",
               "<boolean>; setIsFeedbackBtnVisible: (isVisible: boolean) => void; }"
             ],
@@ -3372,27 +3366,6 @@
           "<LinkId, Id, ChildrenID> & { children: ",
           "NodeDefinition",
           "<LinkId, Id, ChildrenID>[]; }"
-        ],
-        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-public.PanelSelectedNode",
-        "type": "Type",
-        "tags": [],
-        "label": "PanelSelectedNode",
-        "description": [],
-        "signature": [
-          "{ id: string; path: string; title?: string | undefined; children?: ",
-          "ChromeProjectNavigationNode",
-          "[] | undefined; sideNavStatus?: ",
-          "SideNavNodeStatus",
-          " | undefined; deepLink?: ",
-          "ChromeNavLink",
-          " | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
