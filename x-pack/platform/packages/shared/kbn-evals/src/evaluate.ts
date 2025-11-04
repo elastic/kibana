@@ -26,10 +26,13 @@ import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
-import { createInputTokensEvaluator } from './evaluators/trace_based/input_tokens';
-import { createOutputTokensEvaluator } from './evaluators/trace_based/output_tokens';
-import { createLatencyEvaluator } from './evaluators/trace_based/latency';
-import { createToolCallsEvaluator } from './evaluators/trace_based/tool_calls';
+import {
+  createCachedTokensEvaluator,
+  createInputTokensEvaluator,
+  createLatencyEvaluator,
+  createOutputTokensEvaluator,
+  createToolCallsEvaluator,
+} from './evaluators/trace_based';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -207,6 +210,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               log,
             }),
             createToolCallsEvaluator({
+              esClient,
+              log,
+            }),
+            createCachedTokensEvaluator({
               esClient,
               log,
             }),
