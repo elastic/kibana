@@ -7,6 +7,7 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { DATA_CONNECTORS_SHORT_TITLE } from '@kbn/data-connectors-plugin/common';
 import agentsIcon from './assets/robot.svg';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
@@ -23,10 +24,19 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         children: [
           {
             link: 'workplace_ai',
-            title: 'Home',
+            title: 'Workplace AI',
+            renderAs: 'home',
+            breadcrumbStatus: 'hidden',
+          },
+          {
+            iconV2: agentsIcon, // Temp svg until we have icon in EUI
+            link: 'agent_builder',
+            withBadge: true,
+            badgeTypeV2: 'techPreview',
           },
           {
             link: 'data_connectors',
+            title: DATA_CONNECTORS_SHORT_TITLE,
             iconV2: 'plugs',
             badgeTypeV2: 'techPreview',
           },
@@ -43,20 +53,14 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             },
           },
           {
-            iconV2: agentsIcon, // Temp svg until we have icon in EUI
-            link: 'agent_builder',
-            withBadge: true,
-            badgeTypeV2: 'techPreview',
-          },
-          {
-            link: 'discover',
-            spaceBefore: 'l',
-          },
-          {
             link: 'dashboards',
             getIsActive: ({ pathNameSerialized, prepend }) => {
               return pathNameSerialized.startsWith(prepend('/app/dashboards'));
             },
+          },
+          {
+            link: 'discover',
+            spaceBefore: 'l',
           },
         ],
       },

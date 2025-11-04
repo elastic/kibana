@@ -6,11 +6,15 @@
  */
 
 import {
+  AppStatus,
+  type AppUpdater,
   type CoreSetup,
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
+import { KIBANA_WORKPLACE_AI_PROJECT, type KibanaProject } from '@kbn/projects-solutions-groups';
+import { BehaviorSubject } from 'rxjs';
 import { registerApp } from './register';
 import type {
   DataConnectorsPluginSetup,
@@ -18,6 +22,8 @@ import type {
   DataConnectorsPluginStart,
   DataConnectorsPluginStartDependencies,
 } from './types';
+
+const ENABLED_SOLUTIONS: KibanaProject[] = [KIBANA_WORKPLACE_AI_PROJECT];
 
 export class DataConnectorsPlugin
   implements
@@ -28,15 +34,33 @@ export class DataConnectorsPlugin
       DataConnectorsPluginStartDependencies
     >
 {
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({
+    status: AppStatus.inaccessible,
+    visibleIn: [],
+  }));
   constructor(context: PluginInitializerContext) {}
   setup(
     core: CoreSetup<DataConnectorsPluginStartDependencies, DataConnectorsPluginStart>
   ): DataConnectorsPluginSetup {
-    registerApp({ core });
+    registerApp({ core, updater$: this.appUpdater$ });
 
     return {};
   }
   start(core: CoreStart): DataConnectorsPluginStart {
+    core.chrome.getActiveSolutionNavId$().subscribe((solutionId) => {
+      if (!solutionId || !ENABLED_SOLUTIONS.includes(solutionId)) {
+        this.appUpdater$.next(() => ({
+          status: AppStatus.inaccessible,
+          visibleIn: [],
+        }));
+        return;
+      }
+      this.appUpdater$.next(() => ({
+        status: AppStatus.accessible,
+        visibleIn: ['sideNav', 'globalSearch'],
+      }));
+    });
+
     return {};
   }
 }

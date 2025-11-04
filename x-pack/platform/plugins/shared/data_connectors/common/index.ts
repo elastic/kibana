@@ -6,3 +6,4 @@
  */
 
 export { DATA_CONNECTORS_ROUTE } from './routes';
+export { DATA_CONNECTORS_FULL_TITLE, DATA_CONNECTORS_SHORT_TITLE } from './constants';
