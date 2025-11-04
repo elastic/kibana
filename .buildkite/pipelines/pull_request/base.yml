@@ -23,10 +23,10 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: c2-standard-16
+      machineType: n2-highcpu-16
       preemptible: true
-      diskSizeGb: 150
-      diskType: pd-ssd
+      localSsds: 1
+      localSsdInterface: nvme
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
