@@ -170,6 +170,8 @@ describe('BurnRateRuleExecutor', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     soClientMock = savedObjectsClientMock.create();
     loggerMock = loggingSystemMock.createLogger();
+    searchSourceClientMock = jest.fn() as any;
+    uiSettingsClientMock = jest.fn() as any;
     servicesMock = {
       savedObjectsClient: soClientMock,
       scopedClusterClient: {
@@ -183,9 +185,7 @@ describe('BurnRateRuleExecutor', () => {
         done: jest.fn(),
         alertLimit: { getValue: jest.fn(), setLimitReached: jest.fn() },
       },
-      // @ts-expect-error upgrade typescript v5.9.3
       getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
-      // @ts-expect-error upgrade typescript v5.9.3
       uiSettingsClient: uiSettingsClientMock,
       shouldWriteAlerts: jest.fn(),
       shouldStopExecution: jest.fn(),

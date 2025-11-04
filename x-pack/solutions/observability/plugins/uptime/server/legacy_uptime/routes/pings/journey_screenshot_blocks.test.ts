@@ -14,6 +14,11 @@ describe('journey screenshot blocks route', () => {
   let libs: UMServerLibs;
   const data: any = [];
   beforeEach(() => {
+    libs = {
+      requests: {
+        getJourneyScreenshotBlocks: jest.fn().mockReturnValue([]),
+      },
+    } as unknown as UMServerLibs;
     handlerContext = {
       uptimeEsClient: {
         search: jest.fn().mockResolvedValue({
@@ -42,7 +47,6 @@ describe('journey screenshot blocks route', () => {
       request: { body: { hashes: undefined } },
     });
 
-    // @ts-expect-error upgrade typescript v5.9.3
     const route = createJourneyScreenshotBlocksRoute(libs as UMServerLibs);
 
     const response = (await route.handler(handlerContext as any)) as IKibanaResponse<
