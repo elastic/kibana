@@ -43,6 +43,7 @@ export {
   apiIsPresentationContainer,
   combineCompatibleChildrenApis,
   getContainerParentFromAPI,
+  listenForCompatibleApi,
   apiHasSections,
   type PanelPackage,
   type PresentationContainer,
