@@ -51,7 +51,8 @@ function getSavedObjectFields(fields: DashboardStateKeys[]): StoredDashboardStat
       field === 'references' ||
       field === 'spaces' ||
       field === 'namespaces' ||
-      field === 'tags'
+      field === 'tags' ||
+      field === 'accessControl'
     ) {
       return;
     }
