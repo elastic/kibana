@@ -42,22 +42,22 @@ export interface SampleDocumentWithUIAttributes {
 }
 
 export type SimulationEvent =
-  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
-  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'dataSources.select'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'previewColumns.order'; columns: string[] }
+  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
+  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
+  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | { type: 'simulation.fields.map'; field: MappedSchemaField }
+  | { type: 'simulation.fields.unmap'; fieldName: string }
+  | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] }
+  | { type: 'simulation.reset' }
   | { type: 'step.add'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.cancel'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.change'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.edit'; steps: StreamlangStepWithUIAttributes[] }
-  | { type: 'step.save'; steps: StreamlangStepWithUIAttributes[] }
-  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
-  | { type: 'simulation.fields.map'; field: MappedSchemaField }
-  | { type: 'simulation.fields.unmap'; fieldName: string }
-  | { type: 'simulation.reset' }
-  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
-  | { type: 'previewColumns.order'; columns: string[] }
-  | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] };
+  | { type: 'step.save'; steps: StreamlangStepWithUIAttributes[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];

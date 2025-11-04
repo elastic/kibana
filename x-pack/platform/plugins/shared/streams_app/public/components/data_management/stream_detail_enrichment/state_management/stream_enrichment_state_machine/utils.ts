@@ -99,8 +99,10 @@ export function getStepsForSimulation({
 }: Pick<StreamEnrichmentContextType, 'stepRefs'> & { isPartialSimulation: boolean }) {
   let newStepSnapshots = stepRefs
     .map((procRef) => procRef.getSnapshot())
-    .filter((snapshot) => isWhereBlock(snapshot.context.step))
-    .filter((snapshot) => (isPartialSimulation ? snapshot.context.isNew : true));
+    .filter(
+      (snapshot) =>
+        isWhereBlock(snapshot.context.step) || (isPartialSimulation ? snapshot.context.isNew : true)
+    );
 
   // Find if any processor is currently being edited
   const editingProcessorIndex = newStepSnapshots.findIndex(

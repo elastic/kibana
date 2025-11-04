@@ -206,6 +206,10 @@ export const simulationMachine = setup({
       ],
       target: '.idle',
     },
+    'dataSources.select': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
+    },
     // Handle adding/reordering steps
     'step.*': {
       target: '.assertingRequirements',

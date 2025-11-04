@@ -19,6 +19,7 @@ import { DataSourceCard } from './data_source_card';
 import { NameField } from './name_field';
 import { DATA_SOURCES_I18N } from './translations';
 
+const debounceOptions = { wait: 500 };
 interface CustomSamplesDataSourceCardProps {
   readonly dataSourceRef: DataSourceActorRef;
 }
@@ -39,7 +40,7 @@ export const CustomSamplesDataSourceCard = ({
     (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
       dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
     },
-    { wait: 500 }
+    debounceOptions
   );
 
   /**
