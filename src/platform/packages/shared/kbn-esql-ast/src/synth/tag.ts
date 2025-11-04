@@ -34,6 +34,7 @@ export const createTag = <N extends ESQLProperNode>(
           src += fragment;
         }
       }
+
       return generator(src, opts);
     };
   }) as SynthTaggedTemplateWithOpts<N>;

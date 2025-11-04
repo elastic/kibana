@@ -6,9 +6,10 @@
  */
 
 import axios from 'axios';
-import { format, parse } from 'url';
-import { castArray, first, pick, pickBy } from 'lodash';
+import { format } from 'url';
+import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
@@ -48,23 +49,42 @@ export function registerKibanaFunction({
         required: ['method', 'pathname'] as const,
       },
     },
-    ({ arguments: { method, pathname, body, query } }, signal) => {
-      const { request } = resources;
+    async ({ arguments: { method, pathname, body, query } }, signal) => {
+      const { request, logger } = resources;
+      const requestUrl = request.rewrittenUrl || request.url;
+      const core = await resources.plugins.core.start();
 
-      const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
+      function getParsedPublicBaseUrl() {
+        const { publicBaseUrl } = core.http.basePath;
+        if (!publicBaseUrl) {
+          const errorMessage = `Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml`;
+          logger.error(errorMessage);
+          throw new Error(errorMessage);
+        }
+        const parsedBaseUrl = new URL(publicBaseUrl);
+        return parsedBaseUrl;
+      }
 
-      const origin = first(castArray(request.headers.origin));
+      function getPathnameWithSpaceId() {
+        const { serverBasePath } = core.http.basePath;
+        const { spaceId } = getSpaceIdFromPath(requestUrl.pathname, serverBasePath);
+        const pathnameWithSpaceId = addSpaceIdToPath(serverBasePath, spaceId, pathname);
+        return pathnameWithSpaceId;
+      }
 
+      const parsedPublicBaseUrl = getParsedPublicBaseUrl();
       const nextUrl = {
-        host,
-        protocol,
-        ...(origin ? pick(parse(origin), 'host', 'protocol') : {}),
-        pathname: pathnameFromRequest.replace(
-          '/internal/observability_ai_assistant/chat/complete',
-          pathname
-        ),
+        host: parsedPublicBaseUrl.host,
+        protocol: parsedPublicBaseUrl.protocol,
+        pathname: getPathnameWithSpaceId(),
         query: query ? (query as Record<string, string>) : undefined,
       };
+
+      logger.info(
+        `Calling Kibana API by forwarding request from "${requestUrl}" to: "${method} ${format(
+          nextUrl
+        )}"`
+      );
 
       const copiedHeaderNames = [
         'accept-encoding',
@@ -88,15 +108,19 @@ export function registerKibanaFunction({
         );
       });
 
-      return axios({
-        method,
-        headers,
-        url: format(nextUrl),
-        data: body ? JSON.stringify(body) : undefined,
-        signal,
-      }).then((response) => {
+      try {
+        const response = await axios({
+          method,
+          headers,
+          url: format(nextUrl),
+          data: body ? JSON.stringify(body) : undefined,
+          signal,
+        });
         return { content: response.data };
-      });
+      } catch (e) {
+        logger.error(`Error calling Kibana API: ${method} ${format(nextUrl)}. Failed with ${e}`);
+        throw e;
+      }
     }
   );
 }

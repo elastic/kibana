@@ -190,16 +190,21 @@ export function getMatchingSignatures(
   givenTypes: Array<SupportedDataType | 'unknown'>,
   // a boolean array indicating which args are literals
   literalMask: boolean[],
-  acceptUnknown: boolean
+  acceptUnknown: boolean,
+  acceptPartialMatches: boolean = false
 ): Signature[] {
   return signatures.filter((sig) => {
-    if (!matchesArity(sig, givenTypes.length)) {
+    if (!acceptPartialMatches && !matchesArity(sig, givenTypes.length)) {
       return false;
     }
 
     return givenTypes.every((givenType, index) => {
-      // safe to assume the param is there, because we checked the length above
-      const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
+      const param = getParamAtPosition(sig, index);
+      if (!param) {
+        return false;
+      }
+
+      const expectedType = unwrapArrayOneLevel(param.type);
       return argMatchesParamType(givenType, expectedType, literalMask[index], acceptUnknown);
     });
   });

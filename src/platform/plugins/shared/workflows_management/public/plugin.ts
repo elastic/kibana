@@ -8,16 +8,14 @@
  */
 
 import {
-  DEFAULT_APP_CATEGORIES,
   type AppMountParameters,
   type CoreSetup,
   type CoreStart,
+  DEFAULT_APP_CATEGORIES,
   type Plugin,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-// Lazy import to avoid bundling connector dependencies in main plugin
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -26,6 +24,8 @@ import type {
   WorkflowsPublicPluginStartDependencies,
   WorkflowsServices,
 } from './types';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+// Lazy import to avoid bundling connector dependencies in main plugin
 
 export class WorkflowsPlugin
   implements
@@ -40,46 +40,50 @@ export class WorkflowsPlugin
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>,
     plugins: WorkflowsPublicPluginSetupDependencies
   ): WorkflowsPublicPluginSetup {
+    // Check if workflows UI is enabled
+    const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
+
+    /* **************************************************************************************************************************** */
+    /* WARNING: DO NOT ADD ANYTHING ABOVE THIS LINE, which can expose workflows UI to users who don't have the feature flag enabled */
+    /* **************************************************************************************************************************** */
+    // Return early if workflows UI is not enabled, do not register the connector type and UI
+    if (!isWorkflowsUiEnabled) {
+      return {};
+    }
+
     // Register workflows connector UI component lazily to reduce main bundle size
     const registerConnectorType = async () => {
       const { getWorkflowsConnectorType } = await import('./connectors/workflows');
       plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
     };
 
-    // Register the connector type immediately but load it lazily
     registerConnectorType();
 
-    // Check if workflows UI is enabled
-    const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
+    core.application.register({
+      id: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      appRoute: '/app/workflows',
+      euiIconType: 'workflowsApp',
+      visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: 9015,
+      mount: async (params: AppMountParameters) => {
+        // Load application bundle
+        const { renderApp } = await import('./application');
+        const services = await this.createWorkflowsStartServices(core);
 
-    if (isWorkflowsUiEnabled) {
-      core.application.register({
-        id: PLUGIN_ID,
-        title: PLUGIN_NAME,
-        appRoute: '/app/workflows',
-        euiIconType: 'workflowsApp',
-        visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
-        category: DEFAULT_APP_CATEGORIES.management,
-        order: 9015,
-        mount: async (params: AppMountParameters) => {
-          // Load application bundle
-          const { renderApp } = await import('./application');
-          const services = await this.createWorkflowsStartServices(core);
+        // Set badge for classic navbar
+        services.chrome.setBadge({
+          text: 'Technical preview',
+          tooltip:
+            'This functionality is in technical preview. It may change or be removed in a future release.',
+          iconType: 'beaker',
+        });
 
-          // Set badge for classic navbar
-          services.chrome.setBadge({
-            text: 'Technical preview',
-            tooltip:
-              'This functionality is in technical preview. It may change or be removed in a future release.',
-            iconType: 'beaker',
-          });
+        return renderApp(services, params);
+      },
+    });
 
-          return renderApp(services, params);
-        },
-      });
-    }
-
-    // Return methods that should be available to other plugins
     return {};
   }
 

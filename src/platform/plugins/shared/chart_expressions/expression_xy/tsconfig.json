@@ -19,7 +19,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/event-annotation-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/coloring",
     "@kbn/i18n",
     "@kbn/utility-types",
@@ -44,6 +43,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/chart-test-jest-helpers",
     "@kbn/field-formats-common",
+    "@kbn/visualizations-common"
   ],
   "exclude": [
     "target/**/*",

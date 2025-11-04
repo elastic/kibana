@@ -9,11 +9,9 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
-import { ClearAllSection } from './clear_all_section';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -117,6 +115,7 @@ export const DimensionsSelector = ({
 
   const buttonLabel = useMemo(() => {
     const count = selectedDimensions.length;
+    const dimensionLabel = selectedDimensions[0];
     if (count === 0) {
       return (
         <FormattedMessage
@@ -131,49 +130,13 @@ export const DimensionsSelector = ({
         <EuiFlexItem grow={false}>
           <FormattedMessage
             id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
-            defaultMessage="{count, plural, one {Dimension} other {Dimensions}}"
-            values={{ count }}
+            defaultMessage="Breakdown by {dimensionLabel}"
+            values={{ dimensionLabel }}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiNotificationBadge>{count}</EuiNotificationBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }, [selectedDimensions]);
-
-  const popoverContentBelowSearch = useMemo(() => {
-    const count = selectedDimensions.length;
-    const isAtMaxLimit = count >= MAX_DIMENSIONS_SELECTIONS;
-    const allowMultiple = MAX_DIMENSIONS_SELECTIONS > 1;
-
-    let statusMessage: string;
-    if (allowMultiple && isAtMaxLimit) {
-      statusMessage = i18n.translate('metricsExperience.dimensionsSelector.maxLimitStatusMessage', {
-        defaultMessage: 'Maximum of {maxDimensions} dimensions selected ({count}/{maxDimensions})',
-        values: { count, maxDimensions: MAX_DIMENSIONS_SELECTIONS },
-      });
-    } else if (allowMultiple && count > 0) {
-      statusMessage = i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
-        defaultMessage: '{count, plural, one {# dimension selected} other {# dimensions selected}}',
-        values: { count },
-      });
-    } else {
-      statusMessage = i18n.translate('metricsExperience.dimensionsSelector.instructionMessage', {
-        defaultMessage:
-          'Select {maxDimensions, plural, one {a dimension} other {dimensions}} to break down your metrics',
-        values: { maxDimensions: MAX_DIMENSIONS_SELECTIONS },
-      });
-    }
-
-    return (
-      <ClearAllSection
-        selectedOptionsLength={count}
-        onClearAllAction={onClear}
-        selectedOptionsMessage={statusMessage}
-      />
-    );
-  }, [onClear, selectedDimensions.length]);
 
   return (
     <ToolbarSelector
@@ -185,7 +148,6 @@ export const DimensionsSelector = ({
       options={options}
       singleSelection={singleSelection}
       onChange={handleChange}
-      popoverContentBelowSearch={popoverContentBelowSearch}
     />
   );
 };

@@ -17,18 +17,23 @@ import type {
   UiActionsStart,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { VisualizeEditorContext } from '../../types';
-import type { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import type {
+  VisualizeEditorContext,
+  FormBasedPersistedState,
+  FormBasedPrivateState,
+  FormBasedLayer,
+  IndexPattern,
+  IndexPatternRef,
+  DateRange,
+} from '@kbn/lens-common';
 
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
-import type { IndexPattern, IndexPatternRef } from '../../types';
 import {
   getFormulaColumnsFromLayer,
   hasStateFormulaColumn,
 } from './operations/definitions/helpers';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
-import type { DateRange } from '../../../common/types';
 
 export function onRefreshIndexPattern() {
   if (memoizedGetAvailableOperationsByMetadata.cache.clear) {

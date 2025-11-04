@@ -22,7 +22,11 @@ import { CommandVisitorContext, Visitor } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
 import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
 import { BasicPrettyPrinter } from './basic_pretty_printer';
-import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
+import {
+  commandOptionsWithEqualsSeparator,
+  commandsWithNoCommaArgSeparator,
+  commandsWithSpecialCommaRules,
+} from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
 
@@ -317,6 +321,7 @@ export class WrappingPrettyPrinter {
     const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
 
     if (!oneArgumentPerLine) {
+      let argIndex = 0;
       ARGS: for (const arg of singleItems(ctx.arguments())) {
         if (arg.type === 'option') {
           continue;
@@ -329,7 +334,13 @@ export class WrappingPrettyPrinter {
           largestArg = formattedArgLength;
         }
 
-        let separator = txt ? (commaBetweenArgs ? ',' : '') : '';
+        // Check if this command has special comma rules
+        const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
+        const needsComma = specialRule ? specialRule(argIndex) : commaBetweenArgs;
+        let separator = txt ? (needsComma ? ',' : '') : '';
+
+        argIndex++;
+
         let fragment = '';
 
         if (needsWrap) {
@@ -385,10 +396,12 @@ export class WrappingPrettyPrinter {
       for (let i = 0; i <= last; i++) {
         const isFirstArg = i === 0;
         const isLastArg = i === last;
+        const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
+        const needsComma = specialRule ? specialRule(i) : commaBetweenArgs;
         const arg = ctx.visitExpression(args[i], {
           indent,
           remaining: this.opts.wrap - indent.length,
-          suffix: isLastArg ? '' : commaBetweenArgs ? ',' : '',
+          suffix: isLastArg ? '' : needsComma ? ',' : '',
         });
         const indentation = arg.indented ? '' : indent;
         let formattedArg = arg.txt;
@@ -666,6 +679,13 @@ export class WrappingPrettyPrinter {
       return this.decorateWithComments(inp, ctx.node, formatted);
     })
 
+    .on('visitParensExpression', (ctx, inp: Input): Output => {
+      const child = ctx.visitChild(inp);
+      const formatted = `(${child.txt.trimStart()})`;
+
+      return this.decorateWithComments(inp, ctx.node, formatted);
+    })
+
     .on('visitFunctionCallExpression', (ctx, inp: Input): Output => {
       const node = ctx.node;
       let operator = ctx.operator();
@@ -906,17 +926,10 @@ export class WrappingPrettyPrinter {
       }
 
       let i = 0;
-      let prevOut: Output | undefined;
       let hasCommands = false;
 
       for (const out of ctx.visitCommands({ indent, remaining: remaining - indent.length })) {
         const isFirstCommand = i === 0;
-        const isSecondCommand = i === 1;
-
-        if (isSecondCommand) {
-          const firstCommandIsMultiline = prevOut?.lines && prevOut.lines > 1;
-          if (firstCommandIsMultiline) text += '\n' + indent;
-        }
 
         const commandIndent = isFirstCommand ? indent : pipedCommandIndent;
         const topDecorations = this.printTopDecorations(commandIndent, commands[i]);
@@ -941,7 +954,6 @@ export class WrappingPrettyPrinter {
 
         text += out.txt;
         i++;
-        prevOut = out;
         hasCommands = true;
       }
 

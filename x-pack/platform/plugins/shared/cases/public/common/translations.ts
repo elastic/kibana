@@ -321,6 +321,10 @@ export const ALERT_ADDED_TO_CASE = i18n.translate('xpack.cases.common.alertAdded
   defaultMessage: 'added to case',
 });
 
+export const EVENTS = i18n.translate('xpack.cases.common.eventsLabel', {
+  defaultMessage: 'Events',
+});
+
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
 });

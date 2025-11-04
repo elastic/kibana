@@ -138,7 +138,7 @@ describe('DataViewPicker', () => {
     });
   });
 
-  it('calls useUpdateUrlParam when changing explore scoped the data view', () => {
+  it('calls useUpdateUrlParam when changing the explore scoped data view', () => {
     render(
       <TestProviders>
         <DataViewPicker scope={DataViewManagerScopeName.explore} />

@@ -7,14 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+
 import type { LineCounter } from 'yaml';
 import YAML from 'yaml';
 export interface StepInfo {
   stepId: string;
   stepType: string;
-  stepYamlNode: any;
+  stepYamlNode: YAML.YAMLMap<unknown, unknown>;
   lineStart: number;
   lineEnd: number;
+  propInfos: Record<string, StepPropInfo>;
+  parentStepId?: string;
+}
+
+export interface StepPropInfo {
+  path: string[];
+  keyNode: YAML.Scalar<unknown>;
+  valueNode: YAML.Scalar<unknown>;
 }
 
 /**
@@ -74,13 +84,20 @@ export function buildWorkflowLookup(
   };
 }
 
-function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepInfo> {
+const NESTED_STEP_KEYS = ['steps', 'else', 'fallback'];
+
+export function inspectStep(
+  node: any,
+  lineCounter: LineCounter,
+  parentStepId?: string
+): Record<string, StepInfo> {
   const result: Record<string, StepInfo> = {};
 
   let stepId: string | undefined;
   let stepType: string | undefined;
 
   if (YAML.isMap(node)) {
+    // First pass: collect stepId and stepType, and handle non-nested step properties
     node.items.forEach((item) => {
       if (YAML.isPair(item)) {
         if (YAML.isScalar(item.key)) {
@@ -92,16 +109,42 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
             }
           }
         }
-        Object.assign(result, inspectStep(item.value, lineCounter));
+        // For non-nested step keys (steps, else, fallback), we'll handle them in a second pass
+        // after we know the stepId. For other values, recurse with current stepId as parent.
+        const keyValue = YAML.isScalar(item.key) ? (item.key.value as string) : undefined;
+        if (!keyValue || !NESTED_STEP_KEYS.includes(keyValue)) {
+          const currentParentStepId = stepId ?? parentStepId;
+          Object.assign(result, inspectStep(item.value, lineCounter, currentParentStepId));
+        }
       }
     });
+
+    // Second pass: handle nested step keys (steps, else, fallback) with stepId as parentStepId
+    if (stepId) {
+      node.items.forEach((item) => {
+        if (YAML.isPair(item) && YAML.isScalar(item.key)) {
+          const keyValue = item.key.value as string;
+          if (NESTED_STEP_KEYS.includes(keyValue)) {
+            Object.assign(result, inspectStep(item.value, lineCounter, stepId));
+          }
+        }
+      });
+    }
   } else if (YAML.isSeq(node)) {
     node.items.forEach((subItem) => {
-      Object.assign(result, inspectStep(subItem, lineCounter));
+      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId));
     });
   }
 
-  if (stepId && stepType) {
+  if (stepId && stepType && YAML.isMap(node)) {
+    const propNodes: Record<string, StepPropInfo> = {};
+    node.items.forEach((innerNode) => {
+      if (YAML.isPair(innerNode) && YAML.isScalar(innerNode.key)) {
+        if (!NESTED_STEP_KEYS.includes(innerNode.key.value as string)) {
+          Object.assign(propNodes, visitStepProps(innerNode));
+        }
+      }
+    });
     const lineStart = lineCounter.linePos(node.range![0]).line;
     const lineEnd = lineCounter.linePos(node.range![2] - 1).line;
     result[stepId] = {
@@ -110,6 +153,29 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
       stepYamlNode: node,
       lineStart,
       lineEnd,
+      propInfos: propNodes,
+      parentStepId,
+    };
+  }
+
+  return result;
+}
+
+function visitStepProps(node: any, stack: string[] = []): Record<string, StepPropInfo> {
+  const result: Record<string, StepPropInfo> = {};
+  if (YAML.isMap(node.value)) {
+    stack.push(node.key.value);
+    node.value.items.forEach((childNode: any) => {
+      Object.assign(result, visitStepProps(childNode, stack));
+    });
+    stack.pop();
+  } else {
+    const path = [...stack, node.key.value];
+    const composedKey = path.join('.');
+    result[composedKey] = {
+      path,
+      keyNode: node.key,
+      valueNode: node.value,
     };
   }
 
