@@ -63,14 +63,17 @@ export const processGapsBatch = async (
   const results = [];
   const processedGapsByRuleId = new Map<string, number>();
 
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
   // Prepare all scheduling payloads from all rules
-  for (const [ruleId, ruleBatch] of gapsByRuleId) {
-    let ruleGapsClampedIntervals = ruleBatch
+  for (const [ruleId, gapBatchForRule] of gapsByRuleId) {
+    let ruleGapsClampedIntervals = gapBatchForRule
       .map((gap) => ({
         gap,
         clampedIntervals: clampIntervals(gap.unfilledIntervals, {
-          gte: new Date(start),
-          lte: new Date(end),
+          gte: startDate,
+          lte: endDate,
         }),
       }))
       .filter(({ clampedIntervals }) => clampedIntervals.length > 0);
