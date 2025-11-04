@@ -27,6 +27,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
   return showNodeInfo ? (
     <>
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.title"
@@ -48,6 +49,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
   ) : (
     <>
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.serverless.title"
