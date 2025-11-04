@@ -8,10 +8,29 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { WorkflowLogEvent } from '../repositories/logs_repository/logs_repository';
+
+/**
+ * Interface for resolving secret references in workflow steps
+ * Resolves patterns like ${workplace_connector:id:secret_key}
+ */
+export interface ISecretResolver {
+  resolveSecrets(
+    text: string,
+    savedObjectsClient: SavedObjectsClientContract,
+    namespace?: string
+  ): Promise<string>;
+  resolveSecretsInObject(
+    obj: Record<string, unknown>,
+    savedObjectsClient: SavedObjectsClientContract,
+    namespace?: string
+  ): Promise<Record<string, unknown>>;
+}
 
 export interface ContextDependencies {
   cloudSetup: CloudSetup | undefined;
+  secretResolver?: ISecretResolver;
 }
 /**
  * Interface for workflow context manager logging capabilities

@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WORKPLACE_AI_APP_ID } from './constants';
-export type { WorkplaceAIApp, WorkplaceAILinkId, DeepLinkId } from './deep_links';
+export const WORKPLACE_AI_APP_ID = 'workplace_ai';
+export const ONECHAT_APP_ID = 'agent_builder';
+export const WORKPLACE_AI_CONNECTORS_APP_ID = 'workplace_ai_connectors';
