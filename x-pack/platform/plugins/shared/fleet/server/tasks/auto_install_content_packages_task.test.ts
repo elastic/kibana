@@ -34,6 +34,9 @@ jest.mock('../services/epm/registry');
 jest.mock('../services/epm/packages', () => ({
   getInstalledPackages: jest.fn(),
 }));
+jest.mock('../services/epm/packages/get_prerelease_setting', () => ({
+  getPrereleaseFromSettings: jest.fn().mockReturnValue(false),
+}));
 
 const MockRegistry = jest.mocked(Registry);
 

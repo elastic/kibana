@@ -47,7 +47,7 @@ import {
   checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
-import { defaultKibanaIndex } from '../../kibana_migrator_test_kit';
+import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

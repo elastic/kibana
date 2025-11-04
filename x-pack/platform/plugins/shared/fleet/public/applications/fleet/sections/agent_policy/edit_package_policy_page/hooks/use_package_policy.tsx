@@ -18,6 +18,7 @@ import {
   sendBulkGetAgentPolicies,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
+  sendGetSettings,
   sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
 } from '../../../../hooks';
@@ -53,6 +54,12 @@ function mergeVars(
 
     return acc;
   }, {} as PackagePolicyConfigRecord);
+}
+
+async function isPreleaseEnabled() {
+  const { data: settings } = await sendGetSettings();
+
+  return Boolean(settings?.item.prerelease_integrations_enabled);
 }
 
 export function usePackagePolicyWithRelatedData(
@@ -163,6 +170,8 @@ export function usePackagePolicyWithRelatedData(
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
+        const prerelease = await isPreleaseEnabled();
+
         const { data: packagePolicyData, error: packagePolicyError } =
           await sendGetOnePackagePolicy(packagePolicyId);
 
@@ -301,7 +310,7 @@ export function usePackagePolicyWithRelatedData(
             const { data: packageData } = await sendGetPackageInfoByKey(
               _packageInfo!.name,
               _packageInfo!.version,
-              { prerelease: true, full: true }
+              { prerelease, full: true }
             );
 
             if (packageData?.item) {

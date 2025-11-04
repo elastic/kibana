@@ -55,6 +55,7 @@ import type { FleetUsage } from '../collectors/register';
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -201,7 +202,7 @@ class AppContextService {
       url: { href: '', hash: '' } as URL,
       raw: { req: { url: '/' } } as any,
     });
-    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID) {
+    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID && spaceId !== ALL_SPACES_ID) {
       this.httpSetup?.basePath.set(request, `/s/${spaceId}`);
     }
 

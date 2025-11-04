@@ -52,13 +52,7 @@ export const PutSettingsRequestSchema = {
         },
       })
     ),
-    prerelease_integrations_enabled: schema.maybe(
-      schema.boolean({
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
+    prerelease_integrations_enabled: schema.maybe(schema.boolean()),
     delete_unenrolled_agents: schema.maybe(
       schema.object({
         enabled: schema.boolean(),
@@ -80,13 +74,7 @@ export const SpaceSettingsResponseSchema = schema.object({
 export const SettingsResponseSchema = schema.object({
   item: schema.object({
     has_seen_add_data_notice: schema.maybe(schema.boolean()),
-    prerelease_integrations_enabled: schema.maybe(
-      schema.boolean({
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
+    prerelease_integrations_enabled: schema.maybe(schema.boolean()),
     id: schema.string(),
     version: schema.maybe(schema.string()),
     preconfigured_fields: schema.maybe(schema.arrayOf(schema.literal('fleet_server_hosts'))),

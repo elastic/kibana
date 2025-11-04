@@ -147,8 +147,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]\n- [2.apiProvider]: expected at least one defined value but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_union\",\n    \"unionErrors\": [\n      {\n        \"issues\": [\n          {\n            \"expected\": \"'Azure OpenAI'\",\n            \"received\": \"undefined\",\n            \"code\": \"invalid_type\",\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"expected\": \"'OpenAI'\",\n            \"received\": \"undefined\",\n            \"code\": \"invalid_type\",\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"expected\": \"'Other'\",\n            \"received\": \"undefined\",\n            \"code\": \"invalid_type\",\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"defaultModel\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      }\n    ],\n    \"path\": [],\n    \"message\": \"Invalid input\"\n  }\n]`,
             });
           });
       });
@@ -168,8 +167,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]\n- [2.apiProvider]: expected value to equal [Other]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_union\",\n    \"unionErrors\": [\n      {\n        \"issues\": [\n          {\n            \"received\": \"OpenAI\",\n            \"code\": \"invalid_enum_value\",\n            \"options\": [\n              \"Azure OpenAI\"\n            ],\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Invalid enum value. Expected 'Azure OpenAI', received 'OpenAI'\"\n          },\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"apiUrl\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"apiUrl\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"received\": \"OpenAI\",\n            \"code\": \"invalid_enum_value\",\n            \"options\": [\n              \"Other\"\n            ],\n            \"path\": [\n              \"apiProvider\"\n            ],\n            \"message\": \"Invalid enum value. Expected 'Other', received 'OpenAI'\"\n          },\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"apiUrl\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"defaultModel\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      }\n    ],\n    \"path\": [],\n    \"message\": \"Invalid input\"\n  }\n]`,
             });
           });
       });
@@ -417,8 +415,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: genAiActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -649,8 +646,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: genAiActionId,
-              message:
-                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

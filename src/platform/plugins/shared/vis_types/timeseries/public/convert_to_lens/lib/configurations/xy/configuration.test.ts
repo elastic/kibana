@@ -14,6 +14,7 @@ describe('getConfigurationForTimeseries', () => {
   test('should return correct configuration for timeseries', () => {
     expect(getConfigurationForTimeseries(createPanel(), [])).toEqual({
       layers: [],
+      preferredSeriesType: 'bar',
       fillOpacity: 0.5,
       legend: {
         isVisible: false,
@@ -38,6 +39,7 @@ describe('getConfigurationForTimeseries', () => {
 describe('getConfigurationForTopN', () => {
   test('should return correct configuration for top n', () => {
     expect(getConfigurationForTopN(createPanel(), [])).toEqual({
+      preferredSeriesType: 'bar',
       layers: [],
       fillOpacity: 0.5,
       legend: {

@@ -107,6 +107,7 @@ export function Waterfall({
     <Container>
       {waterfall.exceedsMax && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="apmWaterfallSizeWarning"
           color="warning"
           size="s"

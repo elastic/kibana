@@ -7,9 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
 import type { XYState } from '../../types';
-import type { FramePublicAPI } from '../../../../types';
+
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 
 export interface TextPopoverProps {
   state: XYState;
