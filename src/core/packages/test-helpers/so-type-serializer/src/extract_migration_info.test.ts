@@ -193,7 +193,7 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill'],
           hasTransformation: true,
-          modelVersionHash: 'e38f4951df6a13718630d2433f359333b7e6f2f2',
+          modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
           newMappings: [],
           schemas: {
             create: false,
@@ -204,7 +204,7 @@ describe('extractMigrationInfo', () => {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
-          modelVersionHash: '7879fa7115c6e2be00b25676f11a41b6f98fc678',
+          modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
           newMappings: ['foo.type'],
           schemas: {
             create: false,
@@ -246,7 +246,7 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill'],
           hasTransformation: true,
-          modelVersionHash: 'e38f4951df6a13718630d2433f359333b7e6f2f2',
+          modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
           newMappings: [],
           schemas: {
             create: false,
@@ -257,7 +257,7 @@ describe('extractMigrationInfo', () => {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
-          modelVersionHash: '7879fa7115c6e2be00b25676f11a41b6f98fc678',
+          modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
           newMappings: ['foo.type'],
           schemas: {
             create: false,
@@ -299,7 +299,7 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill', 'data_removal', 'unsafe_transform'],
           hasTransformation: true,
-          modelVersionHash: '99f7de59a1ea5a45253d27a617781c1a291df8fc',
+          modelVersionHash: '9cd0fcc20655480bc520446b62b677f8af0c07eff6853553892be53fafc4a696',
           newMappings: [],
           schemas: {
             create: false,
@@ -337,8 +337,8 @@ describe('extractMigrationInfo', () => {
       });
       const output = extractMigrationInfo(type);
       expect(output.modelVersions[0].schemas).toEqual({
-        forwardCompatibility: '895cafb0656e467454fa1448312a7ebba48f7a12',
-        create: '023e5360d8802d04f03ee8bece0ab6d0035a329e',
+        forwardCompatibility: 'c7c71ae951f0ac343cea0403bc34144ede93afec1bfe0ae6bd3279dd28ddf696',
+        create: '2c06d7c23cd5103280e22a4963d98be9c7be6c4b53ca54cc70f3584be2b63e7a',
       });
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,
@@ -389,7 +389,7 @@ describe('extractMigrationInfo', () => {
               version: '1',
               changeTypes: ['data_backfill'],
               hasTransformation: true,
-              modelVersionHash: 'e38f4951df6a13718630d2433f359333b7e6f2f2',
+              modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
               newMappings: [],
               schemas: {
                 create: false,
@@ -400,7 +400,7 @@ describe('extractMigrationInfo', () => {
               version: '2',
               changeTypes: ['mappings_addition'],
               hasTransformation: false,
-              modelVersionHash: '7879fa7115c6e2be00b25676f11a41b6f98fc678',
+              modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
               newMappings: ['foo.type'],
               schemas: {
                 create: false,

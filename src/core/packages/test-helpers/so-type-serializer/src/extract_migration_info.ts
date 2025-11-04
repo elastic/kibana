@@ -69,7 +69,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
   const getModelVersionHash = (
     modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion
   ) => {
-    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const hash = createHash('sha256');
     const modelVersionData = JSON.stringify(modelVersion);
     return `${hash.update(modelVersionData).digest('hex')}`;
   };
@@ -124,7 +124,7 @@ const getSchemaPropertiesHashes = (
 };
 
 const getHash = (schemaProp: unknown) => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha256');
   if (typeof schemaProp === 'function') {
     const funcString = schemaProp.toString();
     return `${hash.update(funcString).digest('hex')}`;
