@@ -87,10 +87,12 @@ export class SpaceTestApiClient {
   // Agent policies
   async createAgentPolicy(
     spaceId?: string,
-    data: Partial<CreateAgentPolicyRequest['body']> = {}
+    data: Partial<CreateAgentPolicyRequest['body']> = {},
+    opts: CreateAgentPolicyRequest['query'] = {}
   ): Promise<CreateAgentPolicyResponse> {
+    const queryString = opts.sys_monitoring ? `?sys_monitoring=true` : '';
     const { body: res, statusCode } = await this.supertest
-      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies${queryString}`)
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({
@@ -626,6 +628,7 @@ export class SpaceTestApiClient {
   ): Promise<GetOneOutputResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/outputs`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send(data)
       .expect(200);
