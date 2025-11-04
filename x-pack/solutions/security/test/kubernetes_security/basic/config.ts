@@ -10,7 +10,6 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 export default createTestConfig({
   license: 'basic',
-  testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
   name: 'X-Pack kubernetes_security API integration tests (basic)',
   testFiles: [require.resolve('./tests')],
 });
