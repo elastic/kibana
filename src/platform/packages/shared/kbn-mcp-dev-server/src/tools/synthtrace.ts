@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolDefinition } from '../types';
 
 // Dynamic require to avoid circular dependencies
+
 function getSynthtraceModule() {
   const synthtracePath = path.resolve(
     REPO_ROOT,
@@ -21,10 +22,14 @@ function getSynthtraceModule() {
   );
 
   return {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     loadManifest: require(path.join(synthtracePath, 'generator')).loadManifest,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     generateSchema: require(path.join(synthtracePath, 'generator')).generateSchema,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     validateConfigWithManifest: require(path.join(synthtracePath, 'validation'))
       .validateConfigWithManifest,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     executeSchema: require(path.join(synthtracePath, 'executor')).executeSchema,
   };
 }
@@ -74,7 +79,7 @@ const synthtraceInputSchema = z.object({
     }, payloadSchema)
     .optional()
     .describe(
-      'Action-specific payload (object or JSON string - strings will be parsed automatically)'
+      'Action-specific payload (object or JSON string - strings will be parsed automatically). For validate/apply actions, pass config object directly in payload.config - DO NOT create files.'
     ),
 });
 
@@ -152,13 +157,155 @@ async function handleSynthtraceAction(
                 'Use get_schema to get the JSON Schema, then use get_examples for reference. Generate a config object matching the schema based on the prompt.',
               prompt: payload.prompt,
               capabilities: manifest,
+              schemaStructure: {
+                description:
+                  'The schema MUST follow this structure. Top-level fields are: timeWindow (required), seed (optional), services (required array).',
+                topLevelFields: {
+                  timeWindow: {
+                    type: 'object',
+                    required: true,
+                    description: 'Time range for data generation',
+                    example: { from: 'now-1h', to: 'now' },
+                  },
+                  seed: {
+                    type: 'number',
+                    required: false,
+                    description: 'Random seed for reproducible data',
+                  },
+                  services: {
+                    type: 'array',
+                    required: true,
+                    description:
+                      'Array of service configurations. Each service contains instances, and each instance contains traces, logs, metrics, etc.',
+                    example: [
+                      {
+                        id: 'service-1',
+                        name: 'service-1',
+                        agentName: 'nodejs',
+                        environment: 'production',
+                        instances: [
+                          {
+                            id: 'instance-1',
+                            logs: [{ message: 'Log message', level: 'info', rate: 10 }],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+                commonMistakes: [
+                  'Do NOT use fields like "scenario", "dataSource", "indexPattern", "interval", "count", "logConfig", "failureStore" at the top level',
+                  'Do NOT use a flat structure - use the nested services -> instances -> logs/traces/metrics structure',
+                  'Logs go inside instances.logs array, not at the top level',
+                  'Failure rate is specified per log block using "failureRate" field, not a separate "failureStore" object',
+                ],
+                failureVsDegraded: {
+                  description:
+                    'CRITICAL: Understand the difference between failed and degraded documents',
+                  failedDocs: {
+                    field: 'failureRate',
+                    description:
+                      'Failed documents FAIL ingestion entirely and go to failure store (NOT indexed in normal indexes)',
+                    promptKeywords: ['failed docs', 'failed documents', 'failure', 'failures'],
+                    example: 'Prompt: "50% failed docs" → config: { "failureRate": 0.5 }',
+                    behavior:
+                      'Documents with missing required fields (e.g., log.level is undefined) that trigger fail processors',
+                  },
+                  degradedDocs: {
+                    field: 'degradedRate',
+                    aliases: ['ignoredRate'],
+                    description:
+                      'Degraded documents ARE indexed but have non-empty _ignore property due to fields exceeding ignore_above limits',
+                    promptKeywords: [
+                      'degraded docs',
+                      'degraded documents',
+                      'degraded',
+                      'ignored docs',
+                      'ignored documents',
+                    ],
+                    example: 'Prompt: "50% degraded docs" → config: { "degradedRate": 0.5 }',
+                    behavior:
+                      'Documents with fields exceeding 1024 character limit (e.g., log.level with MORE_THAN_1024_CHARS)',
+                  },
+                  bothTogether: {
+                    description:
+                      'You can specify BOTH failureRate and degradedRate in the same log config. They are MUTUALLY EXCLUSIVE.',
+                    example:
+                      'Prompt: "50% failed docs and 25% degraded docs" → config: { "failureRate": 0.5, "degradedRate": 0.25 }',
+                    note: 'Failed documents take precedence. degradedRate represents percentage of ALL documents (non-overlapping with failed). Example: failureRate=0.5, degradedRate=0.25 → 50% failed, 25% degraded, 25% normal.',
+                  },
+                },
+              },
               nextSteps: [
-                'Call get_schema to see the expected format',
-                'Call get_examples to see example configurations',
-                'Generate a config object based on the prompt',
-                'Call validate with the generated config',
-                'Call apply to execute the config',
+                'Call get_schema to see the COMPLETE JSON Schema with all fields',
+                'Call get_examples to see example configurations that follow the correct structure',
+                'Generate a config object based on the prompt (IN MEMORY ONLY - do not create files)',
+                'Ensure the config follows: { timeWindow: {...}, services: [{ id, name, instances: [{ id, logs: [...] }] }] }',
+                'Call validate with the generated config (pass config object in payload.config)',
+                'Call apply to execute the config (pass config object in payload.config)',
               ],
+              criticalInstructions: [
+                'DO NOT create any files (.json, .js, .ts, etc.)',
+                'DO NOT modify or write any code',
+                'DO NOT use file system operations',
+                'Pass configuration objects directly in tool payload.config parameter',
+                'The apply action executes immediately and indexes data - no files needed',
+                'All operations must be done through tool calls only',
+                'ALWAYS use get_schema first to understand the exact structure',
+              ],
+              promptParsingGuide: {
+                description:
+                  'When parsing prompts, pay special attention to failed vs degraded document specifications',
+                examples: [
+                  {
+                    prompt:
+                      'Ingest 100 documents to logs-foo.error-default with 50% of them as failed docs',
+                    interpretation: {
+                      dataset: 'logs-foo.error-default',
+                      totalDocs: 100,
+                      failureRate: 0.5,
+                      degradedRate: undefined,
+                    },
+                    configSnippet: {
+                      logs: [
+                        {
+                          message: 'Log message',
+                          level: 'error',
+                          rate: 100,
+                          dataset: 'foo.error',
+                          failureRate: 0.5,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    prompt: 'Ingest docs with 50% degraded and 25% failed docs',
+                    interpretation: {
+                      degradedRate: 0.5,
+                      failureRate: 0.25,
+                    },
+                    configSnippet: {
+                      logs: [
+                        {
+                          message: 'Log message',
+                          level: 'info',
+                          rate: 10,
+                          degradedRate: 0.5,
+                          failureRate: 0.25,
+                        },
+                      ],
+                    },
+                  },
+                ],
+                keyRules: [
+                  'Keywords "failed docs", "failed documents", "failure", "failures" → use "failureRate" field',
+                  'Keywords "degraded docs", "degraded documents", "degraded", "ignored docs" → use "degradedRate" field',
+                  'Convert percentages to decimals (50% → 0.5, 25% → 0.25)',
+                  'Both failureRate and degradedRate can be specified together in the same log config (mutually exclusive)',
+                  'When total document count is specified (e.g., "100 documents"), set rate to that number',
+                  'Note: indexedIndices may return patterns like "logs-*-*" - this is expected behavior (data stream patterns)',
+                ],
+              },
             }),
           },
         ],
@@ -180,6 +327,23 @@ async function handleSynthtraceAction(
           ],
         };
       } else {
+        // Check if the config has unrecognized top-level fields
+        const config = payload.config as Record<string, unknown>;
+        const knownFields = ['timeWindow', 'seed', 'services'];
+        const unknownFields = Object.keys(config).filter((key) => !knownFields.includes(key));
+
+        let errorMessage = `Validation failed: ${result.errors
+          .map((e: { path: string; message: string }) => `${e.path}: ${e.message}`)
+          .join(', ')}`;
+
+        if (unknownFields.length > 0) {
+          errorMessage += `\n\nUnrecognized fields found: ${unknownFields.join(', ')}. `;
+          errorMessage += 'The schema only supports: timeWindow, seed, and services. ';
+          errorMessage += 'Please use the "get_schema" action to see the correct format. ';
+          errorMessage +=
+            'The schema structure is: { timeWindow: {...}, services: [{ id, name, instances: [{ id, traces: [...], logs: [...] }] }] }';
+        }
+
         return {
           content: [
             {
@@ -188,9 +352,8 @@ async function handleSynthtraceAction(
                 {
                   valid: false,
                   errors: result.errors,
-                  message: `Validation failed: ${result.errors
-                    .map((e: { path: string; message: string }) => `${e.path}: ${e.message}`)
-                    .join(', ')}`,
+                  unknownFields: unknownFields.length > 0 ? unknownFields : undefined,
+                  message: errorMessage,
                 },
                 null,
                 2
@@ -210,6 +373,23 @@ async function handleSynthtraceAction(
       // Validate first
       const validation = synthtrace.validateConfigWithManifest(payload.config);
       if (!validation.ok) {
+        // Check if the config has unrecognized top-level fields
+        const config = payload.config as Record<string, unknown>;
+        const knownFields = ['timeWindow', 'seed', 'services'];
+        const unknownFields = Object.keys(config).filter((key) => !knownFields.includes(key));
+
+        let errorMessage = `Validation failed: ${validation.errors
+          .map((e: { path: string; message: string }) => `${e.path}: ${e.message}`)
+          .join(', ')}`;
+
+        if (unknownFields.length > 0) {
+          errorMessage += `\n\nUnrecognized fields found: ${unknownFields.join(', ')}. `;
+          errorMessage += 'The schema only supports: timeWindow, seed, and services. ';
+          errorMessage += 'Please use the "get_schema" action to see the correct format. ';
+          errorMessage +=
+            'The schema structure is: { timeWindow: {...}, services: [{ id, name, instances: [{ id, traces: [...], logs: [...] }] }] }';
+        }
+
         return {
           content: [
             {
@@ -218,6 +398,8 @@ async function handleSynthtraceAction(
                 {
                   error: 'Validation failed',
                   errors: validation.errors,
+                  unknownFields: unknownFields.length > 0 ? unknownFields : undefined,
+                  message: errorMessage,
                 },
                 null,
                 2
@@ -300,7 +482,7 @@ async function handleSynthtraceAction(
         };
 
         // Execute the schema directly
-        await synthtrace.executeSchema(validation.value, executeArgv);
+        const result = await synthtrace.executeSchema(validation.value, executeArgv);
 
         return {
           content: [
@@ -310,6 +492,7 @@ async function handleSynthtraceAction(
                 success: true,
                 message: 'Schema executed successfully. Data has been indexed.',
                 target: executeArgv.target,
+                indexedIndices: result.indexedIndices || [],
                 config: {
                   services: validation.value.services?.length || 0,
                   timeWindow: validation.value.timeWindow,
@@ -463,6 +646,40 @@ async function handleSynthtraceAction(
       reportLines.push(`Metric Configs:    ${summary.totals.metricConfigs}`);
       reportLines.push(`Log Configs:       ${summary.totals.logConfigs}`);
       reportLines.push('');
+
+      // Determine affected indices based on config
+      const affectedIndices: string[] = [];
+      if (config.services) {
+        let hasTraces = false;
+        let hasLogs = false;
+        for (const service of config.services) {
+          for (const instance of service.instances) {
+            if (instance.traces || instance.metrics) {
+              hasTraces = true;
+            }
+            if (instance.logs) {
+              hasLogs = true;
+            }
+          }
+        }
+        if (hasTraces || hasLogs) {
+          affectedIndices.push('traces-apm*', 'metrics-apm*');
+        }
+        if (hasLogs) {
+          affectedIndices.push('logs-*-*');
+        }
+      }
+
+      reportLines.push('AFFECTED INDICES');
+      reportLines.push('-'.repeat(80));
+      if (affectedIndices.length > 0) {
+        affectedIndices.forEach((index) => {
+          reportLines.push(`  - ${index}`);
+        });
+      } else {
+        reportLines.push('  (none - no data types configured)');
+      }
+      reportLines.push('');
       reportLines.push('SERVICES BREAKDOWN');
       reportLines.push('-'.repeat(80));
       reportLines.push(
@@ -559,14 +776,69 @@ function getTimeRange(config: any) {
 export const synthtraceTool: ToolDefinition<typeof synthtraceInputSchema> = {
   name: 'synthtrace',
   description: `Orchestrates synthtrace schema operations. Actions:
-  - get_schema: Get the JSON Schema for synthtrace DSL
-  - get_examples: Get example schema configurations
-  - generate: Generate a config from a natural language prompt (returns instructions)
-  - validate: Validate a config object against the schema
-  - apply: Execute a config directly - generates and indexes data to Elasticsearch (default: http://localhost:9200)
-  - estimate: Estimate event counts without executing
-  - dry_run: Dry run without executing
-  - report: Generate a tabular summary report of the configuration`,
+- get_schema: Get the JSON Schema for synthtrace DSL (ALWAYS call this first to understand the structure)
+- get_examples: Get example schema configurations
+- generate: Generate a config from a natural language prompt (returns instructions)
+- validate: Validate a config object against the schema
+- apply: Execute a config directly - generates and indexes data to Elasticsearch (default: http://localhost:9200)
+- estimate: Estimate event counts without executing
+- dry_run: Dry run without executing
+- report: Generate a tabular summary report of the configuration
+
+SCHEMA STRUCTURE (MUST FOLLOW):
+The config MUST have this structure:
+{
+  "timeWindow": { "from": "now-1h", "to": "now" },
+  "services": [
+    {
+      "id": "service-1",
+      "name": "service-1",
+      "agentName": "nodejs",
+      "environment": "production",
+      "instances": [
+        {
+          "id": "instance-1",
+          "logs": [{ "message": "...", "level": "info", "rate": 10, "failureRate": 0.5, "degradedRate": 0.3 }],
+          "traces": [{ "name": "...", "rate": 10, "errorRate": 0.1 }],
+          "metrics": [{ "metrics": { "cpu": { "type": "constant", "value": 0.5 } } }]
+        }
+      ]
+    }
+  ]
+}
+
+COMMON MISTAKES TO AVOID:
+- Do NOT use top-level fields like "scenario", "dataSource", "indexPattern", "interval", "count", "logConfig", "failureStore"
+- Do NOT use a flat structure - always use nested services -> instances -> logs/traces/metrics
+- Logs go inside instances.logs array, not at the top level
+- Failure rate is specified per log block using "failureRate" field (0-1), not a separate "failureStore" object
+
+FAILED vs DEGRADED DOCUMENTS (CRITICAL DISTINCTION):
+- FAILED DOCS: Use "failureRate" (0-1) - documents FAIL ingestion entirely and go to failure store (NOT indexed)
+  * Prompt keywords: "failed docs", "failed documents", "failure", "failures"
+  * Example: Prompt "50% failed docs" → config: { "failureRate": 0.5 }
+  * Behavior: Documents with missing required fields (e.g., log.level undefined) that trigger fail processors
+  
+- DEGRADED DOCS: Use "degradedRate" or "ignoredRate" (0-1) - documents ARE indexed but have _ignore property
+  * Prompt keywords: "degraded docs", "degraded documents", "degraded", "ignored docs", "ignored documents"
+  * Example: Prompt "50% degraded docs" → config: { "degradedRate": 0.5 }
+  * Behavior: Documents with fields exceeding 1024 character limit (e.g., log.level with MORE_THAN_1024_CHARS)
+
+- BOTH TOGETHER: You can specify BOTH failureRate and degradedRate in the same log config
+  * Example: Prompt "50% failed docs and 25% degraded docs" → config: { "failureRate": 0.5, "degradedRate": 0.25 }
+  * Note: Failed and degraded documents are MUTUALLY EXCLUSIVE
+  *   - Failed documents take precedence - if a document is marked as failed, it will NOT also be degraded
+  *   - degradedRate represents the percentage of ALL documents that should be degraded (non-overlapping with failed)
+  *   - Example: failureRate=0.5, degradedRate=0.25 results in: 50% failed, 25% degraded, 25% normal
+
+CRITICAL INSTRUCTIONS:
+- ALWAYS call get_schema first to see the complete JSON Schema
+- DO NOT create any files (no .json, .js, .ts, or any other files)
+- DO NOT modify or write any code
+- DO NOT use file system operations (writeFile, createFile, etc.)
+- Pass configuration objects directly in the tool's payload.config parameter
+- The 'apply' action executes immediately - no intermediate files needed
+- All operations are handled in-memory through tool calls only`,
   inputSchema: synthtraceInputSchema,
   handler: async (input) => {
     try {

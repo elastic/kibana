@@ -43,5 +43,16 @@ export async function createSchemaContext(argv: any) {
     kibana: kibanaClient,
   });
 
-  return { logger, clients };
+  // Initialize APM Fleet package to ensure index templates and mappings are set up
+  // This is required for APM data to be indexed properly
+  if (clients.apmEsClient) {
+    await clientManager.initFleetPackageForClient({
+      clients: {
+        apmEsClient: clients.apmEsClient,
+      },
+      skipInstallation: true, // Skip installation, just ensure package version is set
+    });
+  }
+
+  return { logger, clients, clientManager };
 }

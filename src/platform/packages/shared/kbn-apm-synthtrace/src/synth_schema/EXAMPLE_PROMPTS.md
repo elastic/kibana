@@ -41,10 +41,14 @@ Please:
 6. Use the synthtrace tool with action "apply" to execute the configuration directly - it will generate and index data to Elasticsearch
 7. Use the synthtrace tool with action "report" to generate a tabular summary of the configuration
 
-**Important:** 
-- **No files should be created** - pass the config object directly in the `apply` action's payload
+**CRITICAL INSTRUCTIONS - READ CAREFULLY:** 
+- **DO NOT create any files** (.json, .js, .ts, or any other file type)
+- **DO NOT modify or write any code**
+- **DO NOT use file system operations** (writeFile, createFile, fs.writeFileSync, etc.)
+- **Pass configuration objects directly** in the tool's `payload.config` parameter
 - The `apply` action executes immediately and indexes data to Elasticsearch (default: http://localhost:9200)
-- The flow is: `get_schema` → `get_examples` → **(you create JSON)** → `validate` → `estimate` → `apply` (executes directly, no file needed)
+- The flow is: `get_schema` → `get_examples` → **(you create JSON object in memory)** → `validate` → `estimate` → `apply` (executes directly, no file needed)
+- All configuration must be passed as JSON objects in tool calls - never create files
 - **Time-varying error rates**: You can use piecewise distributions for `errorRate` to simulate incidents:
   ```json
   "errorRate": {

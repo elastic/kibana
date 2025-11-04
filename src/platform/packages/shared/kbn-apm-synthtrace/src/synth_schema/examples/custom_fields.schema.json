@@ -1,0 +1,130 @@
+{
+  "timeWindow": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "services": [
+    {
+      "id": "custom-fields-service",
+      "name": "custom-fields-service",
+      "environment": "production",
+      "agentName": "nodejs",
+      "instances": [
+        {
+          "id": "instance-1",
+          "logs": [
+            {
+              "message": "Log with simple custom fields",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "customFields": {
+                "requestId": "req-123",
+                "userId": 456,
+                "action": "create",
+                "status": true
+              }
+            },
+            {
+              "message": "Log with bulk generated custom fields",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "customFields": {
+                "count": 50,
+                "prefix": "field",
+                "valueType": "random",
+                "valueConfig": {
+                  "alternating": true,
+                  "min": 0,
+                  "max": 1000000,
+                  "stringLength": 200
+                }
+              }
+            },
+            {
+              "message": "Log with rotated custom field names and values",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "customFields": {
+                "count": 10,
+                "fieldNames": ["metric-1", "metric-2", "metric-3", "metric-4", "metric-5"],
+                "valueType": "rotated",
+                "value": ["value-a", "value-b", "value-c"],
+                "namespace": "log.custom"
+              }
+            },
+            {
+              "message": "Log with fixed prefix and sequential values",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "customFields": {
+                "count": 20,
+                "prefix": "counter",
+                "valueType": "sequential",
+                "namespace": "log.custom"
+              }
+            },
+            {
+              "message": "Log with dynamic values based on timestamp",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "customFields": {
+                "count": 5,
+                "prefix": "dynamic",
+                "valueType": "dynamic",
+                "namespace": "log.custom"
+              }
+            },
+            {
+              "message": "Log with custom namespace (no log.custom prefix)",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "customFields": {
+                "count": 10,
+                "prefix": "app",
+                "valueType": "fixed",
+                "value": "production",
+                "namespace": "app.metadata"
+              }
+            },
+            {
+              "message": "Log with no namespace prefix",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "customFields": {
+                "count": 5,
+                "prefix": "direct",
+                "valueType": "fixed",
+                "value": "no-prefix-value",
+                "namespace": ""
+              }
+            },
+            {
+              "message": "Log with degraded fields for failed documents",
+              "level": "error",
+              "rate": 10,
+              "interval": "1m",
+              "failureRate": 0.3,
+              "customFields": {
+                "count": 50,
+                "prefix": "field",
+                "valueType": "random",
+                "valueConfig": {
+                  "alternating": true
+                },
+                "degradeForFailed": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,64 @@
+{
+  "timeWindow": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "services": [
+    {
+      "id": "web-service",
+      "name": "web-service",
+      "environment": "production",
+      "agentName": "nodejs",
+      "instances": [
+        {
+          "id": "instance-1",
+          "host": "web-host-1",
+          "logs": [
+            {
+              "message": "Access log entry",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "dataset": ["apache.access", "nginx.access"],
+              "namespace": ["default", "space-01"],
+              "hostName": ["web-host-1", "web-host-2"],
+              "containerId": ["container-1", "container-2"],
+              "cloud": {
+                "provider": "aws",
+                "region": "us-east-1",
+                "availabilityZone": "us-east-1a",
+                "projectId": "cloud-project-123",
+                "instanceId": "i-1234567890abcdef0"
+              },
+              "orchestrator": {
+                "clusterName": "production-cluster",
+                "clusterId": "cluster-abc123",
+                "namespace": "production",
+                "resourceId": "resource-xyz789"
+              },
+              "customFields": {
+                "app": "web-frontend",
+                "team": "platform",
+                "environment": "prod"
+              },
+              "traceId": "trace-12345",
+              "transactionId": "transaction-67890",
+              "agentId": "agent-nodejs-001",
+              "agentName": "nodejs",
+              "logFilePath": "/var/log/app/access.log"
+            },
+            {
+              "message": "Error log entry",
+              "level": "error",
+              "rate": 2,
+              "interval": "1m",
+              "dataset": "apache.error",
+              "namespace": "default"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

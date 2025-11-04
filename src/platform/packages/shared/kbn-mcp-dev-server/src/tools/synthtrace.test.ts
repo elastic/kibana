@@ -21,30 +21,21 @@
 import { synthtraceTool } from './synthtrace';
 
 async function simulateLLMFlow() {
-  console.log('=== Simulating LLM Flow: Prompt → Config → Validate → Estimate ===\n');
-
   // Step 1: LLM gets schema to understand format
-  console.log('Step 1: Getting schema...');
   const schemaResult = await synthtraceTool.handler({
     action: 'get_schema',
     payload: undefined,
   });
   const schema = JSON.parse(schemaResult.content[0].text);
-  console.log(
-    `✅ Schema retrieved: ${Object.keys(schema.definitions || schema).length} definitions\n`
-  );
 
   // Step 2: LLM gets examples for reference
-  console.log('Step 2: Getting examples...');
   const examplesResult = await synthtraceTool.handler({
     action: 'get_examples',
     payload: undefined,
   });
   const examples = JSON.parse(examplesResult.content[0].text);
-  console.log(`✅ Examples retrieved: ${Object.keys(examples).length} example files\n`);
 
   // Step 3: LLM generates config from prompt (simulated)
-  console.log('Step 3: Generating config from prompt...');
   const prompt =
     'Generate transactions for a service called "checkout-service" with 20 transactions per minute, each transaction should have 3 spans, and also generate metrics for CPU and memory';
 
@@ -53,10 +44,8 @@ async function simulateLLMFlow() {
     payload: { prompt },
   });
   const generateResponse = JSON.parse(generateResult.content[0].text);
-  console.log(`✅ Generate response received: ${generateResponse.message}\n`);
 
   // Step 4: LLM creates config based on schema and examples (simulated LLM generation)
-  console.log('Step 4: LLM-generated config (simulated)...');
   const generatedConfig = {
     timeWindow: {
       from: 'now-1h',
@@ -108,46 +97,137 @@ async function simulateLLMFlow() {
       },
     ],
   };
-  console.log(
-    'Generated config:',
-    JSON.stringify(generatedConfig, null, 2).substring(0, 200) + '...\n'
-  );
 
   // Step 5: Validate the config
-  console.log('Step 5: Validating config...');
   const validateResult = await synthtraceTool.handler({
     action: 'validate',
     payload: { config: generatedConfig },
   });
   const validation = JSON.parse(validateResult.content[0].text);
-  if (validation.valid) {
-    console.log('✅ Config is valid!\n');
-  } else {
-    console.log('❌ Config validation failed:', validation.errors);
-    return;
+  if (!validation.valid) {
+    throw new Error(`Config validation failed: ${JSON.stringify(validation.errors)}`);
   }
 
   // Step 6: Estimate event counts
-  console.log('Step 6: Estimating event counts...');
   const estimateResult = await synthtraceTool.handler({
     action: 'estimate',
     payload: { config: generatedConfig },
   });
   const estimate = JSON.parse(estimateResult.content[0].text);
-  console.log(`✅ Estimated ${estimate.estimatedEvents} events will be generated\n`);
 
-  console.log('=== E2E Flow Complete! ===');
-  console.log('\nSummary:');
-  console.log(`- Schema: ✅ Retrieved`);
-  console.log(`- Examples: ✅ Retrieved (${Object.keys(examples).length} files)`);
-  console.log(`- Config Generation: ✅ Simulated`);
-  console.log(`- Validation: ✅ Passed`);
-  console.log(`- Estimation: ✅ ${estimate.estimatedEvents} events`);
+  // Test 2: Failed and Degraded Docs Scenario
+
+  // Test prompt parsing for failed docs
+  const failedDocsPrompt =
+    'Ingest 100 documents to logs-foo.error-default with 50% of them as failed docs';
+  const failedDocsGenerateResult = await synthtraceTool.handler({
+    action: 'generate',
+    payload: { prompt: failedDocsPrompt },
+  });
+  JSON.parse(failedDocsGenerateResult.content[0].text);
+
+  // Create config with failureRate
+  const failedDocsConfig = {
+    timeWindow: {
+      from: 'now-1h',
+      to: 'now',
+    },
+    services: [
+      {
+        id: 'foo-service',
+        name: 'foo-service',
+        environment: 'production',
+        agentName: 'nodejs',
+        instances: [
+          {
+            id: 'instance-1',
+            logs: [
+              {
+                message: 'Error log entry',
+                level: 'error',
+                rate: 100,
+                dataset: 'foo.error',
+                failureRate: 0.5, // 50% failed docs
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const failedDocsValidateResult = await synthtraceTool.handler({
+    action: 'validate',
+    payload: { config: failedDocsConfig },
+  });
+  const failedDocsValidation = JSON.parse(failedDocsValidateResult.content[0].text);
+  if (!failedDocsValidation.valid) {
+    throw new Error(
+      `Failed docs config validation failed: ${JSON.stringify(failedDocsValidation.errors)}`
+    );
+  }
+
+  // Test prompt parsing for both degraded and failed docs
+  const bothDocsPrompt = 'Ingest docs with 50% degraded and 25% failed docs';
+  const bothDocsGenerateResult = await synthtraceTool.handler({
+    action: 'generate',
+    payload: { prompt: bothDocsPrompt },
+  });
+  JSON.parse(bothDocsGenerateResult.content[0].text);
+
+  // Create config with both degradedRate and failureRate
+  const bothDocsConfig = {
+    timeWindow: {
+      from: 'now-1h',
+      to: 'now',
+    },
+    services: [
+      {
+        id: 'test-service',
+        name: 'test-service',
+        environment: 'production',
+        agentName: 'nodejs',
+        instances: [
+          {
+            id: 'instance-1',
+            logs: [
+              {
+                message: 'Test log entry',
+                level: 'info',
+                rate: 10,
+                degradedRate: 0.5, // 50% degraded docs
+                failureRate: 0.25, // 25% failed docs
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const bothDocsValidateResult = await synthtraceTool.handler({
+    action: 'validate',
+    payload: { config: bothDocsConfig },
+  });
+  const bothDocsValidation = JSON.parse(bothDocsValidateResult.content[0].text);
+  if (!bothDocsValidation.valid) {
+    throw new Error(
+      `Both docs config validation failed: ${JSON.stringify(bothDocsValidation.errors)}`
+    );
+  }
+
+  // Test estimation for failed/degraded docs
+  const estimateBothResult = await synthtraceTool.handler({
+    action: 'estimate',
+    payload: { config: bothDocsConfig },
+  });
+  JSON.parse(estimateBothResult.content[0].text);
 }
 
 // Run if executed directly
 if (require.main === module) {
   simulateLLMFlow().catch((err) => {
+    // eslint-disable-next-line no-console
     console.error('Test failed:', err);
     process.exit(1);
   });

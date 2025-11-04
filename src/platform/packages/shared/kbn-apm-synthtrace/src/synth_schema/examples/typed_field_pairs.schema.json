@@ -1,0 +1,82 @@
+{
+  "timeWindow": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "services": [
+    {
+      "id": "typed-fields-service",
+      "name": "typed-fields-service",
+      "environment": "production",
+      "agentName": "nodejs",
+      "instances": [
+        {
+          "id": "instance-1",
+          "logs": [
+            {
+              "message": "Log with 6 random fields in 3 pairs (int, bool, double) with string variants",
+              "level": "info",
+              "rate": 10,
+              "interval": "1m",
+              "customFields": {
+                "fields": [
+                  {
+                    "name": "_int",
+                    "valueType": "random",
+                    "valueTypeSpecific": "int",
+                    "valueConfig": {
+                      "min": 0,
+                      "max": 100
+                    }
+                  },
+                  {
+                    "name": "_int_str",
+                    "valueType": "random",
+                    "valueTypeSpecific": "int",
+                    "asString": true,
+                    "valueConfig": {
+                      "min": 0,
+                      "max": 100
+                    }
+                  },
+                  {
+                    "name": "_bool",
+                    "valueType": "random",
+                    "valueTypeSpecific": "bool"
+                  },
+                  {
+                    "name": "_bool_str",
+                    "valueType": "random",
+                    "valueTypeSpecific": "bool",
+                    "asString": true
+                  },
+                  {
+                    "name": "_double",
+                    "valueType": "random",
+                    "valueTypeSpecific": "double",
+                    "valueConfig": {
+                      "min": 0,
+                      "max": 100
+                    }
+                  },
+                  {
+                    "name": "_double_str",
+                    "valueType": "random",
+                    "valueTypeSpecific": "double",
+                    "asString": true,
+                    "valueConfig": {
+                      "min": 0,
+                      "max": 100
+                    }
+                  }
+                ],
+                "namespace": "log.custom"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

@@ -265,6 +265,7 @@
                           "level": {
                             "type": "string",
                             "enum": [
+                              "debug",
                               "info",
                               "warn",
                               "error"
@@ -272,6 +273,369 @@
                           },
                           "message": {
                             "type": "string"
+                          },
+                          "dataset": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1
+                              }
+                            ],
+                            "description": "Dataset name(s). If array, datasets will be rotated. If not provided, uses random dataset."
+                          },
+                          "namespace": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1
+                              }
+                            ],
+                            "description": "Namespace(s) for data stream. If array, namespaces will be rotated."
+                          },
+                          "hostName": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1
+                              }
+                            ],
+                            "description": "Host name(s). If array, host names will be rotated."
+                          },
+                          "containerId": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1
+                              }
+                            ],
+                            "description": "Container ID(s). If array, container IDs will be rotated."
+                          },
+                          "customFields": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "additionalProperties": {},
+                                "description": "Simple custom fields: { \"fieldName\": \"value\" }"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "count": {
+                                    "type": "integer",
+                                    "exclusiveMinimum": 0,
+                                    "description": "Number of fields to generate (for bulk generation)"
+                                  },
+                                  "prefix": {
+                                    "type": "string",
+                                    "description": "Prefix for field names (e.g., \"field\" generates \"field-0\", \"field-1\", etc.)"
+                                  },
+                                  "valueType": {
+                                    "type": "string",
+                                    "enum": [
+                                      "fixed",
+                                      "random",
+                                      "rotated",
+                                      "dynamic",
+                                      "sequential"
+                                    ],
+                                    "description": "Value generation type: fixed (use value), random (random value), rotated (rotate through values), dynamic (computed), sequential (0, 1, 2, ...)"
+                                  },
+                                  "value": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "boolean"
+                                      },
+                                      {
+                                        "type": "array",
+                                        "items": {
+                                          "type": [
+                                            "string",
+                                            "number",
+                                            "boolean"
+                                          ]
+                                        },
+                                        "minItems": 1
+                                      }
+                                    ],
+                                    "description": "Value(s) for the field. For \"rotated\" type, provide array. For \"fixed\" type, provide single value. For \"random\", specify valueType only."
+                                  },
+                                  "valueConfig": {
+                                    "type": "object",
+                                    "properties": {
+                                      "min": {
+                                        "type": "number",
+                                        "description": "Minimum value for random numbers"
+                                      },
+                                      "max": {
+                                        "type": "number",
+                                        "description": "Maximum value for random numbers"
+                                      },
+                                      "stringLength": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Length for random strings"
+                                      },
+                                      "numericOnly": {
+                                        "type": "boolean",
+                                        "description": "If true, generate numeric values only (for random type)"
+                                      },
+                                      "alternating": {
+                                        "type": "boolean",
+                                        "description": "If true, alternate between numeric and string values (for random type)"
+                                      },
+                                      "valueTypeSpecific": {
+                                        "type": "string",
+                                        "enum": [
+                                          "int",
+                                          "bool",
+                                          "double",
+                                          "string"
+                                        ],
+                                        "description": "Generate type-specific values: int (integer), bool (boolean), double (float), string"
+                                      },
+                                      "asString": {
+                                        "type": "boolean",
+                                        "description": "If true, generate string representation of the value (e.g., \"6\" instead of 6, \"true\" instead of true)"
+                                      }
+                                    },
+                                    "additionalProperties": false,
+                                    "description": "Configuration for value generation"
+                                  },
+                                  "fields": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string",
+                                          "description": "Field name"
+                                        },
+                                        "valueType": {
+                                          "type": "string",
+                                          "enum": [
+                                            "fixed",
+                                            "random",
+                                            "rotated",
+                                            "dynamic",
+                                            "sequential"
+                                          ],
+                                          "description": "Value generation type for this specific field"
+                                        },
+                                        "valueTypeSpecific": {
+                                          "type": "string",
+                                          "enum": [
+                                            "int",
+                                            "bool",
+                                            "double",
+                                            "string"
+                                          ],
+                                          "description": "Type-specific value generation"
+                                        },
+                                        "asString": {
+                                          "type": "boolean",
+                                          "description": "Generate as string representation"
+                                        },
+                                        "value": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "type": "boolean"
+                                            },
+                                            {
+                                              "type": "array",
+                                              "items": {
+                                                "type": [
+                                                  "string",
+                                                  "number",
+                                                  "boolean"
+                                                ]
+                                              },
+                                              "minItems": 1
+                                            }
+                                          ],
+                                          "description": "Value(s) for this field"
+                                        },
+                                        "valueConfig": {
+                                          "type": "object",
+                                          "properties": {
+                                            "min": {
+                                              "type": "number"
+                                            },
+                                            "max": {
+                                              "type": "number"
+                                            }
+                                          },
+                                          "additionalProperties": false,
+                                          "description": "Value configuration for this field"
+                                        }
+                                      },
+                                      "required": [
+                                        "name"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    "description": "Explicit field definitions. If provided, overrides count/prefix-based generation. Useful for creating pairs or groups of related fields."
+                                  },
+                                  "fieldNames": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "description": "Rotated field names (if provided, these will be used instead of prefix-based names)"
+                                  },
+                                  "namespace": {
+                                    "type": "string",
+                                    "description": "Namespace prefix (default: \"log.custom\"). Use empty string \"\" for no prefix, or specify custom namespace like \"custom\""
+                                  },
+                                  "degradeForFailed": {
+                                    "type": "boolean",
+                                    "description": "If true and document is failed, generate fields with values exceeding 1024 characters to cause mapping conflicts"
+                                  }
+                                },
+                                "required": [
+                                  "count"
+                                ],
+                                "additionalProperties": false,
+                                "description": "Advanced custom field generation configuration"
+                              }
+                            ],
+                            "description": "Custom fields under log.custom.* namespace. Can be simple object or advanced generation config."
+                          },
+                          "cloud": {
+                            "type": "object",
+                            "properties": {
+                              "provider": {
+                                "type": "string"
+                              },
+                              "region": {
+                                "type": "string"
+                              },
+                              "availabilityZone": {
+                                "type": "string"
+                              },
+                              "projectId": {
+                                "type": "string"
+                              },
+                              "instanceId": {
+                                "type": "string"
+                              }
+                            },
+                            "additionalProperties": false,
+                            "description": "Cloud provider fields"
+                          },
+                          "orchestrator": {
+                            "type": "object",
+                            "properties": {
+                              "clusterName": {
+                                "type": "string"
+                              },
+                              "clusterId": {
+                                "type": "string"
+                              },
+                              "namespace": {
+                                "type": "string"
+                              },
+                              "resourceId": {
+                                "type": "string"
+                              }
+                            },
+                            "additionalProperties": false,
+                            "description": "Orchestrator fields (e.g., Kubernetes)"
+                          },
+                          "traceId": {
+                            "type": "string",
+                            "description": "Trace ID for correlation"
+                          },
+                          "transactionId": {
+                            "type": "string",
+                            "description": "Transaction ID for correlation"
+                          },
+                          "agentId": {
+                            "type": "string",
+                            "description": "Agent ID"
+                          },
+                          "agentName": {
+                            "type": "string",
+                            "description": "Agent name"
+                          },
+                          "logFilePath": {
+                            "type": "string",
+                            "description": "Log file path"
+                          },
+                          "degradedRate": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              {
+                                "$ref": "#/definitions/Synthtrace DSL/properties/services/items/properties/instances/items/properties/traces/items/properties/errorRate/anyOf/1"
+                              }
+                            ],
+                            "description": "Degraded/Ignored rate as a number (0-1) or a distribution. Degraded documents are indexed but have non-empty _ignore property due to fields exceeding ignore_above limits (e.g., 1024 characters)."
+                          },
+                          "ignoredRate": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              {
+                                "$ref": "#/definitions/Synthtrace DSL/properties/services/items/properties/instances/items/properties/traces/items/properties/errorRate/anyOf/1"
+                              }
+                            ],
+                            "description": "Ignored rate (alias for degradedRate). Documents are indexed but have non-empty _ignore property due to mapping conflicts."
+                          },
+                          "failureRate": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              {
+                                "$ref": "#/definitions/Synthtrace DSL/properties/services/items/properties/instances/items/properties/traces/items/properties/errorRate/anyOf/1"
+                              }
+                            ],
+                            "description": "Failure rate as a number (0-1) or a distribution. Failed documents fail ingestion entirely and go to failure store (not indexed in normal indexes). Requires missing required fields or invalid values that trigger fail processors."
                           }
                         },
                         "additionalProperties": false
