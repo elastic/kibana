@@ -140,7 +140,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
 
     // Open the field actions menu
@@ -182,7 +182,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
 
     // Open the field actions menu
@@ -225,7 +225,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
   });
 
