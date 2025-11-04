@@ -226,6 +226,22 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
 
+  const JEST_MAX_PARALLEL_UNIT = process.env.JEST_MAX_PARALLEL_UNIT
+    ? parseFloat(process.env.JEST_MAX_PARALLEL_UNIT)
+    : 3;
+  if (Number.isNaN(JEST_MAX_PARALLEL_UNIT)) {
+    throw new Error(`invalid JEST_MAX_PARALLEL_UNIT: ${process.env.JEST_MAX_PARALLEL_UNIT}`);
+  }
+
+  const JEST_MAX_PARALLEL_INTEGRATION = process.env.JEST_MAX_PARALLEL_INTEGRATION
+    ? parseFloat(process.env.JEST_MAX_PARALLEL_INTEGRATION)
+    : 1;
+  if (Number.isNaN(JEST_MAX_PARALLEL_INTEGRATION)) {
+    throw new Error(
+      `invalid JEST_MAX_PARALLEL_INTEGRATION: ${process.env.JEST_MAX_PARALLEL_INTEGRATION}`
+    );
+  }
+
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
     ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
     : 37;
@@ -403,18 +419,20 @@ export async function pickTestGroupRunOrder() {
         jobName: 'kibana-on-merge',
       },
     ],
+    // NOTE: maxMin raw values for jest groups (unit and integration) assume no parallelism.
+    // As a matter of simplicity for now we are going to multiply max minutes * max parallel
     groups: [
       {
         type: UNIT_TYPE,
         defaultMin: 4,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_MAX_MINUTES * JEST_MAX_PARALLEL_UNIT,
         overheadMin: 0.2,
         names: jestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
         defaultMin: 60,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_MAX_MINUTES * JEST_MAX_PARALLEL_INTEGRATION,
         overheadMin: 0.2,
         names: jestIntegrationConfigs,
       },
@@ -511,6 +529,7 @@ export async function pickTestGroupRunOrder() {
             },
             env: {
               SCOUT_TARGET_TYPE: 'local',
+              JEST_MAX_PARALLEL: JEST_MAX_PARALLEL_UNIT,
             },
             retry: {
               automatic: [
@@ -532,6 +551,7 @@ export async function pickTestGroupRunOrder() {
             agents: expandAgentQueue('n2-4-spot'),
             env: {
               SCOUT_TARGET_TYPE: 'local',
+              JEST_MAX_PARALLEL: JEST_MAX_PARALLEL_INTEGRATION,
             },
             retry: {
               automatic: [

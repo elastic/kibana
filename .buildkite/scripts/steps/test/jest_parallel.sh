@@ -15,7 +15,8 @@ failedConfigs=""
 #   JEST_MAX_PARALLEL: number of concurrent Jest config processes
 #   JEST_MAX_OLD_SPACE_MB: per-process max old space size (MB)
 # NOTE: JEST_MAX_PARALLEL default now depends on TEST_TYPE (unit=3, integration=1).
-# It can still be overridden by exporting JEST_MAX_PARALLEL.
+# It can still be overridden by exporting JEST_MAX_PARALLEL. As this script is invoked by .buildkite/pipeline-utils/ci-stats/pick_test_group_run_order.ts
+# the setting should be set in that file inside the dynamic configuration currently done by JEST_MAX_PARALLEL_UNIT and JEST_MAX_PARALLEL_INTEGRATION
 JEST_MAX_PARALLEL="${JEST_MAX_PARALLEL:-3}"
 JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-8192}"
 
