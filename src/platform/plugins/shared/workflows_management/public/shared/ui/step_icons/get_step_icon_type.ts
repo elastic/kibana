@@ -9,29 +9,12 @@
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-export const getStepIconType = (stepType: string) => {
+export const getStepIconType = (nodeType: string): EuiIconType => {
   let iconType: EuiIconType = 'info';
-  switch (stepType) {
-    case 'http':
-      iconType = 'globe';
-      break;
-    case 'console':
-      iconType = 'console';
-      break;
-    case 'email':
-      iconType = 'email';
-      break;
-    case 'slack':
-    case 'slack_api':
-      iconType = 'logoSlack';
-      break;
-    case 'inference':
-    case 'inference.completion':
-    case 'inference.unified_completion':
-      iconType = 'sparkles';
-      break;
+  switch (nodeType) {
+    // triggers
     case 'manual':
-      iconType = 'accessibility';
+      iconType = 'user';
       break;
     case 'alert':
       iconType = 'warning';
@@ -39,6 +22,14 @@ export const getStepIconType = (stepType: string) => {
     case 'scheduled':
       iconType = 'clock';
       break;
+    // built-in node types
+    case 'http':
+      iconType = 'globe';
+      break;
+    case 'console':
+      iconType = 'console';
+      break;
+    // flow control nodes
     case 'wait':
       iconType = 'clock';
       break;
@@ -49,6 +40,9 @@ export const getStepIconType = (stepType: string) => {
     case 'if':
       iconType = 'branch';
       break;
+    case 'if-branch':
+      iconType = 'tokenBoolean';
+      break;
     case 'enter-foreach':
     case 'foreach':
       iconType = 'refresh';
@@ -56,11 +50,25 @@ export const getStepIconType = (stepType: string) => {
     case 'foreach-iteration':
       iconType = 'tokenNumber';
       break;
-    case 'if-branch':
-      iconType = 'tokenBoolean';
-      break;
+
+    // connectors
+    // should be handled by the connector icon component
+
+    // case 'email':
+    //   iconType = 'email';
+    //   break;
+    // case 'slack':
+    // case 'slack_api':
+    //   iconType = 'logoSlack';
+    //   break;
+    // case 'inference':
+    // case 'inference.completion':
+    // case 'inference.unified_completion':
+    //   iconType = 'sparkles';
+    //   break;
+
     default:
-      iconType = 'info';
+      iconType = 'plugs';
       break;
   }
   return iconType;

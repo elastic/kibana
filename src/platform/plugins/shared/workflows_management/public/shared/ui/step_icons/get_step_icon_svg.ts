@@ -10,22 +10,14 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { getStackConnectorLogo } from '@kbn/stack-connectors-plugin/public/common/logos';
-import { ElasticsearchLogo } from './icons/elasticsearch.svg';
 import { HARDCODED_ICONS } from './icons/hardcoded_icons';
-import { KibanaLogo } from './icons/kibana.svg';
 
-/**
- * Default fallback SVG for unknown connectors
- */
-const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-    <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
-    <circle cx="8" cy="8" r="2" fill="currentColor"/>
-  </svg>`;
+const DEFAULT_SVG = HARDCODED_ICONS.default;
 
 /**
  * Get SVG string for a connector type (for use with mask-image)
  */
-export async function getStepIconSvg(connectorType: string): Promise<string> {
+export async function getStepIconSvg(connectorType: string): Promise<string | null> {
   try {
     const dotConnectorType = `.${connectorType}`;
     const LogoComponent = await getStackConnectorLogo(dotConnectorType);
@@ -33,31 +25,19 @@ export async function getStepIconSvg(connectorType: string): Promise<string> {
       return getSvgFromReactComponent(LogoComponent);
     }
 
-    if (connectorType === 'elasticsearch') {
-      return getSvgFromReactComponent(ElasticsearchLogo);
-    }
-
-    if (connectorType === 'kibana') {
-      return getSvgFromReactComponent(KibanaLogo);
-    }
-
-    if (connectorType === 'slack' || connectorType === 'slack_api') {
-      return atob(HARDCODED_ICONS.slack);
-    }
-
     if (connectorType in HARDCODED_ICONS) {
-      return atob(HARDCODED_ICONS[connectorType as keyof typeof HARDCODED_ICONS]);
+      return HARDCODED_ICONS[connectorType as keyof typeof HARDCODED_ICONS];
     }
 
-    return DEFAULT_CONNECTOR_SVG;
+    return DEFAULT_SVG;
   } catch (error) {
-    return DEFAULT_CONNECTOR_SVG;
+    return DEFAULT_SVG;
   }
 }
 
 function getSvgFromReactComponent(
   component: React.ComponentType<{ width: number; height: number }>
-): string {
+): string | null {
   try {
     const logoElement = React.createElement(component, { width: 16, height: 16 });
     let htmlString = renderToStaticMarkup(logoElement);
@@ -70,15 +50,14 @@ function getSvgFromReactComponent(
         const srcValue = srcMatch[1];
 
         if (srcValue.startsWith('data:image/svg+xml;base64,')) {
-          return atob(srcValue.replace('data:image/svg+xml;base64,', ''));
+          return null;
         }
 
         if (srcValue.startsWith('data:image/svg+xml,')) {
           return decodeURIComponent(srcValue.replace('data:image/svg+xml,', ''));
         }
       }
-      // Fallback if we can't extract SVG from img
-      return DEFAULT_CONNECTOR_SVG;
+      return null;
     }
 
     // Direct SVG - ensure fill="currentColor" is removed for mask-image usage
@@ -86,6 +65,6 @@ function getSvgFromReactComponent(
 
     return htmlString;
   } catch (error) {
-    return DEFAULT_CONNECTOR_SVG;
+    return null;
   }
 }

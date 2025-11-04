@@ -11,7 +11,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { GlobalWorkflowEditorStyles } from './global_workflow_editor_styles';
-import { useDynamicTypeIcons } from './use_dynamic_type_icons';
+import { predefinedStepTypes, useDynamicTypeIcons } from './use_dynamic_type_icons';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 
 export default {
@@ -88,10 +88,6 @@ const mockConnectorsResponse: MockConnectorsResponse = {
       actionTypeId: '.swimlane',
       displayName: 'Swimlane',
     },
-    webhook: {
-      actionTypeId: '.webhook',
-      displayName: 'Webhook',
-    },
     email: {
       actionTypeId: '.email',
       displayName: 'Email',
@@ -99,15 +95,23 @@ const mockConnectorsResponse: MockConnectorsResponse = {
   },
 };
 
+const allTypes = [
+  ...predefinedStepTypes,
+  ...Object.values(mockConnectorsResponse.connectorTypes).map((connector) => ({
+    actionTypeId: connector.actionTypeId.slice(1),
+    displayName: connector.displayName,
+  })),
+];
+
 export const Default = () => {
   useDynamicTypeIcons(mockConnectorsResponse as ConnectorsResponse);
   return (
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <GlobalWorkflowEditorStyles />
-      {Object.values(mockConnectorsResponse.connectorTypes).map((connector) => (
+      {allTypes.map((connector) => (
         <div
           key={connector.actionTypeId}
-          className={`type-inline-highlight type-${connector.actionTypeId.slice(1)}`}
+          className={`type-inline-highlight type-${connector.actionTypeId}`}
         >
           {connector.displayName}
         </div>

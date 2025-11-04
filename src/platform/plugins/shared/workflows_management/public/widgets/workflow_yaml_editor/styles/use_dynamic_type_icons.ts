@@ -10,9 +10,9 @@
 import { useEffect } from 'react';
 import type { ConnectorTypeInfoMinimal } from '@kbn/workflows';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
-import { getStepIconSvg } from '../../../shared/ui/step_icons/get_step_icon_svg';
+import { getStepIconCssProperties } from '../../../shared/ui/step_icons/get_step_icon_css_properties';
 
-const predefinedStepTypes = [
+export const predefinedStepTypes = [
   {
     actionTypeId: 'console',
     displayName: 'Console',
@@ -114,10 +114,10 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
 
     try {
       // Generate CSS rule for this connector
-      const iconSvg = await getStepIconSvg(connectorType);
+      const cssProperties = await getStepIconCssProperties(connectorType);
 
       // Only inject CSS if we successfully generated an icon
-      if (iconSvg) {
+      if (cssProperties) {
         let selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon:before,
@@ -134,16 +134,14 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
         cssToInject += `
           /* Target by aria-label content */
           ${selector} { 
-            mask-image: url("data:image/svg+xml,${encodeURIComponent(iconSvg)}") !important;
-            mask-size: contain !important;
-            background-color: currentColor !important;
-            background-size: 12px 12px !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
             content: " " !important;
             width: 16px !important;
             height: 16px !important;
             display: block !important;
+            ${cssProperties}
+            background-size: 12px 12px !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
           }
         `;
       }
@@ -183,10 +181,9 @@ async function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal
       // Generate CSS rule for this connector shadow icon
       // const iconBase64 = await getStepIconBase64(connectorType);
 
-      const iconSvg = await getStepIconSvg(connectorType);
-
+      const cssProperties = await getStepIconCssProperties(connectorType);
       // Only inject CSS if we successfully generated an icon
-      if (iconSvg) {
+      if (cssProperties) {
         // Get the class name for this connector
         let className = connectorType;
         if (connectorType.startsWith('elasticsearch.')) {
@@ -210,8 +207,7 @@ async function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal
         // background-color is set in get_base_type_icons_styles.tsx
         cssToInject += `
           .type-inline-highlight.type-${className}::after {
-            mask-image: url('data:image/svg+xml,${encodeURIComponent(iconSvg)}');
-            mask-size: contain;
+            ${cssProperties}
             background-size: contain;
             background-repeat: no-repeat;
           }
