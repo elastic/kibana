@@ -92,6 +92,7 @@ export const useActionResults = ({
           ...(currentPageAgentIds.length > 0 && {
             agentIds: currentPageAgentIds.join(','),
           }),
+          totalAgents: agentIds?.length ?? 0,
         },
       }),
     {

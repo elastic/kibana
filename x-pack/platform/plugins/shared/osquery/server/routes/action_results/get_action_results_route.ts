@@ -93,7 +93,7 @@ export const getActionResultsRoute = (
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 100;
 
-          const totalAgentCount = agentIds.length;
+          const totalAgentCount = request.query.totalAgents ?? agentIds.length;
 
           const res = await lastValueFrom(
             search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
@@ -141,7 +141,7 @@ export const getActionResultsRoute = (
           return response.ok({
             body: {
               edges: processedEdges,
-              total: res.edges.length,
+              total: totalAgentCount,
               currentPage: page,
               pageSize,
               totalPages,
