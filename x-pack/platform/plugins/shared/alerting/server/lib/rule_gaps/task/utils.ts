@@ -69,17 +69,15 @@ export function formatConsolidatedSummary(consolidated: AggregatedByRuleEntry[])
 }
 
 export async function handleCancellation({
-  wasCancelled,
   abortController,
   aggregatedByRule,
   logEvent,
 }: {
-  wasCancelled: boolean;
-  abortController?: AbortController;
+  abortController: AbortController;
   aggregatedByRule: Map<string, AggregatedByRuleEntry>;
   logEvent: GapAutoFillSchedulerEventLogger;
 }): Promise<boolean> {
-  if (!wasCancelled && !abortController?.signal.aborted) return false;
+  if (!abortController.signal.aborted) return false;
 
   const consolidated = resultsFromMap(aggregatedByRule);
 

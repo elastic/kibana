@@ -106,12 +106,7 @@ export function registerGapAutoFillSchedulerTask({
       title: 'Gap Auto Fill Scheduler',
       timeout: schedulerConfig?.timeout ?? '40s',
       createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
-        let wasCancelled = false;
-
         return {
-          async cancel() {
-            wasCancelled = true;
-          },
           async run() {
             const loggerMesage = (message: string) =>
               `[gap-fill-auto-scheduler-task][${taskInstance.id}] ${message}`;
@@ -176,6 +171,7 @@ export function registerGapAutoFillSchedulerTask({
                 start: startDate.toISOString(),
                 end: now.toISOString(),
                 sortOrder,
+                hasUnfilledIntervals: true,
               });
 
               if (!ruleIds.length) {
@@ -217,7 +213,6 @@ export function registerGapAutoFillSchedulerTask({
                 }
                 if (
                   await handleCancellation({
-                    wasCancelled,
                     abortController,
                     aggregatedByRule,
                     logEvent,
@@ -228,6 +223,8 @@ export function registerGapAutoFillSchedulerTask({
 
                 const currentRuleIds = ruleIds.slice(startIdx, startIdx + DEFAULT_RULES_BATCH_SIZE);
 
+                // we need to find the rules that are enabled and
+                // and check for rule types and consumers that are supported
                 const { data: rules } = await rulesClient.find({
                   options: {
                     page: 1,
@@ -254,7 +251,6 @@ export function registerGapAutoFillSchedulerTask({
                 while (true) {
                   if (
                     await handleCancellation({
-                      wasCancelled,
                       abortController,
                       aggregatedByRule,
                       logEvent,

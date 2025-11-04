@@ -146,9 +146,10 @@ describe('gap auto fill task utils', () => {
       ]);
       const logEvent = jest.fn();
 
+      const abortController = new AbortController();
+      abortController.abort();
       const res = await handleCancellation({
-        wasCancelled: true,
-        abortController: undefined,
+        abortController,
         aggregatedByRule: aggregated,
         logEvent: logEvent as unknown as GapAutoFillSchedulerEventLogger,
       });
