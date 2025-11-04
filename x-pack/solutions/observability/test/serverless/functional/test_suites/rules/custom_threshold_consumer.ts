@@ -74,9 +74,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         allAvailableConsumers.add(await option.getVisibleText());
       }
 
+      // Check if sets are equal by verifying they have the same size and all elements match
       const areConsumersEqual =
-        allAvailableConsumers.isSupersetOf(consumersToVerify) &&
-        allAvailableConsumers.isSubsetOf(consumersToVerify);
+        allAvailableConsumers.size === consumersToVerify.size &&
+        [...consumersToVerify].every((consumer) => allAvailableConsumers.has(consumer));
 
       expect(areConsumersEqual).toBe(true);
 
