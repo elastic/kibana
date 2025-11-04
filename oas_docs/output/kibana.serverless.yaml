@@ -52278,6 +52278,66 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/security_ai_assistant/knowledge_base:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Read a single KB
+      operationId: GetKnowledgeBase
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseReadResponse200'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
+          description: Generic Error
+      summary: Read a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      operationId: PostKnowledgeBase
+      parameters:
+        - $ref: '#/components/parameters/Security_AI_Assistant_API_KnowledgeBaseModelId'
+        - $ref: '#/components/parameters/Security_AI_Assistant_API_KnowledgeBaseIgnoreLabs'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
+          description: Generic Error
+      summary: Create a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security_ai_assistant/knowledge_base/{resource}:
     get:
       description: |-
@@ -52287,72 +52347,24 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Read a single KB
+        Read a knowledge base with a specific resource identifier.
       operationId: ReadKnowledgeBase
       parameters:
-        - description: The KnowledgeBase `resource` value.
-          example: kb12345
-          in: path
-          name: resource
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/Security_AI_Assistant_API_KnowledgeBaseResource'
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  defend_insights_exists:
-                    description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  elser_exists:
-                    description: Indicates if the ELSER model exists for the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  is_setup_available:
-                    description: Indicates if the setup process is available for the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  is_setup_in_progress:
-                    description: Indicates if the setup process is currently in progress.
-                    example: false
-                    type: boolean
-                  product_documentation_status:
-                    description: The status of the product documentation in the KnowledgeBase.
-                    example: complete
-                    type: string
-                  security_labs_exists:
-                    description: Indicates if Security Labs documentation exists in the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  user_data_exists:
-                    description: Indicates if user data exists in the KnowledgeBase.
-                    example: false
-                    type: boolean
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseReadResponse200'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    description: A short description of the error.
-                    example: Bad Request
-                    type: string
-                  message:
-                    description: A detailed error message.
-                    example: Invalid resource ID provided.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code of the error.
-                    example: 400
-                    type: number
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
           description: Generic Error
-      summary: Read a KnowledgeBase
+      summary: Read a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
       x-metaTags:
@@ -52366,31 +52378,12 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a KnowledgeBase
+        Create a knowledge base with a specific resource identifier.
       operationId: CreateKnowledgeBase
       parameters:
-        - description: The KnowledgeBase `resource` value.
-          example: kb12345
-          in: path
-          name: resource
-          required: true
-          schema:
-            type: string
-        - description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
-          example: elser-model-001
-          in: query
-          name: modelId
-          required: false
-          schema:
-            type: string
-        - description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
-          example: true
-          in: query
-          name: ignoreSecurityLabs
-          required: false
-          schema:
-            default: false
-            type: boolean
+        - $ref: '#/components/parameters/Security_AI_Assistant_API_KnowledgeBaseResource'
+        - $ref: '#/components/parameters/Security_AI_Assistant_API_KnowledgeBaseModelId'
+        - $ref: '#/components/parameters/Security_AI_Assistant_API_KnowledgeBaseIgnoreLabs'
       responses:
         '200':
           content:
@@ -52402,22 +52395,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    description: A short description of the error.
-                    example: Bad Request
-                    type: string
-                  message:
-                    description: A detailed error message.
-                    example: Invalid resource ID provided.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code of the error.
-                    example: 400
-                    type: number
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
           description: Generic Error
-      summary: Create a KnowledgeBase
+      summary: Create a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
       x-metaTags:
@@ -72324,6 +72304,31 @@ components:
       required: false
       schema:
         type: boolean
+    Security_AI_Assistant_API_KnowledgeBaseIgnoreLabs:
+      description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+      example: true
+      in: query
+      name: ignoreSecurityLabs
+      required: false
+      schema:
+        default: false
+        type: boolean
+    Security_AI_Assistant_API_KnowledgeBaseModelId:
+      description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+      example: elser-model-001
+      in: query
+      name: modelId
+      required: false
+      schema:
+        type: string
+    Security_AI_Assistant_API_KnowledgeBaseResource:
+      description: The KnowledgeBase `resource` value.
+      example: kb12345
+      in: path
+      name: resource
+      required: true
+      schema:
+        type: string
     SLOs_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header
@@ -74732,6 +74737,37 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
         propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseReadResponse200:
+      type: object
+      properties:
+        defend_insights_exists:
+          description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
+          example: true
+          type: boolean
+        elser_exists:
+          description: Indicates if the ELSER model exists for the KnowledgeBase.
+          example: true
+          type: boolean
+        is_setup_available:
+          description: Indicates if the setup process is available for the KnowledgeBase.
+          example: true
+          type: boolean
+        is_setup_in_progress:
+          description: Indicates if the setup process is currently in progress.
+          example: false
+          type: boolean
+        product_documentation_status:
+          description: The status of the product documentation in the KnowledgeBase.
+          example: complete
+          type: string
+        security_labs_exists:
+          description: Indicates if Security Labs documentation exists in the KnowledgeBase.
+          example: true
+          type: boolean
+        user_data_exists:
+          description: Indicates if user data exists in the KnowledgeBase.
+          example: false
+          type: boolean
     Security_AI_Assistant_API_KnowledgeBaseResource:
       description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
@@ -74748,6 +74784,21 @@ components:
           description: Identify the success of the method execution.
           example: true
           type: boolean
+    Security_AI_Assistant_API_KnowledgeBaseResponse400:
+      type: object
+      properties:
+        error:
+          description: A short description of the error.
+          example: Bad Request
+          type: string
+        message:
+          description: A detailed error message.
+          example: Invalid resource ID provided.
+          type: string
+        statusCode:
+          description: The HTTP status code of the error.
+          example: 400
+          type: number
     Security_AI_Assistant_API_Message:
       description: AI assistant conversation message.
       type: object
