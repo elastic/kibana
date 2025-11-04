@@ -7,6 +7,7 @@
 
 import {
   AppStatus,
+  type AppUpdatableFields,
   type AppUpdater,
   type CoreSetup,
   type CoreStart,
@@ -23,7 +24,17 @@ import type {
   DataConnectorsPluginStartDependencies,
 } from './types';
 
-const ENABLED_SOLUTIONS: KibanaProject[] = [KIBANA_WORKPLACE_AI_PROJECT];
+const enabledSolutions: readonly KibanaProject[] = [KIBANA_WORKPLACE_AI_PROJECT];
+
+const inaccessibleState: AppUpdatableFields = {
+  status: AppStatus.inaccessible,
+  visibleIn: [],
+};
+
+const accessibleState: AppUpdatableFields = {
+  status: AppStatus.accessible,
+  visibleIn: ['sideNav', 'globalSearch'],
+};
 
 export class DataConnectorsPlugin
   implements
@@ -48,17 +59,9 @@ export class DataConnectorsPlugin
   }
   start(core: CoreStart): DataConnectorsPluginStart {
     core.chrome.getActiveSolutionNavId$().subscribe((solutionId) => {
-      if (!solutionId || !ENABLED_SOLUTIONS.includes(solutionId)) {
-        this.appUpdater$.next(() => ({
-          status: AppStatus.inaccessible,
-          visibleIn: [],
-        }));
-        return;
-      }
-      this.appUpdater$.next(() => ({
-        status: AppStatus.accessible,
-        visibleIn: ['sideNav', 'globalSearch'],
-      }));
+      this.appUpdater$.next(() =>
+        !solutionId || !enabledSolutions.includes(solutionId) ? inaccessibleState : accessibleState
+      );
     });
 
     return {};
