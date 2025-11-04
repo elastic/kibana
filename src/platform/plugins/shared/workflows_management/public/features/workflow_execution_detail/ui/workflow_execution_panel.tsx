@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<< HEAD
 import type { UseEuiTheme } from '@elastic/eui';
-=======
->>>>>>> upstream/main
 import {
   EuiButton,
   EuiFlexGroup,
@@ -21,13 +18,9 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-<<<<<<< HEAD
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-=======
-import React from 'react';
->>>>>>> upstream/main
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
