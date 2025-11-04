@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { TemplateDeserialized } from '@kbn/index-management-plugin/common';
+import { IndexMode } from '@kbn/index-management-plugin/common/constants';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { templatesApi } from './lib/templates.api';
 import { templatesHelpers } from './lib/templates.helpers';
 import { getRandomString } from './lib/random';
@@ -68,6 +69,13 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       };
+      const tmpTemplate3 = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()]);
+      const indexTemplateWithIndexMode = {
+        ...tmpTemplate3,
+        // For composable templates, only the top-level indexMode is needed.
+        // During serialization, serializeTemplate() will automatically set template.settings.index.mode from this value.
+        indexMode: IndexMode.standard,
+      };
 
       beforeEach(async () => {
         try {
@@ -75,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           await createTemplate(legacyTemplate);
           await createTemplate(indexTemplateWithDSL);
           await createTemplate(indexTemplateWithILM);
+          await createTemplate(indexTemplateWithIndexMode);
         } catch (err) {
           log.debug('[Setup error] Error creating index template');
           throw err;
@@ -94,7 +103,6 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
-          'indexMode',
           'hasSettings',
           'hasAliases',
           'hasMappings',
@@ -118,7 +126,6 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedLegacyKeys = [
           'name',
           'indexPatterns',
-          'indexMode',
           'hasSettings',
           'hasAliases',
           'hasMappings',
@@ -142,7 +149,6 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedWithDSLKeys = [
           'name',
           'indexPatterns',
-          'indexMode',
           'lifecycle',
           'hasSettings',
           'hasAliases',
@@ -168,7 +174,6 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedWithILMKeys = [
           'name',
           'indexPatterns',
-          'indexMode',
           'ilmPolicy',
           'hasSettings',
           'hasAliases',
@@ -182,6 +187,30 @@ export default function ({ getService }: FtrProviderContext) {
         ].sort();
 
         expect(Object.keys(templateWithILM).sort()).to.eql(expectedWithILMKeys);
+
+        // Index template with Index Mode
+        const templateWithIndexMode = allTemplates.templates.find(
+          (template: TemplateDeserialized) => template.name === indexTemplateWithIndexMode.name
+        );
+
+        expect(templateWithIndexMode).to.be.ok();
+
+        const expectedWithIndexModeKeys = [
+          'name',
+          'indexPatterns',
+          'indexMode',
+          'hasSettings',
+          'hasAliases',
+          'hasMappings',
+          'priority',
+          'composedOf',
+          'ignoreMissingComponentTemplates',
+          'version',
+          '_kbnMeta',
+          'allowAutoCreate',
+        ].sort();
+
+        expect(Object.keys(templateWithIndexMode).sort()).to.eql(expectedWithIndexModeKeys);
       });
     });
 
@@ -196,7 +225,6 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
-          'indexMode',
           'template',
           'composedOf',
           'ignoreMissingComponentTemplates',
@@ -220,7 +248,6 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
-          'indexMode',
           'template',
           'order',
           'version',
@@ -234,6 +261,82 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.name).to.equal(templateName);
         expect(Object.keys(body).sort()).to.eql(expectedKeys);
         expect(Object.keys(body.template).sort()).to.eql(expectedTemplateKeys);
+      });
+
+      describe('with index mode', () => {
+        const indexModeTemplateName = `template-${getRandomString()}`;
+
+        it('should return an index template with the expected parameters', async () => {
+          const template = getTemplatePayload(indexModeTemplateName, [getRandomString()]);
+          const templateWithIndexMode = {
+            ...template,
+            // For composable templates, only the top-level indexMode is needed.
+            // During serialization, serializeTemplate() will automatically set template.settings.index.mode from this value.
+            indexMode: IndexMode.standard,
+          };
+
+          await createTemplate(templateWithIndexMode).expect(200);
+
+          const { body } = await getOneTemplate(indexModeTemplateName).expect(200);
+          const expectedKeys = [
+            'name',
+            'indexPatterns',
+            'indexMode',
+            'template',
+            'composedOf',
+            'ignoreMissingComponentTemplates',
+            'priority',
+            'version',
+            '_kbnMeta',
+            'allowAutoCreate',
+          ].sort();
+          const expectedTemplateKeys = ['aliases', 'mappings', 'settings'].sort();
+
+          expect(body.name).to.equal(indexModeTemplateName);
+          expect(Object.keys(body).sort()).to.eql(expectedKeys);
+          expect(Object.keys(body.template).sort()).to.eql(expectedTemplateKeys);
+        });
+
+        it('should return a legacy index template with the expected parameters', async () => {
+          const legacyTemplate = getTemplatePayload(
+            indexModeTemplateName,
+            [getRandomString()],
+            true
+          );
+          const legacyTemplateWithIndexMode = {
+            ...legacyTemplate,
+            template: {
+              ...legacyTemplate.template,
+              settings: {
+                ...legacyTemplate.template?.settings,
+                index: {
+                  mode: IndexMode.standard,
+                },
+              },
+            },
+          };
+
+          await createTemplate(legacyTemplateWithIndexMode).expect(200);
+
+          const { body } = await getOneTemplate(indexModeTemplateName, true).expect(200);
+          const expectedKeys = [
+            'name',
+            'indexPatterns',
+            'indexMode',
+            'template',
+            'order',
+            'version',
+            '_kbnMeta',
+            'allowAutoCreate',
+            'composedOf',
+            'ignoreMissingComponentTemplates',
+          ].sort();
+          const expectedTemplateKeys = ['aliases', 'mappings', 'settings'].sort();
+
+          expect(body.name).to.equal(indexModeTemplateName);
+          expect(Object.keys(body).sort()).to.eql(expectedKeys);
+          expect(Object.keys(body.template).sort()).to.eql(expectedTemplateKeys);
+        });
       });
 
       describe('with logs-*-* index pattern', () => {
@@ -250,17 +353,19 @@ export default function ({ getService }: FtrProviderContext) {
         const logsdbSettings: Array<{
           enabled: boolean | null;
           prior_logs_usage: boolean;
-          indexMode: string;
+          indexMode?: string;
         }> = [
           { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
-          { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
-          // In stateful Kibana, when cluster.logsb.enabled setting is not set, the index mode is always standard
+          // If the the cluster.logsdb.enabled setting is false, and the settings.index.mode is not set, index mode is undefined
+          { enabled: false, prior_logs_usage: true, indexMode: undefined },
+          // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so index mode is undefined
+          { enabled: null, prior_logs_usage: true, indexMode: undefined },
           // For versions 9.0+, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
-          { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
+          // Otherwise, index mode is undefined
           {
             enabled: null,
             prior_logs_usage: false,
-            indexMode: esVersion.matchRange('>=9.0.0') ? 'logsdb' : 'standard',
+            indexMode: esVersion.matchRange('>=9.0.0') ? 'logsdb' : undefined,
           },
         ];
 

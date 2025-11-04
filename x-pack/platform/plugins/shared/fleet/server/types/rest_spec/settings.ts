@@ -32,9 +32,18 @@ export const PutSettingsRequestSchema = {
             return 'Protocol and path must be the same for each URL';
           }
         },
+        meta: {
+          deprecated: true,
+        },
       })
     ),
-    kibana_ca_sha256: schema.maybe(schema.string()),
+    kibana_ca_sha256: schema.maybe(
+      schema.string({
+        meta: {
+          deprecated: true,
+        },
+      })
+    ),
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
     delete_unenrolled_agents: schema.maybe(
       schema.object({
