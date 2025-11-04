@@ -15,7 +15,7 @@ import { isToolCallStep } from '@kbn/onechat-common';
 
 import type { Conversation } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import produce from 'immer';
 import { useEffect, useRef } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
