@@ -881,6 +881,7 @@
     "@kbn/saved-object-export-transforms-plugin": "link:src/platform/test/plugin_functional/plugins/saved_object_export_transforms",
     "@kbn/saved-object-import-warnings-plugin": "link:src/platform/test/plugin_functional/plugins/saved_object_import_warnings",
     "@kbn/saved-object-test-plugin": "link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin",
+    "@kbn/saved-objects-example-plugin": "link:examples/saved_objects",
     "@kbn/saved-objects-finder-plugin": "link:src/platform/plugins/shared/saved_objects_finder",
     "@kbn/saved-objects-hidden-from-http-apis-type-plugin": "link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type",
     "@kbn/saved-objects-hidden-type-plugin": "link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_type",
