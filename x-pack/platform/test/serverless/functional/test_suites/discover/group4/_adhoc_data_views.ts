@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const find = getService('find');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -40,8 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.waitForRenderComplete();
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/237951
-  describe.skip('adhoc data views', function () {
+  describe('adhoc data views', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(
@@ -86,7 +86,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await dataViews.getSelectedName()).to.be('logstash*');
+      await retry.try(async () => {
+        const overlayMasks = await find.allByCssSelector('.euiOverlayMask', 1000).catch(() => []);
+        if (overlayMasks.length > 0) throw new Error('Overlay mask still present');
+      });
+
+      await retry.try(async () => {
+        expect(await dataViews.getSelectedName()).to.be('logstash*');
+      });
 
       // navigate to single doc view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -98,7 +105,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await dataViews.getSelectedName()).to.be('logstash*');
+      await retry.try(async () => {
+        const overlayMasks = await find.allByCssSelector('.euiOverlayMask', 1000).catch(() => []);
+        if (overlayMasks.length > 0) throw new Error('Overlay mask still present');
+      });
+
+      await retry.try(async () => {
+        expect(await dataViews.getSelectedName()).to.be('logstash*');
+      });
     });
 
     it('should support query and filtering', async () => {
