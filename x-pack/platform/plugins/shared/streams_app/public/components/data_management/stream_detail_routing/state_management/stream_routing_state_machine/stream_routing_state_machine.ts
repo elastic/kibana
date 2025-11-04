@@ -9,7 +9,7 @@ import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate5
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
-import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
   StreamRoutingContext,
@@ -128,12 +128,19 @@ export const streamRoutingMachine = setup({
     canForkStream: and(['hasManagePrivileges', 'isValidRouting']),
     canReorderRules: and(['hasManagePrivileges', 'hasMultipleRoutingRules']),
     canUpdateStream: and(['hasManagePrivileges', 'isValidRouting']),
+    canSaveSuggestion: and(['hasManagePrivileges', 'isValidEditedSuggestion']),
     hasMultipleRoutingRules: ({ context }) => context.routing.length > 1,
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
     isAlreadyEditing: ({ context }, params: { id: string }) => context.currentRuleId === params.id,
     isValidRouting: ({ context }) =>
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
+    isValidEditedSuggestion: ({ context }) => {
+      if (!context.editedSuggestion) return false;
+      const { name, condition } = context.editedSuggestion;
+      if (!name || name.trim() === '') return false;
+      return isSchema(conditionSchema, condition);
+    },
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGVNkwBDAWwDo9sdSAbbALzygGIBtABgF1FQADqli1sqXPxAAPRAFYATABoQAT0TyuANk2UuATlld9hzQGZNAdgC+V5WiysiJCpWcQVbWMTJUSAYzBsADdIbj4kECERHHFJGQQARllzSj0EgA5tZPSuC1N0i2U1BHMLABZKWU10hU0y-IT5cxs7DBx8Jx9XMnc2e3bCCgF6OEpYMEwAEVQ-dHIwXEwAWVJMPwALADFsekwwZDDJKNFYiPiEsrLZVLqasvT8h9MlVURTC009SnT6pvT-ixpBItED9RzeFxuDywdBQGBeMS4SgCEhBbBgADuhwixxiEjOiASeh0ZVyslkaT0XCeZUKrwQGnkFkoFnJ8k0sgsCS48gMmhBYI6EN8PQ8gqgACV0CNumjMQRYfC9hBsYJhCd8aBzsTKKTWRSidTTKZaUV1Jp2al6oDTFx8rl0gK2uDnCLSL0YXC4HjKJBaKrIuq8XFCTq9eTKUaTXTis8tJRPgorgZzPUnQ4ha7uu6VNQICM+s78FKZX5nHsA7jESHEpYdBYtEDOfIKWbEtyvrSLLzZJcElyyumBp1IaK8wXxSWwL6IP7eEcg9WCQz4+GDVSaTG5FwEqlZOkNJ9SeyLUOXV0oeOwIWM5LpdOSKhkBB9pXF6ctYgytUE5od1d5DKBJ+1kNteX+XQyl5fsCnkJIz0zC8xzLMgBgAOUxKdKA2Uh8FYG8BiwvxcICeg32iJdPwZTldz-eRMhqdkDVA+kLm-XRynZKkG0+TRgVsUEi0IYVs3cbDy1YDCMSI9ZcKgfDJ3vbDZPwMByI1Gt+2AllG2A5tW1Y2pUhqBJTGST5+z0awBPFEc3TElDVkkzClJwvD8AI1gsL9TB1ODZdD11Ml1yjU1WP+a4+IsB5qT0NJTxsoS7NE3NHPQlzSxU+SPMUmUADMnwAaz8yjpFDDRUmeJlzBqUwklMNsEiPFk9EAuq4IeUz+US29ksvNLnOkpSCuQQr8IgcRpzwIJUEK6cRsKuyAEE-EwJ8So-MrqK5BMeQY2pmMavj0iC5I0kBXJ2UdHrhxE-qJPwKSsIW-D9jQZBkXoVYRqoBbltW9b5xxd9NS2jQLl0LhZCSVrWQKBrWLoyoMis-JSSg7rWl6u6xx8rzXKyhShKI8s1KBtUKM284qsoEDyjq+p93ZRqyji2mtGAg8ufkFsEOErNLzx4sCbkonbyIkiwDI8nA0p0HqZ52nWXpi4zIPTQ2zqa5jDqECLiMeQ+b63HZ0IkX3PYXLpzcmANvl9QakoE0zHSNImTgrlGvyUwnaaxouueKp+Kx26BZN0Rhcy0WcuJpSfLtzTjXkJXOXqVWmY1+kPh0PQaihxoN0xwTsbDnMZwju8o4tzzI+neOEnCCmNICoCgv1SNN0a+iTq4ICW37Ulc9do2cbLoXK+twmY-FpSSHIVAQgT5dORO6He-Alte70BHikaJkWRNd51YKP9TBH0uxPHmTo8t2OZVgUhF5lqsqbkaLkfX3PN9ZnfCXML4nj5AMK7d4tJz5ITHqbfGMo54L2gdeCauApq4BmnNSgL4Rh7H+mtA4z8QaJyginFWjN1ZtkyMnFscUNBpHaqycBo5IEVywrAtEtc2BvSfJ9b6T4qAYImGAbBgNG6y2blRLkq8oIGGJByA8ZRGoZC4KkfQrVobmChqzeh9lcxXyUugAQEAnJsMQcg1B049HjGQJgQRuDhEv3tokMyyc6ZpxIczekBgKjJCqsBDIyReyaJSuXM2Mo9EGOCdeDhH1hjcOQFQcx+wrHChWjgpeYj+yUDgrSbecVWochYrvJkzIqhGBAQ8Yk1kQ7ngYWJR8z59jwNgN0J8L5kBi3CU0upNiFxyxrIYH22h-xJmAqyMCxodBMjrBoKG5hyQBMvLUlpDSOmLOnu04iuBSKpK2vrHQvZ6i0h5tSS4egwLu10HBVGFoKRzLHAs+ptdGl3Naas+BYxH5k1sfg5cDZk7Q32eULx28wKGGZL8BsmQoJ9huWXJ5SzQmGP5j4NgxjqAoNmmYgQFjEmumSUI7pojtmkl2ZcaMhyfiszAkBZkeRMhmX-FZPQ0KalgGafciejT4WhyRZErhmAfqUHiZY6xWz4g5F3PuY0udcgciZCc+kgEki0wpKSH47w7TNBulUrRsp0QYgVF6LwkBmFgDlBiNpryFoisQGYH2toNAWEBFcbk3YwKZEUWZLJTM4rklkEy3MqJdX6qVEa2eJrdXmtrthSW0tPk9OXI0B4qRuyWCZLS0h8qLQVD0NaBQ9FiT7j9Tq+UipvQhvykVcak1UWmMoH9JJAMunAzjVRBNPsrLsm7NFF2bjiiFMUQMoC0r0imUHJqxC1T-VhuLQa5Uz0K0eR5dEvlPDa1FWFXg5tW1k1O3KLnaoGhaR1DAh8Huw6MhciMICUyhbx5BtLRAbyUCPKeiVIiZSckwBoQoB8-F-kqJARJEyO0PNLhVFZnI+kh8dD-A6lBQwBoz5jsRROoJjgS2GofXHJ97AX3ejfTbMAABhcQUDxBWoQMeWmacahmHJA6iDsYTS0VyLSBR1Je43uw3ejDj6K41wnu+1S5H6g6CJAaV2w68gGVjIBHQSc6IwXMr6pDxtGHDnQ7OrDfGrZRo2VLcjDYKi0lMK1UyO53gtjbMaK4lQ-wWlZIBYdDxOMV245pmU49PAabfQ-EIbnEQGd7rqPIpnbSmW7Pkt44HdBaw+LnC4XIbACVwKgF88AIi2WFL+0q8QAC0mdij5YCTQOgjAWD4Gy6-CjLxijDqdjzVqTqqg8zyH6yr9iLjXDXB3azW4SiK2HYBXIPIrImELdgfMYB2s1notDFkUzqiXRBX1+1PcoJQy5ESFGo7Knju1QNR6GUptNoJecbQPseJNgi3KgpKQaNJGqNyV2cFC0HagE9c22UoDTfjayftdori90cVUSLtZ96UJ+NFFGlhXsPXe0d1do1WA-aojzRW0UHW9ipIe3IR0mpOwPFyBQ9G0gufCSj7Z2824RkNJ3ViPJFEfCSJkC4Fl2Rk9eTbZHJ2-1bWeBUQC9E9IyMAn1i4iaKRaGzqSKo7wOeRpYfAin8Rs27mioYKyTqk5i62+zRoFIqp2flwJzlSuec5cQKrlkedNeqOeGL40Psplxj-HcIumWL6TtZc89lyuvzkl-IMhVIFTk8lpoBaG-cdzXpU6PZl3ulmwoq+bqr2RaZNT2dSaGoO2q7NUf2eiHbEO7eQ9qpP7KBX6IRXZP3iQeSieSA2JIs2UyUt5Oc20XJ6Lq+c7Hz3Ra9UabLcdpuvP4hXEin+TrweRkZpyCyfcT3njPCpMX4uXKUMBuncGzDMCp1muT6Pi3CA+mB+n0BEP8roqdjyJvDQMVt6Fq34Pmdw-EdjUPyIsfluzJKvbk1CfOCY9OrbNQwdeEdAwY3NzYfWvD1KjOqGjMyTkcoKzYCJxMVAwNeHIHbdfLVQJW9IfXfOubDWve4fpfsQEfcYnJIb8KzRvJVaocpIwd4RlJLIAA */
@@ -575,6 +582,7 @@ export const streamRoutingMachine = setup({
                   ],
                 },
                 'suggestion.saveSuggestion': {
+                  guard: 'canSaveSuggestion',
                   target: '#ready.idle',
                   actions: [
                     { type: 'clearEditingSuggestion' },

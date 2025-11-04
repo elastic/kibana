@@ -33,6 +33,7 @@ import { ConditionPanel, VerticalRule } from '../../shared';
 import { StreamNameFormRow } from '../stream_name_form_row';
 import { RoutingConditionEditor } from '../routing_condition_editor';
 import { processCondition } from '../utils';
+import { EditSuggestedRuleControls } from '../control_bars';
 
 export function SuggestedStreamPanel({
   definition,
@@ -52,13 +53,8 @@ export function SuggestedStreamPanel({
   onSave?: () => void;
 }) {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const {
-    changeSuggestionName,
-    changeSuggestionCondition,
-    reviewSuggestedRule,
-    cancelChanges,
-    saveEditedSuggestion,
-  } = useStreamRoutingEvents();
+  const { changeSuggestionName, changeSuggestionCondition, reviewSuggestedRule } =
+    useStreamRoutingEvents();
 
   const [nameError, setNameError] = React.useState<string | undefined>(undefined);
   const [conditionError, setConditionError] = React.useState<string | undefined>(undefined);
@@ -132,61 +128,12 @@ export function SuggestedStreamPanel({
             onStatusChange={() => {}}
             isSuggestionRouting={true}
           />
-          <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={cancelChanges}
-                aria-label={i18n.translate('xpack.streams.streamDetailRouting.cancel', {
-                  defaultMessage: 'Cancel',
-                })}
-              >
-                {i18n.translate('xpack.streams.streamDetailRouting.cancel', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="m" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    isDisabled={!!nameError || !!conditionError}
-                    onClick={() => {
-                      if (onSave) {
-                        onSave();
-                      }
-                      saveEditedSuggestion();
-                    }}
-                  >
-                    {i18n.translate('xpack.streams.streamDetailRouting.update', {
-                      defaultMessage: 'Update',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    isDisabled={!!nameError || !!conditionError}
-                    onClick={() => {
-                      if (isEditing && onSave) {
-                        onSave();
-                      }
-                      reviewSuggestedRule(currentSuggestion.name || partition.name);
-                    }}
-                    fill
-                  >
-                    {i18n.translate(
-                      'xpack.streams.streamDetailRouting.suggestedStreamPanel.accept',
-                      {
-                        defaultMessage: 'Update & Accept',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EditSuggestedRuleControls
+            onSave={onSave}
+            onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
+            nameError={nameError}
+            conditionError={conditionError}
+          />
         </EuiFlexGroup>
       </SelectablePanel>
     );
