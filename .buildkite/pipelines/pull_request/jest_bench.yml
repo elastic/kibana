@@ -1,11 +1,11 @@
 steps:
   - command: .buildkite/scripts/steps/jest_bench.sh
-    label: 'Jest Bench'
+    label: 'Jest Bench 8'
     agents:
       machineType: n2-standard-8
       diskSizeGb: 100
-    key: jest_bench
-    timeout_in_minutes: 60
+    key: jest_bench8
+    timeout_in_minutes: 75
     soft_fail: true
     depends_on:
       - build
@@ -15,3 +15,33 @@ steps:
       # - linting_with_types
       # - check_types
       # - check_oas_snapshot
+  - command: .buildkite/scripts/steps/jest_bench.sh
+    label: 'Jest Bench 16'
+    agents:
+      machineType: n2-standard-16
+      diskSizeGb: 100
+    key: jest_bench16
+    timeout_in_minutes: 75
+    soft_fail: true
+    depends_on:
+      - build
+  - command: .buildkite/scripts/steps/jest_bench.sh
+    label: 'Jest Bench 4'
+    agents:
+      machineType: n2-standard-4
+      diskSizeGb: 100
+    key: jest_bench4
+    timeout_in_minutes: 75
+    soft_fail: true
+    depends_on:
+      - build
+  - command: .buildkite/scripts/steps/jest_bench.sh
+    label: 'Jest Bench 32'
+    agents:
+      machineType: n2-standard-32
+      diskSizeGb: 100
+    key: jest_bench32
+    timeout_in_minutes: 75
+    soft_fail: true
+    depends_on:
+      - build
