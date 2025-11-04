@@ -22,7 +22,7 @@ const recoverableErrorCodes = [
 
 /**
  * Converts an error which occurred during the execution of the agent to our error format.
- * Also categories the error to identifiable error codes.
+ * Also categorizes the error to identifiable error codes.
  */
 export const convertError = (error: Error): OnechatAgentExecutionError => {
   if (isToolNotFoundError(error)) {

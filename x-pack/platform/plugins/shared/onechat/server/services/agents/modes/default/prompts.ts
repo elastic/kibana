@@ -154,8 +154,6 @@ export const getAnswerPrompt = ({
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
 
-  // TODO: format answer actions
-
   return [
     [
       'system',
