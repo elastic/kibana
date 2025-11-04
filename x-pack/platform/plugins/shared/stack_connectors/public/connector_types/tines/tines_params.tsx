@@ -287,6 +287,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           {showFallbackFrom === 'error' && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.WEBHOOK_URL_ERROR_FALLBACK_TITLE}
                 color="primary"
                 data-test-subj="tines-fallbackCallout"
@@ -299,6 +300,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           {(showFallbackFrom === 'Story' || showFallbackFrom === 'Webhook') && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.WEBHOOK_URL_FALLBACK_TITLE}
                 color="primary"
                 data-test-subj="tines-fallbackCallout"

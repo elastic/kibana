@@ -407,12 +407,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat(termTranslator('Percent'));
       await lens.editDimensionColor('#ff0000');
+      await lens.closeDimensionEditor();
+
       await lens.openVisualOptions();
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
 
       await lens.assertMissingValues(termTranslator('Linear'));
+
+      await lens.closeVisualOptionsPopover();
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -494,6 +498,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // enable value labels
       await lens.openTextOptions();
       await testSubjects.click('lns_valueLabels_inside');
+      await lens.closeTitlesAndTextOptionsPopover();
 
       // check for value labels
       let data = await lens.getCurrentChartDebugState('xyVisChart');
