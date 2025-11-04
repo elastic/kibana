@@ -285,6 +285,9 @@ spaceTest.describe.serial(
         // Open assistant again - should show last conversation
         await pageObjects.assistantPage.open();
         await pageObjects.assistantPage.expectConversationTitleContains('New Rule Test');
+
+        // Close assistant before test ends to ensure clean state for afterEach cleanup
+        await pageObjects.assistantPage.close();
       }
     );
 

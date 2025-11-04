@@ -347,6 +347,7 @@ export class AssistantPage {
    * Requires being on a page with the rule chat icon
    */
   async openFromRule() {
+    await this.dismissOnboardingTour();
     await this.chatIcon.waitFor({ state: 'visible' });
     await this.chatIcon.click();
     await this.waitForAssistantLoaded();
@@ -367,6 +368,19 @@ export class AssistantPage {
    */
   async close() {
     await this.closeFlyoutButton.click();
+  }
+
+  /**
+   * Dismisses the onboarding tour modal if present
+   * This modal may appear for first-time users and can block interactions
+   */
+  async dismissOnboardingTour() {
+    await this.page
+      .getByRole('button', { name: 'Close tour' })
+      .click({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
+      .catch(() => {
+        // Modal not present, continue silently
+      });
   }
 
   // ========================================
