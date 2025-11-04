@@ -26,7 +26,7 @@ import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
   transformMaintenanceWindowToMaintenanceWindowAttributes,
 } from '../application/transforms';
-import { MaintenanceWindowsPluginsStart } from '../plugin';
+import { MaintenanceWindowsPluginsStart } from '../types';
 import { getMaintenanceWindowStatus } from '../application/lib/get_maintenance_window_status';
 import { generateMaintenanceWindowEvents as generateMaintenanceWindowEventsViaRRule } from '../application/lib/generate_maintenance_window_events';
 

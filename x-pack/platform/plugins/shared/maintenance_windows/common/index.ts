@@ -15,7 +15,7 @@ export type {
   MaintenanceWindowClientContext,
   MaintenanceWindowDeepLinkIds,
   ScopedQueryAttributes,
-} from './constants';
+} from '../../maintenance_windows/common/constants';
 
 export {
   MaintenanceWindowStatus,
@@ -29,7 +29,7 @@ export {
   MAINTENANCE_WINDOW_DATE_FORMAT,
   MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
-} from './constants';
+} from '../../maintenance_windows/common/constants';
 
 export {
   getScopedQueryErrorMessage,
@@ -52,3 +52,6 @@ export const GET_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PA
 export const UPDATE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
 export const DELETE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
 export const FIND_MAINTENANCE_WINDOWS_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/_find`;
+
+// export const PLUGIN_ID = 'maintenanceWindows';
+// export const PLUGIN_NAME = 'maintenanceWindows';

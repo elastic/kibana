@@ -24,7 +24,8 @@
       "management",
       "esUiShared",
       "unifiedSearch",
-      "embeddable"
+      "embeddable",
+      "maintenanceWindows"
     ],
     "optionalPlugins": [
       "usageCollection",

@@ -165,15 +165,6 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
-    name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'multiple-isolated',
-    mappings: maintenanceWindowMappings,
-    modelVersions: maintenanceWindowModelVersions,
-  });
-
-  savedObjects.registerType({
     name: AD_HOC_RUN_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,

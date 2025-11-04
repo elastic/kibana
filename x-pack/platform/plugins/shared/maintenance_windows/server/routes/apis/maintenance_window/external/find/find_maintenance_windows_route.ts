@@ -19,7 +19,7 @@ import type { FindMaintenanceWindowsQueryV1 } from '../../../../schemas/maintena
 import {
   findMaintenanceWindowsQuerySchemaV1,
   findMaintenanceWindowsResponseSchemaV1,
-} from '../../../../schemas/maintenance_window/external/request//find';
+} from '../../../../schemas/maintenance_window/external/request/find';
 import {
   transformFindMaintenanceWindowParamsV1,
   transformFindMaintenanceWindowResponseV1,

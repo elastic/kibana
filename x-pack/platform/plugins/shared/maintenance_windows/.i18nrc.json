@@ -1,0 +1,7 @@
+{
+  "prefix": "maintenanceWindows",
+  "paths": {
+    "maintenanceWindows": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

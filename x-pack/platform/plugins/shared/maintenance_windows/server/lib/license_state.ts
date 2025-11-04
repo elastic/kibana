@@ -14,16 +14,6 @@ import type { Observable, Subscription } from 'rxjs';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { PLUGIN } from '../../common/constants/plugin';
-import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
-import type {
-  RuleType,
-  RuleTypeParams,
-  RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  RuleAlertData,
-} from '../types';
-import { RuleTypeDisabledError } from './errors/rule_type_disabled';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
@@ -63,47 +53,6 @@ export class LicenseState {
 
     const { isEnabled } = this.license.getFeature('security');
     return isEnabled;
-  }
-
-  public setNotifyUsage(notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']) {
-    this._notifyUsage = notifyUsage;
-  }
-
-  public getLicenseCheckForRuleType(
-    ruleTypeId: string,
-    ruleTypeName: string,
-    minimumLicenseRequired: LicenseType,
-    { notifyUsage }: { notifyUsage: boolean } = { notifyUsage: false }
-  ): { isValid: true } | { isValid: false; reason: 'unavailable' | 'expired' | 'invalid' } {
-    if (notifyUsage) {
-      this.notifyUsage(ruleTypeName, minimumLicenseRequired);
-    }
-
-    if (!this.license?.isAvailable) {
-      return { isValid: false, reason: 'unavailable' };
-    }
-
-    const check = this.license.check(ruleTypeId, minimumLicenseRequired);
-
-    switch (check.state) {
-      case 'expired':
-        return { isValid: false, reason: 'expired' };
-      case 'invalid':
-        return { isValid: false, reason: 'invalid' };
-      case 'unavailable':
-        return { isValid: false, reason: 'unavailable' };
-      case 'valid':
-        return { isValid: true };
-      default:
-        return assertNever(check.state);
-    }
-  }
-
-  private notifyUsage(ruleTypeName: string, minimumLicenseRequired: LicenseType) {
-    // No need to notify usage on basic alert types
-    if (this._notifyUsage && minimumLicenseRequired !== 'basic') {
-      this._notifyUsage(getRuleTypeFeatureUsageName(ruleTypeName));
-    }
   }
 
   public checkLicense(license: ILicense | undefined): AlertingLicenseInformation {
@@ -170,76 +119,6 @@ export class LicenseState {
           }
         )
       );
-    }
-  }
-
-  public ensureLicenseForRuleType<
-    Params extends RuleTypeParams,
-    ExtractedParams extends RuleTypeParams,
-    State extends RuleTypeState,
-    InstanceState extends AlertInstanceState,
-    InstanceContext extends AlertInstanceContext,
-    ActionGroupIds extends string,
-    RecoveryActionGroupId extends string,
-    AlertData extends RuleAlertData
-  >(
-    ruleType: RuleType<
-      Params,
-      ExtractedParams,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
-    >
-  ) {
-    this.notifyUsage(ruleType.name, ruleType.minimumLicenseRequired);
-
-    const check = this.getLicenseCheckForRuleType(
-      ruleType.id,
-      ruleType.name,
-      ruleType.minimumLicenseRequired
-    );
-
-    if (check.isValid) {
-      return;
-    }
-    switch (check.reason) {
-      case 'unavailable':
-        throw new RuleTypeDisabledError(
-          i18n.translate('xpack.alerting.serverSideErrors.unavailableLicenseErrorMessage', {
-            defaultMessage:
-              'Rule type {ruleTypeId} is disabled because license information is not available at this time.',
-            values: {
-              ruleTypeId: ruleType.id,
-            },
-          }),
-          'license_unavailable'
-        );
-      case 'expired':
-        throw new RuleTypeDisabledError(
-          i18n.translate('xpack.alerting.serverSideErrors.expirerdLicenseErrorMessage', {
-            defaultMessage:
-              'Rule type {ruleTypeId} is disabled because your {licenseType} license has expired.',
-            values: { ruleTypeId: ruleType.id, licenseType: this.license!.type },
-          }),
-          'license_expired'
-        );
-      case 'invalid':
-        throw new RuleTypeDisabledError(
-          i18n.translate('xpack.alerting.serverSideErrors.invalidLicenseErrorMessage', {
-            defaultMessage:
-              'Rule {ruleTypeId} is disabled because it requires a {licenseType} license. Go to License Management to view upgrade options.',
-            values: {
-              ruleTypeId: ruleType.id,
-              licenseType: capitalize(ruleType.minimumLicenseRequired),
-            },
-          }),
-          'license_invalid'
-        );
-      default:
-        assertNever(check.reason);
     }
   }
 }

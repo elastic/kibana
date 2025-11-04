@@ -12,9 +12,15 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    }
+    "@kbn/actions-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/i18n",
+    "@kbn/core-saved-objects-server",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

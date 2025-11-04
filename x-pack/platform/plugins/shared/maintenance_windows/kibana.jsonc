@@ -10,8 +10,26 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "maintenance_windows"],
-    "requiredPlugins": [],
-    "optionalPlugins": [],
-    "extraPublicDirs": ["common"]
+    "requiredPlugins": [
+      "share",
+      "encryptedSavedObjects",
+      "eventLog",
+      "features",
+      "kibanaUtils",
+      "licensing",
+      "taskManager",
+      "kibanaReact",
+      "management",
+      "esUiShared",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "security",
+      "monitoringCollection",
+      "spaces",
+      "serverless"
+    ],
+    "extraPublicDirs": ["common", "common/parse_duration"]
   }
 }
