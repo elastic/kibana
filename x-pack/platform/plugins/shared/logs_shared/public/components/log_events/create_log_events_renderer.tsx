@@ -58,7 +58,9 @@ export const createLogEventsRenderer =
       }
 
       try {
-        const esQuery = toElasticsearchQuery(fromKueryExpression(nonHighlightingQuery.query as string));
+        const esQuery = toElasticsearchQuery(
+          fromKueryExpression(nonHighlightingQuery.query as string)
+        );
         const filter = buildCustomFilter(
           index,
           esQuery,
