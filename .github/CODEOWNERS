@@ -32,6 +32,7 @@ examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 examples/response_stream @elastic/ml-ui
 examples/routing_example @elastic/kibana-core
+examples/saved_objects @elastic/kibana-core
 examples/screenshot_mode_example @elastic/response-ops
 examples/search_examples @elastic/kibana-data-discovery
 examples/share_examples @elastic/appex-sharedux
@@ -359,6 +360,7 @@ src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-visualizations
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
+src/platform/packages/private/kbn-migrator-test-kit @elastic/kibana-core
 src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
 src/platform/packages/private/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-operations
@@ -460,6 +462,7 @@ src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
 src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
+src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-core-server-benchmarks @elastic/kibana-core
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
