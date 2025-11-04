@@ -76,19 +76,9 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables Protection Updates tab in the Endpoint Policy Details page
-   */
-  protectionUpdatesEnabled: true,
-
-  /**
    * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables the new modal for the value list items
-   */
-  valueListItemsModalEnabled: true,
 
   /**
    * Enables the storing of gaps in the event log

@@ -166,7 +166,11 @@ export class UnifiedTabsPageObject extends FtrService {
     const labelElement = await this.find.byCssSelector(
       '[data-test-subj^="unifiedTabs_editTabLabelInput_"]'
     );
-    await labelElement.clearValue();
+    await labelElement.clearValueWithKeyboard();
+    await this.retry.waitFor('the tab label input to be empty', async () => {
+      const value = await labelElement.getAttribute('value');
+      return value === '';
+    });
     await labelElement.type(newLabel, { charByChar: true });
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.retry.waitFor('the tab label to change', async () => {
