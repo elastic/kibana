@@ -226,6 +226,8 @@
       "@kbn/config-mocks/*": ["src/platform/packages/private/kbn-config-mocks/*"],
       "@kbn/config-schema": ["src/platform/packages/shared/kbn-config-schema"],
       "@kbn/config-schema/*": ["src/platform/packages/shared/kbn-config-schema/*"],
+      "@kbn/connector-schemas": ["src/platform/packages/shared/kbn-connector-schemas"],
+      "@kbn/connector-schemas/*": ["src/platform/packages/shared/kbn-connector-schemas/*"],
       "@kbn/console-plugin": ["src/platform/plugins/shared/console"],
       "@kbn/console-plugin/*": ["src/platform/plugins/shared/console/*"],
       "@kbn/content-connectors-plugin": ["x-pack/platform/plugins/shared/content_connectors"],
