@@ -25,6 +25,9 @@ function shouldUseMaskImage(connectorType: string): boolean {
     case 'wait':
     case 'inference':
     case 'email':
+    // connector icons, which are monochrome and should be colored with currentColor
+    case 'gen-ai':
+    case 'bedrock':
       return true;
     default:
       return false;
@@ -37,9 +40,7 @@ export const getStepIconCssProperties = async (connectorType: string): Promise<s
     if (svgString) {
       const isInlineSvg = svgString.startsWith('<svg');
       return `mask-image: url(${
-        isInlineSvg
-          ? `data:image/svg+xml,${encodeURIComponent(svgString)}`
-          : `${encodeURIComponent(svgString)}`
+        isInlineSvg ? `data:image/svg+xml,${encodeURIComponent(svgString)}` : `${svgString}`
       });
               mask-size: contain;
               background-color: currentColor;`;
