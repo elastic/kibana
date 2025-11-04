@@ -19,14 +19,16 @@ export const columnsAfter = async (
   query: string,
   additionalFields: IAdditionalFields
 ) => {
-  // Process each source/subquery: FROM index1, (FROM index2 | KEEP a), index3
-  const promises = command.args.map((arg) => {
-    if (isSubQuery(arg)) {
-      return processSubquery(arg.child, query, additionalFields);
-    } else {
-      return additionalFields.fromFrom({ ...command, args: [arg] });
-    }
-  });
+  const options = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'option');
+  const sources = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'source');
+  const subqueries = command.args.filter(isSubQuery);
+
+  const promises = [
+    ...sources.map((source) =>
+      additionalFields.fromFrom({ ...command, args: [source, ...options] })
+    ),
+    ...subqueries.map((subquery) => processSubquery(subquery.child, query, additionalFields)),
+  ];
 
   const results = await Promise.all(promises);
   const allColumns = results.flat();

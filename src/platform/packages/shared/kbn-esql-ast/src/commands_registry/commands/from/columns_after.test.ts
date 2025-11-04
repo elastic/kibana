@@ -158,4 +158,37 @@ describe('FROM columnsAfter', () => {
     expect(fieldNames).not.toContain('other5');
     expect(fieldNames).not.toContain('timestamp');
   });
+
+  it('passes METADATA options to fromFrom when processing sources', async () => {
+    const command = synth.cmd`FROM index1 METADATA _id, _index`;
+
+    const result = await columnsAfter(command, [], '', {
+      fromFrom: (cmd) => {
+        const sources = cmd.args.filter((arg) => !Array.isArray(arg) && arg.type === 'source');
+        const options = cmd.args.filter((arg) => !Array.isArray(arg) && arg.type === 'option');
+
+        expect(sources).toHaveLength(1);
+        expect(options.length).toBeGreaterThan(0);
+
+        const hasMetadataOption = options.some(
+          (opt) => !Array.isArray(opt) && opt.name === 'metadata'
+        );
+        expect(hasMetadataOption).toBe(true);
+
+        return Promise.resolve([
+          { name: 'field1', type: 'keyword', userDefined: false },
+          { name: '_id', type: 'keyword', userDefined: false },
+          { name: '_index', type: 'keyword', userDefined: false },
+        ]);
+      },
+      fromJoin: () => Promise.resolve([]),
+      fromEnrich: () => Promise.resolve([]),
+    });
+
+    const fieldNames = result.map(({ name }) => name);
+
+    expect(fieldNames).toContain('field1');
+    expect(fieldNames).toContain('_id');
+    expect(fieldNames).toContain('_index');
+  });
 });
