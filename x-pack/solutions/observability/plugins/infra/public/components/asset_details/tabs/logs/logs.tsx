@@ -97,46 +97,53 @@ export const Logs = () => {
     }
   }, [textQueryDebounced]);
 
-  const savedSearchFilters = useMemo<Filter[]>(() => {
+  // User search filters - WILL be highlighted
+  const documentFilters = useMemo<Filter[]>(() => {
     // Exit early if no log sources
     if (!logSources.value) {
       return [];
     }
 
-    const filters: Filter[] = [];
-
-    // Add entity context filter (skip highlighting)
-    if (entityContextFilter.length > 0) {
-      filters.push(
-        buildCustomFilter(
-          logSources.value,
-          entityContextFilter[0],
-          false,
-          false,
-          'Entity Context',
-          FilterStateStore.APP_STATE,
-          true
-        )
-      );
-    }
-
     // Add user search filter (enable highlighting)
     if (userSearchFilter.length > 0) {
-      filters.push(
+      return [
         buildCustomFilter(
           logSources.value,
           userSearchFilter[0],
           false,
           false,
           'User Search',
-          FilterStateStore.APP_STATE,
-          false
-        )
-      );
+          FilterStateStore.APP_STATE
+        ),
+      ];
     }
 
-    return filters;
-  }, [entityContextFilter, userSearchFilter, logSources.value]);
+    return [];
+  }, [userSearchFilter, logSources.value]);
+
+  // Entity context filters - WON'T be highlighted
+  const nonHighlightingFilters = useMemo<Filter[]>(() => {
+    // Exit early if no log sources
+    if (!logSources.value) {
+      return [];
+    }
+
+    // Add entity context filter (skip highlighting)
+    if (entityContextFilter.length > 0) {
+      return [
+        buildCustomFilter(
+          logSources.value,
+          entityContextFilter[0],
+          false,
+          false,
+          'Entity Context',
+          FilterStateStore.APP_STATE
+        ),
+      ];
+    }
+
+    return [];
+  }, [entityContextFilter, logSources.value]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -204,7 +211,8 @@ export const Logs = () => {
               dependencies={{ embeddable, searchSource, dataViews }}
               index={logSources.value}
               timeRange={dateRange}
-              filters={savedSearchFilters}
+              filters={documentFilters}
+              nonHighlightingFilters={nonHighlightingFilters}
               height="68vh"
               displayOptions={{
                 solutionNavIdOverride: 'oblt',

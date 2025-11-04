@@ -652,7 +652,7 @@ export class SearchSource {
           'nonHighlightingFilters',
           (typeof data.nonHighlightingFilters === 'function'
             ? data.nonHighlightingFilters()
-            : data.nonHighlightingFilters || []
+            : data.nonHighlightingFilters ?? []
           ).concat(val)
         );
       case 'query':

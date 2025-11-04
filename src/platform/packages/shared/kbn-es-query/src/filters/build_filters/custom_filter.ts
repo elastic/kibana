@@ -22,7 +22,6 @@ export type CustomFilter = Filter;
  * @param negate
  * @param alias
  * @param store
- * @param skipHighlight - When true, this filter will be excluded from highlight queries
  * @returns
  *
  * @public
@@ -33,8 +32,7 @@ export function buildCustomFilter(
   disabled: boolean,
   negate: boolean,
   alias: string | null,
-  store: FilterStateStore,
-  skipHighlight?: boolean
+  store: FilterStateStore
 ): Filter {
   const meta: FilterMeta = {
     index: indexPatternString,
@@ -42,7 +40,6 @@ export function buildCustomFilter(
     disabled,
     negate,
     alias,
-    skipHighlight,
   };
   const filter: Filter = { ...queryDsl, meta };
   filter.$state = { store };
