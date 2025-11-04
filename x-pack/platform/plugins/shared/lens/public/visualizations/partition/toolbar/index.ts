@@ -6,4 +6,3 @@
  */
 
 export { PieToolbar } from './toolbar';
-export { PartitionFlyoutToolbar } from './flyout_toolbar';
