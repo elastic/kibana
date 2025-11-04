@@ -12,8 +12,6 @@ import type {
   CreateIn,
   CreateResult,
   GetIn,
-  SearchIn,
-  SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
@@ -60,11 +58,3 @@ export type DashboardUpdateOut = CreateResult<
   TypeOf<typeof schema.dashboardMetaSchema>
 >;
 export type DashboardUpdateOptions = TypeOf<typeof schema.dashboardUpdateOptionsSchema>;
-
-export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
-export type DashboardSearchOptions = TypeOf<typeof schema.dashboardSearchOptionsSchema>;
-
-export type DashboardSearchAPIResult = SearchResult<
-  TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>
->;
-export type DashboardSearchOut = DashboardSearchAPIResult;

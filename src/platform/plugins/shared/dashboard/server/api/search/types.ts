@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerAPIRoutes } from './register_routes';
+import type { TypeOf } from '@kbn/config-schema';
+import type { searchRequestBody, searchResponseBody } from './schemas';
 
-export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
+export type DashboardSearchRequestBody = TypeOf<typeof searchRequestBody>;
+export type DashboardSearchResponseBody = TypeOf<typeof searchResponseBody>;

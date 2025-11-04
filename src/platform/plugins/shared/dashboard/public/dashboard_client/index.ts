@@ -11,8 +11,4 @@ export { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard
 export { dashboardClient } from './dashboard_client';
 export { findService } from './find_service';
 
-export type {
-  FindDashboardsByIdResponse,
-  FindDashboardsService,
-  SearchDashboardsResponse,
-} from './types';
+export type { FindDashboardsByIdResponse, FindDashboardsService } from './types';

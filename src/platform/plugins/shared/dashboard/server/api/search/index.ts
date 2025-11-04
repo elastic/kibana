@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerAPIRoutes } from './register_routes';
-
-export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
+export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './types';
+export { registerSearchRoute } from './register_search_route';

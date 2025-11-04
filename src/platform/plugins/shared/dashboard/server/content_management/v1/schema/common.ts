@@ -115,7 +115,7 @@ export const dashboardMetaSchema = schema.object({
   createdBy: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
   error: schema.maybe(apiError),
-  version: schema.string(),
+  version: schema.maybe(schema.string()),
 });
 
 export const optionsSchema = schema.object({
