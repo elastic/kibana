@@ -37,11 +37,14 @@ const getCaseTimestamp = (caseItem: any): number | null => {
 };
 
 const getAppRoute = (owner: string): string => {
+  // Match OWNER_INFO appRoute values (without /cases suffix)
+  // getCaseViewPath will append /cases automatically
   const ownerToRoute: Record<string, string> = {
-    securitySolution: '/app/security/cases',
-    observability: '/app/observability/cases',
+    securitySolution: '/app/security',
+    observability: '/app/observability',
+    cases: '/app/management/insightsAndAlerting',
   };
-  return ownerToRoute[owner] || '/app/management/insightsAndAlerting/cases';
+  return ownerToRoute[owner] || '/app/management/insightsAndAlerting';
 };
 
 const createEmptyResults = (
@@ -75,21 +78,28 @@ const casesSchema = z.object({
     .describe(
       'ISO datetime string for the end time to fetch cases (exclusive). If not provided, defaults to now. If no year is specified (e.g., "11-02T00:00:00Z"), the current year is assumed. Use this to filter for a specific date range (e.g., for "November 2", use start="11-02T00:00:00Z" and end="11-03T00:00:00Z")'
     ),
+  owner: z
+    .enum(['cases', 'observability', 'securitySolution'])
+    .optional()
+    .describe(
+      'Filter cases by owner. Valid values: "cases" (Stack Management/General Cases), "observability" (Observability), "securitySolution" (Elastic Security). If not provided, returns all cases the user has access to.'
+    ),
 });
 
 export const casesTool = (): BuiltinToolDefinition<typeof casesSchema> => {
   return {
-    id: 'platform.catchup.security.cases',
+    id: 'platform.catchup.cases',
     type: ToolType.builtin,
-    description: `Retrieves recently updated cases from Elastic Security since a given timestamp.
+    description: `Retrieves recently updated cases from Elastic Security, Observability, or Stack Management since a given timestamp.
     
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get cases updated on November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
+The optional 'owner' parameter filters cases by owner: "cases" (Stack Management/General Cases), "observability" (Observability), or "securitySolution" (Elastic Security). If not provided, returns all cases the user has access to.
 Returns cases with detailed information including id, title, description, status, severity, tags, assignees, observables, total alerts/comments, and recent comments. Each case includes a URL for direct access.
 
 **IMPORTANT**: When presenting case results to the user, provide a short paragraph summary (2-3 sentences) describing the key details of each case, then include a clickable link to the case using the provided URL.`,
     schema: casesSchema,
-    handler: async ({ start, end }, { request, logger }) => {
+    handler: async ({ start, end, owner }, { request, logger }) => {
       try {
         // Normalize and validate dates
         const normalizedStart = normalizeDateToCurrentYear(start);
@@ -121,6 +131,7 @@ Returns cases with detailed information including id, title, description, status
           sortOrder: 'desc',
           perPage: 100, // Fetch 100 cases per page
           page: 1,
+          ...(owner && { owner }), // Add owner filter if provided
         };
 
         // Fetch cases with pagination to ensure we get all cases
@@ -231,7 +242,7 @@ Returns cases with detailed information including id, title, description, status
         const serverBasePath = core.http.basePath.serverBasePath;
 
         // Helper function to construct case URL
-        const getCaseUrl = (caseId: string, owner: string): string | null => {
+        const getCaseUrl = (caseId: string, caseOwner: string): string | null => {
           try {
             // First try using publicBaseUrl if configured
             if (publicBaseUrl) {
@@ -239,7 +250,7 @@ Returns cases with detailed information including id, title, description, status
                 publicBaseUrl,
                 spaceId,
                 caseId,
-                owner,
+                owner: caseOwner,
               });
             }
 
@@ -251,12 +262,13 @@ Returns cases with detailed information including id, title, description, status
             // Build base URL
             const baseUrl = `${protocol}://${host}`;
 
-            // Determine app route based on owner
-            const appRoute = getAppRoute(owner);
+            // Determine app route based on case owner
+            const appRoute = getAppRoute(caseOwner);
 
             // Add space prefix if not default space
             const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-            const casePath = `${spacePrefix}${serverBasePath}${appRoute}/${caseId}`;
+            // Append /cases to match the pattern used by getCaseViewPath
+            const casePath = `${spacePrefix}${serverBasePath}${appRoute}/cases/${caseId}`;
             const fullUrl = `${baseUrl}${casePath}`;
 
             return fullUrl;
@@ -268,7 +280,7 @@ Returns cases with detailed information including id, title, description, status
 
         // Format cases data with rich details, including URLs
         const casesData = casesWithComments.map(({ case: caseItem, comments, totalComments }) => {
-          // Generate case URL
+          // Generate case URL using the case's owner
           const caseUrl = getCaseUrl(caseItem.id, caseItem.owner);
 
           return {

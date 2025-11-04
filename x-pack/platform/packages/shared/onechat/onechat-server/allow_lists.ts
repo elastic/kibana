@@ -13,7 +13,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Security CatchUp tools
   'platform.catchup.security.attack_discoveries',
   'platform.catchup.security.detections',
-  'platform.catchup.security.cases',
+  'platform.catchup.cases',
   'platform.catchup.security.rule_changes',
   'platform.catchup.security.summary',
   // Observability CatchUp tools

@@ -41,6 +41,10 @@ This tool calls all security sub-tools in parallel and aggregates their results.
 
         // Build tool params with optional end parameter
         const toolParams = end ? { start, end } : { start };
+        // Cases tool params - filter to security cases only
+        const casesToolParams = end
+          ? { start, end, owner: 'securitySolution' }
+          : { start, owner: 'securitySolution' };
 
         // Call all security sub-tools in parallel
         const [attackDiscoveries, detections, cases, ruleChanges] = await Promise.all([
@@ -53,8 +57,8 @@ This tool calls all security sub-tools in parallel and aggregates their results.
             toolParams,
           }),
           runner.runTool({
-            toolId: 'platform.catchup.security.cases',
-            toolParams,
+            toolId: 'platform.catchup.cases',
+            toolParams: casesToolParams,
           }),
           runner.runTool({
             toolId: 'platform.catchup.security.rule_changes',

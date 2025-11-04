@@ -29,7 +29,7 @@ When the user requests a catch-up without specifying a time range, use the follo
             // Individual security tools (for specific queries)
             'platform.catchup.security.attack_discoveries',
             'platform.catchup.security.detections',
-            'platform.catchup.security.cases',
+            'platform.catchup.cases',
             'platform.catchup.security.rule_changes',
             // Security summary tool (for general catch-up queries)
             'platform.catchup.security.summary',
