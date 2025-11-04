@@ -796,7 +796,6 @@ export class FleetPlugin
 
     this.policyWatcher.start(licenseService);
 
-    // We only retry when this feature flag is enabled (Serverless)
     const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
 
     const fleetSetupPromise = (async () => {
@@ -846,7 +845,7 @@ export class FleetPlugin
             jitter: 'full',
             retry: (error: any, attemptCount: number) => {
               const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.warn(summary, { error: { message: error } });
+              logger.warn(summary, { error });
 
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
@@ -870,7 +869,7 @@ export class FleetPlugin
         });
       } catch (error) {
         logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
-          error: { message: error },
+          error,
         });
 
         this.fleetStatus$.next({
@@ -990,7 +989,7 @@ export class FleetPlugin
     } catch (error) {
       appContextService
         .getLogger()
-        .error('Error happened during uninstall token generation.', { error: { message: error } });
+        .error('Error happened during uninstall token generation.', { error });
     }
 
     try {
@@ -998,7 +997,7 @@ export class FleetPlugin
     } catch (error) {
       appContextService
         .getLogger()
-        .error('Error happened during uninstall token validation.', { error: { message: error } });
+        .error('Error happened during uninstall token validation.', { error });
     }
   }
 

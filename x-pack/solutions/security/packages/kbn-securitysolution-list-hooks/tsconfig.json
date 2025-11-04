@@ -9,6 +9,7 @@
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ],
   "kbn_references": [
     "@kbn/securitysolution-hook-utils",
@@ -18,6 +19,7 @@
     "@kbn/securitysolution-utils",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-http-browser",
+    "@kbn/securitysolution-t-grid",
   ],
   "exclude": [
     "target/**/*",

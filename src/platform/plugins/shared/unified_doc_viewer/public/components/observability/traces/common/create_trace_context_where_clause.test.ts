@@ -44,7 +44,7 @@ describe('createTraceContextWhereClause', () => {
       })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND span.id == "span456"'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456")'
     );
   });
 });
