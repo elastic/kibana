@@ -345,7 +345,7 @@ Expected one of:
     case 'forkNotAllowedWithSubqueries':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.forkNotAllowedWithSubqueries', {
-          defaultMessage: '[FORK] Command is not allowed inside a query.',
+          defaultMessage: '[FORK] Command is not allowed inside a subquery.',
         }),
         type: 'error',
       };
