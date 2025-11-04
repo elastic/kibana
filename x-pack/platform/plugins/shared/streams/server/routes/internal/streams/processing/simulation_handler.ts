@@ -24,7 +24,6 @@ import type {
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
-import { set } from '@kbn/safer-lodash-set';
 import type {
   FlattenRecord,
   NamedFieldDefinitionConfig,
@@ -43,6 +42,7 @@ import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import type { RecursiveRecord } from '@kbn/streams-schema/src/shared/record_types';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
@@ -166,8 +166,8 @@ export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKe
  * Input: { "source.geo.location.lat": 41.9, "source.geo.location.lon": 42.0, "other": "value" }
  * Output: { "source.geo.location": { lat: 41.9, lon: 42.0 }, "other": "value" }
  */
-const regroupGeoPointFields = (flattenedDoc: FlattenRecord): FlattenRecord => {
-  const result: FlattenRecord = {};
+const regroupGeoPointFields = (flattenedDoc: FlattenRecord): RecursiveRecord => {
+  const result: RecursiveRecord = {};
   const processedGeoFields = new Set<string>();
 
   for (const [key, value] of Object.entries(flattenedDoc)) {
@@ -184,7 +184,7 @@ const regroupGeoPointFields = (flattenedDoc: FlattenRecord): FlattenRecord => {
         typeof value === 'number'
       ) {
         // Group lat/lon into single object
-        set(result, baseField, { lat: value, lon: flattenedDoc[lonKey] });
+        result[baseField] = { lat: value, lon: flattenedDoc[lonKey] };
         processedGeoFields.add(baseField);
         processedGeoFields.add(lonKey);
         continue;
@@ -193,8 +193,7 @@ const regroupGeoPointFields = (flattenedDoc: FlattenRecord): FlattenRecord => {
 
     // Check if this field was already processed as part of a geo_point
     if (!processedGeoFields.has(key)) {
-      // Use set to handle nested paths properly
-      set(result, key, value);
+      result[key] = value;
     }
   }
 
