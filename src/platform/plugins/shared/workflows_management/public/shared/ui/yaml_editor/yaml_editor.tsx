@@ -22,7 +22,7 @@ const defaultMonacoYamlOptions: MonacoYamlOptions = {
   validate: true, // Keep validation
 };
 
-interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
+export interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
   onChange: (value: string) => void;
   schemas: MonacoYamlOptions['schemas'] | null;
 }
@@ -62,6 +62,14 @@ export const YamlEditor = React.memo(({ value, onChange, ...props }: YamlEditorP
       });
     }
   }, [props.schemas]);
+
+  useEffect(() => {
+    return () => {
+      if (monacoYamlRef.current) {
+        monacoYamlRef.current.dispose();
+      }
+    };
+  }, []);
 
   return (
     <CodeEditor languageId="yaml" value={internalValue} onChange={onChangeInternal} {...props} />

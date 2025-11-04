@@ -42,8 +42,7 @@ import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
-import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
-import { YamlEditor } from '../../../shared/ui/yaml_editor';
+import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
