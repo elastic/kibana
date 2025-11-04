@@ -20,34 +20,16 @@ import { getExecuteToolSpan } from './get_execute_tool_span';
 import { PhoenixProtoExporter } from './phoenix_otlp_exporter';
 
 /**
- * Ensure the base URL is treated as a directory (trailing '/'),
- * so that relative paths are resolved under any existing path prefix (e.g. '/phoenix/').
+ * Build the Phoenix URL by preserving any path prefix on the base URL and
+ * appending the provided path (which may start with '/').
  */
-function getDirectoryBaseUrl(url: URL): URL {
-  if (!url.pathname.endsWith('/')) {
-    const clonedUrl = new URL(url);
-    clonedUrl.pathname = `${clonedUrl.pathname}/`;
-    return clonedUrl;
-  }
-  return url;
-}
-
-/**
- * Resolve a path (may start with '/') within the base URL's pathname,
- * preserving the base URL's path prefix. Supports optional query string.
- */
-function resolvePathWithinBasePrefix(base: URL, path: string): URL {
-  const [pathPart, searchPart] = path.split('?');
-  const relativePath = pathPart.startsWith('/') ? pathPart.slice(1) : pathPart;
-  const result = new URL(base.origin);
-  const basePath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
-
-  result.pathname = `${basePath}${relativePath}`;
-  if (searchPart) {
-    result.search = `?${searchPart}`;
-  }
-
-  return result;
+function getPhoenixUrl(base: string | URL, path: string): URL {
+  const baseUrl = new URL(base);
+  const baseWithTrailingSlash = baseUrl.pathname.endsWith('/')
+    ? baseUrl.toString()
+    : `${baseUrl.toString()}/`;
+  const pathWithoutLeadingSlash = path.startsWith('/') ? path.slice(1) : path;
+  return new URL(pathWithoutLeadingSlash, baseWithTrailingSlash);
 }
 
 export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
@@ -69,9 +51,7 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
         return undefined;
       }
 
-      const base = getDirectoryBaseUrl(new URL(config.public_url));
-
-      const { data } = await fetch(resolvePathWithinBasePrefix(base, '/v1/projects'), {
+      const { data } = await fetch(getPhoenixUrl(config.public_url, '/v1/projects'), {
         headers,
       }).then(
         (response) =>
@@ -113,9 +93,8 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
           return;
         }
 
-        const publicBase = getDirectoryBaseUrl(new URL(this.config.public_url));
-        const url = resolvePathWithinBasePrefix(
-          publicBase,
+        const url = getPhoenixUrl(
+          this.config.public_url,
           `/projects/${projectId}/traces/${traceId}?selected`
         );
         diag.info(`View trace at ${url.toString()}`);
