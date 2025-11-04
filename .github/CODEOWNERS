@@ -40,7 +40,7 @@ examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
 examples/ui_action_examples @elastic/appex-sharedux
 examples/ui_actions_explorer @elastic/appex-sharedux
-examples/unified_doc_viewer @elastic/kibana-core
+examples/unified_doc_viewer @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
@@ -658,7 +658,6 @@ src/platform/packages/shared/shared-ux/button/exit_full_screen @elastic/appex-sh
 src/platform/packages/shared/shared-ux/card/no_data/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/card/no_data/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/card/no_data/types @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/chrome/navigation @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
