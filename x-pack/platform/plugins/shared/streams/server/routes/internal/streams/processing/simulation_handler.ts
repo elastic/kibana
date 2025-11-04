@@ -24,6 +24,7 @@ import type {
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
+import { set } from '@kbn/safer-lodash-set';
 import type {
   FlattenRecord,
   NamedFieldDefinitionConfig,
@@ -152,6 +153,54 @@ export type WithNameAndEsType<TObj = {}> = TObj & {
 };
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
+/**
+ * Detects and groups flattened geo_point fields (*.lat and *.lon) back into a single object.
+ * Elasticsearch's geo_point mapper requires coordinates as a single object: { lat: number, lon: number }
+ *
+ * This function automatically detects any field pairs ending in .lat and .lon and groups them together.
+ *
+ * @param flattenedDoc - A flattened document with separate lat/lon fields
+ * @returns Document with geo_point fields grouped as objects
+ *
+ * @example
+ * Input: { "source.geo.location.lat": 41.9, "source.geo.location.lon": 42.0, "other": "value" }
+ * Output: { "source.geo.location": { lat: 41.9, lon: 42.0 }, "other": "value" }
+ */
+const regroupGeoPointFields = (flattenedDoc: FlattenRecord): Record<string, any> => {
+  const result: Record<string, any> = {};
+  const processedGeoFields = new Set<string>();
+
+  for (const [key, value] of Object.entries(flattenedDoc)) {
+    // Check if this is a .lat field
+    if (key.endsWith('.lat')) {
+      const baseField = key.slice(0, -4); // Remove '.lat'
+      const lonKey = `${baseField}.lon`;
+
+      // Check if we have a corresponding .lon field with numeric values
+      if (
+        lonKey in flattenedDoc &&
+        !processedGeoFields.has(baseField) &&
+        typeof flattenedDoc[lonKey] === 'number' &&
+        typeof value === 'number'
+      ) {
+        // Group lat/lon into single object
+        set(result, baseField, { lat: value, lon: flattenedDoc[lonKey] });
+        processedGeoFields.add(baseField);
+        processedGeoFields.add(lonKey);
+        continue;
+      }
+    }
+
+    // Check if this field was already processed as part of a geo_point
+    if (!processedGeoFields.has(key)) {
+      // Use set to handle nested paths properly
+      set(result, key, value);
+    }
+  }
+
+  return result;
+};
+
 export const simulateProcessing = async ({
   params,
   scopedClusterClient,
@@ -223,7 +272,7 @@ const prepareSimulationDocs = (
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
-    _source: doc,
+    _source: regroupGeoPointFields(doc),
   }));
 };
 
