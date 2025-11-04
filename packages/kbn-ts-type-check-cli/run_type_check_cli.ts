@@ -106,7 +106,7 @@ run(
     await updateRootRefsConfig(log);
 
     if (shouldUseArchive && !shouldCleanCache) {
-      await restoreTSBuildArtifacts(log);
+      // await restoreTSBuildArtifacts(log);
     } else if (shouldCleanCache && shouldUseArchive) {
       log.info('Skipping TypeScript cache restore because --clean-cache was provided.');
     } else {
