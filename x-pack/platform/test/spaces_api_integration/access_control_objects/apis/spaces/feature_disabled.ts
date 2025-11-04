@@ -20,7 +20,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
-  const kibanaServer = getService('kibanaServer');
 
   const createSimpleUser = async (roles: string[] = ['viewer']) => {
     await es.security.putUser({
@@ -87,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('#create', () => {
       it('rejects creating a write-restricted object', async () => {
-        const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
         const response = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
@@ -102,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('allows creating an object without access control metadata', async () => {
-        const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
         const response = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'xxxxx')
@@ -130,10 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Note: would be better to test this against an object with access control metadata and
       // verify that it makes no difference to the outcome
       it('allows overwriting an object by the creating user', async () => {
-        const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
-          'test_user',
-          'changeme'
-        );
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
@@ -219,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('#bulk_create', () => {
       it('returns error status when attempting to create write-restricted objects', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
 
         const response = await supertestWithoutAuth
           .post('/access_control_objects/bulk_create')
@@ -254,8 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('allows creating objects without access control metadata', async () => {
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
 
         const bulkCreateResponse = await supertestWithoutAuth
           .post('/access_control_objects/bulk_create')
@@ -298,8 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Note: would be better to test this against an object with access control metadata and
       // verify that it makes no difference to the outcome
       it('allows overwriting an objects by the creating user', async () => {
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
         const firstObject = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
@@ -337,7 +331,7 @@ export default function ({ getService }: FtrProviderContext) {
             objects,
           })
           .expect(200);
-        for (const { id, accessControl } of res.body.saved_objects) {
+        for (const { id } of res.body.saved_objects) {
           const object = objects.find((obj) => obj.id === id);
           expect(object).to.not.be(undefined);
           expect(object).not.to.have.property('accessControl');
@@ -353,8 +347,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('allows overwriting an objects by a different user', async () => {
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
         const firstObject = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
@@ -398,7 +391,7 @@ export default function ({ getService }: FtrProviderContext) {
             objects,
           })
           .expect(200);
-        for (const { id, accessControl } of res.body.saved_objects) {
+        for (const { id } of res.body.saved_objects) {
           const object = objects.find((obj) => obj.id === id);
           expect(object).to.not.be(undefined);
           expect(object).not.to.have.property('accessControl');
@@ -520,7 +513,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // ToDo: VVVVV
     describe.skip('#bulk_update', () => {
       describe('success', () => {
         it('allows owner to bulk update objects marked as write restricted', async () => {
@@ -1604,268 +1596,51 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('#change_ownership', () => {
-      it('should transfer ownership of write-restricted objects by owner', async () => {
-        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
-
-        const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
-          'test_user',
-          'changeme'
-        );
-
-        const createResponse = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-          .expect(200);
-        const objectId = createResponse.body.id;
-        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
-
-        await supertestWithoutAuth
-          .put('/access_control_objects/change_owner')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({
-            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
-            newOwnerProfileUid: simpleUserProfileUid,
-          })
-          .expect(200);
-
-        const getResponse = await supertestWithoutAuth
-          .get(`/access_control_objects/${objectId}`)
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .expect(200);
-        expect(getResponse.body).to.have.property('accessControl');
-        expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
-      });
-
-      it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
-        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
-        const createResponse = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-          .expect(200);
-        const objectId = createResponse.body.id;
-
-        expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
-
-        const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
-        const transferResponse = await supertestWithoutAuth
-          .put('/access_control_objects/change_owner')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', notOwnerCookie.cookieString())
-          .send({
-            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
-            newOwnerProfileUid: simpleUserProfileUid,
-          })
-          .expect(403);
-
-        expect(transferResponse.body).to.have.property('message');
-        expect(transferResponse.body.message).to.contain(
-          `Access denied: Unable to manage access control for ${ACCESS_CONTROL_TYPE}`
-        );
-      });
-
-      it('should allow admins to transfer ownership of any object', async () => {
-        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
-        const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
-          'test_user',
-          'changeme'
-        );
-        const createResponse = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-          .expect(200);
-        const objectId = createResponse.body.id;
-
-        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
-
-        const { cookie: adminCookie } = await loginAsKibanaAdmin();
-        await supertestWithoutAuth
-          .put('/access_control_objects/change_owner')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({
-            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
-            newOwnerProfileUid: simpleUserProfileUid,
-          })
-          .expect(200);
-
-        const getResponse = await supertestWithoutAuth
-          .get(`/access_control_objects/${objectId}`)
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .expect(200);
-
-        expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
-      });
-
-      it('should allow bulk transfer ownership of allowed objects', async () => {
-        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
+    describe('#change_owner', () => {
+      it('throws when trying to update ownership of ownable type', async () => {
         const { cookie: ownerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-        const { cookie: adminCookie } = await loginAsKibanaAdmin();
-        const firstCreate = await supertestWithoutAuth
+        const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+          .send({ type: ACCESS_CONTROL_TYPE })
           .expect(200);
-        const firstObjectId = firstCreate.body.id;
+        const objectId = createResponse.body.id;
 
-        const secondCreate = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-          .expect(200);
-        const secondObjectId = secondCreate.body.id;
-
-        await supertestWithoutAuth
+        const changeOwnershipResponse = await supertestWithoutAuth
           .put('/access_control_objects/change_owner')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
           .send({
-            objects: [
-              { id: firstObjectId, type: firstCreate.body.type },
-              { id: secondObjectId, type: secondCreate.body.type },
-            ],
-            newOwnerProfileUid: simpleUserProfileUid,
+            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
+            newOwnerProfileUid: 'u_nonexistinguser_ver',
           })
           .expect(200);
-        {
-          const getResponse = await supertestWithoutAuth
-            .get(`/access_control_objects/${firstObjectId}`)
-            .set('kbn-xsrf', 'true')
-            .set('cookie', adminCookie.cookieString())
-            .expect(200);
-
-          expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
-        }
-        {
-          const getResponse = await supertestWithoutAuth
-            .get(`/access_control_objects/${secondObjectId}`)
-            .set('kbn-xsrf', 'true')
-            .set('cookie', adminCookie.cookieString())
-            .expect(200);
-          expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
-        }
-      });
-
-      describe('partial bulk change ownership', () => {
-        it('should allow bulk transfer ownership of allowed objects', async () => {
-          const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
-          const { cookie: ownerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-          const firstCreate = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', ownerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          const firstObjectId = firstCreate.body.id;
-
-          const secondCreate = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', ownerCookie.cookieString())
-            .send({ type: NON_ACCESS_CONTROL_TYPE })
-            .expect(200);
-          const secondObjectId = secondCreate.body.id;
-
-          const transferResponse = await supertestWithoutAuth
-            .put('/access_control_objects/change_owner')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', ownerCookie.cookieString())
-            .send({
-              objects: [
-                { id: firstObjectId, type: firstCreate.body.type },
-                { id: secondObjectId, type: secondCreate.body.type },
-              ],
-              newOwnerProfileUid: simpleUserProfileUid,
-            })
-            .expect(200);
-          expect(transferResponse.body.objects).to.have.length(2);
-          transferResponse.body.objects.forEach(
-            (object: { id: string; type: string; error?: any }) => {
-              if (object.type === ACCESS_CONTROL_TYPE) {
-                expect(object).to.have.property('id', firstObjectId);
-              }
-              if (object.type === NON_ACCESS_CONTROL_TYPE) {
-                expect(object).to.have.property('id', secondObjectId);
-                expect(object).to.have.property('error');
-                expect(object.error).to.have.property('output');
-                expect(object.error.output).to.have.property('payload');
-                expect(object.error.output.payload).to.have.property('message');
-                expect(object.error.output.payload.message).to.contain(
-                  `The type ${NON_ACCESS_CONTROL_TYPE} does not support access control: Bad Request`
-                );
-              }
-            }
-          );
-        });
+        expect(changeOwnershipResponse.body.objects).to.have.length(1);
+        const objectToAssert = changeOwnershipResponse.body.objects[0];
+        expect(objectToAssert.id).to.eql(objectId);
+        expect(objectToAssert.type).to.eql(ACCESS_CONTROL_TYPE);
+        expect(objectToAssert).to.have.property('error');
+        expect(objectToAssert.error.output).to.have.property('payload');
+        expect(objectToAssert.error.output.payload).to.have.property('message');
+        expect(objectToAssert.error.output.payload.message).to.contain(
+          `The type ${ACCESS_CONTROL_TYPE} does not support access control: Bad Request`
+        );
       });
     });
 
-    describe.skip('#change_access_mode', () => {
-      it('should allow admins to change access mode of any object', async () => {
-        const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
-          'test_user',
-          'changeme'
-        );
+    describe('#change_access_mode', () => {
+      it('throws when trying to update access mode of ownable type', async () => {
+        const { cookie: ownerCookie } = await loginAsObjectOwner('test_user', 'changeme');
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
+          .send({ type: ACCESS_CONTROL_TYPE })
           .expect(200);
         const objectId = createResponse.body.id;
-        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
-        const { cookie: adminCookie } = await loginAsKibanaAdmin();
-        const response = await supertestWithoutAuth
-          .put('/access_control_objects/change_access_mode')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({
-            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
-            newAccessMode: 'write_restricted',
-          })
-          .expect(200);
-        expect(response.body.objects).to.have.length(1);
-        expect(response.body.objects[0].id).to.eql(objectId);
-        expect(response.body.objects[0].type).to.eql(ACCESS_CONTROL_TYPE);
-
-        const getResponse = await supertestWithoutAuth
-          .get(`/access_control_objects/${objectId}`)
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .expect(200);
-
-        expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
-      });
-
-      it('allow owner to update object data after access mode change', async () => {
-        const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
-          'test_user',
-          'changeme'
-        );
-        const createResponse = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
-          .expect(200);
-        const objectId = createResponse.body.id;
-        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
-
-        const { cookie: adminCookie } = await loginAsKibanaAdmin();
-        const response = await supertestWithoutAuth
+        const changeAccessModeResponse = await supertestWithoutAuth
           .put('/access_control_objects/change_access_mode')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
@@ -1874,100 +1649,15 @@ export default function ({ getService }: FtrProviderContext) {
             newAccessMode: 'write_restricted',
           })
           .expect(200);
-        expect(response.body.objects).to.have.length(1);
-        expect(response.body.objects[0].id).to.eql(objectId);
-        expect(response.body.objects[0].type).to.eql(ACCESS_CONTROL_TYPE);
-
-        const getResponse = await supertestWithoutAuth
-          .get(`/access_control_objects/${objectId}`)
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .expect(200);
-
-        expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
-
-        const updateResponse = await supertestWithoutAuth
-          .put('/access_control_objects/update')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({ objectId, type: ACCESS_CONTROL_TYPE })
-          .expect(200);
-        expect(updateResponse.body.id).to.eql(objectId);
-        expect(updateResponse.body.attributes).to.have.property(
-          'description',
-          'updated description'
-        );
-      });
-
-      it('should throw when trying to change access mode on locked objects when not owner', async () => {
-        const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
-          'test_user',
-          'changeme'
-        );
-        const createResponse = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-          .expect(200);
-
-        const objectId = createResponse.body.id;
-        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
-
-        await activateSimpleUserProfile();
-        const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
-        const updateResponse = await supertestWithoutAuth
-          .put('/access_control_objects/change_access_mode')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', notOwnerCookie.cookieString())
-          .send({
-            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
-            newAccessMode: 'write_restricted',
-          })
-          .expect(403);
-        expect(updateResponse.body).to.have.property('message');
-        expect(updateResponse.body.message).to.contain(
-          `Access denied: Unable to manage access control for ${ACCESS_CONTROL_TYPE}`
-        );
-      });
-
-      it('allows updates by non-owner after removing write-restricted access mode', async () => {
-        const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
-          'test_user',
-          'changeme'
-        );
-        const createResponse = await supertestWithoutAuth
-          .post('/access_control_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-          .expect(200);
-        const objectId = createResponse.body.id;
-        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
-
-        await supertestWithoutAuth
-          .put('/access_control_objects/change_access_mode')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', ownerCookie.cookieString())
-          .send({
-            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
-            newAccessMode: 'default',
-          })
-          .expect(200);
-
-        await createSimpleUser(['kibana_savedobjects_editor']);
-        const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
-
-        const updateResponse = await supertestWithoutAuth
-          .put('/access_control_objects/update')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', notOwnerCookie.cookieString())
-          .send({ objectId, type: ACCESS_CONTROL_TYPE })
-          .expect(200);
-        expect(updateResponse.body.id).to.eql(objectId);
-        expect(updateResponse.body.attributes).to.have.property(
-          'description',
-          'updated description'
+        expect(changeAccessModeResponse.body.objects).to.have.length(1);
+        const objectToAssert = changeAccessModeResponse.body.objects[0];
+        expect(objectToAssert.id).to.eql(objectId);
+        expect(objectToAssert.type).to.eql(ACCESS_CONTROL_TYPE);
+        expect(objectToAssert).to.have.property('error');
+        expect(objectToAssert.error.output).to.have.property('payload');
+        expect(objectToAssert.error.output.payload).to.have.property('message');
+        expect(objectToAssert.error.output.payload.message).to.contain(
+          `The type ${ACCESS_CONTROL_TYPE} does not support access control: Bad Request`
         );
       });
     });
