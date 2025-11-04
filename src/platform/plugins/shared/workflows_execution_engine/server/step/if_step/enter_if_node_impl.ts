@@ -105,7 +105,9 @@ export class EnterIfNodeImpl implements NodeImplementation {
       } catch (error) {
         if (error instanceof KQLSyntaxError) {
           throw new Error(
-            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(error)}`
+            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
+              error
+            )}`
           );
         }
         throw error;
