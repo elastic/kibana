@@ -97,6 +97,7 @@ const withRemoteTarExtraction = async (remotePath: string, log: SomeDevLog) => {
       cwd: REPO_ROOT,
       stdout: 'pipe',
       stderr: 'inherit',
+      buffer: false,
     });
 
     if (!catProcess.stdout || !tarProcess.stdin) {
