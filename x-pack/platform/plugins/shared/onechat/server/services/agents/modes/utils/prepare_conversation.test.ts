@@ -272,7 +272,13 @@ describe('prepareConversation', () => {
       });
 
       expect(result.previousRounds).toHaveLength(1);
-      expect(result.previousRounds[0]).toEqual(previousRound);
+      expect(result.previousRounds[0]).toEqual({
+        ...previousRound,
+        input: {
+          ...previousRound.input,
+          attachments: [],
+        },
+      });
     });
 
     it('should process previous rounds with attachments', async () => {
@@ -435,7 +441,13 @@ describe('prepareConversation', () => {
         attachmentsService: mockAttachmentsService,
       });
 
-      expect(result.previousRounds[0]).toEqual(previousRounds[0]);
+      expect(result.previousRounds[0]).toEqual({
+        ...previousRounds[0],
+        input: {
+          ...previousRounds[0].input,
+          attachments: [],
+        },
+      });
     });
   });
 
