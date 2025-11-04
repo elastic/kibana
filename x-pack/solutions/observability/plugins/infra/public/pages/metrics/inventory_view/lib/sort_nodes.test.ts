@@ -8,67 +8,25 @@
 import { sortNodes } from './sort_nodes';
 import type { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 
+const createMockNode = (name: string, value: number): SnapshotNode => ({
+  name,
+  path: [{ value: name, label: name }],
+  metrics: [
+    {
+      name: 'cpu',
+      value,
+      avg: value,
+      max: value,
+    },
+  ],
+});
+
 const hostNodes: SnapshotNode[] = [
-  {
-    name: 'host-1',
-    path: [{ value: 'host-1', label: 'host-1' }],
-    metrics: [
-      {
-        name: 'cpu',
-        value: 0.5,
-        max: 1.5,
-        avg: 0.7,
-      },
-    ],
-  },
-  {
-    name: 'host-2',
-    path: [{ value: 'host-2', label: 'host-2' }],
-    metrics: [
-      {
-        name: 'cpu',
-        value: 0.7,
-        max: 1.5,
-        avg: 0.8,
-      },
-    ],
-  },
-  {
-    name: 'host-3',
-    path: [{ value: 'host-3', label: 'host-3' }],
-    metrics: [
-      {
-        name: 'cpu',
-        value: 0.9,
-        max: 1.5,
-        avg: 1.0,
-      },
-    ],
-  },
-  {
-    name: 'host-4',
-    path: [{ value: 'host-4', label: 'host-4' }],
-    metrics: [
-      {
-        name: 'cpu',
-        value: 0.3,
-        max: 1.5,
-        avg: 0.5,
-      },
-    ],
-  },
-  {
-    name: 'host-5',
-    path: [{ value: 'host-5', label: 'host-5' }],
-    metrics: [
-      {
-        name: 'cpu',
-        value: 0.1,
-        max: 1.5,
-        avg: 0.3,
-      },
-    ],
-  },
+  createMockNode('host-1', 0.5),
+  createMockNode('host-2', 0.7),
+  createMockNode('host-3', 0.9),
+  createMockNode('host-4', 0.3),
+  createMockNode('host-5', 0.1),
 ];
 
 describe('sortNodes', () => {
