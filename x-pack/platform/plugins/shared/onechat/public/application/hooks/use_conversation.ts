@@ -106,7 +106,8 @@ export const useConversationRounds = () => {
         input: { message: pendingMessage },
         response: { message: '' },
         steps: [],
-        took: 0,
+        time_to_first_token: 0,
+        time_to_last_token: 0,
         started_at: new Date().toISOString(),
       };
       return [...rounds, pendingRound];

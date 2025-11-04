@@ -80,7 +80,8 @@ describe('conversationLangchainMessages', () => {
         steps: [],
         response: makeAssistantResponse('hello!'),
         started_at: now,
-        took: 42,
+        time_to_first_token: 42,
+        time_to_last_token: 100,
       },
     ];
     const nextInput = makeRoundInput('how are you?');
@@ -116,7 +117,8 @@ describe('conversationLangchainMessages', () => {
         steps: [makeToolCallStep(toolCall)],
         response: makeAssistantResponse('done!'),
         started_at: now,
-        took: 42,
+        time_to_first_token: 42,
+        time_to_last_token: 100,
       },
     ];
     const nextInput = makeRoundInput('next');
@@ -166,7 +168,8 @@ describe('conversationLangchainMessages', () => {
         steps: [],
         response: makeAssistantResponse('hello!'),
         started_at: now,
-        took: 42,
+        time_to_first_token: 42,
+        time_to_last_token: 100,
       },
       {
         id: 'round-2',
@@ -180,7 +183,8 @@ describe('conversationLangchainMessages', () => {
         ],
         response: makeAssistantResponse('done with bar'),
         started_at: now,
-        took: 42,
+        time_to_first_token: 42,
+        time_to_last_token: 100,
       },
     ];
     const nextInput = makeRoundInput('bye');
@@ -238,7 +242,8 @@ describe('conversationLangchainMessages', () => {
         steps: [makeToolCallStep(toolCall)],
         response: makeAssistantResponse('done!'),
         started_at: now,
-        took: 42,
+        time_to_first_token: 42,
+        time_to_last_token: 100,
       },
     ];
     const nextInput = makeRoundInput('next');
@@ -324,7 +329,8 @@ describe('conversationLangchainMessages', () => {
           steps: [],
           response: makeAssistantResponse('got it'),
           started_at: now,
-          took: 42,
+          time_to_first_token: 42,
+          time_to_last_token: 100,
         },
       ];
       const nextInput = makeRoundInput('next message');

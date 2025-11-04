@@ -97,7 +97,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities: resolvedCapabilities,
   });
 
-  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}`);
+  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
     { initialMessages, cycleLimit },
