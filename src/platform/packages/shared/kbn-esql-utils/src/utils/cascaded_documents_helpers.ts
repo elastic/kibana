@@ -349,7 +349,9 @@ function handleStatsByColumnLeafOperation(
           Builder.expression.column({
             args: [Builder.identifier({ name: key })],
           }),
-          Builder.expression.literal.string(value),
+          Number.isInteger(Number(value))
+            ? Builder.expression.literal.integer(Number(value))
+            : Builder.expression.literal.string(value),
         ]),
       ],
     });
