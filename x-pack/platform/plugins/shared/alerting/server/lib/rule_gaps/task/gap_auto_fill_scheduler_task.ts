@@ -22,6 +22,7 @@ import {
   GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
   DEFAULT_RULES_BATCH_SIZE,
   DEFAULT_GAPS_PER_PAGE,
+  DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
   GAP_AUTO_FILL_STATUS,
 } from '../types/scheduler';
 import { backfillInitiator } from '../../../../common/constants';
@@ -104,7 +105,7 @@ export function registerGapAutoFillSchedulerTask({
   taskManager.registerTaskDefinitions({
     [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
       title: 'Gap Auto Fill Scheduler',
-      timeout: schedulerConfig?.timeout ?? '40s',
+      timeout: schedulerConfig?.timeout ?? DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
       createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
         return {
           async run() {

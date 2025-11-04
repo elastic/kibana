@@ -15,6 +15,7 @@ import {
   GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
   DEFAULT_RULES_BATCH_SIZE,
   DEFAULT_GAPS_PER_PAGE,
+  DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
 } from '../types/scheduler';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { backfillInitiator } from '../../../../common/constants';
@@ -199,7 +200,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
           title: 'Gap Auto Fill Scheduler',
-          timeout: '40s',
+          timeout: DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
           createTaskRunner: expect.any(Function),
         },
       });

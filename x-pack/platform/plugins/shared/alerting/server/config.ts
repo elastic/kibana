@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { validateDurationSchema, parseDuration } from './lib';
 import { DEFAULT_CACHE_INTERVAL_MS } from './rules_settings';
+import { DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT } from './lib/rule_gaps/types/scheduler';
 
 export const DEFAULT_MAX_ALERTS = 1000;
 
@@ -85,7 +86,10 @@ export const configSchema = schema.object({
     schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       timeout: schema.maybe(
-        schema.string({ validate: validateDurationSchema, defaultValue: '40s' })
+        schema.string({
+          validate: validateDurationSchema,
+          defaultValue: DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
+        })
       ),
     })
   ),
