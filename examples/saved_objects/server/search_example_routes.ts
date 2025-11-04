@@ -31,8 +31,8 @@ export function registerSearchExampleRoutes(router: IRouter, log: Logger) {
       async (ctx, req, res) => {
         log.info('Searching for saved objects');
         const core = await ctx.core;
-        await setupData(core.savedObjects.client);
         const savedObjectsClient = core.savedObjects.client;
+        await setupData(savedObjectsClient);
         try {
           const result = await savedObjectsClient.search({
             type: [TYPE_A, TYPE_B],
