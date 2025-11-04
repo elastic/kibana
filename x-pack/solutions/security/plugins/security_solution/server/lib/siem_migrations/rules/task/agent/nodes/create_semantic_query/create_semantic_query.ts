@@ -6,12 +6,14 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import type { ChatPromptTemplate, ChatPromptTemplateInput } from '@langchain/core/prompts';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
-import type { GraphNode } from '../../types';
-import { CREATE_SEMANTIC_QUERY_PROMPT } from './prompts';
+import type { GraphNode, ToolsMap } from '../../types';
+import { QRADAR_SEMANTIC_QUERY_PROMPT, SEMANTIC_QUERY_PROMPT_MAP } from './prompts';
 
 interface GetCreateSemanticQueryNodeParams {
   model: ChatModel;
+  toolMap: ToolsMap;
 }
 
 interface GetSemanticQueryResponse {
@@ -20,18 +22,34 @@ interface GetSemanticQueryResponse {
 
 export const getCreateSemanticQueryNode = ({
   model,
+  toolMap,
 }: GetCreateSemanticQueryNodeParams): GraphNode => {
   const jsonParser = new JsonOutputParser();
-  const semanticQueryChain = CREATE_SEMANTIC_QUERY_PROMPT.pipe(model).pipe(jsonParser);
   return async (state) => {
+    const modelWithTools = model;
     const query = state.original_rule.query;
-    const integrationQuery = (await semanticQueryChain.invoke({
-      title: state.original_rule.title,
-      description: state.original_rule.description,
-      query,
-    })) as GetSemanticQueryResponse;
+    let promptTemplate: Awaited<ReturnType<ChatPromptTemplate['formatMessages']>>;
+    if (state.original_rule.vendor === 'qradar') {
+      promptTemplate = await QRADAR_SEMANTIC_QUERY_PROMPT.formatMessages({
+        nlQuery: state.nl_query,
+      });
+    } else {
+      const prompt = SEMANTIC_QUERY_PROMPT_MAP[state.original_rule.vendor];
+      promptTemplate = await prompt.formatMessages({
+        title: state.original_rule.title,
+        description: state.original_rule.description,
+        query,
+      });
+    }
+
+    const semanticQueryChain = modelWithTools.pipe(jsonParser);
+
+    const integrationQuery = (await semanticQueryChain.invoke([
+      ...promptTemplate,
+    ])) as unknown as GetSemanticQueryResponse;
+
     if (!integrationQuery.semantic_query) {
-      return {};
+      return { semantic_query: integrationQuery.semantic_query };
     }
 
     return { semantic_query: integrationQuery.semantic_query };

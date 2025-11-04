@@ -6,11 +6,14 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleConfigSchema, migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type { MigrateRuleConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
+import { getResolveDepsNode } from './nodes/resolve_dependencies_node/resolve_dependencies';
+import { getVendorRouter } from './edges/vendor_edge';
 
 export function getRuleMigrationAgent({
   model,
@@ -18,6 +21,7 @@ export function getRuleMigrationAgent({
   ruleMigrationsRetriever,
   logger,
   telemetryClient,
+  tools,
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
@@ -26,6 +30,8 @@ export function getRuleMigrationAgent({
     telemetryClient,
   });
 
+  const toolNode = new ToolNode(tools);
+
   const translationSubGraph = getTranslateRuleGraph({
     model,
     esqlKnowledgeBase,
@@ -33,15 +39,27 @@ export function getRuleMigrationAgent({
     telemetryClient,
     logger,
   });
-  const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
+  const resolveDependenciesNode = getResolveDepsNode({ model });
+  const createSemanticQueryNode = getCreateSemanticQueryNode({ model, toolMap: tools });
 
   const siemMigrationAgentGraph = new StateGraph(migrateRuleState, migrateRuleConfigSchema)
     // Nodes
+    .addNode('resolveDependencies', resolveDependenciesNode)
     .addNode('createSemanticQuery', createSemanticQueryNode)
+    .addNode('tools', toolNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
-    .addEdge(START, 'createSemanticQuery')
+    .addConditionalEdges(START, getVendorRouter('qradar'), {
+      true: 'resolveDependencies',
+      false: 'createSemanticQuery',
+    })
+    // .addEdge(START, 'createSemanticQuery')
+    .addConditionalEdges('resolveDependencies', toolRouter, {
+      true: 'tools',
+      false: 'createSemanticQuery',
+    })
+    .addEdge('tools', 'resolveDependencies')
     .addConditionalEdges('createSemanticQuery', skipPrebuiltRuleConditional, [
       'matchPrebuiltRule',
       'translationSubGraph',
@@ -65,8 +83,23 @@ const skipPrebuiltRuleConditional = (_state: MigrateRuleState, config: MigrateRu
 };
 
 const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
+  /** Todo for now we do not want to run custom process for qradar. we are just looking for pre-built matches*/
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
   return 'translationSubGraph';
 };
+
+export function toolRouter(state: MigrateRuleState): string {
+  const messages = state.messages;
+  const lastMessage = messages.at(-1);
+
+  const hasToolCalls = lastMessage?.tool_calls?.length;
+
+  // If the LLM makes a tool call, then perform an action
+  if (lastMessage?.tool_calls?.length) {
+    return 'true';
+  }
+  // Otherwise, we stop (reply to the user)
+  return 'false';
+}

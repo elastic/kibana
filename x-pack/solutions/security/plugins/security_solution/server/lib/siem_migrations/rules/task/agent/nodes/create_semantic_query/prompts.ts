@@ -6,6 +6,7 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import type { OriginalRuleVendor } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 export const CREATE_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
@@ -46,3 +47,37 @@ A: Please find the semantic_query keywords JSON object below:
   ],
   ['ai', 'Please find the semantic_query keywords JSON object below:'],
 ]);
+
+export const QRADAR_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages<{ nlQuery: string }>([
+  [
+    'system',
+    `
+You are an agent expert in IBM Qradar SIEM platform. Below is a natural language description of a Qradar rule query. Don't worry about any dependencies you think are unresolved. 
+
+Your task is to extract relevant keywords from the natural language description that can be used to create a semantic search query. The keywords should accurately represent the core concepts and intent of the rule query described.
+
+<example_response>
+
+A: Please find the semantic_query keywords JSON object below:
+\`\`\`json
+{{"semantic_query": "windows host endpoint netsh.exe process creation command-line utility network configuration persistence proxy dll execution sysmon event id 1"}}
+\`\`\`
+</example_response>
+`,
+  ],
+  [
+    'human',
+    `
+Create a collection of keywords specifically crafted to be used as a semantic search query from the following Natural language description of a Qradar SIEM Detection Rule in Natural Language:
+
+Rule in Natural Language:
+
+{nlQuery}
+    `,
+  ],
+]);
+
+export const SEMANTIC_QUERY_PROMPT_MAP = {
+  splunk: CREATE_SEMANTIC_QUERY_PROMPT,
+  qradar: QRADAR_SEMANTIC_QUERY_PROMPT,
+} as const;

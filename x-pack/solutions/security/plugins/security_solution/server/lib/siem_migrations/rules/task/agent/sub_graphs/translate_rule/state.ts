@@ -51,4 +51,8 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
     default: () => [],
   }),
+  nl_query: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
+  }),
 });

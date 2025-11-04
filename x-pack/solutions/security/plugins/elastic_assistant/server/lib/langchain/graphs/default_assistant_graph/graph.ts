@@ -64,6 +64,7 @@ export const getDefaultAssistantGraph = async ({
       throw new Error('Llm instance does not support bindTools method');
     }
     const llmWithTools = llm.bindTools(tools);
+    console.log(`Binding tools ${JSON.stringify({ tools }, null, 2)} to LLM model.`);
     const toolNode = new ToolNode(tools);
 
     // Put together a new graph using default state from above

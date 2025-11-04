@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Annotation } from '@langchain/langgraph';
+import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 import { uniq } from 'lodash/fp';
+import type { BaseListChatMessageHistory } from '@langchain/core/dist/chat_history';
+import type { BaseMessage } from '@langchain/core/messages';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRulePartial,
@@ -22,6 +24,10 @@ export const migrateRuleState = Annotation.Root({
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),
+  nl_query: Annotation<string>({
+    reducer: (current, value) => [current, value].join('\n'),
+    default: () => '',
+  }),
   semantic_query: Annotation<string>({
     reducer: (current, value) => value ?? current,
     default: () => '',
@@ -34,6 +40,10 @@ export const migrateRuleState = Annotation.Root({
   comments: Annotation<RuleMigrationRule['comments']>({
     // Translation subgraph causes the original main graph comments to be concatenated again, we need to deduplicate them.
     reducer: (current, value) => uniq(value ? (current ?? []).concat(value) : current),
+    default: () => [],
+  }),
+  messages: Annotation<BaseMessage[]>({
+    reducer: messagesStateReducer,
     default: () => [],
   }),
 });

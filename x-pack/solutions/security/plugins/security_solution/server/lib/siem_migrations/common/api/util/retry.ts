@@ -11,6 +11,7 @@ import type { RuleMigrationFilters } from '../../../../../../common/siem_migrati
 const RETRY_FILTERS: Record<RuleMigrationRetryFilter, RuleMigrationFilters> = {
   failed: { failed: true },
   not_fully_translated: { fullyTranslated: false },
+  selected: {},
 };
 
 export const getRetryFilter = (retryFilter: RuleMigrationRetryFilter): RuleMigrationFilters => {

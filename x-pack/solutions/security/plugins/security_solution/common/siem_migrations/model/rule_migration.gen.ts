@@ -30,7 +30,9 @@ import {
  * The original rule vendor identifier.
  */
 export type OriginalRuleVendor = z.infer<typeof OriginalRuleVendor>;
-export const OriginalRuleVendor = z.literal('splunk');
+export const OriginalRuleVendor = z.enum(['splunk', 'qradar']);
+export type OriginalRuleVendorEnum = typeof OriginalRuleVendor.enum;
+export const OriginalRuleVendorEnum = OriginalRuleVendor.enum;
 
 /**
  * The original rule annotations containing additional information.
@@ -355,7 +357,7 @@ export const UpdateRuleMigrationRule = z.object({
  * Indicates the filter to retry the migrations rules translation
  */
 export type RuleMigrationRetryFilter = z.infer<typeof RuleMigrationRetryFilter>;
-export const RuleMigrationRetryFilter = z.enum(['failed', 'not_fully_translated']);
+export const RuleMigrationRetryFilter = z.enum(['failed', 'not_fully_translated', 'selected']);
 export type RuleMigrationRetryFilterEnum = typeof RuleMigrationRetryFilter.enum;
 export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;
 

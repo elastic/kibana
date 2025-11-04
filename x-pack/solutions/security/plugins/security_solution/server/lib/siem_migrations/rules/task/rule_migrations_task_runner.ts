@@ -21,6 +21,11 @@ import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
+import {
+  getRulesByNameGetter,
+  getRulesByNameTool,
+  getRulesTools,
+} from '../../common/task/agent/tools/qradar/rules';
 
 export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
 export type RuleMigrationTaskOutput = MigrateRuleState;
@@ -61,6 +66,12 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       migrationId: this.migrationId,
       abortController: this.abortController,
     });
+
+    const toolsMap = getRulesTools(this.migrationId, this.data);
+    const rulesNameTool = getRulesByNameTool(this.migrationId, this.data);
+    const tools = [rulesNameTool];
+    const modelWithTools = model.bindTools(tools);
+
     const modelName = this.actionsClientChat.getModelName(model);
 
     const telemetryClient = new RuleMigrationTelemetryClient(
@@ -79,10 +90,11 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
     const agent = getRuleMigrationAgent({
       esqlKnowledgeBase,
-      model,
+      model: modelWithTools,
       ruleMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,
+      tools,
     });
 
     this.telemetry = telemetryClient;
@@ -97,8 +109,8 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   protected async prepareTaskInput(
     migrationRule: StoredRuleMigrationRule
   ): Promise<RuleMigrationTaskInput> {
-    const resources = await this.retriever.resources.getResources(migrationRule.original_rule);
-    return { id: migrationRule.id, original_rule: migrationRule.original_rule, resources };
+    // const resources = await this.retriever.resources.getResources(migrationRule.original_rule);
+    return { id: migrationRule.id, original_rule: migrationRule.original_rule, resources: {} };
   }
 
   /**

@@ -25,8 +25,16 @@ export const toolChoiceToConverse = (
 };
 
 export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
+  console.log(`Converting tools to Converse Bedrock format: ${JSON.stringify(tools, null, 2)}`);
   if (tools) {
     return Object.entries(tools).map(([toolName, toolDef]) => {
+      console.log(
+        `Converting tool ${toolName} to Converse Bedrock format: ${JSON.stringify(
+          { toolName, toolDef },
+          null,
+          2
+        )}`
+      );
       return {
         toolSpec: {
           name: toolName,
@@ -76,6 +84,7 @@ export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Me
  *
  */
 export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T): T {
+  console.log({ schemaPart });
   if (schemaPart.type === 'object' && schemaPart.properties) {
     return {
       ...schemaPart,

@@ -63,6 +63,6 @@ export class RuleMigrationsRetriever {
         RuleMigrationsRetriever.populatePromise = null;
       });
     }
-    await Promise.all([RuleMigrationsRetriever.populatePromise, this.resources.initialize()]);
+    await Promise.all([RuleMigrationsRetriever.populatePromise]);
   }
 }
