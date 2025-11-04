@@ -10,6 +10,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FieldSelector } from './field_selector';
 
+jest.mock('@kbn/react-field', () => ({
+  FieldIcon: ({ type }: { type: string }) => <span data-test-subj={`field-icon-${type}`} />,
+}));
+
 describe('FieldSelector', () => {
   const mockSuggestions = [
     { name: '@timestamp' },
@@ -149,6 +153,52 @@ describe('FieldSelector', () => {
 
       const input = screen.getByTestId('comboBoxSearchInput');
       expect(input).toHaveAttribute('disabled');
+    });
+  });
+
+  describe('Field Type Icons', () => {
+    it('renders field type icons when suggestions include type information', async () => {
+      const suggestionsWithTypes = [
+        { name: '@timestamp', type: 'date' },
+        { name: 'log.level', type: 'keyword' },
+        { name: 'message', type: 'text' },
+      ];
+
+      render(<FieldSelector {...defaultProps} suggestions={suggestionsWithTypes} />);
+
+      const toggleButton = screen.getByTestId('comboBoxToggleListButton');
+      await userEvent.click(toggleButton);
+
+      // Verify that field icons are rendered for fields with types
+      expect(screen.getByTestId('field-icon-date')).toBeInTheDocument();
+      expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
+      expect(screen.getByTestId('field-icon-text')).toBeInTheDocument();
+    });
+
+    it('does not render icons for fields without type information', async () => {
+      const suggestionsWithoutTypes = [{ name: '@timestamp' }, { name: 'log.level' }];
+
+      render(<FieldSelector {...defaultProps} suggestions={suggestionsWithoutTypes} />);
+
+      const toggleButton = screen.getByTestId('comboBoxToggleListButton');
+      await userEvent.click(toggleButton);
+
+      // Verify that no field icons are rendered
+      expect(screen.queryByTestId(/field-icon-/)).not.toBeInTheDocument();
+    });
+
+    it('shows icon for selected field when type is available', () => {
+      const suggestionsWithTypes = [
+        { name: 'log.level', type: 'keyword' },
+        { name: 'message', type: 'text' },
+      ];
+
+      render(
+        <FieldSelector {...defaultProps} value="log.level" suggestions={suggestionsWithTypes} />
+      );
+
+      // Icon should be visible in the selected value
+      expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
     });
   });
 });
