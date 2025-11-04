@@ -47,7 +47,21 @@ export interface CreateConnectorFlyoutProps {
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
+  initialConnector?: ActionConnector & { actionTypeId: string };
 }
+
+// const testInitialConnector = {
+//   actionTypeId: '.jira',
+//   name: 'jira',
+//   isDeprecated: false,
+//   config: {
+//     apiUrl: 'https://www.test.com',
+//     projectKey: 'test',
+//   },
+//   secrets: {},
+//   isMissingSecrets: false,
+//   isConnectorTypeDeprecated: false,
+// };
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
@@ -55,6 +69,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onClose,
   onConnectorCreated,
   onTestConnector,
+  initialConnector,
 }) => {
   const {
     application: { capabilities },
@@ -80,7 +95,16 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     preSubmitValidator: null,
   });
 
-  const initialConnector = {
+  useEffect(() => {
+    if (initialConnector && allActionTypes && !actionType) {
+      const foundActionType = allActionTypes[initialConnector.actionTypeId];
+      if (foundActionType) {
+        setActionType(foundActionType);
+      }
+    }
+  }, [initialConnector, allActionTypes, actionType]);
+
+  const emptyConnector = {
     actionTypeId: actionType?.id ?? '',
     isDeprecated: false,
     config: {},
@@ -89,10 +113,20 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     isConnectorTypeDeprecated: false,
   };
 
+  // create the current connector that the form will use
+  const currentConnector = initialConnector
+    ? {
+        ...emptyConnector,
+        ...initialConnector,
+        actionTypeId: initialConnector.actionTypeId,
+      }
+    : emptyConnector;
+
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
+  const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
 
   const actionTypeModel: ActionTypeModel | null =
@@ -294,7 +328,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             )}
             <ConnectorForm
               actionTypeModel={actionTypeModel}
-              connector={initialConnector}
+              connector={currentConnector}
               isEdit={false}
               onChange={setFormState}
               setResetForm={setResetForm}
@@ -356,6 +390,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         hasConnectorTypeSelected={hasConnectorTypeSelected}
         onBack={resetActionType}
         onCancel={onClose}
+        isUsingInitialConnector={isUsingInitialConnector}
       />
     </EuiFlyout>
   );
