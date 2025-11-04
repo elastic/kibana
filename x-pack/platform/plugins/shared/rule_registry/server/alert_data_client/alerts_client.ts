@@ -71,6 +71,11 @@ import { getConsumersFilter } from '../lib/get_consumers_filter';
 import { mergeUniqueFieldsByName } from '../utils/unique_fields';
 import { getAlertFieldsFromIndexFetcher } from '../utils/get_alert_fields_from_index_fetcher';
 import type { GetAlertFieldsResponseV1 } from '../routes/get_alert_fields';
+import {
+  ADD_TAGS_UPDATE_SCRIPT,
+  REMOVE_TAGS_UPDATE_SCRIPT,
+  REPLACE_TAGS_UPDATE_SCRIPT,
+} from '../utils/alert_client_bulk_update_scripts';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -109,6 +114,15 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
   status: string;
   _version?: string;
   index: string;
+}
+
+export interface PatchTagOptions<Params extends RuleTypeParams> {
+  alertIds?: string[] | null;
+  addTags?: string[] | null;
+  removeTags?: string[] | null;
+  tags?: string[] | null;
+  index: string;
+  query?: object | string | null;
 }
 
 export interface BulkUpdateOptions<Params extends RuleTypeParams> {
@@ -856,7 +870,112 @@ export class AlertsClient {
         throw err;
       }
     } else {
-      throw Boom.badRequest('no ids or query were provided for updating');
+      throw Boom.badRequest('no alert ids or query were provided for updating');
+    }
+  }
+
+  public async patchTags<Params extends RuleTypeParams = never>({
+    alertIds,
+    query,
+    index,
+    addTags,
+    removeTags,
+    tags,
+  }: PatchTagOptions<Params> & { addTags?: string[]; removeTags?: string[]; tags?: string[] }) {
+    // rejects at the route level if more than 1000 id's are passed in
+    const scriptOps: string[] = [];
+    const params: Record<string, string[] | STATUS_VALUES> = {};
+
+    if (addTags != null && addTags.length > 0) {
+      params.addTags = addTags;
+      scriptOps.push(ADD_TAGS_UPDATE_SCRIPT);
+    }
+
+    if (removeTags != null && removeTags.length > 0) {
+      params.removeTags = removeTags;
+      scriptOps.push(REMOVE_TAGS_UPDATE_SCRIPT);
+    }
+
+    if (tags != null && tags.length > 0) {
+      params.tags = tags;
+      scriptOps.push(REPLACE_TAGS_UPDATE_SCRIPT);
+    }
+
+    if (scriptOps.length === 0) {
+      this.logger.debug(`patchTags: No alerts found to update in index=${index}`);
+      return { updated: 0, errors: [], message: 'No alerts found to update.' };
+    }
+
+    const script = {
+      source: scriptOps.join('\n'),
+      lang: 'painless',
+      params: Object.keys(params).length > 0 ? params : undefined,
+    };
+
+    // rejects at the route level if more than 1000 id's are passed in
+    if (alertIds && alertIds.length > 0) {
+      const alerts = alertIds.map((id) => ({ id, index }));
+      const mgetRes = await this.ensureAllAlertsAuthorized({
+        alerts,
+        operation: WriteOperations.Update,
+      });
+
+      const bulkUpdateRequest = [];
+
+      for (const item of mgetRes.docs) {
+        if ('found' in item && item.found) {
+          bulkUpdateRequest.push(
+            {
+              update: {
+                _index: item._index,
+                _id: item._id,
+              },
+            },
+            { script }
+          );
+        }
+      }
+
+      if (bulkUpdateRequest.length === 0) {
+        return;
+      }
+
+      const bulkUpdateResponse = await this.esClient.bulk({
+        refresh: 'wait_for',
+        body: bulkUpdateRequest,
+      });
+      return bulkUpdateResponse;
+    } else if (query) {
+      try {
+        // execute search after with query + authorization filter
+        // audit results of that query
+        const fetchAndAuditResponse = await this.queryAndAuditAllAlerts({
+          query,
+          index,
+          operation: WriteOperations.Update,
+        });
+
+        if (!fetchAndAuditResponse?.auditedAlerts) {
+          throw Boom.forbidden('Failed to audit alerts');
+        }
+
+        // executes updateByQuery with query + authorization filter
+        // used in the queryAndAuditAllAlerts function
+
+        const result = await this.esClient.updateByQuery({
+          index,
+          conflicts: 'proceed',
+          script,
+          query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
+          ignore_unavailable: true,
+        });
+        return result;
+      } catch (err) {
+        this.logger.error(`bulkUpdate threw an error: ${err}`);
+        throw err;
+      }
+    } else {
+      throw Boom.badRequest('no alert ids or query were provided for updating');
     }
   }
 

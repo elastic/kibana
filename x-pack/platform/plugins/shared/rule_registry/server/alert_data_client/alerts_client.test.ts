@@ -12,6 +12,12 @@ import type { ConstructorOptions } from './alerts_client';
 import { AlertsClient } from './alerts_client';
 import { fromKueryExpression } from '@kbn/es-query';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
+import {
+  ADD_TAGS_UPDATE_SCRIPT,
+  REMOVE_TAGS_UPDATE_SCRIPT,
+  REPLACE_TAGS_UPDATE_SCRIPT,
+} from '../utils/alert_client_bulk_update_scripts';
 
 describe('AlertsClient', () => {
   const alertingAuthMock = alertingAuthorizationMock.create();
@@ -499,6 +505,511 @@ describe('AlertsClient', () => {
       const response = await alertsClient.getAlertFields(['siem.esqlRule']);
 
       expect(response.fields).toHaveLength(0);
+    });
+  });
+
+  describe('patchTags', () => {
+    beforeEach(() => {
+      esClientMock.mget.mockResolvedValue({
+        docs: [
+          {
+            _index: '.alerts-security.alerts-default',
+            _id: 'alert-1',
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'test-rule-type-1',
+              [ALERT_RULE_CONSUMER]: 'foo',
+              [SPACE_IDS]: ['space-1'],
+              '@timestamp': '2023-01-01T00:00:00.000Z',
+            },
+            found: true,
+          },
+          {
+            _index: '.alerts-security.alerts-default',
+            _id: 'alert-2',
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'test-rule-type-1',
+              [ALERT_RULE_CONSUMER]: 'foo',
+              [SPACE_IDS]: ['space-1'],
+              '@timestamp': '2023-01-01T00:00:00.000Z',
+            },
+            found: true,
+          },
+        ],
+      });
+
+      esClientMock.bulk.mockResolvedValue({
+        took: 5,
+        errors: false,
+        items: [
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-1',
+              _version: 1,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-2',
+              _version: 1,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              status: 200,
+            },
+          },
+        ],
+      });
+    });
+
+    it('should bulk update alerts with addTags only', async () => {
+      const result = await alertsClient.patchTags({
+        alertIds: ['alert-1', 'alert-2'],
+        index: '.alerts-security.alerts-default',
+        addTags: ['urgent', 'production'],
+      });
+
+      expect(esClientMock.mget).toHaveBeenCalledWith({
+        docs: [
+          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+        ],
+      });
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        body: [
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-1',
+            },
+          },
+          {
+            script: {
+              source: ADD_TAGS_UPDATE_SCRIPT,
+              lang: 'painless',
+              params: {
+                addTags: ['urgent', 'production'],
+              },
+            },
+          },
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-2',
+            },
+          },
+          {
+            script: {
+              source: ADD_TAGS_UPDATE_SCRIPT,
+              lang: 'painless',
+              params: {
+                addTags: ['urgent', 'production'],
+              },
+            },
+          },
+        ],
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "errors": false,
+          "items": Array [
+            Object {
+              "update": Object {
+                "_id": "alert-1",
+                "_index": ".alerts-security.alerts-default",
+                "_shards": Object {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 1,
+                },
+                "_version": 1,
+                "result": "updated",
+                "status": 200,
+              },
+            },
+            Object {
+              "update": Object {
+                "_id": "alert-2",
+                "_index": ".alerts-security.alerts-default",
+                "_shards": Object {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 1,
+                },
+                "_version": 1,
+                "result": "updated",
+                "status": 200,
+              },
+            },
+          ],
+          "took": 5,
+        }
+      `);
+    });
+
+    it('should bulk update alerts with removeTags only', async () => {
+      const result = await alertsClient.patchTags({
+        alertIds: ['alert-1', 'alert-2'],
+        index: '.alerts-security.alerts-default',
+        removeTags: ['outdated', 'test'],
+      });
+
+      expect(esClientMock.mget).toHaveBeenCalledWith({
+        docs: [
+          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+        ],
+      });
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        body: [
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-1',
+            },
+          },
+          {
+            script: {
+              source: REMOVE_TAGS_UPDATE_SCRIPT,
+              lang: 'painless',
+              params: {
+                removeTags: ['outdated', 'test'],
+              },
+            },
+          },
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-2',
+            },
+          },
+          {
+            script: {
+              source: REMOVE_TAGS_UPDATE_SCRIPT,
+              lang: 'painless',
+              params: {
+                removeTags: ['outdated', 'test'],
+              },
+            },
+          },
+        ],
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "errors": false,
+          "items": Array [
+            Object {
+              "update": Object {
+                "_id": "alert-1",
+                "_index": ".alerts-security.alerts-default",
+                "_shards": Object {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 1,
+                },
+                "_version": 1,
+                "result": "updated",
+                "status": 200,
+              },
+            },
+            Object {
+              "update": Object {
+                "_id": "alert-2",
+                "_index": ".alerts-security.alerts-default",
+                "_shards": Object {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 1,
+                },
+                "_version": 1,
+                "result": "updated",
+                "status": 200,
+              },
+            },
+          ],
+          "took": 5,
+        }
+      `);
+    });
+
+    it('should bulk update alerts with both addTags and removeTags', async () => {
+      const result = await alertsClient.patchTags({
+        alertIds: ['alert-1', 'alert-2'],
+        index: '.alerts-security.alerts-default',
+        addTags: ['urgent'],
+        removeTags: ['outdated'],
+      });
+
+      expect(esClientMock.mget).toHaveBeenCalledWith({
+        docs: [
+          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+        ],
+      });
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        body: [
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-1',
+            },
+          },
+          {
+            script: {
+              source: [ADD_TAGS_UPDATE_SCRIPT, REMOVE_TAGS_UPDATE_SCRIPT].join('\n'),
+              lang: 'painless',
+              params: {
+                addTags: ['urgent'],
+                removeTags: ['outdated'],
+              },
+            },
+          },
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-2',
+            },
+          },
+          {
+            script: {
+              source: [ADD_TAGS_UPDATE_SCRIPT, REMOVE_TAGS_UPDATE_SCRIPT].join('\n'),
+              lang: 'painless',
+              params: {
+                addTags: ['urgent'],
+                removeTags: ['outdated'],
+              },
+            },
+          },
+        ],
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "errors": false,
+          "items": Array [
+            Object {
+              "update": Object {
+                "_id": "alert-1",
+                "_index": ".alerts-security.alerts-default",
+                "_shards": Object {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 1,
+                },
+                "_version": 1,
+                "result": "updated",
+                "status": 200,
+              },
+            },
+            Object {
+              "update": Object {
+                "_id": "alert-2",
+                "_index": ".alerts-security.alerts-default",
+                "_shards": Object {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 1,
+                },
+                "_version": 1,
+                "result": "updated",
+                "status": 200,
+              },
+            },
+          ],
+          "took": 5,
+        }
+      `);
+    });
+
+    it('should bulk update alerts with tags', async () => {
+      const result = await alertsClient.patchTags({
+        alertIds: ['alert-1', 'alert-2'],
+        index: '.alerts-security.alerts-default',
+        tags: ['urgent'],
+      });
+
+      expect(esClientMock.mget).toHaveBeenCalledWith({
+        docs: [
+          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+        ],
+      });
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        body: [
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-1',
+            },
+          },
+          {
+            script: {
+              source: [REPLACE_TAGS_UPDATE_SCRIPT].join('\n'),
+              lang: 'painless',
+              params: {
+                tags: ['urgent'],
+              },
+            },
+          },
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-2',
+            },
+          },
+          {
+            script: {
+              source: [REPLACE_TAGS_UPDATE_SCRIPT].join('\n'),
+              lang: 'painless',
+              params: {
+                tags: ['urgent'],
+              },
+            },
+          },
+        ],
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "errors": false,
+          "items": Array [
+            Object {
+              "update": Object {
+                "_id": "alert-1",
+                "_index": ".alerts-security.alerts-default",
+                "_shards": Object {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 1,
+                },
+                "_version": 1,
+                "result": "updated",
+                "status": 200,
+              },
+            },
+            Object {
+              "update": Object {
+                "_id": "alert-2",
+                "_index": ".alerts-security.alerts-default",
+                "_shards": Object {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 1,
+                },
+                "_version": 1,
+                "result": "updated",
+                "status": 200,
+              },
+            },
+          ],
+          "took": 5,
+        }
+      `);
+    });
+
+    it('should return early when no operations are provided', async () => {
+      const result = await alertsClient.patchTags({
+        alertIds: ['alert-1', 'alert-2'],
+        index: '.alerts-security.alerts-default',
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "errors": Array [],
+          "message": "No alerts found to update.",
+          "updated": 0,
+        }
+      `);
+      expect(esClientMock.mget).not.toHaveBeenCalled();
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when alert ids and query are empty', async () => {
+      await expect(
+        alertsClient.patchTags({
+          alertIds: [],
+          query: '',
+          index: '.alerts-security.alerts-default',
+          addTags: ['urgent', 'production'],
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: no alert ids or query were provided for updating]`);
+
+      expect(esClientMock.mget).not.toHaveBeenCalled();
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('patchTags edge cases', () => {
+    beforeEach(() => {
+      esClientMock.mget.mockResolvedValue({
+        docs: [
+          {
+            _index: '.alerts-security.alerts-default',
+            _id: 'alert-1',
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'test-rule-type-1',
+              [ALERT_RULE_CONSUMER]: 'foo',
+              [SPACE_IDS]: ['space-1'],
+              '@timestamp': '2023-01-01T00:00:00.000Z',
+            },
+            found: true,
+          },
+        ],
+      });
+
+      esClientMock.bulk.mockResolvedValue({
+        took: 5,
+        errors: false,
+        items: [
+          {
+            update: {
+              _index: '.alerts-security.alerts-default',
+              _id: 'alert-1',
+              _version: 1,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              status: 200,
+            },
+          },
+        ],
+      });
+    });
+
+    it('should handle empty addTags array', async () => {
+      await alertsClient.patchTags({
+        alertIds: ['alert-1'],
+        index: '.alerts-security.alerts-default',
+        addTags: [],
+      });
+
+      expect(esClientMock.mget).not.toHaveBeenCalled();
+
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should handle empty removeTags array', async () => {
+      await alertsClient.patchTags({
+        alertIds: ['alert-1'],
+        index: '.alerts-security.alerts-default',
+        removeTags: [],
+      });
+
+      expect(esClientMock.mget).not.toHaveBeenCalled();
+
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
     });
   });
 });
