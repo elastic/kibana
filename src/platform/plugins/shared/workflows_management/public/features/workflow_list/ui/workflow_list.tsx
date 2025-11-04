@@ -219,7 +219,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         field: 'triggers',
         name: 'Trigger',
-        width: '16%',
+        width: '12%',
         render: (value: unknown, item: WorkflowListItemDto) => (
           <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
             <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
