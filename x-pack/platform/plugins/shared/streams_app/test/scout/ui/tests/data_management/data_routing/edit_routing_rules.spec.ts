@@ -79,7 +79,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.streams.clickEditRoutingRule('logs.edit-test-2');
 
     // Should now be editing the second rule
-    await expect(page.getByTestId('streamsAppConditionEditorValueText')).toHaveValue('info');
+    expect(await pageObjects.streams.conditionEditorValueComboBox.getSelectedValue()).toBe('info');
   });
 
   test('should remove routing rule with confirmation', async ({ page, pageObjects }) => {

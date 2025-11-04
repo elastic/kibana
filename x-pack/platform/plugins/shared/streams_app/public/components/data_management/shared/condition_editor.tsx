@@ -191,7 +191,7 @@ function FilterConditionForm(props: {
                 suggestions={valueSuggestions}
                 compressed
                 value={value}
-                data-test-subj="streamsAppConditionEditorValueText"
+                dataTestSubj="streamsAppConditionEditorValueText"
                 onChange={(newValue) => {
                   handleValueChange(newValue);
                 }}
