@@ -89,7 +89,7 @@ export const GraphVisualization: React.FC = memo(() => {
       const docMode = getNodeDocumentMode(node);
       const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
 
-      const showEntityPreview = (item: { id: string }) => {
+      const showEntityPreview = (item: { id: string; entity?: unknown }) => {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
@@ -97,8 +97,7 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
-            // TODO: Remove hardcoded value once https://github.com/elastic/kibana/issues/232226 is implemented
-            isEngineMetadataExist: true,
+            isEngineMetadataExist: !!item.entity,
           },
         });
       };
