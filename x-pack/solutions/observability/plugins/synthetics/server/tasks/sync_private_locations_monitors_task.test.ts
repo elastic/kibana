@@ -231,6 +231,30 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         maxCleanUpRetries: 2,
       });
     });
+
+    it('should update lastStartedAt to the current startedAt value', async () => {
+      const initialLastStartedAt = '2023-01-01T12:00:00.000Z';
+      const startedAt = new Date('2024-06-01T10:00:00.000Z');
+      const taskInstance = {
+        ...getMockTaskInstance({ lastStartedAt: initialLastStartedAt }),
+        startedAt,
+      };
+      jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
+        hasDataChanged: false,
+      });
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.state.lastStartedAt).toBe(startedAt.toISOString());
+    });
   });
 
   describe('hasAnyDataChanged', () => {
@@ -242,7 +266,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasMWsChanged({
         taskState: { lastTotalMWs: 1 } as any,
         soClient: mockSoClient as any,
-        lastStartedAt: expect.anything(),
+        lastStartedAt: new Date().toISOString(),
       });
 
       expect(res.hasMWsChanged).toBe(true);
@@ -258,7 +282,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasMWsChanged({
         taskState: taskState as any,
         soClient: mockSoClient as any,
-        lastStartedAt: expect.anything(),
+        lastStartedAt: new Date().toISOString(),
       });
 
       expect(res.hasMWsChanged).toBe(false);
