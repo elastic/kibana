@@ -7287,6 +7287,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/migrator-test-kit@link:src/platform/packages/private/kbn-migrator-test-kit":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-agg-utils@link:x-pack/platform/packages/private/ml/agg_utils":
   version "0.0.0"
   uid ""
@@ -8008,6 +8012,10 @@
   uid ""
 
 "@kbn/saved-object-test-plugin@link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-objects-example-plugin@link:examples/saved_objects":
   version "0.0.0"
   uid ""
 
