@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';

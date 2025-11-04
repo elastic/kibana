@@ -47,8 +47,8 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
-import { delay } from './test_utils';
 import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
+import { delay } from './utils';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 

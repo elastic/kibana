@@ -16,7 +16,7 @@ import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
