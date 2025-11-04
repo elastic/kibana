@@ -23,7 +23,7 @@ import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_bas
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { AssistantSpaceIdProvider, useAssistantContext } from '../../..';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
