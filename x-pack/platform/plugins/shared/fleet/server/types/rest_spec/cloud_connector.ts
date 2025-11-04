@@ -7,47 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-// Schema for CloudConnectorSecretReference
-const CloudConnectorSecretReferenceSchema = schema.object({
-  isSecretRef: schema.boolean(),
-  id: schema.string(),
-});
-
-// Schema for CloudConnectorVar (text type)
-const CloudConnectorVarSchema = schema.object({
-  type: schema.maybe(schema.literal('text')),
-  value: schema.string(),
-});
-
-// Schema for CloudConnectorSecretVar (password type with secret reference)
-const CloudConnectorSecretVarSchema = schema.object({
-  type: schema.maybe(schema.literal('password')),
-  value: CloudConnectorSecretReferenceSchema,
-  frozen: schema.maybe(schema.boolean()),
-});
-
-// Schema for AWS Cloud Connector Vars
-
-const AwsCloudConnectorVarsSchema = schema.object({
-  role_arn: CloudConnectorVarSchema,
-  external_id: CloudConnectorSecretVarSchema,
-});
-
-// Schema for Azure Cloud Connector Vars
-const AzureCloudConnectorVarsSchema = schema.object({
-  tenant_id: CloudConnectorSecretVarSchema,
-  client_id: CloudConnectorSecretVarSchema,
-  azure_credentials_cloud_connector_id: CloudConnectorVarSchema,
-});
-
-// Conditional CloudConnectorVars schema based on cloudProvider
-const CloudConnectorVarsSchema = schema.conditional(
-  schema.siblingRef('cloudProvider'),
-  'azure',
-  AzureCloudConnectorVarsSchema,
-  AwsCloudConnectorVarsSchema
-);
-
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -61,7 +20,25 @@ export const CreateCloudConnectorRequestSchema = {
         meta: { description: 'The cloud provider type: aws, azure, or gcp.' },
       }
     ),
-    vars: CloudConnectorVarsSchema,
+    vars: schema.recordOf(
+      schema.string({ minLength: 1, maxLength: 100 }),
+      schema.oneOf([
+        schema.string({ maxLength: 1000 }),
+        schema.number(),
+        schema.boolean(),
+        schema.object({
+          type: schema.string({ maxLength: 50 }),
+          value: schema.oneOf([
+            schema.string({ maxLength: 1000 }),
+            schema.object({
+              isSecretRef: schema.boolean(),
+              id: schema.string({ maxLength: 255 }),
+            }),
+          ]),
+          frozen: schema.maybe(schema.boolean()),
+        }),
+      ])
+    ),
   }),
 };
 
