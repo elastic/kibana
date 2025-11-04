@@ -115,7 +115,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         id: 'Synthetics:Sync-Private-Location-Monitors-single-instance',
         state: {},
         schedule: {
-          interval: '10m',
+          interval: '60m',
         },
         taskType: 'Synthetics:Sync-Private-Location-Monitors',
         params: {},
