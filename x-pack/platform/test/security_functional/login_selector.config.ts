@@ -92,6 +92,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               realm: 'unknown_realm',
               description: 'Do-not-log-in-with-THIS-SAML',
               icon: 'logoAWS',
+              origin: [
+                'https://some-domain-that-doesnt-exist.com',
+                getUrl.baseUrl(kibanaFunctionalConfig.get('servers.kibana')),
+              ],
             },
             saml_never: {
               order: 4,
@@ -107,6 +111,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
                 'https://some-domain-that-doesnt-exist.com',
                 'https://some-other-domain-that-doesnt-exist.com',
               ],
+              icon: 'logoKibana',
+            },
+            saml_hidden_2: {
+              order: 6,
+              realm: 'saml_never',
+              description: 'This-SAML-should-be-hidden',
+              origin: 'https://some-domain-that-doesnt-exist.com',
               icon: 'logoKibana',
             },
           },

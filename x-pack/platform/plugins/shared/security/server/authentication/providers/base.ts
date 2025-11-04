@@ -41,7 +41,6 @@ export interface AuthenticationProviderOptions {
     loggedOut: (request: KibanaRequest) => string;
   };
   isElasticCloudDeployment: () => boolean;
-  origin?: string | string[];
 }
 
 /**
@@ -75,17 +74,11 @@ export abstract class BaseAuthenticationProvider {
   protected readonly logger: Logger;
 
   /**
-   * The origins that can the provider can be used to authenticate requests from.
-   */
-  public readonly origin: string | string[] | undefined;
-
-  /**
    * Instantiates AuthenticationProvider.
    * @param options Provider options object.
    */
   constructor(protected readonly options: Readonly<AuthenticationProviderOptions>) {
     this.logger = options.logger;
-    this.origin = options.origin;
   }
 
   /**

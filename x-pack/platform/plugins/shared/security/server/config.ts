@@ -42,6 +42,20 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
     schema.never()
   );
 
+const providerOriginSchema = schema.uri({
+  validate(originConfig) {
+    try {
+      const url = new URL(originConfig);
+
+      if (originConfig !== url.origin) {
+        return `expected a lower-case origin (scheme, host, and optional port) but got: ${originConfig}`;
+      }
+    } catch (error) {
+      return `Invalid origin URI: ${error.message}`;
+    }
+  },
+});
+
 function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
   return {
     enabled: schema.boolean({ defaultValue: true }),
@@ -50,7 +64,9 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     description: schema.maybe(schema.string()),
     hint: schema.maybe(schema.string()),
     icon: schema.maybe(schema.string()),
-    origin: schema.maybe(schema.oneOf([schema.uri(), schema.arrayOf(schema.uri())])),
+    origin: schema.maybe(
+      schema.oneOf([providerOriginSchema, schema.arrayOf(providerOriginSchema)])
+    ),
     accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     session: schema.object({
       idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),

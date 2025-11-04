@@ -131,7 +131,8 @@ const assistanceCss = (theme: UseEuiTheme) => css`
 `;
 
 const noProvidersMessage = i18n.translate('xpack.security.noAuthProvidersForDomain', {
-  defaultMessage: 'No authentication providers have been configured for this domain.',
+  defaultMessage: 'No authentication providers have been configured for this origin ({origin}).',
+  values: { origin: window.location.origin },
 });
 
 export class LoginForm extends Component<LoginFormProps, State> {

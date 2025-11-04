@@ -1454,6 +1454,25 @@ describe('config schema', () => {
         ).toEqual(['https://elastic.co', 'https://localhost:5601']);
       });
 
+      it('should only allow the origin component of the URI', () => {
+        const uriErrorMessage =
+          '[authc.providers]: types that failed validation:\n' +
+          '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+          '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+          ' - [origin.0]: expected a lower-case origin (scheme, host, and optional port) but got: http://test.com/too-long\n' +
+          ' - [origin.1]: could not parse array value from json input';
+
+        const authConfig = {
+          authc: {
+            providers: {
+              basic: { provider1: { order: 0, origin: 'http://test.com/too-long' as any } },
+            },
+          },
+        };
+
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+      });
+
       it('should be allowed for all provider types', () => {
         const origin = 'https://elastic.co';
 

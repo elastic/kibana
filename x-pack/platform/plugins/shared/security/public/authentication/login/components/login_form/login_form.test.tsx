@@ -6,41 +6,56 @@
  */
 
 import { EuiCallOut, EuiIcon, EuiProvider } from '@elastic/eui';
-import { act } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, queryByTestId } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { i18n } from '@kbn/i18n';
-import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
+import {
+  findTestSubject,
+  mountWithIntl,
+  nextTick,
+  renderWithI18n,
+  shallowWithIntl,
+} from '@kbn/test-jest-helpers';
 
 import { LoginForm, MessageType, PageMode } from './login_form';
 
+function getPageModeAssertions(mode: PageMode): Array<[string, boolean]> {
+  return mode === PageMode.Form
+    ? [
+        ['loginForm', true],
+        ['loginSelector', false],
+        ['loginHelp', false],
+        ['autoLoginOverlay', false],
+      ]
+    : mode === PageMode.Selector
+    ? [
+        ['loginForm', false],
+        ['loginSelector', true],
+        ['loginHelp', false],
+        ['autoLoginOverlay', false],
+      ]
+    : [
+        ['loginForm', false],
+        ['loginSelector', false],
+        ['loginHelp', true],
+        ['autoLoginOverlay', false],
+      ];
+}
+
 function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {
-  const assertions: Array<[string, boolean]> =
-    mode === PageMode.Form
-      ? [
-          ['loginForm', true],
-          ['loginSelector', false],
-          ['loginHelp', false],
-          ['autoLoginOverlay', false],
-        ]
-      : mode === PageMode.Selector
-      ? [
-          ['loginForm', false],
-          ['loginSelector', true],
-          ['loginHelp', false],
-          ['autoLoginOverlay', false],
-        ]
-      : [
-          ['loginForm', false],
-          ['loginSelector', false],
-          ['loginHelp', true],
-          ['autoLoginOverlay', false],
-        ];
-  for (const [selector, exists] of assertions) {
+  for (const [selector, exists] of getPageModeAssertions(mode)) {
     expect(findTestSubject(wrapper, selector).exists()).toBe(exists);
+  }
+}
+
+function expectPageModeRenderResult(renderResult: RenderResult, mode: PageMode) {
+  for (const [selector, exists] of getPageModeAssertions(mode)) {
+    expect(!!renderResult.queryByTestId(selector)).toBe(exists);
   }
 }
 
@@ -399,7 +414,7 @@ describe('LoginForm', () => {
       ]);
     });
 
-    it('does not render providers with origin configs that to not match current page', async () => {
+    it('does not render providers with origin configs that do not match current page', async () => {
       const currentURL = `https://some-host.com/login?next=${encodeURIComponent(
         '/some-base-path/app/kibana#/home?_g=()'
       )}`;
@@ -407,7 +422,7 @@ describe('LoginForm', () => {
       const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
 
       window.location = { ...window.location, href: currentURL, origin: 'https://some-host.com' };
-      const wrapper = mountWithIntl(
+      const wrapper = renderWithI18n(
         <EuiProvider>
           <LoginForm
             http={coreStartMock.http}
@@ -449,14 +464,18 @@ describe('LoginForm', () => {
 
       expect(window.location.origin).toBe('https://some-host.com');
 
-      expectPageMode(wrapper, PageMode.Selector);
+      expectPageModeRenderResult(wrapper, PageMode.Selector);
 
-      const result = findTestSubject(wrapper, 'loginCard-', '^=').map((card) => {
-        const hint = findTestSubject(card, 'card-hint');
+      wrapper.queryAllByTestId(/^loginCard-/);
+
+      const result = wrapper.queryAllByTestId(/^loginCard-/).map((card) => {
+        const hint = queryByTestId(card, 'card-hint');
+        const title = queryByTestId(card, 'card-title');
+        const icon = card.querySelector('[data-euiicon-type]');
         return {
-          title: findTestSubject(card, 'card-title').text(),
-          hint: hint.exists() ? hint.text() : '',
-          icon: card.find(EuiIcon).props().type,
+          title: title?.textContent ?? '',
+          hint: hint?.textContent ?? '',
+          icon: icon?.getAttribute('data-euiicon-type') ?? null,
         };
       });
 
@@ -471,10 +490,17 @@ describe('LoginForm', () => {
         '/some-base-path/app/kibana#/home?_g=()'
       )}`;
 
-      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      window.location = {
+        ...window.location,
+        href: currentURL,
+        origin: 'https://some-host.com',
+      };
 
-      window.location = { ...window.location, href: currentURL, origin: 'https://some-host.com' };
-      const wrapper = mountWithIntl(
+      const coreStartMock = coreMock.createStart({
+        basePath: '/some-base-path',
+      });
+
+      const rendered = renderWithI18n(
         <EuiProvider>
           <LoginForm
             http={coreStartMock.http}
@@ -517,15 +543,16 @@ describe('LoginForm', () => {
 
       expect(window.location.origin).toBe('https://some-host.com');
 
-      expect(findTestSubject(wrapper, 'loginForm').exists()).toBe(false);
-      expect(findTestSubject(wrapper, 'loginSelector').exists()).toBe(false);
-      expect(findTestSubject(wrapper, 'loginHelp').exists()).toBe(false);
-      expect(findTestSubject(wrapper, 'autoLoginOverlay').exists()).toBe(false);
-      expect(findTestSubject(wrapper, 'loginCard-', '^=').exists()).toBe(false);
+      expect(rendered.queryByTestId('loginForm')).toBeFalsy();
+      expect(rendered.queryByTestId('loginSelector')).toBeFalsy();
+      expect(rendered.queryByTestId('loginHelp')).toBeFalsy();
+      expect(rendered.queryByTestId('autoLoginOverlay')).toBeFalsy();
+      expect(rendered.queryAllByTestId(/^loginCard-/).length).toBe(0);
 
-      expect(findTestSubject(wrapper, 'loginErrorMessage').text()).toEqual(
+      expect((await rendered.findByTestId('loginErrorMessage')).textContent).toEqual(
         i18n.translate('xpack.security.noAuthProvidersForDomain', {
-          defaultMessage: 'No authentication providers have been configured for this domain.',
+          defaultMessage:
+            'No authentication providers have been configured for this origin (http://localhost).',
         })
       );
     });

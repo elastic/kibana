@@ -340,32 +340,7 @@ export class Authenticator {
       return AuthenticationResult.notHandled();
     }
 
-    const { origin: originHeader } = request.headers;
-
-    const filteredProviders = providers.filter(([name, provider]) => {
-      const providerOrigin = provider.origin;
-
-      return (
-        !originHeader ||
-        !providerOrigin ||
-        (Array.isArray(providerOrigin)
-          ? providerOrigin.includes(originHeader as string)
-          : providerOrigin === originHeader)
-      );
-    });
-
-    if (filteredProviders.length === 0) {
-      this.logger.warn(
-        `Login attempt for provider with ${
-          isLoginAttemptWithProviderName(attempt)
-            ? `name ${attempt.provider.name}`
-            : `type "${(attempt.provider as Record<string, string>).type}"`
-        } is detected, but originated from an invalid origin.`
-      );
-      return AuthenticationResult.notHandled();
-    }
-
-    for (const [providerName, provider] of filteredProviders) {
+    for (const [providerName, provider] of providers) {
       const startTime = performance.now();
       // Check if current session has been set by this provider.
       const ownsSession =

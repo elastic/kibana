@@ -277,7 +277,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('correctly hides login selector with different origin configuration', async () => {
       expect(await testSubjects.exists(`loginCard-saml/saml1`)).to.be(true);
+      expect(await testSubjects.exists(`loginCard-saml/unknown_saml`)).to.be(true);
+
       expect(await testSubjects.exists(`loginCard-saml/saml_hidden`)).to.be(false);
+      expect(await testSubjects.exists(`loginCard-saml/saml_hidden_2`)).to.be(false);
     });
   });
 }
