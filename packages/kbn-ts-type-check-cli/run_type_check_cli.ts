@@ -22,6 +22,7 @@ import {
   ROOT_REFS_CONFIG_PATH,
 } from './root_refs_config';
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
+import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
