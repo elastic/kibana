@@ -87,7 +87,7 @@ export interface SearchSessionRequestInfo {
   /**
    * Search status - used to avoid extra calls to ES when tracking search IDs
    */
-  status: SearchStatus;
+  status?: SearchStatus;
 }
 
 export type SearchSessionRequestStatus =
