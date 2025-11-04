@@ -122,19 +122,19 @@ export const DataSourceCard = ({
       >
         <EuiSpacer size="s" />
         {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+        {isEmpty(previewDocs) ? (
+          <EuiEmptyPrompt
+            icon={<AssetImage type="noResults" size="s" />}
+            titleSize="xs"
+            title={<h4>{DATA_SOURCES_I18N.dataSourceCard.noDataPreview}</h4>}
+          />
+        ) : (
+          <PreviewTable
+            documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
+            height={150}
+          />
+        )}
       </EuiAccordion>
-      {isEmpty(previewDocs) ? (
-        <EuiEmptyPrompt
-          icon={<AssetImage type="noResults" size="s" />}
-          titleSize="xs"
-          title={<h4>{DATA_SOURCES_I18N.dataSourceCard.noDataPreview}</h4>}
-        />
-      ) : (
-        <PreviewTable
-          documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
-          height={150}
-        />
-      )}
     </EuiCheckableCard>
   );
 };

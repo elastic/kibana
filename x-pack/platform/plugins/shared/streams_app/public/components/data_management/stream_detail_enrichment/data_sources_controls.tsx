@@ -21,7 +21,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { getActiveDataSourceId } from './state_management/stream_enrichment_state_machine/utils';
+import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 import type { EnrichmentDataSourceWithUIAttributes } from './types';
 import { DATA_SOURCES_I18N } from './data_sources_flyout/translations';
 
@@ -68,8 +68,8 @@ export const DataSourcesControls = () => {
 const DataSourceSelector = () => {
   const { selectDataSource } = useStreamEnrichmentEvents();
   const dataSourcesRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
-  const selectedDataSourceId = useStreamEnrichmentSelector((state) =>
-    getActiveDataSourceId(state.context.dataSourcesRefs)
+  const selectedDataSourceRef = useStreamEnrichmentSelector((state) =>
+    getActiveDataSourceRef(state.context.dataSourcesRefs)
   );
 
   const options = dataSourcesRefs.map((dataSourceRef) => {
@@ -96,7 +96,7 @@ const DataSourceSelector = () => {
         defaultMessage: 'Select a data source...',
       })}
       options={options}
-      valueOfSelected={selectedDataSourceId ?? undefined}
+      valueOfSelected={selectedDataSourceRef?.id}
       onChange={(id) => selectDataSource(id)}
       hasDividers
       css={css`

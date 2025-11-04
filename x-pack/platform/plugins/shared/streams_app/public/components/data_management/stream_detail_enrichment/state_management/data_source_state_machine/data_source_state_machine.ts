@@ -15,6 +15,7 @@ import type {
   DataSourceEvent,
   DataSourceMachineDeps,
   DataSourceToParentEvent,
+  DataSourceSimulationMode,
 } from './types';
 import {
   createDataCollectionFailureNofitier,
@@ -71,9 +72,10 @@ export const dataSourceMachine = setup({
   id: 'dataSource',
   context: ({ input }) => ({
     parentRef: input.parentRef,
+    data: [],
     dataSource: input.dataSource,
     streamName: input.streamName,
-    data: [],
+    simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
   }),
   initial: 'determining',
   states: {
@@ -83,7 +85,7 @@ export const dataSourceMachine = setup({
     enabled: {
       initial: 'loadingData',
       on: {
-        'dataSource.toggleActivity': {
+        'dataSource.disable': {
           target: 'disabled',
           actions: [
             { type: 'toggleDataSourceActivity' },
@@ -147,7 +149,7 @@ export const dataSourceMachine = setup({
     },
     disabled: {
       on: {
-        'dataSource.toggleActivity': {
+        'dataSource.enable': {
           target: 'enabled',
           actions: [
             { type: 'toggleDataSourceActivity' },
@@ -176,3 +178,18 @@ export const createDataSourceMachineImplementations = ({
     notifyDataCollectionFailure: createDataCollectionFailureNofitier({ toasts }),
   },
 });
+
+const getSimulationModeByDataSourceType = (
+  dataSourceType: EnrichmentDataSourceWithUIAttributes['type']
+): DataSourceSimulationMode => {
+  switch (dataSourceType) {
+    case 'latest-samples':
+      return 'partial';
+    case 'kql-samples':
+      return 'partial';
+    case 'custom-samples':
+      return 'complete';
+    default:
+      return 'partial';
+  }
+};

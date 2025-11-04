@@ -15,7 +15,6 @@ import {
   stopChild,
   and,
   raise,
-  cancel,
   stateIn,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
@@ -53,7 +52,7 @@ import {
   defaultEnrichmentUrlState,
   findInsertIndex,
   getConfiguredSteps,
-  getDataSourcesSamples,
+  getActiveDataSourceSamples,
   getDataSourcesUrlState,
   getUpsertFields,
   getStepsForSimulation,
@@ -61,7 +60,7 @@ import {
   spawnDataSource,
   spawnStep,
   reorderSteps,
-  getActiveDataSourceId,
+  getActiveSimulationMode,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -250,29 +249,27 @@ export const streamEnrichmentMachine = setup({
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendStepsEventToSimulator: enqueueActions(
       ({ context, enqueue }, params: { type: StreamEnrichmentEvent['type'] }) => {
+        const simulationMode = getActiveSimulationMode(context);
+        const isPartialSimulation = simulationMode === 'partial';
         /**
          * When any processor is before persisted, we need to reset the simulator
          * because the processors are not in a valid order.
          * If the order allows it, notify the simulator to run the simulation based on the received event.
          */
-        if (selectWhetherAnyProcessorBeforePersisted(context)) {
+        if (isPartialSimulation && selectWhetherAnyProcessorBeforePersisted(context)) {
           enqueue('sendResetEventToSimulator');
         } else {
           enqueue.sendTo('simulator', {
             type: params.type,
-            steps: getStepsForSimulation({ stepRefs: context.stepRefs }),
+            steps: getStepsForSimulation({ stepRefs: context.stepRefs, isPartialSimulation }),
           });
         }
       }
     ),
-    sendDataSourcesSamplesToSimulator: sendTo(
-      'simulator',
-      ({ context }) => ({
-        type: 'simulation.receive_samples',
-        samples: getDataSourcesSamples(context),
-      }),
-      { delay: 800, id: 'send-samples-to-simulator' }
-    ),
+    sendDataSourcesSamplesToSimulator: sendTo('simulator', ({ context }) => ({
+      type: 'simulation.receive_samples',
+      samples: getActiveDataSourceSamples(context),
+    })),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
   },
   guards: {
@@ -420,32 +417,24 @@ export const streamEnrichmentMachine = setup({
               ],
             },
             'dataSources.select': {
-              actions: enqueueActions(({ enqueue, context, event }) => {
-                const activeDataSourceId = getActiveDataSourceId(context.dataSourcesRefs);
-
-                // Skip update in case the selected data source is already active
-                if (activeDataSourceId === event.id) {
-                  return;
-                }
-
-                // Disable the previous active data source
-                if (activeDataSourceId) {
-                  enqueue.sendTo(activeDataSourceId, {
-                    type: 'dataSource.toggleActivity',
+              actions: [
+                ({ context, event }) => {
+                  context.dataSourcesRefs.forEach((dataSourceRef) => {
+                    if (dataSourceRef.id === event.id) {
+                      dataSourceRef.send({ type: 'dataSource.enable' });
+                    } else {
+                      dataSourceRef.send({ type: 'dataSource.disable' });
+                    }
                   });
-                }
-                // Enable the selected data source
-                enqueue.sendTo(event.id, { type: 'dataSource.toggleActivity' });
-              }),
+                },
+                { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+              ],
             },
             'dataSource.change': {
               actions: raise({ type: 'url.sync' }),
             },
             'dataSource.dataChange': {
-              actions: [
-                cancel('send-samples-to-simulator'), // Debounce samples sent to simulator on multiple data sources retrieval
-                { type: 'sendDataSourcesSamplesToSimulator' },
-              ],
+              actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
             },
           },
           states: {
