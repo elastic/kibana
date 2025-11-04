@@ -39,7 +39,6 @@ import {
   RuleFeatureTour,
 } from '../../components/rules_table/feature_tour/rules_feature_tour';
 import { CreateRuleMenu } from '../../components/create_rule_menu';
-import { C } from 'oas/dist/extensions-ViDsWf_9.cjs';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -144,16 +143,19 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false} id={CREATE_NEW_RULE_TOUR_ANCHOR}>
-               {aiAssistedRuleCreationEnabled ? (<CreateRuleMenu loading={loading} isDisabled={!canUserCRUD || loading} />) : (
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>)}
+                {aiAssistedRuleCreationEnabled ? (
+                  <CreateRuleMenu loading={loading} isDisabled={!canUserCRUD || loading} />
+                ) : (
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusInCircle"
+                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                )}
               </EuiFlexItem>
               {/* TODO: removed when final UX is ready
               
