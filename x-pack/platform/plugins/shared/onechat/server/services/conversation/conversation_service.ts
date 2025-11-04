@@ -15,7 +15,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
-import { createStorage } from './storage';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
@@ -48,10 +47,9 @@ export class ConversationServiceImpl implements ConversationService {
     }
 
     const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
-    const storage = createStorage({ logger: this.logger, esClient });
     const user = { id: authUser.profile_uid!, username: authUser.username };
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
 
-    return createClient({ user, storage, space });
+    return createClient({ user, esClient, logger: this.logger, space });
   }
 }
