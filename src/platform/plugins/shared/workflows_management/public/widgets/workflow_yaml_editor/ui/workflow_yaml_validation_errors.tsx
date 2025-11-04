@@ -127,99 +127,95 @@ export function WorkflowYAMLValidationErrors({
   });
 
   return (
-    <div css={styles.container}>
-      <EuiAccordion
-        id={accordionId}
-        data-testid="wf-yaml-editor-validation-errors-list"
-        buttonContent={
-          <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
-            <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-            <EuiFlexItem css={styles.buttonContentText} className="button-content-text">
-              {buttonContent}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        arrowDisplay={
-          allValidationErrors !== null && allValidationErrors.length > 0 ? 'left' : 'none'
-        }
-        initialIsOpen={allValidationErrors !== null && allValidationErrors.length > 0}
-        isDisabled={allValidationErrors == null || allValidationErrors.length === 0}
-        css={styles.accordion}
-        extraAction={rightSide}
-      >
-        <div css={styles.separator} />
-        <div css={styles.accordionContent} className="eui-yScrollWithShadows">
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {sortedValidationErrors?.map((error, index) => (
-              <button
-                type="button"
-                key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
-                css={styles.validationError}
-                onClick={() => onErrorClick?.(error)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onErrorClick?.(error);
+    <EuiAccordion
+      id={accordionId}
+      data-testid="wf-yaml-editor-validation-errors-list"
+      buttonContent={
+        <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
+          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+          <EuiFlexItem css={styles.buttonContentText} className="button-content-text">
+            {buttonContent}
+          </EuiFlexItem>
+          <EuiFlexItem css={styles.buttonContentRightSide} grow={false}>
+            {rightSide}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      arrowDisplay={
+        allValidationErrors !== null && allValidationErrors.length > 0 ? 'left' : 'none'
+      }
+      initialIsOpen={allValidationErrors !== null && allValidationErrors.length > 0}
+      isDisabled={allValidationErrors == null || allValidationErrors.length === 0}
+      css={styles.accordion}
+    >
+      <div css={styles.separator} />
+      <div css={styles.accordionContent} className="eui-yScrollWithShadows">
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {sortedValidationErrors?.map((error, index) => (
+            <button
+              type="button"
+              key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
+              css={styles.validationError}
+              onClick={() => onErrorClick?.(error)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onErrorClick?.(error);
+                }
+              }}
+              tabIndex={0}
+            >
+              <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
+                <b>{error.startLineNumber}</b>
+                {':'}
+                {error.startColumn}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type={
+                    error.severity === 'error'
+                      ? 'errorFilled'
+                      : error.severity === 'warning'
+                      ? 'warningFilled'
+                      : 'iInCircle'
                   }
-                }}
-                tabIndex={0}
-              >
-                <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
-                  <b>{error.startLineNumber}</b>
-                  {':'}
-                  {error.startColumn}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type={
-                      error.severity === 'error'
-                        ? 'errorFilled'
-                        : error.severity === 'warning'
-                        ? 'warningFilled'
-                        : 'iInCircle'
-                    }
-                    color={
-                      error.severity === 'error'
-                        ? 'danger'
-                        : error.severity === 'warning'
-                        ? euiTheme.colors.vis.euiColorVis8
-                        : 'primary'
-                    }
-                    size="s"
-                    css={styles.validationErrorIcon}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText color="text" size="xs">
-                    <span>{error.message}</span>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs">
-                    <span>{error.source}</span>
-                  </EuiText>
-                </EuiFlexItem>
-              </button>
-            ))}
-          </EuiFlexGroup>
-        </div>
-      </EuiAccordion>
-    </div>
+                  color={
+                    error.severity === 'error'
+                      ? 'danger'
+                      : error.severity === 'warning'
+                      ? euiTheme.colors.vis.euiColorVis8
+                      : 'primary'
+                  }
+                  size="s"
+                  css={styles.validationErrorIcon}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="text" size="xs">
+                  <span>{error.message}</span>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  <span>{error.source}</span>
+                </EuiText>
+              </EuiFlexItem>
+            </button>
+          ))}
+        </EuiFlexGroup>
+      </div>
+    </EuiAccordion>
   );
 }
 
 const componentStyles = {
-  container: ({ euiTheme }: UseEuiTheme) =>
+  accordion: ({ euiTheme }: UseEuiTheme) =>
     css({
-      position: 'relative',
       height: '100%',
       padding: `0 ${euiTheme.size.m}`,
       borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-    }),
-  accordion: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      height: '100%',
+
       '& .euiAccordion__buttonContent': {
         width: '100%',
       },
@@ -234,7 +230,7 @@ const componentStyles = {
     }),
   buttonContent: ({ euiTheme }: UseEuiTheme) => css`
     width: 100%;
-    padding: ${euiTheme.size.m} 0;
+    padding: ${euiTheme.size.s} 0;
     color: ${euiTheme.colors.textParagraph};
     flex-wrap: nowrap !important;
   `,
