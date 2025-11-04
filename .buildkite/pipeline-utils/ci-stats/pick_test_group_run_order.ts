@@ -411,22 +411,22 @@ export async function pickTestGroupRunOrder() {
         overheadMin: 0.2,
         names: jestUnitConfigs,
       },
-      // {
-      //   type: INTEGRATION_TYPE,
-      //   defaultMin: 60,
-      //   maxMin: JEST_MAX_MINUTES,
-      //   overheadMin: 0.2,
-      //   names: jestIntegrationConfigs,
-      // },
-      // ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
-      //   type: FUNCTIONAL_TYPE,
-      //   defaultMin: 60,
-      //   queue,
-      //   maxMin: FUNCTIONAL_MAX_MINUTES,
-      //   minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-      //   overheadMin: 1.5,
-      //   names,
-      // })),
+      {
+        type: INTEGRATION_TYPE,
+        defaultMin: 60,
+        maxMin: JEST_MAX_MINUTES,
+        overheadMin: 0.2,
+        names: jestIntegrationConfigs,
+      },
+      ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
+        type: FUNCTIONAL_TYPE,
+        defaultMin: 60,
+        queue,
+        maxMin: FUNCTIONAL_MAX_MINUTES,
+        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
+        overheadMin: 1.5,
+        names,
+      })),
     ],
   });
 
@@ -522,7 +522,7 @@ export async function pickTestGroupRunOrder() {
             },
           }
         : [],
-      integration.count > 0
+      false
         ? {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
@@ -543,7 +543,7 @@ export async function pickTestGroupRunOrder() {
             },
           }
         : [],
-      functionalGroups.length
+      false
         ? {
             group: 'FTR Configs',
             key: 'ftr-configs',
