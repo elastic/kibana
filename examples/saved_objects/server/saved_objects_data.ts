@@ -37,6 +37,7 @@ export const typeBData: ({ id: string } & TypeBAttributes)[] = [
   },
 ];
 
+/** Designed for single Kibana instances */
 export const setupData = once(async function setupData(
   savedObjectsClient: SavedObjectsClientContract
 ) {
