@@ -99,10 +99,11 @@ export async function ensureEdotCollector({
   log.debug(`Writing collector config to ${COLLECTOR_CONFIG_FILE_PATH}`);
   await writeFile(COLLECTOR_CONFIG_FILE_PATH, collectorConfig);
 
-  const dockerComposeYaml = getDockerComposeYaml({
+  const dockerComposeYaml = await getDockerComposeYaml({
     collectorConfigPath: COLLECTOR_CONFIG_FILE_PATH,
     grpcPort,
     httpPort,
+    log,
   });
 
   log.debug(`Writing docker-compose file to ${DOCKER_COMPOSE_FILE_PATH}`);
