@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@kbn/react-query';
 import { renderHook } from '@testing-library/react';
 import { useGetDataUsageDataStreams } from './use_get_data_streams';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../common';
