@@ -19,11 +19,11 @@ const badgeCss = (euiTheme: EuiThemeComputed) => css`
   max-width: calc(${euiTheme.size.base} * 7.5);
 `;
 
+const euiPaletteRed9 = euiPaletteRed(14);
 interface EventTypeProps {
   eventTypeValue: React.ReactNode;
 }
 export function EventType({ eventTypeValue }: EventTypeProps) {
-  const euiPaletteRed9 = euiPaletteRed(14);
   const { euiTheme } = useEuiTheme();
   return (
     <EuiBadge color={euiPaletteRed9[9]} data-test-subj={dataTestSubj} css={badgeCss(euiTheme)}>
