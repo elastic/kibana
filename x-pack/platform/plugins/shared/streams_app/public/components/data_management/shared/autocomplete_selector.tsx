@@ -9,13 +9,14 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field';
 
-export interface FieldSuggestion {
+export interface Suggestion {
   name: string;
   type?: string;
 }
 
-export interface FieldSelectorProps {
+export interface AutocompleteSelectorProps {
   value?: string;
   onChange?: (value: string) => void;
   label?: string;
@@ -27,15 +28,16 @@ export interface FieldSelectorProps {
   dataTestSubj?: string;
   isInvalid?: boolean;
   error?: string;
-  suggestions?: FieldSuggestion[];
+  suggestions?: Suggestion[];
   autoFocus?: boolean;
+  hideSuggestions?: boolean;
   labelAppend?: React.ReactNode;
 }
 
 /**
  * Generalized field selector component with autocomplete suggestions
  */
-export const FieldSelector = ({
+export const AutocompleteSelector = ({
   value,
   onChange,
   label,
@@ -44,19 +46,23 @@ export const FieldSelector = ({
   disabled = false,
   compressed = false,
   fullWidth = false,
-  dataTestSubj = 'streamsAppFieldSelector',
+  dataTestSubj = 'streamsAppAutocompleteSelector',
   isInvalid,
   error,
   suggestions = [],
   autoFocus,
+  hideSuggestions = false,
   labelAppend,
-}: FieldSelectorProps) => {
+}: AutocompleteSelectorProps) => {
   const comboBoxOptions = useMemo(
     () =>
       suggestions.map((suggestion) => ({
         label: suggestion.name,
         value: suggestion.name,
-        'data-test-subj': `field-suggestion-${suggestion.name}`,
+        prepend: (
+          <FieldIcon type={suggestion.type || 'unknown'} size="s" className="eui-alignMiddle" />
+        ),
+        'data-test-subj': `autocomplete-suggestion-${suggestion.name}`,
       })),
     [suggestions]
   );
@@ -65,8 +71,26 @@ export const FieldSelector = ({
     if (!value) return [];
 
     const matchingSuggestion = comboBoxOptions.find((option) => option.value === value);
-    return matchingSuggestion ? [matchingSuggestion] : [{ label: value, value }];
-  }, [value, comboBoxOptions]);
+    if (matchingSuggestion) {
+      return [matchingSuggestion];
+    }
+
+    // For custom values not in suggestions, try to find the type
+    const suggestionWithType = suggestions.find((s) => s.name === value);
+    return [
+      {
+        label: value,
+        value,
+        prepend: (
+          <FieldIcon
+            type={suggestionWithType?.type || 'unknown'}
+            size="s"
+            className="eui-alignMiddle"
+          />
+        ),
+      },
+    ];
+  }, [value, comboBoxOptions, suggestions]);
 
   const handleSelectionChange = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -87,9 +111,12 @@ export const FieldSelector = ({
     [handleSelectionChange]
   );
 
-  const defaultPlaceholder = i18n.translate('xpack.streams.fieldSelector.defaultPlaceholder', {
-    defaultMessage: 'Select or type a field name...',
-  });
+  const defaultPlaceholder = i18n.translate(
+    'xpack.streams.autocompleteSelector.defaultPlaceholder',
+    {
+      defaultMessage: 'Select or type...',
+    }
+  );
 
   return (
     <>
@@ -119,6 +146,7 @@ export const FieldSelector = ({
             values: { searchValue: '{searchValue}' },
           })}
           autoFocus={autoFocus}
+          noSuggestions={hideSuggestions}
         />
       </EuiFormRow>
     </>
