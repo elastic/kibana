@@ -10,6 +10,7 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
@@ -23,9 +24,18 @@ interface Props {
   filter?: string;
   schema?: DataSchemaFormat | null;
   setVisible(val: boolean): void;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
-export const AlertFlyout = ({ options, nodeType, filter, visible, schema, setVisible }: Props) => {
+export const AlertFlyout = ({
+  options,
+  nodeType,
+  filter,
+  visible,
+  schema,
+  setVisible,
+  focusTrapProps,
+}: Props) => {
   const { services } = useKibana<CoreStart & InfraClientStartDeps>();
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
@@ -55,11 +65,18 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, schema, setVis
         schema,
       }}
       shouldUseRuleProducer
+      focusTrapProps={focusTrapProps}
     />
   );
 };
 
-export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
+export const PrefilledInventoryAlertFlyout = ({
+  onClose,
+  focusTrapProps,
+}: {
+  onClose(): void;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+}) => {
   const { inventoryPrefill } = useAlertPrefillContext();
   const { nodeType, metric, kuery, schema } = inventoryPrefill;
 
@@ -71,6 +88,7 @@ export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) 
       visible
       setVisible={onClose}
       schema={schema}
+      focusTrapProps={focusTrapProps}
     />
   );
 };

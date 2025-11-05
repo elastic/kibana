@@ -31,6 +31,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-navigation-tour",
+    "@kbn/split-button"
   ],
   "exclude": [
     "target/**/*",
