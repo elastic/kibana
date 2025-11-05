@@ -134,29 +134,26 @@ export function useFetchAgentsData() {
   // Sync URL kuery param with session storage search to maintain shareable state
   useEffect(() => {
     const currentUrlKuery = (urlParams.kuery as string) || '';
-    if (search && search !== currentUrlKuery) {
+    // If search is empty and URL has kuery, or search differs from URL, update URL
+    if ((search === '' && currentUrlKuery !== '') || (search && search !== currentUrlKuery)) {
+      const { kuery: _, ...restParams } = urlParams;
+      const newParams = search === '' ? restParams : { ...restParams, kuery: search };
       history.replace({
-        search: toUrlParams({ ...urlParams, kuery: search }),
+        search: toUrlParams(newParams),
       });
     }
   }, [search, urlParams, history, toUrlParams]);
 
-  // Flag to indicate if filters are applied by comparing with default state
+  // Flag to indicate if filters differ from default state
   const isUsingFilter = useMemo(() => {
     return (
-      sessionState.search !== defaultAgentListState.search ||
-      !isEqual(sessionState.selectedAgentPolicies, defaultAgentListState.selectedAgentPolicies) ||
-      !isEqual(sessionState.selectedTags, defaultAgentListState.selectedTags) ||
-      !isEqual(sessionState.selectedStatus, defaultAgentListState.selectedStatus) ||
-      sessionState.showUpgradeable !== defaultAgentListState.showUpgradeable
+      search !== defaultAgentListState.search ||
+      !isEqual(selectedAgentPolicies, defaultAgentListState.selectedAgentPolicies) ||
+      !isEqual(selectedStatus, defaultAgentListState.selectedStatus) ||
+      !isEqual(selectedTags, defaultAgentListState.selectedTags) ||
+      showUpgradeable !== defaultAgentListState.showUpgradeable
     );
-  }, [
-    sessionState.search,
-    sessionState.selectedAgentPolicies,
-    sessionState.selectedStatus,
-    sessionState.selectedTags,
-    sessionState.showUpgradeable,
-  ]);
+  }, [search, selectedAgentPolicies, selectedStatus, selectedTags, showUpgradeable]);
 
   // Create individual setters using updateTableState
   const setSearchState = useCallback(
@@ -208,9 +205,10 @@ export function useFetchAgentsData() {
       }
 
       if (urlParams.kuery !== newVal) {
+        const { kuery: _, ...restParams } = urlParams;
+        const newParams = newVal === '' ? restParams : { ...restParams, kuery: newVal };
         history.replace({
-          // @ts-expect-error - kuery can't be undefined
-          search: toUrlParams({ ...urlParams, kuery: newVal === '' ? undefined : newVal }),
+          search: toUrlParams(newParams),
         });
       }
     },

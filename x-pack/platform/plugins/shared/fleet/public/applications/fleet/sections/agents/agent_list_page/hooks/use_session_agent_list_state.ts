@@ -101,7 +101,7 @@ export const useSessionAgentListState = (): SessionAgentListState => {
     [sessionState, setSessionState]
   );
 
-  // Clear filters by resetting to defaults
+  // Reset filters to default state
   // Do not reset sort parameters, but reset page back to index 0
   const clearFilters = useCallback(() => {
     const latestState = sessionState;

@@ -245,7 +245,7 @@ describe('useSessionAgentListState', () => {
   });
 
   describe('clearFilters', () => {
-    it('should clear filters and reset pagination to first page', () => {
+    it('should reset filters to default state and reset pagination to first page', () => {
       const customState = {
         ...defaultAgentListState,
         search: 'test',
@@ -264,11 +264,11 @@ describe('useSessionAgentListState', () => {
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
         ...customState,
-        search: '',
-        selectedAgentPolicies: [],
+        search: defaultAgentListState.search,
+        selectedAgentPolicies: defaultAgentListState.selectedAgentPolicies,
         selectedStatus: defaultAgentListState.selectedStatus,
-        selectedTags: [],
-        showUpgradeable: false,
+        selectedTags: defaultAgentListState.selectedTags,
+        showUpgradeable: defaultAgentListState.showUpgradeable,
         page: {
           ...customState.page,
           index: 0, // Reset to first page
@@ -276,7 +276,7 @@ describe('useSessionAgentListState', () => {
       });
     });
 
-    it('should preserve page size when clearing filters', () => {
+    it('should preserve page size when resetting filters', () => {
       const customState = {
         ...defaultAgentListState,
         search: 'test',
@@ -292,11 +292,11 @@ describe('useSessionAgentListState', () => {
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
         ...customState,
-        search: '',
-        selectedAgentPolicies: [],
+        search: defaultAgentListState.search,
+        selectedAgentPolicies: defaultAgentListState.selectedAgentPolicies,
         selectedStatus: defaultAgentListState.selectedStatus,
-        selectedTags: [],
-        showUpgradeable: false,
+        selectedTags: defaultAgentListState.selectedTags,
+        showUpgradeable: defaultAgentListState.showUpgradeable,
         page: {
           index: 0,
           size: 100, // Preserve page size
