@@ -7,8 +7,25 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { type IWaterfallLegend, WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+
+const FALLBACK_WARNING = i18n.translate(
+  'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',
+  {
+    defaultMessage:
+      'The trace document is incomplete and not all spans have arrived yet. Try refreshing the page or adjusting the time range.',
+  }
+);
+
+const INSTRUMENTATION_WARNING = i18n.translate(
+  'xpack.apm.traceWaterfallItem.euiCallOut.aDuplicatedSpanWasLabel',
+  {
+    defaultMessage:
+      'A duplicated span was detected. This indicates a problem with how your application has been instrumented, as span IDs are meant to be unique.',
+  }
+);
 
 export interface TraceWaterfallItem extends TraceItem {
   depth: number;
@@ -49,6 +66,7 @@ export function useTraceWaterfall({
       return {
         rootItem,
         traceState,
+        message: traceState !== TraceDataState.Full ? FALLBACK_WARNING : undefined,
         traceWaterfall,
         duration: getTraceWaterfallDuration(traceWaterfall),
         maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
@@ -58,6 +76,7 @@ export function useTraceWaterfall({
     } catch (e) {
       return {
         traceState: TraceDataState.Invalid,
+        message: INSTRUMENTATION_WARNING,
         traceWaterfall: [],
         legends: [],
         duration: 0,
