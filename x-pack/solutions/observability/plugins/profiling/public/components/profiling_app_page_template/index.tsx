@@ -121,6 +121,7 @@ export function ProfilingAppPageTemplate({
         {profilingSetupStatus?.unauthorized === true && privilegesWarningDismissed !== true ? (
           <EuiFlexItem grow={false}>
             <EuiCallOut
+              announceOnMount
               iconType="warning"
               title={i18n.translate('xpack.profiling.privilegesWarningTitle', {
                 defaultMessage: 'User privilege limitation',
