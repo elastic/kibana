@@ -72,7 +72,7 @@ export const getNodeDocumentMode = (
   // Single alert contains both event's document data and alert's document data.
   if (
     node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) &&
-    node.documentsData.length <= 2
+    node.documentsData.length <= 1
   ) {
     return 'single-alert';
   } else if (

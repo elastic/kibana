@@ -290,7 +290,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'a(admin6@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole2)oe(1)oa(0)'
       );
-      await networkEventsPage.flyout.assertPreviewPanelIsOpen('alert');
+      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
+      await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
   });
 }
