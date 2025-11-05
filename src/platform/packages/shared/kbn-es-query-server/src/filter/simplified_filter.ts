@@ -183,6 +183,11 @@ export const simpleFilterConditionSchema = schema.oneOf(
 // FILTER GROUP SCHEMA (RECURSIVE)
 // ====================================================================
 
+interface RecursiveType {
+  name: string;
+  self: undefined | RecursiveType;
+}
+
 /**
  * Schema for logical filter groups with recursive structure
  * Uses lazy schema to handle recursive references
@@ -194,7 +199,7 @@ export const filterGroupSchema = schema.object(
     conditions: schema.arrayOf(
       schema.oneOf([
         simpleFilterConditionSchema,
-        schema.lazy('filterGroup'), // Recursive reference
+        schema.lazy<RecursiveType>('filterGroup'), // Recursive reference
       ])
     ),
   },
