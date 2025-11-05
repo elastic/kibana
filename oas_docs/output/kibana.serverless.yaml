@@ -45932,6 +45932,22 @@ paths:
                         type: boolean
                       id:
                         type: string
+                      ilm_migration_status:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          logs:
+                            enum:
+                              - success
+                            type: string
+                          metrics:
+                            enum:
+                              - success
+                            type: string
+                          synthetics:
+                            enum:
+                              - success
+                            type: string
                       output_secret_storage_requirements_met:
                         type: boolean
                       preconfigured_fields:
@@ -46081,6 +46097,22 @@ paths:
                         type: boolean
                       id:
                         type: string
+                      ilm_migration_status:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          logs:
+                            enum:
+                              - success
+                            type: string
+                          metrics:
+                            enum:
+                              - success
+                            type: string
+                          synthetics:
+                            enum:
+                              - success
+                            type: string
                       output_secret_storage_requirements_met:
                         type: boolean
                       preconfigured_fields:
