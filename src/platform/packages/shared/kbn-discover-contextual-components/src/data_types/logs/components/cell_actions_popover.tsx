@@ -159,6 +159,7 @@ export function CellActionsPopover({
 export interface FieldBadgeWithActionsProps
   extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
   icon?: EuiBadgeProps['iconType'];
+  truncateTitle?: boolean;
 }
 
 interface FieldBadgeWithActionsDependencies {
@@ -175,6 +176,7 @@ export function FieldBadgeWithActions({
   property,
   renderValue,
   value,
+  truncateTitle = false,
 }: FieldBadgeWithActionsPropsAndDependencies) {
   return (
     <CellActionsPopover
@@ -184,7 +186,7 @@ export function FieldBadgeWithActions({
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
-          {truncateMiddle(value)}
+          {truncateTitle ? truncateMiddle(value) : value}
         </EuiBadge>
       )}
     />
