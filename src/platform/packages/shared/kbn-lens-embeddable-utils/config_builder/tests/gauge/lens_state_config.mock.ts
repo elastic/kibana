@@ -73,6 +73,7 @@ export const gaugeAttributes: LensAttributes = {
       },
       ticksPosition: 'bands',
       labelMajorMode: 'auto',
+      labelMinor: 'Bytes Subtitle',
       metricAccessor: '2ba2f501-1bca-4423-95b8-a5b92b05f5f5',
       colorMode: 'palette',
       minAccessor: 'a2ed356d-14fe-4066-9428-cec4a453cb7b',
