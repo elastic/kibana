@@ -35,7 +35,6 @@ export interface JobIdObject {
 
 export interface SkippedJobs {
   jobId: string;
-  missingIndices: string[];
   missingFilters: string[];
 }
 
@@ -129,10 +128,8 @@ export class JobImportService {
   public async validateJobs(
     jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
     type: JobType,
-    getDataViewTitles: (refresh?: boolean) => Promise<string[]>,
     getFilters: () => Promise<Filter[]>
   ) {
-    const existingDataViews = new Set(await getDataViewTitles());
     const existingFilters = new Set((await getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
     const skippedJobs: SkippedJobs[] = [];
@@ -155,11 +152,10 @@ export class JobImportService {
             indices: Array.isArray(j.source.index) ? j.source.index : [j.source.index],
           }));
 
-    commonJobs.forEach(({ jobId, indices, filters = [], destIndex }) => {
-      const missingIndices = indices.filter((i) => existingDataViews.has(i) === false);
+    commonJobs.forEach(({ jobId, filters = [], destIndex }) => {
       const missingFilters = filters.filter((i) => existingFilters.has(i) === false);
 
-      if (missingIndices.length === 0 && missingFilters.length === 0) {
+      if (missingFilters.length === 0) {
         tempJobs.push({
           jobId,
           ...(type === 'data-frame-analytics' ? { destIndex } : {}),
@@ -167,7 +163,6 @@ export class JobImportService {
       } else {
         skippedJobs.push({
           jobId,
-          missingIndices,
           missingFilters,
         });
       }

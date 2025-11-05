@@ -51,9 +51,6 @@ export interface Props {
 export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) => {
   const {
     services: {
-      data: {
-        dataViews: { getTitles: getDataViewTitles },
-      },
       notifications: { toasts },
       mlServices: {
         mlUsageCollection,
@@ -144,7 +141,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getDataViewTitles,
         getFilters
       );
 
