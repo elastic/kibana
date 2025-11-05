@@ -7,9 +7,10 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { EuiCode, EuiFieldText, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ProcessorFieldSelector } from '../processor_field_selector';
 
 const VALUE_FIELD = 'value';
 const COPY_FROM_FIELD = 'copy_from';
@@ -54,32 +55,23 @@ export const ValueField = ({ toggleCustom }: { toggleCustom: () => void }) => {
 };
 
 export const CopyFromField = ({ toggleCustom }: { toggleCustom: () => void }) => {
-  const { register, unregister } = useFormContext();
-  const { ref, ...inputProps } = register(COPY_FROM_FIELD, { required: true });
-
-  useEffect(() => {
-    return () => {
-      unregister(COPY_FROM_FIELD);
-    };
-  }, [unregister]);
-
   return (
-    <EuiFormRow
+    <ProcessorFieldSelector
+      fieldKey={COPY_FROM_FIELD}
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.setCopyFromFieldLabel',
         {
           defaultMessage: 'Copy from',
         }
       )}
-      helpText={
-        <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setCopyFromFieldHelpText"
-          defaultMessage="Field to copy into {field}."
-          values={{
-            field: <EuiCode>{'Field'}</EuiCode>,
-          }}
-        />
-      }
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.setCopyFromFieldHelpText',
+        { defaultMessage: 'Field to copy into the target field.' }
+      )}
+      placeholder={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.setCopyFromFieldPlaceholder',
+        { defaultMessage: 'Select or type a field name...' }
+      )}
       labelAppend={
         <EuiText size="xs">
           <EuiLink onClick={toggleCustom} data-test-subj="toggleValueField">
@@ -90,10 +82,7 @@ export const CopyFromField = ({ toggleCustom }: { toggleCustom: () => void }) =>
           </EuiLink>
         </EuiText>
       }
-      fullWidth
-    >
-      <EuiFieldText {...inputProps} inputRef={ref} />
-    </EuiFormRow>
+    />
   );
 };
 
