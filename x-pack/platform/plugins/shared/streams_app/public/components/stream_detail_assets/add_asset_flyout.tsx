@@ -180,12 +180,13 @@ export function AddAssetFlyout({
                     options={(tagList || []).map((tag) => ({
                       label: tag.name,
                       checked: selectedTags.includes(tag.id) ? 'on' : undefined,
+                      tagId: tag.id,
                     }))}
                     onChange={(newOptions) => {
                       setSelectedTags(
                         newOptions
                           .filter((option) => option.checked === 'on')
-                          .map((option) => savedObjectsTaggingUi.getTagIdFromName(option.label)!)
+                          .map(({ tagId }) => tagId)
                       );
                     }}
                   >
