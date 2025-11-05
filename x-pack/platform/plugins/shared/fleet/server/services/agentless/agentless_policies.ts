@@ -86,11 +86,13 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const agentPolicyId = packagePolicyId; // Use the same ID for agent policy and package policy
     const force = data.force;
     this.logger.debug('Creating agentless policy');
-    let authorizationHeader: HTTPAuthorizationHeader | null = null;
-    if (request) {
-      const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
-    }
+
+    const user = request
+      ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
+      : undefined;
+    const authorizationHeader = request
+      ? HTTPAuthorizationHeader.parseFromRequest(request, user?.username)
+      : null;
 
     const spaceId = this.soClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
@@ -109,7 +111,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       const { outputId, fleetServerId } = agentlessAgentService.getDefaultSettings();
 
       const agentPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(data.name);
-      // TODO retrieve tags for integration
       const agentPolicy = await agentPolicyService.create(
         this.soClient,
         this.esClient,
@@ -126,9 +127,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           fleet_server_host_id: fleetServerId,
           data_output_id: outputId,
           is_protected: false,
-          // space_ids: request.body.space_ids  // TODO add space support,
         },
-        { id: agentPolicyId, skipDeploy: true, authorizationHeader }
+        { id: agentPolicyId, skipDeploy: true, authorizationHeader, user }
       ); // TODO user, authorization ?
 
       createdAgentPolicyId = agentPolicy.id;
@@ -154,6 +154,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           bumpRevision: false,
           spaceId,
           authorizationHeader,
+          user,
         },
         context,
         request
