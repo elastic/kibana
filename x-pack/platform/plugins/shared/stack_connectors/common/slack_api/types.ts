@@ -67,6 +67,79 @@ export interface ValidChannelRouteResponse {
   invalidChannels: string[];
 }
 
+export interface SlackMessage {
+  text: string;
+  user: string;
+  ts: string;
+  thread_ts?: string;
+  reply_count?: number;
+}
+
+export interface SlackConversation {
+  id: string;
+  name: string;
+  is_private: boolean;
+  is_im?: boolean;
+  is_mpim?: boolean;
+}
+
+export interface ConversationsListResponse extends SlackAPiResponse {
+  channels?: SlackConversation[];
+}
+
+export interface ConversationsHistoryResponse extends SlackAPiResponse {
+  messages?: SlackMessage[];
+  has_more?: boolean;
+}
+
+export interface ConversationsRepliesResponse extends SlackAPiResponse {
+  messages?: SlackMessage[];
+}
+
+export interface SlackUser {
+  id: string;
+  name: string;
+  real_name?: string;
+  profile?: {
+    display_name?: string;
+    real_name?: string;
+  };
+}
+
+export interface UsersListResponse extends SlackAPiResponse {
+  members?: SlackUser[];
+}
+
+export interface ChannelDigestMessage {
+  channel: { id: string; name: string };
+  message: SlackMessage;
+  thread_replies?: Array<{ user: string; text: string; ts: string }>;
+}
+
+export interface ChannelDigestResponse extends SlackAPiResponse {
+  total: number;
+  since: string;
+  keywords?: string[];
+  channels_searched: number;
+  messages: Array<{
+    channel: string;
+    channel_id: string;
+    text: string;
+    user: string;
+    user_name: string;
+    user_real_name?: string;
+    timestamp: string;
+    thread_replies_count: number;
+    thread_replies: Array<{
+      user: string;
+      user_name: string;
+      user_real_name?: string;
+      text: string;
+      ts: string;
+    }>;
+  }>;
+}
+
 export interface SlackApiService {
   validChannelId: (
     channelId: string
@@ -81,4 +154,29 @@ export interface SlackApiService {
     channelIds,
     text,
   }: PostBlockkitSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
+  getConversationsList: (params: {
+    types?: string;
+    cursor?: string;
+    excludeArchived?: boolean;
+    limit?: number;
+  }) => Promise<ConnectorTypeExecutorResult<ConversationsListResponse>>;
+  getConversationsHistory: (params: {
+    channel: string;
+    oldest?: number;
+    cursor?: string;
+    limit?: number;
+  }) => Promise<ConnectorTypeExecutorResult<ConversationsHistoryResponse>>;
+  getConversationsReplies: (params: {
+    channel: string;
+    ts: string;
+  }) => Promise<ConnectorTypeExecutorResult<ConversationsRepliesResponse>>;
+  getUsersList: (params: {
+    cursor?: string;
+    limit?: number;
+  }) => Promise<ConnectorTypeExecutorResult<UsersListResponse>>;
+  getChannelDigest: (params: {
+    since: number;
+    types: string[];
+    keywords?: string[];
+  }) => Promise<ConnectorTypeExecutorResult<ChannelDigestResponse>>;
 }

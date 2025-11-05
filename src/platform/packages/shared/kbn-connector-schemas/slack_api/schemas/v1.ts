@@ -91,8 +91,88 @@ export const PostBlockkitParamsSchema = z
   })
   .strict();
 
+export const GetConversationsListSubActionParamsSchema = z
+  .object({
+    types: z.string().optional(),
+    cursor: z.string().optional(),
+    excludeArchived: z.boolean().optional(),
+    limit: z.number().int().min(1).max(1000).optional(),
+  })
+  .strict();
+
+export const GetConversationsListParamsSchema = z
+  .object({
+    subAction: z.literal('getConversationsList'),
+    subActionParams: GetConversationsListSubActionParamsSchema,
+  })
+  .strict();
+
+export const GetConversationsHistorySubActionParamsSchema = z
+  .object({
+    channel: z.string().min(1),
+    oldest: z.number().optional(),
+    cursor: z.string().optional(),
+    limit: z.number().int().min(1).max(1000).optional(),
+  })
+  .strict();
+
+export const GetConversationsHistoryParamsSchema = z
+  .object({
+    subAction: z.literal('getConversationsHistory'),
+    subActionParams: GetConversationsHistorySubActionParamsSchema,
+  })
+  .strict();
+
+export const GetConversationsRepliesSubActionParamsSchema = z
+  .object({
+    channel: z.string().min(1),
+    ts: z.string().min(1),
+  })
+  .strict();
+
+export const GetConversationsRepliesParamsSchema = z
+  .object({
+    subAction: z.literal('getConversationsReplies'),
+    subActionParams: GetConversationsRepliesSubActionParamsSchema,
+  })
+  .strict();
+
+export const GetUsersListSubActionParamsSchema = z
+  .object({
+    cursor: z.string().optional(),
+    limit: z.number().int().min(1).max(1000).optional(),
+  })
+  .strict();
+
+export const GetUsersListParamsSchema = z
+  .object({
+    subAction: z.literal('getUsersList'),
+    subActionParams: GetUsersListSubActionParamsSchema,
+  })
+  .strict();
+
+export const GetChannelDigestSubActionParamsSchema = z
+  .object({
+    since: z.number().int().min(0),
+    types: z.array(z.enum(['public_channel', 'private_channel', 'im', 'mpim'])).min(1),
+    keywords: z.array(z.string()).optional(),
+  })
+  .strict();
+
+export const GetChannelDigestParamsSchema = z
+  .object({
+    subAction: z.literal('getChannelDigest'),
+    subActionParams: GetChannelDigestSubActionParamsSchema,
+  })
+  .strict();
+
 export const SlackApiParamsSchema = z.union([
   ValidChannelIdParamsSchema,
   PostMessageParamsSchema,
   PostBlockkitParamsSchema,
+  GetConversationsListParamsSchema,
+  GetConversationsHistoryParamsSchema,
+  GetConversationsRepliesParamsSchema,
+  GetUsersListParamsSchema,
+  GetChannelDigestParamsSchema,
 ]);

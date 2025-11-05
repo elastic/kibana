@@ -9,6 +9,11 @@ import type {
   PostBlockkitSubActionParams,
   PostMessageSubActionParams,
   ValidChannelIdSubActionParams,
+  GetConversationsListSubActionParams,
+  GetConversationsHistorySubActionParams,
+  GetConversationsRepliesSubActionParams,
+  GetUsersListSubActionParams,
+  GetChannelDigestSubActionParams,
 } from '@kbn/connector-schemas/slack_api';
 import type { SlackApiService } from '../../../common/slack_api/types';
 
@@ -36,8 +41,53 @@ const postBlockkitHandler = async ({
   params: PostBlockkitSubActionParams;
 }) => await externalService.postBlockkit({ channelIds, channels, text });
 
+const getConversationsListHandler = async ({
+  externalService,
+  params,
+}: {
+  externalService: SlackApiService;
+  params: GetConversationsListSubActionParams;
+}) => await externalService.getConversationsList(params);
+
+const getConversationsHistoryHandler = async ({
+  externalService,
+  params,
+}: {
+  externalService: SlackApiService;
+  params: GetConversationsHistorySubActionParams;
+}) => await externalService.getConversationsHistory(params);
+
+const getConversationsRepliesHandler = async ({
+  externalService,
+  params,
+}: {
+  externalService: SlackApiService;
+  params: GetConversationsRepliesSubActionParams;
+}) => await externalService.getConversationsReplies(params);
+
+const getUsersListHandler = async ({
+  externalService,
+  params,
+}: {
+  externalService: SlackApiService;
+  params: GetUsersListSubActionParams;
+}) => await externalService.getUsersList(params);
+
+const getChannelDigestHandler = async ({
+  externalService,
+  params,
+}: {
+  externalService: SlackApiService;
+  params: GetChannelDigestSubActionParams;
+}) => await externalService.getChannelDigest(params);
+
 export const api = {
   validChannelId: validChannelIdHandler,
   postMessage: postMessageHandler,
   postBlockkit: postBlockkitHandler,
+  getConversationsList: getConversationsListHandler,
+  getConversationsHistory: getConversationsHistoryHandler,
+  getConversationsReplies: getConversationsRepliesHandler,
+  getUsersList: getUsersListHandler,
+  getChannelDigest: getChannelDigestHandler,
 };

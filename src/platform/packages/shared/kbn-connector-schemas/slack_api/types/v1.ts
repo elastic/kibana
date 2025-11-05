@@ -15,6 +15,16 @@ import type {
   PostBlockkitSubActionParamsSchema,
   PostMessageParamsSchema,
   PostBlockkitParamsSchema,
+  GetConversationsListSubActionParamsSchema,
+  GetConversationsListParamsSchema,
+  GetConversationsHistorySubActionParamsSchema,
+  GetConversationsHistoryParamsSchema,
+  GetConversationsRepliesSubActionParamsSchema,
+  GetConversationsRepliesParamsSchema,
+  GetUsersListSubActionParamsSchema,
+  GetUsersListParamsSchema,
+  GetChannelDigestSubActionParamsSchema,
+  GetChannelDigestParamsSchema,
   SlackApiParamsSchema,
 } from '../schemas/v1';
 
@@ -25,5 +35,21 @@ export type PostMessageSubActionParams = z.infer<typeof PostMessageSubActionPara
 export type PostBlockkitSubActionParams = z.infer<typeof PostBlockkitSubActionParamsSchema>;
 export type PostBlockkitParams = z.infer<typeof PostBlockkitParamsSchema>;
 export type ValidChannelIdSubActionParams = z.infer<typeof ValidChannelIdSubActionParamsSchema>;
+export type GetConversationsListSubActionParams = z.infer<
+  typeof GetConversationsListSubActionParamsSchema
+>;
+export type GetConversationsListParams = z.infer<typeof GetConversationsListParamsSchema>;
+export type GetConversationsHistorySubActionParams = z.infer<
+  typeof GetConversationsHistorySubActionParamsSchema
+>;
+export type GetConversationsHistoryParams = z.infer<typeof GetConversationsHistoryParamsSchema>;
+export type GetConversationsRepliesSubActionParams = z.infer<
+  typeof GetConversationsRepliesSubActionParamsSchema
+>;
+export type GetConversationsRepliesParams = z.infer<typeof GetConversationsRepliesParamsSchema>;
+export type GetUsersListSubActionParams = z.infer<typeof GetUsersListSubActionParamsSchema>;
+export type GetUsersListParams = z.infer<typeof GetUsersListParamsSchema>;
+export type GetChannelDigestSubActionParams = z.infer<typeof GetChannelDigestSubActionParamsSchema>;
+export type GetChannelDigestParams = z.infer<typeof GetChannelDigestParamsSchema>;
 export type SlackApiParams = z.infer<typeof SlackApiParamsSchema>;
 export type SlackApiActionParams = z.infer<typeof SlackApiParamsSchema>;

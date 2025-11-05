@@ -31,7 +31,17 @@ import type {
 import { api } from './api';
 import { createExternalService } from './service';
 
-const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessage', 'postBlockkit'];
+const supportedSubActions = [
+  'getAllowedChannels',
+  'validChannelId',
+  'postMessage',
+  'postBlockkit',
+  'getConversationsList',
+  'getConversationsHistory',
+  'getConversationsReplies',
+  'getUsersList',
+  'getChannelDigest',
+];
 
 export const getConnectorType = (): SlackApiConnectorType => {
   return {
@@ -152,6 +162,43 @@ const slackApiExecutor = async ({
       externalService,
       params: params.subActionParams,
     });
+  }
+
+  if (subAction === 'getConversationsList') {
+    return await api.getConversationsList({
+      externalService,
+      params: params.subActionParams,
+    });
+  }
+
+  if (subAction === 'getConversationsHistory') {
+    return await api.getConversationsHistory({
+      externalService,
+      params: params.subActionParams,
+    });
+  }
+
+  if (subAction === 'getConversationsReplies') {
+    return await api.getConversationsReplies({
+      externalService,
+      params: params.subActionParams,
+    });
+  }
+
+  if (subAction === 'getUsersList') {
+    return await api.getUsersList({
+      externalService,
+      params: params.subActionParams,
+    });
+  }
+
+  if (subAction === 'getChannelDigest') {
+    logger.debug(`[Slack API Executor] getChannelDigest subAction called`);
+    const result = await api.getChannelDigest({
+      externalService,
+      params: params.subActionParams,
+    });
+    return result;
   }
 
   return { status: 'ok', data: {}, actionId };

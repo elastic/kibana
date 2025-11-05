@@ -10,53 +10,9 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
-import axios from 'axios';
-import type { AxiosResponse } from 'axios';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types/connector';
 import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 import { getPluginServices } from '../../services/service_locator';
-
-const SLACK_API_URL = 'https://slack.com/api/';
-
-interface SlackMessage {
-  text: string;
-  user: string;
-  ts: string;
-  thread_ts?: string;
-  reply_count?: number;
-  replies?: Array<{
-    user: string;
-    ts: string;
-    text: string;
-  }>;
-}
-
-interface SlackConversation {
-  id: string;
-  name: string;
-  is_private: boolean;
-}
-
-interface ConversationsListResponse {
-  ok: boolean;
-  channels?: SlackConversation[];
-  error?: string;
-}
-
-interface ConversationsHistoryResponse {
-  ok: boolean;
-  messages?: SlackMessage[];
-  has_more?: boolean;
-  response_metadata?: {
-    next_cursor?: string;
-  };
-  error?: string;
-}
-
-interface ConversationsRepliesResponse {
-  ok: boolean;
-  messages?: SlackMessage[];
-  error?: string;
-}
 
 const slackDigestSchema = z.object({
   since: z
@@ -64,7 +20,6 @@ const slackDigestSchema = z.object({
     .describe(
       'ISO datetime string for the start time to fetch Slack messages. If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
     ),
-  connectorId: z.string().describe('Slack connector ID configured in Kibana'),
   keywords: z
     .array(z.string())
     .optional()
@@ -77,21 +32,36 @@ export const slackDigestTool = (): BuiltinToolDefinition<typeof slackDigestSchem
     type: ToolType.builtin,
     description: `Fetches messages and threads from Slack since a given timestamp.
 
-**IMPORTANT:** This tool requires a Slack Web API connector (NOT a webhook connector).
+**IMPORTANT:** This tool requires a Slack Web API connector with a User Token (NOT bot tokens or webhooks).
 - Slack Webhook connectors (".slack") can only send messages, not read them
-- Slack Web API connectors (".slack_api") use OAuth tokens and can read messages via the Slack API
+- Slack Web API connectors (".slack_api") with Bot Tokens require the bot to be invited to each channel
+- Slack Web API connectors (".slack_api") with User Tokens can read from channels the user is already a member of (no invites needed)
+
+**Automatic Connector Discovery:**
+This tool automatically searches for a Slack Web API connector with a name containing "UserToken" or "user token" (e.g., "Slack UserToken Connector").
+
+**Required Scopes:**
+The User Token connector must have these scopes:
+- channels:read, channels:history (for public channels the user is a member of)
+- groups:read, groups:history (for private channels the user is a member of)
+- im:read, im:history (for direct messages)
+- users:read (for user information)
+
+**Connector Setup:**
+1. Create a Slack Web API connector (type: .slack_api) with a name containing "UserToken" or "user token"
+2. Configure the User Token OAuth scopes listed above
+3. The tool will automatically discover and use this connector
+
+**Benefits of User Tokens:**
+- No need to invite bots to channels
+- Can access all channels the user is already a member of
+- Works for public channels, private channels, and DMs
 
 The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
-The 'connectorId' must be a Slack Web API connector (actionTypeId: '.slack_api') configured in Kibana Actions with a valid OAuth token.
-The connector's bot token must have the following Slack scopes: 'channels:read', 'groups:read', 'channels:history', 'groups:history'.
 Optionally filters by keywords for user mentions or project names.`,
     schema: slackDigestSchema,
-    handler: async ({ since, connectorId, keywords }, { request, logger }) => {
+    handler: async ({ since, keywords }, { request, logger }) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Slack digest tool called with since: ${since}, connectorId: ${connectorId}`
-        );
-
         // Normalize date to current year if year is missing
         const normalizedSince = normalizeDateToCurrentYear(since);
         const sinceDate = new Date(normalizedSince);
@@ -102,156 +72,132 @@ Optionally filters by keywords for user mentions or project names.`,
         // Convert to Unix timestamp (seconds) for Slack API
         const sinceTimestamp = Math.floor(sinceDate.getTime() / 1000);
 
-        // Get Actions plugin to access connector
+        // Get Actions plugin to access connectors
         const { plugin } = getPluginServices();
         if (!plugin.actions) {
           throw new Error('Actions plugin is not available');
         }
 
-        // Get actions client and fetch connector
+        // Get actions client and search for connectors
         const actionsClient = await plugin.actions.getActionsClientWithRequest(request);
-        const connector = await actionsClient.get({
-          id: connectorId,
-          throwIfSystemAction: true,
-        });
 
-        // Verify it's a Slack API connector (not webhook)
-        if (connector.actionTypeId !== '.slack_api') {
-          throw new Error(
-            `Connector ${connectorId} is not a Slack API connector. Only Slack API connectors (with token) are supported for reading messages.`
-          );
-        }
-
-        // Get token from secrets (automatically decrypted)
-        const secrets = connector.secrets as { token?: string };
-        if (!secrets?.token) {
-          throw new Error(`Slack connector ${connectorId} does not have a token configured`);
-        }
-
-        const token = secrets.token;
-
-        // Get configuration utilities for making requests
-        // Note: We need to create this ourselves since it's not exposed in the plugin start contract
-        // For now, we'll use a simpler approach with direct axios calls and manual URL validation
-        const { core } = getPluginServices();
-
-        // Create axios instance with auth headers
-        const axiosInstance = axios.create({
-          timeout: 30000,
-        });
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          'Content-type': 'application/json; charset=UTF-8',
+        // Helper to detect token type from connector name
+        const detectTokenType = (connectorName: string): 'bot' | 'user' | 'unknown' => {
+          const nameLower = connectorName.toLowerCase();
+          if (nameLower.includes('bottoken') || nameLower.includes('bot token')) {
+            return 'bot';
+          }
+          if (nameLower.includes('usertoken') || nameLower.includes('user token')) {
+            return 'user';
+          }
+          return 'unknown';
         };
 
-        // Step 1: Get list of channels the bot has access to
-        const channelsResponse: AxiosResponse<ConversationsListResponse> = await axiosInstance.get(
-          `${SLACK_API_URL}conversations.list?types=public_channel,private_channel&exclude_archived=true`,
-          { headers }
+        // Search for connectors by name pattern
+        const allConnectors = await actionsClient.getAll();
+        const slackConnectors = allConnectors.filter(
+          (connector: ConnectorWithExtraFindData) => connector.actionTypeId === '.slack_api'
         );
 
-        if (!channelsResponse.data.ok || !channelsResponse.data.channels) {
+        // Find user token connector (required)
+        const userConnector = slackConnectors.find((connector: ConnectorWithExtraFindData) => {
+          const detectedType = detectTokenType(connector.name || '');
+          return detectedType === 'user';
+        });
+
+        if (!userConnector) {
           throw new Error(
-            `Failed to fetch Slack channels: ${channelsResponse.data.error || 'Unknown error'}`
+            `No Slack User Token connector found. Please create a Slack Web API connector (type: .slack_api) with a name containing "UserToken" or "user token" (e.g., "Slack UserToken Connector"). ` +
+              `The connector must have User Token scopes: channels:read, channels:history, groups:read, groups:history, im:read, im:history, users:read. ` +
+              `User tokens allow access to channels the user is already a member of without requiring bot invites.`
           );
-        }
-
-        const channels = channelsResponse.data.channels;
-        logger.info(`[CatchUp Agent] Found ${channels.length} Slack channels`);
-
-        // Step 2: Fetch messages from each channel
-        const allMessages: Array<{
-          channel: { id: string; name: string };
-          message: SlackMessage;
-          thread_replies?: Array<{ user: string; text: string; ts: string }>;
-        }> = [];
-
-        for (const channel of channels) {
-          try {
-            let cursor: string | undefined;
-            let hasMore = true;
-
-            // Fetch messages with pagination
-            while (hasMore) {
-              const historyResponse: AxiosResponse<ConversationsHistoryResponse> =
-                await axiosInstance.get(
-                  `${SLACK_API_URL}conversations.history?channel=${
-                    channel.id
-                  }&oldest=${sinceTimestamp}&limit=100${cursor ? `&cursor=${cursor}` : ''}`,
-                  { headers }
-                );
-
-              if (!historyResponse.data.ok) {
-                logger.warn(
-                  `[CatchUp Agent] Failed to fetch messages from channel ${channel.name}: ${historyResponse.data.error}`
-                );
-                break;
-              }
-
-              const messages = historyResponse.data.messages || [];
-
-              // Filter by keywords if provided
-              let filteredMessages = messages;
-              if (keywords && keywords.length > 0) {
-                filteredMessages = messages.filter((msg) =>
-                  keywords.some((keyword) => msg.text.toLowerCase().includes(keyword.toLowerCase()))
-                );
-              }
-
-              // Process each message
-              for (const message of filteredMessages) {
-                const messageData: {
-                  channel: { id: string; name: string };
-                  message: SlackMessage;
-                  thread_replies?: Array<{ user: string; text: string; ts: string }>;
-                } = {
-                  channel: { id: channel.id, name: channel.name },
-                  message,
-                };
-
-                // If message has thread replies, fetch them
-                if (message.thread_ts && message.reply_count && message.reply_count > 0) {
-                  try {
-                    const repliesResponse: AxiosResponse<ConversationsRepliesResponse> =
-                      await axiosInstance.get(
-                        `${SLACK_API_URL}conversations.replies?channel=${channel.id}&ts=${message.thread_ts}`,
-                        { headers }
-                      );
-
-                    if (repliesResponse.data.ok && repliesResponse.data.messages) {
-                      // Filter out the parent message (first one), keep only replies
-                      const replies = repliesResponse.data.messages.slice(1);
-                      messageData.thread_replies = replies.map((reply) => ({
-                        user: reply.user || 'unknown',
-                        text: reply.text,
-                        ts: reply.ts,
-                      }));
-                    }
-                  } catch (replyError: any) {
-                    logger.warn(
-                      `[CatchUp Agent] Failed to fetch thread replies for message ${message.ts}: ${replyError.message}`
-                    );
-                  }
-                }
-
-                allMessages.push(messageData);
-              }
-
-              // Check if there are more messages
-              hasMore = historyResponse.data.has_more || false;
-              cursor = historyResponse.data.response_metadata?.next_cursor;
-            }
-          } catch (channelError: any) {
-            logger.warn(
-              `[CatchUp Agent] Error fetching messages from channel ${channel.name}: ${channelError.message}`
-            );
-            // Continue to next channel
-          }
         }
 
         logger.info(
-          `[CatchUp Agent] Fetched ${allMessages.length} messages from Slack across ${channels.length} channels`
+          `[CatchUp Agent] Using user token connector: ${userConnector.name} (${userConnector.id})`
         );
+
+        // Use user connector for all channel types (user token can access public channels, private channels, and DMs)
+        const allChannelTypes = ['public_channel', 'private_channel', 'im', 'mpim'];
+        const userParams = {
+          subAction: 'getChannelDigest',
+          subActionParams: {
+            since: sinceTimestamp,
+            types: allChannelTypes,
+            keywords,
+          },
+        };
+
+        logger.info(
+          `[CatchUp Agent] Executing user connector for all channel types, since: ${new Date(
+            sinceTimestamp * 1000
+          ).toISOString()}`
+        );
+
+        let userDigestResult;
+        try {
+          userDigestResult = await actionsClient.execute({
+            actionId: userConnector.id,
+            params: userParams,
+          });
+        } catch (executeError) {
+          logger.error(`[CatchUp Agent] User connector execute error: ${executeError}`);
+          throw executeError;
+        }
+
+        if (userDigestResult.status === 'error') {
+          // Check if it's a retry error (rate limiting)
+          if ('retry' in userDigestResult && userDigestResult.retry) {
+            const retryMsg =
+              userDigestResult.retry instanceof Date
+                ? `Retry after ${userDigestResult.retry.toISOString()}`
+                : 'Retry later';
+            logger.warn(`[CatchUp Agent] User connector rate limited: ${retryMsg}`);
+            throw new Error(
+              `User connector rate limited: ${
+                userDigestResult.message || userDigestResult.serviceMessage
+              }. ${retryMsg}`
+            );
+          }
+
+          throw new Error(
+            `Failed to fetch Slack digest from user connector: ${
+              userDigestResult.message || userDigestResult.serviceMessage
+            }`
+          );
+        }
+
+        const userDigest = userDigestResult.data as {
+          total: number;
+          since: string;
+          keywords?: string[];
+          channels_searched: number;
+          messages: Array<{
+            channel: string;
+            channel_id: string;
+            text: string;
+            user: string;
+            user_name: string;
+            user_real_name?: string;
+            timestamp: string;
+            thread_replies_count: number;
+            thread_replies: Array<{
+              user: string;
+              user_name: string;
+              user_real_name?: string;
+              text: string;
+              ts: string;
+            }>;
+          }>;
+        };
+
+        logger.info(
+          `[CatchUp Agent] User connector returned ${userDigest.messages.length} messages from ${userDigest.channels_searched} channels/DMs`
+        );
+
+        // Use the user connector result directly
+        const allMessages = userDigest.messages;
+        const totalChannels = userDigest.channels_searched;
 
         // Format results
         return {
@@ -262,16 +208,8 @@ Optionally filters by keywords for user mentions or project names.`,
                 total: allMessages.length,
                 since: normalizedSince,
                 keywords: keywords || [],
-                channels_searched: channels.length,
-                messages: allMessages.map((item) => ({
-                  channel: item.channel.name,
-                  channel_id: item.channel.id,
-                  text: item.message.text,
-                  user: item.message.user || 'unknown',
-                  timestamp: new Date(parseFloat(item.message.ts) * 1000).toISOString(),
-                  thread_replies_count: item.message.reply_count || 0,
-                  thread_replies: item.thread_replies || [],
-                })),
+                channels_searched: totalChannels,
+                messages: allMessages,
               },
             },
           ],
