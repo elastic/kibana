@@ -15,6 +15,7 @@
             }
         ] */
 
+import Path from 'path';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
@@ -42,10 +43,12 @@ const getPipeline = (filename: string, removeSteps = true) => {
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
 
+const PRE_BUILD_SCRIPT = Path.resolve(__dirname, '../../lifecycle/pre_build.sh');
+
 // Executes pre_build.sh and streams its output to stderr so stdout stays clean for pipeline YAML.
 const runPreBuild = async () =>
   new Promise<void>((resolve, reject) => {
-    const child = spawn('.buildkite/scripts/lifecycle/pre_build.sh', {
+    const child = spawn(PRE_BUILD_SCRIPT, {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: process.env,
     });

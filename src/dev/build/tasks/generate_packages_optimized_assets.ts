@@ -9,68 +9,116 @@
 
 import Path from 'path';
 
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { fork } from 'child_process';
 import fs from 'fs';
 
-import gulpBrotli from 'gulp-brotli';
-// @ts-expect-error
-import gulpPostCSS from 'gulp-postcss';
-// @ts-expect-error
-import gulpTerser from 'gulp-terser';
-import type { ToolingLog } from '@kbn/tooling-log';
-import terser from 'terser';
-import vfs from 'vinyl-fs';
+import { ToolingLogTextWriter } from '@kbn/tooling-log';
+import type { LogLevel, ToolingLog } from '@kbn/tooling-log';
 import globby from 'globby';
-import del from 'del';
-import zlib from 'zlib';
 
 import type { Task } from '../lib';
 import { write } from '../lib';
 
 const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
-const asyncPipeline = promisify(pipeline);
+const ASSET_DIR_FLAG = '--asset-dir';
+const WORKER_LOG_LEVEL_ENV = 'OPTIMIZE_ASSETS_LOG_LEVEL';
+const WORKER_SCRIPT = Path.resolve(__dirname, 'generate_packages_optimized_assets_worker.js');
 
 const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSync(path).size, 0);
 
-async function optimizeAssets(log: ToolingLog, assetDir: string) {
-  log.info('Creating optimized assets for', assetDir);
-  log.indent(4);
-  try {
-    log.debug('Remove Pre Minify Sourcemaps');
-    await del(['**/*.map'], { cwd: assetDir });
-
-    log.debug('Minify CSS');
-    log.debug('Minify JS');
-    await Promise.all([
-      asyncPipeline(
-        vfs.src(['**/*.css'], { cwd: assetDir }),
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        gulpPostCSS(require('@kbn/optimizer/postcss.config').plugins),
-        vfs.dest(assetDir)
-      ),
-      asyncPipeline(
-        vfs.src(['**/*.js'], { cwd: assetDir }),
-        gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
-        vfs.dest(assetDir)
-      ),
-    ]);
-
-    log.debug('Brotli compress');
-    await asyncPipeline(
-      vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
-      gulpBrotli({
-        params: {
-          [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
-        },
-      }),
-      vfs.dest(assetDir)
+/**
+ * Determine the log level used by the primary build log so the worker mirrors verbosity.
+ */
+const getWorkerLogLevel = (log: ToolingLog): LogLevel => {
+  const writer = log
+    .getWriters()
+    .find(
+      (candidate): candidate is ToolingLogTextWriter => candidate instanceof ToolingLogTextWriter
     );
-  } finally {
-    log.indent(-4);
-  }
+
+  return (writer?.level.name as LogLevel) ?? 'info';
+};
+
+type WorkerLogLevel = 'debug' | 'info' | 'warning' | 'error' | 'success' | 'verbose';
+
+interface WorkerMessage {
+  type: 'log';
+  level: WorkerLogLevel;
+  args: unknown[];
 }
+
+/**
+ * Spawn a child process to run the asset optimization so CPU-heavy work happens off the main thread.
+ */
+const runOptimizeAssetsInChildProcess = async ({
+  assetDir,
+  log,
+  logLevel,
+}: {
+  assetDir: string;
+  log: ToolingLog;
+  logLevel: LogLevel;
+}) => {
+  log.info('Creating optimized assets for %s', assetDir);
+
+  await log.indent(4, async () => {
+    log.debug('Starting optimize-assets worker for %s', assetDir);
+
+    await new Promise<void>((resolve, reject) => {
+      const child = fork(WORKER_SCRIPT, [ASSET_DIR_FLAG, assetDir], {
+        env: {
+          ...process.env,
+          [WORKER_LOG_LEVEL_ENV]: logLevel,
+        },
+        cwd: process.cwd(),
+        stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+      });
+
+      const logWithLevels = log as unknown as Record<
+        WorkerLogLevel,
+        (...methodArgs: unknown[]) => void
+      >;
+
+      const handleMessage = (message: WorkerMessage) => {
+        if (!message || message.type !== 'log') {
+          return;
+        }
+
+        const { level, args } = message;
+        if (!Array.isArray(args)) {
+          return;
+        }
+
+        const logMethod = logWithLevels[level];
+        if (typeof logMethod === 'function') {
+          logMethod.apply(log, args as []);
+          return;
+        }
+
+        log.debug(...(args as []));
+      };
+
+      child.on('message', handleMessage);
+
+      child.once('error', (error) => {
+        child.removeListener('message', handleMessage);
+        reject(error);
+      });
+
+      child.once('exit', (code) => {
+        child.removeListener('message', handleMessage);
+
+        if (code === 0) {
+          resolve();
+          return;
+        }
+
+        reject(new Error(`optimize-assets worker exited with code ${code ?? 'null'}`));
+      });
+    });
+  });
+};
 
 type Category = ReturnType<typeof getCategory>;
 const getCategory = (relative: string) => {
@@ -148,9 +196,14 @@ export const GeneratePackagesOptimizedAssets: Task = {
       `node_modules/@kbn/ui-shared-deps-src/shared_built_assets`
     );
     const assetDirs = [npmAssetDir, srcAssetDir];
+    const workerLogLevel = getWorkerLogLevel(log);
 
-    // process assets in each ui-shared-deps package concurrently for faster completion
-    await Promise.all(assetDirs.map(async (assetDir) => await optimizeAssets(log, assetDir)));
+    // process assets in each ui-shared-deps package concurrently using workers for isolation
+    await Promise.all(
+      assetDirs.map(async (assetDir) =>
+        runOptimizeAssetsInChildProcess({ assetDir, log, logLevel: workerLogLevel })
+      )
+    );
 
     // analyze assets to produce metrics.json file
     const groups = categorizeAssets(assetDirs);
