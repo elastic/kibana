@@ -33,7 +33,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     rpm,
     streamType: streamType === 'classic' ? 'classic' : 'wired',
     systems: {
-      loghub: systems ? castArray(systems).flatMap((item) => item.split(',')) : false,
+      loghub: castArray(systems ?? []).flatMap((item) => item.split(',')),
     },
   });
 

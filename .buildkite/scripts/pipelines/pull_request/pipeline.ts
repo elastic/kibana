@@ -53,8 +53,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
-    await runPreBuild();
-
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
@@ -64,6 +62,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
       emitPipeline(pipeline);
       return;
     }
+
+    await runPreBuild();
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
