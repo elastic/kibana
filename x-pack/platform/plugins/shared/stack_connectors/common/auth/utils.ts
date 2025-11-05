@@ -13,9 +13,9 @@ import type {
   HasAuth,
   SecretsConfigurationType,
   VerificationModeType,
-} from './types';
+} from '@kbn/connector-schemas/common/auth';
 
-import { AuthType } from './constants';
+import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 
 // For backwards compatibility with connectors created before authType was added, interpret a
 // hasAuth: true and undefined authType as basic auth
