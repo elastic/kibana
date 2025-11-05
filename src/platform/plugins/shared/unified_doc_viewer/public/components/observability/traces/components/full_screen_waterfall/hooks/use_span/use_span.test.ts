@@ -8,37 +8,35 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import type { SpanDocument } from '@kbn/apm-types';
 import { useSpan } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
-import { of, throwError } from 'rxjs';
 
 jest.mock('../../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: () => ({
-    indexes: { apm: { traces: 'test-index' } },
-  }),
+const mockFetchSpan = jest.fn<Promise<SpanDocument | undefined>, any>();
+
+const mockGetById: jest.Mock<
+  | {
+      fetchSpan: jest.Mock<Promise<SpanDocument | undefined>>;
+    }
+  | undefined
+> = jest.fn(() => ({
+  fetchSpan: mockFetchSpan,
 }));
 
-const mockSearch = jest.fn();
-const mockAddDanger = jest.fn();
-
-const mockServices = {
-  data: {
-    search: {
-      search: mockSearch,
-    },
-  },
-  core: {
-    notifications: {
-      toasts: {
-        addDanger: mockAddDanger,
+(getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+  data: {},
+  discoverShared: {
+    features: {
+      registry: {
+        getById: mockGetById,
       },
     },
   },
-};
+});
 
 describe('useSpan', () => {
   const spanId = 'test-span-id';
@@ -46,48 +44,223 @@ describe('useSpan', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (getUnifiedDocViewerServices as jest.Mock).mockReturnValue(mockServices);
-  });
-
-  describe('when parameters are NOT missing', () => {
-    it('should fetch span data successfully', async () => {
-      const mockHit = { fields: { name: 'test-span' }, _id: 'test-id' };
-
-      mockSearch.mockReturnValue(
-        of({
-          rawResponse: {
-            hits: {
-              hits: [mockHit],
-            },
-          },
-        })
-      );
-
-      const { result } = renderHook(() => useSpan({ spanId, traceId }));
-      await waitFor(() => !result.current.loading);
-
-      expect(result.current.loading).toBe(false);
-      expect(result.current.span).toEqual(mockHit.fields);
-      expect(result.current.docId).toEqual(mockHit._id);
+    mockGetById.mockReturnValue({
+      fetchSpan: mockFetchSpan,
     });
   });
 
-  describe('when there is an error', () => {
-    it('should show an error toast and set span to null', async () => {
-      const error = new Error('something went wrong');
-      mockSearch.mockReturnValue(throwError(() => error));
+  it('should return undefined when feature is not registered', async () => {
+    mockGetById.mockReturnValue(undefined);
 
-      const { result } = renderHook(() => useSpan({ spanId, traceId }));
-      await waitFor(() => !result.current.loading);
+    const { result } = renderHook(() => useSpan({ spanId, traceId }));
 
-      expect(result.current.loading).toBe(false);
-      expect(result.current.span).toBe(null);
-      expect(result.current.docId).toBe(null);
-      expect(mockAddDanger).toHaveBeenCalledWith(
-        expect.objectContaining({
-          text: 'something went wrong',
-        })
-      );
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchSpan).not.toHaveBeenCalled();
+  });
+
+  it('should return undefined when spanId is empty', async () => {
+    const { result } = renderHook(() => useSpan({ spanId: '', traceId }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchSpan).not.toHaveBeenCalled();
+  });
+
+  it('should return undefined when traceId is empty', async () => {
+    const { result } = renderHook(() => useSpan({ spanId, traceId: '' }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchSpan).not.toHaveBeenCalled();
+  });
+
+  it('should start with loading true and span as undefined', async () => {
+    mockFetchSpan.mockImplementation(
+      () => new Promise(() => {}) // Never resolves to keep loading
+    );
+
+    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+
+    expect(result.current.loading).toBe(true);
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchSpan).toHaveBeenCalledWith(
+      {
+        traceId,
+        spanId,
+      },
+      expect.any(AbortSignal)
+    );
+  });
+
+  it('should update span when data is fetched successfully', async () => {
+    const mockSpan: SpanDocument = {
+      _id: 'test-id',
+      _index: 'traces-apm-*',
+      span: {
+        id: spanId,
+        name: 'test-span',
+        duration: { us: 100000 },
+      },
+      trace: { id: traceId },
+      service: { name: 'test-service' },
+    } as SpanDocument;
+
+    mockFetchSpan.mockResolvedValue(mockSpan);
+
+    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.span).toEqual(mockSpan);
+    expect(mockFetchSpan).toHaveBeenCalledWith(
+      {
+        traceId,
+        spanId,
+      },
+      expect.any(AbortSignal)
+    );
+  });
+
+  it('should handle when span is not found (returns undefined)', async () => {
+    mockFetchSpan.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchSpan).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle errors and set error state', async () => {
+    const errorMessage = 'Fetch error';
+    mockFetchSpan.mockRejectedValue(new Error(errorMessage));
+
+    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error?.message).toBe(errorMessage);
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchSpan).toHaveBeenCalledTimes(1);
+  });
+
+  it('should refetch when spanId changes', async () => {
+    const mockSpan1: SpanDocument = {
+      _id: 'span-1',
+      _index: 'traces-apm-*',
+      span: { id: 'span-1', name: 'span-1' },
+    } as SpanDocument;
+    const mockSpan2: SpanDocument = {
+      _id: 'span-2',
+      _index: 'traces-apm-*',
+      span: { id: 'span-2', name: 'span-2' },
+    } as SpanDocument;
+
+    mockFetchSpan.mockResolvedValueOnce(mockSpan1).mockResolvedValueOnce(mockSpan2);
+
+    const { result, rerender } = renderHook(
+      ({ sId, tId }: { sId: string; tId: string }) => useSpan({ spanId: sId, traceId: tId }),
+      {
+        initialProps: { sId: 'span-1', tId: traceId },
+      }
+    );
+
+    await waitFor(() => !result.current.loading);
+    expect(result.current.span?._id).toBe('span-1');
+    expect(mockFetchSpan).toHaveBeenCalledWith(
+      {
+        traceId,
+        spanId: 'span-1',
+      },
+      expect.any(AbortSignal)
+    );
+
+    rerender({ sId: 'span-2', tId: traceId });
+
+    await waitFor(() => !result.current.loading);
+    expect(result.current.span?._id).toBe('span-2');
+    expect(mockFetchSpan).toHaveBeenCalledWith(
+      {
+        traceId,
+        spanId: 'span-2',
+      },
+      expect.any(AbortSignal)
+    );
+    expect(mockFetchSpan).toHaveBeenCalledTimes(2);
+  });
+
+  it('should refetch when traceId changes', async () => {
+    const mockSpan: SpanDocument = {
+      _id: 'test-id',
+      _index: 'traces-apm-*',
+      span: { id: spanId, name: 'test-span' },
+    } as SpanDocument;
+
+    mockFetchSpan.mockResolvedValue(mockSpan);
+
+    const { result, rerender } = renderHook(
+      ({ sId, tId }: { sId: string; tId: string }) => useSpan({ spanId: sId, traceId: tId }),
+      {
+        initialProps: { sId: spanId, tId: 'trace-1' },
+      }
+    );
+
+    await waitFor(() => !result.current.loading);
+    expect(mockFetchSpan).toHaveBeenCalledWith(
+      {
+        traceId: 'trace-1',
+        spanId,
+      },
+      expect.any(AbortSignal)
+    );
+
+    rerender({ sId: spanId, tId: 'trace-2' });
+
+    await waitFor(() => !result.current.loading);
+    expect(mockFetchSpan).toHaveBeenCalledWith(
+      {
+        traceId: 'trace-2',
+        spanId,
+      },
+      expect.any(AbortSignal)
+    );
+    expect(mockFetchSpan).toHaveBeenCalledTimes(2);
+  });
+
+  it('should pass AbortSignal to fetchSpan', async () => {
+    const mockSpan: SpanDocument = {
+      _id: 'test-id',
+      _index: 'traces-apm-*',
+      span: { id: spanId, name: 'test-span' },
+    } as SpanDocument;
+
+    mockFetchSpan.mockImplementation(({ signal }: { signal: AbortSignal }) => {
+      expect(signal).toBeInstanceOf(AbortSignal);
+      return Promise.resolve(mockSpan);
     });
+
+    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(mockFetchSpan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        traceId,
+        spanId,
+      }),
+      expect.any(AbortSignal)
+    );
   });
 });
