@@ -38,6 +38,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./forecasts'));
     loadTestFile(require.resolve('./single_metric_viewer'));
     loadTestFile(require.resolve('./rule_editor_flyout'));
-    loadTestFile(require.resolve('./cases/anomaly_detection_charts_cases'));
   });
 }

@@ -482,8 +482,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
           });
 
-          // Case attachment tests moved to cases/anomaly_detection_charts_cases.ts
-
           describe('Use anomaly table action to view in Discover', function () {
             beforeEach(async () => {
               await ml.navigation.navigateToAnomalyExplorer(
