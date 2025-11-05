@@ -7,18 +7,18 @@
 
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
-  EuiInMemoryTable,
   EuiSkeletonLoading,
   EuiProgress,
   EuiSkeletonTitle,
   EuiSkeletonText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBasicTable,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import { AddPrebuiltRulesTableFilters } from './add_prebuilt_rules_table_filters';
@@ -28,29 +28,32 @@ import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_
  * Table Component for displaying new rules that are available to be installed
  */
 export const AddPrebuiltRulesTable = React.memo(() => {
-  const addRulesTableContext = useAddPrebuiltRulesTableContext();
-
   const {
     state: {
       rules,
       hasRulesToInstall,
       isLoading,
+      isFetching,
       isRefetching,
       selectedRules,
       isUpgradingSecurityPackages,
+      pagination,
     },
-    actions: { selectRules },
-  } = addRulesTableContext;
+    actions: { setPagination, selectRules },
+  } = useAddPrebuiltRulesTableContext();
+
   const rulesColumns = useAddPrebuiltRulesTableColumns();
 
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
-  const [pageIndex, setPageIndex] = useState(0);
   const handleTableChange = useCallback(
-    ({ page: { index } }: CriteriaWithPagination<RuleResponse>) => {
-      setPageIndex(index);
+    ({ page: { index, size }, sort }: CriteriaWithPagination<RuleResponse>) => {
+      setPagination({
+        page: index + 1,
+        perPage: size,
+      });
     },
-    [setPageIndex]
+    [setPagination]
   );
 
   return (
@@ -89,13 +92,14 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              <EuiInMemoryTable
+              <EuiBasicTable
+                loading={isFetching}
                 items={rules}
-                sorting
                 pagination={{
-                  initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
+                  totalItemCount: pagination.total,
                   pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-                  pageIndex,
+                  pageIndex: pagination.page - 1,
+                  pageSize: pagination.perPage,
                 }}
                 selection={{
                   selectable: () => true,
@@ -105,7 +109,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 itemId="rule_id"
                 data-test-subj="add-prebuilt-rules-table"
                 columns={rulesColumns}
-                onTableChange={handleTableChange}
+                onChange={handleTableChange}
               />
             </>
           )
