@@ -496,11 +496,6 @@ const AlertSchema = z.object({
   '@timestamp': z.string(),
 });
 
-const SummarizedAlertsChunkSchema = z.object({
-  count: z.number(),
-  data: z.array(z.union([AlertSchema, z.any()])),
-});
-
 const RuleSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -511,12 +506,7 @@ const RuleSchema = z.object({
 });
 
 export const EventSchema = z.object({
-  alerts: z.object({
-    new: SummarizedAlertsChunkSchema,
-    ongoing: SummarizedAlertsChunkSchema,
-    recovered: SummarizedAlertsChunkSchema,
-    all: SummarizedAlertsChunkSchema,
-  }),
+  alerts: z.array(z.union([AlertSchema, z.any()])),
   rule: RuleSchema,
   spaceId: z.string(),
   params: z.any(),
