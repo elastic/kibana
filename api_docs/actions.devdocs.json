@@ -6140,21 +6140,6 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.ALERT_HISTORY_PREFIX",
-        "type": "string",
-        "tags": [],
-        "label": "ALERT_HISTORY_PREFIX",
-        "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
-        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
         "id": "def-common.AlertHistoryDefaultIndexName",
         "type": "string",
         "tags": [],
