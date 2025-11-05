@@ -20,9 +20,7 @@ import type { RuleCreationState } from '../../../state';
 export const validateEsqlQueryNode = ({ logger, esClient }: ValidateEsqlQueryNodeParams) => {
   return async (state: RuleCreationState) => {
     let error: string | undefined;
-    let esqlQuery = state.rule.query;
-    const match = state.rule.query.match(/```esql\s*([\s\S]*?)```/);
-    esqlQuery = match ? match[1].trim() : undefined;
+    const esqlQuery = state.rule.query;
 
     const { errors, isEsqlQueryAggregating, hasMetadataOperator } = parseEsqlQuery(esqlQuery);
     if (!isEmpty(errors)) {
@@ -45,7 +43,6 @@ export const validateEsqlQueryNode = ({ logger, esClient }: ValidateEsqlQueryNod
 
     return {
       ...state,
-      rule: { ...state.rule, query: esqlQuery },
       validationErrors: { esqlErrors: error },
     };
   };

@@ -57,6 +57,7 @@ export const nlToEsqlQueryNode = async ({
               - In command FROM use only listed indices: ${state.indices.shortlistedIndexPatterns.join(
                 ', '
               )}
+              - If there is no relevant data in provided index patterns context to fulfil user request, use the best effort to create query based on your knowledge of ES|QL and security detection use cases.
               - Ensure the query is syntactically correct and adheres to ES|QL standards.
               - Do not include any explanations, only provide the ES|QL query string.
               - Any referred field in ES|QL command must exist in list of fields for given index patterns context:
@@ -78,7 +79,10 @@ export const nlToEsqlQueryNode = async ({
         })
       );
 
-      return { ...state, rule: { query: content, language: 'esql', type: 'esql' } };
+      const match = content.match(/```esql\s*([\s\S]*?)```/);
+      const esqlQuery = match ? match[1].trim() : undefined;
+
+      return { ...state, rule: { query: esqlQuery, language: 'esql', type: 'esql' } };
     } catch (e) {
       return { ...state, errors: [...state.errors, `Failed to create ESQL query: ${e.message}`] };
     }
