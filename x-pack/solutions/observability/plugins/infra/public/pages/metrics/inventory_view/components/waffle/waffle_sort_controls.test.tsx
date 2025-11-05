@@ -118,7 +118,7 @@ describe('WaffleSortControls', () => {
         <WaffleSortControls sort={{ by: 'name', direction: 'asc' }} onChange={mockOnChange} />
       );
 
-      let waffleSortByDropdown = screen.getByTestId('waffleSortByDropdown');
+      const waffleSortByDropdown = screen.getByTestId('waffleSortByDropdown');
       expect(waffleSortByDropdown).toHaveTextContent('Name');
 
       await user.click(waffleSortByDropdown);
@@ -133,7 +133,6 @@ describe('WaffleSortControls', () => {
 
       rerender(<WaffleSortControls sort={valueSortAsc} onChange={mockOnChange} />);
 
-      waffleSortByDropdown = screen.getByTestId('waffleSortByDropdown');
       expect(waffleSortByDropdown).toHaveTextContent('Metric value');
 
       await user.click(waffleSortByDropdown);
