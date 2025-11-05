@@ -13,6 +13,11 @@ import type { ThreatHuntingHypothesis } from '../types';
 
 export const MAX_PER_PAGE = 10_000;
 
+/**
+ * 
+ * Notes: 
+ * Change this to a service to match the previous privmon architecture so - update_hypotheses_definitions_service.ts
+ */
 export const updateHypothesesDefinitions = async ({
   auditLogger,
   logger,
