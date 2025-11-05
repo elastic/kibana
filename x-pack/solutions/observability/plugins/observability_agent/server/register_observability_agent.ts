@@ -113,7 +113,6 @@ export async function registerObservabilityAgent({
     description: OBSERVABILITY_AGENT_DESCRIPTION,
     avatar_icon: 'logoObservability',
     configuration: {
-      // TODO: explore whether a workflow can be used to enforce the tool execution order instead of relying on the instructions
       instructions:
         'You are an observability specialist agent.\n' +
         '\n' +
