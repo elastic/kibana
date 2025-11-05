@@ -13,10 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
-import {
-  detectAnomalyAlertFieldUsage,
-  type AnomalyAlertFieldUsage,
-} from '../../../common/util/alerting/detect_anomaly_alert_field_usage';
 import type { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { getRelevantAnomalyFields } from './get_relevant_anomaly_fields';
 import { useMlKibana } from '../../application/contexts/kibana';
@@ -27,13 +23,12 @@ interface AnomalyKqlFilterProps {
   jobConfigs: CombinedJobWithStats[];
   resultType: MlAnomalyResultType;
   jobId?: string;
-  onFieldUsageChange?: (usage: AnomalyAlertFieldUsage) => void;
   errors?: string[];
   disabled?: boolean;
 }
 
 export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
-  ({ value, onChange, jobConfigs, resultType, jobId, onFieldUsageChange, errors, disabled }) => {
+  ({ value, onChange, jobConfigs, resultType, jobId, errors, disabled }) => {
     const { services } = useMlKibana();
     const { unifiedSearch, data } = services;
     const dataViewsService = data?.dataViews;
@@ -104,16 +99,6 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
         fetchDataView();
       },
       [dataViewsService, relevantFields, disabled]
-    );
-
-    useEffect(
-      function parseAndNotifyFieldUsage() {
-        if (onFieldUsageChange) {
-          const usage = detectAnomalyAlertFieldUsage(value);
-          onFieldUsageChange(usage);
-        }
-      },
-      [value, onFieldUsageChange]
     );
 
     /**

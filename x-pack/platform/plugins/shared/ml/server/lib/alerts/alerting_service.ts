@@ -31,7 +31,6 @@ import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
-import { detectAnomalyAlertFieldUsage } from '../../../common/util/alerting/detect_anomaly_alert_field_usage';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
@@ -691,10 +690,6 @@ export function alertingServiceProvider(
 
     const parsedCustomFilter = parseCustomKqlFilter(params.kqlQueryString);
 
-    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(params.kqlQueryString);
-
-    const effectiveSeverity = anomalyAlertFieldUsage.hasAnomalyScoreFilter ? 0 : params.severity;
-
     const requestBody = {
       size: 0,
       query: {
@@ -717,8 +712,7 @@ export function alertingServiceProvider(
                 result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
-            // Only apply interim filter if KQL doesn't already filter on is_interim
-            ...(!anomalyAlertFieldUsage.hasInterimFilter && !params.includeInterim
+            ...(!params.includeInterim
               ? [
                   {
                     term: { is_interim: false },
@@ -738,10 +732,10 @@ export function alertingServiceProvider(
                 // Ignore empty buckets
                 min_doc_count: 1,
               },
-              aggs: getResultTypeAggRequest(params.resultType, effectiveSeverity, true),
+              aggs: getResultTypeAggRequest(params.resultType, params.severity, true),
             },
           }
-        : getResultTypeAggRequest(params.resultType, effectiveSeverity),
+        : getResultTypeAggRequest(params.resultType, params.severity),
     };
 
     const body = await mlClient.anomalySearch(
@@ -872,12 +866,6 @@ export function alertingServiceProvider(
 
     const parsedCustomFilter = parseCustomKqlFilter(kqlQueryString);
 
-    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(kqlQueryString);
-
-    const effectiveSeverity = anomalyAlertFieldUsage.hasAnomalyScoreFilter
-      ? 0
-      : anomalyScoreThreshold;
-
     const requestBody = {
       size: 0,
       query: {
@@ -899,7 +887,7 @@ export function alertingServiceProvider(
                 },
               },
             },
-            ...(!anomalyAlertFieldUsage.hasInterimFilter && !includeInterimResults
+            ...(!includeInterimResults
               ? [
                   {
                     term: { is_interim: false },
@@ -925,7 +913,7 @@ export function alertingServiceProvider(
                 field: anomalyScoreField,
               },
             },
-            ...getResultTypeAggRequest(resultType, effectiveSeverity),
+            ...getResultTypeAggRequest(resultType, anomalyScoreThreshold),
             truncate: {
               bucket_sort: {
                 size: topNBuckets,
