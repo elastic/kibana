@@ -595,7 +595,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     } catch (e) {
       this.services.notifications.toasts.addError(e, {
         title: i18n.translate('unifiedSearch.search.searchBar.backgroundSearch.errorToast.title', {
-          defaultMessage: 'There was a problem backgrounding your search',
+          defaultMessage: 'There was a problem sending your search to background',
         }),
       });
     }

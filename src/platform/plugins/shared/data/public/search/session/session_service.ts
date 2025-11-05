@@ -804,9 +804,15 @@ export class SessionService {
             title: i18n.translate(
               'data.searchSessions.sessionService.backgroundSearchCompletedTitle',
               {
-                defaultMessage: 'Background search "{name}" has completed',
+                defaultMessage: 'Background search finished',
+              }
+            ),
+            text: i18n.translate(
+              'data.searchSessions.sessionService.backgroundSearchCompletedText',
+              {
+                defaultMessage: `Your background search "{searchSessionName}" has completed.`,
                 values: {
-                  name: finishedBackgroundSearch.attributes.name || finishedBackgroundSearch.id,
+                  searchSessionName: finishedBackgroundSearch.attributes.name,
                 },
               }
             ),

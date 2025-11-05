@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { EuiIcon, EuiNotificationBadge } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 export const BackgroundTaskIcon = ({
@@ -19,11 +20,22 @@ export const BackgroundTaskIcon = ({
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div css={componentStyles.container}>
       <EuiIcon type="backgroundTask" />
-      <div style={{ position: 'absolute', top: -8, right: -8 }}>
+      <div css={componentStyles.badge}>
         <EuiNotificationBadge color="subdued">{inProgressSearches}</EuiNotificationBadge>
       </div>
     </div>
   );
+};
+
+const componentStyles = {
+  container: css({
+    position: 'relative',
+  }),
+  badge: css({
+    position: 'absolute',
+    top: -8,
+    left: -8,
+  }),
 };
