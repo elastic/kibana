@@ -157,6 +157,8 @@ export function fetch$(api: unknown): Observable<FetchContext> {
           api.parentApi.searchSessionId$.getValue();
       }
       const { reloadTimestamp, ...rest } = reloadTimeFetchContext;
+      console.log(api.uuid, { reloadTimeFetchContext });
+
       return {
         ...rest,
         searchSessionId,

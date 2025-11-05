@@ -16,6 +16,7 @@ import {
   map,
   merge,
   of,
+  skip,
   switchMap,
 } from 'rxjs';
 
@@ -179,7 +180,13 @@ export function initializeESQLControlSelections(
     selectedOptions$,
     availableOptions$,
     singleSelect$,
-  ]).subscribe(([sectionId]) => esqlVariable$.next(getEsqlVariable(sectionId)));
+  ])
+    .pipe(debounceTime(0), skip(1)) // esqlVariable$ is initialized above
+    .subscribe(([sectionId]) => {
+      const newVariables = getEsqlVariable(sectionId);
+      if (!deepEqual(esqlVariable$.getValue(), newVariables))
+        esqlVariable$.next(getEsqlVariable(sectionId));
+    });
 
   return {
     cleanup: () => {

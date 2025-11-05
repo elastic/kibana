@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, Subject, combineLatest, map } from 'rxjs';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  BehaviorSubject,
+  Subject,
+  combineLatest,
+  combineLatestWith,
+  filter,
+  map,
+  pipe,
+} from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type { StickyControlState } from '@kbn/controls-schemas';
@@ -66,6 +74,7 @@ export const ControlGroupRenderer = ({
   }>();
 
   const lastSavedState$Ref = useRef(new BehaviorSubject<{ [id: string]: StickyControlState }>({}));
+  const [loaded, setLoaded] = useState<boolean>(true);
 
   /** Creation options management */
   const initialState = useInitialControlGroupState(getCreationOptions, lastSavedState$Ref);
@@ -132,8 +141,22 @@ export const ControlGroupRenderer = ({
     if (!parentApi || !input$) return;
 
     const reload$ = new Subject<void>();
+
+    /**
+     * the ControlGroupRenderer will render before the children are available and combineCompatibleChildrenApis
+     * will default to the empty value; however, we shouldn't publish this until the value is real
+     */
+    const ignoreWhileLoading = pipe(
+      combineLatestWith(parentApi.childrenLoading$),
+      filter(([, loading]) => !loading),
+      map(([result]) => result)
+    );
+
     const publicApi = {
       ...parentApi,
+      esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
+      appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
+      appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
       reload: () => reload$.next(),
       getInput$: () => input$,
       getInput: () => input$.value,
@@ -177,7 +200,7 @@ export const ControlGroupRenderer = ({
   }, [parentApi, input$, uiActions]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
-  return !parentApi ? null : (
+  return !parentApi || !loaded ? null : (
     <ControlsRenderer parentApi={parentApi as ControlsRendererParentApi} />
   );
 };
