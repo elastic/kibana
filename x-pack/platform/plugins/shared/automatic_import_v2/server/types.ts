@@ -25,7 +25,11 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { AutomaticImportService } from './services';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { AutomaticImportService, TaskManagerService } from './services';
 
 export const PLUGIN_ID = 'automaticImportV2' as const;
 
@@ -47,6 +51,7 @@ export interface AutomaticImportV2PluginStart {
 export interface AutomaticImportV2PluginSetupDependencies {
   actions: ActionsPluginSetup;
   spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 export interface AutomaticImportV2PluginStartDependencies {
   spaces?: SpacesPluginStart;
@@ -54,6 +59,7 @@ export interface AutomaticImportV2PluginStartDependencies {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface AutomaticImportV2PluginApiRequestHandlerContext {
@@ -66,6 +72,7 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   getSpaceId: () => string;
   automaticImportService: AutomaticImportService;
+  taskManagerService: TaskManagerService;
 }
 
 /**

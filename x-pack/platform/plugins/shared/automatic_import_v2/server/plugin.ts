@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
+import { TaskManagerService } from './services/task_manager';
 
 export class AutomaticImportV2Plugin
   implements
@@ -38,6 +39,7 @@ export class AutomaticImportV2Plugin
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private automaticImportService: AutomaticImportService | null = null;
+  private taskManagerService: TaskManagerService | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -68,12 +70,16 @@ export class AutomaticImportV2Plugin
       core.savedObjects
     );
 
+    // what task definitions are we registering? And can we register multiple? TODO
+    this.taskManagerService = new TaskManagerService(this.logger, plugins.taskManager);
+
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
       core,
       plugins,
       kibanaVersion: this.kibanaVersion,
       automaticImportService: this.automaticImportService,
+      taskManagerService: this.taskManagerService,
     });
 
     core.http.registerRouteHandlerContext<
@@ -97,24 +103,35 @@ export class AutomaticImportV2Plugin
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
 
-    if (this.automaticImportService) {
-      if (!plugins.security) {
-        throw new Error('Security service not initialized.');
-      }
-
-      if (!core.savedObjects) {
-        throw new Error('SavedObjects service not initialized.');
-      }
-
-      this.automaticImportService
-        .initialize(core.security, core.savedObjects)
-        .then(() => {
-          this.logger.debug('AutomaticImportService initialized successfully');
-        })
-        .catch((error) => {
-          this.logger.error('Failed to initialize AutomaticImportService', error);
-        });
+    // TODO better error handling
+    if (!this.automaticImportService || !this.taskManagerService) {
+      throw new Error('Services not initialized during setup');
     }
+
+    if (!plugins.security) {
+      throw new Error('Security service not initialized.');
+    }
+
+    if (!core.savedObjects) {
+      throw new Error('SavedObjects service not initialized.');
+    }
+
+    if (!plugins.taskManager) {
+      throw new Error('TaskManager service not initialized.');
+    }
+
+    this.automaticImportService
+      .initialize(core.security, core.savedObjects)
+      .then(() => {
+        this.logger.debug('AutomaticImportService initialized successfully');
+      })
+      .catch((error) => {
+        this.logger.error('Failed to initialize AutomaticImportService', error);
+      });
+
+    // setup the taskmanager service so that API calls can be made to it freely.
+    this.taskManagerService.initialize(plugins.taskManager);
+    this.logger.info('TaskManagerService initialized successfully');
 
     return {
       actions: plugins.actions,
