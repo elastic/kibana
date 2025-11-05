@@ -127,6 +127,7 @@ export const createAgentGraph = ({
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
     .addEdge(steps.answerAgent, _END_)
     .compile({
+      interruptBefore: [steps.researchAgent],
       checkpointer,
     });
 

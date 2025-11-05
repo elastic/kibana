@@ -14,7 +14,7 @@ import {
 } from '@kbn/onechat-genai-utils/langchain';
 import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
-import { addRoundCompleteEvent, conversationToLangchainMessages, extractRound, prepareConversation, selectProviderTools } from '../utils';
+import { addRoundCompleteEvent, extractRound, prepareConversation, selectProviderTools } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { createAgentGraph } from './graph';
@@ -38,7 +38,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
     conversation,
-    conversationId,
     agentConfiguration,
     capabilities,
     runId = uuidv4(),
@@ -51,6 +50,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
+  const threadId = conversation?.id ?? uuidv4();
 
   const selectedTools = await selectProviderTools({
     provider: toolProvider,
@@ -96,7 +96,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const revertToCheckpoint = await advanceState(agentGraph, {
-    threadId: conversationId,
+    threadId,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -108,7 +108,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       signal: abortSignal,
       runName: chatAgentGraphName,
       configurable: {
-        thread_id: conversationId,
+        thread_id: threadId,
       },
       metadata: {
         graphName: chatAgentGraphName,
@@ -144,7 +144,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     next: (event) => events.emit(event),
     complete: async () => {
       await advanceState(agentGraph, {
-        threadId: conversationId,
+        threadId,
       });
     },
     error: async () => {

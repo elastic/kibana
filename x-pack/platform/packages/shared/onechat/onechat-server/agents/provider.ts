@@ -97,10 +97,6 @@ export interface AgentEventEmitter {
 
 export interface AgentParams {
   /**
-   * The ID of the conversation.
-   */
-  conversationId: string;
-  /**
    * Current conversation
    */
   conversation?: Conversation;
