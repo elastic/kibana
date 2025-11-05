@@ -52,6 +52,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     align-self: end;
     max-inline-size: 80%;
     background-color: ${euiTheme.colors.backgroundBasePrimary};
+    overflow-wrap: break-word;
   `;
 
   const roundContainerStyles = css`
