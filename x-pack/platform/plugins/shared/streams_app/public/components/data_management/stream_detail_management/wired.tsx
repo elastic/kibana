@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -55,6 +56,10 @@ export function WiredStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+
+  const {
+    features: { assets },
+  } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -150,12 +155,16 @@ export function WiredStreamDetailManagement({
         </EuiToolTip>
       ),
     },
-    assets: {
-      content: <StreamDetailAssets definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.assetsTab', {
-        defaultMessage: 'Assets',
-      }),
-    },
+    ...(assets?.enabled
+      ? {
+          assets: {
+            content: <StreamDetailAssets definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.assetsTab', {
+              defaultMessage: 'Assets',
+            }),
+          },
+        }
+      : {}),
     ...otherTabs,
     ...(definition.privileges.manage
       ? {

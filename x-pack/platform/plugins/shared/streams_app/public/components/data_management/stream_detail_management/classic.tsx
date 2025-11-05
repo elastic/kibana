@@ -10,6 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { StreamDescription } from '../../stream_detail_features/stream_description';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
@@ -56,6 +57,10 @@ export function ClassicStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+
+  const {
+    features: { assets },
+  } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -152,12 +157,14 @@ export function ClassicStreamDetailManagement({
     ),
   };
 
-  tabs.assets = {
-    content: <StreamDetailAssets definition={definition} />,
-    label: i18n.translate('xpack.streams.streamDetailView.assetsTab', {
-      defaultMessage: 'Assets',
-    }),
-  };
+  if (assets?.enabled) {
+    tabs.assets = {
+      content: <StreamDetailAssets definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.assetsTab', {
+        defaultMessage: 'Assets',
+      }),
+    };
+  }
 
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;

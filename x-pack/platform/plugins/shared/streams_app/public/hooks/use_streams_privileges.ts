@@ -9,6 +9,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_ASSETS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -27,6 +28,9 @@ export interface StreamsFeatures {
     enabled: boolean;
   };
   contentPacks?: {
+    enabled: boolean;
+  };
+  assets?: {
     enabled: boolean;
   };
 }
@@ -69,6 +73,8 @@ export function useStreamsPrivileges(): StreamsPrivileges {
 
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
 
+  const assetsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ASSETS, false);
+
   return {
     ui: streams as {
       [STREAMS_UI_PRIVILEGES.manage]: boolean;
@@ -90,6 +96,9 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       },
       contentPacks: {
         enabled: contentPacksEnabled,
+      },
+      assets: {
+        enabled: assetsEnabled,
       },
     },
     isLoading: !license,
