@@ -28,7 +28,6 @@ export interface SideNavPrimaryMenuItemProps extends MenuItem {
   isHighlighted: boolean;
   isCurrent?: boolean;
   isCollapsed: boolean;
-  isHorizontal?: boolean;
   onClick?: () => void;
 }
 
@@ -43,7 +42,6 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
       isHighlighted,
       isCurrent,
       isCollapsed,
-      isHorizontal,
       badgeType,
       ...props
     },
@@ -64,33 +62,31 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
       gap: ${euiTheme.size.xs};
     `;
 
+    const badgeLabel =
+      badgeType === 'beta'
+        ? i18n.translate('core.ui.chrome.sideNavigation.betaTooltipLabel', {
+            defaultMessage: 'Beta',
+          })
+        : badgeType === 'techPreview'
+        ? i18n.translate('core.ui.chrome.sideNavigation.techPreviewTooltipLabel', {
+            defaultMessage: 'Tech preview',
+          })
+        : undefined;
+
     const getLabelWithBeta = (label: ReactNode) => (
       <div css={betaContentStyles}>
         <span>{label}</span>
-        {badgeType && <BetaBadge type={badgeType} isInverted={!isHorizontal} />}
+        {badgeType && <BetaBadge type={badgeType} isInverted />}
       </div>
     );
 
     const getTooltipContent = () => {
-      if (isHorizontal || hasContent) return null;
+      if (hasContent) return null;
       if (isCollapsed) return badgeType ? getLabelWithBeta(children) : children;
-      if (!isCollapsed && badgeType)
-        return getLabelWithBeta(
-          badgeType === 'beta'
-            ? i18n.translate('core.ui.chrome.sideNavigation.betaTooltipLabel', {
-                defaultMessage: 'Beta',
-              })
-            : badgeType === 'techPreview'
-            ? i18n.translate('core.ui.chrome.sideNavigation.techPreviewTooltipLabel', {
-                defaultMessage: 'Tech preview',
-              })
-            : children
-        );
+      if (!isCollapsed && badgeType) return getLabelWithBeta(badgeLabel ? badgeLabel : children);
 
       return null;
     };
-
-    const menuItemContent = isHorizontal && badgeType ? getLabelWithBeta(children) : children;
 
     const menuItem = (
       <MenuItemComponent
@@ -100,12 +96,11 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
         id={id}
         isCurrent={isCurrent}
         isHighlighted={isHighlighted}
-        isHorizontal={isHorizontal}
-        isLabelVisible={isHorizontal ? true : !isCollapsed}
+        isLabelVisible={!isCollapsed}
         ref={ref}
         {...props}
       >
-        {menuItemContent}
+        {children}
       </MenuItemComponent>
     );
 
