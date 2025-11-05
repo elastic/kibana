@@ -20,6 +20,7 @@ import {
   type NodeViewModel,
   groupedItemClick$,
   type EntityOrEventItem,
+  NETWORK_PREVIEW_BANNER,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import {
@@ -43,6 +44,7 @@ import {
 } from '../../preview/constants';
 import { useToasts } from '../../../../common/lib/kibana';
 import { GenericEntityPanelKey } from '../../../entity_details/shared/constants';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -82,6 +84,22 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const onOpenNetworkPreview = useCallback(
+    (ip: string, previewScopeId: string) => {
+      openPreviewPanel({
+        id: 'network-preview',
+        params: {
+          ip,
+          scopeId: previewScopeId,
+          flowTarget: FlowTargetSourceDest.source,
+          banner: NETWORK_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel]
+  );
 
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
@@ -279,6 +297,7 @@ export const GraphVisualization: React.FC = memo(() => {
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
+            onOpenNetworkPreview={onOpenNetworkPreview}
           />
         </React.Suspense>
       )}

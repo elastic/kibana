@@ -8,13 +8,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FieldSelector } from './field_selector';
+import { AutocompleteSelector } from './autocomplete_selector';
 
 jest.mock('@kbn/react-field', () => ({
   FieldIcon: ({ type }: { type: string }) => <span data-test-subj={`field-icon-${type}`} />,
 }));
 
-describe('FieldSelector', () => {
+describe('AutocompleteSelector', () => {
   const mockSuggestions = [
     { name: '@timestamp' },
     { name: 'log.level' },
@@ -36,14 +36,14 @@ describe('FieldSelector', () => {
 
   describe('Basic Rendering', () => {
     it('renders with default configuration', () => {
-      render(<FieldSelector {...defaultProps} />);
+      render(<AutocompleteSelector {...defaultProps} />);
 
-      expect(screen.getByTestId('streamsAppFieldSelector')).toBeInTheDocument();
+      expect(screen.getByTestId('streamsAppAutocompleteSelector')).toBeInTheDocument();
     });
 
     it('renders with custom label and placeholder for target field selection', () => {
       render(
-        <FieldSelector
+        <AutocompleteSelector
           {...defaultProps}
           label="Target field"
           placeholder="Select destination field for processed data..."
@@ -59,13 +59,13 @@ describe('FieldSelector', () => {
     it('shows processor-specific help text when provided', () => {
       const grokHelpText =
         'Select the field containing the raw log message to parse with Grok patterns';
-      render(<FieldSelector {...defaultProps} helpText={grokHelpText} />);
+      render(<AutocompleteSelector {...defaultProps} helpText={grokHelpText} />);
 
       expect(screen.getByText(grokHelpText)).toBeInTheDocument();
     });
 
     it('does not show help text when not provided', () => {
-      render(<FieldSelector {...defaultProps} />);
+      render(<AutocompleteSelector {...defaultProps} />);
 
       // Should not have any help text
       expect(screen.queryByText(/select or enter/i)).not.toBeInTheDocument();
@@ -74,14 +74,14 @@ describe('FieldSelector', () => {
 
   describe('Value and onChange Behavior', () => {
     it('displays the selected field value', () => {
-      render(<FieldSelector {...defaultProps} value="log.level" />);
+      render(<AutocompleteSelector {...defaultProps} value="log.level" />);
 
       expect(screen.getByDisplayValue('log.level')).toBeInTheDocument();
     });
 
     it('calls onChange when selecting a structured log field', async () => {
       const mockOnChange = jest.fn();
-      render(<FieldSelector {...defaultProps} onChange={mockOnChange} />);
+      render(<AutocompleteSelector {...defaultProps} onChange={mockOnChange} />);
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -95,7 +95,7 @@ describe('FieldSelector', () => {
 
     it('allows creating custom field paths for dynamic schemas', async () => {
       const mockOnChange = jest.fn();
-      render(<FieldSelector {...defaultProps} onChange={mockOnChange} />);
+      render(<AutocompleteSelector {...defaultProps} onChange={mockOnChange} />);
 
       const input = screen.getByTestId('comboBoxSearchInput');
       await userEvent.click(input);
@@ -108,7 +108,7 @@ describe('FieldSelector', () => {
 
     it('switches between different field types for different processors', async () => {
       const mockOnChange = jest.fn();
-      render(<FieldSelector {...defaultProps} onChange={mockOnChange} />);
+      render(<AutocompleteSelector {...defaultProps} onChange={mockOnChange} />);
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -123,7 +123,7 @@ describe('FieldSelector', () => {
 
   describe('Field Suggestions', () => {
     it('opens dropdown when clicked', async () => {
-      render(<FieldSelector {...defaultProps} />);
+      render(<AutocompleteSelector {...defaultProps} />);
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -135,13 +135,15 @@ describe('FieldSelector', () => {
 
   describe('Validation States', () => {
     it('shows invalid state when isInvalid is true', () => {
-      render(<FieldSelector {...defaultProps} isInvalid error="Field is required" />);
+      render(<AutocompleteSelector {...defaultProps} isInvalid error="Field is required" />);
 
       expect(screen.getByText('Field is required')).toBeInTheDocument();
     });
 
     it('does not show error when isInvalid is false', () => {
-      render(<FieldSelector {...defaultProps} isInvalid={false} error="Field is required" />);
+      render(
+        <AutocompleteSelector {...defaultProps} isInvalid={false} error="Field is required" />
+      );
 
       expect(screen.queryByText('Field is required')).not.toBeInTheDocument();
     });
@@ -149,7 +151,7 @@ describe('FieldSelector', () => {
 
   describe('Disabled State', () => {
     it('disables the combobox when disabled prop is true', () => {
-      render(<FieldSelector {...defaultProps} disabled />);
+      render(<AutocompleteSelector {...defaultProps} disabled />);
 
       const input = screen.getByTestId('comboBoxSearchInput');
       expect(input).toHaveAttribute('disabled');
@@ -164,7 +166,7 @@ describe('FieldSelector', () => {
         { name: 'message', type: 'text' },
       ];
 
-      render(<FieldSelector {...defaultProps} suggestions={suggestionsWithTypes} />);
+      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithTypes} />);
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -178,7 +180,7 @@ describe('FieldSelector', () => {
     it('renders unknown icons for fields without type information', async () => {
       const suggestionsWithoutTypes = [{ name: '@timestamp' }, { name: 'log.level' }];
 
-      render(<FieldSelector {...defaultProps} suggestions={suggestionsWithoutTypes} />);
+      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithoutTypes} />);
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -194,7 +196,11 @@ describe('FieldSelector', () => {
       ];
 
       render(
-        <FieldSelector {...defaultProps} value="log.level" suggestions={suggestionsWithTypes} />
+        <AutocompleteSelector
+          {...defaultProps}
+          value="log.level"
+          suggestions={suggestionsWithTypes}
+        />
       );
 
       // Icon should be visible in the selected value
@@ -205,7 +211,11 @@ describe('FieldSelector', () => {
       const suggestionsWithoutTypes = [{ name: 'log.level' }, { name: 'message' }];
 
       render(
-        <FieldSelector {...defaultProps} value="log.level" suggestions={suggestionsWithoutTypes} />
+        <AutocompleteSelector
+          {...defaultProps}
+          value="log.level"
+          suggestions={suggestionsWithoutTypes}
+        />
       );
 
       // Unknown icon should be visible in the selected value
