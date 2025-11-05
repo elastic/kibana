@@ -96,7 +96,7 @@ export class QradarRulesXmlParser extends XmlParser {
     );
   }
 
-  private getStrValue(val: Array<string> | string | undefined): string {
+  private getStrValue(val: Array<string> | string): string {
     if (Array.isArray(val)) {
       return val[0].trim();
     }

@@ -12,6 +12,8 @@ import { SiemMigrationFakeLLM, MockSiemMigrationTelemetryClient } from '../__moc
 import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks';
 import { MockRuleMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getRuleMigrationAgent } from './graph';
+import { getRulesMigrationTools } from './tools';
+import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
 const mockOriginalRule = {
   id: 'b12c89bc-9d06-11eb-a592-acde48001122',
@@ -101,6 +103,9 @@ const setupAgent = async (responses: NodeResponse[]) => {
     ruleMigrationsRetriever: mockRetriever,
     logger,
     telemetryClient: mockTelemetryClient,
+    tools: getRulesMigrationTools('test-migration', {
+      rulesClient: null as unknown as RuleMigrationsDataClient,
+    }),
   });
   return graph;
 };

@@ -11,7 +11,7 @@ import { MigrationTranslationResult } from '../../../../../../../../common/siem_
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
-import type { GraphNode } from '../../types';
+import type { GraphNode, MigrateRuleGraphParams } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,

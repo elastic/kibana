@@ -8,7 +8,7 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ChatPromptTemplate } from '@langchain/core/prompts';
 import type { GraphNode, MigrateRuleGraphParams } from '../../types';
-import { QRADAR_SEMANTIC_QUERY_PROMPT, SEMANTIC_QUERY_PROMPT_MAP } from './prompts';
+import { CREATE_SPLUNK_SEMANTIC_QUERY_PROMPT, QRADAR_SEMANTIC_QUERY_PROMPT } from './prompts';
 
 interface GetCreateSemanticQueryNodeParams {
   model: MigrateRuleGraphParams['model'];
@@ -31,8 +31,7 @@ export const getCreateSemanticQueryNode = ({
         nlQuery: state.nl_query,
       });
     } else {
-      const prompt = SEMANTIC_QUERY_PROMPT_MAP[state.original_rule.vendor];
-      promptTemplate = await prompt.formatMessages({
+      promptTemplate = await CREATE_SPLUNK_SEMANTIC_QUERY_PROMPT.formatMessages({
         title: state.original_rule.title,
         description: state.original_rule.description,
         query,

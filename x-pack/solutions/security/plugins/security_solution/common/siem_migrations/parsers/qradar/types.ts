@@ -7,35 +7,6 @@
 
 import type { QradarResourceType } from '../../model/vendor/common/qradar.gen';
 
-interface ParsedQradarXml {
-  custom_rule?: QradarRule[];
-  qidmap?: {
-    severity: string[];
-    qname: string[];
-    qdescription: string[];
-  };
-
-  sensordevicetype?: {
-    //
-    // <sensordevicetype>
-    // 	<uniqueperhost>false</uniqueperhost>
-    // 	<default_protocol>0</default_protocol>
-    // 	<devicetypecredibility>8</devicetypecredibility>
-    // 	<dsmparameter></dsmparameter>
-    // 	<latest_version>20250505095</latest_version>
-    // 	<devicecategoryid>1</devicecategoryid>
-    // 	<devicetypedescription>IBM AIX Server</devicetypedescription>
-    // 	<defaultlanguageid>1</defaultlanguageid>
-    // 	<id>85</id>
-    // 	<devicetypename>IBMAIXServer</devicetypename>
-    // 	<devicetypeoverride>0</devicetypeoverride>
-    // 	<mask>0</mask>
-    // </sensordevicetype>
-    devicetypename: string[];
-    devicetypedescription: string[];
-  };
-}
-
 export interface QradarRule {
   id: string;
   rule_data: string;
