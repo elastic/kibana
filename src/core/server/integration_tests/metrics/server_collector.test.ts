@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs';
 import supertest from 'supertest';
@@ -17,7 +18,6 @@ import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ServerMetricsCollector } from '@kbn/core-metrics-collectors-server-internal';
-import { setTimeout as setTimeoutPromise } from 'timers/promises';
 import { createInternalHttpService } from '../utilities';
 
 describe('ServerMetricsCollector', () => {
@@ -26,7 +26,6 @@ describe('ServerMetricsCollector', () => {
   let hapiServer: HapiServer;
   let router: IRouter;
 
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
@@ -174,14 +173,14 @@ describe('ServerMetricsCollector', () => {
     router.get(
       { path: '/500-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
       async (ctx, req, res) => {
-        await delay(500);
+        await timer(500);
         return res.ok({ body: '' });
       }
     );
     router.get(
       { path: '/250-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
       async (ctx, req, res) => {
-        await delay(250);
+        await timer(250);
         return res.ok({ body: '' });
       }
     );
@@ -243,7 +242,7 @@ describe('ServerMetricsCollector', () => {
     await Promise.all([res1, res2]);
     // Give the event-loop one more cycle to allow concurrent connections to be
     // up to date before collecting
-    await setTimeoutPromise(0);
+    await timer(0);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
   });
@@ -311,7 +310,7 @@ describe('ServerMetricsCollector', () => {
       router.get(
         { path: '/500-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
         async (ctx, req, res) => {
-          await delay(500);
+          await timer(500);
           return res.ok({ body: '' });
         }
       );

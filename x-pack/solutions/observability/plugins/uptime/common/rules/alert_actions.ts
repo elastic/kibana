@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type {
-  IndexActionParams,
-  PagerDutyActionParams,
-  ServerLogActionParams,
-  ServiceNowActionParams,
-  JiraActionParams,
-  WebhookActionParams,
-  EmailActionParams,
-  SlackApiActionParams,
-} from '@kbn/stack-connectors-plugin/server/connector_types';
+import type { ServiceNowActionParams } from '@kbn/connector-schemas/servicenow';
+import type { ActionParamsType as EmailActionParams } from '@kbn/connector-schemas/email';
+import type { ActionParamsType as IndexActionParams } from '@kbn/connector-schemas/es_index';
+import type { ActionParamsType as JiraActionParams } from '@kbn/connector-schemas/jira';
+import type { ActionParamsType as PagerDutyActionParams } from '@kbn/connector-schemas/pagerduty';
+import type { ActionParamsType as ServerLogActionParams } from '@kbn/connector-schemas/server_log';
+import type { SlackApiActionParams } from '@kbn/connector-schemas/slack_api';
+import type { ActionParamsType as WebhookActionParams } from '@kbn/connector-schemas/webhook';
+
 import type { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 

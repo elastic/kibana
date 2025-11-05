@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
@@ -44,7 +45,6 @@ afterEach(async () => {
   await server.stop();
 });
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('KibanaRequest', () => {
   describe('auth', () => {
     describe('isAuthenticated', () => {
@@ -226,7 +226,7 @@ describe('KibanaRequest', () => {
               });
 
               // prevents the server to respond
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );
@@ -265,7 +265,7 @@ describe('KibanaRequest', () => {
               });
 
               // prevents the server to respond
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );
@@ -422,7 +422,7 @@ describe('KibanaRequest', () => {
               });
 
               expect(nextSpy).not.toHaveBeenCalled();
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );
@@ -460,7 +460,7 @@ describe('KibanaRequest', () => {
               });
 
               expect(nextSpy).not.toHaveBeenCalled();
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );

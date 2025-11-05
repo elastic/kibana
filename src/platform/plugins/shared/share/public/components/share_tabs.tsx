@@ -54,6 +54,7 @@ export const ShareMenuTabs = () => {
       defaultSelectedTabId={tabs[0].id}
       anchorElement={anchorElement}
       data-test-subj="shareContextModal"
+      outsideClickCloses
     />
   ) : null;
 };
