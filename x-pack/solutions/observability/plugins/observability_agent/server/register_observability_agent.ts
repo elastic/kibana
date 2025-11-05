@@ -27,6 +27,10 @@ import {
 } from './tools/get_data_sources';
 import { createObservabilityAlertsTool, OBSERVABILITY_ALERTS_TOOL_ID } from './tools/alerts/alerts';
 import {
+  createObservabilityGetApmDownstreamDependenciesTool,
+  OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+} from './tools/apm/get_downstream_dependencies';
+import {
   createObservabilityGetAlertsDatasourceFieldsTool,
   OBSERVABILITY_GET_ALERTS_DATASOURCE_FIELDS_TOOL_ID,
 } from './tools/alerts/get_alerts_datasource_fields';
@@ -52,6 +56,7 @@ const OBSERVABILITY_AGENT_TOOL_IDS = [
   OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_DATASOURCE_FIELDS_TOOL_ID,
   OBSERVABILITY_ALERTS_TOOL_ID,
+  OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 ];
 
 export async function registerObservabilityAgent({
@@ -99,12 +104,20 @@ export async function registerObservabilityAgent({
     logger,
   });
 
+  const observabilityGetApmDownstreamDependenciesTool =
+    await createObservabilityGetApmDownstreamDependenciesTool({
+      core,
+      plugins,
+      logger,
+    });
+
   // register tools
   plugins.onechat.tools.register(observabilityGetServicesTool);
   plugins.onechat.tools.register(observabilityGetDataSourcesTool);
   plugins.onechat.tools.register(observabilityRecallKnowledgeBaseTool);
   plugins.onechat.tools.register(observabilityGetAlertsDatasetInfoTool);
   plugins.onechat.tools.register(observabilityAlertsTool);
+  plugins.onechat.tools.register(observabilityGetApmDownstreamDependenciesTool);
 
   // register agent
   plugins.onechat.agents.register({
