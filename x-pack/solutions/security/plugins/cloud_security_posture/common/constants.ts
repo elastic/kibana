@@ -45,10 +45,6 @@ export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
 
-export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
-export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_vulnerabilities';
-
 export const VULNERABILITIES_INDEX_NAME = 'logs-cloud_security_posture.vulnerabilities';
 export const VULNERABILITIES_INDEX_PATTERN = 'logs-cloud_security_posture.vulnerabilities-default*';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =

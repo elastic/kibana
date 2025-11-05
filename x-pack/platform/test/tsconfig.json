@@ -162,5 +162,6 @@
     "@kbn/product-intercept-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/reporting-test-routes",
+    "@kbn/alerting-types",
   ]
 }

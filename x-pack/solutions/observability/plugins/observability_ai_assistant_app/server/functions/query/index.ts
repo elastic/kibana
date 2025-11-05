@@ -25,33 +25,11 @@ import { runAndValidateEsqlQuery } from './validate_esql_query';
 export const QUERY_FUNCTION_NAME = 'query';
 export const EXECUTE_QUERY_NAME = 'execute_query';
 
-export function registerQueryFunction({
+export const registerExecuteQueryFunction = ({
   functions,
   resources,
-  pluginsStart,
   signal,
-}: FunctionRegistrationParameters) {
-  functions.registerInstruction(({ availableFunctionNames }) => {
-    if (!availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
-      return;
-    }
-
-    return `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
-  - visualize data
-  - run any arbitrary query
-  - breakdown or filter ES|QL queries that are displayed on the current page
-  - convert queries from another language to ES|QL
-  - asks general questions about ES|QL
-
-  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${QUERY_FUNCTION_NAME}" function for this.
-
-  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
-
-  Even if the "${QUERY_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
-  even if it has been called before.`;
-  });
-
+}: FunctionRegistrationParameters) => {
   functions.registerFunction(
     {
       name: EXECUTE_QUERY_NAME,
@@ -103,6 +81,33 @@ export function registerQueryFunction({
       };
     }
   );
+};
+
+export function registerQueryFunction(params: FunctionRegistrationParameters) {
+  const { functions, resources, pluginsStart } = params;
+
+  functions.registerInstruction(({ availableFunctionNames }) => {
+    if (!availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
+      return;
+    }
+
+    return `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
+  - visualize data
+  - run any arbitrary query
+  - breakdown or filter ES|QL queries that are displayed on the current page
+  - convert queries from another language to ES|QL
+  - asks general questions about ES|QL
+
+  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
+  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${QUERY_FUNCTION_NAME}" function for this.
+
+  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
+
+  Even if the "${QUERY_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
+  even if it has been called before.`;
+  });
+
+  registerExecuteQueryFunction(params);
 
   functions.registerFunction(
     {

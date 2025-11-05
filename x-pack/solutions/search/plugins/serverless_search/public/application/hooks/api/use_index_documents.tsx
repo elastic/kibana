@@ -8,7 +8,7 @@
 import { Pagination } from '@elastic/eui';
 import { SearchHit } from '@kbn/es-types';
 import { pageToPagination, Paginate } from '@kbn/search-index-documents';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibanaServices } from '../use_kibana';
 
 interface IndexDocuments {

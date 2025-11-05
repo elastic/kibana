@@ -1809,8 +1809,7 @@ export const runActionTestSuite = ({
     });
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/188963
-  describe.skip('createIndex', () => {
+  describe('createIndex', () => {
     afterEach(async () => {
       // Restore the default setting of 1000 shards per node
       await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: null } } });

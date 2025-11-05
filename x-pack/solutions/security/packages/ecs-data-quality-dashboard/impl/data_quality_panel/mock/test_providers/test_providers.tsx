@@ -11,7 +11,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
 import React from 'react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Theme } from '@elastic/charts';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { UserProfileService } from '@kbn/core/public';

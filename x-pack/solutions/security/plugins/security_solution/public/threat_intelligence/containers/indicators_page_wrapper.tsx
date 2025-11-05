@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import { IndicatorsPage } from '../modules/indicators/pages/indicators';
 import { IntegrationsGuard } from './integrations_guard';

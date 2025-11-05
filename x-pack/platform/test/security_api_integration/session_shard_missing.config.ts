@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [resolve(__dirname, './tests/session_shard_missing')],
+    testConfigCategory: xPackAPITestsConfig.get('testConfigCategory'),
     services,
     servers: xPackAPITestsConfig.get('servers'),
     esTestCluster: {

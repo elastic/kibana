@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
