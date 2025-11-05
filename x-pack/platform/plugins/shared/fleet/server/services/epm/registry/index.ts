@@ -673,10 +673,10 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
       const pathWithoutPrefix = path.replace(/^\/package\//, '');
       const [pkgkey, ...rest] = pathWithoutPrefix.split('/');
       const docsIndex = rest.indexOf('docs');
-      
+
       if (docsIndex >= 0) {
         let fileName: string;
-        
+
         // Check if this is a knowledge_base file or README.md
         if (rest[docsIndex + 1] === 'knowledge_base') {
           fileName = rest.slice(docsIndex + 2).join('/');
