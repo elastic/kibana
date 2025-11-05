@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const find = getService('find');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -61,6 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logstash',
         adHoc: true,
@@ -86,14 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.try(async () => {
-        const overlayMasks = await find.allByCssSelector('.euiOverlayMask', 1000).catch(() => []);
-        if (overlayMasks.length > 0) throw new Error('Overlay mask still present');
-      });
-
-      await retry.try(async () => {
-        expect(await dataViews.getSelectedName()).to.be('logstash*');
-      });
+      expect(await dataViews.getSelectedName()).to.be('logstash*');
 
       // navigate to single doc view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -105,14 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.try(async () => {
-        const overlayMasks = await find.allByCssSelector('.euiOverlayMask', 1000).catch(() => []);
-        if (overlayMasks.length > 0) throw new Error('Overlay mask still present');
-      });
-
-      await retry.try(async () => {
-        expect(await dataViews.getSelectedName()).to.be('logstash*');
-      });
+      expect(await dataViews.getSelectedName()).to.be('logstash*');
     });
 
     it('should support query and filtering', async () => {
@@ -172,6 +159,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('search results should be different after data view update', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logst',
         adHoc: true,
@@ -285,6 +274,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should notify about invalid filter reffs', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logstas',
         adHoc: true,
