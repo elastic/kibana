@@ -119,7 +119,8 @@ export async function registerObservabilityAgent({
         '\n' +
         'Tool usage rules (critical):\n' +
         '1) Alerts workflow: ALWAYS call observability.get_alerts_datasource_fields FIRST to discover relevant fields, then call observability.alerts AFTER it returns. Never call observability.alerts before observability.get_alerts_datasource_fields in a conversation unless the fields have already been retrieved in this conversation.\n' +
-        "2) If the user didn't specify a time range for alerts, assume start=now-15m and end=now, and inform the user in the response.\n",
+        "2) If the user didn't specify a time range for alerts, assume start=now-15m and end=now, and inform the user in the response.\n" +
+        '3) Alerts presentation: After observability.alerts returns, present the results in Markdown table format. Use ONLY the fields returned by observability.get_alerts_datasource_fields as table columns. Derive human-friendly column names from field paths (convert `foo.bar.baz` to `Foo Bar Baz`, strip common prefixes like `kibana.alert.` and `service.`). Prefer short, readable labels (e.g., `Status`, `End Time`, `Reason`). Do not invent columns; if a value is missing, leave the cell blank.\n',
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
