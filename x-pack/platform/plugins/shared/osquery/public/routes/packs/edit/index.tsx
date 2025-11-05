@@ -133,7 +133,7 @@ const EditPackPageComponent = () => {
       {!data ? (
         <EuiSkeletonText lines={10} />
       ) : (
-        <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} />
+        <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} packId={packId} />
       )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
