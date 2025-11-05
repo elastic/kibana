@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { RoutingDefinition } from '@kbn/streams-schema';
-import { isRoutingEnabled } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiForm, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { RoutingDefinition } from '@kbn/streams-schema';
+import { isRoutingEnabled } from '@kbn/streams-schema';
+import React from 'react';
 import { useRoutingFieldSuggestions } from '../../../hooks/use_field_suggestions';
+import { useRoutingValueSuggestions } from '../../../hooks/use_value_suggestions';
+import { getFilterConditionField } from '../../../util/condition';
 import type { ConditionEditorProps } from '../shared/condition_editor';
 import { ConditionEditor } from '../shared/condition_editor';
 
@@ -25,6 +27,7 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
   const { isSuggestionRouting, status } = props;
   const isEnabled = isRoutingEnabled(status);
   const fieldSuggestions = useRoutingFieldSuggestions();
+  const valueSuggestions = useRoutingValueSuggestions(getFilterConditionField(props.condition));
 
   return (
     <EuiForm fullWidth>
@@ -56,7 +59,11 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
           />
         </EuiFormRow>
       )}
-      <ConditionEditor {...props} fieldSuggestions={fieldSuggestions} />
+      <ConditionEditor
+        {...props}
+        fieldSuggestions={fieldSuggestions}
+        valueSuggestions={valueSuggestions}
+      />
     </EuiForm>
   );
 }

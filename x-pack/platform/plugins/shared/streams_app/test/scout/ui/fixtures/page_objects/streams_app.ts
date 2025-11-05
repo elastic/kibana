@@ -15,7 +15,9 @@ import type { FieldTypeOption } from '../../../../../public/components/data_mana
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
+  public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
+
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
       this.page,
@@ -25,7 +27,10 @@ export class StreamsApp {
       this.page,
       'streamsAppConditionEditorFieldText'
     );
-
+    this.conditionEditorValueComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppConditionEditorValueText'
+    );
     this.processorTypeComboBox = new EuiComboBoxWrapper(
       this.page,
       'streamsAppProcessorTypeSelector'
@@ -264,7 +269,7 @@ export class StreamsApp {
       await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     }
     if (value) {
-      await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
+      await this.conditionEditorValueComboBox.setCustomSingleOption(value);
     }
     if (operator) {
       await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
@@ -530,7 +535,7 @@ export class StreamsApp {
   async fillCondition(field: string, operator: string, value: string) {
     await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
-    await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
+    await this.conditionEditorValueComboBox.setCustomSingleOption(value);
   }
 
   async removeProcessor(pos: number) {
