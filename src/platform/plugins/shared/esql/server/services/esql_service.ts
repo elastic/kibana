@@ -90,15 +90,16 @@ export class EsqlService {
     // hidden and not, important for finding timeseries mode
     // mode is not returned for time_series datastreams, we need to find it from the indices
     // which are usually hidden
-    const allSources = (await client.indices.resolveIndex({
-      name: namesToQuery,
-      expand_wildcards: 'all', // this returns hidden indices too
-    })) as ResolveIndexResponse;
-
-    const availableSources = (await client.indices.resolveIndex({
-      name: namesToQuery,
-      expand_wildcards: 'open',
-    })) as ResolveIndexResponse;
+    const [allSources, availableSources] = (await Promise.all([
+      client.indices.resolveIndex({
+        name: namesToQuery,
+        expand_wildcards: 'all', // this returns hidden indices too
+      }),
+      client.indices.resolveIndex({
+        name: namesToQuery,
+        expand_wildcards: 'open',
+      }),
+    ])) as [ResolveIndexResponse, ResolveIndexResponse];
 
     const suggestedIndices = this.processSuggestedIndices(availableSources.indices ?? []);
     const suggestedAliases = this.processSuggestedAliases(availableSources.aliases ?? []);
