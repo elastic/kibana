@@ -21,7 +21,6 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
@@ -46,7 +45,6 @@ export interface BootDependencies extends ConsoleStartServices {
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
   element: HTMLElement;
@@ -61,7 +59,6 @@ export async function renderApp({
   docLinkVersion,
   usageCollection,
   application,
-  dataViews,
   data,
   licensing,
   element,
@@ -108,7 +105,6 @@ export async function renderApp({
             http,
             autocompleteInfo,
             application,
-            dataViews,
             data,
             licensing,
           },
