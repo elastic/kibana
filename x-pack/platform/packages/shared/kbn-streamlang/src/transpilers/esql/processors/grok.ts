@@ -22,7 +22,9 @@ import { buildIgnoreMissingFilter, castFieldsToGrokTypes, buildWhereCondition } 
  * @param grokProcessor - An object containing GROK patterns and their definitions.
  * @returns An array of fully expanded patterns.
  */
-export function unwrapPatternDefinitions(grokProcessor: Pick<GrokProcessor, 'patterns' | 'pattern_definitions'>): string[] {
+export function unwrapPatternDefinitions(
+  grokProcessor: Pick<GrokProcessor, 'patterns' | 'pattern_definitions'>
+): string[] {
   const { patterns, pattern_definitions } = grokProcessor;
 
   if (!pattern_definitions || Object.keys(pattern_definitions).length === 0) {

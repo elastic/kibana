@@ -543,8 +543,8 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
             from: 'message',
             patterns: ['%{FAVORITE_CAT:pet}'],
             pattern_definitions: {
-              "FAVORITE_CAT" : "burmese"
-            }
+              FAVORITE_CAT: 'burmese',
+            },
           } as GrokProcessor,
         ],
       };
