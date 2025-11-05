@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiButton,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiPanel, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useSendMessage } from '../../../../context/send_message/send_message_context';
 import { RoundFlyout } from '../round_flyout';
 import { RoundSteps } from './steps/round_steps';
+import { ThinkingTimeDisplay } from './thinking_time_display';
 
 interface RoundThinkingProps {
   rawRound: ConversationRound;
@@ -81,32 +73,6 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     setShowFlyout(!showFlyout);
   };
 
-  const renderThinkingTime = () => {
-    if (rawRound.time_to_first_token > 0) {
-      return (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText
-            size="s"
-            color="subdued"
-            css={css`
-              font-style: italic;
-            `}
-          >
-            <FormattedMessage
-              id="xpack.onechat.conversation.thinking.timeToFirstToken"
-              defaultMessage="Thought for {timeToFirstToken} seconds."
-              values={{
-                timeToFirstToken: Math.round(rawRound.time_to_first_token / 1000),
-              }}
-            />
-          </EuiText>
-        </>
-      );
-    }
-    return null;
-  };
-
   return (
     <EuiAccordion
       id={thinkingAccordionId}
@@ -126,7 +92,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
             {rawResponseButtonLabel}
           </EuiButton>
         )}
-        {renderThinkingTime()}
+        <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
       </EuiPanel>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
     </EuiAccordion>
