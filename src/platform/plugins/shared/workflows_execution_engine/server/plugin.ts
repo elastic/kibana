@@ -188,8 +188,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
     const dependencies: ContextDependencies = this.setupDependencies; // TODO: append start dependencies
-    // this.initializePromise = this.initialize(coreStart);
-    this.initializePromise = Promise.resolve();
+    this.initializePromise = this.initialize(coreStart);
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
