@@ -56,15 +56,11 @@ export function SuggestedStreamPanel({
   const { changeSuggestionName, changeSuggestionCondition, reviewSuggestedRule } =
     useStreamRoutingEvents();
 
-  const [nameError, setNameError] = React.useState<string | undefined>(undefined);
-  const [conditionError, setConditionError] = React.useState<string | undefined>(undefined);
-
   const editedSuggestion = routingSnapshot.context.editedSuggestion;
   const isEditing =
     routingSnapshot.matches({ ready: 'editingSuggestedRule' }) &&
     routingSnapshot.context.editingSuggestionIndex === index;
 
-  // Use edited suggestion when editing, otherwise use original partition
   const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;
   const matchRate = useMatchRate(definition, currentSuggestion);
 
@@ -75,38 +71,44 @@ export function SuggestedStreamPanel({
       selectedPreview.name === currentSuggestion.name
   );
 
-  const handleNameChange = (name: string) => {
-    if (!isEditing) return;
-    const isDuplicateName = routingSnapshot.context.routing.some((r) => r.destination === name);
+  const nameError = React.useMemo(() => {
+    if (!isEditing) return undefined;
+
+    const isDuplicateName = routingSnapshot.context.routing.some(
+      (r) => r.destination === currentSuggestion.name
+    );
 
     if (isDuplicateName) {
-      setNameError(
-        i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
-          defaultMessage: 'A stream with this name already exists',
-        })
-      );
-    } else {
-      setNameError(undefined);
+      return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
+        defaultMessage: 'A stream with this name already exists',
+      });
     }
 
+    return undefined;
+  }, [isEditing, currentSuggestion.name, routingSnapshot.context.routing]);
+
+  const conditionError = React.useMemo(() => {
+    if (!isEditing) return undefined;
+
+    const processedCondition = processCondition(currentSuggestion.condition);
+    const isProcessedCondition = processedCondition ? isCondition(processedCondition) : true;
+
+    if (!isProcessedCondition) {
+      return i18n.translate('xpack.streams.streamDetailRouting.conditionRequiredError', {
+        defaultMessage: 'Condition is required',
+      });
+    }
+
+    return undefined;
+  }, [isEditing, currentSuggestion.condition]);
+
+  const handleNameChange = (name: string) => {
+    if (!isEditing) return;
     changeSuggestionName(name);
   };
 
   const handleConditionChange = (condition: any) => {
     if (!isEditing) return;
-    const processedCondition = processCondition(condition);
-    const isProcessedCondition = processedCondition ? isCondition(processedCondition) : true;
-
-    if (!isProcessedCondition) {
-      setConditionError(
-        i18n.translate('xpack.streams.streamDetailRouting.conditionRequiredError', {
-          defaultMessage: 'Condition is required',
-        })
-      );
-    } else {
-      setConditionError(undefined);
-    }
-
     changeSuggestionCondition(condition);
   };
 
