@@ -261,6 +261,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('clickable links', () => {
+      it('should have links option enabled in Monaco editor configuration', async () => {
+        // Verify that the Monaco editor has the links option enabled
+        // by accessing the editor configuration through the browser
+        const linksEnabled = await browser.execute(() => {
+          // Access Monaco editor instances
+          const monaco = (window as any).MonacoEnvironment?.monaco;
+          if (!monaco) return false;
+
+          // Get all editor instances
+          const editors = monaco.editor.getEditors();
+
+          // Find the console input editor (should be the first one)
+          for (const editor of editors) {
+            const options = editor.getOptions();
+            // Check if the links option is enabled
+            const linksOption = options.get(monaco.editor.EditorOption.links);
+            if (linksOption !== undefined) {
+              return linksOption;
+            }
+          }
+          return false;
+        });
+
+        expect(linksEnabled).to.be(true);
+      });
+    });
+
     it('should work fine with a large content', async () => {
       await PageObjects.console.clearEditorText();
 
