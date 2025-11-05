@@ -94,6 +94,12 @@ function reverseBuildVisualizationState(
 
   const props: DeepPartial<DeepMutable<GaugeState>> = {
     ...generateApiLayer(layer),
+    shape:
+      visualization.shape === 'horizontalBullet'
+        ? { type: 'bullet', direction: 'horizontal' }
+        : visualization.shape === 'verticalBullet'
+        ? { type: 'bullet', direction: 'vertical' }
+        : { type: visualization.shape },
     metric: isEsqlTableTypeDataset(dataset)
       ? {
           ...getValueApiColumn(visualization.metricAccessor, layer as TextBasedLayer),
