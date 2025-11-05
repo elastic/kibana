@@ -30,7 +30,7 @@ export function getLensStateMetricSharedProps(
     time_scale?: TimeScaleUnit;
     reduced_time_range?: string;
     time_shift?: string;
-    filter?: { query: string; language?: 'kuery' | 'lucene' };
+    filter?: { query: string; language: 'kuery' | 'lucene' };
     label?: string;
   },
   dataType: DataType = 'number'

@@ -441,7 +441,9 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
   };
 };
 
-export const filtersToApiFormat = (filters: Filter[]): LensApiFilterType[] => {
+export const filtersToApiFormat = (
+  filters: Filter[]
+): (LensApiFilterType | UnifiedSearchFilterType)[] => {
   return filters.map((filter) => ({
     language: filter.query?.language,
     query: filter.query?.query ?? filter.query,
@@ -469,10 +471,15 @@ export const filtersToLensState = (
 };
 
 export const queryToLensState = (query: LensApiFilterType): Query => {
-  return { query: query.query, language: query.language ?? 'kuery' };
+  return query;
 };
 
-export const filtersAndQueryToApiFormat = (state: LensAttributes) => {
+export const filtersAndQueryToApiFormat = (
+  state: LensAttributes
+): {
+  filters?: (LensApiFilterType | UnifiedSearchFilterType)[];
+  query?: LensApiFilterType;
+} => {
   return {
     ...(state.state.filters?.length ? { filters: filtersToApiFormat(state.state.filters) } : {}),
     ...(state.state.query && !isOfAggregateQueryType(state.state.query)

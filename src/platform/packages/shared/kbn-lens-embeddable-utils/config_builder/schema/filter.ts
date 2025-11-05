@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const filterSchema = schema.object({
-  language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
+  language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')]),
   /**
    * Filter query
    */
@@ -56,7 +56,7 @@ export const unifiedSearchFilterSchema = schema.object({
       range: schema.maybe(schema.any({})),
     }),
   ]),
-  meta: schema.object({}),
+  meta: schema.maybe(schema.object({})),
   language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
 });
 
