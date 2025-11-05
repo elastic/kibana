@@ -15,10 +15,8 @@ import { mergeControlGroupStates } from './merge_control_group_states';
 describe('mergeControlGroupStates', () => {
   const createMockControl = (variableName: string, id: string = `control-${variableName}`) => ({
     id,
-    controlConfig: {
-      variableName,
-      title: `Control for ${variableName}`,
-    },
+    variableName,
+    title: `Control for ${variableName}`,
     order: 0,
     width: 'medium' as const,
     grow: false,
@@ -28,15 +26,6 @@ describe('mergeControlGroupStates', () => {
     controls: ControlsGroupState['controls']
   ): ControlsGroupState => ({
     controls,
-    labelPosition: 'oneLine',
-    chainingSystem: 'HIERARCHICAL',
-    autoApplySelections: true,
-    ignoreParentSettings: {
-      ignoreFilters: false,
-      ignoreQuery: false,
-      ignoreTimerange: false,
-      ignoreValidations: false,
-    },
   });
 
   const createMockEmbeddablePackage = (

@@ -30,8 +30,8 @@ export function mergeControlGroupStates(
     const uniqueControls: ControlsGroupState['controls'] = [];
     const existingControlVariableNames = new Set(
       mergedControlGroupState.controls.map((control) => {
-        if (controlHasVariableName(control.controlConfig)) {
-          return control.controlConfig.variableName;
+        if (controlHasVariableName(control)) {
+          return control.variableName;
         }
       })
     );
@@ -39,8 +39,8 @@ export function mergeControlGroupStates(
     // Checks each incoming control's variable name against existing controls to avoid duplicates
     (incomingControlGroupState as ControlsGroupState).controls.forEach((control) => {
       if (
-        controlHasVariableName(control.controlConfig) &&
-        !existingControlVariableNames.has(control.controlConfig?.variableName)
+        controlHasVariableName(control) &&
+        !existingControlVariableNames.has(control.variableName)
       ) {
         uniqueControls.push(control);
       }
