@@ -336,7 +336,7 @@ export default function (providerContext: FtrProviderContext) {
               },
               'default'
             ),
-          /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
+          /409 Conflict Agent Policy\s.* already exists with name\s.*$/i
         );
       });
 
@@ -376,7 +376,7 @@ export default function (providerContext: FtrProviderContext) {
               },
               'default'
             ),
-          /409 "Conflict" An integration policy with the name\s.* already exists in space\s.*$/i
+          /409 Conflict An integration policy with the name\s.* already exists in space\s.*$/i
         );
       });
 
@@ -398,7 +398,7 @@ export default function (providerContext: FtrProviderContext) {
               },
               'default'
             ),
-          /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
+          /409 Conflict Agent Policy\s.* already exists with name\s.*$/i
         );
       });
     });
