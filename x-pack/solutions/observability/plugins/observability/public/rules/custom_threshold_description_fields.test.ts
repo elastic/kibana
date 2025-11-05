@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
 import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold/latest';

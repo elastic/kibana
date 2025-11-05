@@ -12,8 +12,10 @@ import type { ValidateOptions as RuleParams } from '.';
 
 describe('shard size getDescriptionFields', () => {
   const mockPrebuildField = jest.fn();
+  const mockPrebuildCustomQuery = jest.fn();
   const mockPrebuildFields = {
     indexPattern: mockPrebuildField,
+    customQuery: mockPrebuildCustomQuery,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
@@ -80,5 +82,29 @@ describe('shard size getDescriptionFields', () => {
 
     expect(mockPrebuildField).toHaveBeenCalledWith(['logs-*']);
     expect(result).toEqual([mockReturnValue]);
+  });
+
+  it('should call prebuildField with custom query in array', () => {
+    const mockRule = {
+      params: {
+        indexPattern: 'logs-*',
+        filterQueryText: 'some: query',
+      },
+    } as unknown as Rule<RuleParams>;
+
+    const mockReturnValue = { type: 'index_pattern', value: 'logs-*' };
+    const mockCustomQueryReturnValue = { type: 'custom_query', value: 'some: query' };
+    mockPrebuildField.mockReturnValue(mockReturnValue);
+    mockPrebuildCustomQuery.mockReturnValue(mockCustomQueryReturnValue);
+
+    const result = getDescriptionFields({
+      rule: mockRule,
+      prebuildFields: mockPrebuildFields,
+      http: {} as HttpSetup,
+    });
+
+    expect(mockPrebuildField).toHaveBeenCalledWith(['logs-*']);
+    expect(mockPrebuildCustomQuery).toHaveBeenCalledWith('some: query');
+    expect(result).toEqual([mockReturnValue, mockCustomQueryReturnValue]);
   });
 });
