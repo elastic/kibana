@@ -9,7 +9,10 @@ import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { reviewRuleInstall } from '../../api';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
-import type { ReviewRuleInstallationResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  ReviewRuleInstallationRequestBody,
+  ReviewRuleInstallationResponseBody,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
@@ -17,12 +20,13 @@ import { cappedExponentialBackoff } from './capped_exponential_backoff';
 export const REVIEW_RULE_INSTALLATION_QUERY_KEY = ['POST', REVIEW_RULE_INSTALLATION_URL];
 
 export const useFetchPrebuiltRulesInstallReviewQuery = (
+  request: ReviewRuleInstallationRequestBody,
   options?: UseQueryOptions<ReviewRuleInstallationResponseBody>
 ) => {
   return useQuery<ReviewRuleInstallationResponseBody>(
-    REVIEW_RULE_INSTALLATION_QUERY_KEY,
+    [...REVIEW_RULE_INSTALLATION_QUERY_KEY, request],
     async ({ signal }) => {
-      const response = await reviewRuleInstall({ signal });
+      const response = await reviewRuleInstall({ signal, request });
       return response;
     },
     {

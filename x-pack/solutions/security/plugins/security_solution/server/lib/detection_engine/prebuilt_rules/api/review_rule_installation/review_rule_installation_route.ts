@@ -6,13 +6,12 @@
  */
 
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
-import {
-  PREBUILT_RULES_OPERATION_CONCURRENCY,
-  PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
-} from '../../constants';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { reviewRuleInstallationHandler } from './review_rule_installation_handler';
 
 export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
@@ -26,7 +25,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
         },
       },
       options: {
-        tags: [routeLimitedConcurrencyTag(PREBUILT_RULES_OPERATION_CONCURRENCY)],
+        tags: [routeLimitedConcurrencyTag(3)],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -35,7 +34,11 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
     .addVersion(
       {
         version: '1',
-        validate: {},
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(ReviewRuleInstallationRequestBodySchema),
+          },
+        },
       },
       reviewRuleInstallationHandler
     );

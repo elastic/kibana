@@ -1,0 +1,67 @@
+{
+  "stats": {
+    "filters": {
+      "tags": [
+        {
+          "id": "my-tag",
+          "count": 0
+        },
+        {
+          "id": "my-other-tag",
+          "count": 10
+        }
+      ],
+      "rule_type": [
+        {
+          "id": "query",
+          "count": 25
+        },
+        {
+          "id": "eql",
+          "count": 0
+        }
+      ],
+      "related_integrations": [
+        {
+          "id": "aws",
+          "count": 15
+        },
+        {
+          "id": "azure",
+          "count": 10
+        }
+      ],
+      "severity": [
+        {
+          "id": "high",
+          "count": 15
+        },
+        {
+          "id": "medium",
+          "count": 10
+        },
+        {
+          "id": "low",
+          "count": 5
+        }
+      ],
+      "threat": [
+        {
+          "id": "TA0004",
+          "count": 15
+        }, // tactic
+        {
+          "id": "TA0004/T1548",
+          "count": 10
+        }, // technique
+        {
+          "id": "TA0004/T1548/001",
+          "count": 5
+        }, // sub-technique
+      ]
+    }
+  }
+}
+// Probably there will be different kinds of filters, like range filter for "risk_score"
+// They'll have a different structure
+// Also there's going to be a filter by index pattern

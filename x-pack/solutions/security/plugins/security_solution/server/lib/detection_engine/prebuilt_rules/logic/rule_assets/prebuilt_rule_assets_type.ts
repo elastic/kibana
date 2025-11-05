@@ -19,6 +19,24 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     version: {
       type: 'long',
     },
+    name: {
+      type: 'text',
+      fields: {
+        keyword: {
+          type: 'keyword',
+          normalizer: 'lowercase',
+        },
+      },
+    },
+    tags: {
+      type: 'keyword',
+    },
+    severity: {
+      type: 'keyword',
+    },
+    risk_score: {
+      type: 'float',
+    },
   },
 };
 
@@ -32,4 +50,33 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
   },
   namespaceType: 'agnostic',
   mappings: prebuiltRuleAssetMappings,
+  modelVersions: {
+    '1': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            name: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  normalizer: 'lowercase',
+                },
+              },
+            },
+            tags: {
+              type: 'keyword',
+            },
+            severity: {
+              type: 'keyword',
+            },
+            risk_score: {
+              type: 'float',
+            },
+          },
+        },
+      ],
+    },
+  },
 };
