@@ -27,6 +27,7 @@ interface HoverPopoverActionProps {
   field: string;
   value: unknown;
   formattedValue?: string;
+  rawFieldValue?: unknown;
   title?: unknown;
   anchorPosition?: PopoverAnchorPosition;
   display?: EuiPopoverProps['display'];
@@ -49,13 +50,21 @@ export const HoverActionPopover = ({
   field,
   value,
   formattedValue,
+  rawFieldValue,
   anchorPosition = 'upCenter',
   display = 'inline-block',
   truncate,
 }: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
-  const uiFieldActions = useUIFieldActions({ field, value, formattedValue });
+
+  const cleanValueForActions = rawFieldValue ?? value;
+
+  const uiFieldActions = useUIFieldActions({
+    field,
+    value: cleanValueForActions,
+    formattedValue,
+  });
 
   // The timeout hack is required because we are using a Popover which ideally should be used with a mouseclick,
   // but we are using it as a Tooltip. Which means we now need to manually handle the open and close

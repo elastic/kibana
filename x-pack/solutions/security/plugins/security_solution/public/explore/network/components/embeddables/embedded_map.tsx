@@ -31,6 +31,8 @@ import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { State } from '../../../../common/store';
 import type { SourcererDataView } from '../../../../sourcerer/store/model';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
@@ -112,6 +114,8 @@ export const EmbeddedMapComponent = ({
 
   const { addError } = useAppToasts();
 
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.explore);
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
   const selectedPatterns = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.default);
@@ -122,7 +126,22 @@ export const EmbeddedMapComponent = ({
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const [availableDataViews, setAvailableDataViews] = useState<SourcererDataView[]>([]);
 
+  const experimentalDataViewLayerList = useMemo(
+    () =>
+      experimentalDataView.id && experimentalDataView.getIndexPattern()
+        ? getLayerList([
+            {
+              id: experimentalDataView.id,
+              title: experimentalDataView.getIndexPattern(),
+            },
+          ])
+        : [],
+    [experimentalDataView]
+  );
+
   useEffect(() => {
+    if (newDataViewPickerEnabled) return;
+
     let canceled = false;
 
     const fetchData = async () => {
@@ -149,9 +168,11 @@ export const EmbeddedMapComponent = ({
     return () => {
       canceled = true;
     };
-  }, [addError, availableDataViews, isFieldInIndexPattern]);
+  }, [addError, availableDataViews, isFieldInIndexPattern, newDataViewPickerEnabled]);
 
   useEffect(() => {
+    if (newDataViewPickerEnabled) return;
+
     const dataViews = kibanaDataViews.filter((dataView) =>
       selectedPatterns.includes(dataView.title)
     );
@@ -159,7 +180,7 @@ export const EmbeddedMapComponent = ({
       setIsIndexError(true);
     }
     setAvailableDataViews((prevViews) => (isEqual(prevViews, dataViews) ? prevViews : dataViews));
-  }, [kibanaDataViews, selectedPatterns]);
+  }, [kibanaDataViews, selectedPatterns, newDataViewPickerEnabled]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
@@ -195,7 +216,7 @@ export const EmbeddedMapComponent = ({
               getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
                 <OutPortal node={portalNode} {...tooltipProps} />}
               mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
-              layerList={layerList}
+              layerList={newDataViewPickerEnabled ? experimentalDataViewLayerList : layerList}
               filters={appliedFilters}
               query={query}
               onApiAvailable={(api: MapApi) => {

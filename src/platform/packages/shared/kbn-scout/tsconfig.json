@@ -30,6 +30,7 @@
     "@kbn/scout-reporting",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-http-common"
   ]
 }

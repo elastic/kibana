@@ -60,6 +60,10 @@ export const SimulationPlayground = () => {
                     iconType="refresh"
                     onClick={refreshSimulation}
                     isLoading={isLoading}
+                    aria-label={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
+                      { defaultMessage: 'Refresh data preview' }
+                    )}
                   />
                 }
               >

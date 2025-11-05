@@ -1013,7 +1013,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.kql', {
         defaultMessage: 'KQL',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1291,7 +1291,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.match', {
         defaultMessage: 'MATCH',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1337,7 +1337,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.match_phrase', {
         defaultMessage: 'MATCH_PHRASE',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1351,7 +1351,7 @@ export const functions = {
   -->
 
   ### MATCH_PHRASE
-  Use \`MATCH_PHRASE\` to perform a [\`match_phrase\`](/reference/query-languages/query-dsl/query-dsl-match-query-phrase.md) on the
+  Use \`MATCH_PHRASE\` to perform a \`match_phrase\` query on the
   specified field.
   Using \`MATCH_PHRASE\` is equivalent to using the \`match_phrase\` query in the Elasticsearch Query DSL.
 
@@ -1360,7 +1360,7 @@ export const functions = {
 
   MatchPhrase can use function named parameters to specify additional options for the
   match_phrase query.
-  All [\`match_phrase\`](/reference/query-languages/query-dsl/query-dsl-match-query-phrase.md) query parameters are supported.
+  All \`match_phrase\` query query parameters are supported.
 
   \`MATCH_PHRASE\` returns true if the provided query matches the row.
 
@@ -2096,7 +2096,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.qstr', {
         defaultMessage: 'QSTR',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab

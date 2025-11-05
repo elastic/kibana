@@ -146,7 +146,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                           >
                             <span
                               color="subdued"
-                              data-euiicon-type="iInCircle"
+                              data-euiicon-type="info"
                               data-test-subj="header-section-tooltip-icon"
                               tabindex="0"
                             >

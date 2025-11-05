@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -18,6 +18,7 @@ import { useUpdateRuleByIdCache } from './use_fetch_rule_by_id_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
 import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
+import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
 
 export const UPDATE_RULE_MUTATION_KEY = ['PUT', DETECTION_ENGINE_RULES_URL];
 
@@ -28,6 +29,7 @@ export const useUpdateRuleMutation = (
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const invalidatePrebuiltRulesUpdateReview = useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
+  const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
   const updateRuleCache = useUpdateRuleByIdCache();
 
   return useMutation<RuleResponse, Error, RuleUpdateProps>(
@@ -40,6 +42,7 @@ export const useUpdateRuleMutation = (
         invalidateFetchRuleManagementFilters();
         invalidateFetchCoverageOverviewQuery();
         invalidatePrebuiltRulesUpdateReview();
+        invalidateFetchPrebuiltRuleBaseVerison();
 
         const [response] = args;
 

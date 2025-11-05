@@ -7,7 +7,7 @@
 
 import './mocks';
 import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
-import { setupEnvironment, pageHelpers, nextTick, delay, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternList;
 
@@ -63,20 +63,20 @@ describe('<AutoFollowPatternList />', () => {
     let actions;
     let form;
 
-    const autoFollowPatterns = [
-      getAutoFollowPatternMock({ name: 'unique', followPattern: '{{leader_index}}' }),
-    ];
+    beforeAll(async () => {
+      const autoFollowPatterns = [
+        getAutoFollowPatternMock({ name: 'unique', followPattern: '{{leader_index}}' }),
+      ];
 
-    for (let i = 0; i < 29; i++) {
-      autoFollowPatterns.push(
-        getAutoFollowPatternMock({ name: `${i}`, followPattern: '{{leader_index}}' })
-      );
-    }
+      for (let i = 0; i < 29; i++) {
+        autoFollowPatterns.push(
+          getAutoFollowPatternMock({ name: `${i}`, followPattern: '{{leader_index}}' })
+        );
+      }
 
-    beforeEach(async () => {
       httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
-      // Mount the component
+      // Mount the component once for all tests in this describe
       ({ component, table, actions, form } = setup());
 
       await nextTick(); // Make sure that the http request is fulfilled
@@ -135,12 +135,6 @@ describe('<AutoFollowPatternList />', () => {
 
       // Read the index list table
       ({ tableCellsValues, rows } = table.getMetaData('autoFollowPatternListTable'));
-    });
-
-    afterEach(async () => {
-      // The <EuiPopover /> updates are not all synchronouse
-      // We need to wait for all the updates to ran before unmounting our component
-      await delay(100);
     });
 
     test('should not display the empty prompt', () => {

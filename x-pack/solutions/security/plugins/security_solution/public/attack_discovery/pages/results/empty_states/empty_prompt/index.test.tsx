@@ -191,4 +191,43 @@ describe('EmptyPrompt', () => {
       expect(generateButton).toBeDisabled();
     });
   });
+
+  describe('when attackDiscoveryAlertsEnabled is true', () => {
+    const defaultProps = {
+      alertsCount: 20,
+      aiConnectorsCount: 2,
+      attackDiscoveriesCount: 0,
+      isLoading: false,
+      isDisabled: false,
+      onGenerate: jest.fn(),
+    };
+
+    beforeEach(() => {
+      (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+        attackDiscoveryAlertsEnabled: true,
+      });
+      (useAssistantAvailability as jest.Mock).mockReturnValue({
+        hasAssistantPrivilege: true,
+        isAssistantEnabled: true,
+      });
+      jest.clearAllMocks();
+      render(
+        <TestProviders>
+          <EmptyPrompt {...defaultProps} />
+        </TestProviders>
+      );
+    });
+
+    it('renders the history title', () => {
+      const historyTitle = screen.getByTestId('historyTitle');
+
+      expect(historyTitle).toBeInTheDocument();
+    });
+
+    it('renders the history body', () => {
+      const historyBody = screen.getByTestId('historyBody');
+
+      expect(historyBody).toBeInTheDocument();
+    });
+  });
 });

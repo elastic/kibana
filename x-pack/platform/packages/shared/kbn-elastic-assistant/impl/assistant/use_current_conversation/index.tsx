@@ -11,7 +11,7 @@ import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FetchConversationsResponse } from '../api';
@@ -201,7 +201,13 @@ export const useCurrentConversation = ({
     },
     [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, setLastConversation]
   );
-
+  useEffect(() => {
+    if (defaultConnector && !currentConversation?.apiConfig && currentConversation?.id === '') {
+      // first connector created, provide nothing to getNewConversation
+      // to set new conversation with the defaultConnector
+      getNewConversation({});
+    }
+  }, [defaultConnector, currentConversation, getNewConversation]);
   const [localSecuritySolutionAssistantConnectorId] = useLocalStorage<string | undefined>(
     `securitySolution.onboarding.assistantCard.connectorId.${spaceId}`
   );

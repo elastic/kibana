@@ -115,7 +115,7 @@ const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   },
 };
 
-// There is a test in x-pack/test/usage_collection that validates that the keys in here match all the registered apps
+// There is a test in x-pack/platform/test/usage_collection that validates that the keys in here match all the registered apps
 export const applicationUsageSchema = {
   // OSS
   dashboards: commonSchema,
@@ -139,6 +139,7 @@ export const applicationUsageSchema = {
   searchInferenceEndpoints: commonSchema,
   searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
+  searchQueryRules: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
   enterpriseSearchAISearch: commonSchema,

@@ -337,6 +337,7 @@ describe('Run Scheduled Report Task', () => {
         kibana_name: 'kibana',
         kibana_id: 'instance-uuid',
         started_at: expect.any(String),
+        space_id: 'default',
         timeout: 120000,
         max_attempts: 1,
         process_expiration: expect.any(String),

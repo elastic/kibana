@@ -1,0 +1,15 @@
+# https://moonrepo.dev/docs/config/toolchain
+$schema: 'https://moonrepo.dev/schemas/toolchain.json'
+
+node:
+  packageManager: yarn
+  yarn:
+    installArgs:
+      - '--non-interactive'
+  inferTasksFromScripts: true # Automatically infer tasks from package.json scripts.
+  dependencyVersionFormat: link
+  rootPackageOnly: true # without this, moon would want to install deps in each project
+  syncPackageManagerField: true
+  syncVersionManagerConfig: nvm
+  dedupeOnLockfileChange: true # Dedupe dependencies when the lockfile changes.
+  syncProjectWorkspaceDependencies: false

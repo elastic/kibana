@@ -19,6 +19,7 @@ describe('stripUnsafeHeaders', () => {
     ${'proxy-connection'}    | ${'bananas'}
     ${'proxy-authorization'} | ${'some-base64-encoded-thing'}
     ${'trailer'}             | ${'s are for trucks'}
+    ${':method'}             | ${'POST'}
   `('should strip unsafe header "$header"', ({ header, value }) => {
     const headers = { [header]: value };
 
@@ -26,9 +27,10 @@ describe('stripUnsafeHeaders', () => {
   });
 
   it.each`
-    header   | value
-    ${'foo'} | ${'bar'}
-    ${'baz'} | ${'quix'}
+    header             | value
+    ${'foo'}           | ${'bar'}
+    ${'baz'}           | ${'quix'}
+    ${'method:method'} | ${'POST'}
   `('should keep safe header "$header"', ({ header, value }) => {
     const headers = { [header]: value };
 

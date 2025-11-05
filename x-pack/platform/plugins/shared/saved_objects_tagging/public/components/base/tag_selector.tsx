@@ -17,6 +17,7 @@ import {
   EuiComboBoxProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { Tag } from '../../../common/types';
 import { testSubjFriendly } from '../../utils';
 import type { CreateModalOpener } from '../edition_modal';
@@ -59,6 +60,12 @@ const renderCreateOption = () => {
       gutterSize="xs"
       alignItems="center"
       responsive={false}
+      title={i18n.translate(
+        'xpack.savedObjectsTagging.components.tagSelector.createTagOptionLabel',
+        {
+          defaultMessage: 'Create tag',
+        }
+      )}
     >
       <EuiFlexItem grow={false}>
         <EuiIcon type="tag" />

@@ -14,6 +14,11 @@ type HttpResponse = Record<string, any> | any[];
 export interface ResponseError {
   statusCode: number;
   message: string | Error;
+  attributes?: {
+    error?: {
+      type?: string;
+    };
+  };
 }
 
 // Register helpers to mock HTTP Requests

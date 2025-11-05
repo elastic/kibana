@@ -171,7 +171,7 @@ describe('Table', () => {
 
   test('should not allow edit or deletion for user with only read access', () => {
     const editAvailable = renderTable().prop('columns')[6].actions[0].available(items[4]);
-    const deleteAvailable = renderTable().prop('columns')[7].actions[0].available(items[4]);
+    const deleteAvailable = renderTable().prop('columns')[6].actions[1].available(items[4]);
     expect(editAvailable).toBeFalsy();
     expect(deleteAvailable).toBeFalsy();
   });

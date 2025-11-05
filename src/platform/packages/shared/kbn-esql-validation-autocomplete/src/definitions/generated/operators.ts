@@ -2887,7 +2887,7 @@ const matchOperatorDefinition: FunctionDefinition = {
     defaultMessage:
       'Use the match operator (`:`) to perform a match query on the specified field.\nUsing `:` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nThe match operator is equivalent to the match function.\n\nFor using the function syntax, or adding match query parameters, you can use the\nmatch function.\n\n`:` returns true if the provided query matches the row.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

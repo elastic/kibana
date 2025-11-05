@@ -18,6 +18,7 @@ export const DEPRECATION_LOGS_INDEX = '.logs-deprecation.elasticsearch-default';
 export const DEPRECATION_LOGS_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
 
 export const CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS = 45000;
+export const UPGRADE_STATUS_POLL_INTERVAL_MS = 30000;
 export const CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS = 60000;
 export const DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS = 15000;
 export const SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS = 15000;

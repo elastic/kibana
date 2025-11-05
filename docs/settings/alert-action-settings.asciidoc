@@ -73,7 +73,7 @@ xpack.actions.customHostSettings:
           -----END CERTIFICATE-----
     smtp:
       requireTLS: true
-  - url: https://webhook.example.com
+  - url: <WEBHOOK_URL>
     ssl:
       verificationMode: 'none'
 --
@@ -129,6 +129,9 @@ to validate the server.
 `xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData` {ess-icon}::
 The contents of one or more PEM-encoded certificate files in multiline format.
 This configuration can be used for environments where the files cannot be made available.
+
+[[action-config-email-maximum-body-length]] `xpack.actions.email.maximum_body_length`  {ess-icon}::
+The maximum length of an email body in bytes. Values longer than this length will be truncated. The default is 25MB, the maximum is 25MB.
 
 [[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist`  {ess-icon}::
 A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
@@ -297,7 +300,7 @@ A configuration URL that varies by connector:
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
 * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
-* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
+* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL.
 * For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
 * For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>> specifies the ServiceNow instance URL.
 * For a <<swimlane-action-type,{swimlane} connector>>, specifies the {swimlane} instance URL.
@@ -360,7 +363,7 @@ The default model to use for requests, which varies by connector:
 +
 --
 * For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
-* For a <<gemini-action-type,{gemini} connector>>, current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
+* For a <<gemini-action-type,{gemini} connector>>, current support is for the Gemini models. Defaults to `gemini-2.5-pro`.
 * For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 --
 

@@ -94,7 +94,6 @@ export const cumulativeSumOperation: OperationDefinition<
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,
-      scale: 'ratio',
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
       references: referenceIds,

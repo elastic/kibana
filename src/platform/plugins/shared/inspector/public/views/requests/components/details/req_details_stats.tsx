@@ -41,7 +41,7 @@ export class RequestDetailsStats extends Component<DetailViewProps> {
                 aria-label={i18n.translate('inspector.requests.descriptionRowIconAriaLabel', {
                   defaultMessage: 'Description',
                 })}
-                type="questionInCircle"
+                type="question"
                 color="subdued"
                 content={stat.description}
               />

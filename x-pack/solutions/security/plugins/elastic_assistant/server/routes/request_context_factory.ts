@@ -107,12 +107,16 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getCurrentUser,
 
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
 
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
+      },
+
+      checkPrivileges: () => {
+        return startPlugins.security.authz.checkPrivilegesWithRequest(request);
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,

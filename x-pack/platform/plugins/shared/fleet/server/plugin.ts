@@ -55,7 +55,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -72,6 +71,8 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../common/constants';
+
+import { runWithCache } from './services/epm/packages/cache';
 
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
@@ -240,6 +241,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  runWithCache: typeof runWithCache;
   agentPolicyService: AgentPolicyServiceInterface;
   /**
    * Register callbacks for inclusion in fleet API processing
@@ -347,7 +349,6 @@ export class FleetPlugin
         id: `fleetv2`,
         name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
         privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
@@ -510,7 +511,6 @@ export class FleetPlugin
         id: 'fleet', // for BWC
         name: 'Integrations',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
         privileges: {
@@ -735,7 +735,6 @@ export class FleetPlugin
 
     this.policyWatcher.start(licenseService);
 
-    // We only retry when this feature flag is enabled (Serverless)
     const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
 
     const fleetSetupPromise = (async () => {
@@ -785,7 +784,7 @@ export class FleetPlugin
             jitter: 'full',
             retry: (error: any, attemptCount: number) => {
               const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.warn(summary, { error: { message: error } });
+              logger.warn(summary, { error });
 
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
@@ -809,7 +808,7 @@ export class FleetPlugin
         });
       } catch (error) {
         logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
-          error: { message: error },
+          error,
         });
 
         this.fleetStatus$.next({
@@ -872,6 +871,7 @@ export class FleetPlugin
         const authz = await getAuthzFromRequest(request);
         return new OutputClient(soClient, authz);
       },
+      runWithCache,
     };
   }
 
@@ -933,7 +933,7 @@ export class FleetPlugin
     } catch (error) {
       appContextService
         .getLogger()
-        .error('Error happened during uninstall token generation.', { error: { message: error } });
+        .error('Error happened during uninstall token generation.', { error });
     }
 
     try {
@@ -941,7 +941,7 @@ export class FleetPlugin
     } catch (error) {
       appContextService
         .getLogger()
-        .error('Error happened during uninstall token validation.', { error: { message: error } });
+        .error('Error happened during uninstall token validation.', { error });
     }
   }
 

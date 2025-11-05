@@ -116,6 +116,11 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  public async waitUntilTabIsLoaded() {
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
+
   public async getColumnHeaders() {
     const isLegacy = await this.useLegacyTable();
     if (isLegacy) {
@@ -238,14 +243,27 @@ export class DiscoverPageObject extends FtrService {
 
     await (
       await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field);
+    ).type(field, { charByChar: true });
 
-    const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${
-        value ?? field
-      }"]`
+    const optionValue = value ?? field;
+
+    await this.find.clickDisplayedByCssSelector(
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
-    await option.click();
+
+    await this.retry.waitFor('the dropdown to close', async () => {
+      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
+    });
+
+    await this.retry.waitFor('the value to be selected', async () => {
+      const breakdownButton = await this.testSubjects.find(
+        'unifiedHistogramBreakdownSelectorButton'
+      );
+      return (
+        (await breakdownButton.getAttribute('data-selected-value')) === optionValue ||
+        (await breakdownButton.getVisibleText()) === field
+      );
+    });
   }
 
   public async clearBreakdownField() {

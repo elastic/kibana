@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/intercepts-plugin",
+  "owner": ["@elastic/appex-sharedux"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "This plugin provides implementation for system level conditions which are then used in soliciting product feedback from users.",
+  "plugin": {
+    "id": "intercepts",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["cloud"],
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": [],
+    "configPath": ["xpack", "intercepts"]
+  }
+}

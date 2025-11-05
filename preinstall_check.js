@@ -28,9 +28,9 @@
   try {
     const argv = JSON.parse(rawArgv);
 
-    // allow dependencies to be installed with `yarn kbn bootstrap` or `bazel run @nodejs//:yarn` (called under the hood by bazel)
-    if (argv.cooked.includes('kbn') || !!process.env.BAZEL_YARN_INSTALL) {
-      // all good, trying to install deps using `kbn` or bazel directly
+    // allow dependencies to be installed with `yarn kbn bootstrap`
+    if (argv.cooked.includes('kbn')) {
+      // all good, trying to install deps using `kbn`
       return;
     }
 

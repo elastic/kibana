@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertest.get('/api/monitoring_collection/v1/prometheus').expect(200);
 
       expect(response.text.replace(/\s+/g, ' ')).to.match(
-        /^# HELP request_count_total Counts total number of requests # TYPE request_count_total counter request_count_total [0-9]/
+        /^# HELP target_info Target metadata # TYPE target_info gauge target_info{service_name=".+",service_instance_id=".+",service_version=".+"} 1 # HELP request_count_total Counts total number of requests # TYPE request_count_total counter request_count_total [0-9]/
       );
     });
   });

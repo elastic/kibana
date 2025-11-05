@@ -14,6 +14,9 @@ import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
+import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
+import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/get_attack_discovery_generations';
+import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/post_attack_discovery_generations_dismiss';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';
@@ -52,7 +55,7 @@ import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedule
 import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
-import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 jest.mock('./alert_summary/find_route');
 const findAlertSummaryRouteMock = findAlertSummaryRoute as jest.Mock;
@@ -62,6 +65,13 @@ jest.mock('./attack_discovery/get/get_attack_discovery');
 const getAttackDiscoveryRouteMock = getAttackDiscoveryRoute as jest.Mock;
 jest.mock('./attack_discovery/post/post_attack_discovery');
 const postAttackDiscoveryRouteMock = postAttackDiscoveryRoute as jest.Mock;
+jest.mock('./attack_discovery/get/find_attack_discoveries');
+const findAttackDiscoveriesRouteMock = findAttackDiscoveriesRoute as jest.Mock;
+jest.mock('./attack_discovery/get/get_attack_discovery_generations');
+const getAttackDiscoveryGenerationsRouteMock = getAttackDiscoveryGenerationsRoute as jest.Mock;
+jest.mock('./attack_discovery/post/post_attack_discovery_generations_dismiss');
+const postAttackDiscoveryGenerationsDismissRouteMock =
+  postAttackDiscoveryGenerationsDismissRoute as jest.Mock;
 jest.mock('./user_conversations/create_route');
 const createConversationRouteMock = createConversationRoute as jest.Mock;
 jest.mock('./user_conversations/delete_route');
@@ -136,7 +146,7 @@ const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRo
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
   let server: ReturnType<typeof serverMock.create>;
-  const config = { elserInferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID, responseTimeout: 60000 };
+  const config = { elserInferenceId: defaultInferenceEndpoints.ELSER, responseTimeout: 60000 };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -147,6 +157,18 @@ describe('registerRoutes', () => {
 
   it('should call `cancelAttackDiscoveryRouteMock`', () => {
     expect(cancelAttackDiscoveryRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `findAttackDiscoveriesRouteMock`', () => {
+    expect(findAttackDiscoveriesRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `getAttackDiscoveryGenerationsRouteMock`', () => {
+    expect(getAttackDiscoveryGenerationsRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `postAttackDiscoveryGenerationsDismissRouteMock`', () => {
+    expect(postAttackDiscoveryGenerationsDismissRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `getAttackDiscoveryRouteMock`', () => {

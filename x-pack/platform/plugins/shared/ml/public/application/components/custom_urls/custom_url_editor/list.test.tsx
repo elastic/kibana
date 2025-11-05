@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 import type { CustomUrlListProps } from './list';
 import { CustomUrlList } from './list';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../contexts/kibana');
 
@@ -53,27 +55,32 @@ function prepareTest(setCustomUrlsFn: jest.Mock) {
     dataViewListItems: [],
   };
 
-  return shallow(<CustomUrlList {...props} />);
+  return render(
+    <IntlProvider>
+      <CustomUrlList {...props} />
+    </IntlProvider>
+  );
 }
 
 describe('CustomUrlList', () => {
-  const setCustomUrls = jest.fn(() => {});
+  const setCustomUrls = jest.fn();
 
   test('renders a list of custom URLs', () => {
-    const wrapper = prepareTest(setCustomUrls);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = prepareTest(setCustomUrls);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  test('switches custom URL field to textarea and calls setCustomUrls on change', () => {
-    const wrapper = prepareTest(setCustomUrls);
-    wrapper.update();
-    const url1LabelInput = wrapper.find('[data-test-subj="mlJobEditCustomUrlInput_0"]');
-    url1LabelInput.simulate('focus');
-    wrapper.update();
-    const url1LabelTextarea = wrapper.find('[data-test-subj="mlJobEditCustomUrlTextarea_0"]');
-    expect(url1LabelTextarea).toBeDefined();
-    url1LabelTextarea.simulate('change', { target: { value: 'Edit' } });
-    wrapper.update();
+  test('switches custom URL field to textarea and calls setCustomUrls on change', async () => {
+    const { getByTestId } = prepareTest(setCustomUrls);
+    const user = userEvent.setup();
+
+    const input = getByTestId('mlJobEditCustomUrlInput_0');
+    await user.click(input);
+
+    const textarea = getByTestId('mlJobEditCustomUrlTextarea_0');
+    expect(textarea).toBeInTheDocument();
+
+    await user.type(textarea, 'Edit');
     expect(setCustomUrls).toHaveBeenCalled();
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { InstallPrepackedTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -25,7 +26,10 @@ import { rulesToMap } from '../../logic/utils';
 import { buildFrameworkRequest } from '../../../../timeline/utils/common';
 import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
 
-export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolutionPluginRouter) => {
+export const getPrebuiltRulesAndTimelinesStatusRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .get({
       access: 'public',
@@ -62,7 +66,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
           });
 
           const installedPrebuiltRules = rulesToMap(
-            await getExistingPrepackagedRules({ rulesClient })
+            await getExistingPrepackagedRules({ rulesClient, logger })
           );
 
           const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);

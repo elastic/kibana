@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { KnownTypeToValue, SettingType } from './setting_type';
 
 /**
@@ -26,6 +27,10 @@ export interface UnsavedFieldChange<T extends SettingType = SettingType> {
   isInvalid?: boolean;
   /** The current unsaved value stored in the field. */
   unsavedValue?: KnownTypeToValue<T> | null;
+  /** The scope of the field. */
+  scope?: UiSettingsScope;
+  /** True if the change requires a page reload to take effect, false otherwise. */
+  needsReload?: boolean;
 }
 
 /**

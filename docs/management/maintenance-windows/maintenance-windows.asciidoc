@@ -35,7 +35,7 @@ For more details, refer to <<kibana-privileges>>.
 [[manage-maintenance-windows]]
 == Create and manange maintenance windows
 
-In *Management > {stack-manage-app} > Maintenance Windows*, you can create, edit, and archive maintenance windows.
+In *Management > {stack-manage-app} > Maintenance Windows*, you can create, edit, cancel, archive, and delete maintenance windows. Be aware that you can't recover maintenance windows once you delete them.
 
 When you create a maintenance window, you must provide a name and a schedule.
 You can optionally configure it to repeat daily, monthly, yearly, or on a custom interval.

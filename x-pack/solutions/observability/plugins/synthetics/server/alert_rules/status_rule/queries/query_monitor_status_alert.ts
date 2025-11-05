@@ -10,7 +10,7 @@ import { times } from 'lodash';
 import { intersection } from 'lodash';
 import { SavedObjectsFindResult } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
-import { MonitorData } from '../../../saved_objects/synthetics_monitor/get_all_monitors';
+import { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
 import {
   AlertStatusConfigs,
   AlertStatusMetaData,
@@ -120,7 +120,7 @@ export async function queryMonitorStatusAlert({
             });
 
             const meta: AlertStatusMetaData = {
-              ping: latestPing,
+              latestPing,
               configId,
               monitorQueryId,
               locationId: monLocationId,

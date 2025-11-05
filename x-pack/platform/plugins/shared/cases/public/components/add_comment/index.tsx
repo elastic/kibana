@@ -48,7 +48,6 @@ export interface AddCommentRefObject {
   editor: MarkdownEditorRef | null;
 }
 
-/* eslint-disable react/no-unused-prop-types */
 export interface AddCommentProps {
   id: string;
   caseId: string;
@@ -57,7 +56,6 @@ export interface AddCommentProps {
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
 }
-/* eslint-enable react/no-unused-prop-types */
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
@@ -177,6 +175,30 @@ export const AddComment = React.memo(
 
       const isDisabled =
         isLoading || !comment?.trim().length || comment.trim().length > MAX_COMMENT_LENGTH;
+
+      const handleKeyDown = useCallback(
+        (event: KeyboardEvent) => {
+          const modifierPressed = event.ctrlKey || event.metaKey;
+          const isEnter = event.key === 'Enter' || event.key === 'NumpadEnter';
+          if (!isDisabled && isEnter && modifierPressed) {
+            event.preventDefault();
+            onSubmit();
+          }
+        },
+        [onSubmit, isDisabled]
+      );
+
+      useEffect(() => {
+        const textarea = editorRef.current?.textarea;
+        if (!textarea) {
+          return;
+        }
+        textarea.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+          textarea.removeEventListener('keydown', handleKeyDown);
+        };
+      }, [handleKeyDown]);
 
       return (
         <span id="add-comment-permLink">

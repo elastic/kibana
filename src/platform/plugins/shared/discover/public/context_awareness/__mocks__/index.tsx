@@ -97,6 +97,7 @@ export const createContextAwarenessMocks = ({
         ],
         rowHeight: 3,
         breakdownField: 'extension',
+        hideChart: true,
       })),
       getAdditionalCellActions: jest.fn((prev) => () => [
         ...prev(),
@@ -113,6 +114,11 @@ export const createContextAwarenessMocks = ({
         ...prev(),
         paginationMode: 'multiPage',
       })),
+      getModifiedVisAttributes: jest.fn((prev) => (params) => {
+        const prevAttributes = prev(params);
+        prevAttributes.title = 'Modified title';
+        return prevAttributes;
+      }),
     },
     resolve: jest.fn(() => ({
       isMatch: true,

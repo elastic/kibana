@@ -250,7 +250,7 @@ export const Spaces: Space[] = [Space1, Space2, OtherSpace];
 // to a "type" definition so that we can use the exhaustive switch in
 // typescript to ensure all scenarios are handled.
 
-interface Scenario {
+export interface Scenario {
   user: User;
   space: Space;
 }

@@ -20,14 +20,17 @@ Use one of the editors to create visualizations of your data. Each editor offers
 | <<maps,Maps>>
 | Create beautiful displays of your geographical data
 
-| <<field-statistics-dashboard,Field statistics>>
-| Add a field statistics view of your data to your dashboards
+| <<alert-panels,Alerts>> 
+| View Observability or Security alerts in your dashboard
 
 | <<vega, Custom visualizations>>
 | Use Vega to create new types of visualizations
 
 .3+| Annotations and navigation
-| <<add-text,Text>>
+| <<collapsible-sections, Collapsible sections>>
+| Organize your dashboard into sections that can be collapsed and save loading time
+
+| <<add-text, Markdown text>>
 | Add context to your dashboard with markdown-based *text*
 
 | <<add-image,Image>>
@@ -216,6 +219,9 @@ TIP: Check the link:{ref}/esql-language.html[ES|QL reference] to get familiar wi
 . When editing your query or its configuration, run the query to update the preview of the visualization.
 +
 image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt69dcceb4f1e12bc1/66c752d6aff77d384dc44209/edit-esql-visualization.gif[Previewing an ESQL visualization]
++
+TIP: When you edit the query and run it again, the visualization configuration persists as long as it is compatible with the query changes. 
+
 . You can bind controls to your ES|QL visualizations in dashboards by creating <<esql-controls,ES|QL controls>>.
 . Select **Apply and close** to save the visualization to the dashboard.
 
@@ -234,24 +240,33 @@ image::images/esql-visualization-customization-options.png[Appearance customizat
 
 . Return to the previous menu, then **Apply and close** the configuration to save your changes.
 
+[[create-alert-from-esql-viz]]
+[float]
+== Create an alert from your {esql} visualization
+
+Once you've created an {esql} panel, you can create an {es} threshold rule directly from the visualization panel based on the data it displays. When you do this, the rule query is automatically generated and either describes the data and sets a specific threshold, or describes the data without setting a specific threshold.
+
+[NOTE]
+====
+{elastic-sec} rule types are not supported.
+====
+
+To create a rule with the threshold pre-specified:
+
+* Right-click a data point in the visualization and click *Add alert rule*. This opens the *Create rule* flyout. The generated query will define a threshold that corresponds to the data point you selected.
+* {kib-ref}/rule-type-es-query.html[Configure] your {es} rule.
+
+To create a rule without the threshold pre-specified:
+
+* Open the *More actions* (three dots) menu in the upper right of the panel and select *Add alert rule*. This opens the *Create rule* flyout. The generated query will define a threshold that corresponds to the data point you selected.
+* {kib-ref}/rule-type-es-query.html[Configure] your {es} rule.
+
+include::alerts-panel.asciidoc[][leveloffset=-1]
+
 [[maps-visualizations]]
 == Maps
 
 The Maps editor has extensive documentation. For your reading comfort, we have moved it to <<maps,this section>>.
-
-[[field-statistics-dashboard]]
-== Field statistics
-
-**Field statistics** panels allow you to display a table with additional field information in your dashboards, such as document count, values, and distribution. 
-
-. From your dashboard, select **Add panel**.
-. Choose **Field statistics** under **Visualizations**. An ES|QL editor appears and lets you configure your query with the fields and information that you want to show.
-+
-TIP: Check the link:{ref}/esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
-. When editing your query or its configuration, run the query to update the preview of the visualization.
-+
-image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte2b1371159f5b9ff/66fc6ca13804eb2532b20727/field-statistics-preview-8.16.0.gif[Editing a field statistics dashboard panel and running the query to update the preview]
-. Select **Apply and close** to save the visualization to the dashboard.
 
 include::vega.asciidoc[leveloffset=-1]
 
@@ -321,6 +336,7 @@ When importing a dashboard with an image panel, and the image file is unavailabl
 ============================================================================
 
 include::links-panel.asciidoc[leveloffset=-1]
+
 
 [[legacy-editors]]
 == Legacy editors

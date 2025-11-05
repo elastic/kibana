@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
+import { OnSaveProps, SaveModalState, SaveResult, SavedObjectSaveModalWithSaveResult } from '.';
 
 interface SaveModalDocumentInfo {
   id?: string;
@@ -29,7 +29,7 @@ export interface OriginSaveModalProps {
   objectType: string;
   onClose: () => void;
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
-  onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
+  onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => Promise<SaveResult>;
 }
 
 export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
@@ -88,8 +88,8 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
     }
   };
 
-  const onModalSave = (onSaveProps: OnSaveProps) => {
-    props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
+  const onModalSave = async (onSaveProps: OnSaveProps): Promise<SaveResult> => {
+    return props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
   };
 
   const confirmButtonLabel = returnToOriginMode
@@ -99,7 +99,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
     : null;
 
   return (
-    <SavedObjectSaveModal
+    <SavedObjectSaveModalWithSaveResult
       onSave={onModalSave}
       onClose={props.onClose}
       title={documentInfo.title}

@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions/actions';
+import { type CellActionTemplate, createCellActionFactory } from '@kbn/cell-actions/actions';
 import {
+  dataTableSelectors,
   defaultColumnHeaderType,
   tableDefaults,
-  dataTableSelectors,
-  TableId,
 } from '@kbn/securitysolution-data-table';
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../../common/store';
@@ -69,11 +68,12 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
       }
 
       // When the flyout was initiated from an alerts table, use its toggleColumn action
-      if (metadata.alertsTableRef?.current && scopeId === TableId.alertsOnAlertsPage) {
+      // We can safely do this now as we do not have a page with multiple alerts tables. If that were the case we'd have problem with the ref
+      if (metadata.alertsTableRef?.current) {
         metadata.alertsTableRef.current.toggleColumn(field.name);
         return;
       }
-
+      // Otherwise, use the store to dispatch the action, either for Timeline or the events table in the Explore pages
       const selector = isTimelineScope(scopeId)
         ? timelineSelectors.getTimelineByIdSelector()
         : dataTableSelectors.getTableByIdSelector();

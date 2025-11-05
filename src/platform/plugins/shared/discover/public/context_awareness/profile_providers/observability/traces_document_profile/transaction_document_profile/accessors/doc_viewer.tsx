@@ -22,18 +22,19 @@ export const createGetDocViewer =
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
+    const tabTitle = i18n.translate(
+      'discover.docViews.observability.traces.transactionOverview.title',
+      {
+        defaultMessage: 'Transaction overview',
+      }
+    );
 
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
           id: 'doc_view_obs_traces_transaction_overview',
-          title: i18n.translate(
-            'discover.docViews.observability.traces.transactionOverview.title',
-            {
-              defaultMessage: 'Transaction overview',
-            }
-          ),
+          title: tabTitle,
           order: 0,
           component: (props) => {
             return (

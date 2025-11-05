@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { HttpHandler, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,7 +39,7 @@ export const useFindPrompts = (payload: UseFindPromptsParams) => {
   const { isAssistantEnabled, httpFetch, toasts } = payload.context;
 
   const QUERY = {
-    connector_id: payload.params.connector_id,
+    ...(payload.params.connector_id ? { connector_id: payload.params.connector_id } : {}),
     prompt_ids: payload.params.prompt_ids,
     prompt_group_id: payload.params.prompt_group_id,
   };

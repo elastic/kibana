@@ -26,7 +26,7 @@ export function RequiredFieldsHelpInfo(): JSX.Element {
 
   const button = (
     <EuiButtonIcon
-      iconType="questionInCircle"
+      iconType="question"
       onClick={togglePopover}
       aria-label={i18n.OPEN_HELP_POPOVER_ARIA_LABEL}
     />

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -96,7 +97,7 @@ describe('StatusRuleExecutor', () => {
       expect(staleDownConfigs).toEqual({});
 
       expect(spy).toHaveBeenCalledWith({
-        filter: 'synthetics-monitor.attributes.alert.status.enabled: true',
+        filter: 'synthetics-monitor-multi-space.attributes.alert.status.enabled: true',
       });
     });
 
@@ -163,7 +164,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           monitorQueryId: 'test',
-          ping: {} as any,
+          latestPing: {} as any,
           checks: {
             downWithinXChecks: 1,
             down: 1,
@@ -175,7 +176,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           monitorQueryId: 'test',
-          ping: {} as any,
+          latestPing: {} as any,
           checks: {
             downWithinXChecks: 1,
             down: 1,
@@ -187,7 +188,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           monitorQueryId: 'test',
-          ping: {} as any,
+          latestPing: {} as any,
           checks: {
             downWithinXChecks: 1,
             down: 1,
@@ -201,7 +202,7 @@ describe('StatusRuleExecutor', () => {
           isDeleted: true,
           locationId: 'us-east-1',
           monitorQueryId: 'test',
-          ping: {},
+          latestPing: {},
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           checks: {
@@ -214,7 +215,7 @@ describe('StatusRuleExecutor', () => {
           isLocationRemoved: true,
           locationId: 'us_central_dev',
           monitorQueryId: 'test',
-          ping: {},
+          latestPing: {},
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           checks: {
@@ -253,7 +254,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           monitorQueryId: 'test',
-          ping: {} as any,
+          latestPing: {} as any,
           checks: {
             downWithinXChecks: 1,
             down: 1,
@@ -265,7 +266,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           monitorQueryId: 'test',
-          ping: {} as any,
+          latestPing: {} as any,
           checks: {
             downWithinXChecks: 1,
             down: 1,
@@ -277,7 +278,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           monitorQueryId: 'test',
-          ping: {} as any,
+          latestPing: {} as any,
           checks: {
             downWithinXChecks: 1,
             down: 1,
@@ -291,7 +292,7 @@ describe('StatusRuleExecutor', () => {
           isDeleted: true,
           locationId: 'us-east-1',
           monitorQueryId: 'test',
-          ping: {},
+          latestPing: {},
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           checks: {
@@ -304,7 +305,7 @@ describe('StatusRuleExecutor', () => {
           isLocationRemoved: true,
           locationId: 'us_central_dev',
           monitorQueryId: 'test',
-          ping: {},
+          latestPing: {},
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
           checks: {
@@ -331,7 +332,7 @@ describe('StatusRuleExecutor', () => {
             status: 'down',
             timestamp: '2021-06-01T00:00:00.000Z',
             monitorQueryId: 'test',
-            ping: testPing,
+            latestPing: testPing,
             checks: {
               downWithinXChecks: 1,
               down: 1,
@@ -372,7 +373,7 @@ describe('StatusRuleExecutor', () => {
           configId: 'id1',
           locationId: 'us_central_qa',
           monitorQueryId: 'test',
-          ping: testPing,
+          latestPing: testPing,
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
         },
@@ -400,7 +401,7 @@ describe('StatusRuleExecutor', () => {
             status: 'down',
             timestamp: '2021-06-01T00:00:00.000Z',
             monitorQueryId: 'test',
-            ping: testPing,
+            latestPing: testPing,
             checks: {
               downWithinXChecks: 1,
               down: 1,
@@ -430,7 +431,7 @@ describe('StatusRuleExecutor', () => {
             status: 'down',
             timestamp: '2021-06-01T00:00:00.000Z',
             monitorQueryId: 'test',
-            ping: testPing,
+            latestPing: testPing,
             checks: {
               downWithinXChecks: 1,
               down: 1,
@@ -442,7 +443,7 @@ describe('StatusRuleExecutor', () => {
             status: 'down',
             timestamp: '2021-06-01T00:00:00.000Z',
             monitorQueryId: 'test',
-            ping: testPing,
+            latestPing: testPing,
             checks: {
               downWithinXChecks: 1,
               down: 1,
@@ -473,7 +474,7 @@ describe('StatusRuleExecutor', () => {
             status: 'down',
             timestamp: '2021-06-01T00:00:00.000Z',
             monitorQueryId: 'test',
-            ping: testPing,
+            latestPing: testPing,
             checks: {
               downWithinXChecks: 1,
               down: 1,
@@ -485,7 +486,7 @@ describe('StatusRuleExecutor', () => {
             status: 'down',
             timestamp: '2021-06-01T00:00:00.000Z',
             monitorQueryId: 'test',
-            ping: testPing,
+            latestPing: testPing,
             checks: {
               downWithinXChecks: 1,
               down: 1,
@@ -526,7 +527,7 @@ describe('StatusRuleExecutor', () => {
           configId: 'id1',
           locationId: 'us_central_qa',
           monitorQueryId: 'test',
-          ping: testPing,
+          latestPing: testPing,
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
         },
@@ -554,7 +555,7 @@ describe('StatusRuleExecutor', () => {
             status: 'down',
             timestamp: '2021-06-01T00:00:00.000Z',
             monitorQueryId: 'test',
-            ping: testPing,
+            latestPing: testPing,
             checks: {
               downWithinXChecks: 1,
               down: 1,
@@ -566,7 +567,7 @@ describe('StatusRuleExecutor', () => {
             status: 'down',
             timestamp: '2021-06-01T00:00:00.000Z',
             monitorQueryId: 'test',
-            ping: testPing,
+            latestPing: testPing,
             checks: {
               downWithinXChecks: 1,
               down: 1,
@@ -575,6 +576,84 @@ describe('StatusRuleExecutor', () => {
         },
       });
       expect(spy).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('getRange', () => {
+    const maxPeriod = 60000; // 1 minute
+
+    it('should return the correct range for a default rule', () => {
+      const defaultStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+        params: {},
+        services: {
+          uiSettingsClient,
+          savedObjectsClient: soClient,
+          scopedClusterClient: { asCurrentUser: mockEsClient },
+        },
+        rule: {
+          name: 'test',
+        },
+      } as any);
+      const range = defaultStatusRule.getRange(maxPeriod);
+      const expectedFrom = moment()
+        .subtract(maxPeriod * 1, 'milliseconds')
+        .subtract(5, 'minutes')
+        .toISOString();
+      expect(range.from).toEqual(expectedFrom);
+    });
+
+    it('should return the correct range for a custom rule with numberOfChecks', () => {
+      const customStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+        params: {
+          condition: {
+            window: {
+              numberOfChecks: 5,
+            },
+          },
+        },
+        services: {
+          uiSettingsClient,
+          savedObjectsClient: soClient,
+          scopedClusterClient: { asCurrentUser: mockEsClient },
+        },
+        rule: {
+          name: 'test',
+        },
+      } as any);
+
+      const range = customStatusRule.getRange(maxPeriod);
+      const expectedFrom = moment()
+        .subtract(maxPeriod * 5, 'milliseconds')
+        .subtract(5, 'minutes')
+        .toISOString();
+      expect(range.from).toEqual(expectedFrom);
+    });
+
+    it('should return the correct range for a custom rule with a time window', () => {
+      const timeWindowStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+        params: {
+          condition: {
+            window: {
+              time: {
+                size: 10,
+                unit: 'm',
+              },
+            },
+          },
+        },
+        services: {
+          uiSettingsClient,
+          savedObjectsClient: soClient,
+          scopedClusterClient: { asCurrentUser: mockEsClient },
+        },
+        rule: {
+          name: 'test',
+        },
+      } as any);
+
+      const range = timeWindowStatusRule.getRange(maxPeriod);
+      const expectedFrom = moment().subtract(10, 'minutes').toISOString();
+      expect(range.from).toEqual(expectedFrom);
     });
   });
 
@@ -606,7 +685,7 @@ describe('StatusRuleExecutor', () => {
         status: 'pending',
         timestamp: '2025-05-15T10:00:00.000Z',
         monitorQueryId: MOCK_FIRST_MONITOR.id,
-        ping: {
+        latestPing: {
           '@timestamp': '2025-05-15T10:00:00.000Z',
           monitor: MOCK_FIRST_MONITOR,
           url: { full: MOCK_FIRST_MONITOR.url },
@@ -627,7 +706,7 @@ describe('StatusRuleExecutor', () => {
         status: 'pending',
         timestamp: '2025-05-15T10:00:00.000Z',
         monitorQueryId: MOCK_SECOND_MONITOR.id,
-        ping: {
+        latestPing: {
           '@timestamp': '2025-05-15T10:00:00.000Z',
           monitor: MOCK_SECOND_MONITOR,
           url: { full: MOCK_SECOND_MONITOR.url },
@@ -916,7 +995,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 0, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -937,7 +1016,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -958,7 +1037,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -979,7 +1058,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -988,7 +1067,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -1011,7 +1090,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 0, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -1032,7 +1111,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -1053,7 +1132,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -1074,7 +1153,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -1083,7 +1162,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central',
-          ping: testPing,
+          latestPing: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',

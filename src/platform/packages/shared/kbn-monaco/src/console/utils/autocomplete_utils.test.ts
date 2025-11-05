@@ -134,8 +134,8 @@ describe('autocomplete_utils', () => {
 
     it('should not over-unescape multiple backslashes', () => {
       const input = '\\\\\\\\"test\\\\"';
-      // \\\\\" becomes \\", \\ becomes \
-      expect(unescapeInvalidChars(input)).toBe('\\"test"');
+      // \\\\"test\\" becomes \\"test\"
+      expect(unescapeInvalidChars(input)).toBe('\\\\"test\\"');
     });
   });
 });

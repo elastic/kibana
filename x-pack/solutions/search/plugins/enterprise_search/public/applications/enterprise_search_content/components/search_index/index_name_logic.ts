@@ -27,7 +27,6 @@ export const IndexNameLogic = kea<MakeLogicType<IndexNameValues, IndexNameAction
       // Short-circuiting this to empty string is necessary to enable testing logics relying on this
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setIndexName: (_, { indexName }) => indexName,
       },
     ],

@@ -43,5 +43,14 @@
     "@kbn/datemath",
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-security",
+    "@kbn/inference-common",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/ai-assistant-default-llm-setting",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-ids",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/react-query",
   ]
 }

@@ -45,7 +45,7 @@ const AttackDiscoveryPanelComponent: React.FC<Props> = ({
 
   return (
     <>
-      <EuiPanel data-test-subj="attackDiscovery" hasBorder={true}>
+      <EuiPanel data-test-subj={`attackDiscoveryPanel-${attackDiscovery.id}`} hasBorder={true}>
         <EuiSpacer size="xs" />
 
         <PanelHeader

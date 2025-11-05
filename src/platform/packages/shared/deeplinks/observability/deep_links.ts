@@ -16,6 +16,7 @@ import {
   OBSERVABILITY_ONBOARDING_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
   SYNTHETICS_APP_ID,
+  UPTIME_APP_ID,
   SLO_APP_ID,
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
@@ -31,6 +32,7 @@ type ObservabilityOverviewApp = typeof OBSERVABILITY_OVERVIEW_APP_ID;
 type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;
 type SyntheticsApp = typeof SYNTHETICS_APP_ID;
+type UptimeApp = typeof UPTIME_APP_ID;
 type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
 type SloApp = typeof SLO_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
@@ -48,6 +50,7 @@ export type AppId =
   | ApmApp
   | MetricsApp
   | SyntheticsApp
+  | UptimeApp
   | SloApp
   | AiAssistantApp
   | ObltUxApp
@@ -84,6 +87,8 @@ export type ApmLinkId =
 
 export type SyntheticsLinkId = 'certificates' | 'overview';
 
+export type UptimeLinkId = 'Certificates';
+
 export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type StreamsLinkId = 'overview';
@@ -94,6 +99,7 @@ export type LinkId =
   | MetricsLinkId
   | ApmLinkId
   | SyntheticsLinkId
+  | UptimeLinkId
   | ProfilingLinkId
   | StreamsLinkId;
 
@@ -104,6 +110,7 @@ export type DeepLinkId =
   | `${MetricsApp}:${MetricsLinkId}`
   | `${ApmApp}:${ApmLinkId}`
   | `${SyntheticsApp}:${SyntheticsLinkId}`
+  | `${UptimeApp}:${UptimeLinkId}`
   | `${ObltProfilingApp}:${ProfilingLinkId}`
   | `${InventoryApp}:${InventoryLinkId}`
   | `${StreamsApp}:${StreamsLinkId}`;

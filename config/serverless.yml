@@ -237,3 +237,7 @@ xpack.dataUsage.enabled: true
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 # This feature is disabled in Serverless until Inference Endpoint become enabled within a Serverless environment
 xpack.stack_connectors.enableExperimental: ['inferenceConnectorOff']
+
+## Enable Kibana Product Intercept
+xpack.product_intercept.enabled: true
+xpack.product_intercept.interval: '90d'

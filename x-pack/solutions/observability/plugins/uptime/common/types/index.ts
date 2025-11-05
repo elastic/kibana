@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './monitor_duration';
-export * from './synthetics_monitor';
-export * from './integration_deprecation';
+export type * from './monitor_duration';
+export type * from './synthetics_monitor';
+export type * from './integration_deprecation';

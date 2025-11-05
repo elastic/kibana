@@ -149,7 +149,15 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: Get information for the specified file using the file ID.
+      description: >
+        Get information for the specified file using the file ID.
+
+        > info
+
+        > To construct a `file_id`, combine the `action_id` and `agent_id`
+        values using a dot separator:
+
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -174,7 +182,15 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: Download a file from an endpoint.
+      description: >
+        Download a file from an endpoint. 
+
+        > info
+
+        > To construct a `file_id`, combine the `action_id` and `agent_id`
+        values using a dot separator:
+
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileDownload
       parameters:
         - in: path

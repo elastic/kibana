@@ -8,7 +8,6 @@
 import { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
-import { KNOWN_TYPES } from '../../common/constants';
 import { DataStreamType, QualityIndicators } from '../../common/types';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
@@ -23,8 +22,14 @@ export const useDatasetQualityFilters = () => {
   const isLoading = useSelector(
     service,
     (state) =>
-      state.matches('integrations.fetching') &&
-      (state.matches('stats.datasets.fetching') || state.matches('stats.degradedDocs.fetching'))
+      state.matches('initializing') ||
+      (state.matches('main.integrations.fetching') &&
+        (state.matches('main.stats.datasets.fetching') ||
+          state.matches('main.stats.degradedDocs.fetching')))
+  );
+
+  const authorizedDatasetTypes = useSelector(service, (state) =>
+    !state.matches('initializing') ? state.context.authorizedDatasetTypes : []
   );
 
   const {
@@ -173,11 +178,11 @@ export const useDatasetQualityFilters = () => {
   );
 
   const typeItems: Item[] = useMemo(() => {
-    return KNOWN_TYPES.map((type) => ({
+    return authorizedDatasetTypes.map((type) => ({
       label: type,
       checked: selectedTypes.includes(type) ? 'on' : undefined,
     }));
-  }, [selectedTypes]);
+  }, [authorizedDatasetTypes, selectedTypes]);
 
   const onTypesChange = useCallback(
     (newTypeItems: Item[]) => {
@@ -210,6 +215,7 @@ export const useDatasetQualityFilters = () => {
     namespaces: namespaceItems,
     qualities: qualityItems,
     types: typeItems,
+    authorizedDatasetTypes,
     onIntegrationsChange,
     onNamespacesChange,
     onQualitiesChange,

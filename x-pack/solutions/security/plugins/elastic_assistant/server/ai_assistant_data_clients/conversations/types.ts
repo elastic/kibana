@@ -40,6 +40,9 @@ export interface EsConversationSchema {
       transaction_id?: string;
       trace_id?: string;
     };
+    metadata?: {
+      content_references?: unknown;
+    };
   }>;
   api_config?: {
     connector_id: string;

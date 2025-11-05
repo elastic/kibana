@@ -33,6 +33,11 @@ describe('alert monitor status component', () => {
       expect(hasFilters(EMPTY_FILTERS)).toBe(false);
     });
 
+    it('does not throw if a filter is missing', () => {
+      const { tags, ...rest } = EMPTY_FILTERS;
+      expect(hasFilters(rest)).toBe(false);
+    });
+
     it.each([
       { tags: ['prod'] },
       { 'url.port': ['5678'] },

@@ -72,6 +72,7 @@ describe('SyntheticsPrivateLocation', () => {
         bulkCreate: jest.fn(),
         getByIDs: jest.fn(),
       },
+      runWithCache: async (cb: any) => await cb(),
     },
     spaces: {
       spacesService: {
@@ -116,7 +117,8 @@ describe('SyntheticsPrivateLocation', () => {
         await syntheticsPrivateLocation.createPackagePolicies(
           [{ config: testConfig, globalParams: {} }],
           [mockPrivateLocation],
-          'test-space'
+          'test-space',
+          []
         );
       } catch (e) {
         expect(e).toEqual(new Error(error));

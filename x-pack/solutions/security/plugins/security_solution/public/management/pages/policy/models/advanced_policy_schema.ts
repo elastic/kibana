@@ -1733,6 +1733,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.image_load.origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.origin_info_collection',
+      {
+        defaultMessage:
+          "If set to true, image load events include dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default: false",
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.events.image_load',
     first_supported_version: '8.11',
     documentation: i18n.translate(
@@ -1894,6 +1905,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.process.origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.origin_info_collection',
+      {
+        defaultMessage:
+          "If set to true, process events include process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default: false",
       }
     ),
   },
@@ -2082,6 +2104,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.file.origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.origin_info_collection',
+      {
+        defaultMessage:
+          "If set to true, file events include file origin details: file.origin_url, file.origin_referrer_url, and file.Ext.windows.zone_identifier. These fields show the details of file's Mark of the Web. Default: true",
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.events.file.max_hash_size_mb',
     first_supported_version: '8.16',
     documentation: i18n.translate(
@@ -2247,6 +2280,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.security.event_disabled',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.event_disabled',
+      {
+        defaultMessage:
+          'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801. Default: none.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.alerts.hash.md5',
     first_supported_version: '8.16',
     documentation: i18n.translate(
@@ -2386,6 +2430,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
       }
     ),
   },

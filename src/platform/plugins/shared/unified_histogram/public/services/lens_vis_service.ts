@@ -135,6 +135,7 @@ export class LensVisService {
     table,
     onSuggestionContextChange,
     onVisContextChanged,
+    getModifiedVisAttributes,
   }: {
     externalVisContext: UnifiedHistogramVisContext | undefined;
     queryParams: QueryParams;
@@ -148,6 +149,9 @@ export class LensVisService {
       visContext: UnifiedHistogramVisContext | undefined,
       externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
     ) => void;
+    getModifiedVisAttributes?: (
+      attributes: TypedLensByValueInput['attributes']
+    ) => TypedLensByValueInput['attributes'];
   }) => {
     const suggestionState = this.getCurrentSuggestionState({
       externalVisContext,
@@ -163,6 +167,7 @@ export class LensVisService {
       timeInterval,
       breakdownField,
       table,
+      getModifiedVisAttributes,
     });
 
     onSuggestionContextChange(suggestionState.currentSuggestionContext);
@@ -656,6 +661,7 @@ export class LensVisService {
     timeInterval,
     breakdownField,
     table,
+    getModifiedVisAttributes,
   }: {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
     externalVisContext: UnifiedHistogramVisContext | undefined;
@@ -663,6 +669,9 @@ export class LensVisService {
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
     table: Datatable | undefined;
+    getModifiedVisAttributes?: (
+      attributes: TypedLensByValueInput['attributes']
+    ) => TypedLensByValueInput['attributes'];
   }): {
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
     visContext: UnifiedHistogramVisContext | undefined;
@@ -766,6 +775,13 @@ export class LensVisService {
           table,
         }),
       };
+    }
+
+    if (
+      externalVisContextStatus !== UnifiedHistogramExternalVisContextStatus.applied &&
+      getModifiedVisAttributes
+    ) {
+      visContext.attributes = getModifiedVisAttributes(visContext.attributes);
     }
 
     return {

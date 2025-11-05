@@ -724,6 +724,28 @@ export const EXPORT_RULE = i18n.translate(
   }
 );
 
+export const REVERT_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleDescription',
+  {
+    defaultMessage: 'Revert to Elastic version',
+  }
+);
+
+export const REVERT_RULE_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleTooltipTitle',
+  {
+    defaultMessage: 'Unable to revert rule',
+  }
+);
+
+export const REVERT_RULE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleTooltipContent',
+  {
+    defaultMessage:
+      "This rule hasn't been updated in a while and there's no available version to revert to. We recommend updating this rule instead.",
+  }
+);
+
 export const DELETE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteRuleDescription',
   {

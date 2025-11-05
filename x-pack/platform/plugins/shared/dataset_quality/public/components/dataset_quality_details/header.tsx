@@ -26,6 +26,7 @@ import {
   openInDiscoverText,
   openInLogsExplorerText,
 } from '../../../common/translations';
+import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { AlertFlyout } from '../../alerts/alert_flyout';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import {
@@ -55,7 +56,7 @@ export function Header() {
     navigationSource: navigationSources.Header,
   });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: `${datasetDetails.rawName},${datasetDetails.rawName}${FAILURE_STORE_SELECTOR}`,
     timeRangeConfig: timeRange,
     sendTelemetry,
   });

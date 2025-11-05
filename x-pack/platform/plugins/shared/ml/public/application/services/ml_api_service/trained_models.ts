@@ -177,8 +177,8 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     /**
      * Fetches all ingest pipelines
      */
-    getAllIngestPipelines() {
-      return httpService.http<NodesOverviewResponse>({
+    getAllIngestPipelines(): Promise<string[]> {
+      return httpService.http<string[]>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
         method: 'GET',
         version: '1',

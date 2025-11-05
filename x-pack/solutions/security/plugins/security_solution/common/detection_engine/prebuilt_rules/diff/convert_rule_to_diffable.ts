@@ -54,6 +54,7 @@ import { extractRuleSchedule } from './extract_rule_schedule';
 import { extractTimelineTemplateReference } from './extract_timeline_template_reference';
 import { extractTimestampOverrideObject } from './extract_timestamp_override_object';
 import { extractThreatArray } from './extract_threat_array';
+import { normalizeRuleThreshold } from './normalize_rule_threshold';
 
 /**
  * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
@@ -118,7 +119,7 @@ const extractDiffableCommonFields = (
     version: rule.version,
 
     // Main domain fields
-    name: rule.name.trim(),
+    name: rule.name?.trim(),
     tags: rule.tags ?? [],
     description: rule.description,
     severity: rule.severity,
@@ -224,7 +225,7 @@ const extractDiffableThresholdFieldsFromRuleObject = (
     type: rule.type,
     kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
-    threshold: rule.threshold,
+    threshold: normalizeRuleThreshold(rule.threshold),
     alert_suppression: rule.alert_suppression,
   };
 };

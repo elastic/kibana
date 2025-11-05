@@ -34,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('STATUS = INDEXED TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -57,7 +57,9 @@ export default function (providerContext: FtrProviderContext) {
         await latestVulnerabilitiesIndex.deleteAll();
         await _3pIndex.destroyIndex();
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it(`Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations`, async () => {

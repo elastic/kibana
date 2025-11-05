@@ -55,19 +55,17 @@ export const useOverviewSummaryPanel = () => {
   );
 
   const totalFailedDocsCount = formatNumber(dataStreamDetails?.failedDocsCount ?? 0, NUMBER_FORMAT);
+  const totalDocs = (dataStreamDetails.docsCount ?? 0) + (dataStreamDetails?.failedDocsCount ?? 0);
 
-  const totalDocsCount = formatNumber(
-    (dataStreamDetails.docsCount ?? 0) + (dataStreamDetails?.failedDocsCount ?? 0),
-    NUMBER_FORMAT
-  );
+  const totalDocsCount = formatNumber(totalDocs, NUMBER_FORMAT);
 
   const degradedPercentage = calculatePercentage({
-    totalDocs: dataStreamDetails.docsCount,
+    totalDocs,
     count: dataStreamDetails?.degradedDocsCount,
   });
 
   const failedPercentage = calculatePercentage({
-    totalDocs: dataStreamDetails.docsCount,
+    totalDocs,
     count: dataStreamDetails?.failedDocsCount,
   });
 

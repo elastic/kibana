@@ -32,7 +32,7 @@ import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`
@@ -106,12 +106,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
 
   const selectedDataViewId = useMemo(
-    () =>
-      newDataViewPickerEnabled ? experimentalDataViewSpec?.id ?? '' : selectedDataViewIdSourcerer,
-    [experimentalDataViewSpec?.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
+    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : selectedDataViewIdSourcerer),
+    [experimentalDataView.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
   );
 
   const selectedPatterns = useMemo(

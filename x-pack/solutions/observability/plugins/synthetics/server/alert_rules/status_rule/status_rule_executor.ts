@@ -13,6 +13,7 @@ import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import {
   AlertOverviewStatus,
@@ -40,11 +41,10 @@ import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
-import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import { getConditionType } from '../../../common/rules/status_rule';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
@@ -105,7 +105,7 @@ export class StatusRuleExecutor {
 
   async getMonitors() {
     const baseFilter = !this.hasCustomCondition
-      ? `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`
+      ? `${syntheticsMonitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`
       : '';
 
     const configIds = await queryFilterMonitors({
@@ -239,28 +239,25 @@ export class StatusRuleExecutor {
   }
 
   getRange = (maxPeriod: number) => {
-    let from = this.previousStartedAt
-      ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
-      : 'now-2m';
+    const { numberOfChecks, useLatestChecks, timeWindow } = getConditionType(this.params.condition);
 
-    const condition = this.params.condition;
-    if (condition && 'numberOfChecks' in condition?.window) {
-      const numberOfChecks = condition.window.numberOfChecks;
-      from = moment()
+    if (useLatestChecks) {
+      const from = moment()
         .subtract(maxPeriod * numberOfChecks, 'milliseconds')
         .subtract(5, 'minutes')
         .toISOString();
-    } else if (condition && 'time' in condition.window) {
-      const time = condition.window.time;
-      const { unit, size } = time;
-
-      from = moment().subtract(size, unit).toISOString();
+      this.debug(
+        `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
+      );
+      return { from, to: 'now' };
     }
 
+    // `timeWindow` is guaranteed to be defined here.
+    const { unit, size } = timeWindow;
+    const from = moment().subtract(size, unit).toISOString();
     this.debug(
       `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
     );
-
     return { from, to: 'now' };
   };
 
@@ -333,7 +330,9 @@ export class StatusRuleExecutor {
         alertId,
         monitorSummary,
         statusConfig: configs[0],
-        locationNames: configs.map(({ locationId, ping }) => ping?.observer.geo.name || locationId),
+        locationNames: configs.map(
+          ({ locationId, latestPing }) => latestPing?.observer.geo.name || locationId
+        ),
         locationIds: configs.map(({ locationId }) => locationId),
       });
     }
@@ -384,8 +383,8 @@ export class StatusRuleExecutor {
             statusConfig,
             downThreshold,
             useLatestChecks,
-            locationNames: [statusConfig.ping.observer.geo?.name!],
-            locationIds: [statusConfig.ping.observer.name!],
+            locationNames: [statusConfig.latestPing.observer.geo?.name!],
+            locationIds: [statusConfig.latestPing.observer.name!],
           });
         }
       });
@@ -412,8 +411,8 @@ export class StatusRuleExecutor {
             statusConfig: configs[0],
             downThreshold,
             useLatestChecks,
-            locationNames: configs.map((c) => c.ping.observer.geo?.name!),
-            locationIds: configs.map((c) => c.ping.observer.name!),
+            locationNames: configs.map((c) => c.latestPing.observer.geo?.name!),
+            locationIds: configs.map((c) => c.latestPing.observer.name!),
           });
         }
       }
@@ -421,7 +420,7 @@ export class StatusRuleExecutor {
   };
 
   getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaData }) {
-    const { ping, configId, locationId, checks } = statusConfig;
+    const { latestPing: ping, configId, locationId, checks } = statusConfig;
 
     return getMonitorSummary({
       monitorInfo: ping,
@@ -451,11 +450,11 @@ export class StatusRuleExecutor {
 
   getUngroupedDownSummary({ statusConfigs }: { statusConfigs: AlertStatusMetaData[] }) {
     const sampleConfig = statusConfigs[0];
-    const { ping, configId, checks } = sampleConfig;
+    const { latestPing: ping, configId, checks } = sampleConfig;
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
       reason: 'down',
-      locationId: statusConfigs.map((c) => c.ping.observer.name!),
+      locationId: statusConfigs.map((c) => c.latestPing.observer.name!),
       configId,
       dateFormat: this.dateFormat!,
       tz: this.tz!,
@@ -470,7 +469,7 @@ export class StatusRuleExecutor {
     });
     if (statusConfigs.length > 1) {
       baseSummary.locationNames = statusConfigs
-        .map((c) => c.ping.observer.geo?.name!)
+        .map((c) => c.latestPing.observer.geo?.name!)
         .join(` ${AND_LABEL} `);
     }
 

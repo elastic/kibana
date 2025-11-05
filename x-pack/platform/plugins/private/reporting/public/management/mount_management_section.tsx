@@ -22,7 +22,7 @@ import {
   KibanaContext,
 } from '@kbn/reporting-public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
@@ -61,6 +61,7 @@ export async function mountManagementSection({
     docLinks: coreStart.docLinks,
     data: dataService,
     share: shareService,
+    license$,
     actions: actionsService,
     notifications: notificationsService,
   };
@@ -82,15 +83,7 @@ export async function mountManagementSection({
                     render={(routerProps) => {
                       return (
                         <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-                          <ReportingTabs
-                            coreStart={coreStart}
-                            apiClient={apiClient}
-                            license$={license$}
-                            config={config}
-                            dataService={dataService}
-                            shareService={shareService}
-                            {...routerProps}
-                          />
+                          <ReportingTabs config={config} />
                         </Suspense>
                       );
                     }}

@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
@@ -179,12 +179,21 @@ describe('Discover topnav component', () => {
     });
 
     describe('share service available', () => {
+      let availableIntegrationsSpy: jest.SpyInstance;
+
       beforeAll(() => {
         mockDiscoverService.share = sharePluginMock.createStartContract();
       });
 
       afterAll(() => {
         mockDiscoverService.share = undefined;
+      });
+
+      beforeEach(() => {
+        (availableIntegrationsSpy = jest.spyOn(
+          mockDiscoverService.share!,
+          'availableIntegrations'
+        )).mockImplementation(() => []);
       });
 
       it('will include share menu item if the share service is available', () => {
@@ -196,11 +205,6 @@ describe('Discover topnav component', () => {
       });
 
       it('will include export menu item if there are export integrations available', () => {
-        const availableIntegrationsSpy = jest.spyOn(
-          mockDiscoverService.share!,
-          'availableIntegrations'
-        );
-
         availableIntegrationsSpy.mockImplementation((_objectType, groupId) => {
           if (groupId === 'export') {
             return [
@@ -208,7 +212,7 @@ describe('Discover topnav component', () => {
                 id: 'export',
                 shareType: 'integration',
                 groupId: 'export',
-                config: () => ({}),
+                config: () => Promise.resolve({}),
               },
             ];
           }

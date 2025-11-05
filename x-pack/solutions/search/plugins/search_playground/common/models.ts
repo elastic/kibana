@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticModelIds } from '@kbn/inference-common';
 import { ModelProvider, LLMs } from './types';
 
 export const MODELS: ModelProvider[] = [
@@ -39,15 +40,21 @@ export const MODELS: ModelProvider[] = [
     provider: LLMs.bedrock,
   },
   {
-    name: 'Google Gemini 1.5 Pro',
-    model: 'gemini-1.5-pro-002',
-    promptTokenLimit: 2097152,
+    name: 'Google Gemini 2.5 Pro',
+    model: 'gemini-2.5-pro',
+    promptTokenLimit: 1048576,
     provider: LLMs.gemini,
   },
   {
-    name: 'Google Gemini 1.5 Flash',
-    model: 'gemini-1.5-flash-002',
-    promptTokenLimit: 2097152,
+    name: 'Google Gemini 2.5 Flash',
+    model: 'gemini-2.5-flash',
+    promptTokenLimit: 1048576,
     provider: LLMs.gemini,
+  },
+  {
+    name: 'Elastic Managed LLM',
+    model: elasticModelIds.RainbowSprinkles,
+    promptTokenLimit: 200000,
+    provider: LLMs.inference,
   },
 ];

@@ -281,6 +281,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         type: 'multiNamespaceTypeCustomIndex',
         id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         existingNamespaces: multiNamespaceObjNamespaces,
+        name: 'Testing',
       };
 
       const { namespace: actualNamespace, object: actualObject } =

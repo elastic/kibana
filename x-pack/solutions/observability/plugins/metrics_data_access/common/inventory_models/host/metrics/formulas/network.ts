@@ -15,6 +15,7 @@ export const rx: LensBaseLayer = {
   value: 'sum(host.network.ingress.bytes) * 8',
   format: 'bits',
   decimals: 1,
+  normalizeByUnit: 's',
 };
 
 export const tx: LensBaseLayer = {
@@ -24,4 +25,5 @@ export const tx: LensBaseLayer = {
   value: 'sum(host.network.egress.bytes) * 8',
   format: 'bits',
   decimals: 1,
+  normalizeByUnit: 's',
 };

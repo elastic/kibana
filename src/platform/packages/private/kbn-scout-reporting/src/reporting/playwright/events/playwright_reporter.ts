@@ -30,12 +30,12 @@ import {
   getOwningTeamsForPath,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
+import { SCOUT_TARGET_TYPE, SCOUT_TARGET_MODE } from '@kbn/scout-info';
 import {
   ScoutEventsReport,
   ScoutFileInfo,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
-  uploadScoutReportEvents,
 } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
@@ -63,7 +63,13 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
-    this.baseTestRunInfo = { id: this.runId };
+    this.baseTestRunInfo = {
+      id: this.runId,
+      target: {
+        type: SCOUT_TARGET_TYPE,
+        mode: SCOUT_TARGET_MODE,
+      },
+    };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
 
@@ -87,6 +93,17 @@ export class ScoutPlaywrightReporter implements Reporter {
     };
   }
 
+  private getScoutConfigCategory(configPath: string): ScoutTestRunConfigCategory {
+    const pattern = /scout\/(api|ui)\//;
+    const match = configPath.match(pattern);
+    if (match) {
+      return match[1] === 'api'
+        ? ScoutTestRunConfigCategory.API_TEST
+        : ScoutTestRunConfigCategory.UI_TEST;
+    }
+    return ScoutTestRunConfigCategory.UNKNOWN;
+  }
+
   /**
    * Root path of this reporter's output
    */
@@ -107,12 +124,13 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (config.configFile !== undefined) {
       configInfo = {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.configFile)),
-        category: ScoutTestRunConfigCategory.UI_TEST,
+        category: this.getScoutConfigCategory(config.configFile),
       };
     }
 
     this.baseTestRunInfo = {
       ...this.baseTestRunInfo,
+      fully_parallel: config.fullyParallel,
       config: configInfo,
     };
 
@@ -275,7 +293,6 @@ export class ScoutPlaywrightReporter implements Reporter {
     // Save, upload events & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
     } catch (e) {
       // Log the error but don't propagate it
       this.log.error(e);

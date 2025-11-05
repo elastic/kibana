@@ -27,6 +27,7 @@ import { formatLocation } from '../../../common/utils/location_formatter';
 import * as locationsUtil from '../get_all_locations';
 import { mockEncryptedSO } from '../utils/mocks';
 import { SyntheticsServerSetup } from '../../types';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 
 const testMonitors = [
   {
@@ -122,6 +123,7 @@ describe('ProjectMonitorFormatter', () => {
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
     },
+    fleet: { runWithCache: async (cb: any) => await cb() },
   } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -154,6 +156,7 @@ describe('ProjectMonitorFormatter', () => {
     server: serverMock,
     syntheticsMonitorClient: monitorClient,
     request: kibanaRequest,
+    monitorConfigRepository: new MonitorConfigRepository(soClient, encryptedSavedObjectsClient),
   } as any;
 
   jest.spyOn(locationsUtil, 'getAllLocations').mockImplementation(
@@ -204,7 +207,6 @@ describe('ProjectMonitorFormatter', () => {
       projectId: 'test-project',
       spaceId: 'default',
       routeContext,
-      encryptedSavedObjectsClient,
       monitors: [invalidMonitor],
     });
 
@@ -240,7 +242,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      encryptedSavedObjectsClient,
       monitors: testMonitors,
       routeContext,
     });
@@ -258,7 +259,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -272,7 +273,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      encryptedSavedObjectsClient,
       monitors: testMonitors,
       routeContext,
     });
@@ -290,7 +290,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -304,7 +304,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      encryptedSavedObjectsClient,
       monitors: testMonitors,
       routeContext,
     });
@@ -322,7 +321,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },
@@ -342,7 +341,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      encryptedSavedObjectsClient,
       monitors: testMonitors,
       routeContext,
     });
@@ -495,14 +493,14 @@ const soData = [
       ...payloadData[0],
       revision: 1,
     } as any),
-    type: 'synthetics-monitor',
+    type: 'synthetics-monitor-multi-space',
   },
   {
     attributes: formatSecrets({
       ...payloadData[1],
       revision: 1,
     } as any),
-    type: 'synthetics-monitor',
+    type: 'synthetics-monitor-multi-space',
   },
 ];
 

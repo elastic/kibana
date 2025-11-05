@@ -27,7 +27,7 @@ export const ExplorerNoResultsFound: FC<ExplorerNoResultsFoundProps> = ({
   const noResults = hasResults === false;
   return (
     <EuiEmptyPrompt
-      iconType="iInCircle"
+      iconType="info"
       title={
         <h2>
           {resultsHaveNoAnomalies && (

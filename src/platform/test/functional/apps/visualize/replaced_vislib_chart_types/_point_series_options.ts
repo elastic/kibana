@@ -233,7 +233,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('timezones', function () {
       it('should show round labels in default timezone', async function () {
-        const expectedLabels = ['September 2015', '19th', '20th', '21st', '22nd', '23rd'];
+        const expectedLabels = ['September 2015', '20th', '21st', '22nd', '23rd'];
         await initChart();
         const labels = await visChart.getXAxisLabels(xyChartSelector);
         expect(labels.join()).to.contain(expectedLabels.join());
@@ -268,7 +268,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const xLabels = [
               'September 22, 2015',
-              '09:00',
               '10:00',
               '11:00',
               '12:00',
@@ -328,7 +327,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const xLabels2 = [
               'September 22, 2015',
-              '16:00',
               '17:00',
               '18:00',
               '19:00',

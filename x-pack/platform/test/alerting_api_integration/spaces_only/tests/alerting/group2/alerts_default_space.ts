@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { Spaces } from '../../../scenarios';
 import { alertTests } from '../group1/alerts_base';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertSpace1Tests(context: FtrProviderContext) {
   alertTests(context, Spaces.default);
 }

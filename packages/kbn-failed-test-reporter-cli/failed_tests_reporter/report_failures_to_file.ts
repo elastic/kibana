@@ -81,7 +81,7 @@ function findAllScreenshots(log: ToolingLog) {
       .sync(
         [
           'src/platform/test/functional/**/screenshots/failure/*.png',
-          'x-pack/test/functional/**/screenshots/failure/*.png',
+          'x-pack/platform/test/functional/**/screenshots/failure/*.png',
         ],
         {
           cwd: REPO_ROOT,

@@ -74,7 +74,7 @@ export const NoUpdaterTip = (props: {
 );
 
 const NoUsersTip = ({
-  iconType: type = 'questionInCircle',
+  iconType: type = 'question',
   ...props
 }: {
   content: React.ReactNode;

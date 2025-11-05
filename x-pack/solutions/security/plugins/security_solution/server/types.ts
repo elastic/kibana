@@ -6,6 +6,7 @@
  */
 
 import type {
+  AnalyticsServiceSetup,
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
   IRouter,
@@ -40,10 +41,12 @@ import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/
 import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_rule_migrations_service';
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { ProductFeaturesService } from './lib/product_features_service';
+import type { MlAuthz } from './lib/machine_learning/authz';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
+  getAnalytics: () => AnalyticsServiceSetup;
   getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
   getConfig: () => ConfigType;
@@ -67,6 +70,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getProductFeatureService: () => ProductFeaturesService;
+  getMlAuthz: () => MlAuthz;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

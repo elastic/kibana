@@ -20,13 +20,18 @@ import {
   ConvertConnectorApiLogicArgs,
   ConvertConnectorApiLogicResponse,
 } from '../../../../api/connector/convert_connector_api_logic';
-import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
+import {
+  ConnectorViewLogic,
+  ConnectorViewActions,
+} from '../../../connector_detail/connector_view_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 interface ConvertConnectorValues {
   connectorId: typeof IndexViewLogic.values.connectorId;
+  indexName: typeof IndexViewLogic.values.indexName;
   isLoading: boolean;
   isModalVisible: boolean;
+  shouldHideModal: boolean;
   status: Status;
 }
 
@@ -34,6 +39,8 @@ type ConvertConnectorActions = Pick<
   Actions<ConvertConnectorApiLogicArgs, ConvertConnectorApiLogicResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
+  fetchConnector: ConnectorViewActions['fetchConnector'];
+  fetchConnectorApiSuccess: ConnectorViewActions['fetchConnectorApiSuccess'];
   convertConnector(): void;
   hideModal(): void;
   showModal(): void;
@@ -49,12 +56,22 @@ export const ConvertConnectorLogic = kea<
     showModal: () => true,
   },
   connect: {
-    actions: [ConvertConnectorApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
+    actions: [
+      ConvertConnectorApiLogic,
+      ['apiError', 'apiSuccess', 'makeRequest'],
+      ConnectorViewLogic,
+      ['fetchConnector', 'fetchConnectorApiSuccess'],
+    ],
     values: [ConvertConnectorApiLogic, ['status'], ConnectorViewLogic, ['connectorId']],
   },
   listeners: ({ actions, values }) => ({
     apiSuccess: () => {
-      actions.hideModal();
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
+    fetchConnectorApiSuccess: () => {
+      if (values.shouldHideModal) actions.hideModal();
     },
     convertConnector: () => {
       if (values.connectorId) {
@@ -68,13 +85,24 @@ export const ConvertConnectorLogic = kea<
       false,
       {
         apiError: () => false,
-        apiSuccess: () => false,
         hideModal: () => false,
         showModal: () => true,
       },
     ],
+    shouldHideModal: [
+      false,
+      {
+        apiError: () => false,
+        apiSuccess: () => true,
+        fetchConnectorApiSuccess: () => false,
+        hideModal: () => false,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
-    isLoading: [() => [selectors.status], (status: Status) => status === Status.LOADING],
+    isLoading: [
+      () => [selectors.status, selectors.shouldHideModal],
+      (status: Status, shouldHideModal: boolean) => status === Status.LOADING || shouldHideModal,
+    ],
   }),
 });

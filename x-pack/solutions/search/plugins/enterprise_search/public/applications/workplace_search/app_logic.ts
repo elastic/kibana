@@ -52,16 +52,13 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
     isOrganization: [
       false,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setContext: (_, isOrganization) => isOrganization,
       },
     ],
     organization: [
       emptyOrg,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.organization || emptyOrg,
-        // @ts-expect-error upgrade typescript v5.1.6
         setOrgName: (state, name) => ({
           ...state,
           name,
@@ -71,9 +68,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
     account: [
       emptyAccount,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.account || emptyAccount,
-        // @ts-expect-error upgrade typescript v5.1.6
         setSourceRestriction: (state, canCreatePrivateSources) => ({
           ...state,
           canCreatePrivateSources,
@@ -83,7 +78,6 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
     searchOAuth: [
       emptySearchOAuth,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         initializeAppData: (_, { searchOAuth }) => searchOAuth || emptySearchOAuth,
       },
     ],

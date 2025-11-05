@@ -28,7 +28,7 @@ describe('isFeatureAvailable', () => {
 
     expect(getBooleanValueMock).toHaveBeenCalledWith(
       'securitySolution.assistantAttackDiscoverySchedulingEnabled',
-      false
+      true
     );
   });
 });

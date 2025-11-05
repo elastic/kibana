@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export const ExampleConfigCallout: React.FC = () => (
   <>
     <EuiCallOut
-      iconType="iInCircle"
+      iconType="info"
       color="warning"
       title={i18n.translate(
         'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',

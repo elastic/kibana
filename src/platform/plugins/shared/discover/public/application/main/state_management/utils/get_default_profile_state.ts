@@ -44,7 +44,7 @@ export const getDefaultProfileState = ({
         stateUpdate.breakdownField = defaultState.breakdownField;
       }
 
-      if (defaultState.hideChart !== undefined) {
+      if (resetDefaultProfileState.hideChart && defaultState.hideChart !== undefined) {
         stateUpdate.hideChart = defaultState.hideChart;
       }
 

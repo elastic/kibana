@@ -33,7 +33,7 @@ import {
   FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID,
   FIELD_BROWSER_TEST_ID,
 } from '../constants';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -41,6 +41,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 jest.mock('../hooks/use_case_view_navigation');
 
 const cellActionOnClickMockedFn = jest.fn();
+const mockOnChangeVisibleColumns = jest.fn();
 
 const { fix, cleanup } = getJsDomPerformanceFix();
 
@@ -63,11 +64,13 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   pageSizeOptions: [1, 10, 20, 50, 100],
   leadingControlColumns: [],
   trailingControlColumns: [],
-  visibleColumns: mockColumns.map((c) => c.id),
+  columnVisibility: {
+    visibleColumns: mockColumns.map((c) => c.id),
+    setVisibleColumns: mockOnChangeVisibleColumns,
+  },
   'data-test-subj': 'testTable',
   onToggleColumn: jest.fn(),
   onResetColumns: jest.fn(),
-  onChangeVisibleColumns: jest.fn(),
   query: {},
   sort: [],
   alertsQuerySnapshot: { request: [], response: [] },
@@ -432,6 +435,38 @@ describe('AlertsDataGrid', () => {
           `field-${columnToHide.id}-checkbox`
         );
         expect(columnCheckbox).toBeChecked();
+      });
+
+      it('should toggle column visibility on via column selector dropdown on a hidden column', async () => {
+        const columnToDisplay = mockColumns[0].id;
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            toolbarVisibility={{
+              showColumnSelector: true,
+            }}
+            columnVisibility={{
+              visibleColumns: mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay),
+              setVisibleColumns: mockOnChangeVisibleColumns,
+            }}
+          />
+        );
+        const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');
+
+        fireEvent.click(columnSelectorBtn);
+
+        const columnVisibilityToggle = await screen.findByTestId(
+          `dataGridColumnSelectorToggleColumnVisibility-${columnToDisplay}`
+        );
+
+        fireEvent.click(columnVisibilityToggle);
+
+        expect(mockOnChangeVisibleColumns).toHaveBeenLastCalledWith([
+          'kibana.alert.rule.name',
+          'kibana.alert.reason',
+          'kibana.alert.status',
+          'kibana.alert.case_ids',
+        ]);
       });
     });
 

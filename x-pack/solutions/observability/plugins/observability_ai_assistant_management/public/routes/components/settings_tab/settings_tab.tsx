@@ -29,6 +29,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
 import { ProductDocEntry } from './product_doc_entry';
 import { ChangeKbModel } from './change_kb_model';
+import { getMappedInferenceId } from '../../../helpers/inference_utils';
+import { useProductDoc } from '../../../hooks/use_product_doc';
 
 const GoToSpacesButton = ({ getUrlForSpaces }: { getUrlForSpaces: () => string }) => {
   return (
@@ -59,6 +61,11 @@ export function SettingsTab() {
   const { config } = useAppContext();
 
   const knowledgeBase = useKnowledgeBase();
+  const currentlyDeployedInferenceId = getMappedInferenceId(
+    knowledgeBase.status.value?.currentInferenceId
+  );
+  const productDoc = useProductDoc(currentlyDeployedInferenceId);
+
   const connectors = useGenAIConnectors();
 
   const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
@@ -179,10 +186,20 @@ export function SettingsTab() {
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
-      {productDocBase ? <ProductDocEntry /> : undefined}
+      {productDocBase ? (
+        <ProductDocEntry
+          knowledgeBase={knowledgeBase}
+          productDoc={productDoc}
+          currentlyDeployedInferenceId={currentlyDeployedInferenceId}
+        />
+      ) : undefined}
 
       {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
-        <ChangeKbModel knowledgeBase={knowledgeBase} />
+        <ChangeKbModel
+          knowledgeBase={knowledgeBase}
+          productDoc={productDoc}
+          currentlyDeployedInferenceId={currentlyDeployedInferenceId}
+        />
       ) : undefined}
 
       <UISettings knowledgeBase={knowledgeBase} />

@@ -165,7 +165,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                             defaultMessage: 'Open licensing popover',
                           }
                         )}
-                        iconType="questionInCircle"
+                        iconType="question"
                         onClick={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
                       />
                     }

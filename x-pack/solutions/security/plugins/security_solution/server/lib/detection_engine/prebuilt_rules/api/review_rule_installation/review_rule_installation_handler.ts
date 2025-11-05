@@ -17,6 +17,7 @@ import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { excludeLicenseRestrictedRules } from '../../logic/utils';
 
 export const reviewRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -26,11 +27,12 @@ export const reviewRuleInstallationHandler = async (
   const siemResponse = buildSiemResponse(response);
 
   try {
-    const ctx = await context.resolve(['core', 'alerting']);
+    const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+    const mlAuthz = ctx.securitySolution.getMlAuthz();
 
     const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
     const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
@@ -38,11 +40,15 @@ export const reviewRuleInstallationHandler = async (
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const installableRules = allLatestVersions.filter((latestVersion) => {
-      const currentVersion = currentRuleVersionsMap.get(latestVersion.rule_id);
-      return !currentVersion;
-    });
-    const installableRuleAssets = await ruleAssetsClient.fetchAssetsByVersion(installableRules);
+    const allInstallableRules = allLatestVersions.filter(
+      (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
+    );
+
+    const nonInstalledRuleAssets = await ruleAssetsClient.fetchAssetsByVersion(allInstallableRules);
+    const installableRuleAssets = await excludeLicenseRestrictedRules(
+      nonInstalledRuleAssets,
+      mlAuthz
+    );
 
     const body: ReviewRuleInstallationResponseBody = {
       stats: calculateRuleStats(installableRuleAssets),

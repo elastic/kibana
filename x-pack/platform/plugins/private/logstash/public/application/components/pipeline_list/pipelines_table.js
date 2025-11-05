@@ -28,7 +28,7 @@ function getColumns(openPipeline, clonePipeline) {
             {id} &nbsp;
             <EuiIconTip
               content={PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
-              type="questionInCircle"
+              type="question"
             />
           </span>
         );

@@ -195,6 +195,7 @@ export const JobSetupScreen = (props: Props) => {
             <FeatureFeedbackButton
               data-test-subj={`infraML${props.jobType}FlyoutFeedbackLink`}
               formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
+              sanitizedPath={document.location.pathname}
               kibanaVersion={kibanaVersion}
               isCloudEnv={isCloudEnv}
               isServerlessEnv={isServerlessEnv}

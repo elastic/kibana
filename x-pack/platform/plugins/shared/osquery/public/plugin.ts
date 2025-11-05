@@ -142,6 +142,5 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public stop() {}
 }

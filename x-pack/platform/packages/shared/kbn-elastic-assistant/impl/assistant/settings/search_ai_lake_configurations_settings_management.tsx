@@ -55,6 +55,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -66,8 +67,12 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
 
@@ -122,7 +127,9 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
     const renderTabBody = useCallback(() => {
       switch (currentTab) {
         case CONNECTORS_TAB:
-          return <AIForSOCConnectorSettingsManagement />;
+          return (
+            <AIForSOCConnectorSettingsManagement connectors={connectors} settings={settings} />
+          );
         case SYSTEM_PROMPTS_TAB:
           return (
             <SystemPromptSettingsManagement
@@ -154,7 +161,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
             />
           );
       }
-    }, [connectors, currentTab, dataViews, defaultConnector, modelEvaluatorEnabled]);
+    }, [connectors, currentTab, dataViews, defaultConnector, modelEvaluatorEnabled, settings]);
     return (
       <EuiFlexGroup
         data-test-subj="SearchAILakeConfigurationsSettingsManagement"

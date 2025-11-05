@@ -36,7 +36,7 @@ export const MonitorAsyncError = () => {
             defaultMessage="There was a problem running your monitors for one or more locations:"
           />
         </p>
-        <ul>
+        <ul style={{ maxHeight: 100, overflow: 'auto' }}>
           {Object.values(syncErrors ?? {}).map((e) => {
             return (
               <li key={e.locationId}>

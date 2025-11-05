@@ -6,7 +6,9 @@
  */
 
 import { appContextService } from '..';
-import { AgentPolicyInvalidError } from '../../errors';
+import { AgentPolicyInvalidError, FleetUnauthorizedError } from '../../errors';
+
+import { licenseService } from '..';
 
 import { validateRequiredVersions } from './required_versions';
 
@@ -30,6 +32,10 @@ describe('validateRequiredVersions', () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutomaticAgentUpgrades: true } as any);
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    });
+    afterEach(() => {
+      jest.spyOn(licenseService, 'isEnterprise').mockClear();
     });
 
     it('should throw error if duplicate versions', () => {
@@ -41,6 +47,20 @@ describe('validateRequiredVersions', () => {
       }).toThrow(
         new AgentPolicyInvalidError(
           `Policy "test policy" failed required_versions validation: duplicate versions not allowed`
+        )
+      );
+    });
+
+    it('should throw error if license is not at least Enterprise', () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 10 },
+          { version: '9.0.0', percentage: 10 },
+        ]);
+      }).toThrow(
+        new FleetUnauthorizedError(
+          `Agents auto upgrades feature requires at least Enterprise license`
         )
       );
     });

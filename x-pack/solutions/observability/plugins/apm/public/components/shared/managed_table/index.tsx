@@ -175,10 +175,13 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when url params change
   useEffect(() => {
     // Prevent updates while data is loading, as this cause pagination issues when observability:apmProgressiveLoading is enabled
-    if (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading) {
+    if (
+      (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading) &&
+      saveTableOptionsToUrl
+    ) {
       setTableOptions(getStateFromUrl());
     }
-  }, [getStateFromUrl, progressiveLoadingQuality, isLoading]);
+  }, [getStateFromUrl, progressiveLoadingQuality, isLoading, saveTableOptionsToUrl]);
 
   // Clean up searchQuery when fast filter is toggled off
   useEffect(() => {
@@ -302,6 +305,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           searchQuery={searchQuery}
           onChangeSearchQuery={onChangeSearchQuery}
           techPreview={tableSearchBar.techPreview}
+          isLoading={isLoading}
         />
       ) : null}
 

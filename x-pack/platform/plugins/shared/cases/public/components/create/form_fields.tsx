@@ -66,7 +66,7 @@ const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ configuration, connectors, isLoading, withSteps, draftStorageKey }) => {
     const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
-    const { isSyncAlertsEnabled } = useCasesFeatures();
+    const { isSyncAlertsEnabled, connectorsAuthorized } = useCasesFeatures();
     const configurationOwner = configuration.owner;
 
     /**
@@ -161,8 +161,13 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     );
 
     const allSteps = useMemo(
-      () => [firstStep, secondStep, ...(isSyncAlertsEnabled ? [thirdStep] : []), fourthStep],
-      [firstStep, secondStep, isSyncAlertsEnabled, thirdStep, fourthStep]
+      () => [
+        firstStep,
+        secondStep,
+        ...(isSyncAlertsEnabled ? [thirdStep] : []),
+        ...(connectorsAuthorized ? [fourthStep] : []),
+      ],
+      [firstStep, secondStep, isSyncAlertsEnabled, thirdStep, connectorsAuthorized, fourthStep]
     );
 
     return (
@@ -215,14 +220,16 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
                   <EuiFlexItem>{thirdStep.children}</EuiFlexItem>
                 </EuiFlexGroup>
               )}
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem>
-                  <EuiTitle size="s">
-                    <h2>{i18n.STEP_FOUR_TITLE}</h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem>{fourthStep.children}</EuiFlexItem>
-              </EuiFlexGroup>
+              {connectorsAuthorized && (
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h2>{i18n.STEP_FOUR_TITLE}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem>{fourthStep.children}</EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </EuiFlexGroup>
           </>
         )}

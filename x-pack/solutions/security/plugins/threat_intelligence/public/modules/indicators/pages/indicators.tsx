@@ -23,15 +23,18 @@ import { useColumnSettings } from '../hooks/use_column_settings';
 import { IndicatorsFilters } from '../containers/filters';
 import { UpdateStatus } from '../../../components/update_status';
 import { QueryBar } from '../../query_bar/components/query_bar';
+import { ScreenReaderAnnouncementsProvider } from '../containers/screen_reader_a11y';
 
 const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
-  <IndicatorsFilters>
-    <FieldTypesProvider>
-      <InspectorProvider>
-        <BlockListProvider>{children}</BlockListProvider>
-      </InspectorProvider>
-    </FieldTypesProvider>
-  </IndicatorsFilters>
+  <ScreenReaderAnnouncementsProvider>
+    <IndicatorsFilters>
+      <FieldTypesProvider>
+        <InspectorProvider>
+          <BlockListProvider>{children}</BlockListProvider>
+        </InspectorProvider>
+      </FieldTypesProvider>
+    </IndicatorsFilters>
+  </ScreenReaderAnnouncementsProvider>
 );
 
 const IndicatorsPageContent: VFC = () => {

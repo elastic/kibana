@@ -8,7 +8,7 @@
  */
 
 import { CoreSetup, Plugin } from '@kbn/core/server';
-import { metrics } from '@opentelemetry/api-metrics';
+import { metrics } from '@opentelemetry/api';
 import { generateOtelMetrics } from './routes';
 import { Metrics } from './monitoring/metrics';
 

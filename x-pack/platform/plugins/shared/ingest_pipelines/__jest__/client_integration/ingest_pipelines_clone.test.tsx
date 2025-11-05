@@ -9,10 +9,13 @@ import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
-import { PIPELINE_TO_CLONE, PipelinesCloneTestBed } from './helpers/pipelines_clone.helpers';
+import type { PipelinesCloneTestBed } from './helpers/pipelines_clone.helpers';
+import { PIPELINE_TO_CLONE } from './helpers/pipelines_clone.helpers';
+import { getClonePath } from '../../public/application/services/navigation';
 
 const { setup } = pageHelpers.pipelinesClone;
 
+const originalLocation = window.location;
 describe('<PipelinesClone />', () => {
   let testBed: PipelinesCloneTestBed;
 
@@ -21,11 +24,26 @@ describe('<PipelinesClone />', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE.name, PIPELINE_TO_CLONE);
 
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        ...originalLocation,
+        pathname: getClonePath({ clonedPipelineName: PIPELINE_TO_CLONE.name }),
+      },
+    });
+
     await act(async () => {
       testBed = await setup(httpSetup);
     });
 
     testBed.component.update();
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    });
   });
 
   test('should render the correct page header', () => {

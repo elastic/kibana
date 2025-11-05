@@ -11,7 +11,6 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function serverLogTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

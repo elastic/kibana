@@ -23,6 +23,7 @@ const REGISTERED_SCOPES = [
   DataViewManagerScopeName.timeline,
   DataViewManagerScopeName.detections,
   DataViewManagerScopeName.analyzer,
+  DataViewManagerScopeName.explore,
 ] as const;
 
 /**

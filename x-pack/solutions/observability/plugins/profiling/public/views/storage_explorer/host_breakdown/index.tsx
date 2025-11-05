@@ -77,7 +77,7 @@ export function HostBreakdown({ hasDistinctProbabilisticValues, onReady }: Props
                 'This graph shows the combined values of Universal Profiling samples and metrics. host.name[host.id].',
             })}
           >
-            <EuiIcon type="questionInCircle" style={{ marginLeft: 4 }} />
+            <EuiIcon type="question" style={{ marginLeft: 4 }} />
           </EuiToolTip>
         </EuiText>
       </EuiTitle>

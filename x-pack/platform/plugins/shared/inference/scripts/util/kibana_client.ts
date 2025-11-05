@@ -201,7 +201,7 @@ export class KibanaClient {
               pathname: `/internal/inference/chat_complete/stream`,
             }),
             body,
-            { responseType: 'stream', timeout: NaN }
+            { responseType: 'stream', timeout: 0 }
           )
         ) as ChatCompleteAPIResponse<TOptions>;
       }
@@ -212,7 +212,7 @@ export class KibanaClient {
             pathname: `/internal/inference/chat_complete`,
           }),
           body,
-          { timeout: NaN }
+          { timeout: 0 }
         )
         .then((response) => {
           return response.data;

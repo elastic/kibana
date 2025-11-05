@@ -44,7 +44,7 @@ export const ElasticLlmConversationCallout = () => {
   return (
     <EuiCallOut
       onDismiss={onDismiss}
-      iconType="iInCircle"
+      iconType="info"
       title={i18n.translate('xpack.aiAssistant.elasticLlmCallout.title', {
         defaultMessage: `You're using the Elastic Managed LLM connector`,
       })}

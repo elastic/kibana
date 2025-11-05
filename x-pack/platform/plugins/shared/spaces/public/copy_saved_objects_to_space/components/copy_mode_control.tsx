@@ -99,7 +99,7 @@ const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
       <EuiText>{text}</EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiIconTip content={tooltip} position="left" type="iInCircle" />
+      <EuiIconTip content={tooltip} position="left" type="info" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

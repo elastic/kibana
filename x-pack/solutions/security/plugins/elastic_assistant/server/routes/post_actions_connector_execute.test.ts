@@ -15,9 +15,11 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { PassThrough } from 'stream';
-import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
+import {
+  getConversationResponseMock,
+  getFindAnonymizationFieldsResultWithSingleHit,
+} from '../__mocks__/response';
 import {
   defaultAssistantFeatures,
   ExecuteConnectorRequestBody,
@@ -25,7 +27,7 @@ import {
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
 import { getPrompt } from '../lib/prompt';
-import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
@@ -97,6 +99,9 @@ const mockContext = {
       }),
     },
     core: {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       elasticsearch: {
         client: elasticsearchServiceMock.createScopedClusterClient(),
       },
@@ -129,7 +134,7 @@ const mockResponse = {
   error: jest.fn().mockImplementation((x) => x),
 };
 const mockConfig = {
-  elserInferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+  elserInferenceId: defaultInferenceEndpoints.ELSER,
   responseTimeout: 1000,
 };
 

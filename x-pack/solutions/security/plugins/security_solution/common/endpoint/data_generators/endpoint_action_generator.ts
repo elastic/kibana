@@ -11,7 +11,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isProcessesAction } from '../service/response_actions/type_guards';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { GetProcessesActionOutputContent } from '../types';
 import {
   type ActionDetails,
   type ActionResponseOutput,
@@ -21,6 +20,7 @@ import {
   type EndpointActivityLogAction,
   type EndpointActivityLogActionResponse,
   type EndpointPendingActions,
+  type GetProcessesActionOutputContent,
   type LogsEndpointAction,
   type LogsEndpointActionResponse,
   type ProcessesEntry,
@@ -451,9 +451,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomScanFailureCode(): string {
     return this.randomChoice([
-      'ra_scan_error_scan-invalid-input',
+      'ra_scan_error_invalid-input',
       'ra_scan_error_not-found',
-      'ra_scan_error_scan-queue-quota',
+      'ra_scan_error_queue-quota',
+      'ra_scan_error_processing',
+      'ra_scan_error_processing-interrupted',
     ]);
   }
 

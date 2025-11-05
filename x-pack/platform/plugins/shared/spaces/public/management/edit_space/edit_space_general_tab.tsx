@@ -250,7 +250,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           <EuiSpacer />
           <EuiCallOut
             color="warning"
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate(
               'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',
               {
