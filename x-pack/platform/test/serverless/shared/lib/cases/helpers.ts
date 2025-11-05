@@ -15,9 +15,16 @@ export const createOneCaseBeforeDeleteAllAfter = (
   owner: string
 ) => {
   const svlCases = getService('svlCases');
+  const headerPage = getPageObject('header');
+  const testSubjects = getService('testSubjects');
 
   before(async () => {
     await createAndNavigateToCase(getPageObject, getService, owner);
+  });
+
+  beforeEach(async () => {
+    await testSubjects.click('case-refresh');
+    await headerPage.waitUntilLoadingHasFinished();
   });
 
   after(async () => {
