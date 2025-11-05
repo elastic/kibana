@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  describe('testtest Case connector', () => {
+  describe('Case connector', () => {
     const connectorId = 'system-connector-.cases';
 
     afterEach(async () => {
