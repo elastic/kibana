@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '../..';
-
-// eslint-disable-next-line import/no-default-export
-export default createPlaywrightConfig({
-  testDir: './tests',
+jest.mock('..', () => {
+  const actual = jest.requireActual('..');
+  return {
+    ...actual,
+    useMutation: jest.fn(actual.useMutation),
+    useQuery: jest.fn(actual.useQuery),
+    useQueryClient: jest.fn(actual.useQueryClient),
+  };
 });

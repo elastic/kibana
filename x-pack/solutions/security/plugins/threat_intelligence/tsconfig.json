@@ -37,6 +37,7 @@
     "@kbn/response-ops-alerts-fields-browser",
     "@kbn/charts-theme",
     "@kbn/react-kibana-context-theme",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }
