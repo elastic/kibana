@@ -13,6 +13,7 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SpanLinks, ErrorsByTraceId, TraceRootItem, SpanDocument } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
+import type { HistogramItem } from '@kbn/apm-types-shared';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -95,6 +96,26 @@ export interface ObservabilityTracesFetchSpanFeature {
   ) => Promise<SpanDocument | undefined>;
 }
 
+export interface ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature {
+  id: 'observability-traces-fetch-latency-overall-transaction-distribution';
+  fetchLatencyOverallTransactionDistribution: (
+    params: {
+      transactionName: string;
+      transactionType: string;
+      serviceName: string;
+      start: string;
+      end: string;
+    },
+    signal: AbortSignal
+  ) => Promise<
+    | {
+        overallHistogram?: HistogramItem[];
+        percentileThresholdValue?: number | null;
+      }
+    | undefined
+  >;
+}
+
 export interface ObservabilityCreateSLOFeature {
   id: 'observability-create-slo';
   createSLOFlyout: (props: {
@@ -147,6 +168,7 @@ export type DiscoverFeature =
   | ObservabilityTracesFetchErrorsFeature
   | ObservabilityTracesFetchRootItemByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
+  | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
   | SecuritySolutionFeature;
 
 /**
