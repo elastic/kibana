@@ -2409,6 +2409,58 @@
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.connectorForm",
+            "type": "Object",
+            "tags": [],
+            "label": "connectorForm",
+            "description": [
+              "\nConnector form config"
+            ],
+            "signature": [
+              "{ deserializer?: ",
+              "SerializerFunc",
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.InternalConnectorForm",
+                "text": "InternalConnectorForm"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ConnectorFormSchema",
+                "text": "ConnectorFormSchema"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>> | undefined; serializer?: ",
+              "SerializerFunc",
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ConnectorFormSchema",
+                "text": "ConnectorFormSchema"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>, ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.InternalConnectorForm",
+                "text": "InternalConnectorForm"
+              },
+              "> | undefined; hideSettingsTitle?: boolean | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5244,21 +5296,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ALERT_HISTORY_PREFIX",
-        "type": "string",
-        "tags": [],
-        "label": "ALERT_HISTORY_PREFIX",
-        "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
-        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.AlertHistoryDefaultIndexName",
         "type": "string",
         "tags": [],
@@ -5358,9 +5395,7 @@
         "type": "Type",
         "tags": [],
         "label": "ConnectorFormSchema",
-        "description": [
-          "\nThe following type is equivalent to:\n\ninterface ConnectorFormSchema<Config, Secrets> {\n id?: string,\n name?: string,\n actionTypeId: string,\n isDeprecated: boolean,\n config: Config,\n secrets: Secrets,\n}"
-        ],
+        "description": [],
         "signature": [
           "Pick<",
           {
@@ -5380,7 +5415,7 @@
           },
           "<Config, Secrets>, \"id\" | \"name\">>"
         ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/action_connector_form/types.ts",
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6509,7 +6544,7 @@
         "label": "RULE_PREBUILD_DESCRIPTION_FIELDS",
         "description": [],
         "signature": [
-          "{ readonly INDEX_PATTERN: \"indexPattern\"; readonly CUSTOM_QUERY: \"customQuery\"; readonly ESQL_QUERY: \"esqlQuery\"; readonly DATA_VIEW_ID: \"dataViewId\"; readonly DATA_VIEW_INDEX_PATTERN: \"dataViewIndexPattern\"; }"
+          "{ readonly INDEX_PATTERN: \"indexPattern\"; readonly CUSTOM_QUERY: \"customQuery\"; readonly ESQL_QUERY: \"esqlQuery\"; readonly DATA_VIEW_ID: \"dataViewId\"; readonly DATA_VIEW_INDEX_PATTERN: \"dataViewIndexPattern\"; readonly QUERY_FILTERS: \"queryFilters\"; readonly KQL_FILTERS: \"kqlFilters\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_detail_description_type.ts",
         "deprecated": false,

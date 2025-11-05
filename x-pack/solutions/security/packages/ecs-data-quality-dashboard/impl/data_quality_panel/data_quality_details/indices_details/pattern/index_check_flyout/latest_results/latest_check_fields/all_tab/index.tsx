@@ -34,7 +34,7 @@ const AllTabComponent: React.FC<Props> = ({ indexName, allFields }) => {
     <div data-test-subj="allTabContent">
       {allFields.length > 0 ? (
         <>
-          <EuiCallOut size="s">
+          <EuiCallOut announceOnMount={false} size="s">
             <p>{ALL_CALLOUT(EcsVersion)}</p>
           </EuiCallOut>
           <EuiSpacer />

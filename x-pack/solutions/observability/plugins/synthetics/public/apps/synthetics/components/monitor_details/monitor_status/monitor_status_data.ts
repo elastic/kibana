@@ -8,7 +8,7 @@
 import datemath from '@elastic/datemath';
 import moment from 'moment';
 import type { EuiThemeComputed, EuiThemeColorModeStandard } from '@elastic/eui';
-import { tint, transparentize, VISUALIZATION_COLORS, COLOR_MODES_STANDARD } from '@elastic/eui';
+import { tint, transparentize, COLOR_MODES_STANDARD } from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
 import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
@@ -50,12 +50,9 @@ export interface MonitorStatusPanelProps {
 
 export function getColorBands(euiTheme: EuiThemeComputed, colorMode: EuiThemeColorModeStandard) {
   const colorTransitionFn = colorMode === COLOR_MODES_STANDARD.dark ? transparentize : tint;
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
-  const SUCCESS_COLOR = isAmsterdam ? VISUALIZATION_COLORS[0] : euiTheme.colors.success;
-  const DANGER_COLOR = isAmsterdam
-    ? VISUALIZATION_COLORS[VISUALIZATION_COLORS.length - 1]
-    : euiTheme.colors.danger;
+  const SUCCESS_COLOR = euiTheme.colors.success;
+  const DANGER_COLOR = euiTheme.colors.danger;
 
   return [
     { color: DANGER_COLOR, start: -Infinity, end: -1 },
