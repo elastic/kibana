@@ -183,16 +183,14 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
     const dependencies: ContextDependencies = this.setupDependencies; // TODO: append start dependencies
-    createIndexes({
-      esClient: coreStart.elasticsearch.client.asInternalUser as Client,
-      logger: this.logger,
-    });
+    const initializePromise = this.initialize(coreStart);
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, any>,
       request?: any
     ) => {
+      await initializePromise;
       const workflowCreatedAt = new Date();
 
       // Get ES client and create repository for this execution
@@ -286,6 +284,7 @@ export class WorkflowsExecutionEnginePlugin
       stepId: string,
       contextOverride: Record<string, any>
     ): Promise<ExecuteWorkflowStepResponse> => {
+      await initializePromise;
       const workflowCreatedAt = new Date();
 
       // Get ES client and create repository for this execution
@@ -334,6 +333,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const cancelWorkflowExecution = async (workflowExecutionId: string, spaceId: string) => {
+      await initializePromise;
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -381,4 +381,11 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {}
+
+  private async initialize(coreStart: CoreStart) {
+    await createIndexes({
+      esClient: coreStart.elasticsearch.client.asInternalUser as Client,
+      logger: this.logger,
+    });
+  }
 }
