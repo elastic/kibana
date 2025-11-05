@@ -168,6 +168,7 @@ export const useDashboardMenuItems = ({
         canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
         accessControl,
         createdBy: dashboardApi.createdBy,
+        isManaged: dashboardApi.isManaged,
         accessControlClient,
         saveDashboard: saveFromShareModal,
         changeAccessMode: dashboardApi.changeAccessMode,
@@ -184,6 +185,7 @@ export const useDashboardMenuItems = ({
       dashboardApi.changeAccessMode,
       dashboardApi.createdBy,
       accessControlClient,
+      dashboardApi.isManaged,
     ]
   );
 
