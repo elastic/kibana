@@ -9,7 +9,11 @@
 
 import { uniq } from 'lodash';
 import { createHash } from 'crypto';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsFullModelVersion,
+  SavedObjectsModelVersion,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import {
   extractMigrationInfo,
   type SavedObjectTypeMigrationInfo,
@@ -108,16 +112,24 @@ const getModelVersionsHashes = (soType: SavedObjectsType): string[] => {
         `Missing model version '${index}' (10.${index}.0) for SO type ${soType.name}. Please define versions in order and without skipping any version numbers.`
       );
     }
-    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
-    const modelVersionData = JSON.stringify(modelVersion);
-    return `${soType.name}|10.${version}.0: ${hash.update(modelVersionData).digest('hex')}`;
+
+    const modelVersionHash = getModelVersionHash(modelVersion);
+    return `${soType.name}|10.${version}.0: ${modelVersionHash}`;
   });
+};
+
+const getModelVersionHash = (
+  modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion
+) => {
+  const hash = createHash('sha256');
+  const modelVersionData = JSON.stringify(modelVersion);
+  return `${hash.update(modelVersionData).digest('hex')}`;
 };
 
 export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigrationHash => {
   const migInfo = extractMigrationInfo(soType);
 
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha256');
 
   const hashParts = [
     migInfo.name,
@@ -137,9 +149,10 @@ export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigra
 };
 
 const serializeModelVersion = (modelVersion: ModelVersionSummary): string => {
-  const schemas = [modelVersion.schemas.forwardCompatibility];
+  const schemas = [modelVersion.schemas.forwardCompatibility, modelVersion.schemas.create];
   return [
     modelVersion.version,
+    modelVersion.modelVersionHash,
     modelVersion.changeTypes.join(','),
     modelVersion.hasTransformation,
     schemas.join(','),
