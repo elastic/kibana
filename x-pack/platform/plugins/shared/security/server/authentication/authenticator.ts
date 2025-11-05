@@ -872,8 +872,6 @@ export class Authenticator {
 
     let newSessionValue: Readonly<SessionValue> | null;
     if (!existingSessionValue || intermediateSessionStillNeedsToExist) {
-
-      console.log(`Should update the new authc session state: ${authenticationResult.shouldUpdateState()}`)
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
         userProfileId,
