@@ -82,7 +82,7 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): GaugeState {
-  if (visualization.metricAccessor === undefined) {
+  if (visualization.metricAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
@@ -176,7 +176,7 @@ function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['
 
   const defaultLayer = layers[DEFAULT_LAYER_ID];
 
-  addLayerColumn(defaultLayer, ACCESSOR, columns);
+  addLayerColumn(defaultLayer, getAccessorName('metric'), columns);
 
   if (layer.metric.min) {
     const columnName = getAccessorName('min');
@@ -204,7 +204,7 @@ function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['
 
 function getValueColumns(layer: GaugeStateESQL) {
   return [
-    getValueColumn(ACCESSOR, layer.metric.column, 'number'),
+    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
     ...(layer.metric.max ? [getValueColumn(getAccessorName('max'), layer.metric.max.column)] : []),
     ...(layer.metric.min ? [getValueColumn(getAccessorName('min'), layer.metric.min.column)] : []),
     ...(layer.metric.goal
