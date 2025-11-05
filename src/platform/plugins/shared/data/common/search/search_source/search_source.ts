@@ -648,10 +648,7 @@ export class SearchSource {
           (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
         );
       case 'nonHighlightingFilters':
-        return addToRoot(
-          'nonHighlightingFilters',
-          (data.nonHighlightingFilters ?? []).concat(val)
-        );
+        return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));
       case 'query':
         return addToRoot(key, (data.query ?? []).concat(val));
       case 'fields':
