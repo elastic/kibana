@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ISearchRequestParams } from '@kbn/search-types';
