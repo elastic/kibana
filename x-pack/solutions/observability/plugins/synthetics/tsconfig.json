@@ -41,7 +41,6 @@
     "@kbn/i18n-react",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/es-query",
-    "@kbn/stack-connectors-plugin",
     "@kbn/rule-data-utils",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
@@ -120,7 +119,9 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/content-management-plugin",
     "@kbn/licensing-types",
-    "@kbn/observability-synthetics-test-data"
+    "@kbn/observability-synthetics-test-data",
+    "@kbn/connector-schemas",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

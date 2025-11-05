@@ -7,20 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
-import {
-  EuiButtonEmpty,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  type UseEuiTheme,
-  useEuiTheme,
-} from '@elastic/eui';
+import React from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import type { monaco } from '@kbn/monaco';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const codeEditorAriaLabel = i18n.translate('workflows.jsonDataView.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view',
@@ -49,18 +43,6 @@ export const JsonCodeEditorCommon = ({
   enableFindAction,
 }: JsonCodeEditorCommonProps) => {
   const styles = useMemoCss(componentStyles);
-  const { euiTheme } = useEuiTheme();
-  useEffect(() => {
-    monaco.editor.defineTheme('workflows-subdued', {
-      base: 'vs',
-      inherit: true,
-      rules: [],
-      colors: {
-        'editor.background': euiTheme.colors.backgroundBaseSubdued,
-      },
-    });
-  }, [euiTheme]);
-
   if (jsonValue === '') {
     return null;
   }
@@ -74,7 +56,8 @@ export const JsonCodeEditorCommon = ({
       editorDidMount={onEditorDidMount}
       aria-label={codeEditorAriaLabel}
       options={{
-        theme: 'workflows-subdued',
+        // Limitation: it's not possible to use different themes for different code editors in the same page, so the same theme as the workflow yaml editor is used.
+        theme: WORKFLOWS_MONACO_EDITOR_THEME,
         automaticLayout: true,
         fontSize: 12,
         // prevent line numbers margin from being too wide

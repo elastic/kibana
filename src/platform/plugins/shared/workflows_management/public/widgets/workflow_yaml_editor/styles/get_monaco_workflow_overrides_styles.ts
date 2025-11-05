@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
  * Hook that injects Monaco-specific CSS that can't be handled through the theme system
  * This includes hover widget styling, connector decorations, and autocomplete icons
  */
-export const getMonacoWorkflowOverridesStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
+export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
   return css`
     /* Enhanced Monaco hover styling for workflow editor */
     .monaco-editor .monaco-editor-hover:not([class*='contrib']):not([class*='glyph']),
@@ -100,6 +101,32 @@ export const getMonacoWorkflowOverridesStyles = (euiTheme: UseEuiTheme['euiTheme
       font-size: 12px;
       overflow: auto;
       max-height: 120px;
+    }
+
+    .monaco-editor .suggest-widget {
+      border-radius: 6px !important;
+      ${euiShadow(euiThemeContext, 'm')}
+      border-width: 0 !important;
+      overflow: hidden !important; // so border-radius is applied correctly
+    }
+
+    .monaco-editor .suggest-details > .monaco-scrollable-element > .body > .header > .codicon-close,
+    .monaco-editor
+      .suggest-widget
+      .monaco-list
+      .monaco-list-row
+      > .contents
+      > .main
+      > .right
+      > .readMore::before {
+      margin-right: -4px;
+      line-height: 25px; // 21px + 4px for padding
+    }
+
+    .monaco-scrollable-element > .scrollbar > .slider {
+      width: calc(${euiTheme.size.s} * 0.75) !important;
+      border-radius: ${euiTheme.border.radius.medium} !important;
+      margin-right: 2px;
     }
   `;
 };

@@ -14,6 +14,7 @@ export interface ExtractedSchemaPropertyPath {
   type: ZodFirstPartyTypeKind;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getSchemaType(schema: any): ZodFirstPartyTypeKind {
   if (!schema || !schema._def) {
     return ZodFirstPartyTypeKind.ZodUnknown;
@@ -23,6 +24,7 @@ function getSchemaType(schema: any): ZodFirstPartyTypeKind {
 }
 
 function extractSchemaPropertyPathsRecursive(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   zodSchema: any,
   prefix = ''
 ): ExtractedSchemaPropertyPath[] {
@@ -80,6 +82,7 @@ function extractSchemaPropertyPathsRecursive(
   return paths;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function extractSchemaPropertyPaths(zodSchema: any): ExtractedSchemaPropertyPath[] {
   return extractSchemaPropertyPathsRecursive(zodSchema);
 }

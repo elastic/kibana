@@ -50,6 +50,8 @@ import { AlertsClient } from '../alerts_client';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 import { setAlertsToUntracked } from './lib/set_alerts_to_untracked';
+import type { ClearAlertFlappingHistoryParams } from './lib/clear_alert_flapping_history';
+import { clearAlertFlappingHistory } from './lib/clear_alert_flapping_history';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -496,6 +498,14 @@ export class AlertsService implements IAlertsService {
 
   public async setAlertsToUntracked(opts: SetAlertsToUntrackedParams) {
     return setAlertsToUntracked({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...opts,
+    });
+  }
+
+  public async clearAlertFlappingHistory(opts: ClearAlertFlappingHistoryParams) {
+    return clearAlertFlappingHistory({
       logger: this.options.logger,
       esClient: await this.options.elasticsearchClientPromise,
       ...opts,

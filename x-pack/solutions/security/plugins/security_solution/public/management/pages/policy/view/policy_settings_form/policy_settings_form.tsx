@@ -49,9 +49,6 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
   const { storage } = useKibana().services;
 
-  const eventCollectionDataReductionBannerEnabled = useIsExperimentalFeatureEnabled(
-    'eventCollectionDataReductionBannerEnabled'
-  );
   const trustedDevices = useIsExperimentalFeatureEnabled('trustedDevices');
 
   const renderDeviceControlSection = () => {
@@ -72,8 +69,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   };
 
   const [showEventMergingBanner, setShowEventMergingBanner] = useState(
-    eventCollectionDataReductionBannerEnabled &&
-      (storage.get('securitySolution.showEventMergingBanner') ?? true)
+    storage.get('securitySolution.showEventMergingBanner') ?? true
   );
   const onBannerDismiss = useCallback(() => {
     setShowEventMergingBanner(false);
