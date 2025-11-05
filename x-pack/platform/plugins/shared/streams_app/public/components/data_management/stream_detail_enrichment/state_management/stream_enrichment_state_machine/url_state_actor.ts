@@ -7,7 +7,7 @@
 
 import { fromCallback } from 'xstate5';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
+import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { ENRICHMENT_URL_STATE_KEY, enrichmentUrlSchema } from '../../../../../../common/url_schema';
 import type { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
 import { defaultEnrichmentUrlState, defaultLatestSamplesDataSource } from './utils';
@@ -18,7 +18,7 @@ export function createUrlInitializerActor({
 }: Pick<StreamEnrichmentServiceDependencies, 'core' | 'urlStateStorageContainer'>) {
   return fromCallback(({ sendBack }) => {
     const urlStateValues =
-      urlStateStorageContainer.get<unknown>(ENRICHMENT_URL_STATE_KEY) ?? undefined;
+      urlStateStorageContainer.get<EnrichmentUrlState>(ENRICHMENT_URL_STATE_KEY) ?? undefined;
 
     if (!urlStateValues) {
       return sendBack({

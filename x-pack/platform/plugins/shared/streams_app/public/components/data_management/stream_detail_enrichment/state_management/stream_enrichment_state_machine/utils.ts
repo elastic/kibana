@@ -10,6 +10,7 @@ import { Streams } from '@kbn/streams-schema';
 import type { AssignArgs } from 'xstate5';
 import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { v4 as uuidv4 } from 'uuid';
 import type { StreamEnrichmentContextType } from './types';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
@@ -51,12 +52,15 @@ export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   },
 };
 
-export const defaultCustomSamplesDataSource: CustomSamplesDataSource = {
+export const createDefaultCustomSamplesDataSource = (
+  streamName: string
+): CustomSamplesDataSource => ({
   type: 'custom-samples',
   name: DATA_SOURCES_I18N.customSamples.defaultName,
   enabled: true,
   documents: [],
-};
+  storageKey: `streams:${streamName}__${uuidv4()}`,
+});
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
   v: 1,

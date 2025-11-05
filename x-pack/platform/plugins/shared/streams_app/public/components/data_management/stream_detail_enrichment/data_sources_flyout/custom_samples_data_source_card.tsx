@@ -39,6 +39,9 @@ export const CustomSamplesDataSourceCard = ({
   const { run: handleChange } = useDebounceFn(
     (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
       dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
+      if (dataSource.storageKey && params.documents) {
+        localStorage.setItem(dataSource.storageKey, JSON.stringify(params.documents));
+      }
     },
     debounceOptions
   );

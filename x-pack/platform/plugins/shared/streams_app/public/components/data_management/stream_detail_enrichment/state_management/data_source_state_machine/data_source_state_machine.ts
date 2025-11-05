@@ -37,6 +37,15 @@ export const dataSourceMachine = setup({
   },
   actions: {
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNofitier),
+    restorePersistedCustomSamplesDocuments: assign(({ context }) => {
+      if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
+        const documents = localStorage.getItem(context.dataSource.storageKey);
+        if (documents) {
+          return { dataSource: { ...context.dataSource, documents: JSON.parse(documents) } };
+        }
+      }
+      return {};
+    }),
     storeDataSource: assign(
       ({ context }, params: { dataSource: EnrichmentDataSourceWithUIAttributes }) => ({
         dataSource: { ...params.dataSource, id: context.dataSource.id },
@@ -80,6 +89,7 @@ export const dataSourceMachine = setup({
   initial: 'determining',
   states: {
     determining: {
+      entry: [{ type: 'restorePersistedCustomSamplesDocuments' }],
       always: [{ target: 'enabled', guard: 'isEnabled' }, { target: 'disabled' }],
     },
     enabled: {

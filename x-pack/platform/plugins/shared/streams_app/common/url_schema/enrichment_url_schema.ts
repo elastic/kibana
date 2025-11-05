@@ -71,6 +71,10 @@ const kqlSamplesDataSourceSchema = baseDataSourceSchema.extend({
 export interface CustomSamplesDataSource extends BaseDataSource {
   type: 'custom-samples';
   documents: SampleDocument[];
+  /* Optional key used to store and retrieve the documents from the browser session storage.
+   * The key is a combination of the `streams:${streamName}__${dataSourceIdentifie}`
+   */
+  storageKey?: string;
 }
 
 export const customSamplesDataSourceDocumentsSchema = z.array(sampleDocument);
@@ -78,6 +82,7 @@ export const customSamplesDataSourceDocumentsSchema = z.array(sampleDocument);
 export const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
   type: z.literal('custom-samples'),
   documents: customSamplesDataSourceDocumentsSchema,
+  storageKey: z.string().optional(),
 }) satisfies z.Schema<CustomSamplesDataSource>;
 
 /**

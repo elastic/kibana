@@ -168,12 +168,10 @@ export class StreamsAppPlugin
         renderFlyoutStreamField: createDiscoverFlyoutStreamFieldLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
-          coreApplication: coreStart.application,
         }),
         renderFlyoutStreamProcessingLink: createDiscoverFlyoutStreamProcessingLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
-          coreApplication: coreStart.application,
         }),
       });
     });
