@@ -23,7 +23,7 @@ interface CreateIndexesOptions {
   logger?: Logger;
 }
 
-async function createIndexes(options: CreateIndexesOptions): Promise<void> {
+export async function createIndexes(options: CreateIndexesOptions): Promise<void> {
   const { esClient, logger } = options;
   await createIndexWithMappings({
     esClient,
