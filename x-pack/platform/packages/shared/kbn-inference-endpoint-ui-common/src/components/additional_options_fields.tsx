@@ -268,7 +268,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           <EuiSpacer size="m" />
         </>
       ) : null,
-    [setFieldValue, config.temperature, selectedTaskType]
+    [setFieldValue, config.temperature, selectedTaskType, allowTemperature]
   );
 
   const taskTypeSettings = useMemo(
