@@ -40,25 +40,17 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
   const navTree: NavigationTreeDefinition = {
     body: [
       {
-        type: 'navGroup',
+        link: 'observability-overview',
+        title,
+        icon,
+        renderAs: 'home',
+      },
+      {
         id: 'observability_project_nav',
         title,
         icon,
-        defaultIsCollapsed: false,
-        isCollapsible: false,
         breadcrumbStatus: 'hidden',
         children: [
-          {
-            link: 'observability-overview',
-            title,
-            icon,
-            renderAs: 'home',
-            sideNavVersion: 'v2',
-          },
-          {
-            link: 'observability-overview',
-            sideNavVersion: 'v1',
-          },
           {
             title: i18n.translate('xpack.observability.obltNav.discover', {
               defaultMessage: 'Discover',
@@ -73,23 +65,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           },
           {
             link: 'workflows',
-            withBadge: true,
-            badgeTypeV2: 'techPreview' as const,
-            badgeOptions: {
-              icon: 'beaker',
-              tooltip: i18n.translate('xpack.observability.nav.workflowsBadgeTooltip', {
-                defaultMessage:
-                  'This functionality is experimental and not supported. It may change or be removed at any time.',
-              }),
-            },
           },
           {
             link: 'observability-overview:alerts',
-            iconV2: 'warning',
+            icon: 'warning',
           },
           {
             link: 'observability-overview:cases',
-            renderAs: 'item',
+            renderAs: 'panelOpener',
             children: [
               {
                 link: 'observability-overview:cases_configure',
@@ -98,17 +81,17 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 link: 'observability-overview:cases_create',
               },
             ],
-            iconV2: LazyIconBriefcase,
+            icon: LazyIconBriefcase,
           },
           {
             link: 'slo',
-            iconV2: 'visGauge',
+            icon: 'visGauge',
           },
           ...(streamsAvailable
             ? [
                 {
                   link: 'streams' as const,
-                  iconV2: LazyIconProductStreamsWired,
+                  icon: LazyIconProductStreamsWired,
                 },
               ]
             : []),
@@ -118,8 +101,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
-            spaceBefore: null,
-            iconV2: 'spaces',
+            icon: 'spaces',
             children: [
               {
                 id: 'apm',
@@ -220,8 +202,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Infrastructure',
             }),
             renderAs: 'panelOpener',
-            spaceBefore: null,
-            iconV2: LazyIconProductCloudInfra,
+            icon: LazyIconProductCloudInfra,
             children: [
               {
                 children: [
@@ -278,7 +259,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
               defaultMessage: 'AI Assistant',
             }),
-            iconV2: 'sparkles',
+            icon: 'sparkles',
             link: 'observabilityAIAssistant',
           },
           {
@@ -286,9 +267,8 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
-            spaceBefore: null,
             renderAs: 'panelOpener',
-            iconV2: LazyIconMl,
+            icon: LazyIconMl,
             children: [
               {
                 title: '',
@@ -356,9 +336,8 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.otherTools', {
               defaultMessage: 'Other tools',
             }),
-            spaceBefore: null,
             renderAs: 'panelOpener',
-            iconV2: 'wrench',
+            icon: 'wrench',
             children: [
               {
                 link: 'logs:anomalies',
@@ -387,7 +366,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
     ],
     footer: [
       {
-        type: 'navGroup',
         id: 'observability_project_nav_footer',
         children: [
           {
@@ -395,7 +373,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding',
-            iconV2: 'plusInCircle',
+            icon: 'plusInCircle',
           },
           {
             id: 'devTools',
@@ -403,8 +381,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Developer tools',
             }),
             link: 'dev_tools',
-            iconV2: 'code',
-            icon: 'editorCodeBlock',
+            icon: 'code',
           },
           {
             id: DATA_MANAGEMENT_NAV_ID,
@@ -414,8 +391,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),
             renderAs: 'panelOpener',
-            spaceBefore: null,
-            iconV2: 'database',
+            icon: 'database',
             children: [
               {
                 id: 'ingest_and_integrations',
@@ -425,7 +401,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                     'The heading of a section in a navigation tree dedicated to data collection',
                 }),
                 renderAs: 'panelOpener',
-                spaceBefore: null,
                 children: [
                   {
                     link: 'integrations',
@@ -483,7 +458,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             icon: 'gear',
             breadcrumbStatus: 'hidden',
             renderAs: 'panelOpener',
-            spaceBefore: null,
             children: [
               {
                 id: 'stack_management_home',
@@ -510,7 +484,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   defaultMessage: 'Alerts and Insights',
                 }),
                 renderAs: 'panelOpener',
-                spaceBefore: null,
                 children: [
                   {
                     link: 'management:triggersActions',
