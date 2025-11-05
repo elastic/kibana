@@ -40,8 +40,11 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const { canWriteFileOperations, canWriteExecuteOperations } =
-      useUserPrivileges().endpointPrivileges;
+    const {
+      canWriteFileOperations,
+      canReadActionsLogManagement,
+      canAccessEndpointActionsLogManagement,
+    } = useUserPrivileges().endpointPrivileges;
 
     const hasMultipleAgents = useMemo(() => {
       return action.agents.length > 1;
@@ -84,7 +87,9 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                   <ExecuteActionHostResponse
                     action={action}
                     agentId={agentId}
-                    canAccessFileDownloadLink={canWriteExecuteOperations}
+                    canAccessFileDownloadLink={
+                      canAccessEndpointActionsLogManagement || canReadActionsLogManagement
+                    }
                     textSize="xs"
                     data-test-subj={getTestId('actionsLogTray')}
                   />
@@ -131,7 +136,9 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                     <ExecuteActionHostResponse
                       action={action}
                       agentId={agentId}
-                      canAccessFileDownloadLink={canWriteExecuteOperations}
+                      canAccessFileDownloadLink={
+                        canAccessEndpointActionsLogManagement || canReadActionsLogManagement
+                      }
                       textSize="xs"
                       data-test-subj={getTestId('actionsLogTray')}
                       hideFile={action.agentType === 'crowdstrike'}
@@ -195,7 +202,8 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
       );
     }, [
       action,
-      canWriteExecuteOperations,
+      canAccessEndpointActionsLogManagement,
+      canReadActionsLogManagement,
       canWriteFileOperations,
       consoleCommandName,
       getTestId,
