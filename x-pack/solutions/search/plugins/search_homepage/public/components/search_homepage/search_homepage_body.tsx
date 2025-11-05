@@ -19,6 +19,7 @@ import { DiveDeeperWithElasticsearch } from '../dive_deeper/dive_deeper_with_ela
 import { AlternateSolutions } from '../alternate_solutions/alternate_solutions';
 import { Footer } from '../footer/footer';
 import { useKibana } from '../../hooks/use_kibana';
+import { HomepageNavLinks } from './homepage_nav_links';
 
 export const SearchHomepageBody = () => {
   const { euiTheme } = useEuiTheme();
@@ -59,6 +60,15 @@ export const SearchHomepageBody = () => {
             </EuiFlexItem>
           </>
         )}
+        <EuiFlexItem>
+          <HomepageNavLinks type="dataManagement" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <HomepageNavLinks type="stackManagement" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="s" />
+        </EuiFlexItem>
         <EuiFlexItem css={itemPadding}>
           <DiveDeeperWithElasticsearch />
         </EuiFlexItem>
