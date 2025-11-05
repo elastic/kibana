@@ -6,7 +6,12 @@
  */
 import * as essSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/security_header';
 import * as serverlessSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/serverless_security_header';
-import { APP_MANAGE_PATH, APP_PATH, SECURITY_FEATURE_ID } from '../../../../../common/constants';
+import {
+  APP_MANAGE_PATH,
+  APP_PATH,
+  RULES_FEATURE_ID,
+  SECURITY_FEATURE_ID,
+} from '../../../../../common/constants';
 import { login, ROLE } from '../../tasks/login';
 
 describe(
@@ -28,6 +33,7 @@ describe(
       const loginWithReadAccess = () => {
         login.withCustomKibanaPrivileges({
           [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_read'],
+          [RULES_FEATURE_ID]: ['read'],
         });
       };
 
