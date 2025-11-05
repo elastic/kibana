@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isSupportedConnectorType, type InferenceConnector } from '@kbn/inference-common';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 
 const INFERENCE_CONNECTOR_TYPE = '.inference';
@@ -32,8 +33,7 @@ export const getConnectorsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason: 'This route delegates authorization to the Actions plugin',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ request, getScopedClients, server }) => {
