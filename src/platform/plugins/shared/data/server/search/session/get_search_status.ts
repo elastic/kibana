@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import moment from 'moment';
 import { type SearchSessionRequestInfo, type SearchSessionRequestStatus } from '../../../common';
 import { SearchStatus } from './types';
 
@@ -46,7 +47,7 @@ export async function getSearchStatus({
   // https://github.com/elastic/kibana/issues/127880
   try {
     if (session.status === SearchStatus.COMPLETE) {
-      return { status: SearchStatus.COMPLETE };
+      return { status: SearchStatus.COMPLETE, completionTime: session.completionTime };
     }
 
     const apiResponse = await requestByStrategy({
@@ -65,8 +66,15 @@ export async function getSearchStatus({
         }),
       };
     } else if (!response.is_running) {
+      const took = 'took' in response ? response.took : undefined;
+      const completionTime =
+        took && session.startTime
+          ? moment(session.startTime).add(took, 'ms').toISOString()
+          : undefined;
+
       return {
         status: SearchStatus.COMPLETE,
+        completionTime,
       };
     } else {
       return {

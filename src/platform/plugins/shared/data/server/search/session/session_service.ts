@@ -40,6 +40,7 @@ import type { ISearchSessionService } from '../..';
 import { NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
+import type { SearchStatusWithInfo } from './get_session_status';
 import { getSessionStatus as getSessionStatusInternal } from './get_session_status';
 
 export interface SearchSessionDependencies {
@@ -288,7 +289,7 @@ export class SearchSessionService implements ISearchSessionService {
     searchId: string,
     options: ISearchOptions
   ) => {
-    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY } = options;
+    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY, startTime } = options;
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
     if (!searchRequest.params) return;
 
@@ -302,6 +303,7 @@ export class SearchSessionService implements ISearchSessionService {
       id: searchId,
       strategy,
       status: SearchStatus.IN_PROGRESS,
+      startTime: startTime ? moment.unix(startTime).toISOString() : undefined,
     };
 
     if (!this.trackIdBatchQueueMap.has(sessionId)) {
@@ -485,10 +487,18 @@ export class SearchSessionService implements ISearchSessionService {
     if (!!updatedIdMapping) {
       const hasUpdatedToComplete =
         sessionStatus.status === SearchSessionStatus.COMPLETE && !savedObject.attributes.completed;
+      const latestCompletion = Object.values(updatedIdMapping).reduce<string | undefined>(
+        (res, curr) => {
+          if (!curr.completionTime) return res;
+          if (!res) return curr.completionTime;
+          return moment(curr.completionTime).isAfter(moment(res)) ? curr.completionTime : res;
+        },
+        undefined
+      );
 
       await this.update(searchSessionDeps, user, savedObject.id, {
         idMapping: updatedIdMapping,
-        completed: hasUpdatedToComplete ? moment().toISOString() : undefined,
+        completed: hasUpdatedToComplete ? latestCompletion : undefined,
         status: sessionStatus.status,
       });
     }
@@ -498,7 +508,7 @@ export class SearchSessionService implements ISearchSessionService {
 
   private getUpdatedIdMappings(
     savedObject: SavedObject<SearchSessionSavedObjectAttributes>,
-    searchStatuses: { id: string; status: SearchStatus }[]
+    searchStatuses: SearchStatusWithInfo[]
   ) {
     let hasUpdated = false;
     const idMapping = { ...savedObject.attributes.idMapping };
@@ -509,7 +519,11 @@ export class SearchSessionService implements ISearchSessionService {
 
       const search = idMapping[requestHash];
       if (!search || search.status === searchStatus.status) continue;
-      idMapping[requestHash] = { ...search, status: searchStatus.status };
+      idMapping[requestHash] = {
+        ...search,
+        status: searchStatus.status,
+        completionTime: searchStatus.completionTime,
+      };
       hasUpdated = true;
     }
 

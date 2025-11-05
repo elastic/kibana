@@ -9,7 +9,11 @@
 
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SearchSessionRequestError } from '../../../common/search';
+import type {
+  SearchSessionRequestError,
+  SearchSessionRequestInfo,
+  SearchSessionRequestStatus,
+} from '../../../common/search';
 import type { SearchSessionSavedObjectAttributes } from '../../../common';
 import { SearchSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
@@ -21,6 +25,8 @@ import { getSearchStatus } from './get_search_status';
 // Some examples of possible issues: the browser is closed or in another tab the search requests are canceled.
 const NEW_SESSION_THRESHOLD_SECONDS = 30;
 
+export type SearchStatusWithInfo = SearchSessionRequestStatus & SearchSessionRequestInfo;
+
 export async function getSessionStatus(
   deps: { esClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
@@ -28,7 +34,7 @@ export async function getSessionStatus(
 ): Promise<{
   status: SearchSessionStatus;
   errors?: string[];
-  searchStatuses?: { id: string; status: SearchStatus }[];
+  searchStatuses?: SearchStatusWithInfo[];
 }> {
   if (session.isCanceled === true) {
     return { status: SearchSessionStatus.CANCELLED };

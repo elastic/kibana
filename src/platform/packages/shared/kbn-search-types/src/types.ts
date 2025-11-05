@@ -119,6 +119,11 @@ export interface ISearchOptions {
    * When set es results are streamed back to the caller without any parsing of the content.
    */
   stream?: boolean;
+
+  /**
+   * Start time of the search request in unix timestamp
+   */
+  startTime?: number;
 }
 
 /**
@@ -136,4 +141,5 @@ export type ISearchOptionsSerializable = Pick<
   | 'retrieveResults'
   | 'executionContext'
   | 'stream'
+  | 'startTime'
 >;

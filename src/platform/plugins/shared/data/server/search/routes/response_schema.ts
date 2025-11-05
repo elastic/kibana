@@ -13,6 +13,8 @@ const searchSessionRequestInfoSchema = schema.object({
   id: schema.string(),
   strategy: schema.string(),
   status: schema.maybe(schema.string()),
+  startTime: schema.maybe(schema.string()),
+  completionTime: schema.maybe(schema.string()),
 });
 
 const serializeableSchema = schema.mapOf(schema.string(), schema.any());

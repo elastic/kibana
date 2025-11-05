@@ -58,6 +58,9 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
         schema.object({
           id: schema.string(),
           strategy: schema.string(),
+          status: schema.maybe(schema.string()),
+          startTime: schema.maybe(schema.string()),
+          completionTime: schema.maybe(schema.string()),
         })
       ),
       realmType: schema.maybe(schema.string()),

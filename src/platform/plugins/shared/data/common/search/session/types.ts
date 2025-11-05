@@ -89,6 +89,14 @@ export interface SearchSessionRequestInfo {
    * Search status - used to avoid extra calls to ES when tracking search IDs
    */
   status?: SearchStatus;
+  /**
+   * Start time of the search request in ISO format
+   */
+  startTime?: string;
+  /**
+   * Completion time of the search request in ISO format
+   */
+  completionTime?: string;
 }
 
 export type SearchSessionRequestStatus =
@@ -101,6 +109,7 @@ interface SearchSessionRequestInProgress {
 }
 export interface SearchSessionRequestComplete {
   status: SearchStatus.COMPLETE;
+  completionTime?: string;
 }
 export interface SearchSessionRequestError {
   status: SearchStatus.ERROR;
