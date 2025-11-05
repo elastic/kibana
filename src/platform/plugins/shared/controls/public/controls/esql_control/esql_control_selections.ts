@@ -181,7 +181,7 @@ export function initializeESQLControlSelections(
     availableOptions$,
     singleSelect$,
   ])
-    .pipe(debounceTime(0), skip(1)) // esqlVariable$ is initialized above
+    .pipe(skip(1)) // esqlVariable$ is initialized above
     .subscribe(([sectionId]) => {
       const newVariables = getEsqlVariable(sectionId);
       if (!deepEqual(esqlVariable$.getValue(), newVariables))
