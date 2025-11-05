@@ -831,17 +831,8 @@ export class Authenticator {
         this.logger.debug(
           'Existing unauthenticated session still has pending SAML requests. Keeping session alive until so all pending requestIds can complete'
         );
-        intermediateSessionStillNeedsToExist = true;
 
-        await this.session.update(
-          request,
-          {
-            ...existingSessionValue,
-            idleTimeoutExpiration:
-              (existingSessionValue?.idleTimeoutExpiration ?? Date.now()) + 60000, // Extend idle timeout by 1 minute to allow pending SAML requests to complete
-          },
-          true
-        );
+        intermediateSessionStillNeedsToExist = true;
       } else {
         this.logger.debug(
           'Session is authenticated, existing unauthenticated session will be invalidated.'
@@ -881,6 +872,8 @@ export class Authenticator {
 
     let newSessionValue: Readonly<SessionValue> | null;
     if (!existingSessionValue || intermediateSessionStillNeedsToExist) {
+
+      console.log(`Should update the new authc session state: ${authenticationResult.shouldUpdateState()}`)
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
         userProfileId,

@@ -283,12 +283,10 @@ export class Session {
    * Updates session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
-   * @param shouldOverrideIdleTimeout If `true`, the idle timeout expiration will be set to the `idleTimeoutExpiration` of the passed session value.
    */
   async update(
     request: KibanaRequest,
-    sessionValue: Readonly<SessionValue>,
-    shouldOverrideIdleTimeout = false
+    sessionValue: Readonly<SessionValue>
   ) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     const sessionLogger = this.getLoggerForSID(sessionValue.sid);
@@ -299,8 +297,7 @@ export class Session {
 
     const sessionExpirationInfo = this.calculateExpiry(
       sessionValue.provider,
-      sessionCookieValue.lifespanExpiration,
-      shouldOverrideIdleTimeout ? sessionValue.idleTimeoutExpiration : undefined
+      sessionCookieValue.lifespanExpiration
     );
     // We filter out the `createdAt` field and rely on the one stored in `metadata.index` since it isn't
     // supposed to be updated after it was initially set during creation.
@@ -333,7 +330,7 @@ export class Session {
       ...sessionExpirationInfo,
     });
 
-    sessionLogger.info('Successfully updated existing session.');
+    sessionLogger.debug('Successfully updated existing session.');
 
     return Session.sessionIndexValueToSessionValue(sessionIndexValue, {
       username,
@@ -497,8 +494,7 @@ export class Session {
 
   private calculateExpiry(
     provider: AuthenticationProvider,
-    currentLifespanExpiration?: number | null,
-    idleTimeoutExpirationOverride?: number | null
+    currentLifespanExpiration?: number | null
   ): { idleTimeoutExpiration: number | null; lifespanExpiration: number | null } {
     const now = Date.now();
     const { idleTimeout, lifespan } = this.options.config.session.getExpirationTimeouts(provider);
@@ -511,15 +507,7 @@ export class Session {
       currentLifespanExpiration && lifespan
         ? currentLifespanExpiration
         : lifespan && now + lifespan.asMilliseconds();
-
-    let idleTimeoutExpiration;
-    if (!idleTimeoutExpirationOverride) {
-      idleTimeoutExpiration = idleTimeout && now + idleTimeout.asMilliseconds();
-    } else {
-      console.log('KURT');
-      console.log(idleTimeoutExpirationOverride);
-      idleTimeoutExpiration = idleTimeoutExpirationOverride;
-    }
+    const idleTimeoutExpiration = idleTimeout && now + idleTimeout.asMilliseconds();
 
     return { idleTimeoutExpiration, lifespanExpiration };
   }
