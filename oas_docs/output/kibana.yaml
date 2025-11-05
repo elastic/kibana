@@ -21867,6 +21867,16 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  proxy_headers:
+                                    additionalProperties:
+                                      anyOf:
+                                        - type: string
+                                        - type: boolean
+                                        - type: number
+                                    nullable: true
+                                    type: object
+                                  proxy_url:
+                                    type: string
                                   secrets:
                                     additionalProperties: true
                                     type: object
@@ -21999,7 +22009,14 @@ paths:
                                     items:
                                       type: string
                                     type: array
-                                  proxy_headers: {}
+                                  proxy_headers:
+                                    additionalProperties:
+                                      anyOf:
+                                        - type: string
+                                        - type: boolean
+                                        - type: number
+                                    nullable: true
+                                    type: object
                                   proxy_url:
                                     type: string
                                   secrets:
@@ -22036,7 +22053,6 @@ paths:
                                         type: string
                                 required:
                                   - hosts
-                                  - proxy_headers
                               - additionalProperties: false
                                 type: object
                                 properties:
@@ -22173,14 +22189,20 @@ paths:
                                   items:
                                     type: string
                                   type: array
-                                proxy_headers: {}
+                                proxy_headers:
+                                  additionalProperties:
+                                    anyOf:
+                                      - type: string
+                                      - type: boolean
+                                      - type: number
+                                  nullable: true
+                                  type: object
                                 proxy_url:
                                   type: string
                                 type:
                                   type: string
                               required:
                                 - type
-                                - proxy_headers
                             type: object
                           revision:
                             type: number
@@ -39461,7 +39483,6 @@ paths:
                 url:
                   type: string
               required:
-                - proxy_headers
                 - certificate_authorities
                 - certificate
                 - certificate_key
