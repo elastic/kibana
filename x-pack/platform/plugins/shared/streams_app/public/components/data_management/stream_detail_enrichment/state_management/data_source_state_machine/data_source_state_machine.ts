@@ -9,6 +9,7 @@ import { assertEvent, assign, sendTo, setup } from 'xstate5';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
+import { useSelector } from '@xstate5/react';
 import type {
   DataSourceInput,
   DataSourceContext,
@@ -18,13 +19,15 @@ import type {
   DataSourceSimulationMode,
 } from './types';
 import {
-  createDataCollectionFailureNofitier,
+  createDataCollectionFailureNotifier,
   createDataCollectorActor,
 } from './data_collector_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
 export type DataSourceActorSnapshot = SnapshotFrom<typeof dataSourceMachine>;
+
+export const useDataSourceSelector = useSelector;
 
 export const dataSourceMachine = setup({
   types: {
@@ -36,7 +39,7 @@ export const dataSourceMachine = setup({
     collectData: getPlaceholderFor(createDataCollectorActor),
   },
   actions: {
-    notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNofitier),
+    notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
     restorePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
         const documents = localStorage.getItem(context.dataSource.storageKey);
@@ -185,7 +188,7 @@ export const createDataSourceMachineImplementations = ({
     collectData: createDataCollectorActor({ data }),
   },
   actions: {
-    notifyDataCollectionFailure: createDataCollectionFailureNofitier({ toasts }),
+    notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
   },
 });
 
@@ -200,6 +203,6 @@ const getSimulationModeByDataSourceType = (
     case 'custom-samples':
       return 'complete';
     default:
-      return 'partial';
+      throw new Error(`Invalid data source type: ${dataSourceType}`);
   }
 };
