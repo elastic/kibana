@@ -25,7 +25,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
   const synthtrace = getService('synthtrace');
   const oneChatApiClient = createOneChatApiClient(supertest);
 
-  describe('FOO POST /api/agent_builder/converse: tool calling', () => {
+  describe('POST /api/agent_builder/converse: tool calling', () => {
     let llmProxy: LlmProxy;
     let connectorId: string;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
