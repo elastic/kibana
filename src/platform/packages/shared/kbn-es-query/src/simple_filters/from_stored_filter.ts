@@ -27,6 +27,7 @@ import type {
   SimpleRangeValue,
   Filter,
 } from '@kbn/es-query-server';
+import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 import { migrateFilter } from '../es_query/migrate_filter';
 import { FilterConversionError } from './errors';
 import { extractBaseProperties } from './utils';
@@ -203,7 +204,7 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
   if (query.exists) {
     return {
       field,
-      operator: meta.negate ? 'not_exists' : 'exists',
+      operator: meta.negate ? SIMPLE_FILTER_OPERATOR.NOT_EXISTS : SIMPLE_FILTER_OPERATOR.EXISTS,
     } as SimpleFilterCondition;
   }
 
@@ -218,7 +219,7 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
 
     return {
       field,
-      operator: 'range',
+      operator: SIMPLE_FILTER_OPERATOR.RANGE,
       value: rangeValue,
     };
   }
@@ -228,7 +229,9 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
     const valueArray = Array.isArray(values) ? values : [values];
     return {
       field,
-      operator: meta.negate ? 'is_not_one_of' : 'is_one_of',
+      operator: meta.negate
+        ? SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF
+        : SIMPLE_FILTER_OPERATOR.IS_ONE_OF,
       value: valueArray as string[] | number[] | boolean[],
     };
   }
@@ -237,7 +240,7 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
     const value = query.term[field];
     return {
       field,
-      operator: meta.negate ? 'is_not' : 'is',
+      operator: meta.negate ? SIMPLE_FILTER_OPERATOR.IS_NOT : SIMPLE_FILTER_OPERATOR.IS,
       value,
     };
   }
@@ -249,7 +252,7 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
 
     return {
       field: matchField, // Use the field from the query, not meta
-      operator: meta.negate ? 'is_not' : 'is',
+      operator: meta.negate ? SIMPLE_FILTER_OPERATOR.IS_NOT : SIMPLE_FILTER_OPERATOR.IS,
       value,
     };
   }
@@ -259,7 +262,7 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
     const value = query.match_phrase[phraseField];
     return {
       field: phraseField, // Use the field from the query, not meta
-      operator: meta.negate ? 'is_not' : 'is',
+      operator: meta.negate ? SIMPLE_FILTER_OPERATOR.IS_NOT : SIMPLE_FILTER_OPERATOR.IS,
       value: typeof value === 'object' ? value.query : value,
     };
   }
@@ -270,7 +273,7 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
   if (params && typeof params === 'object' && 'query' in params && params.query !== undefined) {
     return {
       field,
-      operator: meta.negate ? 'is_not' : 'is',
+      operator: meta.negate ? SIMPLE_FILTER_OPERATOR.IS_NOT : SIMPLE_FILTER_OPERATOR.IS,
       value: params.query as string | number | boolean,
     };
   }
@@ -371,7 +374,7 @@ export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
 
     return {
       field,
-      operator: meta.negate ? 'is_not' : 'is',
+      operator: meta.negate ? SIMPLE_FILTER_OPERATOR.IS_NOT : SIMPLE_FILTER_OPERATOR.IS,
       value: typeof value === 'object' ? value.query : value,
     };
   }
@@ -385,7 +388,7 @@ export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
     if (typeof config === 'object' && (config.type === 'phrase' || config.query)) {
       return {
         field,
-        operator: meta.negate ? 'is_not' : 'is',
+        operator: meta.negate ? SIMPLE_FILTER_OPERATOR.IS_NOT : SIMPLE_FILTER_OPERATOR.IS,
         value: config.query || String(config),
       };
     }
@@ -398,7 +401,7 @@ export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
 
     return {
       field,
-      operator: 'range',
+      operator: SIMPLE_FILTER_OPERATOR.RANGE,
       value: rangeConfig,
     };
   }
@@ -410,7 +413,7 @@ export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
 
     return {
       field,
-      operator: meta.negate ? 'is_not' : 'is',
+      operator: meta.negate ? SIMPLE_FILTER_OPERATOR.IS_NOT : SIMPLE_FILTER_OPERATOR.IS,
       value,
     };
   }
@@ -422,7 +425,9 @@ export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
 
     return {
       field,
-      operator: meta.negate ? 'is_not_one_of' : 'is_one_of',
+      operator: meta.negate
+        ? SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF
+        : SIMPLE_FILTER_OPERATOR.IS_ONE_OF,
       value: values as string[] | number[] | boolean[],
     };
   }
@@ -431,7 +436,7 @@ export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
   if (query.exists) {
     return {
       field: query.exists.field,
-      operator: meta.negate ? 'not_exists' : 'exists',
+      operator: meta.negate ? SIMPLE_FILTER_OPERATOR.NOT_EXISTS : SIMPLE_FILTER_OPERATOR.EXISTS,
     };
   }
 

@@ -12,6 +12,13 @@ export { querySchema } from './src/query';
 export { appStateSchema, globalStateSchema, filterSchema } from './src/filter/stored_filter';
 export { simpleFilterSchema } from './src/filter/simplified_filter';
 
+// Re-export filter operator constants for server-side use
+export {
+  SIMPLE_FILTER_OPERATOR,
+  FILTER_OPERATORS,
+  type FilterOperator,
+} from '@kbn/es-query-constants';
+
 export type {
   TimeRange,
   AbsoluteTimeRange,

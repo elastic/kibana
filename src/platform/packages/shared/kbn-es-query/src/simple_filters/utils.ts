@@ -12,6 +12,7 @@
  */
 
 import type { SimpleFilter, Filter } from '@kbn/es-query-server';
+import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 
 /**
  * Extract base properties from stored filter
@@ -36,13 +37,13 @@ export function extractBaseProperties(storedFilter: Filter): Partial<SimpleFilte
  */
 export function getFilterTypeForOperator(operator: string): string {
   switch (operator) {
-    case 'exists':
-    case 'not_exists':
+    case SIMPLE_FILTER_OPERATOR.EXISTS:
+    case SIMPLE_FILTER_OPERATOR.NOT_EXISTS:
       return 'exists';
-    case 'range':
+    case SIMPLE_FILTER_OPERATOR.RANGE:
       return 'range';
-    case 'is_one_of':
-    case 'is_not_one_of':
+    case SIMPLE_FILTER_OPERATOR.IS_ONE_OF:
+    case SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF:
       return 'terms';
     default:
       return 'phrase';

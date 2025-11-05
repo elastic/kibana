@@ -20,6 +20,7 @@ import type {
   SimpleRangeValue,
   StoredFilterState,
 } from '@kbn/es-query-server';
+import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 import { FilterStateStore } from '../..';
 import { FilterConversionError } from './errors';
 import { getFilterTypeForOperator } from './utils';
@@ -104,16 +105,16 @@ export function convertFromSimpleCondition(
   };
 
   switch (condition.operator) {
-    case 'exists':
+    case SIMPLE_FILTER_OPERATOR.EXISTS:
       query = { exists: { field: condition.field } };
       break;
 
-    case 'not_exists':
+    case SIMPLE_FILTER_OPERATOR.NOT_EXISTS:
       query = { exists: { field: condition.field } };
       meta = { ...meta, negate: true };
       break;
 
-    case 'is':
+    case SIMPLE_FILTER_OPERATOR.IS:
       // Use match_phrase for better compatibility with original filters
       query = {
         match_phrase: {
@@ -123,7 +124,7 @@ export function convertFromSimpleCondition(
       meta = { ...meta, params: { query: condition.value } };
       break;
 
-    case 'is_not':
+    case SIMPLE_FILTER_OPERATOR.IS_NOT:
       // Use match_phrase for better compatibility with original filters
       query = {
         match_phrase: {
@@ -133,17 +134,17 @@ export function convertFromSimpleCondition(
       meta = { ...meta, negate: true, params: { query: condition.value } };
       break;
 
-    case 'is_one_of':
+    case SIMPLE_FILTER_OPERATOR.IS_ONE_OF:
       query = { terms: { [condition.field]: condition.value } };
       meta = { ...meta, params: { terms: condition.value } };
       break;
 
-    case 'is_not_one_of':
+    case SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF:
       query = { terms: { [condition.field]: condition.value } };
       meta = { ...meta, negate: true, params: { terms: condition.value } };
       break;
 
-    case 'range':
+    case SIMPLE_FILTER_OPERATOR.RANGE:
       const rangeValue = condition.value as SimpleRangeValue;
 
       // Build range query, preserving format for timestamp fields
@@ -165,8 +166,9 @@ export function convertFromSimpleCondition(
       break;
 
     default:
-      // @ts-expect-error - This should never happen due to validation constraints
-      throw new FilterConversionError(`Unsupported operator: ${condition.operator}`);
+      throw new FilterConversionError(
+        `Unsupported operator: ${(condition as SimpleFilterCondition).operator}`
+      );
   }
 
   return {
@@ -193,7 +195,7 @@ export function convertFromFilterGroup(
         'field' in typedCondition &&
         'operator' in typedCondition &&
         typedCondition.field === (group.conditions[0] as SimpleFilterCondition).field &&
-        typedCondition.operator === 'is'
+        typedCondition.operator === SIMPLE_FILTER_OPERATOR.IS
       );
     });
 

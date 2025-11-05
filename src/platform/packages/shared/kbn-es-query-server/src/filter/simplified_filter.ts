@@ -15,6 +15,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 
 // ====================================================================
 // CORE FILTER OPERATOR AND VALUE SCHEMAS
@@ -120,9 +121,12 @@ const filterConditionFieldSchema = {
  */
 const filterConditionIsSingleSchema = schema.object({
   ...filterConditionFieldSchema,
-  operator: schema.oneOf([schema.literal('is'), schema.literal('is_not')], {
-    meta: { description: 'Single value comparison operators' },
-  }),
+  operator: schema.oneOf(
+    [schema.literal(SIMPLE_FILTER_OPERATOR.IS), schema.literal(SIMPLE_FILTER_OPERATOR.IS_NOT)],
+    {
+      meta: { description: 'Single value comparison operators' },
+    }
+  ),
   value: schema.oneOf([schema.string(), schema.number(), schema.boolean()], {
     meta: { description: 'Single value for comparison' },
   }),
@@ -133,9 +137,15 @@ const filterConditionIsSingleSchema = schema.object({
  */
 const filterConditionIsOneOfSchema = schema.object({
   ...filterConditionFieldSchema,
-  operator: schema.oneOf([schema.literal('is_one_of'), schema.literal('is_not_one_of')], {
-    meta: { description: 'Array value comparison operators' },
-  }),
+  operator: schema.oneOf(
+    [
+      schema.literal(SIMPLE_FILTER_OPERATOR.IS_ONE_OF),
+      schema.literal(SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF),
+    ],
+    {
+      meta: { description: 'Array value comparison operators' },
+    }
+  ),
   value: schema.oneOf(
     [
       schema.arrayOf(schema.string()),
@@ -151,7 +161,7 @@ const filterConditionIsOneOfSchema = schema.object({
  */
 const filterConditionRangeSchema = schema.object({
   ...filterConditionFieldSchema,
-  operator: schema.literal('range'),
+  operator: schema.literal(SIMPLE_FILTER_OPERATOR.RANGE),
   value: rangeValueSchema,
 });
 
@@ -160,9 +170,15 @@ const filterConditionRangeSchema = schema.object({
  */
 const filterConditionExistsSchema = schema.object({
   ...filterConditionFieldSchema,
-  operator: schema.oneOf([schema.literal('exists'), schema.literal('not_exists')], {
-    meta: { description: 'Field existence check operators' },
-  }),
+  operator: schema.oneOf(
+    [
+      schema.literal(SIMPLE_FILTER_OPERATOR.EXISTS),
+      schema.literal(SIMPLE_FILTER_OPERATOR.NOT_EXISTS),
+    ],
+    {
+      meta: { description: 'Field existence check operators' },
+    }
+  ),
   // value is intentionally omitted for exists/not_exists operators
 });
 
