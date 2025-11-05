@@ -169,6 +169,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
           } else if (repos.length === 0) {
             calloutContent = (
               <EuiCallOut
+                announceOnMount={false}
                 color="warning"
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle',
@@ -204,6 +205,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
           ) {
             calloutContent = (
               <EuiCallOut
+                announceOnMount={false}
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle',
                   { defaultMessage: 'Repository name not found' }
@@ -267,6 +269,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
       infoCallout = (
         <EuiCallOut
+          announceOnMount={false}
           size="s"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
@@ -281,6 +284,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     } else if (isDisabledDueToLicense) {
       infoCallout = (
         <EuiCallOut
+          announceOnMount={false}
           data-test-subj="searchableSnapshotDisabledDueToLicense"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle',
