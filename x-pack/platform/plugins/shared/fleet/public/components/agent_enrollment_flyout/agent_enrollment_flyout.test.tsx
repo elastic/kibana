@@ -206,6 +206,7 @@ describe('<AgentEnrollmentFlyout />', () => {
             title: 'Fleet Server',
             version: '1.0.0',
           },
+          inputs: [],
         },
       ] as any,
       revision: 1,
