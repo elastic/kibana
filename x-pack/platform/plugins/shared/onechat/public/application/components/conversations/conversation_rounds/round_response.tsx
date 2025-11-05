@@ -13,15 +13,15 @@ import type {
   ConversationRoundStep,
 } from '@kbn/onechat-common';
 import React from 'react';
-import { StreamingText } from './streaming_text';
-import { ChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking/round_thinking';
+import { RoundText } from './round_text/round_text';
 
 export interface RoundResponseProps {
   rawRound: ConversationRound;
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
+  error: unknown;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -29,8 +29,9 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
   steps,
   isLoading,
+  error,
 }) => {
-  const showThinking = steps.length > 0;
+  const showThinking = steps.length > 0 || Boolean(error);
   return (
     <EuiFlexGroup
       direction="column"
@@ -42,16 +43,12 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
     >
       {showThinking && (
         <EuiFlexItem grow={false}>
-          <RoundThinking steps={steps} isLoading={isLoading} rawRound={rawRound} />
+          <RoundThinking steps={steps} isLoading={isLoading} rawRound={rawRound} error={error} />
         </EuiFlexItem>
       )}
 
       <EuiFlexItem>
-        {isLoading ? (
-          <StreamingText content={message} steps={steps} />
-        ) : (
-          <ChatMessageText content={message} steps={steps} />
-        )}
+        <RoundText isLoading={isLoading} content={message} steps={steps} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

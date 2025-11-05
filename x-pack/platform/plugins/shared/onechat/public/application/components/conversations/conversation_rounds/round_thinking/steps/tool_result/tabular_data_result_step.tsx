@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
-import { useOnechatServices } from '../../../../../hooks/use_onechat_service';
+import { useOnechatServices } from '../../../../../../hooks/use_onechat_service';
 
 interface TabularDataResultStepProps {
   result: TabularDataResult;

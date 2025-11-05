@@ -58,26 +58,24 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  const sendMessage = ({ message }: { message: string }) => {
-    const signal = messageControllerRef.current?.signal;
-    if (!signal) {
-      return Promise.reject(new Error('Abort signal not present'));
-    }
-    const events$ = chatService.chat({
-      signal,
-      input: message,
-      conversationId,
-      agentId,
-      connectorId,
-      browserApiTools: browserApiToolsMetadata,
-    });
-
-    return subscribeToChatEvents(events$);
-  };
-
-  const { mutate, isLoading } = useMutation({
+  const { mutate: sendMessage, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
-    mutationFn: sendMessage,
+    mutationFn: ({ message }: { message: string }) => {
+      const signal = messageControllerRef.current?.signal;
+      if (!signal) {
+        return Promise.reject(new Error('Abort signal not present'));
+      }
+      const events$ = chatService.chat({
+        signal,
+        input: message,
+        conversationId,
+        agentId,
+        connectorId,
+        browserApiTools: browserApiToolsMetadata,
+      });
+
+      return subscribeToChatEvents(events$);
+    },
     onMutate: ({ message }) => {
       const isNewConversation = !conversationId;
       isMutatingNewConversationRef.current = isNewConversation;
@@ -115,16 +113,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   });
 
   const canCancel = isLoading;
-  const cancel = () => {
-    if (!canCancel) {
-      return;
-    }
-    removePendingMessage();
-    messageControllerRef.current?.abort();
-  };
 
   return {
-    sendMessage: mutate,
+    sendMessage,
     isResponseLoading,
     error,
     pendingMessage,
@@ -145,10 +136,16 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         throw new Error('Pending message is not present');
       }
 
-      mutate({ message: pendingMessage });
+      sendMessage({ message: pendingMessage });
     },
     canCancel,
-    cancel,
+    cancel: () => {
+      if (!canCancel) {
+        return;
+      }
+      removePendingMessage();
+      messageControllerRef.current?.abort();
+    },
     // Cleaning only makes sense in the context of an error state on a new conversation round
     // The user can click "New" to clear the pending round and error
     cleanConversation: () => {
