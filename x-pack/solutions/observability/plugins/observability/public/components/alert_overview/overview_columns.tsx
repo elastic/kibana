@@ -35,6 +35,7 @@ export const ColumnIDs = {
   DURATION: 'duration',
   OBSERVED_VALUE: 'observed_value',
   THRESHOLD: 'threshold',
+  THRESHOLD_WARNING: 'threshold_warning',
   RULE_NAME: 'rule_name',
   RULE_TYPE: 'rule_type',
   CASES: 'cases',
@@ -140,6 +141,37 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                 return (
                   <EuiText size="s" key={`${threshold}-${criticalIndex}`}>
                     <h4>{`${formattedComparator} ${threshold}`}</h4>
+                  </EuiText>
+                );
+              })}
+            </div>
+          );
+
+        case ColumnIDs.THRESHOLD_WARNING:
+          if (!ruleCriteria) return <>{'-'}</>;
+          return (
+            <div>
+              {ruleCriteria.map((criteria, criticalIndex) => {
+                const { warningThreshold, warningComparator } = criteria;
+                if (!warningThreshold || !warningComparator) {
+                  return (
+                    <EuiText size="s" key={`warning-${criticalIndex}`}>
+                      <h4>{'-'}</h4>
+                    </EuiText>
+                  );
+                }
+                
+                let formattedWarningComparator = warningComparator.toUpperCase();
+                if (
+                  warningComparator === COMPARATORS.NOT_BETWEEN ||
+                  warningComparator === LEGACY_COMPARATORS.OUTSIDE_RANGE
+                ) {
+                  formattedWarningComparator = 'NOT BETWEEN';
+                }
+                
+                return (
+                  <EuiText size="s" key={`${warningThreshold}-${criticalIndex}`}>
+                    <h4>{`${formattedWarningComparator} ${warningThreshold}`}</h4>
                   </EuiText>
                 );
               })}
