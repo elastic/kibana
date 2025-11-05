@@ -13,6 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { OverviewTrend } from '../../../../../../../../common/types';
 import { MetricItemExtra } from './metric_item_extra';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
@@ -87,10 +88,22 @@ export const getMetricValueProps = (trendData: OverviewTrend | 'loading' | null 
       ),
     };
 
+  if (!trendData || trendData.median === null) {
+    return {
+      value: '',
+      extra: (
+        <FormattedMessage
+          id="xpack.synthetics.overview.metricItem.noDataAvailableMessage"
+          defaultMessage="--"
+        />
+      ),
+    };
+  }
+
   return {
-    value: trendData?.median ?? 0,
+    value: trendData.median,
     valueFormatter: (d: number) => formatDuration(d),
-    extra: !!trendData ? (
+    extra: (
       <MetricItemExtra
         stats={{
           medianDuration: trendData.median,
@@ -99,7 +112,7 @@ export const getMetricValueProps = (trendData: OverviewTrend | 'loading' | null 
           avgDuration: trendData.avg,
         }}
       />
-    ) : undefined,
+    ),
   };
 };
 
