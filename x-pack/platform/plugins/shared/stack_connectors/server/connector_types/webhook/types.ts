@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
 } from '@kbn/actions-plugin/server/types';
-import type { ParamsSchema, ConfigSchema } from './schema';
-import type { SecretConfigurationSchema } from '../../../common/auth/schema';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/webhook';
 
 export type WebhookConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -24,11 +26,3 @@ export type WebhookConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeSecretsType,
   ActionParamsType
 >;
-
-export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
-
-// secrets definition
-export type ConnectorTypeSecretsType = z.infer<typeof SecretConfigurationSchema>;
-
-// params definition
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
