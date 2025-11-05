@@ -190,13 +190,13 @@ export const rawDSLFilterSchema = schema.object({
 });
 
 // ====================================================================
-// SIMPLIFIED FILTER DISCRIMINATED UNION SCHEMA
+// SIMPLE FILTER DISCRIMINATED UNION SCHEMA
 // ====================================================================
 
 /**
  * Schema for simple condition filters (Tier 1)
  */
-export const simplifiedConditionFilterSchema = schema.object(
+export const simpleConditionFilterSchema = schema.object(
   {
     ...baseFilterPropertiesSchema,
     condition: simpleFilterConditionSchema,
@@ -207,7 +207,7 @@ export const simplifiedConditionFilterSchema = schema.object(
 /**
  * Schema for grouped condition filters (Tier 2-3)
  */
-export const simplifiedGroupFilterSchema = schema.object(
+export const simpleGroupFilterSchema = schema.object(
   {
     ...baseFilterPropertiesSchema,
     group: filterGroupSchema,
@@ -218,7 +218,7 @@ export const simplifiedGroupFilterSchema = schema.object(
 /**
  * Schema for raw DSL filters (Tier 4)
  */
-export const simplifiedDSLFilterSchema = schema.object(
+export const simpleDSLFilterSchema = schema.object(
   {
     ...baseFilterPropertiesSchema,
     dsl: rawDSLFilterSchema,
@@ -227,10 +227,10 @@ export const simplifiedDSLFilterSchema = schema.object(
 );
 
 /**
- * Main discriminated union schema for SimplifiedFilter
+ * Main discriminated union schema for SimpleFilter
  * Ensures exactly one of: condition, group, or dsl is present
  */
-export const simplifiedFilterSchema = schema.oneOf(
-  [simplifiedConditionFilterSchema, simplifiedGroupFilterSchema, simplifiedDSLFilterSchema],
+export const simpleFilterSchema = schema.oneOf(
+  [simpleConditionFilterSchema, simpleGroupFilterSchema, simpleDSLFilterSchema],
   { meta: { description: 'A filter which can be a condition, group, or raw DSL' } }
 );
