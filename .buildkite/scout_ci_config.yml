@@ -16,3 +16,4 @@ packages:
   enabled:
     - kbn-streamlang-tests
   disabled:
+    - kbn-scout # Internal scout tests are run in advance to validate Scout integrity (see .buildkite/scripts/steps/test/scout_test_run_builder.sh)
