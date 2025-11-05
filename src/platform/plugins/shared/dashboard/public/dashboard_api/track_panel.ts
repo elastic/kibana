@@ -8,6 +8,7 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
+import { scrollToTop, scrollToBottom, scrollTo } from '@kbn/core-chrome-layout-utils';
 
 export const highlightAnimationDuration = 2000;
 
@@ -68,7 +69,7 @@ export function initializeTrackPanel(
 
       untilLoaded(id).then(() => {
         if (scrollPosition$.value !== undefined) {
-          window.scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
+          scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
           scrollPosition$.next(undefined);
         } else {
           const dashboardTop = dashboardContainerRef$.value?.getBoundingClientRect().top || 0;
@@ -86,11 +87,11 @@ export function initializeTrackPanel(
     },
     scrollPosition$,
     scrollToTop: () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTop({ behavior: 'smooth' });
     },
     scrollToBottom$,
     scrollToBottom: () => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      scrollToBottom({ behavior: 'smooth' });
     },
     setFocusedPanelId: (id: string | undefined) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);

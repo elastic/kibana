@@ -338,6 +338,8 @@
       "@kbn/core-chrome-layout-constants/*": ["src/core/packages/chrome/layout/core-chrome-layout-constants/*"],
       "@kbn/core-chrome-layout-feature-flags": ["src/core/packages/chrome/layout/core-chrome-layout-feature-flags"],
       "@kbn/core-chrome-layout-feature-flags/*": ["src/core/packages/chrome/layout/core-chrome-layout-feature-flags/*"],
+      "@kbn/core-chrome-layout-utils": ["src/core/packages/chrome/layout/core-chrome-layout-utils"],
+      "@kbn/core-chrome-layout-utils/*": ["src/core/packages/chrome/layout/core-chrome-layout-utils/*"],
       "@kbn/core-chrome-navigation": ["src/core/packages/chrome/navigation"],
       "@kbn/core-chrome-navigation/*": ["src/core/packages/chrome/navigation/*"],
       "@kbn/core-chrome-navigation-tour": ["src/core/packages/chrome/navigation-tour"],
