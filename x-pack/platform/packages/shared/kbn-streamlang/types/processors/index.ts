@@ -81,6 +81,7 @@ export interface GrokProcessor extends ProcessorBaseWithWhere {
   action: 'grok';
   from: string;
   patterns: string[];
+  pattern_definitions?: Record<string, string>;
   ignore_missing?: boolean;
 }
 
@@ -88,6 +89,7 @@ export const grokProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('grok'),
   from: StreamlangSourceField,
   patterns: z.array(NonEmptyString).nonempty(),
+  pattern_definitions: z.optional(z.record(z.string())),
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<GrokProcessor>;
 

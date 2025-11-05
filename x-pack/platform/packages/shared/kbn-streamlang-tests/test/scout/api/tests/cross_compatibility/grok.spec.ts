@@ -531,4 +531,37 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
       expect(esqlResult.documentsWithoutKeywordsOrdered[0].message).toBe('no match here at all');
     }
   );
+
+  apiTest(
+    'should inline pattern definitions',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{FAVORITE_CAT:pet}'],
+            pattern_definitions: {
+              "FAVORITE_CAT" : "burmese"
+            }
+          } as GrokProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ message: 'I love burmese cats!' }];
+
+      await testBed.ingest('ingest-grok-pattern-definitions', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-pattern-definitions');
+
+      await testBed.ingest('esql-grok-pattern-definitions', docs);
+      const esqlResult = await esql.queryOnIndex('esql-grok-pattern-definitions', query);
+
+      expect(ingestResult[0].pet).toBe('burmese');
+      expect(esqlResult.documentsWithoutKeywords[0].pet).toBe('burmese');
+    }
+  );
 });

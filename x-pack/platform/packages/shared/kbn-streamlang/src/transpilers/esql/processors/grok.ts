@@ -13,6 +13,48 @@ import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, castFieldsToGrokTypes, buildWhereCondition } from './common';
 
 /**
+ * Unwraps pattern definitions by recursively inlining them
+ * into the provided patterns. This ensures that all patterns are fully
+ * expanded, resolving any references to other patterns defined in the
+ * `pattern_definitions` object. Prevents infinite recursion in case of
+ * cyclic definitions.
+ *
+ * @param grokProcessor - An object containing GROK patterns and their definitions.
+ * @returns An array of fully expanded patterns.
+ */
+export function unwrapPatternDefinitions(grokProcessor: Pick<GrokProcessor, 'patterns' | 'pattern_definitions'>): string[] {
+  const { patterns, pattern_definitions } = grokProcessor;
+
+  if (!pattern_definitions || Object.keys(pattern_definitions).length === 0) {
+    return patterns;
+  }
+
+  // Recursively inline a single pattern
+  function unwrapPattern(pattern: string, seen: Set<string> = new Set()): string {
+    // Match %{PATTERN_NAME} or %{PATTERN_NAME:field}
+    return pattern.replace(/%{([A-Z0-9_]+)(:[^}]*)?}/g, (match, key, fieldName) => {
+      if (pattern_definitions && pattern_definitions[key]) {
+        if (seen.has(key)) {
+          // Prevent infinite recursion on cyclic definitions
+          return match;
+        }
+        seen.add(key);
+        const inlined = unwrapPattern(pattern_definitions[key], seen);
+        seen.delete(key);
+        if (fieldName) {
+          // Named capture group
+          return `(?<${fieldName.substring(1)}>${inlined})`;
+        }
+        return `(${inlined})`;
+      }
+      return match; // Leave as is if not in patternDefs
+    });
+  }
+
+  return patterns.map((pattern) => unwrapPattern(pattern));
+}
+
+/**
  * Converts a Streamlang GrokProcessor into a list of ES|QL AST commands.
  *
  * Conditional execution logic:
@@ -56,13 +98,12 @@ import { buildIgnoreMissingFilter, castFieldsToGrokTypes, buildWhereCondition } 
 export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCommand[] {
   const {
     from,
-    patterns, // eslint-disable-next-line @typescript-eslint/naming-convention
     ignore_missing = false, // default mirrors ingest grok behavior
     where,
   } = processor;
 
   const fromColumn = Builder.expression.column(from);
-  const primaryPattern = patterns[0];
+  const primaryPattern = unwrapPatternDefinitions(processor)[0];
   const grokCommand = buildGrokCommand(fromColumn, primaryPattern);
   const commands: ESQLAstCommand[] = [];
 
