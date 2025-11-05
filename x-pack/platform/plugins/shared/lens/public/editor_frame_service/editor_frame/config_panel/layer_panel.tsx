@@ -24,6 +24,7 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { LayerActions } from './layer_actions';
 import { isOperation } from '../../../types_guards';
@@ -43,7 +44,6 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
@@ -85,7 +85,7 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { parentApi } = editorProps;
   const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
+    apiPublishesESQLVariables(parentApi)
       ? parentApi?.esqlVariables$
       : new BehaviorSubject(undefined)
   );

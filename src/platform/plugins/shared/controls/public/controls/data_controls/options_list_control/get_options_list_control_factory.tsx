@@ -17,14 +17,14 @@ import {
   filter,
   map,
   merge,
+  of,
   skip,
 } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { type Filter } from '@kbn/es-query';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
@@ -60,7 +60,6 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
-import { FieldsGroupNames } from '@kbn/unified-field-list';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
@@ -74,7 +73,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       if (isOptionsListESQLControlState(state)) {
         throw new Error('ES|QL control state handling not yet implemented');
       }
-
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const selectionsManager = initializeSelectionsManager(state);
@@ -211,27 +209,35 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           hasSelections$.next(hasSelections);
         });
 
-      /** Output filters when selections change */
+      /** Output filters when selections and/or filter meta data changes */
+      const sectionId$ = apiHasSections(parentApi)
+        ? parentApi.getPanelSection$(uuid)
+        : of(undefined);
+
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
         selectionsManager.api.selectedOptions$,
         selectionsManager.api.existsSelected$,
         selectionsManager.api.exclude$,
+        sectionId$,
       ])
         .pipe(debounceTime(0))
-        .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
-          const dataView = dataViews?.[0];
-          if (!dataView) return;
+        .subscribe(
+          ([dataViews, fieldName, selectedOptions, existsSelected, exclude, sectionId]) => {
+            const dataView = dataViews?.[0];
+            if (!dataView) return;
 
-          const newFilter = buildFilter(dataView, uuid, {
-            fieldName,
-            selectedOptions,
-            existsSelected,
-            exclude,
-          });
-          dataControlManager.internalApi.setOutputFilter(newFilter);
-        });
+            const newFilter = buildFilter(dataView, uuid, {
+              fieldName,
+              selectedOptions,
+              existsSelected,
+              exclude,
+              sectionId,
+            });
+            dataControlManager.internalApi.setOutputFilter(newFilter);
+          }
+        );
 
       function serializeState(): SerializedPanelState<OptionsListControlState> {
         return {

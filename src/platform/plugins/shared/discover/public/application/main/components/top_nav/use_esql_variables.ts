@@ -90,6 +90,12 @@ export const useESQLVariables = ({
       }
     });
 
+    // update the ES|QL query with new variables, if necessary
+    if (pendingQueryUpdate.current) {
+      onUpdateESQLQuery(pendingQueryUpdate.current);
+      pendingQueryUpdate.current = undefined;
+    }
+
     const variableSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
       if (!isEqual(newVariables, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
