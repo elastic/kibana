@@ -7,7 +7,7 @@
 
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import { AGENTS_PREFIX } from '@kbn/fleet-plugin/common';
