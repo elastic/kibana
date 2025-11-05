@@ -26,7 +26,7 @@ import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import { resumeWorkflow, runWorkflow } from './execution_functions';
-import { LogsRepository } from './repositories/logs_repository/logs_repository';
+import { LogsRepository } from './repositories/logs_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
