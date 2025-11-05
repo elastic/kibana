@@ -474,6 +474,7 @@ export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),
   startedAt: z.date(),
+  url: z.string(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 
@@ -495,11 +496,6 @@ const AlertSchema = z.object({
   '@timestamp': z.string(),
 });
 
-const SummarizedAlertsChunkSchema = z.object({
-  count: z.number(),
-  data: z.array(z.union([AlertSchema, z.any()])),
-});
-
 const RuleSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -510,12 +506,7 @@ const RuleSchema = z.object({
 });
 
 export const EventSchema = z.object({
-  alerts: z.object({
-    new: SummarizedAlertsChunkSchema,
-    ongoing: SummarizedAlertsChunkSchema,
-    recovered: SummarizedAlertsChunkSchema,
-    all: SummarizedAlertsChunkSchema,
-  }),
+  alerts: z.array(z.union([AlertSchema, z.any()])),
   rule: RuleSchema,
   spaceId: z.string(),
   params: z.any(),
@@ -525,6 +516,7 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
+  kibanaUrl: z.string(),
   inputs: z
     .record(
       z.union([
