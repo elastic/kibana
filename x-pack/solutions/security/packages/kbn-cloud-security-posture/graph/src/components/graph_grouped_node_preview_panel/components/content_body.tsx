@@ -15,7 +15,8 @@ import { Title } from './title';
 import { ListHeader } from './list_header';
 import { GroupedItem } from './grouped_item/grouped_item';
 import type { EntityOrEventItem } from './grouped_item/types';
-import { PaginationControls, MIN_PAGE_SIZE } from './pagination_controls';
+import { PaginationControls } from './pagination_controls';
+import { DEFAULT_PAGE_SIZE, type Pagination } from '../use_pagination';
 
 const maxDocumentsShownLabel = i18n.translate(`${i18nNamespaceKey}.maxDocumentsShownLabel`, {
   defaultMessage: '(Maximum 50 document details shown)',
@@ -26,7 +27,7 @@ export interface ContentBodyProps {
   totalHits: number;
   icon: string;
   groupedItemsType: string;
-  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
+  pagination: Pagination;
 }
 
 export const ContentBody: FC<ContentBodyProps> = ({
@@ -34,9 +35,10 @@ export const ContentBody: FC<ContentBodyProps> = ({
   totalHits,
   icon,
   groupedItemsType,
-  onPaginationChange,
+  pagination,
 }) => {
-  const shouldShowPagination = totalHits > MIN_PAGE_SIZE;
+  // Show pagination only when there are more items than fit on a single page with default size
+  const shouldShowPagination = totalHits > DEFAULT_PAGE_SIZE;
 
   return (
     <PanelBody data-test-subj={CONTENT_BODY_TEST_ID}>
@@ -53,7 +55,12 @@ export const ContentBody: FC<ContentBodyProps> = ({
         ))}
       </List>
       {shouldShowPagination && (
-        <PaginationControls totalHits={totalHits} onPaginationChange={onPaginationChange} />
+        <PaginationControls
+          totalHits={totalHits}
+          pagination={pagination.state}
+          goToPage={pagination.goToPage}
+          setPageSize={pagination.setPageSize}
+        />
       )}
     </PanelBody>
   );

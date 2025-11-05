@@ -98,6 +98,13 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
     groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
   }
 
+  // Create mock pagination controls
+  const pagination = {
+    state: { pageIndex: 0, pageSize: 10 },
+    goToPage: () => {},
+    setPageSize: () => {},
+  };
+
   return (
     <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
       <ContentBody
@@ -105,7 +112,7 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
         totalHits={items.length}
         icon={icon}
         groupedItemsType={groupedItemsType}
-        onPaginationChange={() => {}}
+        pagination={pagination}
       />
     </div>
   );
@@ -316,7 +323,15 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
   );
 
   // Pagination state (simulate what PaginationControls does)
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [state, setPaginationState] = useState({ pageIndex: 0, pageSize: 10 });
+
+  const goToPage = (pageIndex: number) => {
+    setPaginationState((prev) => ({ ...prev, pageIndex }));
+  };
+
+  const setPageSize = (pageSize: number) => {
+    setPaginationState({ pageIndex: 0, pageSize });
+  };
 
   // Determine the icon and type based on the items
   const firstItem = allItems[0];
@@ -330,9 +345,15 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
   }
 
   // Slice items for current page
-  const start = pagination.pageIndex * pagination.pageSize;
-  const end = start + pagination.pageSize;
+  const start = state.pageIndex * state.pageSize;
+  const end = start + state.pageSize;
   const pageItems = allItems.slice(start, end);
+
+  const pagination = {
+    state,
+    goToPage,
+    setPageSize,
+  };
 
   return (
     <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
@@ -341,7 +362,7 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
         totalHits={allItems.length}
         icon={icon}
         groupedItemsType={groupedItemsType}
-        onPaginationChange={setPagination}
+        pagination={pagination}
       />
     </div>
   );

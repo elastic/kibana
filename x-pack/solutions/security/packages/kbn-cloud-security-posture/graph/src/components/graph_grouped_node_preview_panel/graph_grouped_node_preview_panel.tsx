@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState, type FC } from 'react';
+import React, { memo, useMemo, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
+import { usePagination } from './use_pagination';
 import type { EntityItem, EntityOrEventItem } from './components/grouped_item/types';
 import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
@@ -65,6 +66,11 @@ interface ContentMetadata {
   groupedItemsType: string;
 }
 
+/**
+ * Hook that handles pagination for both client-side and server-side scenarios
+ * - grouped-entities: Client-side pagination by slicing the in-memory entityItems array
+ * - grouped-events: Server-side pagination using data already paginated by Elasticsearch
+ */
 const usePaginatedData = (
   docMode: 'grouped-entities' | 'grouped-events',
   entityItems: EntityItem[],
@@ -73,6 +79,7 @@ const usePaginatedData = (
 ): PaginatedData => {
   return useMemo(() => {
     if (docMode === 'grouped-entities') {
+      // Client-side pagination: slice the in-memory array
       const startIndex = pagination.pageIndex * pagination.pageSize;
       const endIndex = startIndex + pagination.pageSize;
       return {
@@ -81,6 +88,7 @@ const usePaginatedData = (
       };
     }
 
+    // Server-side pagination: use data already paginated by ES
     return {
       items: fetchedData?.page || [],
       totalHits: fetchedData?.total || 0,
@@ -116,19 +124,22 @@ const useContentMetadata = (
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
   ({ docMode, dataViewId, documentIds, entityItems }) => {
-    const [fetchPagination, setFetchPagination] = useState({ pageIndex: 0, pageSize: 10 });
+    // Initialize pagination state with localStorage persistence
+    // - For 'grouped-entities': Pass entityItems.length to enable client-side pagination validation
+    // - For 'grouped-events': Pass 0 since events use server-side pagination (handled by useFetchDocumentDetails)
+    const pagination = usePagination(docMode === 'grouped-entities' ? entityItems.length : 0);
 
     const { data, isLoading, refresh } = useFetchDocumentDetails({
       dataViewId,
       ids: documentIds,
       options: {
-        pageIndex: fetchPagination.pageIndex,
-        pageSize: fetchPagination.pageSize,
+        pageIndex: pagination.state.pageIndex,
+        pageSize: pagination.state.pageSize,
         enabled: docMode === 'grouped-events',
       },
     });
 
-    const { items, totalHits } = usePaginatedData(docMode, entityItems, fetchPagination, data);
+    const { items, totalHits } = usePaginatedData(docMode, entityItems, pagination.state, data);
     const { icon, groupedItemsType } = useContentMetadata(docMode, items);
 
     if (isLoading) {
@@ -145,7 +156,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
         totalHits={totalHits}
         icon={icon}
         groupedItemsType={groupedItemsType}
-        onPaginationChange={setFetchPagination}
+        pagination={pagination}
       />
     );
   }

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -20,12 +19,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { i18nNamespaceKey } from '../constants';
 import { PAGE_SIZE_BTN_TEST_ID } from '../test_ids';
-
-const GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY =
-  'securitySolution.graphGroupedNodePreview.pagination';
-
-const PAGE_OPTIONS = [10, 20, 50];
-export const MIN_PAGE_SIZE = PAGE_OPTIONS[0];
+import { PAGE_SIZE_OPTIONS } from '../use_pagination';
 
 const rowsPerPageLabel = i18n.translate(`${i18nNamespaceKey}.rowsPerPageLabel`, {
   defaultMessage: 'Rows per page',
@@ -41,45 +35,27 @@ const paginationLabel = i18n.translate(`${i18nNamespaceKey}.paginationLabel`, {
 
 export interface PaginationControlsProps {
   totalHits: number;
-  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
-}
-
-export const PaginationControls = ({ totalHits, onPaginationChange }: PaginationControlsProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  // Manage pagination state internally with localStorage
-  const [pagination, setPagination] = useLocalStorage<{
+  pagination: {
     pageIndex: number;
     pageSize: number;
-  }>(GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY, {
-    pageIndex: 0,
-    pageSize: MIN_PAGE_SIZE,
-  });
+  };
+  goToPage: (pageIndex: number) => void;
+  setPageSize: (pageSize: number) => void;
+}
 
-  // Reset pageIndex if current page is out of bounds
-  useEffect(() => {
-    if (pagination && totalHits > 0) {
-      const maxPageIndex = Math.ceil(totalHits / pagination.pageSize) - 1;
-      if (pagination.pageIndex > maxPageIndex) {
-        const newPagination = { ...pagination, pageIndex: 0 };
-        setPagination(newPagination);
-        onPaginationChange(newPagination);
-      }
-    }
-  }, [totalHits, pagination, setPagination, onPaginationChange]);
+export const PaginationControls = ({
+  totalHits,
+  pagination,
+  goToPage,
+  setPageSize,
+}: PaginationControlsProps) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((s) => !s);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const goToPage = (pageNumber: number) => {
-    if (!pagination) return;
-    const newPagination = { ...pagination, pageIndex: pageNumber };
-    setPagination(newPagination);
-    onPaginationChange(newPagination);
-  };
-
   const getIconType = (size: number) => {
-    return size === pagination?.pageSize ? 'check' : 'empty';
+    return size === pagination.pageSize ? 'check' : 'empty';
   };
 
   const button = (
@@ -92,28 +68,24 @@ export const PaginationControls = ({ totalHits, onPaginationChange }: Pagination
       onClick={onButtonClick}
       aria-label={rowsPerPageLabel}
     >
-      {`${rowsPerPageLabel}: ${pagination?.pageSize ?? MIN_PAGE_SIZE}`}
+      {`${rowsPerPageLabel}: ${pagination.pageSize}`}
     </EuiButtonEmpty>
   );
 
-  const items = PAGE_OPTIONS.map((rowsNumber) => {
+  const items = PAGE_SIZE_OPTIONS.map((rowsNumber) => {
     return (
       <EuiContextMenuItem
         key={`${rowsNumber} rows`}
         icon={getIconType(rowsNumber)}
         onClick={() => {
           closePopover();
-          const newPagination = { pageSize: rowsNumber, pageIndex: 0 };
-          setPagination(newPagination);
-          onPaginationChange(newPagination);
+          setPageSize(rowsNumber);
         }}
       >
         {`${rowsNumber} ${rowsLabel}`}
       </EuiContextMenuItem>
     );
   });
-
-  if (!pagination) return null;
 
   const pageCount = Math.ceil(totalHits / pagination.pageSize);
 
