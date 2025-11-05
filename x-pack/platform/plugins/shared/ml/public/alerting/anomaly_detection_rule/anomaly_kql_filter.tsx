@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { getRelevantAnomalyFields } from './get_relevant_anomaly_fields';
 import { useMlKibana } from '../../application/contexts/kibana';
@@ -65,10 +66,13 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
       function fetchAndCreateDataView() {
         if (!dataViewsService || disabled) return;
 
+        let isMounted = true;
+        let createdDataView: DataView | undefined;
+
         const fetchDataView = async () => {
           try {
             const allFields = await dataViewsService.getFieldsForWildcard({
-              pattern: '.ml-anomalies-*',
+              pattern: ML_RESULTS_INDEX_PATTERN,
             });
 
             const filteredFields =
@@ -83,13 +87,17 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
 
             const dataView = await dataViewsService.create(
               {
-                title: '.ml-anomalies-*',
+                title: ML_RESULTS_INDEX_PATTERN,
                 fields: fieldsMap,
               },
               true
             );
 
-            setMlAnomaliesDataView(dataView);
+            createdDataView = dataView;
+
+            if (isMounted) {
+              setMlAnomaliesDataView(dataView);
+            }
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Failed to fetch/create ML anomalies data view:', error);
@@ -97,6 +105,13 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
         };
 
         fetchDataView();
+
+        return () => {
+          isMounted = false;
+          if (createdDataView?.id) {
+            dataViewsService.clearInstanceCache(createdDataView.id);
+          }
+        };
       },
       [dataViewsService, relevantFields, disabled]
     );
@@ -141,14 +156,14 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
         <div>
           <EuiSpacer size="s" />
 
-          {mlAnomaliesDataView && unifiedSearch ? (
+          {unifiedSearch ? (
             <unifiedSearch.ui.SearchBar
               appName="ML"
               iconType="search"
               placeholder={i18n.translate('xpack.ml.anomalyDetectionAlert.kqlFilter.placeholder', {
                 defaultMessage: 'Filter anomalies using KQL syntax',
               })}
-              indexPatterns={[mlAnomaliesDataView]}
+              indexPatterns={mlAnomaliesDataView ? [mlAnomaliesDataView] : undefined}
               filtersForSuggestions={filtersForSuggestions}
               showQueryInput={true}
               showQueryMenu={false}
@@ -166,7 +181,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
               submitOnBlur
               isDisabled={disabled}
             />
-          ) : disabled ? null : (
+          ) : (
             <EuiSkeletonText
               lines={1}
               size="m"
