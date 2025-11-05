@@ -401,7 +401,8 @@ function handleStatsByCategorizeLeafOperation(
         }
 
         return Builder.expression.func.call('match', [
-          Builder.identifier({ name: matchField }),
+          // this search does work well on the keyword field, so we need to remove the keyword suffix to get the actual field name
+          Builder.identifier({ name: matchField.replace(/\.keyword\b/i, '') }),
           Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
           Builder.expression.map({
             entries: [

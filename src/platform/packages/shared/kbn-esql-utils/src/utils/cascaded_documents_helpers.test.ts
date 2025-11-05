@@ -331,6 +331,30 @@ describe('cascaded documents helpers utils', () => {
             `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
           );
         });
+
+        it('should construct a valid cascade query for a named categorize operation with a keyword field as the argument', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(message.keyword)
+            `,
+          };
+
+          const nodeType = 'leaf';
+          const nodePath = ['Pattern'];
+          const nodePathMap = { Pattern: 'some random pattern' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
+            `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
+          );
+        });
       });
     });
   });
