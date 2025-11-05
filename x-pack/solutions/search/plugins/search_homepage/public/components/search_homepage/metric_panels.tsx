@@ -15,11 +15,16 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useIndicesStats } from '../../hooks/api/use_indices_stats';
+import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
+import { useDataViewsStats } from '../../hooks/api/use_data_views_stats';
 
 interface MetricPanelProps {
   title: string;
-  onClick: () => void;
+  onClick?: () => void;
   metric: {
     value: number;
     detail: string;
@@ -35,6 +40,7 @@ const MetricPanel = ({
   addButtonAriaLabel,
   dataTestSubj,
 }: MetricPanelProps) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel hasBorder paddingSize="m">
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -52,21 +58,27 @@ const MetricPanel = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="plusInCircle"
-                aria-label={addButtonAriaLabel}
-                data-test-subj={dataTestSubj}
-                onClick={onClick}
-              />
-            </EuiFlexItem>
+            {onClick && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="plusInCircle"
+                  aria-label={addButtonAriaLabel}
+                  data-test-subj={dataTestSubj}
+                  onClick={onClick}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="xs"
+            css={css({ padding: `${euiTheme.size.base} 0` })}
+          >
             <EuiFlexItem>
               <EuiTitle size="l">
-                <h2>{metric.value}</h2>
+                <h1>{metric.value}</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -82,74 +94,58 @@ const MetricPanel = ({
 };
 
 export const MetricPanels = () => {
-  const panels = [
+  const { data: indexStats } = useIndicesStats();
+  const { data: dataViewStats } = useDataViewsStats();
+  const { data: dashboardStats } = useDashboardsStats();
+
+  const panels: Array<MetricPanelProps & { id: string }> = [
     {
-      id: 'panel1',
-      title: i18n.translate('xpack.searchHomepage.metrics.panel1.title', {
-        defaultMessage: 'Panel 1',
+      id: 'dashboardPanel',
+      title: i18n.translate('xpack.searchHomepage.metrics.dashboards.title', {
+        defaultMessage: 'Dashboards',
       }),
-      onClick: () => {},
       metric: {
-        value: 0,
-        detail: i18n.translate('xpack.searchHomepage.metrics.panel1.detail', {
-          defaultMessage: 'Metric detail',
+        value: dashboardStats?.totalDashboards ?? 0,
+        detail: i18n.translate('xpack.searchHomepage.metrics.dashboards.detail', {
+          defaultMessage: 'Dashboard count',
         }),
       },
-      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.panel1.add', {
-        defaultMessage: 'Add',
+      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.dashboards.add', {
+        defaultMessage: 'Create new dashboard',
       }),
-      dataTestSubj: 'search-homepage-panel1-add-button',
+      dataTestSubj: 'search-homepage-dashboards-add-button',
     },
     {
-      id: 'panel2',
-      title: i18n.translate('xpack.searchHomepage.metrics.panel2.title', {
-        defaultMessage: 'Panel 2',
+      id: 'dataViewPanel',
+      title: i18n.translate('xpack.searchHomepage.metrics.dataViewPanel.title', {
+        defaultMessage: 'Data Views',
       }),
-      onClick: () => {},
       metric: {
-        value: 0,
-        detail: i18n.translate('xpack.searchHomepage.metrics.panel2.detail', {
-          defaultMessage: 'Metric detail',
+        value: dataViewStats?.userDataViews ?? 0,
+        detail: i18n.translate('xpack.searchHomepage.metrics.dataViewPanel.detail', {
+          defaultMessage: 'Data view count',
         }),
       },
-      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.panel2.add', {
-        defaultMessage: 'Add',
+      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.dataViewPanel.add', {
+        defaultMessage: 'Create new data view',
       }),
-      dataTestSubj: 'search-homepage-panel2-add-button',
+      dataTestSubj: 'search-homepage-dataViewPanel-add-button',
     },
     {
       id: 'panel3',
-      title: i18n.translate('xpack.searchHomepage.metrics.panel3.title', {
-        defaultMessage: 'Panel 3',
+      title: i18n.translate('xpack.searchHomepage.metrics.indices.title', {
+        defaultMessage: 'Indices',
       }),
-      onClick: () => {},
       metric: {
-        value: 0,
-        detail: i18n.translate('xpack.searchHomepage.metrics.panel3.detail', {
-          defaultMessage: 'Metric detail',
+        value: indexStats?.normalIndices ?? 0,
+        detail: i18n.translate('xpack.searchHomepage.metrics.indices.detail', {
+          defaultMessage: 'Index count',
         }),
       },
-      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.panel3.add', {
-        defaultMessage: 'Add',
+      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.indices.add', {
+        defaultMessage: 'Create new index',
       }),
-      dataTestSubj: 'search-homepage-panel3-add-button',
-    },
-    {
-      id: 'panel4',
-      title: i18n.translate('xpack.searchHomepage.metrics.panel4.title', {
-        defaultMessage: 'Panel 4',
-      }),
-      onClick: () => {},
-      metric: {
-        value: 0,
-        detail: i18n.translate('xpack.searchHomepage.metrics.panel4.detail', {
-          defaultMessage: 'Metric detail',
-        }),
-      },
-      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.panel4.add', {
-        defaultMessage: 'Add',
-      }),
-      dataTestSubj: 'search-homepage-panel4-add-button',
+      dataTestSubj: 'search-homepage-indices-add-button',
     },
   ];
 
@@ -159,7 +155,7 @@ export const MetricPanels = () => {
         <EuiFlexItem key={panel.id}>
           <MetricPanel
             title={panel.title}
-            onClick={panel.onClick}
+            onClick={panel?.onClick}
             metric={panel.metric}
             addButtonAriaLabel={panel.addButtonAriaLabel}
             dataTestSubj={panel.dataTestSubj}

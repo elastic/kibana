@@ -10,21 +10,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchHomepageBody } from './search_homepage_body';
 
 export const SearchHomepagePage = () => {
   const [isCalloutDismissed, setIsCalloutDismissed] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const {
     services: { console: consolePlugin, history, searchNavigation, security },
   } = useKibana();
@@ -52,30 +50,6 @@ export const SearchHomepagePage = () => {
     [consolePlugin]
   );
 
-  const contextMenuPanels = [
-    {
-      id: 0,
-      items: [
-        {
-          name: i18n.translate('xpack.searchHomepage.contextMenu.option1', {
-            defaultMessage: 'Option 1',
-          }),
-          onClick: () => {
-            setIsPopoverOpen(false);
-          },
-        },
-        {
-          name: i18n.translate('xpack.searchHomepage.contextMenu.option2', {
-            defaultMessage: 'Option 2',
-          }),
-          onClick: () => {
-            setIsPopoverOpen(false);
-          },
-        },
-      ],
-    },
-  ];
-
   return (
     <KibanaPageTemplate
       offset={0}
@@ -86,6 +60,7 @@ export const SearchHomepagePage = () => {
     >
       {!isCalloutDismissed && (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.searchHomepage.searchHomepagePage.euiCallOut.calloutTitleLabel"
@@ -113,32 +88,21 @@ export const SearchHomepagePage = () => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  iconType="plugs"
-                  iconSide="left"
-                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                  data-test-subj="search-homepage-context-menu-button"
-                  color="text"
-                >
-                  {i18n.translate('xpack.searchHomepage.connectionDetails.buttonLabel', {
-                    defaultMessage: 'Connection details',
-                  })}
-                </EuiButtonEmpty>
-              }
-              isOpen={isPopoverOpen}
-              closePopover={() => setIsPopoverOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
+            <EuiButtonEmpty
+              iconType="plugs"
+              iconSide="left"
+              onClick={() => openWiredConnectionDetails()}
+              data-test-subj="search-homepage-context-menu-button"
+              color="text"
             >
-              <EuiContextMenu initialPanelId={0} panels={contextMenuPanels} />
-            </EuiPopover>
+              {i18n.translate('xpack.searchHomepage.connectionDetails.buttonLabel', {
+                defaultMessage: 'Connection details',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />
       </KibanaPageTemplate.Section>
-
       <SearchHomepageBody />
       {embeddableConsole}
     </KibanaPageTemplate>
