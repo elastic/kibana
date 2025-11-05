@@ -4,19 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import pLimit from 'p-limit';
 import { IdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
-import { generateStreamDescription } from '../description/generate_description';
-
-const CONCURRENT_DESCRIPTION_REQUESTS = 5;
 
 /**
  * Identifies features in a stream, by:
@@ -34,7 +30,9 @@ export async function identifyFeatures({
   kql,
   inferenceClient,
   logger,
+  signal,
   dropUnmapped = false,
+  maxSteps: initialMaxSteps,
 }: {
   stream: Streams.all.Definition;
   features?: Feature[];
@@ -44,8 +42,10 @@ export async function identifyFeatures({
   kql?: string;
   inferenceClient: BoundInferenceClient;
   logger: Logger;
+  signal: AbortSignal;
   dropUnmapped?: boolean;
-}): Promise<{ features: Feature[] }> {
+  maxSteps?: number;
+}): Promise<{ features: Omit<Feature, 'description'>[] }> {
   const [analysis, initialClustering] = await Promise.all([
     describeDataset({
       start,
@@ -72,14 +72,14 @@ export async function identifyFeatures({
   ]);
 
   const response = await executeAsReasoningAgent({
-    maxSteps: 3,
+    maxSteps: initialMaxSteps,
     input: {
       stream: {
         name: stream.name,
         description: stream.description || 'This stream has no description.',
       },
       dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped })
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
       ),
       initial_clustering: JSON.stringify(initialClustering),
       condition_schema: conditionSchemaText,
@@ -123,37 +123,18 @@ export async function identifyFeatures({
         };
       },
     },
+    abortSignal: signal,
   });
 
-  const limiter = pLimit(CONCURRENT_DESCRIPTION_REQUESTS);
-
   return {
-    features: await Promise.all(
-      response.toolCalls.flatMap((toolCall) =>
-        toolCall.function.arguments.systems.map(async (args) => {
-          const feature = {
-            ...args,
-            filter: args.filter as Condition,
-            description: '',
-          };
-
-          const description = await limiter(async () => {
-            return await generateStreamDescription({
-              stream,
-              start,
-              end,
-              esClient,
-              inferenceClient,
-              feature,
-            });
-          });
-
-          return {
-            ...feature,
-            description,
-          };
-        })
-      )
+    features: response.toolCalls.flatMap((toolCall) =>
+      toolCall.function.arguments.systems.map((args) => {
+        const feature = {
+          ...args,
+          filter: args.filter as Condition,
+        };
+        return feature;
+      })
     ),
   };
 }

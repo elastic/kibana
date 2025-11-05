@@ -573,9 +573,7 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.ISavedObjectsRepository.search",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "search",
             "description": [
               "\nPerforms a raw search against the saved objects indices, returning the raw Elasticsearch response"
@@ -592,98 +590,8 @@
               "<T, A>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "deprecated": true,
+            "deprecated": false,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/repository.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/mocks/repository.mock.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.test.ts"
-              }
-            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -3923,9 +3831,7 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.SavedObjectsClientContract.search",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "search",
             "description": [
               "\nPerforms a raw search against the saved objects indices, returning the raw Elasticsearch response"
@@ -3942,18 +3848,8 @@
               "<T, A>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "deprecated": true,
+            "deprecated": false,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.test.ts"
-              }
-            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server",
