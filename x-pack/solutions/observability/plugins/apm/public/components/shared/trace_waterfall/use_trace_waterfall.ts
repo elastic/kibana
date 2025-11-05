@@ -23,7 +23,7 @@ const INSTRUMENTATION_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallItem.euiCallOut.aDuplicatedSpanWasLabel',
   {
     defaultMessage:
-      'A duplicated span was detected. This indicates a problem with how your application has been instrumented, as span IDs are meant to be unique.',
+      'A duplicated span was detected. This indicates a problem with how your services have been instrumented, as span IDs are meant to be unique.',
   }
 );
 
@@ -264,7 +264,7 @@ export function getTraceWaterfall({
     const flattenedChildren = sortedChildren.flatMap((child) => {
       // Check if we have encountered the trace item before.
       // If we have visited the trace item before, then the child waterfall items are already
-      // present in the flattened list, so we return an empty array so we don't duplicate
+      // present in the flattened list, so we throw an error to alert the user of duplicated
       // spans. This should guard against circular or unusual links between spans.
       if (visitor.has(child.id)) {
         throw new Error('Duplicate span id detected');
