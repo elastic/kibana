@@ -11,15 +11,7 @@ import type {
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
 } from '@elastic/eui';
-import {
-  EuiAvatar,
-  EuiButtonIcon,
-  EuiDataGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
