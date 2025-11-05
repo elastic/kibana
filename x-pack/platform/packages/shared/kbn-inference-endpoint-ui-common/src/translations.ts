@@ -255,3 +255,17 @@ export const HEADERS_VALUE_LABEL = i18n.translate(
     defaultMessage: 'Value',
   }
 );
+
+export const TEMPERATURE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureTextFieldLabel',
+  {
+    defaultMessage: 'Temperature',
+  }
+);
+
+export const TEMPERATURE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureValidationMessage',
+  {
+    defaultMessage: 'Temperature must be a number between 0 and 1.',
+  }
+);
