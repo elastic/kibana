@@ -48,17 +48,18 @@ export const rangeValueSchema = schema.object({
 
 /**
  * Schema for all possible filter values
- * Supports single values, arrays, and range objects
  */
 export const filterValueSchema = schema.oneOf(
   [
     schema.string(),
     schema.number(),
     schema.boolean(),
-    schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean()])),
+    schema.arrayOf(schema.string()),
+    schema.arrayOf(schema.number()),
+    schema.arrayOf(schema.boolean()),
     rangeValueSchema,
   ],
-  { meta: { description: 'Possible filter values that could be single values, arrays, or ranges' } }
+  { meta: { description: 'Filter value - single value, array of homogeneous values, or range' } }
 );
 
 // ====================================================================
