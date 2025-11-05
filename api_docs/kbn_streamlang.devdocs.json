@@ -795,7 +795,7 @@
           "\nGet the processor type (action) from a processor definition"
         ],
         "signature": [
-          "(processor: TProcessorDefinition) => \"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"convert\" | \"manual_ingest_pipeline\""
+          "(processor: TProcessorDefinition) => \"date\" | \"append\" | \"set\" | \"rename\" | \"remove\" | \"grok\" | \"dissect\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -969,14 +969,17 @@
         "label": "isActionBlock",
         "description": [],
         "signature": [
-          "(obj: any) => obj is ",
+          "<TBlock extends ",
+          "StreamlangStep",
+          " | ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
             "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.StreamlangProcessorDefinition",
-            "text": "StreamlangProcessorDefinition"
-          }
+            "section": "def-common.StreamlangStepWithUIAttributes",
+            "text": "StreamlangStepWithUIAttributes"
+          },
+          ">(obj?: TBlock | undefined) => obj is Extract<TBlock, { action: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
         "deprecated": false,
@@ -985,17 +988,17 @@
           {
             "parentPluginId": "@kbn/streamlang",
             "id": "def-common.isActionBlock.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "obj",
             "description": [],
             "signature": [
-              "any"
+              "TBlock | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2730,6 +2733,136 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.RemoveByPrefixProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "RemoveByPrefixProcessor",
+        "description": [
+          "\nRemoveByPrefix processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.RemoveByPrefixProcessor",
+            "text": "RemoveByPrefixProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBase",
+            "text": "ProcessorBase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveByPrefixProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"remove_by_prefix\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveByPrefixProcessor.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.RemoveProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "RemoveProcessor",
+        "description": [
+          "\nRemove processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.RemoveProcessor",
+            "text": "RemoveProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBaseWithWhere",
+            "text": "ProcessorBaseWithWhere"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"remove\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveProcessor.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveProcessor.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.RenameProcessor",
         "type": "Interface",
         "tags": [],
@@ -3552,7 +3685,7 @@
           "\nProcessorType is the union of all possible 'action' values"
         ],
         "signature": [
-          "\"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"convert\" | \"manual_ingest_pipeline\""
+          "\"date\" | \"append\" | \"set\" | \"rename\" | \"remove\" | \"grok\" | \"dissect\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -3569,7 +3702,37 @@
           "\nGet all processor types as a string array (derived from the Zod schema)"
         ],
         "signature": [
-          "(\"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"convert\" | \"manual_ingest_pipeline\")[]"
+          "(\"date\" | \"append\" | \"set\" | \"rename\" | \"remove\" | \"grok\" | \"dissect\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\")[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.removeByPrefixProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "removeByPrefixProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.removeProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "removeProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -3698,6 +3861,22 @@
             "docId": "kibKbnStreamlangPluginApi",
             "section": "def-common.ConvertProcessor",
             "text": "ConvertProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.RemoveByPrefixProcessor",
+            "text": "RemoveByPrefixProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.RemoveProcessor",
+            "text": "RemoveProcessor"
           },
           " | ",
           {
