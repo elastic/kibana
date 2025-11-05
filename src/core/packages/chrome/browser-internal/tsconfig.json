@@ -69,6 +69,7 @@
     "@kbn/core-feature-flags-browser-mocks",
     "@kbn/shared-ux-feedback-snippet",
     "@kbn/core-chrome-navigation-tour",
+    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": [
     "target/**/*",
