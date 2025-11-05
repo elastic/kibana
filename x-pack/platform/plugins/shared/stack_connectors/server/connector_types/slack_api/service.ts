@@ -16,10 +16,12 @@ import { map, getOrElse } from 'fp-ts/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { SLACK_CONNECTOR_NAME } from './translations';
 import type {
-  PostMessageSubActionParams,
   PostBlockkitSubActionParams,
+  PostMessageSubActionParams,
+} from '@kbn/connector-schemas/slack_api';
+import { CONNECTOR_ID, CONNECTOR_NAME, SLACK_URL } from '@kbn/connector-schemas/slack_api';
+import type {
   SlackApiService,
   PostMessageResponse,
   SlackAPiResponse,
@@ -32,7 +34,6 @@ import {
   errorResult,
   successResult,
 } from '../../../common/slack_api/lib';
-import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 const buildSlackExecutorErrorResponse = ({
@@ -50,22 +51,22 @@ const buildSlackExecutorErrorResponse = ({
   logger: Logger;
 }) => {
   if (!slackApiError.response) {
-    return serviceErrorResult(SLACK_API_CONNECTOR_ID, slackApiError.message);
+    return serviceErrorResult(CONNECTOR_ID, slackApiError.message);
   }
 
   const { status, statusText, headers } = slackApiError.response;
 
   // special handling for 5xx
   if (status >= 500) {
-    return retryResult(SLACK_API_CONNECTOR_ID, slackApiError.message);
+    return retryResult(CONNECTOR_ID, slackApiError.message);
   }
 
   // special handling for rate limiting
   if (status === 429) {
     return pipe(
       getRetryAfterIntervalFromHeaders(headers),
-      map((retry) => retryResultSeconds(SLACK_API_CONNECTOR_ID, slackApiError.message, retry)),
-      getOrElse(() => retryResult(SLACK_API_CONNECTOR_ID, slackApiError.message))
+      map((retry) => retryResultSeconds(CONNECTOR_ID, slackApiError.message, retry)),
+      getOrElse(() => retryResult(CONNECTOR_ID, slackApiError.message))
     );
   }
 
@@ -79,11 +80,11 @@ const buildSlackExecutorErrorResponse = ({
       },
     }
   );
-  logger.error(`error on ${SLACK_API_CONNECTOR_ID} slack action: ${errorMessage}`);
+  logger.error(`error on ${CONNECTOR_ID} slack action: ${errorMessage}`);
 
   const errorSource = getErrorSource(slackApiError as Error);
 
-  return errorResult(SLACK_API_CONNECTOR_ID, errorMessage, errorSource);
+  return errorResult(CONNECTOR_ID, errorMessage, errorSource);
 };
 
 const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({
@@ -98,13 +99,13 @@ const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({
         defaultMessage: 'unexpected null response from slack',
       }
     );
-    return errorResult(SLACK_API_CONNECTOR_ID, errMessage);
+    return errorResult(CONNECTOR_ID, errMessage);
   }
 
   if (!slackApiResponseData.ok) {
-    return serviceErrorResult(SLACK_API_CONNECTOR_ID, slackApiResponseData.error);
+    return serviceErrorResult(CONNECTOR_ID, slackApiResponseData.error);
   }
-  return successResult<T>(SLACK_API_CONNECTOR_ID, slackApiResponseData);
+  return successResult<T>(CONNECTOR_ID, slackApiResponseData);
 };
 
 export const createExternalService = (
@@ -124,7 +125,7 @@ export const createExternalService = (
   const allowedChannelIds = allowedChannels?.map((ac) => ac.id);
 
   if (!token) {
-    throw Error(`[Action][${SLACK_CONNECTOR_NAME}]: Wrong configuration.`);
+    throw Error(`[Action][${CONNECTOR_NAME}]: Wrong configuration.`);
   }
 
   const axiosInstance = axios.create();
