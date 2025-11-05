@@ -107,51 +107,74 @@ const baseFilterPropertiesSchema = {
 // ====================================================================
 
 /**
- * Base schema for simple filter conditions
+ * Common field property for all filter conditions
  */
-const baseFilterConditionSchema = {
+const filterConditionFieldSchema = {
   field: schema.string({ meta: { description: 'Field the filter applies to' } }),
 };
 
-// ====================================================================
-// DISCRIMINATED FILTER CONDITION SCHEMAS
-// ====================================================================
-
 /**
- * Schema for filter conditions that require a value
+ * Schema for 'is' and 'is_not' operators with single value
  */
-export const filterConditionWithValueSchema = schema.object({
-  ...baseFilterConditionSchema,
-  operator: schema.oneOf(
-    [
-      schema.literal('is'),
-      schema.literal('is_not'),
-      schema.literal('is_one_of'),
-      schema.literal('is_not_one_of'),
-      schema.literal('range'),
-    ],
-    { meta: { description: 'Filter operators that require a value' } }
-  ),
-  value: filterValueSchema,
+const filterConditionIsSingleSchema = schema.object({
+  ...filterConditionFieldSchema,
+  operator: schema.oneOf([schema.literal('is'), schema.literal('is_not')], {
+    meta: { description: 'Single value comparison operators' },
+  }),
+  value: schema.oneOf([schema.string(), schema.number(), schema.boolean()], {
+    meta: { description: 'Single value for comparison' },
+  }),
 });
 
 /**
- * Schema for filter conditions that check existence only
+ * Schema for 'is_one_of' and 'is_not_one_of' operators with array values
  */
-export const filterConditionExistsSchema = schema.object({
-  ...baseFilterConditionSchema,
+const filterConditionIsOneOfSchema = schema.object({
+  ...filterConditionFieldSchema,
+  operator: schema.oneOf([schema.literal('is_one_of'), schema.literal('is_not_one_of')], {
+    meta: { description: 'Array value comparison operators' },
+  }),
+  value: schema.oneOf(
+    [
+      schema.arrayOf(schema.string()),
+      schema.arrayOf(schema.number()),
+      schema.arrayOf(schema.boolean()),
+    ],
+    { meta: { description: 'Homogeneous array of values' } }
+  ),
+});
+
+/**
+ * Schema for 'range' operator with range value
+ */
+const filterConditionRangeSchema = schema.object({
+  ...filterConditionFieldSchema,
+  operator: schema.literal('range'),
+  value: rangeValueSchema,
+});
+
+/**
+ * Schema for 'exists' and 'not_exists' operators without value
+ */
+const filterConditionExistsSchema = schema.object({
+  ...filterConditionFieldSchema,
   operator: schema.oneOf([schema.literal('exists'), schema.literal('not_exists')], {
-    meta: { description: 'Filter operators that check existence' },
+    meta: { description: 'Field existence check operators' },
   }),
   // value is intentionally omitted for exists/not_exists operators
 });
 
 /**
- * Discriminated union schema for simple filter conditions
+ * Discriminated union schema for simple filter conditions with proper operator/value type combinations
  */
 export const simpleFilterConditionSchema = schema.oneOf(
-  [filterConditionWithValueSchema, filterConditionExistsSchema],
-  { meta: { description: 'A filter condition' } }
+  [
+    filterConditionIsSingleSchema,
+    filterConditionIsOneOfSchema,
+    filterConditionRangeSchema,
+    filterConditionExistsSchema,
+  ],
+  { meta: { description: 'A filter condition with strict operator/value type matching' } }
 );
 
 // ====================================================================
