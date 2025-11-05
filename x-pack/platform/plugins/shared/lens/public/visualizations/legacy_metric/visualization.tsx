@@ -31,12 +31,11 @@ import type {
 } from '@kbn/lens-common';
 import { getSuggestions } from './metric_suggestions';
 import { MetricDimensionEditor } from './dimension_editor';
-import { MetricToolbar } from './metric_config_panel';
 import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
 import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
 import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
-import { LegacyMetricTitlesAndTextSettings } from './metric_config_panel/appearance_settings';
+import { LegacyMetricTitlesAndTextSettings } from './metric_config_panel';
 
 interface MetricConfig extends Omit<LegacyMetricState, 'palette' | 'colorMode'> {
   title: string;
@@ -297,10 +296,6 @@ export const getLegacyMetricVisualization = ({
 
   removeDimension({ prevState }) {
     return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
-  },
-
-  ToolbarComponent(props) {
-    return <MetricToolbar state={props.state} setState={props.setState} frame={props.frame} />;
   },
 
   FlyoutToolbarComponent(props) {
