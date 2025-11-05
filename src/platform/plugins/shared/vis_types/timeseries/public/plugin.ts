@@ -20,6 +20,8 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { VisTypeTimeseriesPublicConfig } from '../server/config';
 
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
@@ -38,6 +40,7 @@ import {
   setUnifiedSearchStart,
 } from './services';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
+import { CREATE_TSVB_PANEL } from './add_tsvb_panel_action';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
@@ -53,6 +56,8 @@ export interface MetricsPluginStartDependencies {
   charts: ChartsPluginStart;
   usageCollection: UsageCollectionStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
+  embeddable: EmbeddableStart;
 }
 
 /** @internal */
@@ -105,6 +110,8 @@ export class MetricsPlugin implements Plugin<void, void> {
       usageCollection,
       fieldFormats,
       unifiedSearch,
+      uiActions,
+      embeddable,
     }: MetricsPluginStartDependencies
   ) {
     setCharts(charts);
@@ -115,5 +122,11 @@ export class MetricsPlugin implements Plugin<void, void> {
     setDataViewsStart(dataViews);
     setCoreStart(core);
     setUsageCollectionStart(usageCollection);
+
+    uiActions.registerActionAsync(CREATE_TSVB_PANEL, async () => {
+      const { addTSVBPanelAction } = await import('./add_tsvb_panel_action');
+      return addTSVBPanelAction({ data, embeddable });
+    });
+    uiActions.attachAction(ADD_PANEL_TRIGGER, CREATE_TSVB_PANEL);
   }
 }

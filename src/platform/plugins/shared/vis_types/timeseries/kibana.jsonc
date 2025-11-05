@@ -23,6 +23,8 @@
       "usageCollection",
       "unifiedSearch",
       "expressionXY",
+      "uiActions",
+      "embeddable"
     ],
     "optionalPlugins": [
       "home"
