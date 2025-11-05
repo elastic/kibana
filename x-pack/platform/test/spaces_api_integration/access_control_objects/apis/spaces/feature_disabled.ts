@@ -6,10 +6,7 @@
  */
 import { parse as parseCookie } from 'tough-cookie';
 
-import {
-  ACCESS_CONTROL_TYPE,
-  NON_ACCESS_CONTROL_TYPE,
-} from '@kbn/access-control-test-plugin/server';
+import { ACCESS_CONTROL_TYPE } from '@kbn/access-control-test-plugin/server';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
@@ -57,18 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
   const loginAsObjectOwner = (username: string, password: string) => login(username, password);
 
   const loginAsNotObjectOwner = (username: string, password: string) => login(username, password);
-
-  const activateSimpleUserProfile = async () => {
-    const response = await es.security.activateUserProfile({
-      username: 'simple_user',
-      password: 'changeme',
-      grant_type: 'password',
-    });
-
-    return {
-      profileUid: response.uid,
-    };
-  };
 
   // This test suite relies on the access_control_test_plugin, but the feature flag is explicitly disabled
   // in the congig. This means that ACCESS_CONTROL_TYPE is still registered as supporting access control,
@@ -740,587 +725,148 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('#bulk_delete', () => {
-      describe('bulk delete ownable objects', () => {
-        describe('success', () => {
-          it('allows owner to bulk delete objects in write-restricted mode', async () => {
-            const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-            const firstObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId1, type: type1 } = firstObject.body;
+    describe('#bulk_delete', () => {
+      it('allows bulk delete of objects by the creating user', async () => {
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+        const firstObject = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE })
+          .expect(200);
+        const { id: objectId1, type: type1 } = firstObject.body;
 
-            const secondObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId2, type: type2 } = secondObject.body;
+        const secondObject = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE })
+          .expect(200);
+        const { id: objectId2, type: type2 } = secondObject.body;
 
-            const objects = [
-              {
-                id: objectId1,
-                type: type1,
-              },
-              {
-                id: objectId2,
-                type: type2,
-              },
-            ];
+        const objects = [
+          {
+            id: objectId1,
+            type: type1,
+          },
+          {
+            id: objectId2,
+            type: type2,
+          },
+        ];
 
-            const res = await supertestWithoutAuth
-              .post('/access_control_objects/bulk_delete')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({
-                objects,
-              })
-              .expect(200);
+        const res = await supertestWithoutAuth
+          .post('/access_control_objects/bulk_delete')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({
+            objects,
+          })
+          .expect(200);
 
-            for (const { id, success } of res.body.statuses) {
-              const object = objects.find((obj) => obj.id === id);
-              expect(object).to.not.be(undefined);
-              expect(success).to.be(true);
-            }
-          });
-
-          it('allows non-owner to bulk delete objects in default mode', async () => {
-            const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-
-            const firstObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE })
-              .expect(200);
-            const { id: objectId1, type: type1 } = firstObject.body;
-
-            const secondObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE })
-              .expect(200);
-            const { id: objectId2, type: type2 } = secondObject.body;
-
-            const objects = [
-              {
-                id: objectId1,
-                type: type1,
-              },
-              {
-                id: objectId2,
-                type: type2,
-              },
-            ];
-            await createSimpleUser(['kibana_savedobjects_editor']);
-            const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
-              'simple_user',
-              'changeme'
-            );
-
-            await supertestWithoutAuth
-              .post('/access_control_objects/bulk_delete')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', notOwnerCookie.cookieString())
-              .send({ objects })
-              .expect(200);
-
-            await supertestWithoutAuth
-              .get(`/access_control_objects/${objectId1}`)
-              .set('kbn-xsrf', 'true')
-              .set('cookie', notOwnerCookie.cookieString())
-              .expect(404);
-
-            await supertestWithoutAuth
-              .get(`/access_control_objects/${objectId2}`)
-              .set('kbn-xsrf', 'true')
-              .set('cookie', notOwnerCookie.cookieString())
-              .expect(404);
-          });
-
-          it('allows admin to bulk delete objects they do not own', async () => {
-            const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-            const firstObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId1, type: type1 } = firstObject.body;
-
-            const secondObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId2, type: type2 } = secondObject.body;
-
-            const { cookie: adminCookie } = await loginAsKibanaAdmin();
-
-            const objects = [
-              {
-                id: objectId1,
-                type: type1,
-              },
-              {
-                id: objectId2,
-                type: type2,
-              },
-            ];
-
-            const res = await supertestWithoutAuth
-              .post('/access_control_objects/bulk_delete')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', adminCookie.cookieString())
-              .send({
-                objects,
-              })
-              .expect(200);
-            for (const { id, success } of res.body.statuses) {
-              const object = objects.find((obj) => obj.id === id);
-              expect(object).to.not.be(undefined);
-              expect(success).to.be(true);
-            }
-          });
-        });
-
-        describe('failure modes', () => {
-          it('rejects if all objects are write-restricted and inaccessible', async () => {
-            const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-            const firstObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId1, type: type1 } = firstObject.body;
-
-            const secondObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId2, type: type2 } = secondObject.body;
-
-            await createSimpleUser(['kibana_savedobjects_editor']);
-            const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
-              'simple_user',
-              'changeme'
-            );
-
-            const objects = [
-              {
-                id: objectId1,
-                type: type1,
-              },
-              {
-                id: objectId2,
-                type: type2,
-              },
-            ];
-
-            const res = await supertestWithoutAuth
-              .post('/access_control_objects/bulk_delete')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', notOwnerCookie.cookieString())
-              .send({
-                objects,
-              })
-              .expect(403);
-            expect(res.body).to.have.property('message');
-            expect(res.body.message).to.contain(
-              `Unable to bulk_delete ${ACCESS_CONTROL_TYPE}, access control restrictions for`
-            );
-            expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`); // order is not guaranteed
-            expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
-          });
-
-          it('returns status if all objects are write-restricted but some objects are owned by the current user', async () => {
-            await activateSimpleUserProfile();
-            const { cookie: object1OwnerCookie, profileUid: obj1OwnerId } =
-              await loginAsObjectOwner('test_user', 'changeme');
-            const firstObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', object1OwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId1, type: type1 } = firstObject.body;
-            expect(firstObject.body).to.have.property('accessControl');
-            expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-            expect(firstObject.body.accessControl).to.have.property(
-              'accessMode',
-              'write_restricted'
-            );
-
-            await createSimpleUser(['kibana_savedobjects_editor']);
-            const { cookie: object2OwnerCookie, profileUid: obj2OwnerId } =
-              await loginAsNotObjectOwner('simple_user', 'changeme');
-
-            const secondObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', object2OwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId2, type: type2 } = secondObject.body;
-            expect(secondObject.body).to.have.property('accessControl');
-            expect(secondObject.body.accessControl).to.have.property('owner', obj2OwnerId);
-            expect(secondObject.body.accessControl).to.have.property(
-              'accessMode',
-              'write_restricted'
-            );
-
-            const objects = [
-              {
-                id: objectId1,
-                type: type1,
-              },
-              {
-                id: objectId2,
-                type: type2,
-              },
-            ];
-
-            const res = await supertestWithoutAuth
-              .post('/access_control_objects/bulk_delete')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', object2OwnerCookie.cookieString())
-              .send({
-                objects,
-              })
-              .expect(200);
-
-            expect(res.body).to.have.property('statuses');
-            expect(res.body.statuses).to.be.an('array');
-            expect(res.body.statuses).to.have.length(2);
-            expect(res.body.statuses).to.eql([
-              {
-                id: objectId1,
-                type: ACCESS_CONTROL_TYPE,
-                success: false,
-                error: {
-                  statusCode: 403,
-                  error: 'Forbidden',
-                  message:
-                    'Deleting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
-                },
-              },
-              {
-                id: objectId2,
-                type: ACCESS_CONTROL_TYPE,
-                success: true,
-              },
-            ]);
-          });
-
-          it('returns status if some objects are in default mode', async () => {
-            await activateSimpleUserProfile();
-            const { cookie: objectOwnerCookie, profileUid: obj1OwnerId } = await loginAsObjectOwner(
-              'test_user',
-              'changeme'
-            );
-            const firstObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId1, type: type1 } = firstObject.body;
-            expect(firstObject.body).to.have.property('accessControl');
-            expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-            expect(firstObject.body.accessControl).to.have.property(
-              'accessMode',
-              'write_restricted'
-            );
-
-            const secondObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
-              .expect(200);
-            const { id: objectId2, type: type2 } = secondObject.body;
-            expect(secondObject.body).to.have.property('accessControl');
-            expect(secondObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-            expect(secondObject.body.accessControl).to.have.property('accessMode', 'default');
-
-            await createSimpleUser(['kibana_savedobjects_editor']);
-            const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
-              'simple_user',
-              'changeme'
-            );
-
-            const objects = [
-              {
-                id: objectId1,
-                type: type1,
-              },
-              {
-                id: objectId2,
-                type: type2,
-              },
-            ];
-
-            const res = await supertestWithoutAuth
-              .post('/access_control_objects/bulk_delete')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', notOwnerCookie.cookieString())
-              .send({
-                objects,
-              })
-              .expect(200);
-
-            expect(res.body).to.have.property('statuses');
-            expect(res.body.statuses).to.be.an('array');
-            expect(res.body.statuses).to.have.length(2);
-            expect(res.body.statuses).to.eql([
-              {
-                id: objectId1,
-                type: ACCESS_CONTROL_TYPE,
-                success: false,
-                error: {
-                  statusCode: 403,
-                  error: 'Forbidden',
-                  message:
-                    'Deleting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
-                },
-              },
-              {
-                id: objectId2,
-                type: ACCESS_CONTROL_TYPE,
-                success: true,
-              },
-            ]);
-          });
-
-          it('returns status if some authorized types do not support access control', async () => {
-            await activateSimpleUserProfile();
-            const { cookie: objectOwnerCookie, profileUid: obj1OwnerId } = await loginAsObjectOwner(
-              'test_user',
-              'changeme'
-            );
-            const firstObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-              .expect(200);
-            const { id: objectId1, type: type1 } = firstObject.body;
-            expect(firstObject.body).to.have.property('accessControl');
-            expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-            expect(firstObject.body.accessControl).to.have.property(
-              'accessMode',
-              'write_restricted'
-            );
-
-            const secondObject = await supertestWithoutAuth
-              .post('/access_control_objects/create')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: NON_ACCESS_CONTROL_TYPE })
-              .expect(200);
-            const { id: objectId2, type: type2 } = secondObject.body;
-            expect(secondObject.body).not.to.have.property('accessControl');
-
-            const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
-              'simple_user',
-              'changeme'
-            );
-
-            const objects = [
-              {
-                id: objectId1,
-                type: type1,
-              },
-              {
-                id: objectId2,
-                type: type2,
-              },
-            ];
-
-            const res = await supertestWithoutAuth
-              .post('/access_control_objects/bulk_delete')
-              .set('kbn-xsrf', 'true')
-              .set('cookie', notOwnerCookie.cookieString())
-              .send({
-                objects,
-              })
-              .expect(200);
-
-            expect(res.body).to.have.property('statuses');
-            expect(res.body.statuses).to.be.an('array');
-            expect(res.body.statuses).to.have.length(2);
-            expect(res.body.statuses).to.eql([
-              {
-                id: objectId1,
-                type: ACCESS_CONTROL_TYPE,
-                success: false,
-                error: {
-                  statusCode: 403,
-                  error: 'Forbidden',
-                  message:
-                    'Deleting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
-                },
-              },
-              {
-                id: objectId2,
-                type: NON_ACCESS_CONTROL_TYPE,
-                success: true,
-              },
-            ]);
-          });
-        });
+        for (const { id, success } of res.body.statuses) {
+          const object = objects.find((obj) => obj.id === id);
+          expect(object).to.not.be(undefined);
+          expect(success).to.be(true);
+        }
       });
 
-      describe('force bulk delete ownable objects', () => {
-        it('allow owner to bulk delete objects marked as write-restricted', async () => {
-          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-          const firstObject = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          const { id: objectId1, type: type1 } = firstObject.body;
+      it('allows bulk delete of objects by different user', async () => {
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+        const firstObject = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE })
+          .expect(200);
+        const { id: objectId1, type: type1 } = firstObject.body;
 
-          const secondObject = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          const { id: objectId2, type: type2 } = secondObject.body;
+        const secondObject = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE })
+          .expect(200);
+        const { id: objectId2, type: type2 } = secondObject.body;
 
-          const objects = [
-            {
-              id: objectId1,
-              type: type1,
-            },
-            {
-              id: objectId2,
-              type: type2,
-            },
-          ];
+        const objects = [
+          {
+            id: objectId1,
+            type: type1,
+          },
+          {
+            id: objectId2,
+            type: type2,
+          },
+        ];
 
-          const res = await supertestWithoutAuth
-            .post('/access_control_objects/bulk_delete')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({
-              objects,
-              force: true,
-            })
-            .expect(200);
+        await createSimpleUser(['kibana_savedobjects_editor']);
+        const { cookie: notObjectOwnerCookie } = await loginAsNotObjectOwner(
+          'simple_user',
+          'changeme'
+        );
 
-          for (const { id, success } of res.body.statuses) {
-            const object = objects.find((obj) => obj.id === id);
-            expect(object).to.not.be(undefined);
-            expect(success).to.be(true);
-          }
-        });
+        const res = await supertestWithoutAuth
+          .post('/access_control_objects/bulk_delete')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', notObjectOwnerCookie.cookieString())
+          .send({
+            objects,
+          })
+          .expect(200);
 
-        it('allow admin to bulk delete objects marked as write-restricted', async () => {
-          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-          const firstObject = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          const { id: objectId1, type: type1 } = firstObject.body;
+        for (const { id, success } of res.body.statuses) {
+          const object = objects.find((obj) => obj.id === id);
+          expect(object).to.not.be(undefined);
+          expect(success).to.be(true);
+        }
+      });
 
-          const secondObject = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          const { id: objectId2, type: type2 } = secondObject.body;
+      it('rejects bulk delete of objects by a user withouth RBAC permissions', async () => {
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+        const firstObject = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE })
+          .expect(200);
+        const { id: objectId1, type: type1 } = firstObject.body;
 
-          const { cookie: adminCookie } = await loginAsKibanaAdmin();
+        const secondObject = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: ACCESS_CONTROL_TYPE })
+          .expect(200);
+        const { id: objectId2, type: type2 } = secondObject.body;
 
-          const objects = [
-            {
-              id: objectId1,
-              type: type1,
-            },
-            {
-              id: objectId2,
-              type: type2,
-            },
-          ];
+        const objects = [
+          {
+            id: objectId1,
+            type: type1,
+          },
+          {
+            id: objectId2,
+            type: type2,
+          },
+        ];
 
-          const res = await supertestWithoutAuth
-            .post('/access_control_objects/bulk_delete')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', adminCookie.cookieString())
-            .send({
-              objects,
-              force: true,
-            })
-            .expect(200);
-          for (const { id, success } of res.body.statuses) {
-            const object = objects.find((obj) => obj.id === id);
-            expect(object).to.not.be(undefined);
-            expect(success).to.be(true);
-          }
-        });
-        it('does not allow non-owner to bulk delete objects marked as write-restricted', async () => {
-          await activateSimpleUserProfile();
-          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-          const firstObject = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          const { id: objectId1, type: type1 } = firstObject.body;
+        await createSimpleUser(['viewer']);
+        const { cookie: notObjectOwnerCookie } = await loginAsNotObjectOwner(
+          'simple_user',
+          'changeme'
+        );
 
-          const secondObject = await supertestWithoutAuth
-            .post('/access_control_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
-            .expect(200);
-          const { id: objectId2, type: type2 } = secondObject.body;
-
-          const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
-
-          const objects = [
-            {
-              id: objectId1,
-              type: type1,
-            },
-            {
-              id: objectId2,
-              type: type2,
-            },
-          ];
-
-          const res = await supertestWithoutAuth
-            .post('/access_control_objects/bulk_delete')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', notOwnerCookie.cookieString())
-            .send({
-              objects,
-              force: true,
-            })
-            .expect(403);
-          expect(res.body).to.have.property('message');
-          expect(res.body.message).to.contain(
-            `Unable to bulk_delete ${ACCESS_CONTROL_TYPE}, access control restrictions for`
-          );
-          expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`); // order is not guaranteed
-          expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
-        });
+        const res = await supertestWithoutAuth
+          .post('/access_control_objects/bulk_delete')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', notObjectOwnerCookie.cookieString())
+          .send({
+            objects,
+          })
+          .expect(403);
+        expect(res.body).to.have.property('message');
+        expect(res.body.message).to.contain(`Unable to bulk_delete ${ACCESS_CONTROL_TYPE}`);
       });
     });
 
