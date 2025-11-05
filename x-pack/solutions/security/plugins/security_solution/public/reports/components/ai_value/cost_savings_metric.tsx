@@ -18,6 +18,7 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
 import { useMetricAnimation } from '../../hooks/use_metric_animation';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 
 interface Props {
   from: string;
@@ -48,7 +49,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     animationDurationMs: 1500,
     selector: '.echMetricText__value',
   });
-
+  const signalIndexName = useSignalIndexWithDefault();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const getLensAttributes = useCallback<GetLensAttributes>(
     (args) =>
@@ -57,8 +58,9 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
         backgroundColor: colors.backgroundBaseSuccess,
         minutesPerAlert,
         analystHourlyRate,
+        signalIndexName,
       }),
-    [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert]
+    [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert, signalIndexName]
   );
 
   return (
