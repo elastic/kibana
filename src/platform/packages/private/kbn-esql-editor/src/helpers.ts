@@ -210,6 +210,7 @@ export const getIndicesList = async (
   const response = await core.http.get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`).catch((error) => {
     // eslint-disable-next-line no-console
     console.error('Failed to fetch the sources', error);
+    return [];
   });
 
   return response as ESQLSourceResult[];
