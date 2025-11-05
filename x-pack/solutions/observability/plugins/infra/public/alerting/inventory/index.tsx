@@ -14,6 +14,7 @@ import type {
   AssetDetailsLocatorParams,
   InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
+import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { InfraPublicConfig } from '../../../common/plugin_config_types';
 import type { InventoryMetricConditions } from '../../../common/alerting/metrics';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
@@ -24,6 +25,22 @@ import type { ExpressionsProps } from './components/expression';
 interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
 }
+
+export const getDescriptionFields: GetDescriptionFieldsFn<InventoryMetricRuleTypeParams> = ({
+  rule,
+  prebuildFields,
+}) => {
+  if (!rule || !prebuildFields) {
+    return [];
+  }
+
+  const params = rule.params;
+  if (params.filterQueryText && typeof params.filterQueryText === 'string') {
+    return [prebuildFields.customQuery(params.filterQueryText)];
+  }
+
+  return [];
+};
 
 const inventoryDefaultActionMessage = i18n.translate(
   'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
@@ -89,5 +106,6 @@ export function createInventoryMetricRuleType({
     requiresAppContext: false,
     format,
     priority: 20,
+    getDescriptionFields,
   };
 }
