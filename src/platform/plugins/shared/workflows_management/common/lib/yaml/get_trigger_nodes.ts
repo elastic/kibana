@@ -13,9 +13,15 @@ import { isMap, isPair, isScalar, visit } from 'yaml';
 export function getTriggerNodes(
   yamlDocument: Document
 ): Array<{ node: YAMLMap; triggerType: string; typePair: Pair }> {
-  const triggerNodes: Array<{ node: YAMLMap; triggerType: string; typePair: Pair }> = [];
+  const triggerNodes: Array<{
+    node: YAMLMap;
+    triggerType: string;
+    typePair: Pair;
+  }> = [];
 
-  if (!yamlDocument?.contents) return triggerNodes;
+  if (!yamlDocument?.contents) {
+    return triggerNodes;
+  }
 
   visit(yamlDocument, {
     Pair(key, pair, ancestors) {

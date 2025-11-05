@@ -8,7 +8,7 @@
  */
 
 import type { Document, Node, Pair, Scalar } from 'yaml';
-import { isDocument, isPair, isSeq } from 'yaml';
+import { isDocument, isNode, isPair, isSeq } from 'yaml';
 
 /**
  * Builds a path array from YAML visitor ancestors.
@@ -46,20 +46,13 @@ export function getPathFromAncestors(
   if (isSeq(lastAncestor) && targetNode && !isDocument(targetNode)) {
     const index = lastAncestor.items.findIndex((item) => {
       // Direct match
-      if (item === targetNode) return true;
+      if (isNode(item) && isNode(targetNode) && item === targetNode) {
+        return true;
+      }
 
       // Check if targetNode is within the range of this item
       // This handles cases where the target is a child of the sequence item
-      if (
-        item &&
-        targetNode &&
-        typeof item === 'object' &&
-        typeof targetNode === 'object' &&
-        'range' in item &&
-        'range' in targetNode &&
-        item.range &&
-        targetNode.range
-      ) {
+      if (isNode(item) && isNode(targetNode) && targetNode.range && item.range) {
         return targetNode.range[0] >= item.range[0] && targetNode.range[1] <= item.range[2];
       }
 

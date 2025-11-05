@@ -17,7 +17,7 @@ describe('parseYamlToJSONWithoutValidation', () => {
         with:
           message: Hello, world!`;
     const result = parseYamlToJSONWithoutValidation(yaml);
-    expect(result.json).toEqual({
+    expect((result as any).json).toEqual({
       steps: [
         {
           name: 'noop_step',
@@ -42,7 +42,7 @@ describe('parseYamlToJSONWithoutValidation', () => {
         with:
           message: "true {{event.spaceId}}"`;
     const result = parseYamlToJSONWithoutValidation(yaml);
-    expect(result.json).toEqual({
+    expect((result as any).json).toEqual({
       steps: [
         { name: 'first-step', type: null },
         {
