@@ -25,9 +25,7 @@ export const useLayoutApi = (
   childrenApi: ReturnType<typeof useChildrenApi>['childrenApi'],
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
 ) => {
-  const layout$Ref = useRef(
-    new BehaviorSubject<ControlsLayout>({ controls: {}, panels: {}, sections: {} })
-  );
+  const layout$Ref = useRef(new BehaviorSubject<ControlsLayout>({ controls: {} }));
 
   useEffect(() => {
     /** Keep `layout$` in sync with `lastSavedState$Ref` */
@@ -78,8 +76,6 @@ export const useLayoutApi = (
           },
         };
         layout$Ref.current.next({
-          panels: {},
-          sections: {},
           controls: {
             ...oldControls,
             [uuid]: {
