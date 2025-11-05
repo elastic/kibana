@@ -29,7 +29,7 @@ export interface KibanaAlertSeverityCellRendererProps {
 
 /**
  * Renders a EuiBadge for the kibana.alert.severity field.
- * Used in AI for SOC alert summary table.
+ * Used in EASE alert summary table.
  */
 export const KibanaAlertSeverityCellRenderer = memo(
   ({ alert }: KibanaAlertSeverityCellRendererProps) => {

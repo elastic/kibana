@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { shareReplay, switchMap, Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  RoundInput,
+  RawRoundInput,
   Conversation,
   ChatAgentEvent,
   AgentCapabilities,
@@ -20,7 +20,7 @@ export const executeAgent$ = ({
   request,
   capabilities,
   agentService,
-  conversation$,
+  conversation,
   nextInput,
   abortSignal,
   defaultConnectorId,
@@ -29,41 +29,36 @@ export const executeAgent$ = ({
   request: KibanaRequest;
   capabilities?: AgentCapabilities;
   agentService: AgentsServiceStart;
-  conversation$: Observable<Conversation>;
-  nextInput: RoundInput;
+  conversation: Conversation;
+  nextInput: RawRoundInput;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
 }): Observable<ChatAgentEvent> => {
-  return conversation$.pipe(
-    switchMap((conversation) => {
-      return new Observable<ChatAgentEvent>((observer) => {
-        agentService
-          .execute({
-            request,
-            agentId,
-            abortSignal,
-            defaultConnectorId,
-            agentParams: {
-              nextInput,
-              conversation: conversation.rounds,
-              capabilities,
-            },
-            onEvent: (event) => {
-              observer.next(event);
-            },
-          })
-          .then(
-            () => {
-              observer.complete();
-            },
-            (err) => {
-              observer.error(err);
-            }
-          );
+  return new Observable<ChatAgentEvent>((observer) => {
+    agentService
+      .execute({
+        request,
+        agentId,
+        abortSignal,
+        defaultConnectorId,
+        agentParams: {
+          nextInput,
+          conversation,
+          capabilities,
+        },
+        onEvent: (event) => {
+          observer.next(event);
+        },
+      })
+      .then(
+        () => {
+          observer.complete();
+        },
+        (err) => {
+          observer.error(err);
+        }
+      );
 
-        return () => {};
-      });
-    }),
-    shareReplay()
-  );
+    return () => {};
+  }).pipe(shareReplay());
 };

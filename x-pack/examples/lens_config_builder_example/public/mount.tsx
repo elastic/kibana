@@ -17,7 +17,7 @@ export const mount =
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
-    const dataViews = plugins.data.indexPatterns;
+    const dataViews = plugins.data.dataViews;
 
     const i18nCore = core.i18n;
 

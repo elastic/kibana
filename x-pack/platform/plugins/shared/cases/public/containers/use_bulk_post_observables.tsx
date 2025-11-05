@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { MAX_OBSERVABLES_PER_CASE } from '../../common/constants';
 import type { BulkAddObservablesRequest } from '../../common/types/api';
 import { bulkPostObservables } from './api';

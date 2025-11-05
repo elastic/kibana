@@ -29,7 +29,7 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
     return { integrations: [] };
   }
   try {
-    const output = await outputService.get(soClient, outputId);
+    const output = await outputService.get(outputId);
     if (output?.type !== 'remote_elasticsearch') {
       throw new FleetError(`Output ${outputId} is not a remote elasticsearch output`);
     }

@@ -11,6 +11,7 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { createMockConnector } from '../../../application/connector/mocks';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -32,16 +33,12 @@ describe('getConnectorRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id}"`);
 
-    const getResult = {
+    const getResult = createMockConnector({
       id: '1',
       actionTypeId: '2',
       name: 'action name',
-      config: {},
-      isPreconfigured: false,
-      isDeprecated: false,
       isMissingSecrets: false,
-      isSystemAction: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.get.mockResolvedValueOnce(getResult);
@@ -60,6 +57,7 @@ describe('getConnectorRoute', () => {
           "config": Object {},
           "connector_type_id": "2",
           "id": "1",
+          "is_connector_type_deprecated": false,
           "is_deprecated": false,
           "is_missing_secrets": false,
           "is_preconfigured": false,
@@ -82,6 +80,7 @@ describe('getConnectorRoute', () => {
         is_deprecated: false,
         is_missing_secrets: false,
         is_system_action: false,
+        is_connector_type_deprecated: false,
       },
     });
   });
@@ -95,15 +94,13 @@ describe('getConnectorRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.get.mockResolvedValueOnce({
-      id: '1',
-      actionTypeId: '2',
-      name: 'action name',
-      config: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    });
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '2',
+        name: 'action name',
+      })
+    );
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -131,15 +128,13 @@ describe('getConnectorRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.get.mockResolvedValueOnce({
-      id: '1',
-      actionTypeId: '2',
-      name: 'action name',
-      config: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    });
+    actionsClient.get.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '2',
+        name: 'action name',
+      })
+    );
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },

@@ -11,7 +11,8 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ESQLSourceResult } from '@kbn/esql-types';
+import { SOURCES_TYPES, SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ILicense } from '@kbn/licensing-types';
 import { monaco } from '@kbn/monaco';
@@ -201,40 +202,18 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   });
 };
 
-export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
-  const indices = await dataViews.getIndices({
-    showAllIndices: false,
-    pattern: '*',
-    isRollupIndex: () => false,
-  });
-
-  return indices.map((index) => {
-    const [tag] = index?.tags ?? [];
-    return { name: index.name, hidden: index.name.startsWith('.'), type: tag?.name ?? 'Index' };
-  });
-};
-
-export const getRemoteIndicesList = async (
-  dataViews: DataViewsPublicPluginStart,
+export const getIndicesList = async (
+  core: Pick<CoreStart, 'http'>,
   areRemoteIndicesAvailable: boolean
 ) => {
-  if (!areRemoteIndicesAvailable) {
+  const scope = areRemoteIndicesAvailable ? 'all' : 'local';
+  const response = await core.http.get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`).catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error('Failed to fetch the sources', error);
     return [];
-  }
-  const indices = await dataViews.getIndices({
-    showAllIndices: false,
-    pattern: '*:*',
-    isRollupIndex: () => false,
-  });
-  const finalIndicesList = indices.filter((source) => {
-    const [_, index] = source.name.split(':');
-    return !index.startsWith('.') && !Boolean(source.item.indices);
   });
 
-  return finalIndicesList.map((source) => {
-    const [tag] = source?.tags ?? [];
-    return { name: source.name, hidden: false, type: tag?.name ?? 'Index' };
-  });
+  return response as ESQLSourceResult[];
 };
 
 // refresh the esql cache entry after 10 minutes
@@ -274,25 +253,23 @@ const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) =>
         hidden: false,
         title: source.title,
         dataStreams: source.dataStreams,
-        type: 'Integration',
+        type: SOURCES_TYPES.INTEGRATION,
       })) ?? []
   );
 };
 
 export const getESQLSources = async (
-  dataViews: DataViewsPublicPluginStart,
   core: Pick<CoreStart, 'application' | 'http'>,
   getLicense: (() => Promise<ILicense | undefined>) | undefined
 ) => {
   const ls = await getLicense?.();
   const ccrFeature = ls?.getFeature('ccr');
   const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
-  const [remoteIndices, localIndices, integrations] = await Promise.all([
-    getRemoteIndicesList(dataViews, areRemoteIndicesAvailable),
-    getIndicesList(dataViews),
+  const [allIndices, integrations] = await Promise.all([
+    getIndicesList(core, areRemoteIndicesAvailable),
     getIntegrations(core),
   ]);
-  return [...localIndices, ...remoteIndices, ...integrations];
+  return [...allIndices, ...integrations];
 };
 
 export const onMouseDownResizeHandler = (

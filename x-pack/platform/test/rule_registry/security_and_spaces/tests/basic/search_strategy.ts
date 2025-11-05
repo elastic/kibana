@@ -10,7 +10,6 @@ import { ALERT_RULE_TYPE_ID, ALERT_START } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Client } from '@elastic/elasticsearch';
-import { deleteRuleById } from '../../../../alerting_api_integration/common/lib/rules';
 import { getAlwaysFiringInternalRule } from '../../../../alerting_api_integration/common/lib/alert_utils';
 import { getEventLog } from '../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -1124,5 +1123,12 @@ const deleteAllAlertsFromIndex = async (index: string, es: Client) => {
     },
     conflicts: 'proceed',
     ignore_unavailable: true,
+  });
+};
+
+const deleteRuleById = async (es: Client, id: string) => {
+  await es.delete({
+    id: `alert:${id}`,
+    index: '.kibana_alerting_cases',
   });
 };

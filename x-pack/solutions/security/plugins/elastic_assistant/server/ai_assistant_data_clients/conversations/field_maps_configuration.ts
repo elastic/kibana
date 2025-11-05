@@ -193,3 +193,17 @@ export const conversationsFieldMap: FieldMap = {
     required: false,
   },
 } as const;
+
+export const conversationsAssistantInterruptsFieldMap: FieldMap = {
+  ...conversationsFieldMap,
+  'messages.metadata.interrupt_value': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'messages.metadata.interrupt_resume_value': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+} as const;

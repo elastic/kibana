@@ -10,12 +10,14 @@
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout';
 import { EuiComboBoxWrapper } from '@kbn/scout';
-import type { ProcessorType } from '@kbn/streamlang';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
+  public readonly conditionEditorValueComboBox;
+  public readonly processorTypeComboBox;
+
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
       this.page,
@@ -24,6 +26,14 @@ export class StreamsApp {
     this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
       this.page,
       'streamsAppConditionEditorFieldText'
+    );
+    this.conditionEditorValueComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppConditionEditorValueText'
+    );
+    this.processorTypeComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppProcessorTypeSelector'
     );
   }
 
@@ -259,7 +269,7 @@ export class StreamsApp {
       await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     }
     if (value) {
-      await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
+      await this.conditionEditorValueComboBox.setCustomSingleOption(value);
     }
     if (operator) {
       await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
@@ -398,6 +408,11 @@ export class StreamsApp {
     await processorEditButton.click();
   }
 
+  async clickDuplicateProcessor(pos: number) {
+    const processorDuplicateButton = await this.getProcessorDuplicateButton(pos);
+    await processorDuplicateButton.click();
+  }
+
   async clickEditCondition(pos: number) {
     const conditionEditButton = await this.getConditionEditButton(pos);
     await conditionEditButton.click();
@@ -421,6 +436,13 @@ export class StreamsApp {
     const targetProcessor = processors[pos];
     await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
     return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorDuplicateButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
+    return this.page.getByTestId('stepContextMenuDuplicateItem');
   }
 
   async getConditionEditButton(pos: number) {
@@ -477,9 +499,8 @@ export class StreamsApp {
     await expect(this.getModal()).toBeHidden();
   }
 
-  async selectProcessorType(value: ProcessorType) {
-    await this.page.getByTestId('streamsAppProcessorTypeSelector').click();
-    await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
+  async selectProcessorType(value: string) {
+    await this.processorTypeComboBox.selectSingleOption(value);
   }
 
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
@@ -514,7 +535,7 @@ export class StreamsApp {
   async fillCondition(field: string, operator: string, value: string) {
     await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
-    await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
+    await this.conditionEditorValueComboBox.setCustomSingleOption(value);
   }
 
   async removeProcessor(pos: number) {

@@ -7,18 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { AlertHit } from '@kbn/alerting-plugin/server/types';
 import type { Logger } from '@kbn/core/server';
+import type { z } from '@kbn/zod';
 import type { ExecutorParamsSchema } from './schema';
 
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
 export type WorkflowsActionParamsType = ExecutorParams;
 
 export interface RunWorkflowParams {
   workflowId: string;
   spaceId: string;
-  alerts?: any[];
-  inputs?: Record<string, unknown>;
+  inputs: {
+    event: {
+      alerts: AlertHit[];
+      rule: {
+        id: string;
+        name: string;
+        tags: string[];
+        consumer: string;
+        producer: string;
+        ruleTypeId: string;
+      };
+      ruleUrl?: string;
+      spaceId: string;
+    };
+  };
   [key: string]: unknown;
 }
 

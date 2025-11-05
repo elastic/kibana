@@ -6,6 +6,7 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import { firstValueFrom } from 'rxjs';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/internal/streams/features/types';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
@@ -23,6 +24,7 @@ interface StreamFeaturesApi {
   ) => Promise<IdentifiedFeaturesEvent>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
   removeFeaturesFromStream: (featureNames: string[]) => Promise<StorageClientBulkResponse>;
+  abort: () => void;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -34,11 +36,11 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     },
   } = useKibana();
 
-  const { signal } = useAbortController();
+  const { signal, abort, refresh } = useAbortController();
 
   return {
     identifyFeatures: async (connectorId: string, to: string, from: string) => {
-      return await streamsRepositoryClient.fetch(
+      const events$ = streamsRepositoryClient.stream(
         'POST /internal/streams/{name}/features/_identify',
         {
           signal,
@@ -52,6 +54,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           },
         }
       );
+
+      return firstValueFrom(events$);
     },
     addFeaturesToStream: async (features: Feature[]) => {
       return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
@@ -100,6 +104,10 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           body: request,
         },
       });
+    },
+    abort: () => {
+      abort();
+      refresh();
     },
   };
 }

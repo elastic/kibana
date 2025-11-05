@@ -176,6 +176,39 @@ describe('autocomplete.suggest', () => {
       });
     });
 
+    test('suggests `?multiValue` option', async () => {
+      const { suggest } = await setup();
+
+      const suggestions = await suggest('FROM index_a | WHERE MV_CONTAINS( /', {
+        callbacks: {
+          canSuggestVariables: () => true,
+          getVariables: () => [
+            {
+              key: 'interval',
+              value: '1 hour',
+              type: ESQLVariableType.TIME_LITERAL,
+            },
+            {
+              key: 'multiValue',
+              value: ['value1', 'value2'],
+              type: ESQLVariableType.MULTI_VALUES,
+            },
+          ],
+          getColumnsFor: () =>
+            Promise.resolve([{ name: '@timestamp', type: 'date', userDefined: false }]),
+        },
+      });
+
+      expect(suggestions).toContainEqual({
+        label: '?multiValue',
+        text: '?multiValue',
+        kind: 'Constant',
+        detail: 'Named parameter',
+        command: undefined,
+        sortText: '11A',
+      });
+    });
+
     test('suggests `Create control` option when ? is being typed', async () => {
       const { suggest } = await setup();
 

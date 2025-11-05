@@ -37,7 +37,6 @@ import { AlertContextMenu } from '../../../detections/components/alerts_table/ti
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
 import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
 
@@ -45,8 +44,6 @@ const ActionsContainer = styled.div`
   align-items: center;
   display: flex;
 `;
-
-const emptyNotes: string[] = [];
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
@@ -150,9 +147,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     onEventDetailsPanelOpened();
   }, [onEventDetailsPanelOpened]);
 
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
   const selectNotesByDocumentId = useMemo(() => makeSelectNotesByDocumentId(), []);
   /* only applicable for new event based notes */
   const documentBasedNotes = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
@@ -165,24 +159,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   /* note ids associated with the document AND attached to the current timeline, used for pinning */
-  const timelineNoteIds = useMemo(() => {
-    if (!securitySolutionNotesDisabled) {
+  const timelineNoteIds = useMemo(
+    () =>
       // if timeline is unsaved, there is no notes associated to timeline yet
-      return savedObjectId ? documentBasedNotesInTimeline.map((note) => note.noteId) : [];
-    }
-    return eventIdToNoteIds?.[eventId] ?? emptyNotes;
-  }, [
-    eventIdToNoteIds,
-    eventId,
-    documentBasedNotesInTimeline,
-    savedObjectId,
-    securitySolutionNotesDisabled,
-  ]);
-
-  /* note count of the document */
-  const notesCount = useMemo(
-    () => (securitySolutionNotesDisabled ? timelineNoteIds.length : documentBasedNotes.length),
-    [documentBasedNotes, timelineNoteIds, securitySolutionNotesDisabled]
+      savedObjectId ? documentBasedNotesInTimeline.map((note) => note.noteId) : [],
+    [documentBasedNotesInTimeline, savedObjectId]
   );
 
   // we hide the analyzer icon if the data is not available for the resolver
@@ -232,7 +213,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
             key="add-event-note"
             timelineType={timelineType}
-            notesCount={notesCount}
+            notesCount={documentBasedNotes.length}
             eventId={eventId}
             toggleShowNotes={toggleShowNotes}
           />

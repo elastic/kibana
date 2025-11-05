@@ -55,6 +55,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
       expect(data.end).to.eql(end1);
       expect(data.status).to.eql('pending');
       expect(data.space_id).to.eql(spaceId);
+      expect(data.initiator).to.eql('user');
+      expect(data.initiator_id).to.be(undefined);
       expect(typeof data.created_at).to.be('string');
       testExpectedRule(data, ruleId, false);
       expect(data.schedule.length).to.eql(12);
@@ -77,6 +79,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
       expect(data.end).to.eql(end2);
       expect(data.status).to.eql('pending');
       expect(data.space_id).to.eql(spaceId);
+      expect(data.initiator).to.eql('user');
+      expect(data.initiator_id).to.be(undefined);
       expect(typeof data.created_at).to.be('string');
       testExpectedRule(data, ruleId, false);
       expect(data.schedule.length).to.eql(4);
@@ -207,6 +211,26 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
           // find backfills with no query params
           const findNoQueryParamsResponse = await supertestWithoutAuth
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password);
+
+          // find backfills filtered by initiator=user (should return the same backfills)
+          const findInitiatorUserResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/backfill/_find?initiator=user`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password);
+
+          // find backfills filtered by initiator=system (should be empty)
+          const findInitiatorSystemResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/backfill/_find?initiator=system`
+            )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
 
@@ -408,6 +432,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 findWithSortAndPageResponse1,
                 findWithSortAndPageResponse2,
                 findWithSortResponse,
+                findInitiatorUserResponse,
+                findInitiatorSystemResponse,
               ].forEach((response) => {
                 expect(response.statusCode).to.eql(403);
                 expect(response.body).to.eql({
@@ -445,6 +471,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 findWithSortAndPageResponse1,
                 findWithSortAndPageResponse2,
                 findWithSortResponse,
+                findInitiatorUserResponse,
+                findInitiatorSystemResponse,
               ].forEach((response) => {
                 expect(response.statusCode).to.eql(200);
               });
@@ -663,6 +691,15 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
               const sortedStart1 = new Date(resultFindWithSort.data[0].start).valueOf();
               const sortedStart2 = new Date(resultFindWithSort.data[1].start).valueOf();
               expect(sortedStart1).to.be.greaterThan(sortedStart2);
+
+              const resultFindInitatorUser = findInitiatorUserResponse.body;
+              expect(resultFindInitatorUser.total).to.be.greaterThan(0);
+              expect(resultFindInitatorUser.data.every((b: any) => b.initiator === 'user')).to.be(
+                true
+              );
+
+              const resultFindInitatorSystem = findInitiatorSystemResponse.body;
+              expect(resultFindInitatorSystem.total).to.eql(0);
 
               break;
             default:

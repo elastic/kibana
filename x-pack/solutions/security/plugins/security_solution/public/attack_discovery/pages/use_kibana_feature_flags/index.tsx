@@ -19,7 +19,7 @@ export const useKibanaFeatureFlags = (): UseKibanaFeatureFlags => {
   } = useKibana();
 
   const attackDiscoveryPublicApiEnabled = useMemo(
-    () => featureFlags.getBooleanValue(ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG, false),
+    () => featureFlags.getBooleanValue(ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG, true),
     [featureFlags]
   );
 

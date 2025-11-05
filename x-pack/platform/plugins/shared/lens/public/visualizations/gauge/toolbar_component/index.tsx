@@ -6,83 +6,23 @@
  */
 
 import React, { memo, useState } from 'react';
-import type { IconType } from '@elastic/eui';
-import {
-  EuiButtonGroup,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-} from '@elastic/eui';
+
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GaugeLabelMajorMode, GaugeShape } from '@kbn/expression-gauge-plugin/common';
-import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
+import type { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
+
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import {
-  IconChartGaugeArcSimple,
-  IconChartGaugeCircleSimple,
-  IconChartGaugeSemiCircleSimple,
-  IconChartLinearSimple,
-} from '@kbn/chart-icons';
-import type { VisualizationToolbarProps } from '../../../types';
-import { ToolbarPopover, VisLabel } from '../../../shared_components';
-import { gaugeTitlesByType, type GaugeVisualizationState } from '../constants';
 
-const PREFIX = `lns_gaugeOrientation_`;
-export const bulletTypes = [
-  {
-    id: `${PREFIX}horizontalBullet`,
-    label: i18n.translate('xpack.lens.gauge.bullet.orientantionHorizontal', {
-      defaultMessage: 'Horizontal',
-    }),
-  },
-  {
-    id: `${PREFIX}verticalBullet`,
-    label: i18n.translate('xpack.lens.gauge.bullet.orientantionVertical', {
-      defaultMessage: 'Vertical',
-    }),
-  },
-];
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import { ToolbarPopover } from '../../../shared_components';
+import { type GaugeVisualizationState } from '../constants';
+import { AppearanceSettings } from './appearance_settings';
+import { TitlesAndTextSettings } from './titles_and_text_settings';
 
-const CHART_NAMES: Record<GaugeShape, { id: string; icon: IconType; label: string }> = {
-  horizontalBullet: {
-    id: GaugeShapes.HORIZONTAL_BULLET,
-    icon: IconChartLinearSimple,
-    label: i18n.translate('xpack.lens.gaugeLinear.gaugeLabel', {
-      defaultMessage: 'Linear',
-    }),
-  },
-  verticalBullet: {
-    id: GaugeShapes.VERTICAL_BULLET,
-    icon: IconChartLinearSimple,
-    label: i18n.translate('xpack.lens.gaugeLinear.gaugeLabel', {
-      defaultMessage: 'Linear',
-    }),
-  },
-  semiCircle: {
-    id: GaugeShapes.SEMI_CIRCLE,
-    icon: IconChartGaugeSemiCircleSimple,
-    label: gaugeTitlesByType.semiCircle,
-  },
-  arc: {
-    id: GaugeShapes.ARC,
-    icon: IconChartGaugeArcSimple,
-    label: gaugeTitlesByType.arc,
-  },
-  circle: {
-    id: GaugeShapes.CIRCLE,
-    icon: IconChartGaugeCircleSimple,
-    label: gaugeTitlesByType.circle,
-  },
-};
-
-const gaugeShapes = [
-  CHART_NAMES.horizontalBullet,
-  CHART_NAMES.semiCircle,
-  CHART_NAMES.arc,
-  CHART_NAMES.circle,
-];
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   return (
@@ -100,8 +40,6 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
 const AppearancePopover = (props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   const { state, setState } = props;
 
-  const selectedOption = CHART_NAMES[state.shape];
-  const selectedBulletType = bulletTypes.find(({ id }) => id === `${PREFIX}${state.shape}`);
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.gauge.appearanceLabel', {
@@ -114,64 +52,13 @@ const AppearancePopover = (props: VisualizationToolbarProps<GaugeVisualizationSt
       }}
       data-test-subj="lnsVisualOptionsPopover"
     >
-      <EuiFormRow
-        fullWidth
-        display="columnCompressed"
-        label={i18n.translate('xpack.lens.label.gauge.angleType', {
-          defaultMessage: 'Gauge shape',
-        })}
-      >
-        <EuiComboBox
-          fullWidth
-          compressed
-          data-test-subj="lnsToolbarGaugeAngleType"
-          aria-label={i18n.translate('xpack.lens.label.gauge.angleType', {
-            defaultMessage: 'Gauge shape',
-          })}
-          onChange={([option]) => {
-            setState({ ...state, shape: option.value as GaugeShape });
-          }}
-          isClearable={false}
-          options={gaugeShapes.map(({ id, label, icon }) => ({
-            value: id,
-            label,
-            prepend: <EuiIcon type={icon} />,
-          }))}
-          selectedOptions={[selectedOption]}
-          singleSelection={{ asPlainText: true }}
-          prepend={<EuiIcon type={selectedOption.icon} />}
-        />
-      </EuiFormRow>
-      {(state.shape === GaugeShapes.HORIZONTAL_BULLET ||
-        state.shape === GaugeShapes.VERTICAL_BULLET) &&
-        selectedBulletType && (
-          <EuiFormRow fullWidth display="columnCompressed" label=" ">
-            <EuiButtonGroup
-              isFullWidth
-              legend={i18n.translate('xpack.lens.gauge.bulletType', {
-                defaultMessage: 'Bullet type',
-              })}
-              data-test-subj="lens-gauge-bullet-type"
-              buttonSize="compressed"
-              options={bulletTypes}
-              idSelected={selectedBulletType.id}
-              onChange={(optionId) => {
-                const newBulletTypeWithPrefix = bulletTypes.find(({ id }) => id === optionId)!.id;
-                const newBulletType = newBulletTypeWithPrefix.replace(PREFIX, '');
-                setState({ ...state, shape: newBulletType as GaugeShape });
-              }}
-            />
-          </EuiFormRow>
-        )}
+      <AppearanceSettings state={state} setState={setState} />
     </ToolbarPopover>
   );
 };
 
 const TitlesAndTextPopover = (props: VisualizationToolbarProps<GaugeVisualizationState>) => {
-  const { state, setState, frame } = props;
-  const metricDimensionTitle =
-    state.layerId &&
-    frame.activeData?.[state.layerId]?.columns.find((col) => col.id === state.metricAccessor)?.name;
+  const { state, setState } = props;
 
   const [subtitleMode, setSubtitleMode] = useState<GaugeLabelMajorMode>(() =>
     state.labelMinor ? 'custom' : 'none'
@@ -197,54 +84,13 @@ const TitlesAndTextPopover = (props: VisualizationToolbarProps<GaugeVisualizatio
       }}
       data-test-subj="lnsTextOptionsPopover"
     >
-      <EuiFormRow
-        display="columnCompressed"
-        label={i18n.translate('xpack.lens.label.gauge.labelMajor.header', {
-          defaultMessage: 'Title',
-        })}
-        fullWidth
-      >
-        <VisLabel
-          header={i18n.translate('xpack.lens.label.gauge.labelMajor.header', {
-            defaultMessage: 'Title',
-          })}
-          dataTestSubj="lnsToolbarGaugeLabelMajor"
-          label={inputValue.labelMajor || ''}
-          mode={inputValue.labelMajorMode}
-          placeholder={metricDimensionTitle || ''}
-          hasAutoOption={true}
-          handleChange={(value) => {
-            handleInputChange({
-              ...inputValue,
-              labelMajor: value.label,
-              labelMajorMode: value.mode,
-            });
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        display="columnCompressed"
-        label={i18n.translate('xpack.lens.label.gauge.labelMinor.header', {
-          defaultMessage: 'Subtitle',
-        })}
-      >
-        <VisLabel
-          header={i18n.translate('xpack.lens.label.gauge.labelMinor.header', {
-            defaultMessage: 'Subtitle',
-          })}
-          dataTestSubj="lnsToolbarGaugeLabelMinor"
-          label={inputValue.labelMinor || ''}
-          mode={subtitleMode}
-          handleChange={(value) => {
-            handleInputChange({
-              ...inputValue,
-              labelMinor: value.mode === 'none' ? '' : value.label,
-            });
-            setSubtitleMode(value.mode);
-          }}
-        />
-      </EuiFormRow>
+      <TitlesAndTextSettings
+        {...props}
+        inputValue={inputValue}
+        handleInputChange={handleInputChange}
+        subtitleMode={subtitleMode}
+        setSubtitleMode={setSubtitleMode}
+      />
     </ToolbarPopover>
   );
 };

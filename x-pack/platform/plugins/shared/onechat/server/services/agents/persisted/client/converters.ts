@@ -8,7 +8,7 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AgentType } from '@kbn/onechat-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
-import type { AgentProperties } from './storage';
+import type { AgentProperties, AgentConfigurationProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
@@ -20,6 +20,9 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     throw new Error('No source found on get conversation response');
   }
 
+  const configuration: AgentConfigurationProperties =
+    document._source.configuration ?? document._source.config;
+
   return {
     // backward compatibility with M1 - we check the document id.
     id: document._source.id ?? document._id,
@@ -30,8 +33,8 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
     configuration: {
-      instructions: document._source.configuration.instructions,
-      tools: document._source.configuration.tools,
+      instructions: configuration.instructions,
+      tools: configuration.tools,
     },
   };
 };
@@ -54,7 +57,7 @@ export const createRequestToEs = ({
     labels: profile.labels,
     avatar_color: profile.avatar_color,
     avatar_symbol: profile.avatar_symbol,
-    configuration: {
+    config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
     },
@@ -74,12 +77,16 @@ export const updateRequestToEs = ({
   update: AgentUpdateRequest;
   updateDate: Date;
 }): AgentProperties => {
+  const currentConfig = currentProps.configuration ?? currentProps.config;
+
   const updated: AgentProperties = {
     ...currentProps,
     ...update,
     id: agentId,
-    configuration: {
-      ...currentProps.configuration,
+    // Explicitly omit configuration to ensure migration
+    configuration: undefined,
+    config: {
+      ...currentConfig,
       ...update.configuration,
     },
     updated_at: updateDate.toISOString(),

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { isPair, isScalar, visit } from 'yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml_utils';
 import type { StepNameInfo } from '../model/types';

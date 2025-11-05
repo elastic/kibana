@@ -45,6 +45,23 @@ describe('retryableBulkUpdate()', () => {
     expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[1]], { validate: false });
   });
 
+  it('should call store.bulkUpdate with mergeAttributes when defined', async () => {
+    filter.mockImplementation((task) => task.id === '2');
+    await retryableBulkUpdate({
+      taskIds,
+      getTasks,
+      filter,
+      map,
+      store,
+      validate: false,
+      mergeAttributes: false,
+    });
+    expect(store.bulkUpdate).toHaveBeenCalledWith([tasks[1]], {
+      validate: false,
+      mergeAttributes: false,
+    });
+  });
+
   it('should map tasks returned from getTasks', async () => {
     map.mockImplementation((task) => ({ ...task, status: TaskStatus.Claiming }));
     await retryableBulkUpdate({ taskIds, getTasks, filter, map, store, validate: false });

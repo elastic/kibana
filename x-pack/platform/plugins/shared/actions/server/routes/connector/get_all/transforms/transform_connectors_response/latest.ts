@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformGetAllConnectorsResponse } from './v1';
+export { transformGetAllConnectorsResponse } from './v2';

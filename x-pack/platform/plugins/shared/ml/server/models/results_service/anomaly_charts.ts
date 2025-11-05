@@ -28,6 +28,8 @@ import {
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type { CriteriaField } from '@kbn/ml-anomaly-utils/types';
+import type { ErrorType } from 'eventsource-parser';
 import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { MlClient } from '../../lib/ml_client';
 import type {
@@ -49,7 +51,6 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CriteriaField } from './results_service';
 import type { CombinedJob, Datafeed } from '../../shared';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
@@ -1292,7 +1293,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           }),
           job.job_id
         );
-        return { success: false, results: {}, error };
+        return { success: false, results: {}, error: error as ErrorType };
       }
     } else {
       // Extract the partition, by, over fields on which to filter.
@@ -1359,7 +1360,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           job.job_id
         );
 
-        return { success: false, results: {}, error };
+        return { success: false, results: {}, error: error as ErrorType };
       }
     }
   }
@@ -1491,7 +1492,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         }),
         config.jobId
       );
-      return { success: false, events: {}, error };
+      return { success: false, events: {}, error: error as ErrorType };
     }
   }
 
@@ -1723,7 +1724,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         }),
         config.jobId
       );
-      return { success: false, records: [], error };
+      return { success: false, records: [], error: error as ErrorType };
     }
   }
 

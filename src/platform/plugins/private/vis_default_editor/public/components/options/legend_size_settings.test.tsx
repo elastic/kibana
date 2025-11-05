@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { LegendSizeSettings } from './legend_size_settings';
-import { LegendSize, DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
+import { LegendSize, DEFAULT_LEGEND_SIZE } from '@kbn/chart-expressions-common';
 import { EuiSuperSelect } from '@elastic/eui';
 import { shallow } from 'enzyme';
 

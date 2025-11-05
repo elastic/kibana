@@ -86,6 +86,7 @@ describe('MS Defender response actions client', () => {
     processPendingActions: true,
     getCustomScripts: true,
     cancel: true,
+    memoryDump: false,
   };
 
   it.each(
@@ -850,7 +851,6 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
         false;
-
       await expect(msClientMock.getFileInfo('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
       );
@@ -1015,7 +1015,6 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
         false;
-
       await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
       );
@@ -1382,6 +1381,39 @@ describe('MS Defender response actions client', () => {
           parameters: { id: 'original-action-id' },
         })
       ).rejects.toThrow('Microsoft Defender cancel API error');
+    });
+
+    it('should throw validation error when attempting to cancel a cancel action', async () => {
+      // Mock getActionDetailsById to return a cancel action
+      getActionDetailsByIdMock.mockResolvedValueOnce(
+        new EndpointActionGenerator('seed').generateActionDetails({
+          id: 'cancel-action-id',
+          command: 'cancel',
+          isCompleted: false,
+          wasSuccessful: false,
+          agents: ['1-2-3'],
+        })
+      );
+
+      await expect(
+        msClientMock.cancel({
+          endpoint_ids: ['1-2-3'],
+          comment: 'trying to cancel a cancel action',
+          parameters: { id: 'cancel-action-id' },
+        })
+      ).rejects.toMatchObject({
+        message: 'Cannot cancel a cancel action.',
+        statusCode: 400,
+      });
+
+      // Verify that the connector was NOT called since validation should fail first
+      expect(connectorActionsMock.execute).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+          }),
+        })
+      );
     });
 
     it('should handle MDE error when action status is not Pending or InProgress', async () => {
@@ -2499,9 +2531,6 @@ describe('MS Defender response actions client', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assign to readonly property
-      clientConstructorOptionsMock.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointCancelEnabled =
         true;

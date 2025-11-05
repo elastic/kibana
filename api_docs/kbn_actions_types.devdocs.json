@@ -138,6 +138,17 @@
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-types",
+            "id": "def-common.ActionType.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
