@@ -146,7 +146,9 @@ spaceTest.describe(
         await pageObjects.assistantPage.conversations.selectConversation(mockConvo1.title);
 
         // Select the Azure connector
-        await pageObjects.assistantPage.connectors.selectConnector('Azure OpenAI Scout test connector');
+        await pageObjects.assistantPage.connectors.selectConnector(
+          'Azure OpenAI Scout test connector'
+        );
 
         // Select a system prompt
         await pageObjects.assistantPage.prompts.selectSystemPrompt(customPrompt2.name);
@@ -190,7 +192,10 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Create a system prompt without setting default conversations
-        await pageObjects.assistantPage.prompts.createSystemPrompt(testPrompt.name, testPrompt.content);
+        await pageObjects.assistantPage.prompts.createSystemPrompt(
+          testPrompt.name,
+          testPrompt.content
+        );
 
         // Verify the prompt is not automatically selected (no default conversation was set)
         await pageObjects.assistantPage.assertions.expectEmptySystemPrompt();
@@ -230,10 +235,11 @@ spaceTest.describe(
 
         // Current conversation is 'Lovely title'
         // Create system prompt and set it as default for both conversations
-        await pageObjects.assistantPage.prompts.createSystemPrompt(testPrompt.name, testPrompt.content, [
-          'Lucky title',
-          'Lovely title',
-        ]);
+        await pageObjects.assistantPage.prompts.createSystemPrompt(
+          testPrompt.name,
+          testPrompt.content,
+          ['Lucky title', 'Lovely title']
+        );
 
         // Verify the prompt is automatically selected (current conversation is in default list)
         await pageObjects.assistantPage.assertions.expectSystemPromptSelected(testPrompt.name);
@@ -313,7 +319,10 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Create a quick prompt
-        await pageObjects.assistantPage.prompts.createQuickPrompt(testPrompt.name, testPrompt.content);
+        await pageObjects.assistantPage.prompts.createQuickPrompt(
+          testPrompt.name,
+          testPrompt.content
+        );
 
         // Verify quick prompt badge is visible
         await pageObjects.assistantPage.assertions.expectQuickPromptVisible(testPrompt.name);
@@ -336,9 +345,11 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Create a quick prompt with 'Alert (from view)' context
-        await pageObjects.assistantPage.prompts.createQuickPrompt(testPrompt.name, testPrompt.content, [
-          'Alert (from view)',
-        ]);
+        await pageObjects.assistantPage.prompts.createQuickPrompt(
+          testPrompt.name,
+          testPrompt.content,
+          ['Alert (from view)']
+        );
 
         // Verify the quick prompt badge is NOT visible in the general context
         await pageObjects.assistantPage.assertions.expectQuickPromptNotVisible(testPrompt.name);

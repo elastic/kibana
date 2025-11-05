@@ -17,10 +17,7 @@ import type { AssistantLocators } from './assistant_locators';
  * the state and behavior of the AI Assistant.
  */
 export class AssistantAssertions {
-  constructor(
-    private readonly page: ScoutPage,
-    private readonly locators: AssistantLocators
-  ) {}
+  constructor(private readonly page: ScoutPage, private readonly locators: AssistantLocators) {}
 
   /**
    * Asserts that a new conversation is displayed

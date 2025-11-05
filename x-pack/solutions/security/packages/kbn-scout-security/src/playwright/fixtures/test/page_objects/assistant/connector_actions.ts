@@ -16,10 +16,7 @@ import type { AssistantLocators } from './assistant_locators';
  * This class handles selecting and creating connectors for the AI Assistant.
  */
 export class ConnectorActions {
-  constructor(
-    private readonly page: ScoutPage,
-    private readonly locators: AssistantLocators
-  ) {}
+  constructor(private readonly page: ScoutPage, private readonly locators: AssistantLocators) {}
 
   /**
    * Selects a connector by name

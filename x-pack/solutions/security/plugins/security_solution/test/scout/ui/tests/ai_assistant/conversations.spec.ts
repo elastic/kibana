@@ -110,9 +110,14 @@ spaceTest.describe(
         // Open assistant from rule context
         await pageObjects.assistantPage.openFromRule();
 
-        await pageObjects.assistantPage.assertions.expectConversationTitle(`Detection Rules - ${ruleName}`);
+        await pageObjects.assistantPage.assertions.expectConversationTitle(
+          `Detection Rules - ${ruleName}`
+        );
         await pageObjects.assistantPage.assertions.expectConnectorSelected(azureConnectorName);
-        await pageObjects.assistantPage.assertions.expectPromptContext(0, RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
+        await pageObjects.assistantPage.assertions.expectPromptContext(
+          0,
+          RULE_MANAGEMENT_CONTEXT_DESCRIPTION
+        );
       }
     );
 
