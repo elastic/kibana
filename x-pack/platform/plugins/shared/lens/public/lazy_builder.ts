@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+
+import { getLensFeatureFlags } from './get_feature_flags';
+
+const [getBuilder, setBuilder] = createGetterSetter<LensConfigBuilder>('LensBuilder', false);
+
+/**
+ * Retrieves the Lens builder
+ */
+export function getLensBuilder(): LensConfigBuilder | null {
+  const builder = getBuilder();
+  const flags = getLensFeatureFlags();
+
+  if (!builder && flags.apiFormat) {
+    // only throw if the feature flag is enabled and the builder is null
+    throw new Error('Lens builder not initialized');
+  }
+
+  return builder;
+}
+
+export async function setLensBuilder(): Promise<LensConfigBuilder | null> {
+  const flags = getLensFeatureFlags();
+
+  if (flags.apiFormat) {
+    const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
+    const builder = new LensConfigBuilder(undefined, flags.apiFormat);
+    setBuilder(builder);
+    return builder;
+  }
+
+  return null;
+}

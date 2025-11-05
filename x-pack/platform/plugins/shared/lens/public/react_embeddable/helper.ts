@@ -17,7 +17,6 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type {
   LensRuntimeState,
@@ -34,8 +33,8 @@ import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
-import { getLensFeatureFlags } from '../get_feature_flags';
 import type { LensEmbeddableStartServices } from './types';
+import { getLensBuilder } from '../lazy_builder';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -168,8 +167,12 @@ export function getStructuredDatasourceStates(
 }
 
 export function transformInitialState(state: LensSerializedAPIConfig): LensSerializedState {
-  const enableAPITransforms = getLensFeatureFlags().apiFormat;
-  const builder = new LensConfigBuilder(undefined, enableAPITransforms);
+  const builder = getLensBuilder();
+
+  if (!builder) {
+    // builder not enabled, return the state as is
+    return state as LensSerializedState;
+  }
 
   const chartType = builder.getType(state.attributes);
 
@@ -203,8 +206,13 @@ export function transformOutputState(state: LensSerializedState): LensByValueSer
     };
   }
 
-  const enableAPITransforms = getLensFeatureFlags().apiFormat;
-  const builder = new LensConfigBuilder(undefined, enableAPITransforms);
+  const builder = getLensBuilder();
+
+  if (!builder) {
+    // builder not enabled, return the state as is
+    return state as LensByValueSerializedAPIConfig;
+  }
+
   const chartType = builder.getType(state.attributes);
 
   if (!builder.isSupported(chartType)) {
