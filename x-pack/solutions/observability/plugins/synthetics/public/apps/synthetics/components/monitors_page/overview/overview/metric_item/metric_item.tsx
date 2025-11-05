@@ -75,14 +75,15 @@ export const getMetricValueProps = (trendData: OverviewTrend | 'loading' | null 
     return {
       value: '',
       extra: (
-        <div
-          css={css`
-            height: 16px;
-            width: 50px;
-          `}
-        >
-          <EuiSkeletonText lines={1} />
-        </div>
+        <EuiSkeletonText
+          lines={1}
+          ariaWrapperProps={{
+            style: {
+              height: '16px',
+              width: '50px',
+            },
+          }}
+        />
       ),
     };
 
