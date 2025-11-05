@@ -88,6 +88,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     defaultActionMessage: transactionDurationMessage,
     defaultRecoveryMessage: transactionDurationRecoveryMessage,
     priority: 60,
+    getDescriptionFields,
   });
 
   observabilityRuleTypeRegistry.register({
