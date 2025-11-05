@@ -533,7 +533,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const superTestWithoutAuth = getService('supertestWithoutAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
     ...securitySolutionApiServiceFactory(supertest),

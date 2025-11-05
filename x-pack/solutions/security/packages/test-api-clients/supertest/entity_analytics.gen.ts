@@ -685,7 +685,7 @@ If the specified entity already exists, it is updated with the provided values. 
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const superTestWithoutAuth = getService('supertestWithoutAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
     ...securitySolutionApiServiceFactory(supertest),
