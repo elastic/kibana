@@ -650,10 +650,7 @@ export class SearchSource {
       case 'nonHighlightingFilters':
         return addToRoot(
           'nonHighlightingFilters',
-          (typeof data.nonHighlightingFilters === 'function'
-            ? data.nonHighlightingFilters()
-            : data.nonHighlightingFilters ?? []
-          ).concat(val)
+          (data.nonHighlightingFilters ?? []).concat(val)
         );
       case 'query':
         return addToRoot(key, (data.query ?? []).concat(val));
@@ -892,19 +889,12 @@ export class SearchSource {
     const filters =
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters;
 
-    const nonHighlightingFilters =
-      typeof searchRequest.nonHighlightingFilters === 'function'
-        ? searchRequest.nonHighlightingFilters()
-        : searchRequest.nonHighlightingFilters;
+    const nonHighlightingFilters = searchRequest.nonHighlightingFilters ?? [];
 
     // Merge filters and nonHighlightingFilters for the main query
     const allFilters = [
       ...(Array.isArray(filters) ? filters : filters ? [filters] : []),
-      ...(Array.isArray(nonHighlightingFilters)
-        ? nonHighlightingFilters
-        : nonHighlightingFilters
-        ? [nonHighlightingFilters]
-        : []),
+      ...nonHighlightingFilters,
     ];
 
     const builtQuery = this.getBuiltEsQuery({
@@ -1163,10 +1153,9 @@ export class SearchSource {
       };
     }
     if (originalNonHighlightingFilters) {
-      const nonHighlightingFilters = this.getFilters(originalNonHighlightingFilters);
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
-        nonHighlightingFilters,
+        nonHighlightingFilters: originalNonHighlightingFilters,
       };
     }
     if (searchSourceAggs) {

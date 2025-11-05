@@ -86,7 +86,7 @@ export interface SearchSourceFields {
    * but excluded from the highlight_query parameter in Elasticsearch.
    * {@link Filter}
    */
-  nonHighlightingFilters?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
+  nonHighlightingFilters?: Filter[];
   /**
    * {@link EsQuerySortValue}
    */
