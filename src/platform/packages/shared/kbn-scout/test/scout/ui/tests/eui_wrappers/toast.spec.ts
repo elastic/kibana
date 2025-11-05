@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect } from '../../../../src/playwright';
-import { EuiToastWrapper } from '../../../../src/playwright/eui_components';
-import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
+import { test, expect } from '../../../../../src/playwright';
+import { EuiToastWrapper } from '../../../../../src/playwright/eui_components';
+import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiToast', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`toast`, async ({ page, log }) => {

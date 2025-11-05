@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { IToasts } from '@kbn/core/public';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION, InferenceProvider } from '../..';

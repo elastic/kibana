@@ -44,7 +44,8 @@
     "@kbn/server-route-repository-utils",
     "@kbn/core-application-browser",
     "@kbn/core-plugins-server",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"
