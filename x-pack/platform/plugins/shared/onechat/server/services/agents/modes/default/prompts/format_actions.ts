@@ -99,7 +99,10 @@ const formatHandoverAction = ({ message, forceful }: HandoverAction): BaseMessag
   } else {
     return [
       createAIMessage(
-        `[researcher agent] Finished the research step. Handover for the answering agent: "${message}"`
+        `[researcher agent] Finished the research step. Handover for the answering agent:
+        """
+        ${message}
+        """`
       ),
       createUserMessage(
         'Ack. forwarding to answering agent: Proceed to answer as best as you can with the collected information.'

@@ -6,7 +6,7 @@
  */
 
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
-import type { ToolCall, ToolCallResult } from '@kbn/onechat-genai-utils/langchain';
+import type { ToolCall } from '@kbn/onechat-genai-utils/langchain';
 
 export enum AgentActionType {
   Error = 'error',
@@ -14,6 +14,12 @@ export enum AgentActionType {
   ExecuteTool = 'execute_tool',
   HandOver = 'hand_over',
   Answer = 'answer',
+}
+
+export interface ToolCallResult {
+  toolCallId: string;
+  content: string;
+  artifact?: any;
 }
 
 // research phase actions

@@ -21,7 +21,8 @@ const recoverableErrorCodes = [
 ];
 
 /**
- * Converts an error which occurred during the execution of the agent to our error format.
+ * Converts an error which occurred during the execution of the agent to our error format,
+ * leveraging the errors which are already processed by the inference plugin for some of them.
  * Also categorizes the error to identifiable error codes.
  */
 export const convertError = (error: Error): OnechatAgentExecutionError => {

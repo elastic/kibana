@@ -37,7 +37,8 @@ import {
   handoverAction,
 } from './actions';
 
-const MAX_ERROR_COUNT = 3;
+// number of successive recoverable errors we try to recover from before throwing
+const MAX_ERROR_COUNT = 2;
 
 export const createAgentGraph = ({
   chatModel,
@@ -98,7 +99,7 @@ export const createAgentGraph = ({
     const lastAction = state.mainActions[state.mainActions.length - 1];
 
     if (isAgentErrorAction(lastAction)) {
-      if (state.errorCount < MAX_ERROR_COUNT) {
+      if (state.errorCount <= MAX_ERROR_COUNT) {
         return steps.researchAgent;
       } else {
         // max error count reached, stop execution by throwing
@@ -121,8 +122,8 @@ export const createAgentGraph = ({
   const executeTool = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
     if (!isToolCallAction(lastAction)) {
-      throw new Error(
-        `Error during executeTool: Invalid state - expected last action to be "tool_call" action, got "${lastAction.type}"`
+      throw invalidState(
+        `[executeTool] expected last action to be "tool_call" action, got "${lastAction.type}"`
       );
     }
 
@@ -152,7 +153,9 @@ export const createAgentGraph = ({
   });
 
   const answerAgent = async (state: StateType) => {
-    events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
+    if (state.answerActions.length === 0 && state.errorCount === 0) {
+      events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
+    }
     try {
       const response = await answeringModel.invoke(
         getAnswerPrompt({
@@ -187,7 +190,7 @@ export const createAgentGraph = ({
     const lastAction = state.answerActions[state.answerActions.length - 1];
 
     if (isAgentErrorAction(lastAction)) {
-      if (state.errorCount < MAX_ERROR_COUNT) {
+      if (state.errorCount <= MAX_ERROR_COUNT) {
         return steps.answerAgent;
       } else {
         // max error count reached, stop execution by throwing

@@ -211,7 +211,7 @@ export const createAgentExecutionError = <ErrCode extends AgentExecutionErrorCod
   meta: ExecutionErrorMetaOf<ErrCode>
 ): OnechatAgentExecutionError<ErrCode> => {
   return new OnechatError(OnechatErrorCode.agentExecutionError, message, {
-    ...(meta ?? {}),
+    ...meta,
     errCode: code,
   });
 };

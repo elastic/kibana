@@ -6,12 +6,18 @@
  */
 
 export enum AgentExecutionErrorCode {
+  /** too many input tokens */
   contextLengthExceeded = 'context_length_exceeded',
+  /** agent called a tool not currently available */
   toolNotFound = 'tool_not_found',
+  /** agent called a tool with invalid arguments */
   toolValidationError = 'tool_validation_error',
-  unknownError = 'unknown_error',
-  invalidState = 'invalid_state',
+  /** agent replied with an empty response */
   emptyResponse = 'empty_response',
+  /** any uncategorized error */
+  unknownError = 'unknown_error',
+  /** invalid workflow state - should never be surfaced */
+  invalidState = 'invalid_state',
 }
 
 export interface ToolNotFoundErrorMeta {

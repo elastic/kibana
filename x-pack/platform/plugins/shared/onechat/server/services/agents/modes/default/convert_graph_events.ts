@@ -18,7 +18,7 @@ import type {
   ToolResultEvent,
   ReasoningEvent,
 } from '@kbn/onechat-common';
-import type { ToolCallResult, ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
+import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
   matchGraphName,
   matchEvent,
@@ -38,6 +38,7 @@ import { createErrorResult } from '@kbn/onechat-server';
 import type { StateType } from './state';
 import { steps, tags } from './constants';
 import { isToolCallAction, isAnswerAction, isExecuteToolAction } from './actions';
+import type { ToolCallResult } from './actions';
 
 export type ConvertedEvents =
   | MessageChunkEvent
