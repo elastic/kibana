@@ -878,7 +878,7 @@
             "application/json": {
               "examples": {
                 "a2aTaskRequestExample": {
-                  "description": "Example request for A2A Task Endpoint",
+                  "description": "WARNING: DO NOT USE THIS ENDPOINT VIA REST API. These examples are auto-generated and should not be run. Integrate with A2A using an A2A SDK or A2A Inspector instead.",
                   "value": {
                     "id": "task-123",
                     "jsonrpc": "2.0",
@@ -2037,7 +2037,7 @@
             "application/json": {
               "examples": {
                 "mcpInitializeRequestExample": {
-                  "description": "Example request to initalise communication over MCP protocol",
+                  "description": "WARNING: DO NOT USE THIS ENDPOINT VIA REST API. These examples are auto-generated and should not be run. Integrate with MCP using MCP Inspector or native MCP clients (Claude Desktop, Cursor, VS Code) instead.",
                   "value": {
                     "id": 1,
                     "jsonrpc": "2.0",
