@@ -13,12 +13,13 @@ import type {
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import type { SlackConnectorType, SlackConnectorTypeExecutorOptions } from '.';
-import { getConnectorType, ConnectorTypeId } from '.';
+import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/slack';
 
 const sendSpy = jest.spyOn(IncomingWebhook.prototype, 'send');
 
@@ -44,7 +45,7 @@ beforeEach(() => {
 
 describe('connector registration', () => {
   test('returns connector type', () => {
-    expect(connectorType.id).toEqual(ConnectorTypeId);
+    expect(connectorType.id).toEqual(CONNECTOR_ID);
     expect(connectorType.name).toEqual('Slack');
   });
 });
