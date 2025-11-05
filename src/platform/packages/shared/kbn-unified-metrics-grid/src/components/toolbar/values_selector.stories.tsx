@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { ValuesSelector } from './values_selector';
-import { MetricsExperienceClientProvider } from '../../context/metrics_experience_client_provider';
+import { MetricsExperienceProvider } from '../../context/metrics_experience_provider';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 
 export default {
@@ -37,7 +37,7 @@ const queryClient = new QueryClient({
 
 // Mock client for Storybook
 const mockClient: MetricsExperienceClient = {
-  getDimensions: async () => ({
+  getDimensions: async (params, signal) => ({
     values: [
       { field: 'host.name', value: 'server-01' },
       { field: 'host.name', value: 'server-02' },
@@ -47,16 +47,19 @@ const mockClient: MetricsExperienceClient = {
       { field: 'service.name', value: 'database-service' },
     ],
   }),
-  getFields: async () => ({ fields: [], total: 0, page: 1 }),
+  getFields: async (params, signal) => ({ fields: [], total: 0, page: 1 }),
+  getIndexPatternMetadata: async (params, signal) => ({
+    indexPatternMetadata: {},
+  }),
 } as MetricsExperienceClient;
 
 // Wrapper component with all required providers
 const StoryWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
-      <MetricsExperienceClientProvider value={{ client: mockClient }}>
+      <MetricsExperienceProvider value={{ client: mockClient }}>
         {children}
-      </MetricsExperienceClientProvider>
+      </MetricsExperienceProvider>
     </QueryClientProvider>
   </IntlProvider>
 );
