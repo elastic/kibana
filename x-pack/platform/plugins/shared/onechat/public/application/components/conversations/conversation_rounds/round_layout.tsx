@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, euiTextBreakWord, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -52,7 +52,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     align-self: end;
     max-inline-size: 80%;
     background-color: ${euiTheme.colors.backgroundBasePrimary};
-    overflow-wrap: break-word;
+    ${euiTextBreakWord()}
   `;
 
   const roundContainerStyles = css`
