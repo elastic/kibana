@@ -79,7 +79,7 @@ export const convertGraphEvents = ({
             const events: ConvertedEvents[] = [];
             if (!isThinkingComplete) {
               // Emit thinking complete event when first chunk arrives
-              events.push(createThinkingCompleteEvent(startTime));
+              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
               isThinkingComplete = true;
             }
             events.push(createTextChunkEvent(textContent, { messageId }));

@@ -73,7 +73,7 @@ const createRoundFromEvents = ({
   events,
   input,
   startTime,
-  endTime,
+  endTime = new Date(),
 }: {
   events: SourceEvents[];
   input: RoundInput;
@@ -86,13 +86,7 @@ const createRoundFromEvents = ({
   const stepEvents = events.filter(isStepEvent);
   const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
 
-  if (!endTime) {
-    endTime = new Date();
-  }
-
-  const endTimeMs = endTime.getTime();
-  const startTimeMs = startTime.getTime();
-  const timeToLastToken = endTimeMs - startTimeMs;
+  const timeToLastToken = endTime.getTime() - startTime.getTime();
   const timeToFirstToken = thinkingCompleteEvent
     ? thinkingCompleteEvent.data.time_to_first_token
     : 0;

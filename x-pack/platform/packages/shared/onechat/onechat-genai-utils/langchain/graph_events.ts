@@ -110,11 +110,11 @@ export const createReasoningEvent = (
   };
 };
 
-export const createThinkingCompleteEvent = (startTime: Date): ThinkingCompleteEvent => {
+export const createThinkingCompleteEvent = (timeToFirstToken: number): ThinkingCompleteEvent => {
   return {
     type: ChatEventType.thinkingComplete,
     data: {
-      time_to_first_token: Date.now() - startTime.getTime(),
+      time_to_first_token: timeToFirstToken,
     },
   };
 };
