@@ -16,7 +16,7 @@ interface UseSpanParams {
 }
 
 export const useSpan = ({ spanId, traceId }: UseSpanParams) => {
-  const { data, core, discoverShared } = getUnifiedDocViewerServices();
+  const { discoverShared } = getUnifiedDocViewerServices();
 
   const fetchSpanFeature = discoverShared.features.registry.getById(
     'observability-traces-fetch-span'
