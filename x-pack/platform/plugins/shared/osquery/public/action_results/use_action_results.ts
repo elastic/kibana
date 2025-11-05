@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { flatten, reverse, uniqBy } from 'lodash/fp';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { InspectResponse } from '../common/helpers';

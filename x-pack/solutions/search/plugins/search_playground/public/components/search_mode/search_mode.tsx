@@ -17,7 +17,7 @@ import { css } from '@emotion/react';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { DEFAULT_PAGINATION } from '../../../common';
 import { ResultList } from './result_list';
 import { PlaygroundForm, PlaygroundFormFields, Pagination } from '../../types';

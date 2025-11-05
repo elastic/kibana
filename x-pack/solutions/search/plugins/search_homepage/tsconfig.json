@@ -33,7 +33,8 @@
     "@kbn/search-api-keys-components",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
-    "@kbn/search-shared-ui"
+    "@kbn/search-shared-ui",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*",

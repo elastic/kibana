@@ -11,7 +11,7 @@ import { useShareTypeContext } from '@kbn/share-plugin/public';
 import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { isEmpty } from 'lodash';
 import { supportedReportTypes } from '../report_params';
 import { queryClient } from '../../query_client';
