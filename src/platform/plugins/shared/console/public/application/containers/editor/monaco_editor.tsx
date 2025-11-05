@@ -310,6 +310,8 @@ export const MonacoEditor = ({
           hover: {
             above: false,
           },
+          // Enable clickable links with Cmd/Ctrl+Click
+          links: true,
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
