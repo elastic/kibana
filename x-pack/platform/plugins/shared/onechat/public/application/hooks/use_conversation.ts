@@ -17,6 +17,7 @@ import { useOnechatServices } from './use_onechat_service';
 import { storageKeys } from '../storage_keys';
 import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
+import { useConversationContext } from '../context/conversation/conversation_context';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -65,6 +66,7 @@ const useGetNewConversationAgentId = () => {
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
+  const context = useConversationContext();
   const agentId = conversation?.agent_id;
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
@@ -72,6 +74,10 @@ export const useAgentId = () => {
 
   if (agentId) {
     return agentId;
+  }
+
+  if (context.agentId) {
+    return context.agentId;
   }
 
   // For new conversations, agent id must be defined
