@@ -59,7 +59,7 @@ const CountryFlag = ({ countryCode }: { countryCode?: string }) => {
           font-weight: ${euiTheme.font.weight.medium};
         `}
       >
-        {geoLabel}
+        {`${geoLabel}: `}
       </EuiText>
 
       {/* NOTE: Wrap emoji flag with spaces for screen readers */}

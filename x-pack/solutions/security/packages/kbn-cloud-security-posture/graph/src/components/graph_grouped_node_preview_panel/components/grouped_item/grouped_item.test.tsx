@@ -50,7 +50,7 @@ describe('<GroupedItem />', () => {
       );
       expect(getByTestId(GROUPED_ITEM_IP_TEST_ID).textContent).toContain('IP: 5.5.5.5');
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
     });
 
@@ -389,7 +389,7 @@ describe('<GroupedItem />', () => {
         />
       );
 
-      expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe('Geo 🇮🇱 Israel');
+      expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe('Geo:  🇮🇱 Israel');
     });
 
     it('does not render geolocation info when countryCode is undefined', () => {
@@ -455,17 +455,17 @@ describe('<GroupedItem />', () => {
       );
 
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
 
       rerender(<GroupedItem item={{ ...item, countryCode: 'US' }} />); // uppercase
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
 
       rerender(<GroupedItem item={{ ...item, countryCode: 'uS' }} />); // mixed case
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
-        'Geo 🇺🇸 United States of America'
+        'Geo:  🇺🇸 United States of America'
       );
     });
   });
