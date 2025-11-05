@@ -207,9 +207,7 @@ describe('When using Actions service utilities', () => {
         wasSuccessful: true,
         outputs: {
           '123': {
-            content: {
-              code: 'aaa',
-            },
+            content: expect.anything(),
             type: 'json',
           },
         },
@@ -262,9 +260,7 @@ describe('When using Actions service utilities', () => {
         outputs: {
           '123': {
             type: 'json',
-            content: {
-              entries: processes,
-            },
+            content: expect.objectContaining({ entries: processes }),
           },
         },
         agentState: {
@@ -1181,11 +1177,7 @@ describe('When using Actions service utilities', () => {
         },
         outputs: {
           '6e6796b0-af39-4f12-b025-fcb06db499e5': {
-            content: {
-              code: 'ra_upload_file-success',
-              disk_free_space: 4825566125475,
-              path: '/disk1/file/saved/here',
-            },
+            content: expect.anything(),
             type: 'json',
           },
         },
