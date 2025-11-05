@@ -7,15 +7,16 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import { inputsFormat } from '../../../common/constants';
+import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import type { FleetRequestHandler } from '../../types';
-import type { CreateAgentlessPolicyRequestSchema } from '../../types/agentless_policy';
 import { appContextService } from '../../services';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 
 export const createAgentlessPolicyHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof CreateAgentlessPolicyRequestSchema.query>,
   TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
@@ -40,9 +41,10 @@ export const createAgentlessPolicyHandler: FleetRequestHandler<
 
   return response.ok({
     body: {
-      item: true // TODO request.query.format === inputsFormat.Simplified
-        ? packagePolicyToSimplifiedPackagePolicy(packagePolicy)
-        : packagePolicy,
+      item:
+        request.query.format === inputsFormat.Simplified
+          ? packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+          : packagePolicy,
     },
   });
 };

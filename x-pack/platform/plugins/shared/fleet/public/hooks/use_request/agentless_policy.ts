@@ -12,11 +12,15 @@ import type { CreateAgentlessPolicyRequest } from '../../../common/types/rest_sp
 
 import { sendRequestForRq } from './use_request';
 
-export const sendCreateAgentlessPolicy = (body: CreateAgentlessPolicyRequest['body']) => {
+export const sendCreateAgentlessPolicy = (
+  body: CreateAgentlessPolicyRequest['body'],
+  query?: CreateAgentlessPolicyRequest['query']
+) => {
   return sendRequestForRq<any>({
     path: agentlesPolicyRouteService.getCreatePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
+    query,
   });
 };

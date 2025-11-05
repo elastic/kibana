@@ -142,5 +142,52 @@ describe('AgentlessPoliciesService', () => {
         })
       );
     });
+
+    it('should support cloud connectors in new agentless policy', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      const result = await agentlessPoliciesService.createAgentlessPolicy({
+        name: 'Test Agentless Policy',
+        namespace: 'default',
+        package: {
+          name: 'agentless_integration',
+          version: '1.0.0',
+        },
+        inputs: {},
+        cloud_connector_id: 'test-cloud-connector-id',
+        supports_cloud_connector: true,
+      });
+
+      expect(result).toBeDefined();
+
+      expect(jest.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          supports_agentless: true,
+          supports_cloud_connector: true,
+          cloud_connector_id: 'test-cloud-connector-id',
+        }),
+        expect.anything(),
+        undefined,
+        undefined
+      );
+      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledTimes(1);
+    });
+
+    it('should delete agent policy if an error occurs during deployment', async () => {
+      // TODO
+    });
   });
 });

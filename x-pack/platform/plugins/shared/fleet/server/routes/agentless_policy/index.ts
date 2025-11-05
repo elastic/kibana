@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { CreateAgentlessPolicyRequestSchema } from '../../../common/types/rest_spec/agentless_policy';
 import { AGENTLESS_POLICIES_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
-import { CreateAgentlessPolicyRequestSchema } from '../../types/agentless_policy';
 import { CreatePackagePolicyResponseSchema } from '../../types';
 import { genericErrorResponse } from '../schema/errors';
 
@@ -18,9 +18,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN,
-      summary: 'Create a package policy',
+      summary: 'Create an agentless policy',
       options: {
-        tags: ['oas-tag:Fleet package policies'],
+        tags: ['oas-tag:Fleet agentless policies'],
       },
       // TODO add security
       security: {

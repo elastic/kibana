@@ -332,10 +332,32 @@ function validateAdditionalDatastreamsPermissions(values: string[]) {
 }
 
 export const SimplifiedPackagePolicyBaseSchema = schema.object({
-  id: schema.maybe(schema.string()),
-  name: schema.string(),
-  description: schema.maybe(schema.string()),
-  namespace: schema.maybe(schema.string()),
+  id: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Policy unique identifier',
+      },
+    })
+  ),
+  name: schema.string({
+    meta: {
+      description: 'Policy name (should be unique)',
+    },
+  }),
+  description: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Policy description',
+      },
+    })
+  ),
+  namespace: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Policy namespace, leave blank to inherit the agent policy namespace',
+      },
+    })
+  ),
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: SimplifiedPackagePolicyInputsSchema,
@@ -373,8 +395,21 @@ export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolic
 
 export const SimplifiedCreatePackagePolicyRequestBodySchema =
   SimplifiedPackagePolicyBaseSchema.extends({
-    policy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+    policy_id: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string()], {
+        meta: {
+          description: 'Deprecated use policy_ids instead.',
+          deprecated: true,
+        },
+      })
+    ),
+    policy_ids: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        meta: {
+          description: 'Agent policy IDs where that package policy will be added',
+        },
+      })
+    ),
     force: schema.maybe(schema.boolean()),
     package: PackagePolicyPackageSchema,
   });

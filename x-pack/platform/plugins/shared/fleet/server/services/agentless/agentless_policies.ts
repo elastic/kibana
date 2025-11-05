@@ -17,13 +17,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
+import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
+
 import { AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT } from '../../../common/constants';
 
 import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import type { PackagePolicyClient } from '../package_policy_service';
-import type { CreateAgentlessPolicyRequestSchema } from '../../types/agentless_policy';
+
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService } from '../app_context';
@@ -135,12 +137,10 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         ...omit(data, 'id', 'package'),
         namespace: data.namespace || 'default',
         policy_ids: [agentPolicy.id],
+        supports_agentless: true,
       };
 
-      const newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
-        { ...newPolicy, supports_agentless: true },
-        pkgInfo
-      );
+      const newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
 
       // Create package policy
       this.logger.debug(`Creating agentless package policy ${packagePolicyId}`);

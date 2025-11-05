@@ -14,6 +14,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
+import { inputsFormat } from '../../../../../../../../common/constants';
 import {
   formatInputs,
   formatVars,
@@ -38,7 +39,6 @@ import {
 import {
   useStartServices,
   sendCreateAgentPolicy,
-  sendCreatePackagePolicy,
   sendBulkInstallPackages,
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
@@ -157,23 +157,27 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
       return omit(pkg, 'title');
     }
 
-    const result = await sendCreateAgentlessPolicy({
-      package: formatPackage(pkgPolicy.package),
-      ...omit(
-        pkgPolicy,
-        'policy_ids',
-        'package',
-        'enabled',
-        'inputs',
-        'vars',
-        'id',
-        'supports_agentless',
-        'supports_cloud_connector'
-      ),
-      id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
-      inputs: formatInputs(pkgPolicy.inputs),
-      vars: formatVars(pkgPolicy.vars),
-    });
+    const result = await sendCreateAgentlessPolicy(
+      {
+        package: formatPackage(pkgPolicy.package),
+        ...omit(
+          pkgPolicy,
+          'policy_ids',
+          'package',
+          'enabled',
+          'inputs',
+          'vars',
+          'id',
+          'supports_agentless'
+        ),
+        id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
+        inputs: formatInputs(pkgPolicy.inputs),
+        vars: formatVars(pkgPolicy.vars),
+      },
+      {
+        format: inputsFormat.Legacy,
+      }
+    );
 
     return result;
   }
