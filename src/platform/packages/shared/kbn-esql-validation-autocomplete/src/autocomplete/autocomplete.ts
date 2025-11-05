@@ -56,8 +56,12 @@ export async function suggest(
     return [];
   }
 
+  // Use the appropriate AST context for field retrieval
+  // When in a subquery, use the subquery's AST to get only its fields
+  const astForFields = astContext.isCursorInSubquery ? astContext.astForContext : root;
+
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, root),
+    getQueryForFields(correctedQuery, astForFields),
     innerText,
     resourceRetriever
   );
@@ -82,6 +86,7 @@ export async function suggest(
       .getAllCommands({
         isCursorInSubquery: astContext.isCursorInSubquery,
         isStartingSubquery,
+        queryContainsSubqueries: astContext.queryContainsSubqueries,
       })
       .filter((command) => {
         const license = command.metadata?.license;

@@ -185,24 +185,6 @@ function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
 }
 
 /**
- * Checks if cursor is inside subquery bounds, including edge cases.
- */
-function isCursorInsideSubquery(cursorPos: number, minPos: number, maxPos: number): boolean {
-  // Cursor just after opening parenthesis
-  if (cursorPos === minPos + 1) {
-    return true;
-  }
-
-  // Cursor at closing parenthesis
-  if (cursorPos === maxPos) {
-    return true;
-  }
-
-  // Standard containment check
-  return cursorPos > minPos && cursorPos <= maxPos;
-}
-
-/**
  * Given a ES|QL query string, its AST and the cursor position,
  * it returns the type of context for the position ("list", "function", "option", "setting", "expression", "newCommand")
  * plus the whole hierarchy of nodes (command, option, setting and actual position node) context.
@@ -223,13 +205,16 @@ export function getAstContext(
   //                                         ↑ cursor
   // Returns: ESQLAstQueryExpression for "FROM c | WHERE"
   let innermostSubquery: ESQLAstQueryExpression | null = null;
+  let queryContainsSubqueries = false;
+
+  // Check if query contains subqueries while walking the AST
+  const allCommands = Walker.commands(queryAst);
+  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
+  queryContainsSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
 
   Walker.walk(queryAst, {
     visitParens: (node) => {
-      if (
-        isSubQuery(node) &&
-        isCursorInsideSubquery(offset, node.location.min, node.location.max)
-      ) {
+      if (isSubQuery(node) && within(offset, node)) {
         innermostSubquery = node.child;
       }
     },
@@ -258,6 +243,7 @@ export function getAstContext(
     return {
       type: 'comment' as const,
       isCursorInSubquery,
+      queryContainsSubqueries,
       astForContext,
     };
   }
@@ -277,6 +263,7 @@ export function getAstContext(
       option,
       containingFunction,
       isCursorInSubquery,
+      queryContainsSubqueries,
       astForContext,
     };
   }
@@ -289,6 +276,7 @@ export function getAstContext(
     option,
     node,
     isCursorInSubquery,
+    queryContainsSubqueries,
     astForContext,
   };
 }

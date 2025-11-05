@@ -31,8 +31,8 @@ export const forkCommand = {
     declaration: `TODO`,
     examples: [],
     subqueryRestrictions: {
-      allowedInside: false,
-      allowedOutside: false,
+      hideInside: true,
+      hideOutside: true,
     },
   },
 };

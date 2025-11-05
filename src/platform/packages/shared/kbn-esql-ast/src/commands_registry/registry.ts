@@ -80,10 +80,9 @@ export interface ICommandMetadata {
   license?: LicenseType; // Optional property indicating the license for the command's availability
   observabilityTier?: string; // Optional property indicating the observability tier availability
   subqueryRestrictions?: {
-    allowedInside: boolean; // Command is allowed inside subqueries
-    allowedOutside: boolean; // Command is allowed outside subqueries (at root level)
+    hideInside: boolean; // Command is hidden inside subqueries
+    hideOutside: boolean; // Command is hidden outside subqueries (at root level)
   };
-  isSubqueryEntryPoint?: boolean; // Indicates command can start a subquery (e.g., FROM, ROW, SHOW)
 }
 
 /**
@@ -189,6 +188,7 @@ export class CommandRegistry implements ICommandRegistry {
   public getAllCommands(options?: {
     isCursorInSubquery?: boolean;
     isStartingSubquery?: boolean;
+    queryContainsSubqueries?: boolean;
   }): ICommand[] {
     const allCommands = Array.from(this.commands.entries(), ([name, { methods, metadata }]) => ({
       name,
@@ -198,19 +198,19 @@ export class CommandRegistry implements ICommandRegistry {
 
     const isCursorInSubquery = options?.isCursorInSubquery ?? false;
     const isStartingSubquery = options?.isStartingSubquery ?? false;
+    const queryContainsSubqueries = options?.queryContainsSubqueries ?? false;
 
-    // When starting a subquery, only show commands that can be entry points
     const filtered = isStartingSubquery
-      ? allCommands.filter(({ metadata }) => metadata.isSubqueryEntryPoint === true)
+      ? allCommands.filter(({ name }) => name === 'from')
       : allCommands;
 
     // Then apply subquery restrictions
     return filtered.filter(({ metadata: { subqueryRestrictions: restrictions } }) => {
-      if (!restrictions) {
+      if (!restrictions || !queryContainsSubqueries) {
         return true;
       }
 
-      return isCursorInSubquery ? restrictions.allowedInside : restrictions.allowedOutside;
+      return isCursorInSubquery ? !restrictions.hideInside : !restrictions.hideOutside;
     });
   }
 

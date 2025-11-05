@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '../../../types';
 import { pipeCompleteItem, commaCompleteItem, subqueryCompleteItem } from '../../complete_items';
 import {
@@ -18,11 +19,8 @@ import { getRecommendedQueriesSuggestions } from '../../options/recommended_quer
 import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import {
-  endsWithSpace,
-  getOverlapRange,
-  isRestartingExpression,
-} from '../../../definitions/utils/shared';
+import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
+import { isSubQuery, isSource } from '../../../ast/is';
 
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
@@ -56,8 +54,8 @@ async function handleFromAutocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  const innerText = query.substring(0, cursorPosition);
   const cursorPos = cursorPosition ?? query.length;
+  const innerText = query.substring(0, cursorPos);
 
   // Cursor before FROM keyword
   if (command.location.min > cursorPos) {
@@ -69,26 +67,31 @@ async function handleFromAutocomplete(
   }
 
   // Extract text relative to command start (critical for subqueries)
-  // Use commandText for pattern matching (e.g., /METADATA\s+$/, endsWithSpace) because these
+  // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
 
   // METADATA suggestions - uses commandText for regex pattern matching
-  const metadataSuggestions = getMetadataSuggestions(command, commandText);
+  const metadataSuggestions = await getMetadataSuggestions(command, commandText);
   if (metadataSuggestions) {
     return metadataSuggestions;
   }
 
   const indexes = getSourcesFromCommands([command], SOURCE_TYPE_INDEX);
 
-  // Case 1: FROM | (no indexes yet)
-  if (indexes.length === 0) {
+  // Check if there are any sources (including subqueries)
+  const hasAnySources = command.args.some(
+    (arg) => !Array.isArray(arg) && (isSource(arg) || isSubQuery(arg))
+  );
+
+  // Case 1: FROM | (no sources yet)
+  if (!hasAnySources) {
     // Use innerText for absolute positions in rangeToReplace
     return suggestInitialSources(context, innerText);
   }
 
   // Case 2: FROM index | (after space, suggest next actions)
-  if (endsWithSpace(commandText) && !isRestartingExpression(commandText)) {
+  if (/\s$/.test(commandText) && !isRestartingExpression(commandText)) {
     return suggestNextActions(context, callbacks);
   }
 
@@ -104,11 +107,13 @@ function suggestInitialSources(
   context: ICommandContext | undefined,
   innerText: string
 ): ISuggestionItem[] {
-  const suggestions = getSourceSuggestions(
-    context?.sources ?? EMPTY_SOURCES_ARRAY,
-    EMPTY_SOURCES_ARRAY,
-    innerText
-  );
+  let sources = context?.sources ?? EMPTY_SOURCES_ARRAY;
+
+  if (context?.isCursorInSubquery) {
+    sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
+  }
+
+  const suggestions = getSourceSuggestions(sources, EMPTY_SOURCES_ARRAY, innerText);
 
   // Only suggest subqueries when not already inside a subquery
   if (!context?.isCursorInSubquery) {
@@ -149,14 +154,19 @@ async function suggestAdditionalSources(
   indexes: ReturnType<typeof getSourcesFromCommands>
 ): Promise<ISuggestionItem[]> {
   const lastIndex = indexes[indexes.length - 1];
-  const isTypingIndexName = lastIndex.name && innerText.endsWith(lastIndex.name);
+  const isTypingIndexName = lastIndex?.name && innerText.endsWith(lastIndex.name);
 
   // Check for METADATA overlap (only when not typing index name)
   if (!isTypingIndexName && getOverlapRange(innerText, METADATA_KEYWORD)) {
     return [metadataSuggestion];
   }
 
-  const sources = context?.sources ?? [];
+  let sources = context?.sources ?? [];
+
+  if (context?.isCursorInSubquery) {
+    sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
+  }
+
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,
     callbacks?.getByType

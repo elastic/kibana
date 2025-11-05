@@ -39,8 +39,8 @@ export const inlineStatsCommand = {
       '… | INLINE STATS sum(b) BY b % 2',
     ],
     subqueryRestrictions: {
-      allowedInside: true,
-      allowedOutside: false,
+      hideInside: false,
+      hideOutside: true,
     },
   },
 };
