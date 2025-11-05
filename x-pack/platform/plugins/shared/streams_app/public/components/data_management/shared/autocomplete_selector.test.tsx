@@ -10,6 +10,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AutocompleteSelector } from './autocomplete_selector';
 
+jest.mock('@kbn/react-field', () => ({
+  FieldIcon: ({ type }: { type: string }) => <span data-test-subj={`field-icon-${type}`} />,
+}));
+
 describe('AutocompleteSelector', () => {
   const mockSuggestions = [
     { name: '@timestamp' },
@@ -151,6 +155,71 @@ describe('AutocompleteSelector', () => {
 
       const input = screen.getByTestId('comboBoxSearchInput');
       expect(input).toHaveAttribute('disabled');
+    });
+  });
+
+  describe('Field Type Icons', () => {
+    it('renders field type icons when suggestions include type information', async () => {
+      const suggestionsWithTypes = [
+        { name: '@timestamp', type: 'date' },
+        { name: 'log.level', type: 'keyword' },
+        { name: 'message', type: 'text' },
+      ];
+
+      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithTypes} />);
+
+      const toggleButton = screen.getByTestId('comboBoxToggleListButton');
+      await userEvent.click(toggleButton);
+
+      // Verify that field icons are rendered for fields with types
+      expect(screen.getByTestId('field-icon-date')).toBeInTheDocument();
+      expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
+      expect(screen.getByTestId('field-icon-text')).toBeInTheDocument();
+    });
+
+    it('renders unknown icons for fields without type information', async () => {
+      const suggestionsWithoutTypes = [{ name: '@timestamp' }, { name: 'log.level' }];
+
+      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithoutTypes} />);
+
+      const toggleButton = screen.getByTestId('comboBoxToggleListButton');
+      await userEvent.click(toggleButton);
+
+      // Verify that unknown field icons are rendered for fields without types
+      expect(screen.getAllByTestId('field-icon-unknown')).toHaveLength(2);
+    });
+
+    it('shows icon for selected field when type is available', () => {
+      const suggestionsWithTypes = [
+        { name: 'log.level', type: 'keyword' },
+        { name: 'message', type: 'text' },
+      ];
+
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          value="log.level"
+          suggestions={suggestionsWithTypes}
+        />
+      );
+
+      // Icon should be visible in the selected value
+      expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
+    });
+
+    it('shows unknown icon for selected field when type is not available', () => {
+      const suggestionsWithoutTypes = [{ name: 'log.level' }, { name: 'message' }];
+
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          value="log.level"
+          suggestions={suggestionsWithoutTypes}
+        />
+      );
+
+      // Unknown icon should be visible in the selected value
+      expect(screen.getByTestId('field-icon-unknown')).toBeInTheDocument();
     });
   });
 });
