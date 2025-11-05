@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { ICON_TEST_ID, TOTAL_HITS_TEST_ID, GROUPED_ITEMS_TYPE_TEST_ID } from '../test_ids';
 
 export interface TitleProps {
@@ -29,10 +30,22 @@ export const Title = ({ icon, text, count }: TitleProps) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <h2>
-            {count ? <span data-test-subj={TOTAL_HITS_TEST_ID}>{count}</span> : null}
-            <span> </span>
-            <span data-test-subj={GROUPED_ITEMS_TYPE_TEST_ID}>{text}</span>
+          <h2 data-test-subj={GROUPED_ITEMS_TYPE_TEST_ID}>
+            {count ? (
+              <>
+                <span data-test-subj={TOTAL_HITS_TEST_ID}>
+                  {i18n.translate(
+                    'xpack.cloudSecurityPosture.graph.groupedNodePreviewPanel.title.withCount',
+                    {
+                      defaultMessage: '{count} {text}',
+                      values: { count, text },
+                    }
+                  )}
+                </span>
+              </>
+            ) : (
+              text
+            )}
           </h2>
         </EuiTitle>
       </EuiFlexItem>
