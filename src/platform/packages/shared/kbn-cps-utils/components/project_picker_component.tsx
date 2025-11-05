@@ -102,6 +102,7 @@ export const ProjectPickerComponent = ({
                   <h5>{strings.getProjectPickerPopoverTitle()}</h5>
                 </EuiTitle>
               </EuiFlexItem>
+              {/* TODO: Add settings button when cps management is available
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={strings.getManageCrossProjectSearchLabel()} repositionOnScroll>
                   <EuiButtonIcon
@@ -118,7 +119,7 @@ export const ProjectPickerComponent = ({
                     color="text"
                   />
                 </EuiToolTip>
-              </EuiFlexItem>
+              </EuiFlexItem> */}
             </EuiFlexGroup>
           </EuiPopoverTitle>
         </EuiFlexItem>

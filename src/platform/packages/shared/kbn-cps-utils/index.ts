@@ -16,4 +16,4 @@ const ProjectPickerLazy = React.lazy(async () => {
   return { default: Component };
 });
 
-export const ProjectPicker = withSuspense(ProjectPickerLazy);
+export const ProjectPicker = withSuspense(ProjectPickerLazy, null);

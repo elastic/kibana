@@ -105,7 +105,9 @@ export const ProjectListItem = ({ project, index, isOriginProject }: ProjectList
                     </EuiThemeProvider>
                   ))}
                 >
-                  <EuiBadge iconType="tag">{tags.length}</EuiBadge>
+                  <EuiBadge iconType="tag" tabIndex={0}>
+                    {tags.length}
+                  </EuiBadge>
                 </EuiToolTip>
               </EuiFlexItem>
             ) : null}

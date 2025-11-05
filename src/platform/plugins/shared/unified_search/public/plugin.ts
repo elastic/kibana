@@ -62,7 +62,13 @@ export class UnifiedSearchPublicPlugin
 
   public start(
     core: CoreStart,
-    { data, dataViews, uiActions, screenshotMode, cps }: UnifiedSearchStartDependencies
+    {
+      data,
+      dataViews,
+      uiActions,
+      screenshotMode,
+      cps: crossProjectSearch,
+    }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setCoreStart(core);
     setIndexPatterns(dataViews);
@@ -87,7 +93,7 @@ export class UnifiedSearchPublicPlugin
         unifiedSearch: {
           autocomplete: autocompleteStart,
         },
-        cps,
+        cps: crossProjectSearch,
       });
 
     const SearchBar = getCustomSearchBar();
