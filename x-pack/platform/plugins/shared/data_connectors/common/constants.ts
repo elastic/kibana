@@ -16,5 +16,3 @@ export const DATA_CONNECTORS_FULL_TITLE = i18n.translate('xpack.dataConnectors.a
 export const DATA_CONNECTORS_SHORT_TITLE = i18n.translate('xpack.dataConnectors.app.shortTitle', {
   defaultMessage: 'Connectors',
 });
-
-export const DATA_CONNECTORS_ENABLED_SETTING_ID = 'dataConnectors:enabled';

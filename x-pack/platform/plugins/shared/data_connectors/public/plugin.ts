@@ -11,6 +11,7 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
+import { DATA_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerApp } from './register';
 import type {
   DataConnectorsPluginSetup,
@@ -18,7 +19,6 @@ import type {
   DataConnectorsPluginStart,
   DataConnectorsPluginStartDependencies,
 } from './types';
-import { DATA_CONNECTORS_ENABLED_SETTING_ID } from '../common/constants';
 
 export class DataConnectorsPlugin
   implements

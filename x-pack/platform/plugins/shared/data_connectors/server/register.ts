@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsServiceSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { DATA_CONNECTORS_ENABLED_SETTING_ID } from '../common/constants';
+import { DATA_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
