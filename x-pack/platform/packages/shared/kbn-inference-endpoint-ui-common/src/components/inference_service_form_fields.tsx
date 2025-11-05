@@ -99,6 +99,7 @@ interface InferenceServicesProps {
     isPreconfigured?: boolean;
     allowContextWindowLength?: boolean;
     reenterSecretsOnEdit?: boolean;
+    allowTemperature?: boolean;
   };
   http: HttpSetup;
   toasts: IToasts;
@@ -109,6 +110,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   toasts,
   config: {
     allowContextWindowLength,
+    allowTemperature,
     isEdit,
     enforceAdaptiveAllocations,
     isPreconfigured,
@@ -140,6 +142,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       'config.taskType',
       'config.inferenceId',
       'config.contextWindowLength',
+      'config.temperature',
       'config.provider',
       'config.providerConfig',
     ],
@@ -585,6 +588,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             selectedTaskType={selectedTaskType}
             isEdit={isEdit}
             allowContextWindowLength={allowContextWindowLength}
+            allowTemperature={allowTemperature}
           />
           {/* HIDDEN VALIDATION */}
           <ProviderSecretHiddenField
