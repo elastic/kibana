@@ -10,10 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { IWorkflowEventLogger, WorkflowEventLoggerContext } from './workflow_event_logger';
 import { WorkflowEventLogger } from './workflow_event_logger';
-import type {
-  LogSearchResult,
-  LogsRepository,
-} from '../repositories/logs_repository/logs_repository';
+import type { LogSearchResult, LogsRepository } from '../repositories/logs_repository';
 
 export interface WorkflowEventLoggerServiceOptions {
   logsRepository: LogsRepository;
