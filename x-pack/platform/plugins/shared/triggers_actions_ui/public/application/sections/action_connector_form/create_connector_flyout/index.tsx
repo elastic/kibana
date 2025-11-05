@@ -47,21 +47,8 @@ export interface CreateConnectorFlyoutProps {
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
-  initialConnector?: ActionConnector & { actionTypeId: string };
+  initialConnector?: Partial<ActionConnector> & { actionTypeId: string };
 }
-
-// const testInitialConnector = {
-//   actionTypeId: '.jira',
-//   name: 'jira',
-//   isDeprecated: false,
-//   config: {
-//     apiUrl: 'https://www.test.com',
-//     projectKey: 'test',
-//   },
-//   secrets: {},
-//   isMissingSecrets: false,
-//   isConnectorTypeDeprecated: false,
-// };
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
@@ -113,8 +100,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     isConnectorTypeDeprecated: false,
   };
 
-  // create the current connector that the form will use
-  const currentConnector = initialConnector
+  const defaultConnector = initialConnector
     ? {
         ...emptyConnector,
         ...initialConnector,
@@ -328,7 +314,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             )}
             <ConnectorForm
               actionTypeModel={actionTypeModel}
-              connector={currentConnector}
+              connector={defaultConnector}
               isEdit={false}
               onChange={setFormState}
               setResetForm={setResetForm}
