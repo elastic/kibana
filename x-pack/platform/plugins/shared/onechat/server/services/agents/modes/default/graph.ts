@@ -136,6 +136,8 @@ export const createAgentGraph = ({
   };
 
   const prepareToAnswer = async (state: StateType) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     const lastAction = state.mainActions[state.mainActions.length - 1];
     const maxCycleReached = state.currentCycle > state.cycleLimit;
 
@@ -153,6 +155,8 @@ export const createAgentGraph = ({
   });
 
   const answerAgent = async (state: StateType) => {
+    console.log('*** answer agent');
+
     if (state.answerActions.length === 0 && state.errorCount === 0) {
       events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     }
@@ -232,7 +236,6 @@ export const createAgentGraph = ({
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
-    .addEdge(steps.answerAgent, steps.finalize)
     .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
       [steps.answerAgent]: steps.answerAgent,
       [steps.finalize]: steps.finalize,
