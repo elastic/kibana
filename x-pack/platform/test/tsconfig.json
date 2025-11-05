@@ -172,8 +172,9 @@
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
     "@kbn/alerting-types",
-    "@kbn/es-types",
     "@kbn/visualizations-common",
+    "@kbn/connector-schemas",
+    "@kbn/es-types",
     "@kbn/setup-node-env",
   ]
 }

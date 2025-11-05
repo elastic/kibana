@@ -9,6 +9,7 @@
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
+import { getScrollDimensions, isAtBottomOfPage } from '../../utils/scroll_container';
 import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
 import type { GridLayoutStateManager, RuntimeGridSettings } from '../../types';
 import { updateClientY } from '../keyboard_utils';
@@ -134,6 +135,7 @@ export const getNextKeyboardPositionForPanel = (
   const stepX = columnPixelWidth + gutterSize;
   const stepY = rowHeight + gutterSize;
   const gridPosition = gridLayoutStateManager.layoutRef.current?.getBoundingClientRect();
+  const scrollContainer = gridLayoutStateManager.scrollContainer$.getValue();
 
   switch (ev.code) {
     case KeyboardCode.Right: {
@@ -159,18 +161,26 @@ export const getNextKeyboardPositionForPanel = (
 
     case KeyboardCode.Down: {
       // check if we are at the end of the scroll of the page
-      const bottomOfPageReached = window.innerHeight + window.scrollY >= document.body.scrollHeight;
+      const bottomOfPageReached = isAtBottomOfPage(scrollContainer);
+
       // check if next key will cross the bottom edge
       // if we're at the end of the scroll of the page, the dragged handle can go down even more so we can reorder with the last row
       const bottomMaxPosition = bottomOfPageReached
         ? panelPosition.bottom + stepY - (panelPosition.bottom - panelPosition.top) * 0.5
         : panelPosition.bottom + stepY + KEYBOARD_DRAG_BOTTOM_LIMIT;
 
-      const isCloseToBottom = bottomMaxPosition > window.innerHeight;
+      const { clientHeight } = getScrollDimensions(scrollContainer);
+      const isCloseToBottom = bottomMaxPosition > clientHeight;
 
       return {
         ...handlePosition,
-        clientY: updateClientY(handlePosition.clientY, stepY, isCloseToBottom, type),
+        clientY: updateClientY(
+          handlePosition.clientY,
+          stepY,
+          isCloseToBottom,
+          type,
+          scrollContainer
+        ),
       };
     }
     case KeyboardCode.Up: {
@@ -178,7 +188,7 @@ export const getNextKeyboardPositionForPanel = (
       const isCloseToTop = panelPosition.top - stepY - keyboardDragTopLimit < 0;
       return {
         ...handlePosition,
-        clientY: updateClientY(handlePosition.clientY, -stepY, isCloseToTop, type),
+        clientY: updateClientY(handlePosition.clientY, -stepY, isCloseToTop, type, scrollContainer),
       };
     }
     default:
