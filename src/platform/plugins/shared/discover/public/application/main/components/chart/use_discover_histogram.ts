@@ -115,7 +115,7 @@ export const useDiscoverHistogram = (
     const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
       (changes) => {
         if ('timeInterval' in changes && changes.timeInterval) {
-          unifiedHistogramApi?.setTimeInterval(changes.timeInterval);
+          unifiedHistogramApi?.setTimeInterval(changes.timeInterval); // TODO: make a part of fetch params?
         }
 
         if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
@@ -414,6 +414,7 @@ export const useDiscoverHistogram = (
   return useMemo(
     () => ({
       setUnifiedHistogramApi,
+      enableLensVisService: true,
       services,
       localStorageKeyPrefix: 'discover',
       initialState: {
@@ -430,7 +431,7 @@ export const useDiscoverHistogram = (
       isChartLoading: isSuggestionLoading,
       onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
       onBreakdownFieldChange,
-      getModifiedVisAttributes, // TODO: should it be a part of fetch params?
+      getModifiedVisAttributes, // TODO: make a part of fetch params instead
     }),
     [
       chartHidden,

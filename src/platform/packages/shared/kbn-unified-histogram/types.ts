@@ -174,6 +174,16 @@ export interface LensRequestData {
   breakdownField?: string;
 }
 
+export enum LensVisServiceStatus {
+  'initial' = 'initial',
+  'completed' = 'completed',
+}
+
+export interface LensVisServiceState {
+  status: LensVisServiceStatus;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext;
+  visContext: UnifiedHistogramVisContext | undefined;
+}
 /**
  * Unified Histogram type for recreating a stored Lens vis
  */
@@ -242,7 +252,10 @@ export interface UnifiedHistogramFetchParamsExternal {
   externalVisContext?: UnifiedHistogramVisContext;
 }
 
-export type UnifiedHistogramFetchParams = UnifiedHistogramFetchParamsExternal & {
+export type UnifiedHistogramFetchParams = Omit<
+  UnifiedHistogramFetchParamsExternal,
+  'breakdownField'
+> & {
   query: Query | AggregateQuery;
   filters: Filter[];
   timeRange: TimeRange;
@@ -252,10 +265,21 @@ export type UnifiedHistogramFetchParams = UnifiedHistogramFetchParamsExternal & 
   // additional
   triggeredAt: number;
   isESQLQuery: boolean;
+  isTimeBased: boolean;
   columnsMap: Record<string, DatatableColumn> | undefined;
+  breakdown:
+    | {
+        field: DataViewField | undefined;
+      }
+    | undefined;
 };
 
-export type UnifiedHistogramFetch$ = ReplaySubject<UnifiedHistogramFetchParams | undefined>;
+export interface UnifiedHistogramFetch$Arguments {
+  fetchParams: UnifiedHistogramFetchParams;
+  lensVisServiceState: LensVisServiceState | undefined;
+}
+
+export type UnifiedHistogramFetch$ = ReplaySubject<UnifiedHistogramFetch$Arguments>;
 
 // A shared interface for communication between Discover and custom components.
 export interface ChartSectionProps {

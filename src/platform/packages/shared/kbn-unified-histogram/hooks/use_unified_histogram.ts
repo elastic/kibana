@@ -12,10 +12,7 @@ import type {
   LensEmbeddableInput,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { useLayoutEffect, useMemo, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
-import { cloneDeep } from 'lodash';
-import useLatest from 'react-use/lib/useLatest';
+import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
@@ -30,7 +27,6 @@ import type {
   UnifiedHistogramStateOptions,
   UnifiedHistogramStateService,
 } from '../services/state_service';
-import { LensVisService } from '../services/lens_vis_service';
 import { checkChartAvailability } from '../components/chart';
 import type { UnifiedHistogramLayoutProps } from '../components/layout/layout';
 import { useServicesBootstrap } from './use_services_bootstrap';
@@ -77,6 +73,10 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
   getModifiedVisAttributes?: (
     attributes: TypedLensByValueInput['attributes']
   ) => TypedLensByValueInput['attributes'];
+  /**
+   * Whether to calculate lens vis context automatically
+   */
+  enableLensVisService?: boolean;
 };
 
 export type UnifiedHistogramApi = {
@@ -109,62 +109,8 @@ export type UseUnifiedHistogramResult =
     };
 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
-  const [lensVisService, setLensVisService] = useState<LensVisService>();
-
-  const { stateProps, fetch$, fetchParams, hasValidFetchParams, api } = useServicesBootstrap(props);
-
-  // Load async services and initialize API
-  useMount(async () => {
-    const apiHelper = await services.lens.stateHelperApi();
-    setLensVisService(new LensVisService({ services, lensSuggestionsApi: apiHelper.suggestions }));
-  });
-
-  const { services, isChartLoading } = props;
-  const latestGetModifiedVisAttributes = useLatest(props.getModifiedVisAttributes);
-
-  useLayoutEffect(() => {
-    if (isChartLoading || !lensVisService || !fetchParams?.dataView) {
-      return;
-    }
-
-    lensVisService.update({
-      externalVisContext: fetchParams.externalVisContext,
-      queryParams: {
-        dataView: fetchParams.dataView,
-        query: fetchParams.query,
-        filters: fetchParams.filters,
-        timeRange: fetchParams.timeRange,
-        isPlainRecord: fetchParams.isESQLQuery,
-        columns: fetchParams.columns,
-        columnsMap: fetchParams.columnsMap,
-      },
-      timeInterval: stateProps.chart?.timeInterval,
-      breakdownField: stateProps.breakdown?.field,
-      table: fetchParams.table,
-      onSuggestionContextChange: stateProps.onSuggestionContextChange,
-      onVisContextChanged: stateProps.onVisContextChanged,
-      getModifiedVisAttributes: (attributes) => {
-        return latestGetModifiedVisAttributes.current?.(cloneDeep(attributes)) ?? attributes;
-      },
-    });
-  }, [
-    fetchParams?.columns,
-    fetchParams?.table,
-    fetchParams?.timeRange,
-    fetchParams?.dataView,
-    fetchParams?.externalVisContext,
-    fetchParams?.filters,
-    fetchParams?.query,
-    fetchParams?.columnsMap,
-    fetchParams?.isESQLQuery,
-    isChartLoading,
-    latestGetModifiedVisAttributes,
-    lensVisService,
-    stateProps.breakdown?.field,
-    stateProps.chart?.timeInterval,
-    stateProps.onSuggestionContextChange,
-    stateProps.onVisContextChanged,
-  ]);
+  const { stateProps, fetch$, fetchParams, hasValidFetchParams, api, lensVisService } =
+    useServicesBootstrap(props);
 
   const lensVisServiceState = useObservable(lensVisService?.state$ ?? of(undefined));
   const lensVisServiceCurrentSuggestionContextType =

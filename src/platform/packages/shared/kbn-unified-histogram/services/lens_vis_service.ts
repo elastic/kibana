@@ -41,8 +41,16 @@ import type { XYState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
-import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
+import type {
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramVisContext,
+  LensVisServiceState,
+} from '../types';
+import {
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramSuggestionType,
+  LensVisServiceStatus,
+} from '../types';
 import {
   isSuggestionShapeAndVisContextCompatible,
   deriveLensSuggestionFromLensAttributes,
@@ -54,17 +62,6 @@ import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
-export enum LensVisServiceStatus {
-  'initial' = 'initial',
-  'completed' = 'completed',
-}
-
-export interface LensVisServiceState {
-  status: LensVisServiceStatus;
-  currentSuggestionContext: UnifiedHistogramSuggestionContext;
-  visContext: UnifiedHistogramVisContext | undefined;
-}
-
 interface Services {
   data: DataPublicPluginStart;
 }
@@ -75,7 +72,6 @@ interface LensVisServiceParams {
 }
 
 export class LensVisService {
-  private state: LensVisServiceState;
   state$: BehaviorSubject<LensVisServiceState>;
   private services: Services;
   private lensSuggestionsApi: LensSuggestionsApi;
@@ -85,7 +81,7 @@ export class LensVisService {
         timeInterval: string | undefined;
         breakdownField: DataViewField | undefined;
         table: Datatable | undefined;
-        onSuggestionContextChange: (
+        onSuggestionContextChange?: (
           suggestionContext: UnifiedHistogramSuggestionContext | undefined
         ) => void;
         onVisContextChanged?: (
@@ -108,14 +104,9 @@ export class LensVisService {
       visContext: undefined,
     };
     this.state$ = new BehaviorSubject<LensVisServiceState>(initialState);
-    this.state = initialState;
 
     this.prevUpdateContext = undefined;
   }
-
-  getStateValue = () => {
-    return this.state; // more preferable here than this.state$.getValue() to enable faster access to the latest value in sync flows
-  };
 
   update = ({
     externalVisContext,
@@ -132,7 +123,7 @@ export class LensVisService {
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
     table?: Datatable;
-    onSuggestionContextChange: (
+    onSuggestionContextChange?: (
       suggestionContext: UnifiedHistogramSuggestionContext | undefined
     ) => void;
     onVisContextChanged?: (
@@ -160,7 +151,7 @@ export class LensVisService {
       getModifiedVisAttributes,
     });
 
-    onSuggestionContextChange(suggestionState.currentSuggestionContext);
+    onSuggestionContextChange?.(suggestionState.currentSuggestionContext);
     onVisContextChanged?.(
       lensAttributesState.visContext,
       lensAttributesState.externalVisContextStatus
@@ -173,7 +164,6 @@ export class LensVisService {
     };
 
     this.state$.next(nextState);
-    this.state = nextState;
 
     this.prevUpdateContext = {
       queryParams,

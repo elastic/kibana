@@ -7,20 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
-import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect, useMemo } from 'react';
 import type {
   UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramServices,
-  UnifiedHistogramSuggestionContext,
   UnifiedHistogramTopPanelHeightContext,
-  UnifiedHistogramVisContext,
 } from '../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
@@ -34,30 +28,19 @@ import {
 } from '../utils/state_selectors';
 import { useStateSelector } from './use_state_selector';
 import { setBreakdownField } from '../utils/local_storage_utils';
-import { exportVisContext } from '../utils/external_vis_context';
-import type { UseUnifiedHistogramProps } from './use_unified_histogram';
 
 export const useStateProps = ({
   services,
   localStorageKeyPrefix,
   stateService,
   fetchParams,
-  initialBreakdownField,
   onBreakdownFieldChange: originalOnBreakdownFieldChange,
-  onVisContextChanged: originalOnVisContextChanged,
 }: {
   services: UnifiedHistogramServices;
   localStorageKeyPrefix: string | undefined;
   stateService: UnifiedHistogramStateService | undefined;
   fetchParams: UnifiedHistogramFetchParams | undefined;
-  initialBreakdownField: string | undefined;
   onBreakdownFieldChange: ((breakdownField: string | undefined) => void) | undefined;
-  onVisContextChanged:
-    | ((
-        nextVisContext: UnifiedHistogramVisContext | undefined,
-        externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
-      ) => void)
-    | undefined;
 }) => {
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
@@ -67,19 +50,8 @@ export const useStateProps = ({
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
   const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
 
-  const breakdownField =
-    fetchParams && 'breakdownField' in fetchParams
-      ? fetchParams.breakdownField
-      : initialBreakdownField;
-  const { dataView, query, columns, searchSessionId, requestAdapter, isESQLQuery } =
+  const { searchSessionId, requestAdapter, breakdown, isTimeBased, isESQLQuery } =
     fetchParams || {};
-  /**
-   * Contexts
-   */
-
-  const isTimeBased = useMemo(() => {
-    return dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
-  }, [dataView]);
 
   const hits = useMemo(() => {
     if (totalHitsResult instanceof Error) {
@@ -102,31 +74,6 @@ export const useStateProps = ({
       timeInterval,
     };
   }, [chartHidden, isESQLQuery, isTimeBased, timeInterval]);
-
-  const breakdown = useMemo(() => {
-    if (!isTimeBased) {
-      return undefined;
-    }
-
-    // hide the breakdown field selector when the ES|QL query has a transformational command (STATS, KEEP etc)
-    if (query && isOfAggregateQueryType(query) && hasTransformationalCommand(query.esql)) {
-      return undefined;
-    }
-
-    if (isESQLQuery) {
-      const breakdownColumn = columns?.find((column) => column.name === breakdownField);
-      const field = breakdownColumn
-        ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
-        : undefined;
-      return {
-        field,
-      };
-    }
-
-    return {
-      field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
-    };
-  }, [isTimeBased, query, isESQLQuery, breakdownField, dataView, columns]);
 
   // TODO: consider dropping in favor of fetchParams
   const request = useMemo(() => {
@@ -188,29 +135,11 @@ export const useStateProps = ({
     [originalOnBreakdownFieldChange]
   );
 
-  const onSuggestionContextChange = useCallback(
-    (suggestionContext: UnifiedHistogramSuggestionContext | undefined) => {
-      stateService?.setCurrentSuggestionContext(suggestionContext);
-    },
-    [stateService]
-  );
-
-  const onVisContextChanged: UseUnifiedHistogramProps['onVisContextChanged'] = useMemo(() => {
-    if (!originalOnVisContextChanged || !isESQLQuery) {
-      return undefined;
-    }
-
-    return (visContext, externalVisContextStatus) => {
-      const minifiedVisContext = exportVisContext(visContext);
-
-      originalOnVisContextChanged(minifiedVisContext, externalVisContextStatus);
-    };
-  }, [isESQLQuery, originalOnVisContextChanged]);
-
   /**
    * Effects
    */
 
+  const breakdownField = breakdown?.field?.name ?? '';
   // Sync the breakdown field with local storage
   useEffect(() => {
     if (localStorageKeyPrefix) {
@@ -239,7 +168,5 @@ export const useStateProps = ({
     onChartHiddenChange,
     onChartLoad,
     onBreakdownFieldChange,
-    onSuggestionContextChange,
-    onVisContextChanged,
   };
 };

@@ -7,41 +7,137 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import { pick } from 'lodash';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneDeep, pick } from 'lodash';
 import { ReplaySubject } from 'rxjs';
+import type { TypedLensByValueInput } from '@kbn/lens-common';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
-import type { UnifiedHistogramFetchParams } from '../types';
+import type {
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramFetchParams,
+  UnifiedHistogramFetch$Arguments,
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramVisContext,
+  LensVisServiceState,
+} from '../types';
 import { getBreakdownField } from '../utils/local_storage_utils';
 import { processFetchParams } from '../utils/process_fetch_params';
+import { LensVisService } from '../services/lens_vis_service';
+import { exportVisContext } from '../utils/external_vis_context';
+
+interface State {
+  fetchParams: UnifiedHistogramFetchParams | undefined;
+  lensVisService: LensVisService | undefined;
+  lensVisServiceState: LensVisServiceState | undefined;
+}
+
+const INITIAL_STATE: State = {
+  fetchParams: undefined,
+  lensVisService: undefined,
+  lensVisServiceState: undefined,
+};
 
 export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
-  const [fetch$] = useState(() => new ReplaySubject<UnifiedHistogramFetchParams | undefined>(1));
-  const [fetchParams, setFetchParams] = useState<UnifiedHistogramFetchParams | undefined>(
-    undefined
+  const [fetch$] = useState(() => new ReplaySubject<UnifiedHistogramFetch$Arguments>(1));
+  const [state, setState] = useState<State>(INITIAL_STATE);
+  const { fetchParams, lensVisService } = state;
+  const { services, initialState, localStorageKeyPrefix, enableLensVisService } = props;
+  const propsRef = useRef<UseUnifiedHistogramProps>(props);
+  propsRef.current = props;
+
+  const initialBreakdownField = useMemo(
+    () =>
+      localStorageKeyPrefix
+        ? getBreakdownField(services.storage, localStorageKeyPrefix)
+        : undefined,
+    [localStorageKeyPrefix, services.storage]
   );
 
   useEffect(() => {
-    if (fetchParams) {
+    if (state.fetchParams) {
       // update the observable after fetchParams state is set
-      fetch$.next(fetchParams);
+      fetch$.next({
+        fetchParams: state.fetchParams,
+        lensVisServiceState: state.lensVisServiceState,
+      });
     }
-  }, [fetchParams, fetch$]);
+  }, [state, fetch$]);
 
   const [stateService] = useState(() => {
-    const { services, initialState, localStorageKeyPrefix } = props;
     return createStateService({
-      services,
+      services: props.services,
       initialState,
       localStorageKeyPrefix,
     });
   });
 
+  const onVisContextChanged = useCallback(
+    (
+      visContext: UnifiedHistogramVisContext | undefined,
+      externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+    ) => {
+      if (!propsRef.current.onVisContextChanged) {
+        return;
+      }
+
+      const minifiedVisContext = exportVisContext(visContext);
+
+      propsRef.current.onVisContextChanged?.(minifiedVisContext, externalVisContextStatus);
+    },
+    []
+  );
+  const getModifiedVisAttributes = useCallback(
+    (attributes: TypedLensByValueInput['attributes']) => {
+      return propsRef.current.getModifiedVisAttributes?.(cloneDeep(attributes)) ?? attributes;
+    },
+    []
+  );
+
   const [api] = useState<UnifiedHistogramApi>(() => ({
-    fetch: (params) => {
-      setFetchParams(processFetchParams({ params, services }));
+    fetch: async (params) => {
+      const nextFetchParams = processFetchParams({
+        params,
+        services,
+        initialBreakdownField,
+      });
+      let updatedLensVisService = lensVisService;
+      if (!updatedLensVisService && enableLensVisService) {
+        const apiHelper = await services.lens.stateHelperApi();
+        updatedLensVisService = new LensVisService({
+          services,
+          lensSuggestionsApi: apiHelper.suggestions,
+        });
+      }
+      let updatedLensVisServiceState: LensVisServiceState | undefined;
+      if (updatedLensVisService && enableLensVisService) {
+        updatedLensVisServiceState = updatedLensVisService.update({
+          externalVisContext: nextFetchParams.externalVisContext,
+          queryParams: {
+            dataView: nextFetchParams.dataView,
+            query: nextFetchParams.query,
+            filters: nextFetchParams.filters,
+            timeRange: nextFetchParams.timeRange,
+            isPlainRecord: nextFetchParams.isESQLQuery,
+            columns: nextFetchParams.columns,
+            columnsMap: nextFetchParams.columnsMap,
+          },
+          timeInterval:
+            !nextFetchParams.isTimeBased && !nextFetchParams.isESQLQuery
+              ? undefined
+              : stateService.getTimeInterval(),
+          breakdownField: nextFetchParams.breakdown?.field,
+          table: nextFetchParams.table,
+          onVisContextChanged: nextFetchParams.isESQLQuery ? onVisContextChanged : undefined,
+          getModifiedVisAttributes,
+        });
+      }
+      setState({
+        fetchParams: nextFetchParams,
+        lensVisService: updatedLensVisService,
+        lensVisServiceState: updatedLensVisServiceState,
+      });
     },
     ...pick(
       stateService,
@@ -53,24 +149,12 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     ),
   }));
 
-  const { services, localStorageKeyPrefix } = props;
-
-  const initialBreakdownField = useMemo(
-    () =>
-      localStorageKeyPrefix
-        ? getBreakdownField(services.storage, localStorageKeyPrefix)
-        : undefined,
-    [localStorageKeyPrefix, services.storage]
-  );
-
   const stateProps = useStateProps({
     services,
     localStorageKeyPrefix,
     stateService,
     fetchParams,
-    initialBreakdownField,
     onBreakdownFieldChange: props.onBreakdownFieldChange,
-    onVisContextChanged: props.onVisContextChanged,
   });
 
   return {
@@ -81,5 +165,6 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     hasValidFetchParams: Boolean(
       fetchParams && (fetchParams.searchSessionId || fetchParams.isESQLQuery)
     ),
+    lensVisService,
   };
 };

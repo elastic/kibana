@@ -17,7 +17,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import type {
   UnifiedHistogramFetch$,
-  UnifiedHistogramFetchParams,
+  UnifiedHistogramFetch$Arguments,
   UnifiedHistogramHitsContext,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
@@ -31,7 +31,7 @@ export const useTotalHits = ({
   hits,
   chartVisible,
   fetch$,
-  fetchParams,
+  abortController: parentAbortController,
   onTotalHitsChange,
 }: {
   services: UnifiedHistogramServices;
@@ -39,14 +39,12 @@ export const useTotalHits = ({
   hits: UnifiedHistogramHitsContext | undefined;
   chartVisible: boolean;
   fetch$: UnifiedHistogramFetch$;
-  fetchParams: UnifiedHistogramFetchParams;
+  abortController: AbortController | undefined;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
-  const isPlainRecord = fetchParams.isESQLQuery;
-  const parentAbortController = fetchParams.abortController;
   const abortController = useRef<AbortController>();
 
-  const fetch = useStableCallback(() => {
+  const fetch = useStableCallback(({ fetchParams }: UnifiedHistogramFetch$Arguments) => {
     fetchTotalHits({
       services,
       abortController,
@@ -58,7 +56,7 @@ export const useTotalHits = ({
       query: fetchParams.query,
       timeRange: fetchParams.timeRange,
       onTotalHitsChange,
-      isPlainRecord,
+      isPlainRecord: fetchParams.isESQLQuery,
     });
   });
 

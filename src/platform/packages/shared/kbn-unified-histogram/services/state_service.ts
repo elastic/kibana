@@ -8,7 +8,6 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '..';
@@ -92,7 +91,7 @@ export interface UnifiedHistogramStateService {
   /**
    * The current state of the container
    */
-  state$: Observable<UnifiedHistogramState>;
+  state$: BehaviorSubject<UnifiedHistogramState>;
   /**
    * Sets the current chart hidden state
    */
@@ -131,7 +130,24 @@ export interface UnifiedHistogramStateService {
 
 export const createStateService = (
   options: UnifiedHistogramStateOptions
-): UnifiedHistogramStateService => {
+): {
+  state$: BehaviorSubject<UnifiedHistogramState>;
+  getChartHidden: () => boolean;
+  getTimeInterval: () => string;
+  setChartHidden: (chartHidden: boolean) => void;
+  setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
+  setCurrentSuggestionContext: (
+    suggestionContext: UnifiedHistogramSuggestionContext | undefined
+  ) => void;
+  setTimeInterval: (timeInterval: string) => void;
+  setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
+  setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
+  setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => void;
+  setTotalHits: (totalHits: {
+    totalHitsStatus: UnifiedHistogramFetchStatus;
+    totalHitsResult: number | Error | undefined;
+  }) => void;
+} => {
   const { services, localStorageKeyPrefix, initialState } = options;
 
   let initialChartHidden = false;
@@ -162,6 +178,14 @@ export const createStateService = (
 
   return {
     state$,
+
+    getChartHidden: () => {
+      return state$.getValue().chartHidden;
+    },
+
+    getTimeInterval: () => {
+      return state$.getValue().timeInterval;
+    },
 
     setChartHidden: (chartHidden: boolean) => {
       if (localStorageKeyPrefix) {

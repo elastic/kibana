@@ -35,6 +35,7 @@ import type {
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
+  LensVisServiceState,
 } from '../../types';
 import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionType } from '../../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
@@ -44,7 +45,7 @@ import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
 import { useEditVisualization } from './hooks/use_edit_visualization';
-import type { LensVisService, LensVisServiceState } from '../../services/lens_vis_service';
+import type { LensVisService } from '../../services/lens_vis_service';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
 import { useStableCallback } from '../../hooks/use_stable_callback';
@@ -139,7 +140,7 @@ export function UnifiedHistogramChart({
     hits,
     chartVisible,
     fetch$,
-    fetchParams,
+    abortController,
     onTotalHitsChange,
   });
 
@@ -193,8 +194,6 @@ export function UnifiedHistogramChart({
 
   const lensPropsContext = useLensProps({
     fetch$,
-    fetchParams,
-    lensVisService,
     onLoad,
   });
 
