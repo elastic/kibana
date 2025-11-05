@@ -334,6 +334,8 @@ export class SearchInterceptor {
     let isSavedToBackground =
       this.deps.session.isCurrentSession(sessionId) &&
       (this.deps.session.isSaving() || this.deps.session.isStored());
+    if (isSavedToBackground) searchAbortController.clearTimeout();
+
     const savedToBackgroundSub =
       this.deps.session.isCurrentSession(sessionId) &&
       this.deps.session.state$
@@ -347,6 +349,7 @@ export class SearchInterceptor {
           take(1)
         )
         .subscribe(() => {
+          searchAbortController.clearTimeout();
           isSavedToBackground = true;
         });
 
@@ -413,9 +416,7 @@ export class SearchInterceptor {
                 : response
             ),
             tap(async () => {
-              if (!isSavedToBackground) {
-                await sendCancelRequest();
-              }
+              await sendCancelRequest();
               this.handleSearchError(e, request?.params?.body ?? {}, options, true);
             })
           );
