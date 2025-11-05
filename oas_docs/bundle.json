@@ -1727,6 +1727,37 @@
                     "description": "The ID of the agent to chat with. Defaults to the default Elastic AI agent.",
                     "type": "string"
                   },
+                  "attachments": {
+                    "description": "Optional attachments to send with the message.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "description": "Payload of the attachment.",
+                          "type": "object"
+                        },
+                        "hidden": {
+                          "description": "When true, the attachment will not be displayed in the UI.",
+                          "type": "boolean"
+                        },
+                        "id": {
+                          "description": "Optional id for the attachment.",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "Type of the attachment.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "data"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
                   "capabilities": {
                     "additionalProperties": false,
                     "description": "Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.",
@@ -1849,6 +1880,37 @@
                     "default": "elastic-ai-agent",
                     "description": "The ID of the agent to chat with. Defaults to the default Elastic AI agent.",
                     "type": "string"
+                  },
+                  "attachments": {
+                    "description": "Optional attachments to send with the message.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "additionalProperties": {},
+                          "description": "Payload of the attachment.",
+                          "type": "object"
+                        },
+                        "hidden": {
+                          "description": "When true, the attachment will not be displayed in the UI.",
+                          "type": "boolean"
+                        },
+                        "id": {
+                          "description": "Optional id for the attachment.",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "Type of the attachment.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "data"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
                   },
                   "capabilities": {
                     "additionalProperties": false,
@@ -17609,6 +17671,26 @@
                                 "download": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "proxy_headers": {
+                                      "additionalProperties": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "boolean"
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ]
+                                      },
+                                      "nullable": true,
+                                      "type": "object"
+                                    },
+                                    "proxy_url": {
+                                      "type": "string"
+                                    },
                                     "secrets": {
                                       "additionalProperties": true,
                                       "properties": {
@@ -17818,7 +17900,23 @@
                                       },
                                       "type": "array"
                                     },
-                                    "proxy_headers": {},
+                                    "proxy_headers": {
+                                      "additionalProperties": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "boolean"
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ]
+                                      },
+                                      "nullable": true,
+                                      "type": "object"
+                                    },
                                     "proxy_url": {
                                       "type": "string"
                                     },
@@ -17872,8 +17970,7 @@
                                     }
                                   },
                                   "required": [
-                                    "hosts",
-                                    "proxy_headers"
+                                    "hosts"
                                   ],
                                   "type": "object"
                                 },
@@ -18079,7 +18176,23 @@
                                     },
                                     "type": "array"
                                   },
-                                  "proxy_headers": {},
+                                  "proxy_headers": {
+                                    "additionalProperties": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    },
+                                    "nullable": true,
+                                    "type": "object"
+                                  },
                                   "proxy_url": {
                                     "type": "string"
                                   },
@@ -18088,8 +18201,7 @@
                                   }
                                 },
                                 "required": [
-                                  "type",
-                                  "proxy_headers"
+                                  "type"
                                 ],
                                 "type": "object"
                               },
@@ -26157,6 +26269,267 @@
         ]
       }
     },
+    "/api/fleet/epm/packages/_bulk_rollback": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "post-fleet-epm-packages-bulk-rollback",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "bulkRollbackRequest": {
+                  "value": {
+                    "packages": [
+                      {
+                        "name": "system"
+                      }
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "packages": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "description": "Package name to rollback",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "type": "object"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "packages"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "taskId": "taskId"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "taskId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "taskId"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Bulk rollback packages",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
+    "/api/fleet/epm/packages/_bulk_rollback/{taskId}": {
+      "get": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "get-fleet-epm-packages-bulk-rollback-taskid",
+        "parameters": [
+          {
+            "description": "Task ID of the bulk operation",
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "status": "success"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "results": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "error": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "message"
+                            ],
+                            "type": "object"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "success"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Get Bulk rollback packages details",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
     "/api/fleet/epm/packages/_bulk_uninstall": {
       "post": {
         "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
@@ -26276,6 +26649,7 @@
         "operationId": "get-fleet-epm-packages-bulk-uninstall-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
@@ -26510,6 +26884,7 @@
         "operationId": "get-fleet-epm-packages-bulk-upgrade-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
@@ -26919,6 +27294,109 @@
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
+      }
+    },
+    "/api/fleet/epm/packages/{pkgName}/rollback": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "post-fleet-epm-packages-pkgname-rollback",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Package name to roll back",
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "success": true,
+                      "version": "1.0.0"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "version",
+                    "success"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Rollback a package to previous version",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "x-state": "Technical Preview; added in 9.1.0"
       }
     },
     "/api/fleet/epm/packages/{pkgName}/stats": {
@@ -45864,7 +46342,6 @@
                   }
                 },
                 "required": [
-                  "proxy_headers",
                   "certificate_authorities",
                   "certificate",
                   "certificate_key"
@@ -53570,6 +54047,345 @@
                                                               "properties": {
                                                                 "action": {
                                                                   "enum": [
+                                                                    "remove_by_prefix"
+                                                                  ],
+                                                                  "type": "string"
+                                                                },
+                                                                "customIdentifier": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "description": {
+                                                                  "type": "string"
+                                                                },
+                                                                "from": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "ignore_failure": {
+                                                                  "type": "boolean"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "action",
+                                                                "from"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "action": {
+                                                                  "enum": [
+                                                                    "remove"
+                                                                  ],
+                                                                  "type": "string"
+                                                                },
+                                                                "customIdentifier": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "description": {
+                                                                  "type": "string"
+                                                                },
+                                                                "from": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "ignore_failure": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "ignore_missing": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "where": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "anyOf": [
+                                                                        {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "contains": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "endsWith": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "eq": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "field": {
+                                                                              "minLength": 1,
+                                                                              "type": "string"
+                                                                            },
+                                                                            "gt": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "gte": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "lt": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "lte": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "neq": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "range": {
+                                                                              "additionalProperties": false,
+                                                                              "properties": {
+                                                                                "gt": {
+                                                                                  "anyOf": [
+                                                                                    {
+                                                                                      "type": "string"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "boolean"
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                "gte": {
+                                                                                  "anyOf": [
+                                                                                    {
+                                                                                      "type": "string"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "boolean"
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                "lt": {
+                                                                                  "anyOf": [
+                                                                                    {
+                                                                                      "type": "string"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "boolean"
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                "lte": {
+                                                                                  "anyOf": [
+                                                                                    {
+                                                                                      "type": "string"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "boolean"
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              },
+                                                                              "type": "object"
+                                                                            },
+                                                                            "startsWith": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          },
+                                                                          "required": [
+                                                                            "field"
+                                                                          ],
+                                                                          "type": "object"
+                                                                        },
+                                                                        {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "exists": {
+                                                                              "type": "boolean"
+                                                                            },
+                                                                            "field": {
+                                                                              "minLength": 1,
+                                                                              "type": "string"
+                                                                            }
+                                                                          },
+                                                                          "required": [
+                                                                            "field"
+                                                                          ],
+                                                                          "type": "object"
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "and": {
+                                                                          "items": {},
+                                                                          "type": "array"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "and"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "or": {
+                                                                          "items": {},
+                                                                          "type": "array"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "or"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "not": {}
+                                                                      },
+                                                                      "required": [
+                                                                        "not"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "never": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {},
+                                                                          "type": "object"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "never"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "always": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {},
+                                                                          "type": "object"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "always"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "action",
+                                                                "from"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "action": {
+                                                                  "enum": [
                                                                     "convert"
                                                                   ],
                                                                   "type": "string"
@@ -57523,6 +58339,345 @@
                                                           "properties": {
                                                             "action": {
                                                               "enum": [
+                                                                "remove_by_prefix"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "customIdentifier": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "from": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "action",
+                                                            "from"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "action": {
+                                                              "enum": [
+                                                                "remove"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "customIdentifier": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "from": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "ignore_missing": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "where": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "contains": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "endsWith": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "eq": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "gt": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "gte": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "lt": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "lte": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "neq": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "range": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "gt": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "gte": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "lt": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "lte": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          },
+                                                                          "type": "object"
+                                                                        },
+                                                                        "startsWith": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "exists": {
+                                                                          "type": "boolean"
+                                                                        },
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "and": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "and"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "or": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "or"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "not": {}
+                                                                  },
+                                                                  "required": [
+                                                                    "not"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "never": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "never"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "always": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "always"
+                                                                  ],
+                                                                  "type": "object"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "action",
+                                                            "from"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "action": {
+                                                              "enum": [
                                                                 "convert"
                                                               ],
                                                               "type": "string"
@@ -61061,6 +62216,345 @@
                                                                 "action",
                                                                 "to",
                                                                 "value"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "action": {
+                                                                  "enum": [
+                                                                    "remove_by_prefix"
+                                                                  ],
+                                                                  "type": "string"
+                                                                },
+                                                                "customIdentifier": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "description": {
+                                                                  "type": "string"
+                                                                },
+                                                                "from": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "ignore_failure": {
+                                                                  "type": "boolean"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "action",
+                                                                "from"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "action": {
+                                                                  "enum": [
+                                                                    "remove"
+                                                                  ],
+                                                                  "type": "string"
+                                                                },
+                                                                "customIdentifier": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "description": {
+                                                                  "type": "string"
+                                                                },
+                                                                "from": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "ignore_failure": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "ignore_missing": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "where": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "anyOf": [
+                                                                        {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "contains": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "endsWith": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "eq": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "field": {
+                                                                              "minLength": 1,
+                                                                              "type": "string"
+                                                                            },
+                                                                            "gt": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "gte": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "lt": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "lte": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "neq": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "range": {
+                                                                              "additionalProperties": false,
+                                                                              "properties": {
+                                                                                "gt": {
+                                                                                  "anyOf": [
+                                                                                    {
+                                                                                      "type": "string"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "boolean"
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                "gte": {
+                                                                                  "anyOf": [
+                                                                                    {
+                                                                                      "type": "string"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "boolean"
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                "lt": {
+                                                                                  "anyOf": [
+                                                                                    {
+                                                                                      "type": "string"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "boolean"
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                "lte": {
+                                                                                  "anyOf": [
+                                                                                    {
+                                                                                      "type": "string"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "number"
+                                                                                    },
+                                                                                    {
+                                                                                      "type": "boolean"
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              },
+                                                                              "type": "object"
+                                                                            },
+                                                                            "startsWith": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          },
+                                                                          "required": [
+                                                                            "field"
+                                                                          ],
+                                                                          "type": "object"
+                                                                        },
+                                                                        {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "exists": {
+                                                                              "type": "boolean"
+                                                                            },
+                                                                            "field": {
+                                                                              "minLength": 1,
+                                                                              "type": "string"
+                                                                            }
+                                                                          },
+                                                                          "required": [
+                                                                            "field"
+                                                                          ],
+                                                                          "type": "object"
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "and": {
+                                                                          "items": {},
+                                                                          "type": "array"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "and"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "or": {
+                                                                          "items": {},
+                                                                          "type": "array"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "or"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "not": {}
+                                                                      },
+                                                                      "required": [
+                                                                        "not"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "never": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {},
+                                                                          "type": "object"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "never"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "always": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {},
+                                                                          "type": "object"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "always"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "action",
+                                                                "from"
                                                               ],
                                                               "type": "object"
                                                             },
@@ -64710,6 +66204,345 @@
                                                             "action",
                                                             "to",
                                                             "value"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "action": {
+                                                              "enum": [
+                                                                "remove_by_prefix"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "customIdentifier": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "from": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "action",
+                                                            "from"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "action": {
+                                                              "enum": [
+                                                                "remove"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "customIdentifier": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "from": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "ignore_missing": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "where": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "contains": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "endsWith": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "eq": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "gt": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "gte": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "lt": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "lte": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "neq": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "range": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "gt": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "gte": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "lt": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            },
+                                                                            "lte": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          },
+                                                                          "type": "object"
+                                                                        },
+                                                                        "startsWith": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "exists": {
+                                                                          "type": "boolean"
+                                                                        },
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "and": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "and"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "or": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "or"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "not": {}
+                                                                  },
+                                                                  "required": [
+                                                                    "not"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "never": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "never"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "always": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "always"
+                                                                  ],
+                                                                  "type": "object"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "action",
+                                                            "from"
                                                           ],
                                                           "type": "object"
                                                         },
@@ -68848,6 +70681,345 @@
                                               "properties": {
                                                 "action": {
                                                   "enum": [
+                                                    "remove_by_prefix"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "customIdentifier": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "from": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "required": [
+                                                "action",
+                                                "from"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "action": {
+                                                  "enum": [
+                                                    "remove"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "customIdentifier": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "from": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                },
+                                                "ignore_missing": {
+                                                  "type": "boolean"
+                                                },
+                                                "where": {
+                                                  "anyOf": [
+                                                    {
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "contains": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "endsWith": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "eq": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "gt": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "gte": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "lt": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "lte": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "neq": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "range": {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "gt": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "gte": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "lt": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "lte": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              },
+                                                              "type": "object"
+                                                            },
+                                                            "startsWith": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "exists": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "and": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "and"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "or": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "or"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "not": {}
+                                                      },
+                                                      "required": [
+                                                        "not"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "never": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "never"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "always": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "always"
+                                                      ],
+                                                      "type": "object"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "action",
+                                                "from"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "action": {
+                                                  "enum": [
                                                     "convert"
                                                   ],
                                                   "type": "string"
@@ -72358,6 +74530,345 @@
                                                 "action",
                                                 "to",
                                                 "value"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "action": {
+                                                  "enum": [
+                                                    "remove_by_prefix"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "customIdentifier": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "from": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "required": [
+                                                "action",
+                                                "from"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "action": {
+                                                  "enum": [
+                                                    "remove"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "customIdentifier": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "from": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                },
+                                                "ignore_missing": {
+                                                  "type": "boolean"
+                                                },
+                                                "where": {
+                                                  "anyOf": [
+                                                    {
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "contains": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "endsWith": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "eq": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "gt": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "gte": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "lt": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "lte": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "neq": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "range": {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "gt": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "gte": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "lt": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "lte": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              },
+                                                              "type": "object"
+                                                            },
+                                                            "startsWith": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "exists": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "and": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "and"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "or": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "or"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "not": {}
+                                                      },
+                                                      "required": [
+                                                        "not"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "never": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "never"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "always": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "always"
+                                                      ],
+                                                      "type": "object"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "action",
+                                                "from"
                                               ],
                                               "type": "object"
                                             },
