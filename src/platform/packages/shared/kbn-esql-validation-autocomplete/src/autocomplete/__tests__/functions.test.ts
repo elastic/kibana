@@ -287,6 +287,32 @@ describe('functions arg suggestions', () => {
       expect(labels).toEqual(expect.arrayContaining(arithmetic));
     });
 
+    it('ROUND second param (decimals) is constantOnly: should NOT suggest fields/functions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = ROUND(doubleField, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain('doubleField');
+      expect(labels).not.toContain('integerField');
+      expect(labels).not.toContain('longField');
+      expect(labels).not.toContain('ABS');
+      expect(labels).not.toContain('CEIL');
+      expect(labels).not.toContain('FLOOR');
+    });
+
+    it('ROUND_TO second param (points) is constantOnly: should NOT suggest fields/functions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = ROUND_TO(doubleField, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain('doubleField');
+      expect(labels).not.toContain('integerField');
+      expect(labels).not.toContain('longField');
+      expect(labels).not.toContain('ABS');
+      expect(labels).not.toContain('CEIL');
+      expect(labels).not.toContain('FLOOR');
+    });
+
     it('nested functions: excludes parent function names from suggestions to prevent recursion', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = CEIL(FLOOR(ABS(/)');
@@ -330,6 +356,30 @@ describe('functions arg suggestions', () => {
 
       const comparison = comparisonFunctions.map(({ name }) => name.toUpperCase());
       comparison.forEach((operatorName) => expect(labels).not.toContain(operatorName));
+    });
+
+    it('single-param string function in EVAL: after text field no operators (function accepts type directly)', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = TRIM(textField /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual([]);
+    });
+
+    it('single-param string function in EVAL: after keyword field no operators (function accepts type directly)', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = TRIM(keywordField /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual([]);
+    });
+
+    it('variadic string function in EVAL: after first string field suggests comma, not operators', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = CONCAT(textField /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual([',']);
     });
   });
 
@@ -375,21 +425,18 @@ describe('functions arg suggestions', () => {
       expect(labels).toEqual([]);
     });
 
-    it('conditional expression: non-boolean field in condition suggests all comparison/pattern/null/IN operators', async () => {
+    it('conditional expression: non-boolean field in condition suggests pattern/null/IN operators (not comparison)', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = CASE(textField /)');
       const labels = suggestions.map(({ label }) => label);
 
-      const comparison = comparisonFunctions.map(({ name }) => name);
-
       expect(labels).toEqual(
-        expect.arrayContaining([
-          ...comparison,
-          ...patternMatchSymbols,
-          ...inSymbols,
-          ...nullCheckSymbols,
-        ])
+        expect.arrayContaining([...patternMatchSymbols, ...inSymbols, ...nullCheckSymbols])
       );
+      const comparison = comparisonFunctions.map(({ name }) => name);
+      comparison.forEach((op) => {
+        expect(labels).not.toContain(op);
+      });
     });
 
     it('IN operator: suggests opening parenthesis for list', async () => {
@@ -1047,7 +1094,8 @@ describe('functions arg suggestions', () => {
           name: 'first param string: comma and string operators',
           query: 'FROM index | EVAL result = COALESCE(textField /)',
           expectComma: true,
-          expectContains: ['==', '!=', 'LIKE', 'IN'],
+          expectContains: [...patternMatchSymbols, ...inSymbols, ...nullCheckSymbols],
+          expectNotContains: comparisonSymbols, // No comparison operators for strings
         },
         {
           name: 'first param numeric: comma and arithmetic/comparison',
@@ -1065,6 +1113,12 @@ describe('functions arg suggestions', () => {
           expectContains: ['AND', 'OR'],
         },
         {
+          name: 'after arithmetic expression: comma and arithmetic operators',
+          query: 'FROM index | EVAL result = COALESCE(integerField + integerField /)',
+          expectComma: true,
+          expectContains: ['+', '-', '*', '/'],
+        },
+        {
           name: 'second param string: no comma, string functions',
           query: 'FROM index | EVAL result = COALESCE(textField, /)',
           expectComma: false,
@@ -1076,12 +1130,19 @@ describe('functions arg suggestions', () => {
           expectComma: false,
           expectContains: ['integerField', 'ABS', 'ROUND'],
         },
-      ])('$name', async ({ query, expectComma, expectContains }) => {
+      ])('$name', async ({ query, expectComma, expectContains, expectNotContains }) => {
         const { suggest } = await setup();
         const suggestions = await suggest(query);
         const labels = suggestions.map(({ label }) => label);
 
         expect(labels).toEqual(expect.arrayContaining(expectContains));
+
+        if (expectNotContains) {
+          expectNotContains.forEach((item) => {
+            expect(labels).not.toContain(item);
+          });
+        }
+
         if (expectComma) {
           expect(labels).toEqual(expect.arrayContaining([',']));
         } else {
@@ -1133,6 +1194,29 @@ describe('functions arg suggestions', () => {
         ])
       );
     });
+
+    it('CONCAT variadic: after second param should suggest comma', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CONCAT(textField, keywordField /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // Should suggest comma for continuing with more params (variadic function)
+      expect(labels).toContain(',');
+    });
+
+    it('CONCAT variadic: after comma should suggest fields for third param', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CONCAT(textField, keywordField, /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // Should suggest fields for third parameter (variadic accepts more params)
+      expect(labels).toContain('textField');
+      expect(labels).toContain('keywordField');
+    });
   });
 
   describe('consistent behavior across EVAL and STATS contexts', () => {
@@ -1170,53 +1254,56 @@ describe('functions arg suggestions', () => {
       }
     );
 
-    it('conditional with text field: suggests comparison/pattern/IN/null operators in EVAL', async () => {
+    it('conditional with text field: suggests pattern/IN/null operators (not comparison) in EVAL', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = CASE(textField /)');
       const labels = suggestions.map(({ label }) => label);
+      expect(labels).toEqual(
+        expect.arrayContaining([...patternMatchSymbols, ...inSymbols, ...nullCheckSymbols])
+      );
 
       const comparison = comparisonFunctions.map(({ name }) => name);
-
-      expect(labels).toEqual(
-        expect.arrayContaining([
-          ...comparison,
-          ...patternMatchSymbols,
-          ...inSymbols,
-          ...nullCheckSymbols,
-        ])
-      );
+      comparison.forEach((op) => {
+        expect(labels).not.toContain(op);
+      });
     });
 
-    it('conditional with text field: suggests comparison/pattern/IN/null operators in STATS', async () => {
+    it('conditional with text field: suggests pattern/IN/null operators (not comparison) in STATS', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | STATS result = CASE(textField /)');
       const labels = suggestions.map(({ label }) => label);
 
+      expect(labels).toEqual(expect.arrayContaining([]));
+
       const comparison = comparisonFunctions.map(({ name }) => name.toUpperCase());
-      expect(labels).toEqual(expect.arrayContaining(comparison));
+      comparison.forEach((op) => {
+        expect(labels).not.toContain(op);
+      });
     });
 
-    it('variadic function after text field: comma and comparison/pattern/IN operators in EVAL', async () => {
+    it('variadic function after text field: comma and pattern/IN/null operators in EVAL', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = COALESCE(textField /)');
       const labels = suggestions.map(({ label }) => label);
 
-      const comparison = comparisonFunctions.map(({ name }) => name);
-
       expect(labels).toEqual(expect.arrayContaining([',']));
       expect(labels).toEqual(
-        expect.arrayContaining([...comparison, ...patternMatchSymbols, ...inSymbols])
+        expect.arrayContaining([...patternMatchSymbols, ...inSymbols, ...nullCheckSymbols])
       );
+
+      const comparison = comparisonFunctions.map(({ name }) => name);
+      comparison.forEach((op) => expect(labels).not.toContain(op));
     });
 
-    it('variadic function after text field: comma and comparison operators in STATS', async () => {
+    it('variadic function after text field: comma only in STATS (location restricts pattern operators)', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | STATS result = COALESCE(textField /)');
       const labels = suggestions.map(({ label }) => label);
 
       expect(labels).toEqual(expect.arrayContaining([',']));
+
       const comparison = comparisonFunctions.map(({ name }) => name.toUpperCase());
-      expect(labels).toEqual(expect.arrayContaining(comparison));
+      comparison.forEach((op) => expect(labels).not.toContain(op));
     });
   });
 

@@ -74,10 +74,15 @@ describe('updateAgentPolicySpaces', () => {
   });
 
   it('does nothings if agent policy is already in correct space', async () => {
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'Policy 1',
+      space_ids: ['default'],
+    };
+
     await updateAgentPolicySpaces({
-      agentPolicyId: 'policy1',
+      agentPolicy,
       currentSpaceId: 'default',
-      newSpaceIds: ['default'],
       authorizedSpaces: ['default'],
     });
     expect(
@@ -87,10 +92,15 @@ describe('updateAgentPolicySpaces', () => {
 
   it('does nothing if feature flag is not enabled', async () => {
     jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'Policy 1',
+      space_ids: ['default'],
+    };
+
     await updateAgentPolicySpaces({
-      agentPolicyId: 'policy1',
+      agentPolicy,
       currentSpaceId: 'default',
-      newSpaceIds: ['test'],
       authorizedSpaces: ['test', 'default'],
     });
 
@@ -100,10 +110,15 @@ describe('updateAgentPolicySpaces', () => {
   });
 
   it('allow to change spaces', async () => {
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'Policy 1',
+      space_ids: ['test'],
+    };
+
     await updateAgentPolicySpaces({
-      agentPolicyId: 'policy1',
+      agentPolicy,
       currentSpaceId: 'default',
-      newSpaceIds: ['test'],
       authorizedSpaces: ['test', 'default'],
     });
 
@@ -144,11 +159,17 @@ describe('updateAgentPolicySpaces', () => {
         policy_ids: ['policy1', 'policy2'],
       },
     ] as any);
+
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'Policy 1',
+      space_ids: ['test'],
+    };
+
     await expect(
       updateAgentPolicySpaces({
-        agentPolicyId: 'policy1',
+        agentPolicy,
         currentSpaceId: 'default',
-        newSpaceIds: ['test'],
         authorizedSpaces: ['test', 'default'],
       })
     ).rejects.toThrowError(
@@ -163,61 +184,71 @@ describe('updateAgentPolicySpaces', () => {
       is_managed: true,
     } as any);
     jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([] as any);
+
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'Policy 1',
+      space_ids: ['test'],
+    };
+
     await expect(
       updateAgentPolicySpaces({
-        agentPolicyId: 'policy1',
+        agentPolicy,
         currentSpaceId: 'default',
-        newSpaceIds: ['test'],
         authorizedSpaces: ['test', 'default'],
       })
     ).rejects.toThrowError(/Cannot update hosted agent policy policy1 space/);
   });
 
   it('throw when trying to add a space with missing permissions', async () => {
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'Policy 1',
+      space_ids: ['default', 'test'],
+    };
+
     await expect(
       updateAgentPolicySpaces({
-        agentPolicyId: 'policy1',
+        agentPolicy,
         currentSpaceId: 'default',
-        newSpaceIds: ['default', 'test'],
         authorizedSpaces: ['default'],
       })
     ).rejects.toThrowError(/Not enough permissions to create policies in space test/);
   });
 
   it('throw when trying to remove a space with missing permissions', async () => {
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'Policy 1',
+      space_ids: ['test'],
+    };
+
     await expect(
       updateAgentPolicySpaces({
-        agentPolicyId: 'policy1',
+        agentPolicy,
         currentSpaceId: 'default',
-        newSpaceIds: ['test'],
         authorizedSpaces: ['test'],
       })
     ).rejects.toThrowError(/Not enough permissions to remove policies from space default/);
   });
 
-  it('throw when validateUniqueName is true and policy name already exists on another space', async () => {
+  it('throw when policy name already exists on another space', async () => {
     jest
       .mocked(mockValidatePackagePoliciesUniqueNameAcrossSpaces)
       .mockRejectedValueOnce(new Error('Name already exists'));
+
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'Policy 1',
+      space_ids: ['test'],
+    };
+
     await expect(
       updateAgentPolicySpaces({
-        agentPolicyId: 'policy1',
+        agentPolicy,
         currentSpaceId: 'default',
-        newSpaceIds: ['test'],
-        authorizedSpaces: ['test'],
-        options: { validateUniqueName: true },
+        authorizedSpaces: ['default', 'test'],
       })
     ).rejects.toThrowError(/Name already exists/);
-  });
-
-  it('do not call validatePackagePoliciesUniqueNameAcrossSpaces when validateUniqueName is false', async () => {
-    await updateAgentPolicySpaces({
-      agentPolicyId: 'policy1',
-      currentSpaceId: 'default',
-      newSpaceIds: ['default'],
-      authorizedSpaces: ['default'],
-      options: { validateUniqueName: false },
-    });
-    expect(validatePackagePoliciesUniqueNameAcrossSpaces).not.toHaveBeenCalled();
   });
 });

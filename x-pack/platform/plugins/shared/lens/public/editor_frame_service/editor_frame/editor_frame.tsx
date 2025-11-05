@@ -17,6 +17,10 @@ import type {
   AddUserMessages,
   LensInspector,
 } from '@kbn/lens-common';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -40,6 +44,7 @@ import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_erro
 import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
+import { VisualizationToolbarWrapper } from './visualization_toolbar';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -59,6 +64,9 @@ export function EditorFrame(props: EditorFrameProps) {
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const visualization = useLensSelector(selectVisualization);
   const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
+
+  const styles = useMemoCss(componentStyles);
+
   const isVisualizationLoaded = !!visualization.state;
   const visualizationTypeIsKnown = Boolean(
     visualization.activeId && visualizationMap[visualization.activeId]
@@ -147,15 +155,27 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
-              <ConfigPanelWrapper
-                core={props.core}
-                framePublicAPI={framePublicAPI}
-                uiActions={props.plugins.uiActions}
-                dataViews={props.plugins.dataViews}
-                data={props.plugins.data}
-                indexPatternService={props.indexPatternService}
-                getUserMessages={props.getUserMessages}
-              />
+              <>
+                <EuiFlexGroup
+                  css={styles.visualizationToolbar}
+                  justifyContent="flexEnd"
+                  responsive={false}
+                  wrap={true}
+                >
+                  <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+                    <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <ConfigPanelWrapper
+                  core={props.core}
+                  framePublicAPI={framePublicAPI}
+                  uiActions={props.plugins.uiActions}
+                  dataViews={props.plugins.dataViews}
+                  data={props.plugins.data}
+                  indexPatternService={props.indexPatternService}
+                  getUserMessages={props.getUserMessages}
+                />
+              </>
             </ErrorBoundary>
           )
         }
@@ -195,3 +215,10 @@ export function EditorFrame(props: EditorFrameProps) {
     </RootDragDropProvider>
   );
 }
+
+const componentStyles = {
+  visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base}`,
+    }),
+};

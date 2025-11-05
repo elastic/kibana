@@ -84,6 +84,7 @@ import type {
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   PackagePolicyConfigRecord,
+  ArchiveEntry,
 } from '../../common/types';
 import {
   FleetError,
@@ -113,6 +114,7 @@ import type {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyPostUpdateCallback,
+  AssetsMap,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -142,7 +144,7 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
-import { compileTemplate } from './epm/agent/agent';
+import { compileTemplate, getMetaVariables } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
@@ -419,10 +421,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
     }
 
+    const spaceIds = agentPolicies.flatMap((ap) => ap.space_ids ?? []);
     // trailing whitespace causes issues creating API keys
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
-      await requireUniqueName(soClient, enrichedPackagePolicy);
+      await requireUniqueName(soClient, enrichedPackagePolicy, undefined, spaceIds);
     }
     if (enrichedPackagePolicy.namespace) {
       await validatePolicyNamespaceForSpace({
@@ -1247,12 +1250,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       this.keepPolicyIdInSync(oldPackagePolicy);
     }
 
+    const agentPolicies: AgentPolicy[] = [];
+
+    for (const policyId of packagePolicyUpdate.policy_ids) {
+      const agentPolicy = await agentPolicyService.get(soClient, policyId, false);
+      if (!agentPolicy) {
+        throw new AgentPolicyNotFoundError('Agent policy not found');
+      }
+
+      agentPolicies.push(agentPolicy);
+    }
+
+    const spaceIds = agentPolicies.flatMap((ap) => ap.space_ids ?? []);
+
     if (
       packagePolicy.name &&
       packagePolicy.name !== oldPackagePolicy.name &&
       !options?.skipUniqueNameVerification
     ) {
-      await requireUniqueName(soClient, enrichedPackagePolicy, id);
+      await requireUniqueName(soClient, enrichedPackagePolicy, id, spaceIds);
     }
 
     if (packagePolicy.namespace) {
@@ -1327,8 +1343,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       };
     }
 
-    for (const policyId of packagePolicyUpdate.policy_ids) {
-      const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+    for (const agentPolicy of agentPolicies) {
       if (agentPolicy) {
         validateReusableIntegrationsAndSpaceAwareness(packagePolicy, [agentPolicy]);
       }
@@ -3215,6 +3230,7 @@ function _compilePackagePolicyInput(
   return compileTemplate(
     // Populate template variables from package- and input-level vars
     Object.assign({}, vars, input.vars),
+    getMetaVariables(pkgInfo, input),
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -3287,6 +3303,32 @@ export function _applyIndexPrivileges(
   return streamOut;
 }
 
+export function _getAssetForTemplatePath(
+  pkgInfo: PackageInfo,
+  assetsMap: AssetsMap,
+  datasetPath: string,
+  templatePath: string
+): ArchiveEntry {
+  const assets = getAssetsDataFromAssetsMap(
+    pkgInfo,
+    assetsMap,
+    (path: string) => path.endsWith(`/agent/stream/${templatePath}`),
+    datasetPath
+  );
+  if (assets.length === 1) {
+    return assets[0];
+  }
+
+  // fallback to old path structure for backward compatibility
+  const [fallbackPkgStreamTemplate] = getAssetsDataFromAssetsMap(
+    pkgInfo,
+    assetsMap,
+    (path: string) => path.endsWith(templatePath),
+    datasetPath
+  );
+  return fallbackPkgStreamTemplate;
+}
+
 function _compilePackageStream(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
@@ -3334,11 +3376,11 @@ function _compilePackageStream(
 
   const datasetPath = packageDataStream.path;
 
-  const [pkgStreamTemplate] = getAssetsDataFromAssetsMap(
+  const pkgStreamTemplate = _getAssetForTemplatePath(
     pkgInfo,
     assetsMap,
-    (path: string) => path.endsWith(streamFromPkg.template_path),
-    datasetPath
+    datasetPath,
+    streamFromPkg.template_path
   );
 
   if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
@@ -3350,6 +3392,7 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
+    getMetaVariables(pkgInfo, input, streamIn),
     pkgStreamTemplate.buffer.toString()
   );
 
@@ -3950,17 +3993,37 @@ function removeStaleVars<T extends SupportsVars>(
 async function requireUniqueName(
   soClient: SavedObjectsClientContract,
   packagePolicy: UpdatePackagePolicy | NewPackagePolicy,
-  id?: string
+  id?: string,
+  spaceIds: string[] = []
 ) {
   const savedObjectType = await getPackagePolicySavedObjectType();
-  const existingPoliciesWithName = await packagePolicyService.list(soClient, {
+  const isMultiSpace = spaceIds.length > 1;
+  const baseSearchParams = {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${savedObjectType}.name:"${packagePolicy.name}"`,
-  });
+  };
+
+  let existingPoliciesWithName;
+
+  if (isMultiSpace) {
+    existingPoliciesWithName = await packagePolicyService.list(
+      appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+      {
+        ...baseSearchParams,
+        spaceId: '*',
+      }
+    );
+  } else {
+    existingPoliciesWithName = await packagePolicyService.list(soClient, baseSearchParams);
+  }
 
   const policiesToCheck = id
     ? // Check that the name does not exist already but exclude the current package policy
-      (existingPoliciesWithName?.items || []).filter((p) => p.id !== id)
+      (existingPoliciesWithName?.items || []).filter(
+        (p) =>
+          p.id !== id &&
+          (isMultiSpace ? (p.spaceIds ?? []).some((spaceId) => spaceIds.includes(spaceId)) : true)
+      )
     : existingPoliciesWithName?.items;
 
   if (policiesToCheck.length > 0) {

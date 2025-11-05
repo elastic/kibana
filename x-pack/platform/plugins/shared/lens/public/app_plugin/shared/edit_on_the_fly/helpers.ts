@@ -70,7 +70,7 @@ export const getGridAttrs = async (
 
   const dataView = dataViewSpec
     ? await data.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview(query.esql, data.dataViews);
+    : await getESQLAdHocDataview(query.esql, data.dataViews, { skipFetchFields: true });
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
 

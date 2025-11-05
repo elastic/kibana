@@ -1085,7 +1085,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
     this.log.info(`${new Date().toISOString()} Calling API DeleteSingleEntity`);
     return this.kbnClient
       .request<DeleteSingleEntityResponse>({
-        path: replaceParams('/api/entity_store/entities/{entityType}/{entityId}', props.params),
+        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
