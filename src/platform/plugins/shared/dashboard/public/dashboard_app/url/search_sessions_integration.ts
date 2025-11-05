@@ -84,11 +84,8 @@ function getLocatorParams({
     'panels' | 'references'
   >;
 
-  const { controlGroupInput, controlGroupReferences } = dashboardInternalApi.serializeControls();
-
   const combinedReferences = [
     ...(panels?.references ?? []),
-    ...(controlGroupReferences ?? []),
   ] as unknown as DashboardState['references'] & SerializableRecord;
 
   return {
@@ -110,7 +107,6 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
-    controlGroupInput,
     panels: panels?.panels,
     references: combinedReferences,
   };

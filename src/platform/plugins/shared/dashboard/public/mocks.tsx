@@ -173,9 +173,9 @@ export function getMockPanelsWithSections() {
 }
 
 export function getMockLayout() {
-  return deserializeLayout(getMockPanels(), () => []).layout;
+  return deserializeLayout(getMockPanels(), { controls: [] }, () => []).layout;
 }
 
 export function getMockLayoutWithSections() {
-  return deserializeLayout(getMockPanelsWithSections(), () => []).layout;
+  return deserializeLayout(getMockPanelsWithSections(), { controls: [] }, () => []).layout;
 }
