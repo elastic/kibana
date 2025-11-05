@@ -32,7 +32,7 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpo
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem>
             <EuiText size="s" color="subdued">
-              {provider ? provider.name : 'Custom'}
+              {provider ? provider.name : service}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
