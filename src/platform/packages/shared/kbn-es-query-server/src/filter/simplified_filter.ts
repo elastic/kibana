@@ -82,7 +82,9 @@ const baseFilterPropertiesSchema = {
   ),
   controlledBy: schema.maybe(
     schema.string({
-      meta: { description: 'Owner that manages this filter' },
+      meta: {
+        description: 'Optional identifier for the component/plugin managing this filter',
+      },
     })
   ),
   dataViewId: schema.maybe(
