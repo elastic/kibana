@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 
 import { GET_ONBOARDING_TOKEN_ROUTE } from '../../../common/routes';
 import type { OnboardingTokenResponse } from '../../../common/types';

@@ -151,7 +151,9 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         <ProviderSelector
           selectedProvider={selectedProvider}
           setSelectedProvider={(provider) => {
-            const showCloudConnectors = isCloudConnectorsEnabledForProvider(provider);
+            const showCloudConnectors =
+              isCloudConnectorsEnabledForProvider(provider) &&
+              setupTechnology === SetupTechnology.AGENTLESS;
             setEnabledPolicyInput(provider, showCloudConnectors);
           }}
           disabled={isEditPage}
@@ -247,19 +249,25 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
               useDescribedFormGroup={false}
               onSetupTechnologyChange={(value) => {
                 updateSetupTechnology(value);
-                const showCloudConnectors = isCloudConnectorsEnabledForProvider(selectedProvider);
+                const showCloudConnectors =
+                  isCloudConnectorsEnabledForProvider(selectedProvider) &&
+                  value === SetupTechnology.AGENTLESS;
                 updatePolicy({
-                  updatedPolicy: updatePolicyWithInputs(
-                    newPolicy,
-                    config.providers[selectedProvider].type,
-                    getDefaultCloudCredentialsType(
-                      value === SetupTechnology.AGENTLESS,
-                      selectedProvider,
-                      packageInfo,
-                      showCloudConnectors,
-                      templateName
-                    )
-                  ),
+                  updatedPolicy: {
+                    ...updatePolicyWithInputs(
+                      newPolicy,
+                      config.providers[selectedProvider].type,
+                      getDefaultCloudCredentialsType(
+                        value === SetupTechnology.AGENTLESS,
+                        selectedProvider,
+                        packageInfo,
+                        showCloudConnectors,
+                        templateName
+                      )
+                    ),
+                    supports_cloud_connector: showCloudConnectors,
+                    cloud_connector_id: undefined,
+                  },
                 });
               }}
             />

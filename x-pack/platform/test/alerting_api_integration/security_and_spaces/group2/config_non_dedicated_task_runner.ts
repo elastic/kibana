@@ -6,6 +6,7 @@
  */
 
 import { createTestConfig } from '../../common/config';
+import { EmailMaximumBodyLength } from './config';
 
 export default createTestConfig('security_and_spaces', {
   disabledPlugins: [],
@@ -20,4 +21,5 @@ export default createTestConfig('security_and_spaces', {
     'crowdstrikeConnectorOn',
     'microsoftDefenderEndpointOn',
   ],
+  emailMaximumBodyLength: EmailMaximumBodyLength,
 });
