@@ -24,6 +24,10 @@ export const DeleteEntityEngineRequestQuery = z.object({
   /**
    * Control flag to also delete the entity data.
    */
+  delete_data: BooleanFromString.optional(),
+  /**
+   * Control flag to also delete the entity data.
+   */
   data: BooleanFromString.optional(),
 });
 export type DeleteEntityEngineRequestQueryInput = z.input<typeof DeleteEntityEngineRequestQuery>;
@@ -50,11 +54,12 @@ export const DeleteEntityEnginesRequestQuery = z.object({
   /**
    * Control flag to also delete the entity data.
    */
-  data: BooleanFromString.optional(),
+  delete_data: BooleanFromString.optional(),
 });
 export type DeleteEntityEnginesRequestQueryInput = z.input<typeof DeleteEntityEnginesRequestQuery>;
 
 export type DeleteEntityEnginesResponse = z.infer<typeof DeleteEntityEnginesResponse>;
 export const DeleteEntityEnginesResponse = z.object({
-  deleted: z.boolean().optional(),
+  deleted: z.array(EntityType).optional(),
+  still_running: z.array(EntityType).optional(),
 });

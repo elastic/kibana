@@ -64,7 +64,7 @@ export const deleteEntityEngineRoute = (
           const body = await secSol
             .getEntityStoreDataClient()
             .delete(EntityType[request.params.entityType], taskManager, {
-              deleteData: !!request.query.data,
+              deleteData: !!(request.query.delete_data || request.query.data),
               deleteEngine: true,
             });
 
@@ -117,22 +117,37 @@ export const deleteEntityEnginesRoute = (
         }
         try {
           const secSol = await context.securitySolution;
+          const client = await secSol.getEntityStoreDataClient();
           let engines = request.query.entityTypes;
           if (engines === undefined || engines.length === 0) {
-            engines = [EntityType.user, EntityType.host, EntityType.service, EntityType.generic];
+            engines = await client.getEnabledEntityTypes();
           }
 
-          for (let i = 0; i < engines.length; i++) {
-            const engine = EntityType[engines[i]];
-            await secSol.getEntityStoreDataClient().delete(engine, taskManager, {
-              deleteData: !!request.query.data,
-              deleteEngine: true,
-            });
-          }
+          const deletedEngines: EntityType[] = [];
+          await Promise.all(
+            engines.map((e) => {
+              const engine = EntityType[e];
+              if (!client.isEngineRunning(engine)) {
+                return Promise.resolve();
+              }
+              deletedEngines.push(engine);
+              return client.delete(engine, taskManager, {
+                deleteData: !!request.query.delete_data,
+                deleteEngine: true,
+              });
+            })
+          );
 
-          return response.ok({ body: { deleted: true } });
+          const stillRunning = (await client.list()).engines?.map((e) => e.type);
+
+          return response.ok({
+            body: {
+              deleted: deletedEngines,
+              still_running: stillRunning,
+            },
+          });
         } catch (e) {
-          logger.error('Error in DeleteEntityEngine:', e);
+          logger.error('Error in DeleteEntityEngines:', e);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,
