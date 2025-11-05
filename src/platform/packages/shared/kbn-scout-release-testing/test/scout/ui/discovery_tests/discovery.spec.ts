@@ -137,9 +137,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
       from: defaultStartTime,
       to: endTimeNoResults,
     });
-    await expect(page.testSubj.locator('discoverNoResults')).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(page.testSubj.locator('discoverNoResults')).toBeVisible();
   });
 
   test('should suggest a new time range is picked', async ({ page, pageObjects, uiSettings }) => {
@@ -148,9 +146,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
       to: endTimeNoResults,
     });
     await pageObjects.discover.goto();
-    await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeVisible();
   });
 
   test('should show matches when time range is expanded', async ({
@@ -165,9 +161,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await pageObjects.discover.goto();
     await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
-    await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeHidden({
-      timeout: 5000,
-    });
+    await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeHidden();
     await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
   });
 });

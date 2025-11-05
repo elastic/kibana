@@ -26,13 +26,16 @@ Tests are written using **Scout**, Kibana's Playwright-based testing framework, 
 ## Directory Structure
 
 ```
-kbn-scout-upgrade-testing/
+kbn-scout-release-testing/
 ├── test/
-│   ├── playwright.config.ts      # Playwright configuration
-│   └── discovery_tests/           # Test suites organized by feature
-│       └── discovery.spec.ts
-├── kibana.jsonc                   # Package manifest
+│   └── scout/
+│       └── ui/
+│           ├── playwright.config.ts      # Playwright configuration
+│           └── discovery_tests/          # Test suites organized by feature
+│               └── discovery.spec.ts     # Discover app tests
+├── kibana.jsonc                          # Package manifest
 ├── package.json
+├── tsconfig.json
 └── README.md
 ```
 
