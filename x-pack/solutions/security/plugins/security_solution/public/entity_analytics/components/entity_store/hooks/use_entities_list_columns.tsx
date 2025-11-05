@@ -11,10 +11,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
+import { css } from '@emotion/react';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
 } from '../../../../../common/search_strategy';
+import {
+  EntityTypeToIdentifierField,
+  EntityIdentifierFields,
+} from '../../../../../common/entity_analytics/types';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
@@ -29,6 +34,18 @@ import { ENTITIES_LIST_TABLE_ID } from '../constants';
 import { EntityIconByType, getEntityType, sourceFieldToText } from '../helpers';
 import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 import { formatRiskScore } from '../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useNavigateToTimeline } from '../../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
+
+const ACTIONS_ROW_HEIGHT = 48;
+
+const GRADIENT_TEXT_CLASS = css`
+  background: linear-gradient(106deg, #1750ba 16.88%, #731dcf 88.31%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+`;
 
 export type EntitiesListColumns = [
   Columns<Entity>,
@@ -43,6 +60,8 @@ export type EntitiesListColumns = [
 export const useEntitiesListColumns = (): EntitiesListColumns => {
   const { openRightPanel } = useExpandableFlyoutApi();
   const { euiTheme } = useEuiTheme();
+  const entityThreatHuntingEnabled = useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
+  const { openTimelineWithFilters } = useNavigateToTimeline();
 
   return [
     {
@@ -56,41 +75,110 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       render: (record: Entity) => {
         const entityType = getEntityType(record);
 
-        const value = record.entity.name;
-        const onClick = () => {
-          const id = EntityPanelKeyByType[entityType];
+        const identifierField =
+          EntityTypeToIdentifierField[entityType] ?? EntityIdentifierFields.generic;
+        const rawIdentifier = get(identifierField, record);
+        const identifierCandidates = Array.isArray(rawIdentifier)
+          ? rawIdentifier
+          : rawIdentifier
+          ? [rawIdentifier]
+          : [];
 
-          if (id) {
-            openRightPanel({
-              id,
-              params: {
-                [EntityPanelParamByType[entityType] ?? '']: value,
-                contextID: ENTITIES_LIST_TABLE_ID,
-                scopeId: ENTITIES_LIST_TABLE_ID,
-              },
-            });
+        const candidateNames: Array<string | undefined> = [
+          record.entity?.name,
+          record.service?.name,
+          record.user?.name,
+          record.host?.name,
+          ...identifierCandidates,
+          record.entity?.id,
+        ];
+
+        const displayName = candidateNames.find(
+          (name): name is string => typeof name === 'string' && name.length > 0
+        );
+
+        const flyoutKey = EntityPanelKeyByType[entityType];
+
+        const onClick = () => {
+          if (!flyoutKey || !displayName) {
+            return;
           }
+
+          openRightPanel({
+            id: flyoutKey,
+            params: {
+              [EntityPanelParamByType[entityType] ?? '']: displayName,
+              contextID: ENTITIES_LIST_TABLE_ID,
+              scopeId: ENTITIES_LIST_TABLE_ID,
+            },
+          });
         };
 
-        if (!value || !EntityPanelKeyByType[entityType]) {
+        const timelineIdentifier = identifierCandidates.find(
+          (value): value is string => typeof value === 'string' && value.length > 0
+        );
+        const canRenderTimelineActions = entityThreatHuntingEnabled && timelineIdentifier != null;
+
+        if (!flyoutKey && !canRenderTimelineActions) {
           return null;
         }
 
         return (
-          <EuiButtonIcon
-            iconType="expand"
-            onClick={onClick}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
-              {
-                defaultMessage: 'Preview entity with name {name}',
-                values: { name: value },
-              }
+          <span>
+            {flyoutKey && displayName && (
+              <EuiButtonIcon
+                iconType="expand"
+                onClick={onClick}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
+                  {
+                    defaultMessage: 'Preview entity with name {name}',
+                    values: { name: displayName },
+                  }
+                )}
+                style={{ color: euiTheme.colors.primary }}
+              />
             )}
-          />
+            {canRenderTimelineActions && (
+              <>
+                <EuiButtonIcon
+                  iconType="timeline"
+                  onClick={() =>
+                    openTimelineWithFilters([
+                      [
+                        {
+                          field: identifierField,
+                          value: timelineIdentifier,
+                        },
+                      ],
+                    ])
+                  }
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.openTimeline.ariaLabel',
+                    {
+                      defaultMessage: 'Open timeline for {name}',
+                      values: { name: displayName ?? timelineIdentifier },
+                    }
+                  )}
+                  style={{ color: euiTheme.colors.primary }}
+                />
+                <EuiButtonIcon
+                  iconType="sparkles"
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.huntWithAi.ariaLabel',
+                    {
+                      defaultMessage: 'Open AI assistant for {name}',
+                      values: { name: displayName ?? timelineIdentifier },
+                    }
+                  )}
+                  className={GRADIENT_TEXT_CLASS}
+                />
+              </>
+            )}
+          </span>
         );
       },
-      width: '5%',
+      width: '8%',
     },
     {
       field: 'entity.name',

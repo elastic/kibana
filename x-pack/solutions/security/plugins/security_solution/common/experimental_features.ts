@@ -71,6 +71,11 @@ export const allowedExperimentalValues = Object.freeze({
   entityDetailsHighlightsEnabled: false,
 
   /**
+   * Enables the experimental Threat Hunting home experience.
+   */
+  entityThreatHuntingEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,

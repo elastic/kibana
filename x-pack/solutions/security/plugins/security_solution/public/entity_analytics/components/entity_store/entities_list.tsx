@@ -144,6 +144,7 @@ export const EntitiesList: React.FC = () => {
       updateLimitPagination={setLimit}
       totalCount={data?.total ?? 0}
       itemsPerRow={rowItems}
+      rowHeight={48}
       sorting={sorting}
       onChange={onSort}
       headerFilters={
