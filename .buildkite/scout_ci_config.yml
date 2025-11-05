@@ -1,6 +1,7 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
+    - console
     - discover_enhanced
     - maps
     - observability_onboarding
