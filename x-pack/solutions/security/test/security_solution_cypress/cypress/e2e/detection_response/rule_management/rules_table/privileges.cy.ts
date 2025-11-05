@@ -43,6 +43,7 @@ import {
   DUPLICATE_RULE_BULK_BTN,
   ENABLE_RULE_BULK_BTN,
 } from '../../../../screens/rules_bulk_actions';
+import { NO_PRIVILEGES_BOX } from '../../../../screens/common/page';
 const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser];
 const rolesToCreate = [rulesAll, rulesRead, rulesNone];
 
@@ -155,7 +156,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     } with role(s) ${rulesNoneUser.roles.join()} should not be able to see the rules management page`, () => {
       loginWithUser(rulesNoneUser);
       visit(RULES_URL);
-      cy.get(CREATE_NEW_RULE_BTN).should('not.be.enabled');
+      cy.get(NO_PRIVILEGES_BOX).should('exist');
     });
   });
 });
