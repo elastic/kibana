@@ -92,6 +92,7 @@
     "@kbn/actions-plugin",
     "@kbn/mcp-connector-common",
     "@kbn/react-query",
-    "@kbn/maps-plugin"
+    "@kbn/maps-plugin",
+    "@kbn/shared-ux-utility"
   ]
 }

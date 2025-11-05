@@ -19,6 +19,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { AttachmentServiceSetup } from './services/attachments';
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;
@@ -35,6 +36,13 @@ export interface OnechatStartDependencies {
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+}
+
+export interface AttachmentsSetup {
+  /**
+   * Register an attachment type to be available in onechat.
+   */
+  registerType: AttachmentServiceSetup['registerType'];
 }
 
 /**
@@ -73,13 +81,17 @@ export interface AgentsSetup {
  */
 export interface OnechatPluginSetup {
   /**
-   * Agents setup contract, can be used to register built-in agents.
+   * Agents setup contract, which can be used to register built-in agents.
    */
   agents: AgentsSetup;
   /**
-   * Tools setup contract, can be used to register built-in tools.
+   * Tools setup contract, which can be used to register built-in tools.
    */
   tools: ToolsSetup;
+  /**
+   * Attachments setup contract, which can be used to register attachment types.
+   */
+  attachments: AttachmentsSetup;
 }
 
 /**

@@ -50,7 +50,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/mcp-connector-common",
     "@kbn/react-query",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/connector-schemas",
   ],
   "exclude": [
     "target/**/*",

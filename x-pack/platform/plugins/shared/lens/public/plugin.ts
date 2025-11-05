@@ -62,6 +62,7 @@ import type {
   VisualizeEditorContext,
   EditorFrameSetup,
   LensDocument,
+  LensByRefSerializedState,
 } from '@kbn/lens-common';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -385,23 +386,24 @@ export class LensPlugin {
         return createLensEmbeddableFactory(deps);
       });
 
+      embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
+        const { getLensTransforms } = await import('../common/transforms');
+        return getLensTransforms({
+          transformEnhancementsIn: embeddable.transformEnhancementsIn,
+          transformEnhancementsOut: embeddable.transformEnhancementsOut,
+        }).transformOut;
+      });
+
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensAttributes>({
-        onAdd: async (container, savedObject) => {
-          const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
+        onAdd: (container, savedObject) => {
           container.addNewPanel(
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {},
-                references: [
-                  ...savedObject.references,
-                  {
-                    name: SAVED_OBJECT_REF_NAME,
-                    type: LENS_EMBEDDABLE_TYPE,
-                    id: savedObject.id,
-                  },
-                ],
+                rawState: {
+                  savedObjectId: savedObject.id,
+                } satisfies LensByRefSerializedState,
               },
             },
             true
