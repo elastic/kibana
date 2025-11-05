@@ -132,7 +132,6 @@ export const simulationMachine = setup({
     detectedSchemaFields: [],
     detectedSchemaFieldsCache: new Map(),
     previewDocsFilter: 'outcome_filter_all',
-    previewDocuments: [],
     explicitlyDisabledPreviewColumns: [],
     explicitlyEnabledPreviewColumns: [],
     previewColumnsOrder: [],
@@ -174,42 +173,6 @@ export const simulationMachine = setup({
         actions: [{ type: 'storeSamples', params: ({ event }) => event }],
       },
     ],
-    'previewColumns.updateExplicitlyEnabledColumns': {
-      actions: [
-        {
-          type: 'storeExplicitlyEnabledPreviewColumns',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.updateExplicitlyDisabledColumns': {
-      actions: [
-        {
-          type: 'storeExplicitlyDisabledPreviewColumns',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.order': {
-      actions: [
-        {
-          type: 'storePreviewColumnsOrder',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.setSorting': {
-      actions: [
-        {
-          type: 'storePreviewColumnsSorting',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
     'step.change': {
       target: '.debouncingChanges',
       reenter: true,
@@ -241,6 +204,38 @@ export const simulationMachine = setup({
         'simulation.fields.unmap': {
           target: 'assertingRequirements',
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
+        },
+        'previewColumns.updateExplicitlyEnabledColumns': {
+          actions: [
+            {
+              type: 'storeExplicitlyEnabledPreviewColumns',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.updateExplicitlyDisabledColumns': {
+          actions: [
+            {
+              type: 'storeExplicitlyDisabledPreviewColumns',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.order': {
+          actions: [
+            {
+              type: 'storePreviewColumnsOrder',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.setSorting': {
+          actions: [
+            {
+              type: 'storePreviewColumnsSorting',
+              params: ({ event }) => event,
+            },
+          ],
         },
       },
     },
