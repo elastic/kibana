@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, concat, uniqBy, omit } from 'lodash';
+import { merge, concat, uniqBy, omit, uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
@@ -13,6 +13,7 @@ import pMap from 'p-map';
 import type {
   IndicesCreateRequest,
   ClusterPutComponentTemplateRequest,
+  IlmGetLifecycleLifecycle,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchAssetType } from '../../../../types';
@@ -60,7 +61,12 @@ import {
   getTemplate,
   getTemplatePriority,
 } from './template';
-import { buildDefaultSettings } from './default_settings';
+import {
+  buildDefaultSettings,
+  getILMMigrationStatus,
+  getILMPolicies,
+  saveILMMigrationChanges,
+} from './default_settings';
 import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
@@ -94,19 +100,12 @@ export const prepareToInstallTemplates = async (
   const dataStreams = onlyForDataStreams || packageInfo.data_streams;
   if (!dataStreams) return { assetsToAdd: [], assetsToRemove, install: () => Promise.resolve([]) };
 
-  const templates = dataStreams.map((dataStream) => {
-    const experimentalDataStreamFeature = experimentalDataStreamFeatures.find(
-      (datastreamFeature) =>
-        datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
-    );
-
-    return prepareTemplate({
-      packageInstallContext,
-      fieldAssetsMap,
-      dataStream,
-      experimentalDataStreamFeature,
-    });
-  });
+  const templates = await prepareDataStreamTemplates(
+    dataStreams,
+    packageInstallContext,
+    fieldAssetsMap,
+    experimentalDataStreamFeatures
+  );
 
   const assetsToAdd = getAllTemplateRefs(templates.map((template) => template.indexTemplate));
 
@@ -138,6 +137,46 @@ export const prepareToInstallTemplates = async (
     },
   };
 };
+
+export async function prepareDataStreamTemplates(
+  dataStreams: RegistryDataStream[],
+  packageInstallContext: PackageInstallContext,
+  fieldAssetsMap: AssetsMap,
+  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = []
+): Promise<
+  {
+    componentTemplates: TemplateMap;
+    indexTemplate: IndexTemplateEntry;
+  }[]
+> {
+  const ilmMigrationStatusMap = await getILMMigrationStatus();
+  const updatedILMMigrationStatusMap = new Map(ilmMigrationStatusMap);
+
+  const dataStreamTypes = uniq(dataStreams.map((ds) => ds.type));
+  const ilmPolicies = await getILMPolicies(dataStreamTypes);
+
+  const templates = dataStreams.map((dataStream) => {
+    const experimentalDataStreamFeature = experimentalDataStreamFeatures.find(
+      (datastreamFeature) =>
+        datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
+    );
+
+    const { componentTemplates, indexTemplate, ilmMigrationStatus } = prepareTemplate({
+      packageInstallContext,
+      fieldAssetsMap,
+      dataStream,
+      experimentalDataStreamFeature,
+      ilmMigrationStatusMap,
+      ilmPolicies,
+    });
+    updatedILMMigrationStatusMap.set(dataStream.type, ilmMigrationStatus);
+    return { componentTemplates, indexTemplate };
+  });
+
+  await saveILMMigrationChanges(updatedILMMigrationStatusMap);
+
+  return templates;
+}
 
 const installPreBuiltTemplates = async (
   packageInstallContext: PackageInstallContext,
@@ -627,12 +666,23 @@ export function prepareTemplate({
   fieldAssetsMap,
   dataStream,
   experimentalDataStreamFeature,
+  ilmMigrationStatusMap,
+  ilmPolicies,
 }: {
   packageInstallContext: PackageInstallContext;
   fieldAssetsMap: AssetsMap;
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
-}): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
+  ilmMigrationStatusMap: Map<string, 'success' | undefined>;
+  ilmPolicies: Map<
+    string,
+    { deprecatedILMPolicy?: IlmGetLifecycleLifecycle; newILMPolicy?: IlmGetLifecycleLifecycle }
+  >;
+}): {
+  componentTemplates: TemplateMap;
+  indexTemplate: IndexTemplateEntry;
+  ilmMigrationStatus: 'success' | undefined;
+} {
   const { name: packageName, version: packageVersion } = packageInstallContext.packageInfo;
   const fields = loadDatastreamsFieldsFromYaml(
     packageInstallContext,
@@ -663,6 +713,8 @@ export function prepareTemplate({
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
     isOtelInputType,
+    ilmMigrationStatusMap,
+    ilmPolicies,
   });
 
   const componentTemplates = buildComponentTemplates({
@@ -697,6 +749,10 @@ export function prepareTemplate({
       templateName,
       indexTemplate: template,
     },
+    ilmMigrationStatus:
+      !isOtelInputType && defaultSettings.index?.lifecycle?.name === `${dataStream.type}@lifecycle`
+        ? 'success'
+        : undefined,
   };
 }
 

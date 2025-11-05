@@ -22,6 +22,8 @@ describe('buildDefaultSettings', () => {
   it('should not generate default_field settings ', () => {
     const settings = buildDefaultSettings({
       type: 'logs',
+      ilmMigrationStatusMap: new Map(),
+      ilmPolicies: new Map(),
     });
 
     expect(settings).toMatchInlineSnapshot(`
@@ -39,6 +41,8 @@ describe('buildDefaultSettings', () => {
     const settings = buildDefaultSettings({
       type: 'logs',
       isOtelInputType: true,
+      ilmMigrationStatusMap: new Map(),
+      ilmPolicies: new Map(),
     });
 
     expect(settings).toMatchInlineSnapshot(`

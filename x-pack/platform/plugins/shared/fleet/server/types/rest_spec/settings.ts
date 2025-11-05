@@ -93,6 +93,13 @@ export const SettingsResponseSchema = schema.object({
         is_preconfigured: schema.boolean(),
       })
     ),
+    ilm_migration_status: schema.maybe(
+      schema.object({
+        logs: schema.maybe(schema.literal('success')),
+        metrics: schema.maybe(schema.literal('success')),
+        synthetics: schema.maybe(schema.literal('success')),
+      })
+    ),
   }),
 });
 

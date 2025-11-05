@@ -18,6 +18,11 @@ export interface BaseSettings {
     enabled: boolean;
     is_preconfigured: boolean;
   };
+  ilm_migration_status?: {
+    logs?: 'success';
+    metrics?: 'success';
+    synthetics?: 'success';
+  };
 }
 
 export interface Settings extends BaseSettings {

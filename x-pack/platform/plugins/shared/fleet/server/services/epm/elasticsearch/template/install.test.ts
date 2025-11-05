@@ -64,6 +64,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixUnset,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
       expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
       expect(indexTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
@@ -89,6 +91,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixFalse,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixFalse);
@@ -115,6 +119,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixTrue,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixTrue);
@@ -140,6 +146,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixTrue,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
@@ -171,6 +179,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixTrue,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
@@ -211,6 +221,8 @@ describe('EPM index template install', () => {
             doc_value_only_other: false,
           },
         },
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
@@ -250,6 +262,8 @@ describe('EPM index template install', () => {
             doc_value_only_other: false,
           },
         },
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
@@ -280,6 +294,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixTrue,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       expect(indexTemplate.indexTemplate.template.settings).toEqual({
@@ -311,6 +327,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         dataStream,
         fieldAssetsMap: new Map(),
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -339,6 +357,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         dataStream,
         fieldAssetsMap: new Map(),
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -378,6 +398,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -417,6 +439,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -458,6 +482,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -503,6 +529,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -539,6 +567,8 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -610,6 +640,8 @@ describe('EPM index template install', () => {
         packageInstallContext: otelInputPackageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       expect(componentTemplates).toStrictEqual({
@@ -760,6 +792,8 @@ describe('EPM index template install', () => {
         packageInstallContext: otelInputPackageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
+        ilmPolicies: new Map(),
       });
 
       expect(componentTemplates).toStrictEqual({
