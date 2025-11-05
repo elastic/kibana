@@ -88,14 +88,35 @@ export const MetricsExperienceGrid = ({
   );
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
+
   const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange,
   });
 
+  const fieldIndices = useMemo(() => {
+    return [...new Set(fields.map((field) => field.index))];
+  }, [fields]);
+
+  const {
+    currentPageFields = [],
+    totalPages = 0,
+    filteredFieldsCount = 0,
+    isFetching: isPaginatedFieldsFetching,
+  } = usePaginatedFields({
+    fields,
+    indices: fieldIndices,
+    timeRange,
+    dimensions,
+    pageSize: PAGE_SIZE,
+    currentPage,
+    searchTerm,
+    valueFilters,
+  }) ?? {};
+
   const { leftSideActions, rightSideActions } = useToolbarActions({
     fields,
-    indexPattern,
+    indices: fieldIndices,
     renderToggleActions,
     requestParams,
   });
@@ -110,18 +131,6 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  const {
-    currentPageFields = [],
-    totalPages = 0,
-    filteredFieldsCount = 0,
-  } = usePaginatedFields({
-    fields,
-    dimensions,
-    pageSize: PAGE_SIZE,
-    currentPage,
-    searchTerm,
-  }) ?? {};
-
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
     () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
     [filteredFieldsCount]
@@ -129,7 +138,7 @@ export const MetricsExperienceGrid = ({
 
   const filters = useValueFilters(valueFilters);
 
-  if (fields.length === 0) {
+  if (fields.length === 0 && !isPaginatedFieldsFetching) {
     return <EmptyState isLoading={isFieldsLoading} />;
   }
 
@@ -212,7 +221,7 @@ export const MetricsExperienceGrid = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {isDiscoverLoading && <MetricsGridLoadingProgress />}
+          {(isDiscoverLoading || isPaginatedFieldsFetching) && <MetricsGridLoadingProgress />}
           <MetricsGrid
             columns={columns}
             dimensions={dimensions}

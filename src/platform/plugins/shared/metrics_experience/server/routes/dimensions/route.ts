@@ -17,7 +17,7 @@ import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getDimensionsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/dimensions',
-  security: { authz: { enabled: false, reason: 'Authorization provided by Elasticsearch' } },
+  security: { authz: { requiredPrivileges: ['read'] } },
   params: z.object({
     query: z.object({
       dimensions: z
@@ -32,9 +32,18 @@ export const getDimensionsRoute = createRoute({
         })
         .pipe(z.array(z.string()).min(1).max(10)),
       indices: z
-        .union([z.string(), z.array(z.string())])
-        .transform((val) => (Array.isArray(val) ? val : [val]))
-        .default(['metrics-*']),
+        .string()
+        .optional()
+        .transform((str) => {
+          if (!str) return ['metrics-*'];
+          try {
+            const parsed = JSON.parse(str);
+            return parsed;
+          } catch {
+            throw new Error('Invalid JSON');
+          }
+        })
+        .pipe(z.array(z.string())),
       to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
       from: z
         .string()

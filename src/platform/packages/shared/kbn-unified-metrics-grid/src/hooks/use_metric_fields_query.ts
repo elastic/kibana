@@ -17,25 +17,28 @@ export const useMetricFieldsQuery = (params?: {
   fields?: string[];
   index: string;
   timeRange: TimeRange | undefined;
+  kuery?: string;
 }) => {
   const { client } = useMetricsExperienceClient();
 
   const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching } =
     useInfiniteQuery({
+      enabled: params?.kuery !== undefined ? Boolean(params.kuery) : true,
       queryKey: [
         'metricFields',
         params?.fields,
         params?.index,
         params?.timeRange?.from,
         params?.timeRange?.to,
+        params?.kuery,
       ],
       queryFn: async ({
         queryKey,
         pageParam = 1,
         signal,
-      }: QueryFunctionContext<[string, string[]?, string?, string?, string?], number>) => {
+      }: QueryFunctionContext<[string, string[]?, string?, string?, string?, string?], number>) => {
         try {
-          const [, fields, index, from, to] = queryKey;
+          const [, fields, index, from, to, kuery] = queryKey;
 
           const response = await client.getFields(
             {
@@ -45,6 +48,7 @@ export const useMetricFieldsQuery = (params?: {
               to,
               page: pageParam,
               size: 200,
+              kuery,
             },
             signal
           );

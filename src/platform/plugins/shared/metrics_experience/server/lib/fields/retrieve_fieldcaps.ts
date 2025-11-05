@@ -9,7 +9,7 @@
 
 import type { FieldCapsFieldCapability, Fields } from '@elastic/elasticsearch/lib/api/types';
 import { type ElasticsearchClient } from '@kbn/core/server';
-import { dateRangeQuery } from '@kbn/es-query';
+import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
 import { DIMENSION_TYPES, NUMERIC_TYPES } from '../../../common/fields/constants';
 import type { EpochTimeRange } from '../../types';
 
@@ -18,11 +18,13 @@ export async function retrieveFieldCaps({
   indexPattern,
   fields = '*',
   timerange: { from, to },
+  kuery,
 }: {
   esClient: ElasticsearchClient;
   indexPattern: string;
   fields?: Fields;
   timerange: EpochTimeRange;
+  kuery?: string;
 }) {
   const dataStreamFieldCapsMap = new Map<
     string,
@@ -44,13 +46,25 @@ export async function retrieveFieldCaps({
 
   const uniqueFieldTypes = new Set([...NUMERIC_TYPES, ...DIMENSION_TYPES]);
 
+  // Build index filter combining date range and kuery
+  const dateFilter = dateRangeQuery(from, to)[0];
+  const kueryFilters = kqlQuery(kuery);
+  const indexFilter =
+    kueryFilters.length > 0
+      ? {
+          bool: {
+            filter: [dateFilter, ...kueryFilters],
+          },
+        }
+      : dateFilter;
+
   // Call field caps in parallel for each data stream
   const fieldCapsPromises = dataStreams.map(async (dataStream) => {
     const fieldCaps = await esClient.fieldCaps({
       index: dataStream.name,
       fields,
       include_unmapped: false,
-      index_filter: dateRangeQuery(from, to)[0],
+      index_filter: indexFilter,
       types: [...uniqueFieldTypes],
     });
 

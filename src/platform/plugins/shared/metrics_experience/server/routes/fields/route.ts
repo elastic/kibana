@@ -30,6 +30,7 @@ export const getFieldsRoute = createRoute({
       fields: z.union([z.string(), z.array(z.string())]).default('*'),
       page: z.coerce.number().int().positive().default(1),
       size: z.coerce.number().int().positive().default(100),
+      kuery: z.string().optional(),
     }),
   }),
   handler: async ({ context, params, logger, response }) => {
@@ -52,6 +53,7 @@ export const getFieldsRoute = createRoute({
       page,
       size,
       logger,
+      kuery: params.query.kuery,
     });
 
     return {

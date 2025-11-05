@@ -29,6 +29,7 @@ export async function getMetricFields({
   size,
   logger,
   timerange,
+  kuery,
 }: {
   esClient: TracedElasticsearchClient;
   indexPattern: string;
@@ -37,6 +38,7 @@ export async function getMetricFields({
   page: number;
   size: number;
   logger: Logger;
+  kuery?: string;
 }): Promise<MetricFieldsResponse> {
   if (!indexPattern) return { fields: [], total: 0 };
 
@@ -45,6 +47,7 @@ export async function getMetricFields({
     indexPattern,
     fields,
     timerange,
+    kuery,
   });
 
   const allMetricFields: MetricField[] = [];
@@ -80,6 +83,7 @@ export async function getMetricFields({
     dataStreamFieldCapsMap,
     logger,
     timerange,
+    kuery,
   });
 
   const finalFields = enrichedMetricFields.map((field) => {
