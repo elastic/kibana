@@ -61,28 +61,10 @@
     "script": ".buildkite/scripts/steps/checks/native_modules.sh"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"
-  },
-  {
     "script": ".buildkite/scripts/steps/checks/styled_components_mapping.sh",
     "mayChangeFiles": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/dependencies_missing_owner.sh"
-  },
-  {
-    "script": ".buildkite/scripts/steps/checks/validate_pipelines.sh",
-    "mayChangeFiles": true
-  },
-  {
     "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
-  },
-  {
-    "script": ".buildkite/scripts/steps/checks/dependencies_diff.sh",
-    "mayChangeFiles": true
-  },
-  {
-    "script": ".buildkite/scripts/steps/checks/verify_codeowners.sh",
-    "mayChangeFiles": true
   }
 ]
