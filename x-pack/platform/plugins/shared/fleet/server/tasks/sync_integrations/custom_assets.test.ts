@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FleetError } from '../../errors';
 import { packagePolicyService } from '../../services';
 
 import {
@@ -974,8 +975,8 @@ describe('custom assets', () => {
           { debug: jest.fn() } as any
         )
       ).rejects.toThrowError(
-        new Error(
-          `Not supported to sync ingest pipelines referencing enrich policies. Please sync manually.`
+        new FleetError(
+          `Syncing ingest pipelines that reference enrich policies is not supported. Please sync manually.`
         )
       );
 

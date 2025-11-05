@@ -18,6 +18,8 @@ import { retryTransientEsErrors } from '../../services/epm/elasticsearch/retry';
 import { packagePolicyService } from '../../services';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { FleetError } from '../../errors';
+
 import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
 const DELETED_ASSET_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -312,8 +314,8 @@ async function updateIngestPipeline(
   }
 
   if (shouldUpdatePipeline && customAsset.pipeline.processors.some((p: any) => p.enrich)) {
-    throw new Error(
-      `Not supported to sync ingest pipelines referencing enrich policies. Please sync manually.`
+    throw new FleetError(
+      `Syncing ingest pipelines that reference enrich policies is not supported. Please sync manually.`
     );
   }
 
