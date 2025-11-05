@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
-import { last } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { QueryResult, TabularDataResult } from '@kbn/onechat-common';
@@ -26,7 +25,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
   const synthtrace = getService('synthtrace');
   const oneChatApiClient = createOneChatApiClient(supertest);
 
-  describe('POST /api/agent_builder/converse: tool calling', () => {
+  describe('FOO POST /api/agent_builder/converse: tool calling', () => {
     let llmProxy: LlmProxy;
     let connectorId: string;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
@@ -63,11 +62,16 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
 
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      const lastMessage = last(last(llmProxy.interceptedRequests)?.requestBody.messages);
-      const lastMessageParsed = JSON.parse(lastMessage?.content as string);
-      expect(lastMessage?.role).to.eql('tool');
+      const handoverRequest = llmProxy.interceptedRequests.find(
+        (request) => request.matchingInterceptorName === 'handover-to-answer'
+      )!.requestBody;
 
-      [queryResult, tabularDataResult] = lastMessageParsed.results as [
+      const esqlToolCallMsg = handoverRequest.messages[handoverRequest.messages.length - 1]!;
+
+      expect(esqlToolCallMsg.role).to.eql('tool');
+
+      const toolCallContent = JSON.parse(esqlToolCallMsg?.content as string);
+      [queryResult, tabularDataResult] = toolCallContent.results as [
         QueryResult,
         TabularDataResult
       ];
