@@ -180,12 +180,19 @@ describe('setupFleet', () => {
 
 describe('_runSetupWithLock', () => {
   let mockedWithLock: jest.Mock<any, any, any>;
+
   beforeEach(() => {
+    jest.useFakeTimers();
     mockedWithLock = jest.fn();
     mockedAppContextService.getLockManagerService.mockReturnValue({
       withLock: mockedWithLock as any,
     } as any);
   });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should retry on lock acquisition error', async () => {
     mockedWithLock
       .mockImplementationOnce(async () => {
@@ -196,7 +203,11 @@ describe('_runSetupWithLock', () => {
       });
 
     const setupFn = jest.fn();
-    await _runSetupWithLock(setupFn);
+    const promise = _runSetupWithLock(setupFn);
+
+    // Fast-forward through retry delays
+    await jest.runAllTimersAsync();
+    await promise;
 
     expect(setupFn).toHaveBeenCalled();
     expect(mockedWithLock).toHaveBeenCalledTimes(2);
@@ -207,10 +218,14 @@ describe('_runSetupWithLock', () => {
       return fn();
     });
 
-    const setupFn = jest.fn();
-    setupFn.mockRejectedValue(new Error('test'));
+    const setupFn = jest.fn().mockRejectedValue(new Error('test'));
 
-    await expect(_runSetupWithLock(setupFn)).rejects.toThrow(/test/);
+    const promise = _runSetupWithLock(setupFn);
+
+    // Fast-forward timers to handle any internal delays
+    setImmediate(() => jest.runAllTimers());
+
+    await expect(promise).rejects.toThrow(/test/);
 
     expect(setupFn).toHaveBeenCalled();
     expect(mockedWithLock).toHaveBeenCalledTimes(1);

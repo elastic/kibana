@@ -55,38 +55,50 @@ export async function ensureTemplatesAndIndexCreated(
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> {
-  await esClient.cluster.putComponentTemplate({
-    name: LOCKS_COMPONENT_TEMPLATE_NAME,
-    template: {
-      mappings: {
-        dynamic: false,
-        properties: {
-          token: { type: 'keyword' },
-          metadata: { enabled: false },
-          createdAt: { type: 'date' },
-          expiresAt: { type: 'date' },
+  try {
+    await esClient.cluster.putComponentTemplate({
+      name: LOCKS_COMPONENT_TEMPLATE_NAME,
+      template: {
+        mappings: {
+          dynamic: false,
+          properties: {
+            token: { type: 'keyword' },
+            metadata: { enabled: false },
+            createdAt: { type: 'date' },
+            expiresAt: { type: 'date' },
+          },
         },
       },
-    },
-  });
-  logger.info(
-    `Component template ${LOCKS_COMPONENT_TEMPLATE_NAME} created or updated successfully.`
-  );
+    });
+    logger.info(
+      `Component template ${LOCKS_COMPONENT_TEMPLATE_NAME} created or updated successfully.`
+    );
+  } catch (error) {
+    logger.error(
+      `Failed to create component template ${LOCKS_COMPONENT_TEMPLATE_NAME}: ${error.message}`
+    );
+    throw error;
+  }
 
-  await esClient.indices.putIndexTemplate({
-    name: LOCKS_INDEX_TEMPLATE_NAME,
-    index_patterns: [INDEX_PATTERN],
-    composed_of: [LOCKS_COMPONENT_TEMPLATE_NAME],
-    priority: 500,
-    template: {
-      settings: {
-        number_of_shards: 1,
-        auto_expand_replicas: '0-1',
-        hidden: true,
+  try {
+    await esClient.indices.putIndexTemplate({
+      name: LOCKS_INDEX_TEMPLATE_NAME,
+      index_patterns: [INDEX_PATTERN],
+      composed_of: [LOCKS_COMPONENT_TEMPLATE_NAME],
+      priority: 500,
+      template: {
+        settings: {
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+          hidden: true,
+        },
       },
-    },
-  });
-  logger.info(`Index template ${LOCKS_INDEX_TEMPLATE_NAME} created or updated successfully.`);
+    });
+    logger.info(`Index template ${LOCKS_INDEX_TEMPLATE_NAME} created or updated successfully.`);
+  } catch (error) {
+    logger.error(`Failed to create index template ${LOCKS_INDEX_TEMPLATE_NAME}: ${error.message}`);
+    throw error;
+  }
 
   try {
     await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME });

@@ -74,10 +74,10 @@ export class LockManager {
   }: AcquireOptions = {}): Promise<boolean> {
     let response: Awaited<ReturnType<ElasticsearchClient['update']>>;
 
-    await runSetupIndexAssetOnce(this.esClient, this.logger);
-    this.token = uuid();
-
     try {
+      await runSetupIndexAssetOnce(this.esClient, this.logger);
+      this.token = uuid();
+
       response = await this.esClient.update<LockDocument>(
         {
           index: LOCKS_CONCRETE_INDEX_NAME,
@@ -88,7 +88,7 @@ export class LockManager {
             source: `
               // Get the current time on the ES server.
               long now = System.currentTimeMillis();
-              
+
               // If creating the document, or if the lock is expired,
               // or if the current document is owned by the same token, then update it.
               if (ctx.op == 'create' ||
