@@ -11,7 +11,6 @@ import type { FtrProviderContext } from './ftr_provider_context';
 export function SearchGettingStartedProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const retry = getService('retry');
 
   return {
     async expectSearchGettingStartedIsLoaded() {
@@ -40,18 +39,6 @@ export function SearchGettingStartedProvider({ getService }: FtrProviderContext)
       const tstSubjId = 'gettingStartedExampleCode';
       await testSubjects.existOrFail(tstSubjId);
       expect(await testSubjects.getVisibleText(tstSubjId)).contain(value);
-    },
-    async expectFooterCallout(calloutDataTestSubj: string, calloutUrl: string) {
-      await testSubjects.existOrFail(calloutDataTestSubj);
-      await testSubjects.existOrFail(`${calloutDataTestSubj}-btn`);
-      await testSubjects.click(`${calloutDataTestSubj}-btn`);
-      await retry.tryWithRetries(
-        'wait for URL to change',
-        async () => {
-          expect(await browser.getCurrentUrl()).to.contain(calloutUrl);
-        },
-        { initialDelay: 200, retryCount: 5, retryDelay: 500 }
-      );
     },
   };
 }

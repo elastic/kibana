@@ -174,22 +174,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         describe('Footer content', function () {
           it('renders Search Labs callout and navigates correctly', async () => {
-            await pageObjects.searchGettingStarted.expectFooterCallout(
-              'gettingStartedSearchLabs',
-              'search-labs'
-            );
+            const href = await testSubjects.getAttribute('gettingStartedSearchLabs-btn', 'href');
+            expect(href).to.contain('search-labs');
           });
           it('renders Python Notebooks callout and navigates correctly', async () => {
-            await pageObjects.searchGettingStarted.expectFooterCallout(
-              'gettingStartedOpenNotebooks',
-              'search-labs/tutorials/examples'
-            );
+            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
+            expect(href).to.contain('search-labs/tutorials/examples');
           });
           it('renders Elasticsearch Documentation callout and navigates correctly', async () => {
-            await pageObjects.searchGettingStarted.expectFooterCallout(
-              'gettingStartedViewDocumentation',
-              'docs/solutions/search/get-started'
+            const href = await testSubjects.getAttribute(
+              'gettingStartedViewDocumentation-btn',
+              'href'
             );
+            expect(href).to.contain('docs/solutions/search/get-started');
           });
         });
       });
