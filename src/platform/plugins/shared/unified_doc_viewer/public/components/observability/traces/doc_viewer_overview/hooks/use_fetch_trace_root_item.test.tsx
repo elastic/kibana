@@ -8,10 +8,8 @@
  */
 
 import React from 'react';
-import { lastValueFrom } from 'rxjs';
-import { DURATION, SPAN_DURATION, TRANSACTION_DURATION } from '@kbn/apm-types';
-import { waitFor } from '@testing-library/dom';
-import { renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
+import type { TraceRootItem } from '@kbn/apm-types';
 import { TraceRootItemProvider, useFetchTraceRootItemContext } from './use_fetch_trace_root_item';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
@@ -19,42 +17,45 @@ jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
-jest.mock('rxjs', () => {
-  const originalModule = jest.requireActual('rxjs');
-  return {
-    ...originalModule,
-    lastValueFrom: jest.fn(),
-  };
-});
-
-jest.mock('../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: () => ({
-    indexes: { apm: { traces: 'test-index' } },
-  }),
+const mockFetchRootItemByTraceId = jest.fn<Promise<TraceRootItem | undefined>, any>();
+const mockGetAbsoluteTime = jest.fn(() => ({
+  from: '2023-01-01T00:00:00.000Z',
+  to: '2023-01-01T01:00:00.000Z',
 }));
 
-const mockSearch = jest.fn();
-const mockAddDanger = jest.fn();
+const mockGetById: jest.Mock<
+  | {
+      fetchRootItemByTraceId: jest.Mock<Promise<TraceRootItem | undefined>>;
+    }
+  | undefined
+> = jest.fn(() => ({
+  fetchRootItemByTraceId: mockFetchRootItemByTraceId,
+}));
+
 (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
   data: {
-    search: {
-      search: mockSearch,
+    query: {
+      timefilter: {
+        timefilter: {
+          getAbsoluteTime: mockGetAbsoluteTime,
+        },
+      },
     },
   },
-  core: {
-    notifications: {
-      toasts: {
-        addDanger: mockAddDanger,
+  discoverShared: {
+    features: {
+      registry: {
+        getById: mockGetById,
       },
     },
   },
 });
 
-const lastValueFromMock = lastValueFrom as jest.Mock;
-
 beforeEach(() => {
   jest.clearAllMocks();
-  lastValueFromMock.mockReset();
+  mockGetById.mockReturnValue({
+    fetchRootItemByTraceId: mockFetchRootItemByTraceId,
+  });
 });
 
 describe('useFetchTraceRootItem hook', () => {
@@ -62,105 +63,162 @@ describe('useFetchTraceRootItem hook', () => {
     <TraceRootItemProvider traceId="test-trace">{children}</TraceRootItemProvider>
   );
 
-  it('should start with loading true and item as null', async () => {
-    lastValueFromMock.mockResolvedValue({});
+  it('should return undefined when feature is not registered', async () => {
+    mockGetById.mockReturnValue(undefined);
+
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.item).toBeUndefined();
+    expect(mockFetchRootItemByTraceId).not.toHaveBeenCalled();
+  });
+
+  it('should start with loading true and item as undefined', async () => {
+    mockFetchRootItemByTraceId.mockImplementation(
+      () => new Promise(() => {}) // Never resolves to keep loading
+    );
 
     const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
 
     expect(result.current.loading).toBe(true);
-    expect(lastValueFrom).toHaveBeenCalledTimes(1);
+    expect(result.current.item).toBeUndefined();
+    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+      {
+        traceId: 'test-trace',
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
+      },
+      expect.any(AbortSignal)
+    );
   });
 
-  it('should update item when transaction data is fetched successfully APM', async () => {
-    const transactionDuration = 1;
-    lastValueFromMock.mockResolvedValue({
-      rawResponse: {
-        hits: {
-          hits: [
-            {
-              fields: {
-                [TRANSACTION_DURATION]: transactionDuration,
-              },
-            },
-          ],
-        },
+  it('should return undefined when traceId is empty', async () => {
+    const emptyTraceIdWrapper = ({ children }: { children: React.ReactNode }) => (
+      <TraceRootItemProvider traceId="">{children}</TraceRootItemProvider>
+    );
+
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), {
+      wrapper: emptyTraceIdWrapper,
+    });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.item).toBeUndefined();
+    expect(mockFetchRootItemByTraceId).not.toHaveBeenCalled();
+  });
+
+  it('should update item when data is fetched successfully', async () => {
+    const mockItem: TraceRootItem = { duration: 1000 };
+    mockFetchRootItemByTraceId.mockResolvedValue(mockItem);
+
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.item).toEqual(mockItem);
+    expect(result.current.item?.duration).toBe(1000);
+    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+      {
+        traceId: 'test-trace',
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
       },
+      expect.any(AbortSignal)
+    );
+  });
+
+  it('should handle when item is not found (returns undefined)', async () => {
+    mockFetchRootItemByTraceId.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.item).toBeUndefined();
+    expect(mockFetchRootItemByTraceId).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle errors and set error state', async () => {
+    const errorMessage = 'Fetch error';
+    mockFetchRootItemByTraceId.mockRejectedValue(new Error(errorMessage));
+
+    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error?.message).toBe(errorMessage);
+    expect(result.current.item).toBeUndefined();
+    expect(mockFetchRootItemByTraceId).toHaveBeenCalledTimes(1);
+  });
+
+  it('should refetch when traceId changes', async () => {
+    const mockItem1: TraceRootItem = { duration: 1000 };
+    const mockItem2: TraceRootItem = { duration: 2000 };
+    mockFetchRootItemByTraceId.mockResolvedValueOnce(mockItem1).mockResolvedValueOnce(mockItem2);
+
+    const wrapper1 = ({ children }: { children: React.ReactNode }) => (
+      <TraceRootItemProvider traceId="trace-1">{children}</TraceRootItemProvider>
+    );
+    const wrapper2 = ({ children }: { children: React.ReactNode }) => (
+      <TraceRootItemProvider traceId="trace-2">{children}</TraceRootItemProvider>
+    );
+
+    const { result: result1 } = renderHook(() => useFetchTraceRootItemContext(), {
+      wrapper: wrapper1,
+    });
+
+    await waitFor(() => !result1.current.loading);
+    expect(result1.current.item?.duration).toBe(1000);
+    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+      {
+        traceId: 'trace-1',
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
+      },
+      expect.any(AbortSignal)
+    );
+
+    const { result: result2 } = renderHook(() => useFetchTraceRootItemContext(), {
+      wrapper: wrapper2,
+    });
+
+    await waitFor(() => !result2.current.loading);
+    expect(result2.current.item?.duration).toBe(2000);
+    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+      {
+        traceId: 'trace-2',
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
+      },
+      expect.any(AbortSignal)
+    );
+    expect(mockFetchRootItemByTraceId).toHaveBeenCalledTimes(2);
+  });
+
+  it('should pass AbortSignal to fetchRootItemByTraceId', async () => {
+    mockFetchRootItemByTraceId.mockImplementation(({ signal }: { signal: AbortSignal }) => {
+      expect(signal).toBeInstanceOf(AbortSignal);
+      return Promise.resolve({ duration: 1000 });
     });
 
     const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
-    expect(result.current.loading).toBe(false);
-    expect(result.current.item?.duration).toBe(transactionDuration);
-    expect(lastValueFrom).toHaveBeenCalledTimes(1);
-  });
-  it('should update item when span data is fetched successfully APM', async () => {
-    const spanDuration = 1;
-    lastValueFromMock.mockResolvedValue({
-      rawResponse: {
-        hits: {
-          hits: [
-            {
-              fields: {
-                [SPAN_DURATION]: spanDuration,
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
-
-    await waitFor(() => !result.current.loading);
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.item?.duration).toBe(spanDuration);
-    expect(lastValueFrom).toHaveBeenCalledTimes(1);
-  });
-
-  it('should update item when span data is fetched successfully OTel', async () => {
-    const itemDuration = 1;
-    lastValueFromMock.mockResolvedValue({
-      rawResponse: {
-        hits: {
-          hits: [
-            {
-              fields: {
-                [DURATION]: itemDuration,
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
-
-    await waitFor(() => !result.current.loading);
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.item?.duration).toBe(itemDuration * 0.001);
-    expect(lastValueFrom).toHaveBeenCalledTimes(1);
-  });
-
-  it('should handle errors and set item to null, and show a toast error', async () => {
-    const errorMessage = 'Search error';
-    lastValueFromMock.mockRejectedValue(new Error(errorMessage));
-
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
-
-    await waitFor(() => !result.current.loading);
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.item).toBeNull();
-    expect(lastValueFrom).toHaveBeenCalledTimes(1);
-    expect(mockAddDanger).toHaveBeenCalledWith(
+    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'An error occurred while fetching the root item of the trace',
-        text: errorMessage,
-      })
+        traceId: 'test-trace',
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
+      }),
+      expect.any(AbortSignal)
     );
   });
 });
