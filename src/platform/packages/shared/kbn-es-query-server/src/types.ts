@@ -22,7 +22,7 @@ import type {
   appStateSchema,
 } from './filter/stored_filter';
 import type {
-  simplifiedFilterSchema,
+  simpleFilterSchema,
   simpleFilterConditionSchema,
   filterGroupSchema,
   rawDSLFilterSchema,
@@ -41,14 +41,14 @@ export type Filter = Writable<TypeOf<typeof filterSchema>>;
 export type FilterMeta = Writable<TypeOf<typeof filterMetaSchema>>;
 
 /**
- * Schema-inferred types for Simplified Filter API
+ * Schema-inferred types for Simple Filter API
  *
  * These types are inferred from validation schemas and provide runtime validation compatibility.
  */
-export type SimplifiedFilter = Writable<TypeOf<typeof simplifiedFilterSchema>>;
+export type SimpleFilter = Writable<TypeOf<typeof simpleFilterSchema>>;
 export type SimpleFilterCondition = Writable<TypeOf<typeof simpleFilterConditionSchema>>;
-export type FilterGroup = Writable<TypeOf<typeof filterGroupSchema>>;
-export type RawDSLFilter = Writable<TypeOf<typeof rawDSLFilterSchema>>;
-export type FilterValue = Writable<TypeOf<typeof filterValueSchema>>;
-export type RangeValue = Writable<TypeOf<typeof rangeValueSchema>>;
+export type SimpleFilterGroup = Writable<TypeOf<typeof filterGroupSchema>>;
+export type SimpleDSLFilter = Writable<TypeOf<typeof rawDSLFilterSchema>>;
+export type SimpleFilterValue = Writable<TypeOf<typeof filterValueSchema>>;
+export type SimpleRangeValue = Writable<TypeOf<typeof rangeValueSchema>>;
 export type StoredFilterState = TypeOf<typeof appStateSchema> | TypeOf<typeof globalStateSchema>;
