@@ -19,6 +19,7 @@ import { WiredAdvancedView } from './wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { WiredStreamBadge } from '../../stream_badges';
+import { StreamDetailAssets } from '../../stream_detail_assets';
 
 const wiredStreamManagementSubTabs = [
   'partitioning',
@@ -28,6 +29,7 @@ const wiredStreamManagementSubTabs = [
   'advanced',
   'significantEvents',
   'dataQuality',
+  'assets',
   'references',
 ] as const;
 
@@ -147,6 +149,12 @@ export function WiredStreamDetailManagement({
           </span>
         </EuiToolTip>
       ),
+    },
+    assets: {
+      content: <StreamDetailAssets definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.assetsTab', {
+        defaultMessage: 'Assets',
+      }),
     },
     ...otherTabs,
     ...(definition.privileges.manage

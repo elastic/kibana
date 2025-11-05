@@ -28,17 +28,17 @@ import React, { useMemo, useState, useEffect } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { DashboardsTable } from './dashboard_table';
+import { AssetsTable } from './asset_table';
 
-export function AddDashboardFlyout({
+export function AddAssetFlyout({
   entityId,
-  onAddDashboards,
-  linkedDashboards,
+  onAddAssets,
+  linkedAssets,
   onClose,
 }: {
   entityId: string;
-  onAddDashboards: (dashboard: SanitizedDashboardAsset[]) => Promise<void>;
-  linkedDashboards: SanitizedDashboardAsset[];
+  onAddAssets: (assets: SanitizedDashboardAsset[]) => Promise<void>;
+  linkedAssets: SanitizedDashboardAsset[];
   onClose: () => void;
 }) {
   const {
@@ -53,7 +53,7 @@ export function AddDashboardFlyout({
   const [query, setQuery] = useState('');
 
   const [submittedQuery, setSubmittedQuery] = useState(query);
-  const [selectedDashboards, setSelectedDashboards] = useState<SanitizedDashboardAsset[]>([]);
+  const [selectedAssets, setSelectedAssets] = useState<SanitizedDashboardAsset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -82,14 +82,12 @@ export function AddDashboardFlyout({
         .then(({ suggestions }) => {
           return {
             dashboards: suggestions.filter((dashboard) => {
-              return !linkedDashboards.find(
-                (linkedDashboard) => linkedDashboard.id === dashboard.id
-              );
+              return !linkedAssets.find((linkedAsset) => linkedAsset.id === dashboard.id);
             }),
           };
         });
     },
-    [streamsRepositoryClient, entityId, submittedQuery, selectedTags, linkedDashboards]
+    [streamsRepositoryClient, entityId, submittedQuery, selectedTags, linkedAssets]
   );
 
   const tagList = savedObjectsTaggingUi.getTagList();
@@ -104,7 +102,7 @@ export function AddDashboardFlyout({
       hasActiveFilters={selectedTags.length > 0}
       numActiveFilters={selectedTags.length}
     >
-      {i18n.translate('xpack.streams.addDashboardFlyout.filterButtonLabel', {
+      {i18n.translate('xpack.streams.addAssetFlyout.filterButtonLabel', {
         defaultMessage: 'Tags',
       })}
     </EuiFilterButton>
@@ -115,14 +113,14 @@ export function AddDashboardFlyout({
   });
 
   const flyoutTitleId = useGeneratedHtmlId({
-    prefix: 'addDashboardFlyoutTitle',
+    prefix: 'addAssetFlyoutTitle',
   });
 
   useEffect(() => {
-    setSelectedDashboards([]);
-  }, [linkedDashboards]);
+    setSelectedAssets([]);
+  }, [linkedAssets]);
 
-  const allDashboards = useMemo(() => {
+  const allAssets = useMemo(() => {
     return dashboardSuggestionsFetch.value?.dashboards || [];
   }, [dashboardSuggestionsFetch.value]);
 
@@ -131,8 +129,8 @@ export function AddDashboardFlyout({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2 id={flyoutTitleId}>
-            {i18n.translate('xpack.streams.addDashboardFlyout.flyoutHeaderLabel', {
-              defaultMessage: 'Add dashboards',
+            {i18n.translate('xpack.streams.addAssetFlyout.flyoutHeaderLabel', {
+              defaultMessage: 'Add assets',
             })}
           </h2>
         </EuiTitle>
@@ -140,9 +138,9 @@ export function AddDashboardFlyout({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiText size="s">
-            {i18n.translate('xpack.streams.addDashboardFlyout.helpLabel', {
+            {i18n.translate('xpack.streams.addAssetFlyout.helpLabel', {
               defaultMessage:
-                'Select dashboards which you want to add and assign to the {stream} stream',
+                'Select assets which you want to add and assign to the {stream} stream',
               values: {
                 stream: entityId,
               },
@@ -174,12 +172,9 @@ export function AddDashboardFlyout({
                     allowExclusions
                     searchable
                     searchProps={{
-                      placeholder: i18n.translate(
-                        'xpack.streams.addDashboardFlyout.searchTagsLabel',
-                        {
-                          defaultMessage: 'Search tags',
-                        }
-                      ),
+                      placeholder: i18n.translate('xpack.streams.addAssetFlyout.searchTagsLabel', {
+                        defaultMessage: 'Search tags',
+                      }),
                       compressed: true,
                     }}
                     options={(tagList || []).map((tag) => ({
@@ -205,32 +200,32 @@ export function AddDashboardFlyout({
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <DashboardsTable
+          <AssetsTable
             entityId={entityId}
-            dashboards={allDashboards}
+            assets={allAssets}
             loading={dashboardSuggestionsFetch.loading}
-            selectedDashboards={selectedDashboards}
-            setSelectedDashboards={setSelectedDashboards}
-            dataTestSubj="streamsAppAddDashboardFlyoutDashboardsTable"
+            selectedAssets={selectedAssets}
+            setSelectedAssets={setSelectedAssets}
+            dataTestSubj="streamsAppAddAssetFlyoutAssetsTable"
           />
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButton
           isLoading={isLoading}
-          disabled={selectedDashboards.length === 0}
-          data-test-subj="streamsAppAddDashboardFlyoutAddDashboardsButton"
+          disabled={selectedAssets.length === 0}
+          data-test-subj="streamsAppAddAssetFlyoutAddAssetsButton"
           onClick={async () => {
             setIsLoading(true);
             try {
-              await onAddDashboards(selectedDashboards);
+              await onAddAssets(selectedAssets);
             } finally {
               setIsLoading(false);
             }
           }}
         >
-          {i18n.translate('xpack.streams.addDashboardFlyout.addDashboardsButtonLabel', {
-            defaultMessage: 'Add dashboards',
+          {i18n.translate('xpack.streams.addAssetFlyout.addAssetsButtonLabel', {
+            defaultMessage: 'Add assets',
           })}
         </EuiButton>
       </EuiFlyoutFooter>

@@ -14,14 +14,10 @@ import React, { useMemo, useState } from 'react';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { useKibana } from '../../hooks/use_kibana';
-import { AddDashboardFlyout } from './add_dashboard_flyout';
-import { DashboardsTable } from './dashboard_table';
+import { AddAssetFlyout } from './add_asset_flyout';
+import { AssetsTable } from './asset_table';
 
-export function StreamDetailDashboardsView({
-  definition,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-}) {
+export function StreamDetailAssets({ definition }: { definition: Streams.ingest.all.GetResponse }) {
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
@@ -75,7 +71,7 @@ export function StreamDetailDashboardsView({
               }}
               color="danger"
             >
-              {i18n.translate('xpack.streams.streamDetailDashboardView.removeSelectedButtonLabel', {
+              {i18n.translate('xpack.streams.streamDetailAssetView.removeSelectedButtonLabel', {
                 defaultMessage: 'Unlink selected',
               })}
             </EuiButton>
@@ -97,26 +93,26 @@ export function StreamDetailDashboardsView({
               setIsAddDashboardFlyoutOpen(true);
             }}
           >
-            {i18n.translate('xpack.streams.streamDetailDashboardView.addADashboardButtonLabel', {
-              defaultMessage: 'Add a dashboard',
+            {i18n.translate('xpack.streams.streamDetailAssetView.addAnAssetButtonLabel', {
+              defaultMessage: 'Add an asset',
             })}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <DashboardsTable
+        <AssetsTable
           entityId={definition?.stream.name}
-          dashboards={filteredDashboards}
+          assets={filteredDashboards}
           loading={dashboardsFetch.loading}
-          selectedDashboards={selectedDashboards}
-          setSelectedDashboards={canLinkAssets ? setSelectedDashboards : undefined}
+          selectedAssets={selectedDashboards}
+          setSelectedAssets={canLinkAssets ? setSelectedDashboards : undefined}
           dataTestSubj="streamsAppStreamDetailDashboardsTable"
         />
         {definition && isAddDashboardFlyoutOpen ? (
-          <AddDashboardFlyout
-            linkedDashboards={linkedDashboards}
+          <AddAssetFlyout
+            linkedAssets={linkedDashboards}
             entityId={definition.stream.name}
-            onAddDashboards={async (dashboards) => {
+            onAddAssets={async (dashboards) => {
               await addDashboards(dashboards);
               dashboardsFetch.refresh();
               setIsAddDashboardFlyoutOpen(false);

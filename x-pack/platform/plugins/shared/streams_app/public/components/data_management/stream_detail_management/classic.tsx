@@ -20,6 +20,7 @@ import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { StreamDetailAssets } from '../../stream_detail_assets';
 
 const classicStreamManagementSubTabs = [
   'processing',
@@ -29,6 +30,7 @@ const classicStreamManagementSubTabs = [
   'significantEvents',
   'schemaEditor',
   'schema',
+  'assets',
   'references',
 ] as const;
 
@@ -148,6 +150,13 @@ export function ClassicStreamDetailManagement({
         </span>
       </EuiToolTip>
     ),
+  };
+
+  tabs.assets = {
+    content: <StreamDetailAssets definition={definition} />,
+    label: i18n.translate('xpack.streams.streamDetailView.assetsTab', {
+      defaultMessage: 'Assets',
+    }),
   };
 
   if (otherTabs.significantEvents) {

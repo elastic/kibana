@@ -15,21 +15,21 @@ import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
-export function DashboardsTable({
-  dashboards,
+export function AssetsTable({
+  assets,
   compact = false,
-  selectedDashboards,
-  setSelectedDashboards,
+  selectedAssets,
+  setSelectedAssets,
   loading,
   entityId,
   dataTestSubj,
 }: {
   entityId?: string;
   loading: boolean;
-  dashboards: SanitizedDashboardAsset[] | undefined;
+  assets: SanitizedDashboardAsset[] | undefined;
   compact?: boolean;
-  selectedDashboards?: SanitizedDashboardAsset[];
-  setSelectedDashboards?: (dashboards: SanitizedDashboardAsset[]) => void;
+  selectedAssets?: SanitizedDashboardAsset[];
+  setSelectedAssets?: (assets: SanitizedDashboardAsset[]) => void;
   dataTestSubj?: string;
 }) {
   const {
@@ -50,8 +50,8 @@ export function DashboardsTable({
     return [
       {
         field: 'label',
-        name: i18n.translate('xpack.streams.dashboardTable.dashboardNameColumnTitle', {
-          defaultMessage: 'Dashboard name',
+        name: i18n.translate('xpack.streams.assetTable.assetNameColumnTitle', {
+          defaultMessage: 'Asset name',
         }),
         render: (_, { title, id }) => (
           <EuiLink
@@ -76,11 +76,22 @@ export function DashboardsTable({
           </EuiLink>
         ),
       },
+      {
+        field: 'type',
+        name: i18n.translate('xpack.streams.assetTable.assetTypeColumnTitle', {
+          defaultMessage: 'Asset type',
+        }),
+        render: () => {
+          return i18n.translate('xpack.streams.assetTable.dashboardType', {
+            defaultMessage: 'Dashboard',
+          });
+        },
+      },
       ...(!compact
         ? ([
             {
               field: 'tags',
-              name: i18n.translate('xpack.streams.dashboardTable.tagsColumnTitle', {
+              name: i18n.translate('xpack.streams.assetTable.tagsColumnTitle', {
                 defaultMessage: 'Tags',
               }),
               render: (_, { tags }) => {
@@ -107,8 +118,8 @@ export function DashboardsTable({
   ]);
 
   const items = useMemo(() => {
-    return dashboards ?? [];
-  }, [dashboards]);
+    return assets ?? [];
+  }, [assets]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -120,8 +131,8 @@ export function DashboardsTable({
         items={items}
         loading={loading}
         selection={
-          setSelectedDashboards
-            ? { onSelectionChange: setSelectedDashboards, selected: selectedDashboards }
+          setSelectedAssets
+            ? { onSelectionChange: setSelectedAssets, selected: selectedAssets }
             : undefined
         }
       />
