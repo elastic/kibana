@@ -15,6 +15,7 @@ import type {
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import { type AggregateQuery } from '@kbn/es-query';
 import { appendFilteringWhereClauseForCascadeLayout, constructCascadeQuery } from '@kbn/esql-utils';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiContextMenu,
@@ -294,6 +295,17 @@ export const useEsqlDataCascadeRowActionHelpers = (
   };
 };
 
+const metaSlotStyles = {
+  textWrapper: css({
+    minWidth: 0,
+    textWrap: 'nowrap',
+  }),
+  textInner: css({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }),
+};
+
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
@@ -368,10 +380,8 @@ export function useEsqlDataCascadeRowHeaderComponents(
                   selectedColumn,
                   selectedColumnValue: rowData[selectedColumn] as string | number,
                   bold: (chunks) => (
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" textAlign="right">
-                        <p>{chunks}</p>
-                      </EuiText>
+                    <EuiFlexItem grow={false} css={metaSlotStyles.textWrapper}>
+                      <span css={metaSlotStyles.textInner}>{chunks}</span>
                     </EuiFlexItem>
                   ),
                   badge: ([chunk]) => {
