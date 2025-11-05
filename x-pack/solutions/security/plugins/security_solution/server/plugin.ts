@@ -253,8 +253,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.ruleMonitoringService.setup(core, plugins);
 
     // // Register onechat tools
-    plugins.onechat.tools.register(securitySolutionToolInternal(core.getStartServices));
-    plugins.onechat.tools.register(entityAnalyticsToolInternal(core.getStartServices));
+    plugins.onechat.tools.register(securitySolutionToolInternal(core.getStartServices, plugins.ml));
+    plugins.onechat.tools.register(entityAnalyticsToolInternal(core.getStartServices, plugins.ml));
 
     plugins.onechat.agents.register(entityAnalyticsAgentCreator());
 

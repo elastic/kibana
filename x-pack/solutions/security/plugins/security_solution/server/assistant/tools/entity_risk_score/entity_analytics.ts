@@ -102,7 +102,8 @@ const MAP_DOMAIN_TO_INFO_BUILDER = {
 } as const;
 
 export const entityAnalyticsToolInternal = (
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  ml: EntityAnalyticsRoutesDeps['ml']
 ): BuiltinToolDefinition<typeof entityRiskScoreInternalSchema> => {
   return {
     id: ENTITY_ANALYTICS_TOOL_INTERNAL_ID,
