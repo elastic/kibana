@@ -8,7 +8,7 @@
  */
 
 import { type Document, isPair, isScalar, visit } from 'yaml';
-import { getPathFromAncestors } from '../../../../common/lib/yaml/yaml_utils';
+import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { StepNameInfo } from '../model/types';
 
 export function collectAllStepNames(yamlDocument: Document): StepNameInfo[] {

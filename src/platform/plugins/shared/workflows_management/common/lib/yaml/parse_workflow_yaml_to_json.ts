@@ -9,7 +9,8 @@
 
 import type { z } from '@kbn/zod';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
-import { InvalidYamlSchemaError } from '../errors';
+import { getYamlDocumentErrors } from './validate_yaml_document';
+import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
 import { formatZodError } from '../zod/format_zod_error';
 
 export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
@@ -21,6 +22,13 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
     return {
       success: false,
       error: parseResult.error,
+    };
+  }
+  const yamlDocumentErrors = getYamlDocumentErrors(parseResult.document);
+  if (yamlDocumentErrors.length > 0) {
+    return {
+      success: false,
+      error: new InvalidYamlSyntaxError(yamlDocumentErrors.map((err) => err.message).join(', ')),
     };
   }
   const result = schema.safeParse(parseResult.json);

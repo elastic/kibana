@@ -19,6 +19,10 @@ export function isInTriggersContext(path: (string | number)[]): boolean {
   return path.length > 0 && path[0] === 'triggers';
 }
 
+export function isInStepsContext(path: (string | number)[]): boolean {
+  return path.length > 0 && path[0] === 'steps';
+}
+
 /**
  * Detect if we're in a scheduled trigger's with block
  */

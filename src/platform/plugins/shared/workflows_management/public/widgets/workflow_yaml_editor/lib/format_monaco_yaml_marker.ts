@@ -12,7 +12,7 @@
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import { getCurrentPath } from '../../../../common/lib/yaml';
+import { getPathAtOffset } from '../../../../common/lib/yaml';
 import { formatZodError } from '../../../../common/lib/zod';
 
 export function formatMonacoYamlMarker(
@@ -61,7 +61,7 @@ export function formatMonacoYamlMarker(
           lineNumber: marker.startLineNumber,
           column: marker.startColumn,
         });
-        yamlPath = getCurrentPath(yamlDocument, markerPosition);
+        yamlPath = getPathAtOffset(yamlDocument, markerPosition);
       }
 
       // Create a mock Zod error with the path information

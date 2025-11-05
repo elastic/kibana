@@ -15,8 +15,12 @@ import type { AutocompleteContext, MinimalWorkflowDetailState } from './autocomp
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
 import { parseLineForCompletion } from './parse_line_for_completion';
-import { isInScheduledTriggerWithBlock, isInTriggersContext } from './triggers_utils';
-import { getCurrentPath } from '../../../../../../common/lib/yaml';
+import {
+  isInScheduledTriggerWithBlock,
+  isInStepsContext,
+  isInTriggersContext,
+} from './triggers_utils';
+import { getPathAtOffset } from '../../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../../common/lib/zod';
 import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
 import type { StepInfo } from '../../store';
@@ -84,7 +88,7 @@ export function buildAutocompleteContext({
     };
   }
 
-  const path = getCurrentPath(yamlDocument, absoluteOffset);
+  const path = getPathAtOffset(yamlDocument, absoluteOffset);
   const yamlNode = yamlDocument.getIn(path, true);
   const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
   const shouldBeQuoted = scalarType === null || scalarType === 'PLAIN';

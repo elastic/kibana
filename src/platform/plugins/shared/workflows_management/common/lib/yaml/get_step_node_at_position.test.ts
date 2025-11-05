@@ -8,40 +8,7 @@
  */
 
 import { parseDocument, YAMLMap } from 'yaml';
-import type { WorkflowYaml } from '@kbn/workflows';
-import { getStepNodeAtPosition, stringifyWorkflowDefinition } from './yaml_utils';
-
-describe('getYamlStringFromJSON', () => {
-  it('should sort keys according to the order of the keys in the workflow definition', () => {
-    const json: Partial<WorkflowYaml> = {
-      enabled: true,
-      steps: [
-        {
-          name: 'step1',
-          type: 'noop',
-          with: { message: 'Hello, world!' },
-        },
-      ],
-      description: 'test',
-      name: 'test',
-    };
-    const yaml = stringifyWorkflowDefinition(json);
-    expect(yaml).toBe(`name: test
-description: test
-enabled: true
-steps:
-  - name: step1
-    type: noop
-    with:
-      message: Hello, world!
-`);
-  });
-
-  it('it should throw an error if the input is not a plain object', () => {
-    const json: any = [1, 2, 3];
-    expect(() => stringifyWorkflowDefinition(json)).toThrow();
-  });
-});
+import { getStepNodeAtPosition } from './get_step_node_at_position';
 
 describe('getStepNodeAtPosition', () => {
   it('should get the step node at the position', () => {
