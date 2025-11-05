@@ -52,7 +52,7 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
       <pre>
         <FormattedMessage
           id="interactiveSetup.app.notReady"
-          defaultMessage="Kibana server is not ready yet. Please check the logs for more information."
+          defaultMessage="The Kibana server is not ready yet. Check the logs for more information."
         />
       </pre>
     );
