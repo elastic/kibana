@@ -36,11 +36,18 @@ export const CustomSamplesDataSourceCard = ({
     snapshot.matches('disabled')
   );
 
-  const { run: handleChange } = useDebounceFn(
-    (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
-      dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
-      if (dataSource.storageKey && params.documents) {
-        localStorage.setItem(dataSource.storageKey, JSON.stringify(params.documents));
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    dataSourceRef.send({
+      type: 'dataSource.change',
+      dataSource: { ...dataSource, name: event.target.value },
+    });
+  };
+
+  const { run: handleDocumentsChange } = useDebounceFn(
+    (documents: CustomSamplesDataSourceWithUIAttributes['documents']) => {
+      dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, documents } });
+      if (dataSource.storageKey) {
+        localStorage.setItem(dataSource.storageKey, JSON.stringify(documents));
       }
     },
     debounceOptions
@@ -59,7 +66,7 @@ export const CustomSamplesDataSourceCard = ({
     setEditorValue(value);
     const documents = deserializeJson(value);
     if (isSchema(customSamplesDataSourceDocumentsSchema, documents)) {
-      handleChange({ documents });
+      handleDocumentsChange(documents);
     }
   };
 
@@ -72,11 +79,7 @@ export const CustomSamplesDataSourceCard = ({
     >
       <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.customSamples.callout} />
       <EuiSpacer size="m" />
-      <NameField
-        onChange={(event) => handleChange({ name: event.target.value })}
-        value={dataSource.name}
-        disabled={isDisabled}
-      />
+      <NameField onChange={handleNameChange} value={dataSource.name} disabled={isDisabled} />
       <EuiFormRow
         label={DATA_SOURCES_I18N.customSamples.label}
         helpText={DATA_SOURCES_I18N.customSamples.helpText}
