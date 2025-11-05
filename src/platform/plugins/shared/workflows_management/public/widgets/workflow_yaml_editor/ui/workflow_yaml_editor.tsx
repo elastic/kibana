@@ -551,8 +551,6 @@ export const WorkflowYAMLEditor = ({
     }
   }, [workflowJsonSchemaStrict, notifications]);
 
-  const editorClassName = classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml });
-
   return (
     <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
@@ -600,7 +598,10 @@ export const WorkflowYAMLEditor = ({
           </EuiFlexGroup>
         </div>
       )}
-      <div css={styles.editorContainer} className={editorClassName}>
+      <div
+        css={styles.editorContainer}
+        className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
+      >
         <YamlEditor
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
