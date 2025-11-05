@@ -21,10 +21,6 @@ interface ConversationInputFormProps {
   onSubmit?: () => void;
 }
 
-const fullHeightStyles = css`
-  height: 100%;
-`;
-
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
   const [input, setInput] = useState('');
@@ -49,7 +45,8 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   };
 
   const formContainerStyles = css`
-    ${fullHeightStyles}
+    width: 100%;
+    min-height: 150px;
     padding: ${euiTheme.size.base};
     box-shadow: none;
     border: ${euiTheme.border.thin};

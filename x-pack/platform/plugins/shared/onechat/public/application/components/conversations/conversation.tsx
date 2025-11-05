@@ -17,15 +17,16 @@ import { useShouldStickToBottom } from '../../context/conversation/use_should_st
 import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
-import { ConversationContent } from './conversation_grid';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
+
+const MAX_WIDTH = 800; // The size that the conversation container can grow up to.
 
 const fullHeightStyles = css`
   height: 100%;
 `;
 const conversationContainerStyles = css`
   ${fullHeightStyles}
-  width: 100%;
+  max-width: ${MAX_WIDTH}px;
 `;
 
 export const Conversation: React.FC<{}> = () => {
@@ -73,10 +74,6 @@ export const Conversation: React.FC<{}> = () => {
     left: 50%;
     transform: translateX(-50%);
   `;
-  const contentStyles = css`
-    ${fullHeightStyles}
-    align-items: stretch;
-  `;
 
   if (!hasActiveConversation) {
     return <NewConversationPrompt />;
@@ -105,9 +102,7 @@ export const Conversation: React.FC<{}> = () => {
             </EuiResizablePanel>
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
-              <ConversationContent css={contentStyles}>
-                <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
-              </ConversationContent>
+              <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
             </EuiResizablePanel>
           </>
         );
