@@ -22,7 +22,7 @@ import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
 } from '../../../shared_components';
-import { XyAppearanceSettings, getValueLabelDisableReason } from './visual_options_popover';
+import { XyAppearanceSettings, getValueLabelDisableReason } from './appearance_settings';
 import { XyTitlesAndTextSettings } from './titles_and_text_settings';
 import { XyAxisSettings, axisConfig } from './axis_settings';
 import type { AxisGroupConfiguration } from '../axes_configuration';
