@@ -421,7 +421,7 @@ function getValueColumns(layer: MetricStateESQL) {
     ...(layer.breakdown_by
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by.column)]
       : []),
-    getValueColumn(ACCESSOR, layer.metric.column, 'number'),
+    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
     ...(layer.metric?.background_chart?.type === 'bar'
       ? [
           getValueColumn(
