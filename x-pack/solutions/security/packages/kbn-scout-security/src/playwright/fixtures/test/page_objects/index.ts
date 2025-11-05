@@ -12,7 +12,7 @@ import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { SecurityNavigation } from './security_navigation';
 import { AssistantPage } from './assistant';
 import { SecurityCommonPage } from './security_common';
-import { RulesManagementPage } from './rules_management_page';
+import { RulesManagementPage } from './rules_management';
 import { TimelinePage } from './timeline_page';
 
 export interface SecurityPageObjects extends PageObjects {

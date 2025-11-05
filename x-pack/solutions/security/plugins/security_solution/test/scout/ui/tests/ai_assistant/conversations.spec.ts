@@ -102,10 +102,10 @@ spaceTest.describe(
         const createdRule = await apiServices.detectionRule.createCustomQueryRule(rule);
 
         // Navigate to rules management page using page object
-        await pageObjects.rulesManagementPage.navigateAndDismissOnboarding();
+        await pageObjects.rulesManagementPage.navigation.navigateAndDismissOnboarding();
 
         // Select the rule using its checkbox
-        await pageObjects.rulesManagementPage.selectRuleByCheckbox(createdRule.id);
+        await pageObjects.rulesManagementPage.selection.selectRuleByCheckbox(createdRule.id);
 
         // Open assistant from rule context
         await pageObjects.assistantPage.openFromRule();
