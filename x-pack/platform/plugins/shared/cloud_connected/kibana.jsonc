@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-connected-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "cloudConnected",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "cloud_connected"
+    ],
+    "requiredPlugins": [
+      "management"
+    ]
+  }
+}
