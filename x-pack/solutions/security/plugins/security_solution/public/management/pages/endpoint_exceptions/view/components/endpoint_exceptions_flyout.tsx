@@ -229,3 +229,4 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
     </EuiFlyout>
   );
 };
+EndpointExceptionsFlyout.displayName = 'EndpointExceptionsFlyout';

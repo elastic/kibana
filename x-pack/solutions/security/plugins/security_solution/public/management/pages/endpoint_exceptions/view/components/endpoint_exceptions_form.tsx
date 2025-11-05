@@ -35,6 +35,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { useSuggestions } from '../../../../hooks/use_suggestions';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   alertsIndexPattern,
@@ -64,6 +66,7 @@ import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../constants';
 
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
+import { EndpointExceptionsApiClient } from '../../service/api_client';
 
 const ENDPOINT_ALERTS_INDEX_NAMES = [alertsIndexPattern];
 
@@ -106,7 +109,17 @@ export const EndpointExceptionsForm: React.FC<
   ArtifactFormComponentProps & { allowSelectOs?: boolean }
 > = memo(({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
   const getTestId = useTestIdGenerator('endpointExceptions-form');
-  const { http, unifiedSearch } = useKibana().services;
+  const { http } = useKibana().services;
+
+  const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
+    ({ field, query }) => {
+      const endpointExceptionsAPIClient = new EndpointExceptionsApiClient(http);
+      return endpointExceptionsAPIClient.getSuggestions({ field: field.name, query });
+    },
+    [http]
+  );
+
+  const autocompleteSuggestions = useSuggestions(getSuggestionsFn);
 
   const [hasFormChanged, setHasFormChanged] = useState(false);
   const [hasNameError, toggleHasNameError] = useState<boolean>(!exception.name);
@@ -406,7 +419,7 @@ export const EndpointExceptionsForm: React.FC<
       getExceptionBuilderComponentLazy({
         allowLargeValueLists: false,
         httpService: http,
-        autocompleteService: unifiedSearch.autocomplete,
+        autocompleteService: autocompleteSuggestions,
         exceptionListItems: [endpointExceptionItem as ExceptionListItemSchema],
         listType: ENDPOINT_EXCEPTIONS_LIST_DEFINITION.type,
         listId: ENDPOINT_EXCEPTIONS_LIST_DEFINITION.list_id,
@@ -423,7 +436,7 @@ export const EndpointExceptionsForm: React.FC<
       }),
     [
       http,
-      unifiedSearch.autocomplete,
+      autocompleteSuggestions,
       endpointExceptionItem,
       indexPatterns,
       handleOnBuilderChange,
