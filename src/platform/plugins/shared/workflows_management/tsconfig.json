@@ -62,7 +62,9 @@
     "@kbn/utility-types",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

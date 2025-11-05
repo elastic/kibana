@@ -21280,7 +21280,7 @@
         "label": "CustomErrorParams",
         "description": [],
         "signature": [
-          "{ params?: { [k: string]: any; } | undefined; message?: string | undefined; path?: (string | number)[] | undefined; }"
+          "{ params?: { [k: string]: any; } | undefined; path?: (string | number)[] | undefined; message?: string | undefined; }"
         ],
         "path": "node_modules/zod/v3/types.d.cts",
         "deprecated": false,

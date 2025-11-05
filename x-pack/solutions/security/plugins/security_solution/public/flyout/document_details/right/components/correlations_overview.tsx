@@ -49,11 +49,10 @@ export const CorrelationsOverview: React.FC = () => {
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const { navigateToLeftPanel: goToCorrelationsTab, isEnabled: isLinkEnabled } =
-    useNavigateToLeftPanel({
-      tab: LeftPanelInsightsTab,
-      subTab: CORRELATIONS_TAB_ID,
-    });
+  const goToCorrelationsTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: CORRELATIONS_TAB_ID,
+  });
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
@@ -81,19 +80,16 @@ export const CorrelationsOverview: React.FC = () => {
   const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0] as Type | undefined;
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: goToCorrelationsTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
-                defaultMessage="Show all correlations"
-              />
-            ),
-          }
-        : undefined,
-    [goToCorrelationsTab, isLinkEnabled]
+    () => ({
+      callback: goToCorrelationsTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
+          defaultMessage="Show all correlations"
+        />
+      ),
+    }),
+    [goToCorrelationsTab]
   );
 
   return (

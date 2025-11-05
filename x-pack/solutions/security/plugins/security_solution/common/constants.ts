@@ -39,6 +39,7 @@ export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
 export const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert' as const;
+export const DEFAULT_ATTACK_DATA_VIEW_ID = 'security-solution-attack' as const;
 export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
@@ -471,6 +472,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
   SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
+  DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
