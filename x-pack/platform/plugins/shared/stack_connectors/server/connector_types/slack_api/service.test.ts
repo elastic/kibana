@@ -416,7 +416,8 @@ describe('Slack API service', () => {
     const errorNoChannelsRes = {
       actionId: CONNECTOR_ID,
       message: 'error posting slack message',
-      serviceMessage: 'The channel is empty',
+      serviceMessage:
+        'One of channels, channelIds, or channelNames is required and cannot be empty',
       status: 'error',
     };
 
@@ -439,19 +440,26 @@ describe('Slack API service', () => {
         );
       });
 
-      it('should post a message if allowedChannels is an empty array and use channelsIds', async () => {
-        service = createExternalServiceMock({ config: {} });
+      it.each([
+        ['channelNames', '#channel-1'],
+        ['channelIds', 'channel-id-1'],
+        ['channels', 'my-channel'],
+      ])(
+        'should post a message if allowedChannels is an empty array and use channelsIds',
+        async (key, value) => {
+          service = createExternalServiceMock({ config: { allowedChannels: [] } });
 
-        await service[method]({ channelIds: ['channel-id-1'], text });
+          await service[method]({ [key]: [value], text });
 
-        expect(requestMock).toHaveBeenCalledTimes(1);
+          expect(requestMock).toHaveBeenCalledTimes(1);
 
-        expect(requestMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            data: expect.objectContaining({ channel: 'channel-id-1' }),
-          })
-        );
-      });
+          expect(requestMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              data: expect.objectContaining({ channel: value }),
+            })
+          );
+        }
+      );
 
       it('should post a message if allowedChannels is an empty array and use channels', async () => {
         service = createExternalServiceMock({ config: {} });

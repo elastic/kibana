@@ -8,6 +8,8 @@
  */
 import { z } from '@kbn/zod';
 
+export const MAX_ALLOWED_CHANNELS = 500;
+
 export const SlackApiSecretsSchema = z
   .object({
     token: z.string().min(1),
@@ -25,7 +27,7 @@ export const SlackApiConfigSchema = z
           })
           .strict()
       )
-      .max(500)
+      .max(MAX_ALLOWED_CHANNELS)
       .optional(),
   })
   .strict();
@@ -51,7 +53,11 @@ export const PostMessageSubActionParamsSchema = z
      */
     channels: z.array(z.string()).max(1).optional(),
     channelIds: z.array(z.string()).max(1).optional(),
-    channelNames: z.array(z.string().max(200).superRefine(validateChannelName)).max(1).optional(),
+    channelNames: z
+      // min of two characters to account for '#' prefix
+      .array(z.string().min(2).max(200).superRefine(validateChannelName))
+      .max(1)
+      .optional(),
     text: z.string().min(1),
   })
   .strict();
@@ -82,6 +88,7 @@ export function validateChannelName(value: string | undefined, ctx: z.Refinement
     });
     return;
   }
+
   if (!value.startsWith('#')) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,

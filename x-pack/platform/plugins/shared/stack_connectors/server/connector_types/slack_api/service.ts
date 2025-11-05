@@ -192,6 +192,17 @@ export const createExternalService = (
     }
   };
 
+  /**
+   * Selects the Slack channel to use for message delivery. At the moment, only posting to a single channel is supported.
+   *
+   * Priority order:
+   *   1. If channelNames is provided and non-empty, validates against allowedChannelNames (if configured) and returns the first entry.
+   *   2. If channelIds is provided and non-empty, validates against allowedChannelIds (if configured) and returns the first entry.
+   *   3. If channels (legacy) is provided and non-empty, returns the first entry.
+   *   4. Throws if none are provided or all are empty.
+   *
+   * If allowedChannels is empty or undefined, no validation is performed against allowedChannelNames or allowedChannelIds.
+   */
   const getChannelToUse = ({
     channels = [],
     channelIds = [],
@@ -204,7 +215,9 @@ export const createExternalService = (
     const hasChannels = channelNames.length > 0 || channelIds.length > 0 || channels.length > 0;
 
     if (!hasChannels) {
-      throw new Error(`The channel is empty`);
+      throw new Error(
+        `One of channels, channelIds, or channelNames is required and cannot be empty`
+      );
     }
 
     // priority: channelNames > channelIds > channels
@@ -226,7 +239,7 @@ export const createExternalService = (
       return channels[0];
     }
 
-    throw new Error(`The channel is empty`);
+    throw new Error(`No valid channel found to use`);
   };
 
   const postMessage = async ({

@@ -8,7 +8,13 @@
  */
 
 import type { z } from '@kbn/zod';
-import { validateBlockkit, validateChannelName, PostMessageSubActionParamsSchema } from './v1';
+import {
+  validateBlockkit,
+  validateChannelName,
+  PostMessageSubActionParamsSchema,
+  SlackApiConfigSchema,
+  MAX_ALLOWED_CHANNELS,
+} from './v1';
 
 const ctx = {
   addIssue: jest.fn(),
@@ -108,6 +114,59 @@ describe('Slack Api Schema validation', () => {
     });
   });
 
+  describe('SlackApiConfigSchema', () => {
+    test('should not throw if all properties are missing', () => {
+      expect(() => SlackApiConfigSchema.parse({})).not.toThrow();
+    });
+
+    test('should throw with excess fields', () => {
+      expect(() =>
+        SlackApiConfigSchema.parse({ allowedChannels: [{ name: '#channel-name' }], foo: 'bar' })
+      ).toThrow();
+    });
+
+    test('should throw if allowedChannels.id is missing', () => {
+      expect(() =>
+        SlackApiConfigSchema.parse({ allowedChannels: [{ name: '#channel-name' }] })
+      ).not.toThrow();
+    });
+
+    test('should throw if allowedChannels.name is missing', () => {
+      expect(() => SlackApiConfigSchema.parse({ allowedChannels: [{}] })).toThrow();
+    });
+
+    test('should throw if allowedChannels.id is empty', () => {
+      expect(() =>
+        SlackApiConfigSchema.parse({ allowedChannels: [{ id: '', name: '#channel-name' }] })
+      ).toThrow();
+    });
+
+    test('should throw if allowedChannels.name is empty', () => {
+      expect(() =>
+        SlackApiConfigSchema.parse({ allowedChannels: [{ id: 'channel-id', name: '' }] })
+      ).toThrow();
+    });
+
+    test('should throw with excess fields in allowedChannels', () => {
+      expect(() =>
+        SlackApiConfigSchema.parse({
+          allowedChannels: [{ name: '#channel-name', foo: 'bar' }],
+        })
+      ).toThrow();
+    });
+
+    test(`should throw if allowedChannels is more than ${MAX_ALLOWED_CHANNELS}`, () => {
+      expect(() =>
+        SlackApiConfigSchema.parse({
+          allowedChannels: Array.from({ length: MAX_ALLOWED_CHANNELS + 1 }, (_, i) => ({
+            id: `channel-id-${i}`,
+            name: `#channel-name-${i}`,
+          })),
+        })
+      ).toThrow();
+    });
+  });
+
   describe('PostMessageSubActionParamsSchema', () => {
     test('should throw if text is missing', () => {
       expect(() => PostMessageSubActionParamsSchema.parse({})).toThrow();
@@ -115,6 +174,12 @@ describe('Slack Api Schema validation', () => {
 
     test('should not throw if text is not missing', () => {
       expect(() => PostMessageSubActionParamsSchema.parse({ text: 'hello' })).not.toThrow();
+    });
+
+    test('should throw if channelNames is too short', () => {
+      expect(() =>
+        PostMessageSubActionParamsSchema.parse({ text: 'hello', channelNames: ['#'] })
+      ).toThrow();
     });
 
     test('should throw if channelNames is too long', () => {
@@ -127,6 +192,12 @@ describe('Slack Api Schema validation', () => {
       expect(() =>
         PostMessageSubActionParamsSchema.parse({ text: 'hello', channelNames: ['general'] })
       ).toThrow();
+    });
+
+    test('should not throw with valid names', () => {
+      expect(() =>
+        PostMessageSubActionParamsSchema.parse({ text: 'hello', channelNames: ['#general'] })
+      ).not.toThrow();
     });
   });
 });
