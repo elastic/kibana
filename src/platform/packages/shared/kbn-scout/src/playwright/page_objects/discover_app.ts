@@ -115,20 +115,6 @@ export class DiscoverApp {
     return (await button.getAttribute('data-selected-value')) || '';
   }
 
-  async hasNoResults(state?: 'visible' | 'hidden'): Promise<boolean> {
-    return await this.page.testSubj.checkVisibility('discoverNoResults', {
-      state: state ?? 'visible',
-      timeout: 5000,
-    });
-  }
-
-  async hasNoResultsTimepicker(state?: 'visible' | 'hidden'): Promise<boolean> {
-    return await this.page.testSubj.checkVisibility('discoverNoResultsTimefilter', {
-      state: state ?? 'visible',
-      timeout: 5000,
-    });
-  }
-
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
     const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
     await button.click();
