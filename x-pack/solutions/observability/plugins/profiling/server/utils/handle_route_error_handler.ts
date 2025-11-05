@@ -33,9 +33,10 @@ export function handleRouteHandlerError({
     });
   }
   logger.error(error);
+  const err = error as Error;
 
   return response.customError({
     statusCode: error.statusCode ?? 500,
-    body: { message },
+    body: { message: err?.message || message },
   });
 }
