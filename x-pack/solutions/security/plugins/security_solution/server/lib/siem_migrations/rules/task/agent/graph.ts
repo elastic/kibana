@@ -83,7 +83,6 @@ const skipPrebuiltRuleConditional = (_state: MigrateRuleState, config: MigrateRu
 };
 
 const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
-  /** Todo for now we do not want to run custom process for qradar. we are just looking for pre-built matches*/
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
@@ -93,13 +92,5 @@ const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
 export function toolRouter(state: MigrateRuleState): string {
   const messages = state.messages;
   const lastMessage = messages.at(-1);
-
-  const hasToolCalls = lastMessage?.tool_calls?.length;
-
-  // If the LLM makes a tool call, then perform an action
-  if (lastMessage?.tool_calls?.length) {
-    return 'hasToolCalls';
-  }
-  // Otherwise, we stop (reply to the user)
-  return 'noToolCalls';
+  return lastMessage?.tool_calls?.length ? 'hasToolCalls' : 'noToolCalls';
 }

@@ -32,7 +32,7 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
     let comments: MigrationComments = [];
 
     if (vendor === 'qradar') {
-      params.logger.info(
+      params.logger.debug(
         `Translating rule "${state.original_rule.title}" using NL to ESQL for vendor: ${vendor}`
       );
       ({ esqlQuery, comments } = await nlToESQLQuery({
@@ -40,7 +40,7 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
         indexPattern: indexPatterns,
       }));
     } else {
-      params.logger.info(
+      params.logger.debug(
         `Translating rule "${state.original_rule.title}" using SPL to ESQL for vendor: ${vendor}`
       );
       ({ esqlQuery, comments } = await translateSplToEsql({

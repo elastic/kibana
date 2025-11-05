@@ -52,6 +52,12 @@ export function getTranslateRuleGraph({
     .addNode('translationResult', translationResultNode)
     // Edges
     .addConditionalEdges(START, getVendorRouter('splunk'), {
+      /**
+       *  For now inlineQuery node is only for splunk rules because we resolve dependencies such as `lookups` and `macros`
+       *  in this step. For new vendors and for splunk, resolve dependencies node should be used instead of inlineQuery node.
+       *
+       *  TODO : as of now we do not want to change splunk rule migration flow, so keeping inlineQuery node for splunk as it is.
+       */
       is_splunk: 'inlineQuery',
       is_not_splunk: 'retrieveIntegrations',
     })

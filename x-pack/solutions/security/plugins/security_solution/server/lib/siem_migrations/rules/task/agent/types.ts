@@ -33,6 +33,7 @@ export interface MigrateRuleGraphParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;
   model:
     | ChatModel
+    // when model is passed with tools, its type changes to Runnable
     | Runnable<BaseLanguageModelInput, AIMessageChunk, InferenceChatModelCallOptions>;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;

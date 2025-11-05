@@ -47,7 +47,6 @@ export class ActionsClientChat {
         maxConcurrency: 50,
         telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
         signal: abortController.signal,
-        functionCallingMode: 'auto',
       },
     });
   }

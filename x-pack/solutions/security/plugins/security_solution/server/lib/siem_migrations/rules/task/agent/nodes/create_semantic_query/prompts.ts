@@ -6,7 +6,6 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import type { OriginalRuleVendor } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 export const CREATE_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
@@ -76,8 +75,3 @@ Rule in Natural Language:
     `,
   ],
 ]);
-
-export const SEMANTIC_QUERY_PROMPT_MAP = {
-  splunk: CREATE_SEMANTIC_QUERY_PROMPT,
-  qradar: QRADAR_SEMANTIC_QUERY_PROMPT,
-} as const;
