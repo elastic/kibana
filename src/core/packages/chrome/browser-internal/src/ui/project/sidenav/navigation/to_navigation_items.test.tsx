@@ -273,7 +273,6 @@ describe('panel opener href', () => {
 describe('empty panel opener', () => {
   it('should not return panel opener if it has no children', () => {
     const tree = structuredClone(navigationTree);
-    // @ts-expect-error to avoid excess type checking for test
     tree.body[0]!.children![2].children = []; // 'securityGroup:rules' panel opener has no children now
     const {
       navItems: { primaryItems },
@@ -289,7 +288,7 @@ describe('hidden panel link', () => {
     const tree = structuredClone(navigationTree);
     // @ts-expect-error to avoid excess type checking for test
     const stackManagementNode = tree.footer[0].children[2].children[0];
-    stackManagementNode.children.push({
+    stackManagementNode.children!.push({
       link: 'management',
       sideNavStatus: 'hidden',
     });

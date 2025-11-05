@@ -12,22 +12,15 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
   NodeDefinition,
-  RecentlyAccessedDefinition,
-  RootNavigationItemDefinition,
   NavigationTreeDefinitionUI,
-  PresetDefinition,
-  GroupDefinition,
   AppDeepLinkId,
   SideNavNodeStatus,
   CloudLinkId,
   CloudLinks,
-  ItemDefinition,
   SolutionId,
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
-import type { MouseEventHandler } from 'react';
 import type { SideNavigationSection } from '@kbn/core-chrome-browser/src/project_navigation';
-import { getPresets } from './navigation_presets';
 
 const wrapIdx = (index: number): string => `[${index}]`;
 
@@ -216,17 +209,15 @@ function getNodeStatus(
     deepLink,
     cloudLink,
     sideNavStatus,
-    onClick,
   }: {
     link?: string;
     deepLink?: ChromeNavLink;
     cloudLink?: CloudLinkId;
     sideNavStatus?: SideNavNodeStatus;
-    onClick?: MouseEventHandler<HTMLButtonElement | HTMLElement>;
   },
   { cloudLinks }: { cloudLinks: CloudLinks }
 ): SideNavNodeStatus | 'remove' {
-  if (link && !deepLink && !onClick) {
+  if (link && !deepLink) {
     // If a link is provided, but no deepLink is found, don't render anything
     return 'remove';
   }
@@ -265,7 +256,7 @@ function validateNodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
->({ id, link, href, cloudLink, renderAs, onClick }: NodeDefinition<LinkId, Id, ChildrenId>) {
+>({ id, link, href, cloudLink, renderAs }: NodeDefinition<LinkId, Id, ChildrenId>) {
   if (link && cloudLink) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. Only one of "link" or "cloudLink" can be provided.`
@@ -274,11 +265,6 @@ function validateNodeProps<
   if (href && cloudLink) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. Only one of "href" or "cloudLink" can be provided.`
-    );
-  }
-  if (renderAs === 'item' && !link && !onClick) {
-    throw new Error(
-      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" or "onClick" must also be provided.`
     );
   }
 }
@@ -303,7 +289,7 @@ const initNavNode = <
 ): ChromeProjectNavigationNode | null => {
   validateNodeProps(node);
 
-  const { cloudLink, link, children, onClick, ...navNodeFromProps } = node;
+  const { cloudLink, link, children, ...navNodeFromProps } = node;
   const deepLink = link !== undefined ? deepLinks[link] : undefined;
   const sideNavStatus = getNodeStatus(
     {
@@ -311,7 +297,6 @@ const initNavNode = <
       deepLink,
       cloudLink,
       sideNavStatus: navNodeFromProps.sideNavStatus,
-      onClick,
     },
     { cloudLinks }
   );
@@ -326,7 +311,7 @@ const initNavNode = <
   const href = isExternalLink ? cloudLinks[cloudLink]?.href : node.href;
   const path = parentNodePath ? `${parentNodePath}.${id}` : id;
 
-  if (href && !isAbsoluteLink(href) && !onClick) {
+  if (href && !isAbsoluteLink(href)) {
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
   }
 
@@ -334,7 +319,6 @@ const initNavNode = <
     ...navNodeFromProps,
     id,
     href: getNavigationNodeHref({ href, deepLink }),
-    onClick,
     path,
     title,
     deepLink,
@@ -343,26 +327,6 @@ const initNavNode = <
   };
 
   return navNode;
-};
-
-const isPresetDefinition = (
-  item: RootNavigationItemDefinition | NodeDefinition
-): item is PresetDefinition => {
-  return (item as PresetDefinition).preset !== undefined;
-};
-
-const isGroupDefinition = (
-  item: RootNavigationItemDefinition | NodeDefinition
-): item is GroupDefinition => {
-  return (
-    (item as GroupDefinition).type === 'navGroup' || (item as NodeDefinition).children !== undefined
-  );
-};
-
-const isRecentlyAccessedDefinition = (
-  item: RootNavigationItemDefinition | NodeDefinition
-): item is RecentlyAccessedDefinition => {
-  return (item as RootNavigationItemDefinition).type === 'recentlyAccessed';
 };
 
 export const parseNavigationTree = (
@@ -379,8 +343,6 @@ export const parseNavigationTree = (
   navigationTree: ChromeProjectNavigationNode[];
   navigationTreeUI: NavigationTreeDefinitionUI;
 } => {
-  const navTreePresets = getPresets('all');
-
   // The navigation tree that represents the global navigation and will be used by the Chrome service
   const navigationTree: ChromeProjectNavigationNode[] = [];
 
@@ -388,35 +350,18 @@ export const parseNavigationTree = (
   const navigationTreeUI: NavigationTreeDefinitionUI = { id, body: [] };
 
   const initNodeAndChildren = (
-    node: GroupDefinition | ItemDefinition | NodeDefinition,
+    node: NodeDefinition,
     { index = 0, parentPath = [] }: { index?: number; parentPath?: string[] } = {}
-  ): ChromeProjectNavigationNode | RecentlyAccessedDefinition | null => {
-    if (isRecentlyAccessedDefinition(node)) {
-      return node;
-    }
-
-    if (node.sideNavVersion === 'v1') {
-      // If the node is v1 and we are in v2 mode, skip it
-      return null;
-    }
-
-    let nodeSerialized: NodeDefinition | GroupDefinition | ItemDefinition = node;
-
-    if (isPresetDefinition(node)) {
-      // Get the navGroup definition from the preset
-      const { preset, type, ...rest } = node;
-      nodeSerialized = { ...navTreePresets[preset], type: 'navGroup', ...rest };
-    }
-
-    const navNode = initNavNode(nodeSerialized, {
+  ): ChromeProjectNavigationNode | null => {
+    const navNode = initNavNode(node, {
       cloudLinks,
       deepLinks,
       parentNodePath: parentPath.length > 0 ? parentPath.join('.') : undefined,
       index,
     });
 
-    if (navNode && isGroupDefinition(nodeSerialized) && nodeSerialized.children) {
-      navNode.children = nodeSerialized.children
+    if (navNode && node.children) {
+      navNode.children = node.children
         .map((child, i) =>
           initNodeAndChildren(child, {
             index: i,
@@ -430,14 +375,12 @@ export const parseNavigationTree = (
   };
 
   const onNodeInitiated = (
-    navNode: ChromeProjectNavigationNode | RecentlyAccessedDefinition | null,
+    navNode: ChromeProjectNavigationNode | null,
     section: SideNavigationSection = 'body'
   ) => {
     if (navNode) {
-      if (!isRecentlyAccessedDefinition(navNode)) {
-        // Add the node to the global navigation tree
-        navigationTree.push(navNode);
-      }
+      // Add the node to the global navigation tree
+      navigationTree.push(navNode);
 
       // Add the node to the Side Navigation UI tree
       if (!navigationTreeUI[section]) {
@@ -448,7 +391,7 @@ export const parseNavigationTree = (
   };
 
   const parseNodesArray = (
-    nodes?: RootNavigationItemDefinition[],
+    nodes?: NodeDefinition[],
     section: SideNavigationSection = 'body',
     startIndex = 0
   ): void => {
@@ -462,7 +405,6 @@ export const parseNavigationTree = (
 
   parseNodesArray(navigationTreeDef.body, 'body');
   parseNodesArray(navigationTreeDef.footer, 'footer', navigationTreeDef.body?.length ?? 0);
-  parseNodesArray(navigationTreeDef.callout, 'callout', navigationTreeDef.body?.length ?? 0);
 
   return { navigationTree, navigationTreeUI };
 };
