@@ -155,8 +155,6 @@ export const createAgentGraph = ({
   });
 
   const answerAgent = async (state: StateType) => {
-    console.log('*** answer agent');
-
     if (state.answerActions.length === 0 && state.errorCount === 0) {
       events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     }
