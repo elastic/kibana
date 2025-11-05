@@ -1,0 +1,1370 @@
+/**
+ * Stack Connectors 2.0 - Universal TypeScript Specification
+ * 
+ * This file defines the universal interface that all Stack Connectors will implement.
+ * It supports all features found across 30 existing Kibana connectors including:
+ * - 8 authentication patterns
+ * - Rate limiting and pagination strategies
+ * - Streaming for AI connectors
+ * - Multiple sub-actions per connector
+ * - Special capabilities (OAuth token management, RTR sessions, etc.)
+ * 
+ * KEY DESIGN PRINCIPLE:
+ * The UI should be fully derivable from Zod schemas with minimal additional metadata.
+ * This enables:
+ * - Single source of truth (schema = validation + UI)
+ * - LLM-friendly spec (just define schemas, UI is generated)
+ * - Reduced boilerplate (no separate UI definitions)
+ * 
+ * @see connector_spec.md for comprehensive feature mapping and examples
+ * @see connector_spec_ui.ts for UI metadata extension system
+ * @see connector_spec_examples.ts for example implementations
+ */
+
+import { z } from "zod";
+import type { Logger } from "@kbn/core/server";
+import type { AxiosInstance } from "axios";
+
+// Re-export UI utilities for convenience
+export { withUIMeta, UISchemas } from "./connector_spec_ui";
+
+// ============================================================================
+// METADATA & IDENTIFICATION
+// ============================================================================
+
+/**
+ * Connector metadata that defines its identity and capabilities
+ */
+export interface ConnectorMetadata {
+  /** Unique connector ID (e.g., ".slack_api", ".jira") */
+  id: string;
+  
+  /** Display name shown in UI */
+  displayName: string;
+  
+  /** Icon identifier for UI rendering */
+  icon?: string;
+  
+  /** Short description of the connector's purpose */
+  description: string;
+  
+  /** URL to connector documentation */
+  docsUrl?: string;
+  
+  /** Minimum Kibana license required */
+  minimumLicense: "basic" | "gold" | "platinum" | "enterprise";
+  
+  /** Feature IDs this connector supports */
+  supportedFeatureIds: Array<
+    | "alerting"
+    | "cases" 
+    | "uptime"
+    | "security"
+    | "siem"
+    | "generativeAIForSecurity"
+    | "generativeAIForObservability"
+    | "generativeAIForSearchPlayground"
+    | "endpointSecurity"
+  >;
+  
+  /** 
+   * Sub-feature type for specialized connectors
+   * 
+   * WHY: Some connectors require special categorization beyond basic feature IDs
+   * for security and access control purposes. This allows grouping connectors
+   * that share specialized capabilities or security requirements.
+   * 
+   * USED BY: Endpoint security connectors (Crowdstrike, SentinelOne, Microsoft Defender Endpoint)
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/index.ts:42
+   *   Code: `subFeature: 'endpointSecurity'`
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone/index.ts:42
+   *   Code: `subFeature: 'endpointSecurity'`
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/microsoft_defender_endpoint/index.ts:49
+   *   Code: `subFeature: 'endpointSecurity'`
+   * 
+   * WHY NEEDED: Endpoint security connectors require special privilege checks and 
+   * access controls beyond standard connectors. This flag allows the framework to
+   * apply additional security measures.
+   */
+  subFeature?: "endpointSecurity";
+  
+  /** 
+   * Dynamic privilege requirements based on execution context
+   * 
+   * WHY: Some connectors require different Kibana privileges depending on:
+   * - How they're executed (HTTP request vs rule execution)
+   * - Which action is being performed
+   * - User context and permissions needed
+   * 
+   * This allows connectors to enforce fine-grained access control dynamically
+   * rather than static privilege requirements.
+   * 
+   * USED BY: Endpoint security connectors (Crowdstrike, SentinelOne, Microsoft Defender Endpoint)
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/index.ts:43-52
+   *   Code:
+   *   ```typescript
+   *   getKibanaPrivileges: (args) => {
+   *     const privileges = [ENDPOINT_SECURITY_EXECUTE_PRIVILEGE];
+   *     if (
+   *       args?.source === ActionExecutionSourceType.HTTP_REQUEST &&
+   *       args?.params?.subAction !== SUB_ACTION.GET_AGENT_DETAILS
+   *     ) {
+   *       privileges.push(ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE);
+   *     }
+   *     return privileges;
+   *   }
+   *   ```
+   * 
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone/index.ts:43-52
+   *   Code: Similar pattern - requires `actionsSubActionsExecute:endpointSecurity` for
+   *   most actions when executed via HTTP, except for read-only actions like `GET_AGENTS`
+   * 
+   * WHY NEEDED: Endpoint security actions can be highly privileged (isolate host,
+   * execute commands). Different actions need different privilege levels, and
+   * HTTP-initiated actions need stricter checks than rule-based executions.
+   */
+  getKibanaPrivileges?: (args?: {
+    source?: string;
+    params?: Record<string, unknown>;
+  }) => string[];
+}
+
+// ============================================================================
+// AUTHENTICATION
+// ============================================================================
+
+/**
+ * Authentication schema covering all 8 auth patterns found in connectors
+ * 
+ * Each method includes real-world connector examples with exact file paths and line numbers
+ */
+export const AuthSchema = z.discriminatedUnion("method", [
+  // 1. No Authentication
+  // USED BY: Server Log, ES Index (internal connectors that don't call external APIs)
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/server_log/index.ts
+  z.object({
+    method: z.literal("none"),
+  }),
+  
+  // 2. Basic Authentication (username/password)
+  // USED BY: Jira, ServiceNow (ITSM, SIR, ITOM), Resilient, XSOAR, TheHive
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/jira/service.ts:66
+  //   Code: `headers: getBasicAuthHeader({ username: email, password: apiToken })`
+  // WHY: Enterprise ticketing systems commonly use HTTP Basic Auth
+  z.object({
+    method: z.literal("basic"),
+    credentials: z.object({
+      username: z.string(),
+      password: z.string(),
+    }),
+  }),
+  
+  // 3. Bearer Token / API Key
+  // USED BY: OpenAI, Gemini, PagerDuty, Opsgenie, Torq, D3Security, Inference
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/lib/utils.ts:94
+  //   Code: `Authorization: \`Bearer \${apiKey}\``
+  // WHY: Most modern APIs use Bearer tokens or API keys for simplicity
+  z.object({
+    method: z.literal("bearer"),
+    token: z.string().describe("Bearer token or API key"),
+  }),
+  
+  // 4. Custom Headers
+  // USED BY: Slack API, xMatters, Cases Webhook, Tines
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/slack_api/service.ts:131-134
+  //   Code: `headers: { Authorization: \`Bearer \${token}\`, 'Content-type': 'application/json; charset=UTF-8' }`
+  // WHY: Services requiring custom header names (e.g., "Authorization: Bearer ...", "X-API-Key: ...")
+  z.object({
+    method: z.literal("headers"),
+    headers: z.record(z.string(), z.string()),
+  }),
+  
+  // 5. OAuth2 Client Credentials
+  // USED BY: Crowdstrike, SentinelOne, Microsoft Defender Endpoint (Teams uses webhook, not OAuth2)
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/token_manager.ts:76
+  //   Code: `authorization: 'Basic ' + this.base64encodedToken` (client_credentials flow)
+  //   Code: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/crowdstrike.ts:250
+  //   Code: `Authorization: \`Bearer \${token}\`` (using fetched OAuth token)
+  // WHY: Enterprise services requiring OAuth2 machine-to-machine auth
+  z.object({
+    method: z.literal("oauth2"),
+    config: z.object({
+      tokenUrl: z.string().url(),
+      clientId: z.string(),
+      clientSecret: z.string(),
+      scope: z.string().optional(),
+      additionalFields: z.string().optional(),
+    }),
+  }),
+  
+  // 6. mTLS/PKI Certificate-based
+  // USED BY: Webhook (with SSL), Cases Webhook (with SSL), Email (optional)
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/get_axios_config.ts:100-106
+  //   Code: `buildConnectorAuth({ hasAuth, authType, secrets, verificationMode, ca })`
+  // WHY: High-security environments requiring mutual TLS authentication
+  z.object({
+    method: z.literal("ssl"),
+    certificate: z.discriminatedUnion("type", [
+      z.object({
+        type: z.literal("crt"),
+        cert: z.string().describe("Base64-encoded certificate"),
+        key: z.string().describe("Base64-encoded private key"),
+        passphrase: z.string().optional(),
+        ca: z.string().optional().describe("Base64-encoded CA certificate"),
+        verificationMode: z.enum(["none", "certificate", "full"]).optional(),
+      }),
+      z.object({
+        type: z.literal("pfx"),
+        pfx: z.string().describe("Base64-encoded PFX bundle"),
+        passphrase: z.string().optional(),
+        ca: z.string().optional().describe("Base64-encoded CA certificate"),
+        verificationMode: z.enum(["none", "certificate", "full"]).optional(),
+      }),
+    ]),
+  }),
+  
+  // 7. AWS Signature v4
+  // USED BY: Bedrock (AWS AI service)
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/bedrock.ts:186-211
+  //   Code: `aws.sign({ host, headers, body, path, service: 'bedrock' }, { secretAccessKey, accessKeyId })`
+  // WHY: AWS services require SigV4 signing for authentication
+  z.object({
+    method: z.literal("aws_sig_v4"),
+    credentials: z.object({
+      accessKey: z.string(),
+      secretKey: z.string(),
+      region: z.string().optional(),
+      service: z.string().optional(),
+    }),
+  }),
+  
+  // 8. Webhook URL (auth embedded in URL)
+  // USED BY: Slack Webhook, PagerDuty (webhook mode), Teams, Webhook connector
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/teams/index.ts:140
+  //   Code: `url: webhookUrl` (secret webhook URL from configuration)
+  // WHY: Simple webhook integrations where the secret is in the URL itself
+  z.object({
+    method: z.literal("webhook"),
+    url: z.string().url(),
+    extraHeaders: z.record(z.string(), z.string()).optional(),
+  }),
+]);
+
+export type AuthConfig = z.infer<typeof AuthSchema>;
+
+// ============================================================================
+// POLICIES & STRATEGIES
+// ============================================================================
+
+/**
+ * Rate limiting policy configuration
+ * 
+ * WHY: External APIs often have rate limits to prevent abuse. Connectors need
+ * to detect and handle rate limiting gracefully, with automatic retries after
+ * the rate limit resets.
+ */
+export interface RateLimitPolicy {
+  /**
+   * Strategy for detecting rate limits
+   * 
+   * - header: Read rate limit info from response headers
+   *   USED BY: Slack API, Teams
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/slack_api/service.ts:63
+   *     Code: `// special handling for rate limiting`
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/teams/index.ts:158-159
+   *     Code: Comment about 429 rate limiting with response body
+   *   
+   * - status_code: Detect 429 status codes
+   *   USED BY: Most connectors as fallback (PagerDuty, Opsgenie, Jira, Webhook, Torq)
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.ts:178
+   *     Code: `// special handling for rate limiting`
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/torq/index.ts:218
+   *     Code: `// special handling for rate limiting`
+   *   
+   * - response_body: Parse rate limit info from response JSON
+   *   USED BY: Teams (embeds rate limit info in response body)
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/teams/index.ts:158-159
+   *     Code: `// with a 429 message in the response body when the rate limit is hit`
+   */
+  strategy: "header" | "status_code" | "response_body";
+  
+  /** 
+   * HTTP status codes that indicate rate limiting
+   * COMMON: [429, 503] - 429 = Too Many Requests, 503 = Service Unavailable
+   * USED BY: Slack, Jira, ServiceNow, OpenAI, Teams
+   * REFERENCE: Most connectors handle 429 as a special case for user-facing errors
+   */
+  codes?: number[];
+  
+  /** 
+   * Header containing retry-after information
+   * EXAMPLE: "x-ratelimit-remaining" (Slack), "x-rate-limit-remaining" (GitHub)
+   * REFERENCE: Slack API uses this to determine when rate limits will reset
+   */
+  remainingHeader?: string;
+  
+  /** 
+   * Header containing rate limit reset time
+   * EXAMPLE: "x-ratelimit-reset" (Slack), "x-rate-limit-reset" (GitHub)
+   * REFERENCE: Used to calculate wait time before retrying
+   */
+  resetHeader?: string;
+  
+  /** 
+   * JSON path to rate limit info in response body
+   * EXAMPLE: "error.retry_after" for APIs that embed retry info in error responses
+   * REFERENCE: Teams connector parses rate limit info from response body
+   */
+  bodyPath?: string;
+}
+
+/**
+ * Pagination policy configuration
+ */
+export interface PaginationPolicy {
+  /**
+   * Pagination strategy
+   * 
+   * cursor: Cursor/token-based pagination (most modern APIs)
+   *   USED BY: Slack (response_metadata.next_cursor), Crowdstrike, SentinelOne
+   *   REFERENCE: Slack uses cursor pagination in API responses
+   *   Example: { "response_metadata": { "next_cursor": "dGVhbTpDMDYxRkE1UEI=" } }
+   *   
+   * offset: Offset/limit-based pagination (traditional REST)
+   *   USED BY: Jira, ServiceNow, Resilient
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/jira/service.ts:436-438
+   *   Code: `jql=project="${projectKey}" and summary ~"${title}"` with startAt parameter
+   *   
+   * link_header: RFC 5988 Link header pagination
+   *   USED BY: GitHub API, some enterprise REST APIs
+   *   Example: Link: <https://api.example.com/data?page=2>; rel="next"
+   *   
+   * none: No pagination support
+   *   USED BY: Most single-action connectors (Webhook, Email, Teams, PagerDuty)
+   */
+  strategy: "cursor" | "offset" | "link_header" | "none";
+  
+  /** 
+   * For cursor-based pagination
+   * cursorParam: Query parameter name for cursor (e.g., "cursor", "next_token")
+   * cursorPath: JSON path to next cursor in response (e.g., "response_metadata.next_cursor")
+   * EXAMPLE: Slack API uses cursor="xxx" parameter and returns next_cursor in response
+   */
+  cursorParam?: string;
+  cursorPath?: string;
+  
+  /** 
+   * For offset-based pagination
+   * offsetParam: Parameter for page offset (e.g., "offset", "skip", "startAt")
+   * limitParam: Parameter for page size (e.g., "limit", "maxResults", "top")
+   * EXAMPLE: Jira uses startAt=0&maxResults=50
+   */
+  offsetParam?: string;
+  limitParam?: string;
+  
+  /** 
+   * For link header pagination
+   * linkHeaderName: Header name (usually "Link")
+   * EXAMPLE: Link: <https://api.example.com/data?page=2>; rel="next"
+   */
+  linkHeaderName?: string;
+  
+  /** 
+   * Page size parameter name
+   * EXAMPLE: "limit" (Slack), "maxResults" (Jira), "top" (Teams)
+   */
+  pageSizeParam?: string;
+  
+  /** 
+   * Default/max page size
+   * COMMON: 50-100 for most APIs
+   * EXAMPLE: Slack defaults to 100, Jira defaults to 50
+   */
+  defaultPageSize?: number;
+}
+
+/**
+ * Retry policy configuration
+ * 
+ * WHY: Network failures and transient errors are common. Automatic retries with
+ * exponential backoff improve reliability without user intervention.
+ */
+export interface RetryPolicy {
+  /** 
+   * Automatically retry on 5xx errors
+   * 
+   * USED BY: Most connectors handle 5xx as retryable server errors
+   * REFERENCE: Actions framework handles server errors with retry logic
+   * WHY: 5xx errors are typically temporary server issues (overload, restart)
+   */
+  retryOn5xx?: boolean;
+  
+  /** 
+   * Retry on 429 (rate limit) with backoff
+   * 
+   * USED BY: Slack API, Teams, OpenAI, most API-based connectors
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/slack/index.test.ts:399
+   *   Code: `test('returns a user error for rate-limiting responses', async () => { ... })`
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/openai.test.ts:626
+   *   Code: `it('marks 429 errors as user errors', async () => { ... })`
+   * WHY: Rate limits require wait time before retry - should use exponential backoff
+   */
+  retryOn429?: boolean;
+  
+  /** 
+   * Custom retry logic for specific error patterns
+   * 
+   * USED BY: Connectors with custom error handling (Crowdstrike, OAuth2 connectors)
+   * WHY: Some APIs have unique error codes or patterns that need special retry logic
+   */
+  customRetryCondition?: (error: {
+    status?: number;
+    message?: string;
+    response?: unknown;
+  }) => boolean;
+  
+  /** 
+   * Maximum retry attempts
+   * 
+   * COMMON: 3-5 retries for most connectors
+   * WHY: Balance between reliability and response time. Too many retries delay error reporting.
+   */
+  maxRetries?: number;
+  
+  /** 
+   * Backoff strategy
+   * 
+   * - exponential: Recommended for most APIs (doubles delay each retry)
+   *   USED BY: Most production connectors
+   *   WHY: Prevents thundering herd, gives services time to recover
+   *   
+   * - linear: Fixed increment each retry
+   *   USED BY: Simple connectors with predictable behavior
+   *   
+   * - fixed: Same delay between all retries
+   *   USED BY: Local/internal services with consistent response times
+   */
+  backoffStrategy?: "exponential" | "linear" | "fixed";
+  
+  /** 
+   * Initial backoff delay in ms
+   * 
+   * COMMON: 1000ms (1 second) initial delay
+   * WHY: Short enough to be responsive, long enough to let transient issues resolve
+   */
+  initialDelay?: number;
+}
+
+/**
+ * Error classification for better handling
+ * 
+ * WHY: Proper error classification helps users understand whether an error is
+ * their fault (user error) or a system/service issue. This affects retry logic,
+ * error messages, and alerting behavior.
+ */
+export interface ErrorPolicy {
+  /** 
+   * Classify errors as user vs system errors
+   * 
+   * USED BY: Webhook, Email, OpenAI, and most connectors
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/email/index.ts:483
+   *   Code: `// Mark 4xx and 5xx errors as user errors`
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.test.ts:1118
+   *   Code: `'forwards user error source in result for %s error responses'`
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/slack/index.test.ts:399
+   *   Code: `test('returns a user error for rate-limiting responses', async () => { ... })`
+   * 
+   * WHY NEEDED:
+   * - User errors (4xx): Bad credentials, invalid parameters, rate limits
+   *   → Don't retry automatically, show actionable error messages
+   * - System errors (5xx, network): Service down, timeouts
+   *   → Retry automatically, alert operators
+   * 
+   * CLASSIFICATION RULES (common pattern):
+   * - 400-499: User errors (except 408 timeout, 429 rate limit may retry)
+   * - 500-599: System errors (retryable)
+   * - Network errors: System errors (retryable)
+   * - Validation errors: User errors
+   */
+  classifyError?: (error: {
+    status?: number;
+    message?: string;
+  }) => "user" | "system" | "unknown";
+  
+  /** 
+   * User error status codes (4xx typically)
+   * 
+   * COMMON: [400, 401, 403, 404] - client errors
+   * REFERENCE: Most connectors treat 4xx as user errors requiring user action
+   * WHY: These indicate problems with the request (bad auth, invalid params, etc.)
+   */
+  userErrorCodes?: number[];
+  
+  /** 
+   * System error status codes (5xx typically)
+   * 
+   * COMMON: [500, 502, 503, 504] - server errors
+   * REFERENCE: Most connectors treat 5xx as retryable system errors
+   * WHY: These indicate temporary server issues that may resolve on retry
+   */
+  systemErrorCodes?: number[];
+}
+
+/**
+ * Streaming configuration for AI connectors
+ */
+export interface StreamingPolicy {
+  /** 
+   * Whether connector supports streaming
+   * USED BY: All AI connectors (OpenAI, Bedrock, Gemini, Inference)
+   * WHY: LLMs generate responses token-by-token for better UX
+   */
+  enabled: boolean;
+  
+  /**
+   * Streaming mechanism
+   * 
+   * - sse: Server-Sent Events (most common for AI APIs)
+   *   USED BY: OpenAI (stream=true), Inference connector
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/lib/utils.ts:107-114
+   *   Code: `pipeStreamingResponse(response: AxiosResponse<IncomingMessage>)` handles SSE streams
+   *   
+   * - chunked: HTTP chunked transfer encoding
+   *   USED BY: Bedrock streaming API with AWS EventStream
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/bedrock.ts:191-196
+   *   Code: `headers: { accept: 'application/vnd.amazon.eventstream' }` for chunked streaming
+   *   
+   * - websocket: WebSocket connection for bidirectional streaming
+   *   USED BY: (reserved for future real-time connectors)
+   */
+  mechanism?: "sse" | "chunked" | "websocket";
+  
+  /**
+   * Parser for streaming data
+   * 
+   * - ndjson: Newline-delimited JSON (most common)
+   *   USED BY: OpenAI (data: {...}\n\ndata: {...}\n\n)
+   *   
+   * - json: Standard JSON chunks
+   *   USED BY: Some enterprise APIs
+   *   
+   * - text: Plain text streaming
+   *   USED BY: Simple text-based APIs
+   *   
+   * - custom: Custom parser implementation
+   *   USED BY: Proprietary streaming formats
+   */
+  parser?: "ndjson" | "json" | "text" | "custom";
+}
+
+/**
+ * Complete policies object
+ */
+export interface ConnectorPolicies {
+  rateLimit?: RateLimitPolicy;
+  pagination?: PaginationPolicy;
+  retry?: RetryPolicy;
+  error?: ErrorPolicy;
+  streaming?: StreamingPolicy;
+}
+
+// ============================================================================
+// ACTIONS & SUB-ACTIONS
+// ============================================================================
+
+/**
+ * Definition of a single action/sub-action
+ */
+export interface ActionDefinition<TInput = unknown, TOutput = unknown> {
+  /** Whether this action can be used as a tool in LLM contexts */
+  isTool?: boolean;
+  
+  /** Zod schema for input validation */
+  input: z.ZodSchema<TInput>;
+  
+  /** Optional output schema for response validation */
+  output?: z.ZodSchema<TOutput>;
+  
+  /** Action handler function */
+  handler: (
+    ctx: ActionContext,
+    input: TInput
+  ) => Promise<TOutput>;
+  
+  /** Optional description for documentation/UI */
+  description?: string;
+  
+  /** Whether this action supports streaming responses */
+  supportsStreaming?: boolean;
+}
+
+/**
+ * Context passed to action handlers
+ */
+export interface ActionContext {
+  /** Authenticated connector instance */
+  auth: AuthConfig;
+  
+  /** Logger instance */
+  log: Logger;
+  
+  /** HTTP client (pre-configured with auth) */
+  client?: AxiosInstance;
+  
+  /** Configuration values */
+  config?: Record<string, unknown>;
+  
+  /** Optional connector usage collector */
+  connectorUsageCollector?: unknown;
+}
+
+// ============================================================================
+// SPECIAL CAPABILITIES
+// ============================================================================
+
+/**
+ * Multi-provider support (e.g., Email with SMTP, Exchange, AWS SES)
+ * 
+ * USED BY: Email connector (supports multiple email services)
+ * FILE: email/index.ts
+ * WHY: Single connector that can work with different backend services
+ */
+export interface MultiProviderCapability {
+  /** 
+   * Available service providers
+   * EXAMPLE (Email): 
+   *   - { id: "smtp", name: "SMTP", requiredConfig: ["host", "port"] }
+   *   - { id: "exchange_server", name: "Microsoft Exchange Server" }
+   *   - { id: "ses", name: "AWS SES" }
+   *   - { id: "other", name: "Other" }
+   */
+  providers: Array<{
+    id: string;
+    name: string;
+    requiredConfig?: string[];
+    requiredSecrets?: string[];
+  }>;
+  
+  /** Selected provider from config */
+  selectedProvider: string;
+}
+
+/**
+ * Function calling support for AI connectors
+ * 
+ * USED BY: OpenAI (tools/functions), Bedrock (tool use), Gemini (function declarations)
+ * FILE: openai/index.ts, bedrock/index.ts, gemini/index.ts
+ * WHY: LLMs can call external functions/tools during generation
+ */
+export interface FunctionCallingCapability {
+  /** Whether native function calling is supported */
+  supported: boolean;
+  
+  /** 
+   * Function calling format/protocol
+   * - openai: OpenAI function calling format (used by OpenAI, Inference)
+   * - anthropic: Claude function calling format (used by Bedrock with Claude)
+   * - generic: Generic tool use format
+   */
+  format?: "openai" | "anthropic" | "generic";
+  
+  /** Whether tool use is enabled */
+  toolUseEnabled?: boolean;
+}
+
+/**
+ * Token management for OAuth2 connectors
+ * 
+ * USED BY: Teams, Crowdstrike, SentinelOne, Microsoft Defender Endpoint
+ * FILE: teams/index.ts, crowdstrike/index.ts, sentinelone/index.ts
+ * WHY: OAuth2 tokens expire and need refresh logic
+ */
+export interface TokenManagementCapability {
+  /** 
+   * Token refresh logic
+   * EXAMPLE: Teams connector refreshes Azure AD tokens before expiry
+   */
+  refreshToken?: (currentToken: string) => Promise<string>;
+  
+  /** 
+   * Token expiration check
+   * EXAMPLE: Check JWT exp claim or expiry timestamp
+   */
+  isTokenExpired?: (token: string) => boolean;
+  
+  /** 
+   * Token storage key
+   * EXAMPLE: "teams_oauth_token", "crowdstrike_bearer_token"
+   */
+  tokenStorageKey?: string;
+}
+
+/**
+ * Real-time session management (e.g., Crowdstrike RTR)
+ * 
+ * WHY: Some APIs require stateful, long-lived sessions for performing
+ * operations. Sessions must be initialized, kept alive, and cleaned up properly.
+ * 
+ * USED BY: Crowdstrike (Real-Time Response sessions)
+ * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/rtr_session_manager.ts:17-86
+ * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/crowdstrike.ts:63
+ *   Code: `private crowdStrikeSessionManager: CrowdStrikeSessionManager;`
+ */
+export interface SessionManagementCapability {
+  /** 
+   * Initialize a session
+   * 
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/rtr_session_manager.ts:36-86
+   *   Code:
+   *   ```typescript
+   *   async initializeSession(
+   *     payload: CrowdstrikeInitRTRParams,
+   *     connectorUsageCollector: ConnectorUsageCollector
+   *   ): Promise<string> {
+   *     if (!this.currentBatchId) {
+   *       const response = await this.apiRequest({
+   *         url: this.urls.batchInitRTRSession,
+   *         method: 'post',
+   *         data: { host_ids: payload.endpoint_ids },
+   *       });
+   *       this.currentBatchId = response.batch_id;
+   *       this.startRefreshInterval(connectorUsageCollector);
+   *     }
+   *     return this.currentBatchId;
+   *   }
+   *   ```
+   * 
+   * WHY: Crowdstrike RTR requires a session to be initialized before executing
+   * commands on remote hosts. The session ID is used for all subsequent operations.
+   */
+  initSession: (params: unknown) => Promise<{ sessionId: string }>;
+  
+  /** 
+   * Close a session
+   * 
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/rtr_session_manager.ts
+   *   Sessions are cleaned up when no longer needed
+   * 
+   * WHY: Sessions consume server resources and should be cleaned up. Crowdstrike
+   * requires explicit session cleanup to free remote host connections.
+   */
+  closeSession: (sessionId: string) => Promise<void>;
+  
+  /** 
+   * Session timeout in ms
+   * 
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/rtr_session_manager.ts:88-104
+   *   Code: Refresh interval keeps sessions alive (every 4 minutes)
+   * 
+   * WHY: Crowdstrike RTR sessions timeout after 10 minutes of inactivity.
+   * Sessions must be periodically refreshed or they'll be terminated by the server.
+   */
+  sessionTimeout?: number;
+}
+
+/**
+ * Special capabilities union
+ */
+export interface SpecialCapabilities {
+  multiProvider?: MultiProviderCapability;
+  functionCalling?: FunctionCallingCapability;
+  tokenManagement?: TokenManagementCapability;
+  sessionManagement?: SessionManagementCapability;
+  
+  /**
+   * Lifecycle Hooks - executed at specific points in connector lifecycle
+   * These allow connectors to perform setup, validation, or cleanup operations
+   */
+  
+  /** 
+   * Pre-save hook - runs before connector config is saved
+   * 
+   * USED BY: Swimlane (validates API token and fetches app schema)
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/swimlane/validators.ts:16-26
+   *   Code: `validateCommonConfig(configObject, validatorServices)`
+   *   validates URL with: `configurationUtilities.ensureUriAllowed(configObject.apiUrl)`
+   * WHY: Validate configuration, enrich config with API data, check permissions
+   * 
+   * EXAMPLE USE CASES:
+   * - Validate API connectivity before saving
+   * - Fetch and cache metadata (app schemas, field definitions)
+   * - Transform config values
+   * - Check user permissions
+   */
+  preSaveHook?: (params: {
+    config: unknown;
+    secrets: unknown;
+    logger: Logger;
+    services: unknown;
+    isUpdate: boolean;
+  }) => Promise<void>;
+  
+  /** 
+   * Post-save hook - runs after connector config is successfully saved
+   * 
+   * USED BY: (Reserved for future use - audit logging, external notifications)
+   * WHY: Trigger side effects after successful save (logging, notifications, provisioning)
+   * 
+   * EXAMPLE USE CASES:
+   * - Log audit events
+   * - Send notifications to external systems
+   * - Provision resources
+   * - Update external registries
+   */
+  postSaveHook?: (params: {
+    config: unknown;
+    logger: Logger;
+    services: unknown;
+    wasSuccessful: boolean;
+    isUpdate: boolean;
+  }) => Promise<void>;
+  
+  /** 
+   * Post-delete hook - runs after connector is deleted
+   * 
+   * USED BY: Crowdstrike (cleans up RTR sessions), OAuth2 connectors (revoke tokens)
+   * FILE: crowdstrike/index.ts (cleanup), teams/index.ts (token revocation)
+   * WHY: Clean up external resources when connector is removed
+   * 
+   * EXAMPLE USE CASES:
+   * - Close open sessions
+   * - Revoke OAuth tokens
+   * - Delete cached data
+   * - Deregister webhooks
+   * - Clean up external resources
+   */
+  postDeleteHook?: (params: {
+    config: unknown;
+    logger: Logger;
+    services: unknown;
+  }) => Promise<void>;
+}
+
+// ============================================================================
+// CONNECTOR TESTING
+// ============================================================================
+
+/**
+ * Test function to verify connector configuration
+ */
+export interface ConnectorTest {
+  /** Test logic */
+  handler: (ctx: ActionContext) => Promise<{
+    ok: boolean;
+    message?: string;
+    [key: string]: unknown;
+  }>;
+  
+  /** Description of what the test verifies */
+  description?: string;
+}
+
+// ============================================================================
+// REQUEST/RESPONSE TRANSFORMATIONS
+// ============================================================================
+
+/**
+ * Template rendering configuration
+ * 
+ * WHY: Connectors often need to dynamically inject runtime values (alert data,
+ * user input) into request bodies. Mustache templating provides a safe, sandboxed
+ * way to do this without allowing arbitrary code execution.
+ */
+export interface TemplateRendering {
+  /** 
+   * Whether mustache templates are supported
+   * 
+   * USED BY: Webhook, Email, Slack API, ES Index, and many connectors
+   * REFERENCE: All connectors implementing `renderParameterTemplates`
+   * WHY: Allows users to customize request bodies with dynamic data from alerts/rules
+   */
+  enabled: boolean;
+  
+  /** 
+   * Template format
+   * 
+   * - mustache: Standard Mustache templating (most common)
+   *   USED BY: Webhook, Email, Bedrock, OpenAI, Gemini, D3Security, and most connectors
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.ts:80-89
+   *     Code:
+   *     ```typescript
+   *     function renderParameterTemplates(
+   *       logger: Logger,
+   *       params: ActionParamsType,
+   *       variables: Record<string, unknown>
+   *     ): ActionParamsType {
+   *       if (!params.body) return params;
+   *       return {
+   *         body: renderMustacheString(logger, params.body, variables, 'json'),
+   *       };
+   *     }
+   *     ```
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/render.ts:13-27
+   *     Code: `body: renderMustacheString(logger, params.subActionParams.body as string, variables, 'json')`
+   *   
+   * - handlebars: Handlebars templating (more powerful, less common)
+   *   USED BY: Complex connectors needing advanced logic
+   *   WHY: Provides more features than Mustache (helpers, partials)
+   *   
+   * - custom: Custom template engine
+   *   USED BY: Specialized connectors with unique requirements
+   *   WHY: Some APIs need special formatting that standard engines can't provide
+   */
+  format?: "mustache" | "handlebars" | "custom";
+  
+  /** 
+   * Escaping strategy
+   * 
+   * - json: Escape for JSON strings (most common for APIs)
+   *   USED BY: Webhook, Bedrock, OpenAI, Gemini - all API connectors
+   *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.ts:87
+   *     Code: `renderMustacheString(logger, params.body, variables, 'json')`
+   *   WHY: Prevents JSON injection and ensures valid JSON output
+   *   
+   * - html: Escape for HTML contexts
+   *   USED BY: Email connector
+   *   WHY: Prevents XSS when rendering email bodies
+   *   
+   * - markdown: Escape for Markdown contexts
+   *   USED BY: Connectors posting to Markdown-based systems
+   *   WHY: Prevents Markdown injection
+   *   
+   * - none: No escaping (use with caution!)
+   *   USED BY: Connectors with pre-sanitized input
+   *   WHY: Maximum flexibility, but risky if input is untrusted
+   */
+  escaping?: "html" | "json" | "markdown" | "none";
+}
+
+/**
+ * Request/response transformation
+ * 
+ * WHY: APIs may require custom serialization, response parsing, or request/response
+ * modification. Transformations provide hooks to customize data flow.
+ */
+export interface Transformations {
+  /** 
+   * Mustache template rendering
+   * 
+   * USED BY: Most connectors that support dynamic parameters
+   * REFERENCE: See TemplateRendering interface above
+   * WHY: Allows injecting runtime data into requests
+   */
+  templates?: TemplateRendering;
+  
+  /** 
+   * Custom request serialization
+   * 
+   * USED BY: Connectors with non-standard request formats
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/crowdstrike.ts:45-49
+   *   Code:
+   *   ```typescript
+   *   const paramsSerializer = (params: Record<string, string>) => {
+   *     return Object.entries(params)
+   *       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+   *       .join('&');
+   *   };
+   *   ```
+   * WHY: Some APIs require custom query parameter encoding or special formatting
+   */
+  serializeRequest?: (data: unknown) => unknown;
+  
+  /** 
+   * Custom response deserialization
+   * 
+   * USED BY: Connectors parsing custom response formats
+   * WHY: Some APIs return non-JSON data (XML, CSV, binary) that needs parsing
+   */
+  deserializeResponse?: (data: unknown) => unknown;
+  
+  /** 
+   * Request/response interceptors
+   * 
+   * USED BY: Webhook, Email (OAuth2 token cleanup)
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/get_axios_config.ts:77-82
+   *   Code:
+   *   ```typescript
+   *   const { onFulfilled, onRejected } = getOauth2DeleteTokenAxiosInterceptor({
+   *     configurationUtilities,
+   *     logger,
+   *   });
+   *   axiosInstance.interceptors.response.use(onFulfilled, onRejected);
+   *   ```
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/email/send_email.ts:150-155
+   *   Code: Similar OAuth2 token deletion interceptor
+   * 
+   * WHY: Interceptors allow:
+   * - Modifying requests before they're sent (add auth headers, logs)
+   * - Processing responses before handlers see them (parse errors, cleanup tokens)
+   * - Cleaning up sensitive data (OAuth2 tokens) after use
+   */
+  interceptors?: {
+    request?: (config: unknown) => unknown | Promise<unknown>;
+    response?: (response: unknown) => unknown | Promise<unknown>;
+  };
+}
+
+// ============================================================================
+// VALIDATION
+// ============================================================================
+
+/**
+ * Validation configuration
+ * 
+ * WHY: Connector configuration and secrets must be validated before they're saved
+ * and used. Validation prevents runtime errors, security issues, and user confusion.
+ */
+export interface ValidationConfig {
+  /** 
+   * Config schema (Zod)
+   * 
+   * USED BY: ALL connectors - required by framework
+   * REFERENCE: All connectors define config schemas
+   * WHY: Provides type-safe validation of configuration values at runtime
+   */
+  configSchema: z.ZodSchema;
+  
+  /** 
+   * Secrets schema (Zod)
+   * 
+   * USED BY: ALL connectors - required by framework
+   * REFERENCE: All connectors define secrets schemas
+   * WHY: Validates sensitive data (API keys, passwords) before encryption
+   */
+  secretsSchema: z.ZodSchema;
+  
+  /** 
+   * Custom config validator
+   * 
+   * USED BY: Webhook, OpenAI, Bedrock, and many connectors
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.ts:66
+   *   Code: `customValidator: validateConnectorTypeConfig`
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/index.ts:62-92
+   *   Code:
+   *   ```typescript
+   *   export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
+   *     try {
+   *       assertURL(configObject.apiUrl);
+   *       urlAllowListValidator('apiUrl')(configObject, validatorServices);
+   *       
+   *       if (!['OpenAi', 'AzureAi', 'Other'].includes(apiProvider)) {
+   *         throw new Error(`API Provider is not supported: ${apiProvider}`);
+   *       }
+   *       
+   *       return configObject;
+   *     } catch (err) {
+   *       throw new Error(`Error configuring OpenAI action: ${err}`);
+   *     }
+   *   };
+   *   ```
+   * 
+   * WHY: Zod schemas provide structure validation, but custom validators handle:
+   * - URL allowlist checks (security)
+   * - Complex business logic (provider-specific requirements)
+   * - External validation (API connectivity tests)
+   */
+  validateConfig?: (config: unknown, services: unknown) => void | string | null;
+  
+  /** 
+   * Custom secrets validator
+   * 
+   * USED BY: OpenAI (PKI validation), Webhook (auth validation)
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/index.ts:51-60
+   *   Code:
+   *   ```typescript
+   *   const secretsValidator = (secretsObject: Secrets) => {
+   *     const validatorFn = 
+   *       ('certificateData' in secretsObject && secretsObject.certificateData) ||
+   *       ('privateKeyData' in secretsObject && secretsObject.privateKeyData)
+   *         ? pkiSecretsValidator
+   *         : nonPkiSecretsValidator;
+   *     validatorFn(secretsObject);
+   *     return secretsObject;
+   *   };
+   *   ```
+   * 
+   * WHY: Secrets often have interdependencies:
+   * - Certificate + private key must both be present
+   * - Username requires password (and vice versa)
+   * - Different auth methods need different secrets
+   */
+  validateSecrets?: (secrets: unknown, services: unknown) => void | string | null;
+  
+  /** 
+   * Cross-field validation (config + secrets)
+   * 
+   * USED BY: Connectors with complex validation across config and secrets
+   * WHY: Some validations require both config and secrets together:
+   * - Test API connectivity with credentials
+   * - Validate auth method matches config
+   * - Check that URLs and credentials align
+   */
+  validateConnector?: (
+    config: unknown,
+    secrets: unknown
+  ) => string | null;
+  
+  /** 
+   * URL allowlist validation
+   * 
+   * USED BY: All connectors making external HTTP requests
+   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.ts:103-111
+   *   Code: URL validation ensures connectors only call allowed domains
+   * REFERENCE: Most SubActionConnectorType connectors use urlAllowListValidator
+   * 
+   * WHY: Security - prevents SSRF attacks by restricting which URLs connectors can call.
+   * Admins configure allowed URL patterns in kibana.yml.
+   * 
+   * EXAMPLE: Only allow calls to *.company.com or specific partner APIs
+   */
+  validateUrls?: {
+    configFields?: string[];
+    secretFields?: string[];
+  };
+}
+
+// ============================================================================
+// LAYOUT & UI CONFIGURATION
+// ============================================================================
+
+/**
+ * Optional layout configuration for connector UI
+ * 
+ * WHY: While most UI can be derived from schemas, complex connectors
+ * may want to customize how fields are organized and presented.
+ * 
+ * PRINCIPLE: This is entirely optional. Without layout config:
+ * - Fields render in schema definition order
+ * - All config fields in one section
+ * - All secret fields in another section
+ * - Actions listed alphabetically
+ * 
+ * Only specify layout when default organization isn't ideal.
+ */
+export interface ConnectorLayout {
+  /**
+   * Organize config fields into collapsible sections
+   * WHY: Large forms need organization for usability
+   * 
+   * @example
+   * configSections: [
+   *   { title: "Connection", fields: ["apiUrl", "timeout"], order: 1 },
+   *   { title: "Advanced", fields: ["retries", "debug"], order: 2, collapsed: true }
+   * ]
+   */
+  configSections?: Array<{
+    /** Section title */
+    title: string;
+    /** Field names in this section */
+    fields: string[];
+    /** Display order (lower = shown first) */
+    order?: number;
+    /** Whether section starts collapsed */
+    collapsed?: boolean;
+    /** Help text for the entire section */
+    description?: string;
+  }>;
+  
+  /**
+   * Group actions into categories
+   * WHY: Connectors with many actions need categorization
+   * Example: Crowdstrike has "Host Actions", "RTR Commands", "Agent Info"
+   * 
+   * @example
+   * actionGroups: [
+   *   { title: "Send Messages", actions: ["postMessage", "postBlockkit"] },
+   *   { title: "Manage Channels", actions: ["getChannels", "searchChannels"] }
+   * ]
+   */
+  actionGroups?: Array<{
+    /** Group title */
+    title: string;
+    /** Action names in this group */
+    actions: string[];
+    /** Display order */
+    order?: number;
+    /** Description of what these actions do */
+    description?: string;
+  }>;
+  
+  /**
+   * Hide specific fields from UI (advanced use case)
+   * WHY: Some fields might be set programmatically, not by users
+   * Example: internal tracking IDs, computed values
+   */
+  hiddenFields?: {
+    config?: string[];
+    secrets?: string[];
+  };
+  
+  /**
+   * Custom ordering for secrets fields
+   * WHY: Sometimes auth fields have logical order (username before password)
+   * If not specified, uses schema definition order
+   */
+  secretsOrder?: string[];
+}
+
+// ============================================================================
+// MAIN CONNECTOR DEFINITION
+// ============================================================================
+
+/**
+ * Complete single-file connector definition
+ * This is the interface that all connectors must satisfy
+ * 
+ * PHILOSOPHY:
+ * - Required fields = what every connector MUST have
+ * - Optional fields = what some connectors need
+ * - UI is derivable from schemas + optional layout hints
+ * - LLM can write a complete connector by just filling schemas
+ */
+export interface SingleFileConnectorDefinition {
+  // ---- Core Metadata ----
+  /**
+   * Connector metadata (required)
+   * WHY: Every connector needs identity and basic info
+   */
+  metadata: ConnectorMetadata;
+  
+  // ---- Authentication ----
+  /**
+   * Auth schema (required)
+   * WHY: Defines how connector authenticates with external service
+   * UI will be derived from this discriminated union
+   * Each auth method automatically gets appropriate form fields
+   * 
+   * Can be the full AuthSchema (all 8 methods) or a subset for your connector
+   * 
+   * @example
+   * authSchema: z.discriminatedUnion("method", [
+   *   z.object({
+   *     method: z.literal("bearer"),
+   *     token: z.string().describe("API Token")
+   *   })
+   * ])
+   */
+  authSchema: z.ZodTypeAny;
+  
+  // ---- Validation ----
+  /**
+   * Validation configuration (required)
+   * WHY: Every connector needs schemas for config and secrets
+   * These schemas drive both validation AND UI generation
+   */
+  validation: ValidationConfig;
+  
+  // ---- Policies ----
+  /**
+   * Operational policies (optional)
+   * WHY: Most connectors use sensible defaults
+   * Only specify when connector has special requirements
+   * - Rate limiting: Most connectors retry on 429/5xx
+   * - Pagination: Most connectors don't paginate
+   * - Streaming: Only AI connectors need this
+   */
+  policies?: ConnectorPolicies;
+  
+  // ---- Actions ----
+  /** 
+   * Map of action name to action definition (required)
+   * WHY: Every connector has at least one action
+   * 
+   * Single-action connectors: { execute: { ... } }
+   * Multi-action connectors: { action1: {...}, action2: {...} }
+   * 
+   * Each action's input schema automatically generates parameter form
+   */
+  actions: Record<string, ActionDefinition>;
+  
+  // ---- Testing ----
+  /**
+   * Test function to validate connector setup (optional but recommended)
+   * WHY: Users need to verify configuration before saving
+   * Test result automatically rendered as success/error message
+   */
+  test?: ConnectorTest;
+  
+  // ---- Layout ----
+  /**
+   * Optional layout configuration (optional)
+   * WHY: Most connectors can use default layout
+   * Only needed for complex connectors with many fields/actions
+   * 
+   * Without this: fields render in definition order, all in one section
+   * With this: custom sections, grouping, ordering
+   */
+  layout?: ConnectorLayout;
+  
+  // ---- Transformations ----
+  /**
+   * Request/response transformations (optional)
+   * WHY: Most connectors don't need custom transformations
+   * Template rendering is handled automatically if enabled
+   */
+  transformations?: Transformations;
+  
+  // ---- Special Capabilities ----
+  /**
+   * Special capabilities for advanced connectors (optional)
+   * WHY: Only 5-7 connectors out of 30 need these
+   * Examples: OAuth token refresh, multi-provider, session management
+   * 
+   * Don't include if connector doesn't need it
+   */
+  capabilities?: SpecialCapabilities;
+}
+
+// ============================================================================
+// HELPER UTILITIES
+// ============================================================================
+
+/**
+ * Type guard to check if auth requires credentials
+ */
+export function requiresCredentials(auth: AuthConfig): boolean {
+  return auth.method !== "none" && auth.method !== "webhook";
+}
+
+/**
+ * Type guard to check if connector supports streaming
+ */
+export function supportsStreaming(
+  connector: SingleFileConnectorDefinition
+): boolean {
+  return connector.policies?.streaming?.enabled ?? false;
+}
+
+/**
+ * Get all action names for a connector
+ */
+export function getActionNames(
+  connector: SingleFileConnectorDefinition
+): string[] {
+  return Object.keys(connector.actions);
+}
+
+/**
+ * Check if an action is tool-compatible
+ */
+export function isToolAction(
+  connector: SingleFileConnectorDefinition,
+  actionName: string
+): boolean {
+  return connector.actions[actionName]?.isTool ?? false;
+}
+
+// ============================================================================
+// EXAMPLE IMPLEMENTATIONS
+// ============================================================================
+
+/**
+ * Example connector implementations have been moved to connector_spec_examples.ts
+ * 
+ * SEE:
+ * - SlackApiConnectorExample: Complete Slack API connector with all features
+ * - MinimalConnectorExample: Minimal 30-line connector (LLM-friendly)
+ * - ComplexConnectorExample: Complex connector with sections and layout
+ * 
+ * @see connector_spec_examples.ts
+ */

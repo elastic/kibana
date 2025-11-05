@@ -1,0 +1,331 @@
+/**
+ * Example: Amazon Bedrock Connector
+ * 
+ * This demonstrates an AWS service connector with:
+ * - AWS Signature v4 authentication
+ * - Streaming support for AI responses
+ * - Tool calling (Claude-specific format)
+ * - Multiple model support (Claude, Titan, etc.)
+ * 
+ * REFERENCE: Based on actual Bedrock connector
+ * FILE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/
+ */
+
+import { z } from "zod";
+import type { SingleFileConnectorDefinition } from "../connector_spec";
+import { withUIMeta, UISchemas } from "../connector_spec_ui";
+
+export const BedrockConnectorExample: SingleFileConnectorDefinition = {
+  // ---- Metadata (required) ----
+  metadata: {
+    id: ".bedrock",
+    displayName: "Amazon Bedrock",
+    icon: "logoAWS",
+    description: "Amazon Bedrock foundation models (Claude, Titan, etc.)",
+    docsUrl: "https://docs.aws.amazon.com/bedrock/",
+    minimumLicense: "enterprise",
+    supportedFeatureIds: [
+      "generativeAIForSecurity",
+      "generativeAIForObservability",
+      "generativeAIForSearchPlayground"
+    ],
+  },
+  
+  // ---- Special Capabilities ----
+  capabilities: {
+    // Tool calling (Claude models)
+    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:97-111
+    // WHY: Claude models support tool use
+    functionCalling: {
+      supported: true,
+      format: "anthropic", // Claude/Anthropic tool format
+      toolUseEnabled: true,
+    },
+  },
+  
+  // ---- Policies (optional) ----
+  policies: {
+    // Streaming support via AWS SDK
+    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/bedrock.ts:291-356
+    // WHY: Bedrock supports streaming for real-time AI responses
+    streaming: {
+      enabled: true,
+      mechanism: "chunked", // Uses AWS SDK chunked transfer encoding
+      parser: "json", // Bedrock's JSON streaming format
+    },
+  },
+  
+  // ---- Auth Schema (required) ----
+  // WHY: AWS services require SigV4 signing with access key and secret
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:28-33
+  authSchema: z.discriminatedUnion("method", [
+    z.object({
+      method: z.literal("aws_sig_v4"),
+      credentials: z.object({
+        accessKey: withUIMeta(
+          z.string(),
+          {
+            helpText: "AWS IAM access key ID",
+            placeholder: "AKIAIOSFODNN7EXAMPLE",
+          }
+        ).describe("Access Key ID"),
+        
+        secretKey: withUIMeta(
+          UISchemas.secret(),
+          {
+            helpText: "AWS IAM secret access key",
+          }
+        ).describe("Secret Access Key"),
+        
+        // AWS region is inferred from API URL, not separate field
+      }),
+    }),
+  ]),
+  
+  // ---- Validation (required) ----
+  validation: {
+    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:19-26
+    configSchema: z.object({
+      apiUrl: withUIMeta(
+        UISchemas.url(),
+        {
+          helpText: "Bedrock runtime endpoint (e.g., https://bedrock-runtime.us-east-1.amazonaws.com)",
+          placeholder: "https://bedrock-runtime.us-east-1.amazonaws.com",
+        }
+      ).describe("API URL"),
+      
+      defaultModel: withUIMeta(
+        z.string(),
+        {
+          widget: "select",
+          helpText: "Default foundation model to use",
+        }
+      )
+        .default("anthropic.claude-3-5-sonnet-20241022-v2:0")
+        .describe("Default Model"),
+      
+      contextWindowLength: z.number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Context Window Length"),
+      
+      temperature: z.number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Temperature"),
+    }).strict(),
+    
+    secretsSchema: z.object({}),
+    
+    // Custom validators
+    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/index.ts:43-59
+    validateConfig: (config: any, services) => {
+      // Validate URL is a Bedrock endpoint
+      if (!config.apiUrl.includes("bedrock-runtime")) {
+        return "API URL must be a valid Bedrock endpoint";
+      }
+      return null;
+    },
+  },
+  
+  // ---- Actions (required) ----
+  actions: {
+    // Action 1: Run completion (non-streaming)
+    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:35-45
+    run: {
+      isTool: false,
+      
+      input: z.object({
+        body: withUIMeta(
+          UISchemas.json(),
+          {
+            helpText: "Bedrock API request body (JSON)",
+            docsUrl: "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html",
+          }
+        ).describe("Request Body"),
+        
+        model: z.string()
+          .optional()
+          .describe("Model Override"),
+        
+        timeout: z.number()
+          .optional()
+          .default(120000) // Bedrock can be slower
+          .describe("Timeout (ms)"),
+      }),
+      
+      handler: async (ctx, input) => {
+        // Implementation:
+        // 1. Parse model ID from input or use default
+        // 2. Sign request with AWS SigV4
+        // 3. Make request to Bedrock runtime
+        // 4. Parse response based on model provider
+        
+        return {
+          completion: "AI generated text response",
+          stop_reason: "end_turn",
+          usage: {
+            input_tokens: 10,
+            output_tokens: 20,
+          },
+        };
+      },
+    },
+    
+    // Action 2: Invoke AI (high-level with messages)
+    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:85-111
+    invokeAI: {
+      isTool: true,
+      
+      input: z.object({
+        messages: z.array(
+          z.object({
+            role: z.enum(["user", "assistant"]),
+            content: z.string().optional(),
+            // Bedrock supports rich content (images, etc.)
+            rawContent: z.array(z.any()).optional(),
+          })
+        ).describe("Messages"),
+        
+        model: z.string()
+          .optional()
+          .describe("Model Override"),
+        
+        system: z.string()
+          .optional()
+          .describe("System Prompt"),
+        
+        temperature: z.number()
+          .min(0)
+          .max(1)
+          .optional()
+          .describe("Temperature"),
+        
+        maxTokens: z.number()
+          .int()
+          .positive()
+          .optional()
+          .default(512)
+          .describe("Max Tokens"),
+        
+        stopSequences: z.array(z.string())
+          .optional()
+          .describe("Stop Sequences"),
+        
+        // Tool calling (Claude-specific)
+        tools: z.array(
+          z.object({
+            name: z.string(),
+            description: z.string(),
+            input_schema: z.object({}).passthrough(),
+          })
+        ).optional().describe("Tools"),
+        
+        toolChoice: z.object({
+          type: z.enum(["auto", "any", "tool"]),
+          name: z.string().optional(),
+        }).optional().describe("Tool Choice"),
+      }),
+      
+      handler: async (ctx, input) => {
+        // High-level message-based invocation
+        // Automatically handles AWS SigV4 signing
+        return {
+          message: "AI response",
+          usage: {
+            input_tokens: 15,
+            output_tokens: 25,
+          },
+        };
+      },
+    },
+    
+    // Action 3: Converse (unified API for all models)
+    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:198-216
+    converse: {
+      isTool: true,
+      
+      input: z.object({
+        messages: z.array(z.any()).describe("Messages"),
+        model: z.string().optional().describe("Model"),
+        system: z.array(z.any()).optional().describe("System"),
+        temperature: z.number().optional().describe("Temperature"),
+        maxTokens: z.number().optional().describe("Max Tokens"),
+        stopSequences: z.array(z.string()).optional().describe("Stop Sequences"),
+        tools: z.array(z.any()).optional().describe("Tools"),
+        toolChoice: z.any().optional().describe("Tool Choice"),
+      }),
+      
+      handler: async (ctx, input) => {
+        // Uses Bedrock's Converse API (model-agnostic)
+        return {
+          output: {
+            message: {
+              role: "assistant",
+              content: [{ text: "Response" }],
+            },
+          },
+          usage: {
+            inputTokens: 10,
+            outputTokens: 20,
+            totalTokens: 30,
+          },
+        };
+      },
+    },
+    
+    // Action 4: Converse Stream
+    converseStream: {
+      isTool: true,
+      supportsStreaming: true,
+      
+      input: z.object({
+        messages: z.array(z.any()).describe("Messages"),
+        model: z.string().optional().describe("Model"),
+        // ... same as converse
+      }),
+      
+      handler: async (ctx, input) => {
+        // Streaming version of Converse API
+        return {
+          stream: true,
+        };
+      },
+    },
+  },
+  
+  // ---- Test Function (optional) ----
+  test: {
+    handler: async (ctx) => {
+      // Verify AWS credentials and Bedrock access
+      // Make a minimal request to test auth
+      return {
+        ok: true,
+        message: "Successfully connected to Amazon Bedrock",
+        region: "us-east-1", // Extracted from apiUrl
+      };
+    },
+    description: "Verifies AWS credentials and Bedrock access",
+  },
+  
+  // ---- Layout (optional) ----
+  layout: {
+    actionGroups: [
+      {
+        title: "AI Invocation",
+        actions: ["invokeAI", "converse", "converseStream"],
+        order: 1,
+        description: "Generate AI responses using Bedrock models",
+      },
+      {
+        title: "Advanced",
+        actions: ["run"],
+        order: 2,
+        description: "Low-level API access",
+      },
+    ],
+  },
+};
+
