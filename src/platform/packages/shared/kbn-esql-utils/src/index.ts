@@ -17,7 +17,6 @@ export {
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
   prettifyQuery,
-  isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
   mapVariableToColumn,
