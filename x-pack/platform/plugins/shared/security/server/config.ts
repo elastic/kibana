@@ -44,14 +44,10 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
 
 const providerOriginSchema = schema.uri({
   validate(originConfig) {
-    try {
-      const url = new URL(originConfig);
+    const url = new URL(originConfig);
 
-      if (originConfig !== url.origin) {
-        return `expected a lower-case origin (scheme, host, and optional port) but got: ${originConfig}`;
-      }
-    } catch (error) {
-      return `Invalid origin URI: ${error.message}`;
+    if (originConfig !== url.origin) {
+      return `expected a lower-case origin (scheme, host, and optional port) but got: ${originConfig}`;
     }
   },
 });
