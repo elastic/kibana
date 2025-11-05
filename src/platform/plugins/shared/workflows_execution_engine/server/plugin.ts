@@ -389,7 +389,7 @@ export class WorkflowsExecutionEnginePlugin
 
   private async initialize(coreStart: CoreStart) {
     await createIndexes({
-      esClient: coreStart.elasticsearch.client.asInternalUser as Client,
+      esClient: coreStart.elasticsearch.client.asInternalUser,
       logger: this.logger,
     });
   }
