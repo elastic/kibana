@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/jest_bench.sh
     label: 'Jest Bench 8'
     agents:
-      machineType: n2-standard-8
+      machineType: n2-highmem-8
       diskSizeGb: 100
     key: jest_bench8
     timeout_in_minutes: 75
@@ -18,7 +18,7 @@ steps:
   - command: .buildkite/scripts/steps/jest_bench.sh
     label: 'Jest Bench 16'
     agents:
-      machineType: n2-standard-16
+      machineType: n2-highmem-16
       diskSizeGb: 100
     key: jest_bench16
     timeout_in_minutes: 75
@@ -28,7 +28,7 @@ steps:
   - command: .buildkite/scripts/steps/jest_bench.sh
     label: 'Jest Bench 4'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 100
     key: jest_bench4
     timeout_in_minutes: 75
@@ -38,7 +38,7 @@ steps:
   - command: .buildkite/scripts/steps/jest_bench.sh
     label: 'Jest Bench 32'
     agents:
-      machineType: n2-standard-32
+      machineType: n2-highmem-32
       diskSizeGb: 100
     key: jest_bench32
     timeout_in_minutes: 75
