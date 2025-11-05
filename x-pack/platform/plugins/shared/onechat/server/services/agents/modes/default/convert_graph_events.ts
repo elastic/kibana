@@ -14,6 +14,7 @@ import { EMPTY, mergeMap, of } from 'rxjs';
 import type {
   MessageChunkEvent,
   MessageCompleteEvent,
+  ThinkingCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
   ReasoningEvent,
@@ -29,6 +30,7 @@ import {
   createToolCallEvent,
   createToolResultEvent,
   createReasoningEvent,
+  createThinkingCompleteEvent,
   extractTextContent,
   extractToolCalls,
   extractToolReturn,
@@ -41,6 +43,7 @@ import { steps, tags } from './constants';
 export type ConvertedEvents =
   | MessageChunkEvent
   | MessageCompleteEvent
+  | ThinkingCompleteEvent
   | ToolCallEvent
   | ToolResultEvent
   | ReasoningEvent;
@@ -49,14 +52,18 @@ export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
   logger,
+  startTime,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
   logger: Logger;
+  startTime: Date;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
     const messageId = uuidv4();
+
+    let isThinkingComplete = false;
 
     return streamEvents$.pipe(
       mergeMap((event) => {
@@ -69,7 +76,14 @@ export const convertGraphEvents = ({
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            return of(createTextChunkEvent(textContent, { messageId }));
+            const events: ConvertedEvents[] = [];
+            if (!isThinkingComplete) {
+              // Emit thinking complete event when first chunk arrives
+              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
+              isThinkingComplete = true;
+            }
+            events.push(createTextChunkEvent(textContent, { messageId }));
+            return of(...events);
           }
         }
 
