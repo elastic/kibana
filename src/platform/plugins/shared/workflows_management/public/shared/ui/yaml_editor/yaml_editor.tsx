@@ -8,21 +8,11 @@
  */
 
 import { debounce } from 'lodash';
-import { type MonacoYaml, type MonacoYamlOptions } from 'monaco-yaml';
+import { type MonacoYamlOptions } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import { configureMonacoYamlSchema } from '@kbn/monaco';
-
-// Configure Monaco YAML with completions and hover disabled
-// while keeping validation and hover information enabled
-const defaultMonacoYamlOptions: MonacoYamlOptions = {
-  completion: true, // Enable schema-based completions from monaco-yaml until we re-implement 'with' block completions in our own provider
-  hover: false, // hover is handled by the custom providers
-  validate: true, // Keep validation
-};
-
-export const monacoYamlSingletonObj: { singleton: MonacoYaml | null } = { singleton: null };
+import { yamlLanguageService } from './yaml_language_service';
 
 export interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
   onChange: (value: string) => void;
@@ -35,18 +25,8 @@ export const YamlEditor = React.memo(
     const onChangeDebounced = useMemo(() => debounce(onChange, 200), [onChange]);
 
     useEffect(() => {
-      if (!monacoYamlSingletonObj.singleton) {
-        configureMonacoYamlSchema(props.schemas ?? [], defaultMonacoYamlOptions).then(
-          (monacoYaml) => {
-            monacoYamlSingletonObj.singleton = monacoYaml;
-          }
-        );
-      } else {
-        monacoYamlSingletonObj.singleton.update({
-          ...defaultMonacoYamlOptions,
-          schemas: props.schemas ?? [],
-        });
-      }
+      // Initialize or update the YAML language service with the provided schemas
+      yamlLanguageService.update(props.schemas ?? []);
     }, [props.schemas]);
 
     useEffect(() => {
@@ -66,13 +46,9 @@ export const YamlEditor = React.memo(
     );
 
     const handleEditorWillUnmount = useCallback(() => {
-      if (monacoYamlSingletonObj.singleton) {
-        monacoYamlSingletonObj.singleton.update({
-          ...defaultMonacoYamlOptions,
-          schemas: [],
-        });
-        monacoYamlSingletonObj.singleton = null;
-      }
+      // Clear schemas when unmounting to avoid conflicts with other YamlEditor instances
+      // Note: We don't dispose the service entirely as other instances might still be using it
+      yamlLanguageService.clearSchemas();
       _editorWillUnmount?.();
     }, [_editorWillUnmount]);
 
