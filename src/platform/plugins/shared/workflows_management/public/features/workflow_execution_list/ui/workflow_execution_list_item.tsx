@@ -104,18 +104,20 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="clock" color="subdued" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {formattedDuration}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {formattedDuration && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="clock" color="subdued" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {formattedDuration}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     );
