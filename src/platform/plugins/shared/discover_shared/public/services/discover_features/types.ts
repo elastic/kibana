@@ -116,6 +116,26 @@ export interface ObservabilityTracesFetchLatencyOverallTransactionDistributionFe
   >;
 }
 
+export interface ObservabilityTracesFetchLatencyOverallSpanDistributionFeature {
+  id: 'observability-traces-fetch-latency-overall-span-distribution';
+  fetchLatencyOverallSpanDistribution: (
+    params: {
+      spanName: string;
+      serviceName: string;
+      start: string;
+      end: string;
+      isOtel: boolean;
+    },
+    signal: AbortSignal
+  ) => Promise<
+    | {
+        overallHistogram?: HistogramItem[];
+        percentileThresholdValue?: number | null;
+      }
+    | undefined
+  >;
+}
+
 export interface ObservabilityCreateSLOFeature {
   id: 'observability-create-slo';
   createSLOFlyout: (props: {
@@ -169,6 +189,7 @@ export type DiscoverFeature =
   | ObservabilityTracesFetchRootItemByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
+  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
   | SecuritySolutionFeature;
 
 /**
