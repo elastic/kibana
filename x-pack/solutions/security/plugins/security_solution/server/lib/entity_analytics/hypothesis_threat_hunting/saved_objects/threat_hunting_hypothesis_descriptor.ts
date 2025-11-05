@@ -16,7 +16,7 @@ interface ThreatHuntingHypothesisDependencies {
 export class ThreatHuntingHypothesisDescriptorClient {
   constructor(private readonly deps: ThreatHuntingHypothesisDependencies) {}
   getSavedObjectId() {
-    return `threat-hunting-hypothesis-${this.deps.namespace}`;
+    return `${threatHuntingHypothesisTypeName}-${this.deps.namespace}`;
   }
 
   async get(id: string): Promise<ThreatHuntingHypothesis> {
