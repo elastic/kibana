@@ -7,6 +7,11 @@
 
 import { getMetricValueProps } from './metric_item';
 import type { OverviewTrend } from '../../../../../../../../common/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+jest.mock('@kbn/i18n-react', () => ({
+  FormattedMessage: jest.fn(),
+}));
 
 describe('getMetricValueProps', () => {
   it('returns loading state props when trendData is loading', () => {
@@ -17,19 +22,30 @@ describe('getMetricValueProps', () => {
     });
   });
 
-  it('returns default value props when trendData is null or undefined', () => {
+  it('returns a no-data message when trendData is null or undefined', () => {
     const nullResult = getMetricValueProps(null);
+
     expect(nullResult).toEqual({
-      value: 0,
-      valueFormatter: expect.any(Function),
-      extra: undefined,
+      value: '',
+      extra: expect.objectContaining({
+        type: FormattedMessage,
+        props: {
+          id: 'xpack.synthetics.overview.metricItem.noDataAvailableMessage',
+          defaultMessage: '--',
+        },
+      }),
     });
 
     const undefinedResult = getMetricValueProps(undefined);
     expect(undefinedResult).toEqual({
-      value: 0,
-      valueFormatter: expect.any(Function),
-      extra: undefined,
+      value: '',
+      extra: expect.objectContaining({
+        type: FormattedMessage,
+        props: {
+          id: 'xpack.synthetics.overview.metricItem.noDataAvailableMessage',
+          defaultMessage: '--',
+        },
+      }),
     });
   });
 
