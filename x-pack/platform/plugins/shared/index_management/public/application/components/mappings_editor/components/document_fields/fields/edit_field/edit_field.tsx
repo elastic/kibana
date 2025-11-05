@@ -189,6 +189,7 @@ export const EditField = React.memo(
           {form.isSubmitted && !form.isValid && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.editFieldFlyout.validationErrorTitle',
                   {
@@ -219,7 +220,7 @@ export const EditField = React.memo(
                         )}
                         position="top"
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <EuiTextColor color="subdued">
                             {i18n.translate(
                               'xpack.idxMgmt.mappingsEditor.editFieldFlyout.formCompletionGuide',

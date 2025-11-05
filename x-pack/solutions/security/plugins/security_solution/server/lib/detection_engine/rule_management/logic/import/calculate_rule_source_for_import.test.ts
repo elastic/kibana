@@ -41,6 +41,8 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: false,
       },
       immutable: true,
     });
@@ -61,6 +63,8 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: false,
       },
       immutable: true,
     });
@@ -84,6 +88,8 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: true,
+        customized_fields: [],
+        has_base_version: false,
       },
       immutable: true,
     });
@@ -92,7 +98,15 @@ describe('calculateRuleSourceForImport', () => {
   it('calculates as external with customizations if a matching asset/version is found', () => {
     const rule = getRulesSchemaMock();
     rule.rule_id = 'rule_id';
-    const prebuiltRuleAssetsByRuleId = { rule_id: getPrebuiltRuleMock({ rule_id: 'rule_id' }) };
+    const prebuiltRuleAssetsByRuleId = {
+      rule_id: getPrebuiltRuleMock({
+        rule_id: 'rule_id',
+        tags: ['updated tag'],
+        false_positives: ['new false positive'],
+        references: ['https://new.reference.co'],
+        index: ['new-index-pattern'],
+      }),
+    };
 
     const result = calculateRuleSourceForImport({
       importedRule: rule,
@@ -105,6 +119,21 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: true,
+        customized_fields: [
+          {
+            field_name: 'tags',
+          },
+          {
+            field_name: 'false_positives',
+          },
+          {
+            field_name: 'references',
+          },
+          {
+            field_name: 'index',
+          },
+        ],
+        has_base_version: true,
       },
       immutable: true,
     });
@@ -126,6 +155,8 @@ describe('calculateRuleSourceForImport', () => {
       ruleSource: {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: true,
       },
       immutable: true,
     });

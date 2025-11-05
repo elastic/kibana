@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterContinueNode } from '@kbn/workflows';
-import type { StepErrorCatcher, StepImplementation } from '../../step_base';
+import type { EnterContinueNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { NodeImplementation, NodeWithErrorCatching } from '../../node_implementation';
 
-export class EnterContinueNodeImpl implements StepImplementation, StepErrorCatcher {
+export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorCatching {
   constructor(
     private node: EnterContinueNode,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
@@ -20,8 +20,7 @@ export class EnterContinueNodeImpl implements StepImplementation, StepErrorCatch
   ) {}
 
   public async run(): Promise<void> {
-    this.workflowRuntime.enterScope();
-    this.workflowRuntime.goToNextStep();
+    this.workflowRuntime.navigateToNextNode();
   }
 
   public async catchError(): Promise<void> {
@@ -29,7 +28,7 @@ export class EnterContinueNodeImpl implements StepImplementation, StepErrorCatch
 
     // Continue step should always go to exit continue node to continue execution
     // regardless of any errors that occurred within its scope
-    this.workflowRuntime.goToStep(this.node.exitNodeId);
+    this.workflowRuntime.navigateToNode(this.node.exitNodeId);
     this.workflowRuntime.setWorkflowError(undefined);
   }
 }

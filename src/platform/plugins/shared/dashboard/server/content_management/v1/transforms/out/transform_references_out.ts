@@ -8,11 +8,44 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { DashboardState, DashboardPanel } from '../../types';
+import { isDashboardSection } from '../../../../../common';
+import { embeddableService } from '../../../../kibana_services';
+import { getPanelIdFromReference } from '../../../../../common/reference_utils';
 
-export function transformReferencesOut(references: SavedObjectReference[]): SavedObjectReference[] {
-  return references.map((ref) => {
-    return isLegacySavedObjectRef(ref) ? transformLegacySavedObjectRef(ref) : ref;
+export function transformReferencesOut(
+  references: SavedObjectReference[],
+  panels?: DashboardState['panels']
+): SavedObjectReference[] {
+  // key: panel uid
+  // value: boolean indicating to drop references for panel
+  // because transformOut injected references serverside
+  // TODO - remove when all references are handled on server
+  const dropRefsForPanel: Record<string, boolean> = {};
+  function setDropRefsForPanel(panel: DashboardPanel) {
+    if (!panel.uid) return;
+    const { transformOutInjectsReferences } = embeddableService?.getTransforms(panel.type) ?? {};
+    dropRefsForPanel[panel.uid] = Boolean(transformOutInjectsReferences);
+  }
+  (panels ?? []).forEach((panel) => {
+    if (isDashboardSection(panel)) {
+      panel.panels.forEach((panelInSection) => setDropRefsForPanel(panelInSection));
+    } else {
+      setDropRefsForPanel(panel);
+    }
   });
+
+  return references
+    .map((ref) => {
+      return isLegacySavedObjectRef(ref) ? transformLegacySavedObjectRef(ref) : ref;
+    })
+    .filter((ref) => {
+      const panelId = getPanelIdFromReference(ref);
+      return panelId && dropRefsForPanel[panelId]
+        ? // drop references for panels that inject references on server
+          false
+        : true;
+    });
 }
 
 // < 9.2 legach saved object ref name shape `${panelId}:panel_${panelId}`

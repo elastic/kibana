@@ -97,6 +97,10 @@
     "@kbn/react-kibana-mount",
     "@kbn/css-utils",
     "@kbn/licensing-types",
+    "@kbn/es-query-server",
+    "@kbn/data-service-server",
+    "@kbn/visualizations-common",
+    "@kbn/lens-common",
   ],
   "exclude": [
     "target/**/*",

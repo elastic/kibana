@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import type { TableFieldConfiguration } from '..';
 
 interface NamePopoverContentProps {
@@ -24,13 +25,22 @@ export function NamePopoverContent({
 }: NamePopoverContentProps) {
   return (
     <>
-      <EuiText size="s" className="eui-textTruncate">
-        {fieldName}
-      </EuiText>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        {fieldConfig.type && (
+          <EuiFlexItem grow={false}>
+            <FieldIcon type={fieldConfig.type} size="s" />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" className="eui-textBreakWord">
+            {fieldName}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {fieldConfig?.description && (
         <>
           <EuiSpacer size="s" />
-          <EuiText size="xs" className="eui-textTruncate">
+          <EuiText size="xs" className="eui-textBreakWord">
             {fieldConfig.description}
           </EuiText>
         </>

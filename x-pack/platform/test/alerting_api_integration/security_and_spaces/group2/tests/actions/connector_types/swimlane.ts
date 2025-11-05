@@ -157,6 +157,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           is_system_action: false,
           is_deprecated: false,
           name: 'A swimlane action',
+          is_connector_type_deprecated: false,
         });
 
         expect(typeof createdAction.id).to.be('string');
@@ -177,6 +178,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             ...mockSwimlane.config,
             apiUrl: swimlaneSimulatorURL,
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -199,8 +201,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -224,8 +225,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [appId]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"appId\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -248,8 +248,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiToken]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiToken\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -293,8 +292,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [connectorType]: types that failed validation:\n- [connectorType.0]: expected value to equal [all]\n- [connectorType.1]: expected value to equal [alerts]\n- [connectorType.2]: expected value to equal [cases]',
+              message: `error validating action type config: [\n  {\n    \"received\": \"not-supported\",\n    \"code\": \"invalid_enum_value\",\n    \"options\": [\n      \"all\",\n      \"alerts\",\n      \"cases\"\n    ],\n    \"path\": [\n      \"connectorType\"\n    ],\n    \"message\": \"Invalid enum value. Expected 'all' | 'alerts' | 'cases', received 'not-supported'\"\n  }\n]`,
             });
           });
       });
@@ -351,8 +349,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: [subAction]: expected value to equal [pushToService]',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_union_discriminator\",\n    \"options\": [\n      \"pushToService\"\n    ],\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'pushToService'\"\n  }\n]`,
               });
             });
         });
@@ -377,8 +374,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: [subActionParams]: expected a plain object value, but found [null] instead.',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"object\",\n    \"received\": \"null\",\n    \"path\": [\n      \"subActionParams\"\n    ],\n    \"message\": \"Expected object, received null\"\n  }\n]`,
               });
             });
         });
@@ -402,8 +398,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"commentId\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
               });
             });
         });
@@ -427,8 +422,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"comment\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
               });
             });
         });

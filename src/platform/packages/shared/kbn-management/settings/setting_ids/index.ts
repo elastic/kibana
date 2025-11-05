@@ -61,6 +61,8 @@ export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimati
 
 // Agent builder settings
 export const AGENT_BUILDER_ENABLED_SETTING_ID = 'agentBuilder:enabled';
+export const AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID = 'agentBuilder:dashboardTools';
+export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
@@ -135,6 +137,7 @@ export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExc
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
   'observability:streamsEnableSignificantEvents';
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
+export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

@@ -14,7 +14,7 @@ export const PlainIndexSyncUtils = (
 ) => {
   const log = getService('log');
   const es = getService('es');
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
@@ -75,7 +75,7 @@ export const PlainIndexSyncUtils = (
       filter: {},
     };
 
-    const response = await api.createEntitySource({ body: entitySource });
+    const response = await entityAnalyticsApi.createEntitySource({ body: entitySource });
     expect(response.status).toBe(200);
 
     return response;

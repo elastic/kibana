@@ -26,18 +26,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import type { ConnectorSelectorProps } from '@kbn/security-solution-connectors';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import type { ReactNode } from 'react-markdown';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
-import { getConnectorDescription } from '../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../common/lib/kibana';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import type { MigrationSettingsBase } from '../../types';
 import * as i18n from './translations';
 
-interface StartMigrationModalProps {
+export interface StartMigrationModalProps {
   /** Modals title */
   title: string;
   /** Modals description message */
@@ -64,10 +62,7 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
   }) => {
     const { connectorId } = defaultSettings;
 
-    const {
-      triggersActionsUi: { actionTypeRegistry },
-      siemMigrations,
-    } = useKibana().services;
+    const { siemMigrations, settings } = useKibana().services;
 
     const { aiConnectors, isLoading } = useAIConnectors();
 
@@ -78,20 +73,6 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
     );
 
     const startMigrationModalTitleId = useGeneratedHtmlId();
-
-    const connectorOptions: ConnectorSelectorProps['connectors'] = useMemo(() => {
-      return aiConnectors.map((connector) => {
-        const connectorDescription = getConnectorDescription({
-          connector,
-          actionTypeRegistry,
-        });
-        return {
-          id: connector.id,
-          name: connector.name,
-          description: connectorDescription,
-        };
-      });
-    }, [actionTypeRegistry, aiConnectors]);
 
     const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
@@ -160,7 +141,7 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
                 helpText={
                   <FormattedMessage
                     id="xpack.securitySolution.siemMigrations.reprocessFailedDialog.connectorHelpText"
-                    defaultMessage={'To setup other LLM connectors, visit {link}.'}
+                    defaultMessage={'To set up other LLM connectors, visit {link}.'}
                     values={{
                       link: (
                         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
@@ -175,12 +156,13 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
                 aria-required={true}
               >
                 <ConnectorSelector
-                  connectors={connectorOptions}
+                  connectors={aiConnectors}
                   selectedId={selectedConnectorId}
                   onChange={setSelectedConnectorId}
                   isInvalid={!selectedConnectorId}
                   isLoading={isLoading}
                   mode={'combobox'}
+                  settings={settings}
                 />
               </EuiFormRow>
               {additionalSettings && <EuiFormRow>{additionalSettings}</EuiFormRow>}
@@ -188,6 +170,7 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    aria-label={i18n.START_MIGRATION_MODAL_CANCEL}
                     onClick={closeModal}
                     data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Cancel`}
                   >

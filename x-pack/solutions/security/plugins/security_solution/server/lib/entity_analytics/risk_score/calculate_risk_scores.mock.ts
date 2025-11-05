@@ -7,9 +7,9 @@
 
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
-import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { EntityRiskLevelsEnum } from '../../../../common/api/entity_analytics/common';
+import type { CalculationResults } from './calculate_and_persist_risk_scores';
 
 const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
   key: { 'user.name': 'username' },
@@ -64,9 +64,7 @@ const buildAggregationResponseMock = (
   ...overrides,
 });
 
-const buildResponseMock = (
-  overrides: Partial<RiskScoresCalculationResponse> = {}
-): RiskScoresCalculationResponse => ({
+const buildResponseMock = (overrides: Partial<CalculationResults> = {}): CalculationResults => ({
   after_keys: { host: { 'host.name': 'hostname' } },
   scores: {
     host: [
@@ -101,6 +99,12 @@ const buildResponseMock = (
   },
   errors: [],
   scores_written: 1,
+  entities: {
+    host: ['hostname'],
+    user: [],
+    service: [],
+    generic: [],
+  },
   ...overrides,
 });
 

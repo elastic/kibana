@@ -16,7 +16,12 @@ export interface ActiveItemsState {
 }
 
 /**
- * Utility function to determine the active menu items based on the `activeItemId`
+ * Utility function to determine the active menu items based on the `activeItemId`.
+ *
+ * @param items - The navigation structure.
+ * @param activeItemId - The active item ID.
+ * @param logoId - The logo ID.
+ * @returns The active items state including: `primaryItem`, `secondaryItem`, and `isLogoActive`.
  */
 export const getActiveItems = (
   items: NavigationStructure,

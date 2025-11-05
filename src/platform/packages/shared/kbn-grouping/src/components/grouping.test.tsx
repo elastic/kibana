@@ -20,7 +20,7 @@ import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
 import type { SetRequired } from 'type-fest';
 
 const renderChildComponent = jest.fn();
-const takeActionItems = jest.fn();
+const takeActionItems = jest.fn(mockGroupingProps.takeActionItems);
 const mockTracker = jest.fn();
 
 const testProps: SetRequired<GroupingProps<{}>, 'data'> = {
@@ -131,7 +131,7 @@ describe('Grouping', () => {
   });
 
   it('Renders a null group and passes the correct filter to take actions and child component', () => {
-    takeActionItems.mockReturnValue([<span />]);
+    takeActionItems.mockReturnValue({ items: [{ key: '1', name: '1' }], panels: [] });
     render(
       <I18nProvider>
         <Grouping {...testProps} />

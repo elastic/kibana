@@ -1,6 +1,0 @@
-.root {
-  composes: canvasPage from global;
-  composes: canvasInteractivePage from global;
-  composes: kbn-resetFocusState from global;
-  overflow: 'hidden';
-}

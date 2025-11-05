@@ -223,6 +223,7 @@ describe('on_failure graph', () => {
         id: 'enterRetry_testRetryConnectorStep',
         type: 'enter-retry',
         stepId: 'testRetryConnectorStep',
+        stepType: 'retry',
         exitNodeId: 'exitRetry_testRetryConnectorStep',
         configuration: {
           'max-attempts': 3,
@@ -238,6 +239,7 @@ describe('on_failure graph', () => {
         id: 'enterContinue_testRetryConnectorStep',
         type: 'enter-continue',
         stepId: 'testRetryConnectorStep',
+        stepType: 'continue',
         exitNodeId: 'exitContinue_testRetryConnectorStep',
       });
     });
@@ -250,8 +252,10 @@ describe('on_failure graph', () => {
           id: 'enterTryBlock_testRetryConnectorStep',
           exitNodeId: 'exitTryBlock_testRetryConnectorStep',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           type: 'enter-try-block',
           enterNormalPathNodeId: 'enterNormalPath_testRetryConnectorStep',
+          enterFallbackPathNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
 
@@ -262,6 +266,7 @@ describe('on_failure graph', () => {
           type: 'exit-try-block',
           id: 'exitTryBlock_testRetryConnectorStep',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterNodeId: 'enterTryBlock_testRetryConnectorStep',
         });
       });
@@ -273,6 +278,7 @@ describe('on_failure graph', () => {
           id: 'enterNormalPath_testRetryConnectorStep',
           type: 'enter-normal-path',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterZoneNodeId: 'enterTryBlock_testRetryConnectorStep',
           enterFailurePathNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
@@ -285,6 +291,7 @@ describe('on_failure graph', () => {
           id: 'exitNormalPath_testRetryConnectorStep',
           type: 'exit-normal-path',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterNodeId: 'enterNormalPath_testRetryConnectorStep',
           exitOnFailureZoneNodeId: 'exitTryBlock_testRetryConnectorStep',
         });
@@ -299,6 +306,7 @@ describe('on_failure graph', () => {
           id: 'enterFallbackPath_testRetryConnectorStep',
           type: 'enter-fallback-path',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterZoneNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
@@ -310,6 +318,7 @@ describe('on_failure graph', () => {
           id: 'exitFallbackPath_testRetryConnectorStep',
           type: 'exit-fallback-path',
           stepId: 'testRetryConnectorStep',
+          stepType: 'fallback',
           enterNodeId: 'enterFallbackPath_testRetryConnectorStep',
           exitOnFailureZoneNodeId: 'exitTryBlock_testRetryConnectorStep',
         });
@@ -374,7 +383,7 @@ describe('on_failure graph', () => {
         const executionGraph = convertToWorkflowGraph(workflow as any);
         const topsort = graphlib.alg.topsort(executionGraph);
         expect(topsort).toEqual([
-          'outer_foreach',
+          'enterForeach_outer_foreach',
           'enterContinue_testRetryConnectorStep',
           'enterTryBlock_testRetryConnectorStep',
           'enterNormalPath_testRetryConnectorStep',
@@ -387,7 +396,7 @@ describe('on_failure graph', () => {
           'exitFallbackPath_testRetryConnectorStep',
           'exitTryBlock_testRetryConnectorStep',
           'exitContinue_testRetryConnectorStep',
-          'exitForeach(outer_foreach)',
+          'exitForeach_outer_foreach',
         ]);
       });
 
@@ -439,8 +448,8 @@ describe('on_failure graph', () => {
         const executionGraph = convertToWorkflowGraph(workflow as any);
         expect(executionGraph.nodes()).toEqual(
           expect.arrayContaining([
-            'ifStep',
-            'enterThen(ifStep)',
+            'enterCondition_ifStep',
+            'enterThen_ifStep',
             'enterContinue_trueConnectorStep',
             'enterTryBlock_trueConnectorStep',
             'enterNormalPath_trueConnectorStep',
@@ -453,8 +462,8 @@ describe('on_failure graph', () => {
             'exitFallbackPath_trueConnectorStep',
             'exitTryBlock_trueConnectorStep',
             'exitContinue_trueConnectorStep',
-            'exitThen(ifStep)',
-            'enterElse(ifStep)',
+            'exitThen_ifStep',
+            'enterElse_ifStep',
             'enterContinue_falseConnectorStep',
             'enterTryBlock_falseConnectorStep',
             'enterNormalPath_falseConnectorStep',
@@ -467,8 +476,8 @@ describe('on_failure graph', () => {
             'exitFallbackPath_falseConnectorStep',
             'exitTryBlock_falseConnectorStep',
             'exitContinue_falseConnectorStep',
-            'exitElse(ifStep)',
-            'exitCondition(ifStep)',
+            'exitElse_ifStep',
+            'exitCondition_ifStep',
           ])
         );
       });
@@ -502,7 +511,7 @@ describe('on_failure graph', () => {
         const executionGraph = convertToWorkflowGraph(workflow as any);
         expect(executionGraph.nodes()).toEqual(
           expect.arrayContaining([
-            'foreachStep',
+            'enterForeach_foreachStep',
             'enterContinue_foreachChild',
             'enterTryBlock_foreachChild',
             'enterNormalPath_foreachChild',
@@ -515,7 +524,7 @@ describe('on_failure graph', () => {
             'exitFallbackPath_foreachChild',
             'exitTryBlock_foreachChild',
             'exitContinue_foreachChild',
-            'exitForeach(foreachStep)',
+            'exitForeach_foreachStep',
           ])
         );
       });

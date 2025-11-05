@@ -108,7 +108,6 @@ export const putFleetProxyHandler: RequestHandler<
 
     // Bump all the agent policy that use that proxy
     const { fleetServerHosts, outputs, downloadSources } = await getFleetProxyRelatedSavedObjects(
-      soClient,
       proxyId
     );
     await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs, downloadSources);
@@ -149,7 +148,6 @@ export const deleteFleetProxyHandler: RequestHandler<
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
     const { fleetServerHosts, outputs, downloadSources } = await getFleetProxyRelatedSavedObjects(
-      soClient,
       proxyId
     );
 

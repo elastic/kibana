@@ -12,7 +12,7 @@ import { PrivMonUtils, PlainIndexSyncUtils } from '../utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const privMonUtils = PrivMonUtils(getService);
 
   describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await api.deleteMonitoringEngine({ query: { data: true } });
+      await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
       await disablePrivmonSetting(kibanaServer);
     });
 
@@ -43,11 +43,12 @@ export default ({ getService }: FtrProviderContext) => {
       await privMonUtils.initPrivMonEngine();
 
       // Step 1: Add user via API
-      await api.createPrivMonUser({
+      await entityAnalyticsApi.createPrivMonUser({
         body: { user: user1 },
       });
 
-      let users = (await api.listPrivMonUsers({ query: {} })).body as ListPrivMonUsersResponse;
+      let users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
+        .body as ListPrivMonUsersResponse;
       let user = privMonUtils.findUser(users, user1.name);
       privMonUtils.assertIsPrivileged(user, true);
       expect(user?.user?.name).toEqual(user1.name);
@@ -60,7 +61,8 @@ export default ({ getService }: FtrProviderContext) => {
       expect(csvUploadResponse.status).toBe(200);
       expect(csvUploadResponse.body.stats.successful).toBeGreaterThanOrEqual(1);
 
-      users = (await api.listPrivMonUsers({ query: {} })).body as ListPrivMonUsersResponse;
+      users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
+        .body as ListPrivMonUsersResponse;
       user = privMonUtils.findUser(users, user1.name);
       privMonUtils.assertIsPrivileged(user, true);
       expect(user?.user?.name).toEqual(user1.name);
@@ -68,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(user?.labels?.sources).toContain('csv');
 
       // Step 3: Add same user via index sync - should merge all three sources
-      const createEntitySourceResponse = await api.createEntitySource({
+      const createEntitySourceResponse = await entityAnalyticsApi.createEntitySource({
         body: {
           type: 'index',
           name: 'User Monitored Indices - Multi-Source Test',
@@ -80,7 +82,8 @@ export default ({ getService }: FtrProviderContext) => {
       await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
       await privMonUtils.waitForSyncTaskRun();
 
-      users = (await api.listPrivMonUsers({ query: {} })).body as ListPrivMonUsersResponse;
+      users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
+        .body as ListPrivMonUsersResponse;
       user = privMonUtils.findUser(users, user1.name);
       privMonUtils.assertIsPrivileged(user, true);
       expect(user?.user?.name).toEqual(user1.name);
@@ -96,11 +99,11 @@ export default ({ getService }: FtrProviderContext) => {
       const user3 = { name: 'user_3' };
 
       // Create user1 via API
-      await api.createPrivMonUser({
+      await entityAnalyticsApi.createPrivMonUser({
         body: { user: user1 },
       });
       // Create user2 via API
-      await api.createPrivMonUser({
+      await entityAnalyticsApi.createPrivMonUser({
         body: { user: user2 },
       });
       // Add user1 (update) and user3 (new) via CSV
@@ -108,7 +111,8 @@ export default ({ getService }: FtrProviderContext) => {
       await privMonUtils.bulkUploadUsersCsv(csvContent);
 
       // Verify final state
-      const users = (await api.listPrivMonUsers({ query: {} })).body as ListPrivMonUsersResponse;
+      const users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
+        .body as ListPrivMonUsersResponse;
       expect(users.length).toBe(3);
 
       const foundUser1 = privMonUtils.findUser(users, user1.name);

@@ -8,13 +8,12 @@
 import type { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { LensDispatch, LensStoreDeps } from '..';
+import type { LensAppState, LensState, LensStoreDeps, DatasourceMap } from '@kbn/lens-common';
+import type { LensDispatch } from '..';
 import { setExecutionContext, navigateAway, applyChanges, selectAutoApplyEnabled } from '..';
-import type { LensAppState, LensState } from '../types';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
 import { onActiveDataChange } from '../lens_slice';
-import type { DatasourceMap } from '../../types';
 
 function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
   const { activeDatasourceId, datasourceStates, dataViews } = state.lens;

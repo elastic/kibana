@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { badRequest } from '@hapi/boom';
 import type {
   SignificantEventsGenerateResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
-import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
-import moment from 'moment';
 import { from as fromRxjs, map, mergeMap } from 'rxjs';
+import { conditionSchema } from '@kbn/streamlang';
+import { NonEmptyString } from '@kbn/zod-helpers';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -33,6 +31,12 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
+        feature: z
+          .object({
+            name: NonEmptyString,
+            filter: conditionSchema,
+          })
+          .optional(),
         kql: z.object({
           query: z.string(),
         }),
@@ -64,11 +68,6 @@ const previewSignificantEventsRoute = createServerRoute({
         request,
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams is not enabled');
-    }
 
     const {
       body: { query },
@@ -146,35 +145,24 @@ const readSignificantEventsRoute = createServerRoute({
   },
 });
 
-const durationSchema = z.string().transform((value) => {
-  const match = value.match(/^(\d+)([mhd])$/);
-  if (!match) {
-    throw new Error('Duration must follow format: {number}{unit} where unit is m, h, or d');
-  }
-
-  const [, numberStr, unit] = match;
-  const number = parseInt(numberStr, 10);
-
-  // Map units to moment duration units
-  const unitMap: Record<string, moment.unitOfTime.DurationConstructor> = {
-    m: 'minute',
-    h: 'hour',
-    d: 'day',
-  };
-
-  const momentUnit = unitMap[unit];
-  return moment.duration(number, momentUnit);
-});
-
 const generateSignificantEventsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/significant_events/_generate 2023-10-31',
+  endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
       connectorId: z.string(),
       currentDate: dateFromString.optional(),
-      shortLookback: durationSchema.optional(),
-      longLookback: durationSchema.optional(),
+      from: dateFromString,
+      to: dateFromString,
+    }),
+    body: z.object({
+      feature: z
+        .object({
+          name: NonEmptyString,
+          filter: conditionSchema,
+          description: z.string(),
+        })
+        .optional(),
     }),
   }),
   options: {
@@ -210,18 +198,14 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
+          feature: params.body?.feature,
           connectorId: params.query.connectorId,
-          currentDate: params.query.currentDate,
-          shortLookback: params.query.shortLookback,
-          longLookback: params.query.longLookback,
+          start: params.query.from.valueOf(),
+          end: params.query.to.valueOf(),
         },
         {
           inferenceClient,
-          esClient: createTracedEsClient({
-            client: scopedClusterClient.asCurrentUser,
-            logger,
-            plugin: 'streams',
-          }),
+          esClient: scopedClusterClient.asCurrentUser,
           logger,
         }
       )

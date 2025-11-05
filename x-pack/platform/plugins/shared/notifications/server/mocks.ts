@@ -6,34 +6,35 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { lazyObject } from '@kbn/lazy-object';
 import type { EmailService } from './services';
 import type { NotificationsServerStart } from './types';
 import type { NotificationsPlugin } from './plugin';
 
-const emailServiceMock: jest.Mocked<EmailService> = {
+const emailServiceMock: jest.Mocked<EmailService> = lazyObject({
   sendPlainTextEmail: jest.fn(),
   sendHTMLEmail: jest.fn(),
   sendAttachmentEmail: jest.fn(),
-};
+});
 
 const createEmailServiceMock = () => {
   return emailServiceMock;
 };
 
-const startMock: jest.Mocked<NotificationsServerStart> = {
+const startMock: jest.Mocked<NotificationsServerStart> = lazyObject({
   isEmailServiceAvailable: jest.fn(),
   getEmailService: jest.fn(createEmailServiceMock),
-};
+});
 
 const createStartMock = () => {
   return startMock;
 };
 
-const notificationsPluginMock: jest.Mocked<PublicMethodsOf<NotificationsPlugin>> = {
+const notificationsPluginMock: jest.Mocked<PublicMethodsOf<NotificationsPlugin>> = lazyObject({
   setup: jest.fn(),
   start: jest.fn(createStartMock) as jest.Mock<NotificationsServerStart>,
   stop: jest.fn(),
-};
+});
 
 const createNotificationsPluginMock = () => {
   return notificationsPluginMock;

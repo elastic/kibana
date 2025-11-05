@@ -111,7 +111,7 @@ describe('ActionableSummary', () => {
     });
   });
 
-  describe('when configurations capabilities is defined (for AI4DSOC)', () => {
+  describe('when configurations capabilities is defined (for EASE)', () => {
     beforeEach(() => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {

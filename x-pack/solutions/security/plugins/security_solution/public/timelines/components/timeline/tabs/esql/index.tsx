@@ -12,7 +12,7 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public/customiz
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
 import { from, type Subscription } from 'rxjs';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -235,12 +235,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const savedSearchStateSub = stateContainer.savedSearchState.getHasChanged$().subscribe({
-        next: (hasChanged) => {
-          if (hasChanged) {
-            const latestSavedSearchState = stateContainer.savedSearchState.getState();
-            setDiscoverSavedSearchState(latestSavedSearchState);
-          }
+      const savedSearchStateSub = stateContainer.savedSearchState.getCurrent$().subscribe({
+        next: (latestSavedSearchState) => {
+          setDiscoverSavedSearchState(latestSavedSearchState);
         },
       });
 

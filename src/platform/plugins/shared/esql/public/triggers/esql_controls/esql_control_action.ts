@@ -9,12 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import { firstValueFrom, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
 
@@ -34,6 +36,7 @@ interface Context {
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
+  parentApi?: unknown;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -69,14 +72,24 @@ export class CreateESQLControlAction implements Action<Context> {
     onCancelControl,
     cursorPosition,
     initialState,
+    parentApi,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
     }
+    const currentApp = await firstValueFrom(this.core.application.currentAppId$ ?? of(undefined));
+    // Close all existing flyouts before opening the control flyout
+    try {
+      if (currentApp === 'discover') {
+        dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlControls);
+      }
+    } catch (error) {
+      // Flyouts don't exist or couldn't be closed, continue with opening the new flyout
+    }
 
     openLazyFlyout({
       core: this.core,
-      parentApi: this.search,
+      parentApi,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
         const { loadESQLControlFlyout } = await import('./esql_control_helpers');
         return await loadESQLControlFlyout({
@@ -92,6 +105,7 @@ export class CreateESQLControlAction implements Action<Context> {
           cursorPosition,
           initialState,
           closeFlyout,
+          currentApp,
         });
       },
       flyoutProps: {
@@ -99,6 +113,10 @@ export class CreateESQLControlAction implements Action<Context> {
         isResizable: true,
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
+        // When queryString is present (i.e. flyout opened from the ES|QL editor),
+        // use onCancelControl as the onClose handler to ensure proper nested flyout closing behavior.
+        // In other scenarios (opened directly from the dashboard), we keep the default close behavior.
+        ...(queryString && { onClose: onCancelControl }),
       },
     });
   }

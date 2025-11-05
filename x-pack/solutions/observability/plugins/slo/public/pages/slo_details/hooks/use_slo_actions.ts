@@ -15,7 +15,6 @@ import { useSpace } from '../../../hooks/use_space';
 import type { BurnRateRuleParams } from '../../../typings';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
-  createRemoteSloAddToCaseUrl,
   createRemoteSloDeleteUrl,
   createRemoteSloDisableUrl,
   createRemoteSloEditUrl,
@@ -52,7 +51,6 @@ export const useSloActions = ({
       remoteResetUrl: undefined,
       remoteEnableUrl: undefined,
       remoteDisableUrl: undefined,
-      remoteAddToCaseUrl: undefined,
       sloDetailsUrl: '',
     };
   }
@@ -86,7 +84,6 @@ export const useSloActions = ({
   const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);
   const remoteEnableUrl = createRemoteSloEnableUrl(slo, spaceId);
   const remoteDisableUrl = createRemoteSloDisableUrl(slo, spaceId);
-  const remoteAddToCaseUrl = createRemoteSloAddToCaseUrl(slo, spaceId);
 
   const sloEditUrl = slo.remote
     ? createRemoteSloEditUrl(slo, spaceId)
@@ -99,7 +96,6 @@ export const useSloActions = ({
     remoteResetUrl,
     remoteEnableUrl,
     remoteDisableUrl,
-    remoteAddToCaseUrl,
     sloDetailsUrl: http.basePath.prepend(detailsUrl),
   };
 };

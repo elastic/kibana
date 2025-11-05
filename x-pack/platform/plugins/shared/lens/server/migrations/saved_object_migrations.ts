@@ -18,7 +18,7 @@ import type { Query, Filter } from '@kbn/es-query';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { PersistableFilter } from '../../common/types';
+import type { PersistableFilter } from '@kbn/lens-common';
 import type {
   LensDocShapePost712,
   LensDocShapePre712,

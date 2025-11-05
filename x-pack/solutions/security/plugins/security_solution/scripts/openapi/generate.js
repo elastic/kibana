@@ -23,15 +23,57 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
   });
 
   await generate({
-    title: 'API client for tests',
+    title: 'Detections API client for tests',
     rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: './common/**/*.schema.yaml',
+    sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/detection_engine/**/*.schema.yaml'),
     templateName: 'api_client_supertest',
     skipLinting: true,
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/solutions/security/test/api_integration/services/security_solution_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/supertest/detections.gen.ts'
+      ),
+    },
+  });
+
+  await generate({
+    title: 'Endpoint Management API client for tests',
+    rootDir: SECURITY_SOLUTION_ROOT,
+    sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/endpoint/**/*.schema.yaml'),
+    templateName: 'api_client_supertest',
+    skipLinting: true,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_management.gen.ts'
+      ),
+    },
+  });
+
+  await generate({
+    title: 'Entity Analytics API client for tests',
+    rootDir: SECURITY_SOLUTION_ROOT,
+    sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/entity_analytics/**/*.schema.yaml'),
+    templateName: 'api_client_supertest',
+    skipLinting: true,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/solutions/security/packages/test-api-clients/supertest/entity_analytics.gen.ts'
+      ),
+    },
+  });
+
+  await generate({
+    title: 'Timelines API client for tests',
+    rootDir: SECURITY_SOLUTION_ROOT,
+    sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/timeline/**/*.schema.yaml'),
+    templateName: 'api_client_supertest',
+    skipLinting: true,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/solutions/security/packages/test-api-clients/supertest/timelines.gen.ts'
       ),
     },
   });

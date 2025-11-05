@@ -19,17 +19,15 @@ const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesServic
 
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),
-  sendGetAgents: jest.fn().mockResolvedValue({
-    data: {
-      statusSummary: {},
-      items: [
-        {
-          id: 'agent123',
-          policy_id: 'agent-policy-1',
-        },
-      ],
-      total: 5,
-    },
+  sendGetAgentsForRq: jest.fn().mockResolvedValue({
+    statusSummary: {},
+    items: [
+      {
+        id: 'agent123',
+        policy_id: 'agent-policy-1',
+      },
+    ],
+    total: 5,
   }),
   sendGetAgentStatus: jest.fn().mockResolvedValue({
     data: {
@@ -39,18 +37,16 @@ jest.mock('../../../../hooks', () => ({
       totalInactive: 2,
     },
   }),
-  sendBulkGetAgentPolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [
-        { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
-        {
-          id: 'agent-policy-managed',
-          name: 'Managed Agent policy',
-          namespace: 'default',
-          managed: true,
-        },
-      ],
-    },
+  sendBulkGetAgentPoliciesForRq: jest.fn().mockReturnValue({
+    items: [
+      { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
+      {
+        id: 'agent-policy-managed',
+        name: 'Managed Agent policy',
+        namespace: 'default',
+        managed: true,
+      },
+    ],
   }),
   sendGetAgentPolicies: jest.fn().mockReturnValue({
     data: {
@@ -81,7 +77,7 @@ jest.mock('../../../../hooks', () => ({
     isLoading: false,
     resendRequest: jest.fn(),
   } as any),
-  sendGetAgentTags: jest.fn().mockReturnValue({ data: { items: ['tag1', 'tag2'] } }),
+  sendGetAgentTagsForRq: jest.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
       toasts: {
@@ -117,7 +113,9 @@ describe('useFetchAgentsData', () => {
   it('should fetch agents and agent policies data', async () => {
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() => useFetchAgentsData());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
 
     expect(result?.current.selectedStatus).toEqual([
       'healthy',
@@ -150,7 +148,7 @@ describe('useFetchAgentsData', () => {
     expect(result?.current.kuery).toEqual(
       'status:online or (status:error or status:degraded) or status:orphaned or (status:updating or status:unenrolling or status:enrolling) or status:offline'
     );
-    expect(result?.current.currentRequestRef).toEqual({ current: 2 });
+
     expect(result?.current.pagination).toEqual({ currentPage: 1, pageSize: 5 });
     expect(result?.current.pageSizeOptions).toEqual([5, 20, 50]);
   });

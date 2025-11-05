@@ -246,7 +246,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -343,7 +343,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -381,7 +381,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -415,7 +415,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
+        config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
       logger: mockLogger,
@@ -804,7 +804,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
-            "rejectUnauthorized": false,
+            "rejectUnauthorized": true,
           },
         },
       ]
@@ -851,7 +851,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
-            "rejectUnauthorized": false,
+            "rejectUnauthorized": true,
           },
         },
       ]
@@ -901,6 +901,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
+            "rejectUnauthorized": true,
           },
         },
       ]

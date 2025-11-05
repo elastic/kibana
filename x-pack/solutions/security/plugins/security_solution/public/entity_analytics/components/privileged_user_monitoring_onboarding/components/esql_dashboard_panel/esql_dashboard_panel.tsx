@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import { isLeft } from 'fp-ts/Either';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import type { GetLensAttributes } from '../../../../../common/components/visualization_actions/types';
+import { VisualizationContextMenuActions } from '../../../../../common/components/visualization_actions/types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { VisualizationEmbeddable } from '../../../../../common/components/visualization_actions/visualization_embeddable';
 import { DASHBOARD_TABLE_QUERY_ID, useDashboardTableQuery } from './hooks';
@@ -102,6 +103,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
   if (isLeft(visualizationQuery)) {
     return (
       <EuiCallOut
+        announceOnMount={false}
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.missingMappings.errorTitle"
@@ -136,6 +138,13 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
           height={260}
           id="GenericDashboard"
           timerange={timerange}
+          withActions={[
+            VisualizationContextMenuActions.inspect,
+            VisualizationContextMenuActions.addToNewCase,
+            VisualizationContextMenuActions.addToExistingCase,
+            VisualizationContextMenuActions.saveToLibrary,
+            // Excluding VisualizationContextMenuActions.openInLens
+          ]}
         />
       </EuiFlexGroup>
       <EuiSpacer size="l" />
@@ -147,6 +156,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
           ) : isError ? (
             <div>
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate('xpack.securitySolution.genericDashboard.errorLoadingData', {
                   defaultMessage: 'Error loading data',
                 })}

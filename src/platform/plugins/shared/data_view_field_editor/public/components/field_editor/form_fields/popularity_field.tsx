@@ -11,12 +11,16 @@ import React from 'react';
 
 import { UseField, NumericField } from '../../../shared_imports';
 
-export const PopularityField = () => {
+interface Props {
+  disabled?: boolean;
+}
+
+export const PopularityField = ({ disabled }: Props) => {
   return (
     <UseField
       path="popularity"
       component={NumericField}
-      componentProps={{ euiFieldProps: { 'data-test-subj': 'editorFieldCount' } }}
+      componentProps={{ euiFieldProps: { 'data-test-subj': 'editorFieldCount', disabled } }}
     />
   );
 };

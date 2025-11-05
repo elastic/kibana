@@ -374,7 +374,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
     });
 
-    describe('Knowledge Base', () => {
+    // Re-enable when feature flag is on by default
+    // https://github.com/elastic/kibana/issues/239796
+    describe.skip('Knowledge Base', () => {
       const knowledgeBasePkgName = 'knowledge_base_test';
       const knowledgeBasePkgVersion = '1.0.0';
 

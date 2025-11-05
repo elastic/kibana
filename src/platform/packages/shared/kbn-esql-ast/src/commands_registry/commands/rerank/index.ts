@@ -12,10 +12,12 @@ import type { ICommand, ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../../types';
+import { columnsAfter } from './columns_after';
 
 const rerankCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
+  columnsAfter,
 };
 
 export const rerankCommand: ICommand = {
@@ -33,6 +35,6 @@ export const rerankCommand: ICommand = {
       'FROM books | RERANK rerank_score = "hobbit" ON title, description WITH { "inference_id": "my_reranker" }',
     ],
     preview: true,
-    hidden: true,
+    hidden: false,
   },
 };

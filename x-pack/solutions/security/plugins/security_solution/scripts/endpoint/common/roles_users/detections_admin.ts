@@ -7,7 +7,6 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 import { getNoResponseActionsRole } from './without_response_actions_role';
-import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export const getDetectionsAdmin: () => Omit<Role, 'name'> = () => {
   const noResponseActionsRole = getNoResponseActionsRole();
@@ -18,7 +17,7 @@ export const getDetectionsAdmin: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          [SECURITY_FEATURE_ID]: ['all', 'global_artifact_management_all'],
+          siemV4: ['all', 'global_artifact_management_all', 'endpoint_exceptions_all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

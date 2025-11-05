@@ -4,5 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { DOCUMENT_FIELD_NAME } from './constants';
-export type { PersistableFilter, LegacyMetricState, ValueFormatConfig } from './types';
+
+export type { PersistableFilter, LegacyMetricState } from '@kbn/lens-common';

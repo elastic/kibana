@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useSendMessage } from '../../../context/send_message_context';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { ConversationContent } from '../conversation_grid';
 import { RoundError } from './round_error';

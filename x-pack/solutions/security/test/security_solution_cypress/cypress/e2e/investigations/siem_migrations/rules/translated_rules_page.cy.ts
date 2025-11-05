@@ -26,75 +26,78 @@ import {
   reprocessWithoutPrebuiltRulesMatching,
 } from '../../../../tasks/siem_migrations';
 import { GET_STARTED_URL } from '../../../../urls/navigation';
-import { role } from './role';
+import { role } from '../common/role';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
-const tags = ['@ess', '@serverless', '@skipInServerlessMKI'];
-describe('Rule Migrations - Translated Rules Page', { tags }, () => {
-  before(() => {
-    role.setup();
-  });
-
-  beforeEach(() => {
-    deleteConnectors();
-    cy.task('esArchiverLoad', {
-      archiveName: 'siem_migrations/rules',
+describe(
+  'Rule Migrations - Translated Rules Page',
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+  () => {
+    before(() => {
+      role.setup();
     });
 
-    cy.task('esArchiverLoad', {
-      archiveName: 'siem_migrations/rule_migrations',
+    beforeEach(() => {
+      deleteConnectors();
+      cy.task('esArchiverLoad', {
+        archiveName: 'siem_migrations/rules',
+      });
+
+      cy.task('esArchiverLoad', {
+        archiveName: 'siem_migrations/rule_migrations',
+      });
+
+      createBedrockConnector();
+
+      role.login();
+      visit(GET_STARTED_URL);
+      selectMigrationConnector();
+      navigateToTranslatedRulesPage();
     });
 
-    createBedrockConnector();
+    after(() => {
+      role.teardown();
 
-    role.login();
-    visit(GET_STARTED_URL);
-    selectMigrationConnector();
-    navigateToTranslatedRulesPage();
-  });
+      cy.task('esArchiverUnload', {
+        archiveName: 'siem_migrations/rules',
+      });
 
-  after(() => {
-    role.teardown();
-
-    cy.task('esArchiverUnload', {
-      archiveName: 'siem_migrations/rules',
+      cy.task('esArchiverUnload', {
+        archiveName: 'siem_migrations/rule_migrations',
+      });
+    });
+    it('should be able to see the result of the completed migration', () => {
+      cy.get(TRANSLATED_RULES_RESULT_TABLE.ROWS).should('have.length', 6);
+      cy.get(TRANSLATED_RULES_RESULT_TABLE.STATUS('partial')).should('have.length', 4);
+      cy.get(TRANSLATED_RULES_RESULT_TABLE.STATUS('full')).should('have.length', 1);
+      cy.get(TRANSLATED_RULES_RESULT_TABLE.STATUS('failed')).should('have.length', 1);
     });
 
-    cy.task('esArchiverUnload', {
-      archiveName: 'siem_migrations/rule_migrations',
+    it('should be able to edit a rule with partial translation', () => {
+      cy.get(TRANSLATED_RULES_RESULT_TABLE.TABLE).should('be.visible');
+
+      editTranslatedRuleByRow(1);
+      const newESQLQuery = 'FROM auditbeat-* metadata _id, _version, _index';
+      updateTranslatedRuleQuery(newESQLQuery);
+      saveUpdatedTranslatedRuleQuery();
+
+      cy.get(TRANSLATED_RULE_EDIT_BTN).should('be.visible');
+      cy.get(TRANSLATED_RULE_QUERY_VIEWER).should('contain.text', newESQLQuery);
+      cy.get(TRANSLATED_RULE_RESULT_BADGE).should('have.text', 'Translated');
     });
-  });
-  it('should be able to see the result of the completed migration', () => {
-    cy.get(TRANSLATED_RULES_RESULT_TABLE.ROWS).should('have.length', 6);
-    cy.get(TRANSLATED_RULES_RESULT_TABLE.STATUS('partial')).should('have.length', 4);
-    cy.get(TRANSLATED_RULES_RESULT_TABLE.STATUS('full')).should('have.length', 1);
-    cy.get(TRANSLATED_RULES_RESULT_TABLE.STATUS('failed')).should('have.length', 1);
-  });
 
-  it('should be able to edit a rule with partial translation', () => {
-    cy.get(TRANSLATED_RULES_RESULT_TABLE.TABLE).should('be.visible');
-
-    editTranslatedRuleByRow(1);
-    const newESQLQuery = 'FROM auditbeat-* metadata _id, _version, _index';
-    updateTranslatedRuleQuery(newESQLQuery);
-    saveUpdatedTranslatedRuleQuery();
-
-    cy.get(TRANSLATED_RULE_EDIT_BTN).should('be.visible');
-    cy.get(TRANSLATED_RULE_QUERY_VIEWER).should('contain.text', newESQLQuery);
-    cy.get(TRANSLATED_RULE_RESULT_BADGE).should('have.text', 'Translated');
-  });
-
-  it('should be able to reprocess a failed Rule', () => {
-    cy.intercept({
-      url: '**/start',
-    }).as('reprocessFailedRules');
-    openReprocessDialog();
-    // cy.wait(50000);
-    reprocessWithoutPrebuiltRulesMatching();
-    cy.wait('@reprocessFailedRules')
-      .its('request.body.settings')
-      .should('have.property', 'skip_prebuilt_rules_matching', true);
-    cy.get(RULE_MIGRATION_PROGRESS_BAR).should('be.visible');
-    cy.get(RULE_MIGRATION_PROGRESS_BAR_TEXT).should('contain.text', '83%');
-  });
-});
+    it('should be able to reprocess a failed Rule', () => {
+      cy.intercept({
+        url: '**/start',
+      }).as('reprocessFailedRules');
+      openReprocessDialog();
+      // cy.wait(50000);
+      reprocessWithoutPrebuiltRulesMatching();
+      cy.wait('@reprocessFailedRules')
+        .its('request.body.settings')
+        .should('have.property', 'skip_prebuilt_rules_matching', true);
+      cy.get(RULE_MIGRATION_PROGRESS_BAR).should('be.visible');
+      cy.get(RULE_MIGRATION_PROGRESS_BAR_TEXT).should('contain.text', '83%');
+    });
+  }
+);

@@ -1119,7 +1119,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; getEditorConfig: () => ",
+          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; untilFiltersPublished: () => Promise<void>; getEditorConfig: () => ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -1321,7 +1321,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; getEditorConfig: () => ",
+          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; untilFiltersPublished: () => Promise<void>; getEditorConfig: () => ",
           {
             "pluginId": "controls",
             "scope": "common",

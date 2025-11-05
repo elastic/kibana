@@ -7,26 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitRetryNode } from '@kbn/workflows';
-import type { StepImplementation } from '../../step_base';
+import type { ExitRetryNode } from '@kbn/workflows/graph';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { NodeImplementation } from '../../node_implementation';
 
-export class ExitRetryNodeImpl implements StepImplementation {
+export class ExitRetryNodeImpl implements NodeImplementation {
   constructor(
-    private step: ExitRetryNode,
+    private node: ExitRetryNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    this.workflowRuntime.exitScope();
-    await this.workflowRuntime.finishStep(this.step.startNodeId);
-    const retryState = this.workflowRuntime.getStepState(this.step.startNodeId)!;
+    // Exit whole retry step scope
+    await this.stepExecutionRuntime.finishStep();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
     this.workflowLogger.logDebug(
-      `Exiting retry step ${this.step.startNodeId} after ${retryState.attempt} attempts.`
+      `Exiting retry step ${this.node.stepId} after ${retryState.attempt} attempts.`
     );
-    await this.workflowRuntime.setStepState(this.step.startNodeId, undefined);
-    this.workflowRuntime.goToNextStep();
+    await this.stepExecutionRuntime.setCurrentStepState(undefined);
+    this.workflowRuntime.navigateToNextNode();
   }
 }

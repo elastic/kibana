@@ -33,6 +33,7 @@ import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   AttachmentType,
+  EventAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
@@ -61,6 +62,7 @@ import {
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
+  isCommentRequestTypeEvent,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
@@ -121,6 +123,8 @@ export const decodeCommentRequest = (
         )} indices: ${JSON.stringify(indices)}`
       );
     }
+  } else if (isCommentRequestTypeEvent(comment)) {
+    decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {

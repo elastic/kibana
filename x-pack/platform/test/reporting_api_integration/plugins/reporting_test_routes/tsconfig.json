@@ -1,0 +1,17 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "isolatedModules": true
+  },
+  "include": [
+    "server/**/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/reporting-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -18,8 +18,20 @@ export const GetSettingsRequestSchema = {};
 
 export const PutSettingsRequestSchema = {
   body: schema.object({
-    has_seen_add_data_notice: schema.maybe(schema.boolean()),
-    additional_yaml_config: schema.maybe(schema.string()),
+    has_seen_add_data_notice: schema.maybe(
+      schema.boolean({
+        meta: {
+          deprecated: true,
+        },
+      })
+    ),
+    additional_yaml_config: schema.maybe(
+      schema.string({
+        meta: {
+          deprecated: true,
+        },
+      })
+    ),
     // Deprecated not used
     kibana_urls: schema.maybe(
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
@@ -28,9 +40,18 @@ export const PutSettingsRequestSchema = {
             return 'Protocol and path must be the same for each URL';
           }
         },
+        meta: {
+          deprecated: true,
+        },
       })
     ),
-    kibana_ca_sha256: schema.maybe(schema.string()),
+    kibana_ca_sha256: schema.maybe(
+      schema.string({
+        meta: {
+          deprecated: true,
+        },
+      })
+    ),
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
     delete_unenrolled_agents: schema.maybe(
       schema.object({
@@ -59,6 +80,7 @@ export const SettingsResponseSchema = schema.object({
     preconfigured_fields: schema.maybe(schema.arrayOf(schema.literal('fleet_server_hosts'))),
     secret_storage_requirements_met: schema.maybe(schema.boolean()),
     output_secret_storage_requirements_met: schema.maybe(schema.boolean()),
+    action_secret_storage_requirements_met: schema.maybe(schema.boolean()),
     use_space_awareness_migration_status: schema.maybe(
       schema.oneOf([schema.literal('pending'), schema.literal('success'), schema.literal('error')])
     ),

@@ -3,6 +3,8 @@
   "id": "@kbn/screenshot-mode-example-plugin",
   "owner": "@elastic/response-ops",
   "description": "Example plugin of how to use screenshotMode plugin services",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "screenshotModeExample",
     "server": true,

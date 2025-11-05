@@ -6,7 +6,7 @@
  */
 
 import { ToolType } from './definition';
-import { internalNamespaces } from './namespaces';
+import { internalNamespaces } from '../base/namespaces';
 
 const platformCoreTool = (toolName: string) => {
   return `${internalNamespaces.platformCore}.${toolName}`;
@@ -23,12 +23,17 @@ export const platformCoreTools = {
   getDocumentById: platformCoreTool('get_document_by_id'),
   generateEsql: platformCoreTool('generate_esql'),
   executeEsql: platformCoreTool('execute_esql'),
+  createVisualization: platformCoreTool('create_visualization'),
 } as const;
 
 /**
  * List of tool types which can be created / edited by a user.
  */
-export const editableToolTypes: ToolType[] = [ToolType.esql, ToolType.index_search];
+export const editableToolTypes: ToolType[] = [
+  ToolType.esql,
+  ToolType.index_search,
+  ToolType.workflow,
+];
 
 export const defaultAgentToolIds = [
   platformCoreTools.search,

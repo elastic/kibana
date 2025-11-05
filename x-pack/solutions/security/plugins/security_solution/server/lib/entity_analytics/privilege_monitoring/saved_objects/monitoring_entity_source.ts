@@ -11,6 +11,7 @@ import type {
   MonitoringEntitySource,
 } from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
+import type { MonitoringEntitySyncType } from '../types';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
@@ -24,6 +25,8 @@ interface UpsertResult {
   source: MonitoringEntitySource;
 }
 
+export type Processor = (source: MonitoringEntitySource) => Promise<void>;
+
 export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
 
@@ -33,7 +36,8 @@ export class MonitoringEntitySourceDescriptorClient {
     const { id, attributes: created } =
       await this.dependencies.soClient.create<CreateMonitoringEntitySource>(
         monitoringEntitySourceTypeName,
-        { ...attributes, managed: attributes.managed ?? false } // Ensure managed is set to true on creation
+        { ...attributes, managed: attributes.managed ?? false }, // Ensure managed is set to true on creation
+        { refresh: 'wait_for' }
       );
 
     return { ...created, id };
@@ -44,7 +48,8 @@ export class MonitoringEntitySourceDescriptorClient {
       sources.map((source) => ({
         type: monitoringEntitySourceTypeName,
         attributes: { ...source },
-      }))
+      })),
+      { refresh: 'wait_for' }
     );
     return createdSources;
   }
@@ -129,10 +134,15 @@ export class MonitoringEntitySourceDescriptorClient {
     await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, id);
   }
 
-  public async findByIndex(): Promise<MonitoringEntitySource[]> {
+  /**
+   * entity_analytics_integration or index type
+   */
+  public async findSourcesByType(
+    type: MonitoringEntitySyncType
+  ): Promise<MonitoringEntitySource[]> {
     const result = await this.find();
     return result.saved_objects
-      .filter((so) => so.attributes.type === 'index')
+      .filter((so) => so.attributes.type === type)
       .map((so) => ({ ...so.attributes, id: so.id }));
   }
 
@@ -141,6 +151,17 @@ export class MonitoringEntitySourceDescriptorClient {
     return result.saved_objects
       .filter((so) => so.attributes.type !== 'csv') // from the spec we are not using CSV on monitoring
       .map((so) => ({ ...so.attributes, id: so.id }));
+  }
+
+  public async findByQuery(query: string): Promise<MonitoringEntitySource[]> {
+    const scopedSoClient = this.dependencies.soClient;
+
+    const results = await scopedSoClient.find<MonitoringEntitySource>({
+      type: monitoringEntitySourceTypeName,
+      filter: query,
+      namespaces: [this.dependencies.namespace],
+    });
+    return results.saved_objects.map((so) => ({ ...so.attributes, id: so.id }));
   }
 
   private async assertNameUniqueness(attributes: Partial<MonitoringEntitySource>): Promise<void> {
@@ -160,5 +181,44 @@ export class MonitoringEntitySourceDescriptorClient {
         );
       }
     }
+  }
+
+  /**
+   * Integrations Specific Methods
+   */
+  async updateLastProcessedMarker(
+    source: MonitoringEntitySource,
+    lastProcessedMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastUpdateProcessed: lastProcessedMarker,
+        },
+      },
+    });
+  }
+
+  async getLastProcessedMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastUpdateProcessed;
+  }
+
+  async getLastFullSyncMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastFullSync;
+  }
+
+  async updateLastFullSyncMarker(
+    source: MonitoringEntitySource,
+    lastFullSyncMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastFullSync: lastFullSyncMarker,
+        },
+      },
+    });
   }
 }

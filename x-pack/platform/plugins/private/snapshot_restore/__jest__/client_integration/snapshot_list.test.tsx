@@ -325,6 +325,52 @@ describe('<SnapshotList />', () => {
           });
         });
       });
+
+      describe('state', () => {
+        test('partial state search is parsed', async () => {
+          await setSearchText('state:SUCCESS');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'SUCCESS',
+            searchMatch: 'must',
+            searchOperator: 'eq',
+          });
+        });
+
+        test('excluding partial state search is parsed', async () => {
+          await setSearchText('-state:FAILED');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'FAILED',
+            searchMatch: 'must_not',
+            searchOperator: 'eq',
+          });
+        });
+
+        test('exact state search is parsed', async () => {
+          await setSearchText('state=IN_PROGRESS');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'IN_PROGRESS',
+            searchMatch: 'must',
+            searchOperator: 'exact',
+          });
+        });
+
+        test('excluding exact state search is parsed', async () => {
+          await setSearchText('-state=PARTIAL');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'PARTIAL',
+            searchMatch: 'must_not',
+            searchOperator: 'exact',
+          });
+        });
+      });
     });
 
     describe('error handling', () => {
@@ -358,6 +404,140 @@ describe('<SnapshotList />', () => {
         expect(searchErrorExists()).toBeTruthy();
         expect(getSearchErrorText()).toEqual('Invalid search: Unknown field `unknown_field`');
       });
+    });
+  });
+
+  describe('last successful managed snapshot protection', () => {
+    const managedRepository = 'managed_repo';
+
+    beforeEach(() => {
+      (useLoadRepositories as jest.Mock).mockReturnValue({
+        error: null,
+        isInitialRequest: false,
+        isLoading: false,
+        data: {
+          repositories: [
+            {
+              name: managedRepository,
+            },
+            {
+              name: 'regular_repo',
+            },
+          ],
+        },
+      });
+    });
+
+    test('renders snapshots with isLastSuccessfulSnapshot flag correctly', async () => {
+      const snapshots = [
+        fixtures.getSnapshot({
+          repository: managedRepository,
+          snapshot: 'snapshot1',
+          state: 'SUCCESS',
+          managedRepository,
+          isLastSuccessfulSnapshot: false,
+        }),
+        fixtures.getSnapshot({
+          repository: managedRepository,
+          snapshot: 'snapshot2',
+          state: 'SUCCESS',
+          managedRepository,
+          isLastSuccessfulSnapshot: true, // This should be non-selectable
+        }),
+      ];
+
+      (useLoadSnapshots as jest.Mock).mockReturnValue({
+        error: null,
+        isInitialRequest: false,
+        isLoading: false,
+        data: {
+          snapshots,
+          policies: [],
+          errors: {},
+          total: snapshots.length,
+        },
+        resendRequest: () => {},
+      });
+
+      testBed = await setup();
+      const { component } = testBed;
+
+      // Component should render successfully with the snapshots
+      expect(component.find('EuiBasicTable').exists()).toBe(true);
+
+      // Both snapshots should be visible in the table
+      const table = component.find('EuiBasicTable');
+      expect(table.prop('items')).toEqual(snapshots);
+    });
+
+    test('renders snapshots from non-managed repositories correctly', async () => {
+      const snapshots = [
+        fixtures.getSnapshot({
+          repository: 'regular_repo',
+          snapshot: 'snapshot1',
+          state: 'SUCCESS',
+          managedRepository,
+          isLastSuccessfulSnapshot: false,
+        }),
+      ];
+
+      (useLoadSnapshots as jest.Mock).mockReturnValue({
+        error: null,
+        isInitialRequest: false,
+        isLoading: false,
+        data: {
+          snapshots,
+          policies: [],
+          errors: {},
+          total: snapshots.length,
+        },
+        resendRequest: () => {},
+      });
+
+      testBed = await setup();
+      const { component } = testBed;
+
+      // Component should render successfully
+      expect(component.find('EuiBasicTable').exists()).toBe(true);
+
+      // Snapshot should be visible in the table
+      const table = component.find('EuiBasicTable');
+      expect(table.prop('items')).toEqual(snapshots);
+    });
+
+    test('renders snapshots when there is no managed repository', async () => {
+      const snapshots = [
+        fixtures.getSnapshot({
+          repository: 'regular_repo',
+          snapshot: 'snapshot1',
+          state: 'SUCCESS',
+          managedRepository: undefined,
+          isLastSuccessfulSnapshot: false,
+        }),
+      ];
+
+      (useLoadSnapshots as jest.Mock).mockReturnValue({
+        error: null,
+        isInitialRequest: false,
+        isLoading: false,
+        data: {
+          snapshots,
+          policies: [],
+          errors: {},
+          total: snapshots.length,
+        },
+        resendRequest: () => {},
+      });
+
+      testBed = await setup();
+      const { component } = testBed;
+
+      // Component should render successfully
+      expect(component.find('EuiBasicTable').exists()).toBe(true);
+
+      // All snapshots should be visible
+      const table = component.find('EuiBasicTable');
+      expect(table.prop('items')).toEqual(snapshots);
     });
   });
 });

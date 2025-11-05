@@ -88,6 +88,7 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
           <EuiSpacer size="xs" />
           <EuiComboBox
             id={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
+            data-test-subj={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
             aria-label={i18n.SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
             onChange={onChange}
             options={migrationOptions}

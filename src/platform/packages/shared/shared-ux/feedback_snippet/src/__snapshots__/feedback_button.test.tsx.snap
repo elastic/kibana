@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeedbackButton renders with the expected id 1`] = `
+<button
+  aria-label="Feedback button"
+  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-FeedbackButton"
+  data-test-subj="feedbackSnippetTestIdButtonSurveyLink"
+  id="feedbackSnippetTestIdButtonSurveyLink"
+  type="button"
+>
+  <span
+    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+  >
+    <span
+      class="eui-textTruncate euiButtonEmpty__text"
+    >
+      Got feedback?
+    </span>
+    <span
+      color="inherit"
+      data-euiicon-type="popout"
+    />
+  </span>
+</button>
+`;

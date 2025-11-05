@@ -110,4 +110,13 @@ describe('Host Summary Component', () => {
     expect(getByTestId('host-risk-overview')).toHaveTextContent(risk);
     expect(getByTestId('host-risk-overview')).toHaveTextContent(riskScore.toString());
   });
+
+  test('it renders host id', () => {
+    const { container } = render(
+      <TestProviders>
+        <HostOverview {...mockProps} data={mockData.Hosts.edges[0].node} />
+      </TestProviders>
+    );
+    expect(container).toHaveTextContent('aa7ca589f1b8220002f2fc61c64cfbf1');
+  });
 });

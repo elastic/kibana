@@ -30,7 +30,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { useServices } from '../services';
 import type { TagOptionItem } from './use_tag_filter_panel';
@@ -67,7 +66,7 @@ export const TagFilterContextProvider: FC<React.PropsWithChildren<Context>> = ({
 
 export const TagFilterPanel: FC<{}> = ({}) => {
   const { euiTheme } = useEuiTheme();
-  const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
+  const { getTagManagementUrl } = useServices();
   const componentContext = React.useContext(TagFilterContext);
   const titleId = useGeneratedHtmlId();
 
@@ -214,23 +213,14 @@ export const TagFilterPanel: FC<{}> = ({}) => {
             </EuiFlexItem>
 
             <EuiFlexItem>
-              <RedirectAppLinks
-                coreStart={{
-                  application: {
-                    navigateToUrl,
-                    currentAppId$,
-                  },
-                }}
-              >
-                <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
-                  {i18n.translate(
-                    'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
-                    {
-                      defaultMessage: 'Manage tags',
-                    }
-                  )}
-                </EuiLink>
-              </RedirectAppLinks>
+              <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
+                {i18n.translate(
+                  'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
+                  {
+                    defaultMessage: 'Manage tags',
+                  }
+                )}
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverFooter>

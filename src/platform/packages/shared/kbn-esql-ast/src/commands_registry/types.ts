@@ -71,6 +71,7 @@ export interface ISuggestionItem {
   command?: {
     title: string;
     id: string;
+    arguments?: { [key: string]: string }[];
   };
   /**
    * The range that should be replaced when the suggestion is applied
@@ -84,6 +85,12 @@ export interface ISuggestionItem {
     start: number;
     end: number;
   };
+  /**
+   * If the suggestions list is incomplete and should be re-requested when the user types more characters.
+   * If a completion item with incomplete true is shown, the editor will ask for new suggestions in every keystroke
+   * until there are no more incomplete suggestions returned.
+   */
+  incomplete?: boolean;
 }
 
 export type GetColumnsByTypeFn = (
@@ -136,6 +143,7 @@ export interface ICommandCallbacks {
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  isServerless?: boolean;
 }
 
 export interface ICommandContext {
@@ -151,7 +159,6 @@ export interface ICommandContext {
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
 }
-
 /**
  * This is a list of locations within an ES|QL query.
  *
@@ -240,29 +247,3 @@ export enum Location {
    */
   COMPLETION = 'completion',
 }
-
-const commandOptionNameToLocation: Record<string, Location> = {
-  eval: Location.EVAL,
-  where: Location.WHERE,
-  row: Location.ROW,
-  sort: Location.SORT,
-  stats: Location.STATS,
-  inlinestats: Location.STATS,
-  by: Location.STATS_BY,
-  enrich: Location.ENRICH,
-  with: Location.ENRICH_WITH,
-  dissect: Location.DISSECT,
-  rename: Location.RENAME,
-  join: Location.JOIN,
-  show: Location.SHOW,
-  completion: Location.COMPLETION,
-  rerank: Location.RERANK,
-};
-
-/**
- * Pause before using this in new places. Where possible, use the Location enum directly.
- *
- * This is primarily around for backwards compatibility with the old system of command and option names.
- */
-export const getLocationFromCommandOrOptionName = (name: string) =>
-  commandOptionNameToLocation[name];

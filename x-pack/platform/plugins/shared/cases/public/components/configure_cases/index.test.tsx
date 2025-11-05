@@ -1109,6 +1109,7 @@ describe('ConfigureCases', () => {
                 },
                 settings: {
                   syncAlerts: true,
+                  extractObservables: false,
                 },
                 customFields: [
                   {
@@ -1253,6 +1254,7 @@ describe('ConfigureCases', () => {
                 customFields: [],
                 settings: {
                   syncAlerts: true,
+                  extractObservables: false,
                 },
               },
             },
@@ -1287,7 +1289,7 @@ describe('ConfigureCases', () => {
 
     it('should not render observable types section if observable feature is not enabled', async () => {
       renderWithTestingProviders(<ConfigureCases />, {
-        wrapperProps: { features: { observables: { enabled: false } } },
+        wrapperProps: { features: { observables: { enabled: false, autoExtract: false } } },
       });
 
       expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();

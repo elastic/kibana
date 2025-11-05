@@ -11,7 +11,7 @@ import type {
   ValidatedRuleToImport,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_source/calculate_is_customized';
+import { calculateExternalRuleSource } from '../detection_rules_client/mergers/rule_source/calculate_external_rule_source';
 import { convertRuleToImportToRuleResponse } from './converters/convert_rule_to_import_to_rule_response';
 
 /**
@@ -50,17 +50,14 @@ export const calculateRuleSourceForImport = ({
   // satisfy the type system.
   const nextRule = convertRuleToImportToRuleResponse(importedRule);
 
-  const isCustomized = calculateIsCustomized({
+  const ruleSource = calculateExternalRuleSource({
     baseRule,
     nextRule,
     currentRule,
   });
 
   return {
-    ruleSource: {
-      type: 'external',
-      is_customized: isCustomized,
-    },
+    ruleSource,
     immutable: true,
   };
 };

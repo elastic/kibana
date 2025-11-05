@@ -73,7 +73,6 @@ import {
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
-import { getTrackedExecutions } from './lib/get_tracked_execution';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -426,6 +425,11 @@ export class TaskRunner<
         }
       })
     );
+    await withAlertingSpan('alerting:update-alerts', () =>
+      this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
+        await alertsClient.updatePersistedAlerts();
+      })
+    );
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
@@ -445,11 +449,6 @@ export class TaskRunner<
         alertInstances: alertsToReturn,
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
-        trackedExecutions: getTrackedExecutions({
-          trackedExecutions: alertsClient.getTrackedExecutions(),
-          currentExecution: this.executionId,
-          limit: flappingSettings.lookBackWindow,
-        }),
       },
     };
   }

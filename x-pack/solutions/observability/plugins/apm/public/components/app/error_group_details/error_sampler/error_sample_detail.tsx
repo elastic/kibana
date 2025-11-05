@@ -189,6 +189,9 @@ export function ErrorSampleDetails({
               pageCount={errorSampleIds.length}
               activePage={sampleActivePage}
               onPageClick={goToSample}
+              aria-label={i18n.translate('xpack.apm.errorSampleDetails.paginationAriaLabel', {
+                defaultMessage: 'Error sample pages',
+              })}
               compressed
             />
           )}
@@ -251,7 +254,9 @@ export function ErrorSampleDetails({
                   defaultMessage: 'Environment',
                 })}
               >
-                <EuiBadge color="hollow">{environment}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {environment}
+                </EuiBadge>
               </EuiToolTip>
             ) : null,
             serviceVersion ? (
@@ -260,7 +265,9 @@ export function ErrorSampleDetails({
                   defaultMessage: 'Service version',
                 })}
               >
-                <EuiBadge color="hollow">{serviceVersion}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {serviceVersion}
+                </EuiBadge>
               </EuiToolTip>
             ) : null,
             isUnhandled ? (

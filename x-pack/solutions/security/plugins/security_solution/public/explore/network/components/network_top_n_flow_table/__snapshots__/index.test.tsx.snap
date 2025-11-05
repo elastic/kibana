@@ -35,7 +35,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
 }
 
 .c2 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -79,7 +79,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
 
   .c5 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;
@@ -656,6 +656,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
         class="euiFlexItem c5 emotion-euiFlexItem-growZero"
       >
         <nav
+          aria-label="Table pagination"
           class="euiPagination emotion-euiPagination"
           data-test-subj="numberedPagination"
         >
@@ -843,7 +844,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
 }
 
 .c2 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -887,7 +888,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
 
   .c5 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;
@@ -1515,6 +1516,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
         class="euiFlexItem c5 emotion-euiFlexItem-growZero"
       >
         <nav
+          aria-label="Table pagination"
           class="euiPagination emotion-euiPagination"
           data-test-subj="numberedPagination"
         >

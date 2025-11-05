@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { triggersActionsRoute, createRuleFromTemplateRoute } from '@kbn/rule-data-utils';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
@@ -186,6 +187,12 @@ export function setupSavedObjects(
         createdAt: {
           type: 'date',
         },
+        initiator: {
+          type: 'keyword',
+        },
+        initiatorId: {
+          type: 'keyword',
+        },
         end: {
           type: 'date',
         },
@@ -223,6 +230,15 @@ export function setupSavedObjects(
       importableAndExportable: true,
       getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
         return `${ruleTemplateSavedObject.attributes.name}`;
+      },
+      getInAppUrl: (savedObject: SavedObject<RawRuleTemplate>) => {
+        return {
+          path: `${triggersActionsRoute}${createRuleFromTemplateRoute.replace(
+            ':templateId',
+            encodeURIComponent(savedObject.id)
+          )}`,
+          uiCapabilitiesPath: '',
+        };
       },
     },
     mappings: ruleTemplateMappings,

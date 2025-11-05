@@ -13,19 +13,21 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_provider';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 export interface ToolContextMenuProps {
-  tool: ToolDefinitionWithSchema;
+  tool: ToolDefinition;
 }
 
 export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
   const { euiTheme } = useEuiTheme();
   const { editTool, deleteTool, testTool, cloneTool, viewTool } = useToolsActions();
   const [isOpen, setIsOpen] = useState(false);
+  const { manageTools } = useUiPrivileges();
 
   const editMenuItem = (
     <EuiContextMenuItem
@@ -100,9 +102,10 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     </EuiContextMenuItem>
   );
 
-  const menuItems = !tool.readonly
-    ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
-    : [testMenuItem, viewMenuItem];
+  const menuItems =
+    !tool.readonly && manageTools
+      ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
+      : [testMenuItem, viewMenuItem];
 
   return (
     <EuiPopover

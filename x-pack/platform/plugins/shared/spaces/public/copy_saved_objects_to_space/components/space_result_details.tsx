@@ -59,6 +59,10 @@ export const SpaceCopyResultDetails = (props: Props) => {
   const { destinationMap, onDestinationMapChange, summarizedCopyResult } = props;
   const { objects } = summarizedCopyResult;
   const { euiTheme } = useEuiTheme();
+  const objectIdLabel = i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
+    { defaultMessage: 'Object ID' }
+  );
 
   return (
     <div
@@ -207,10 +211,8 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   options={selectProps.options}
                   valueOfSelected={destinationMap.get(`${type}:${id}`)}
                   onChange={selectProps.onChange}
-                  prepend={i18n.translate(
-                    'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
-                    { defaultMessage: 'Object ID' }
-                  )}
+                  prepend={objectIdLabel}
+                  aria-label={objectIdLabel}
                   hasDividers
                   fullWidth
                   compressed

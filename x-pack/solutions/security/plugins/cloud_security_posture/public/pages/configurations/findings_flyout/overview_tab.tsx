@@ -173,29 +173,34 @@ const getDetailsList = (
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h1>
-              <div
-                css={{
-                  textAlign: 'right',
-                  display: 'flex',
-                  gap: euiTheme?.size.s,
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  marginBottom: euiTheme?.size.xs,
-                }}
-              >
-                <EuiIcon type="expand" color="primary" />
-                <EuiLink href={ruleFlyoutLink} target="_blank" external={false}>
-                  {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails', {
-                    defaultMessage: 'Show rule details',
-                  })}
-                </EuiLink>
-              </div>
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
+        {ruleFlyoutLink && (
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h1>
+                <div
+                  css={{
+                    textAlign: 'right',
+                    display: 'flex',
+                    gap: euiTheme?.size.s,
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    marginBottom: euiTheme?.size.xs,
+                  }}
+                >
+                  <EuiIcon type="expand" color="primary" />
+                  <EuiLink href={ruleFlyoutLink} target="_blank" external={false}>
+                    {i18n.translate(
+                      'xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails',
+                      {
+                        defaultMessage: 'Show rule details',
+                      }
+                    )}
+                  </EuiLink>
+                </div>
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     ),
     description: data.rule?.description ? (

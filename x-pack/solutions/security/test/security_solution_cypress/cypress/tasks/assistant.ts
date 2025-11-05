@@ -100,6 +100,8 @@ export const selectConnector = (connectorName: string) => {
   cy.get(CONNECTOR_SELECTOR).click();
   cy.get(CONNECTOR_SELECT(connectorName)).click();
   assertConnectorSelected(connectorName);
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
+  cy.wait(2000);
 };
 export const resetConversation = () => {
   cy.get(CONVERSATION_SETTINGS_MENU).click();
@@ -127,6 +129,7 @@ export const submitMessage = () => {
 };
 
 export const typeAndSendMessage = (message: string) => {
+  cy.get(USER_PROMPT).click();
   cy.get(USER_PROMPT).type(message);
   submitMessage();
 };
@@ -135,6 +138,7 @@ export const typeAndSendMessage = (message: string) => {
 export const createAndTitleConversation = (newTitle = 'Something else') => {
   createNewChat();
   assertNewConversation(false, 'New chat');
+  selectConnector(azureConnectorAPIPayload.name);
   assertConnectorSelected(azureConnectorAPIPayload.name);
   typeAndSendMessage('hello');
   assertMessageSent('hello');

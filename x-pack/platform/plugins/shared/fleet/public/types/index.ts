@@ -150,7 +150,7 @@ export type {
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsRequest,
   GetListAgentPolicyOutputsResponse,
-  CloudConnectorResponse,
+  CloudConnector,
   CloudConnectorListOptions,
   CreateCloudConnectorRequest,
   CloudConnectorVars,

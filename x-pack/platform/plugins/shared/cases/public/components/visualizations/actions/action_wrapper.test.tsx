@@ -61,6 +61,10 @@ describe('ActionWrapper', () => {
           "alerts": Object {
             "sync": true,
           },
+          "observables": Object {
+            "autoExtract": true,
+            "enabled": true,
+          },
         },
         "owner": Array [
           "securitySolution",
@@ -85,6 +89,10 @@ describe('ActionWrapper', () => {
         "features": Object {
           "alerts": Object {
             "sync": false,
+          },
+          "observables": Object {
+            "autoExtract": false,
+            "enabled": true,
           },
         },
         "owner": Array [
@@ -111,6 +119,10 @@ describe('ActionWrapper', () => {
           "alerts": Object {
             "sync": false,
           },
+          "observables": Object {
+            "autoExtract": false,
+            "enabled": true,
+          },
         },
         "owner": Array [
           "observability",
@@ -135,6 +147,10 @@ describe('ActionWrapper', () => {
         "features": Object {
           "alerts": Object {
             "sync": false,
+          },
+          "observables": Object {
+            "autoExtract": false,
+            "enabled": true,
           },
         },
         "owner": Array [],

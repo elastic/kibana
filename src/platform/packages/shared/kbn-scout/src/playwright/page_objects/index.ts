@@ -17,6 +17,7 @@ import { DiscoverApp } from './discover_app';
 import { FilterBar } from './fiter_bar';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
+import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 
 export interface PageObjectsFixtures {
@@ -33,6 +34,7 @@ export interface PageObjects {
   maps: MapsPage;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
+  toasts: Toasts;
 }
 
 /**
@@ -50,6 +52,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
+    toasts: createLazyPageObject(Toasts, fixtures.page),
     // Add new page objects here
   };
 }

@@ -31,6 +31,7 @@ interface Context {
   initialState?: ESQLControlState;
   closeFlyout?: () => void;
   ariaLabelledBy: string;
+  currentApp?: string;
 }
 
 export async function loadESQLControlFlyout({
@@ -46,6 +47,7 @@ export async function loadESQLControlFlyout({
   initialState,
   closeFlyout = () => {},
   ariaLabelledBy,
+  currentApp,
 }: Context) {
   const timeRange = timefilter.getTime();
   const deps = await untilPluginStartServicesReady();
@@ -69,6 +71,7 @@ export async function loadESQLControlFlyout({
           initialState={initialState}
           esqlVariables={esqlVariables}
           timeRange={timeRange}
+          currentApp={currentApp}
         />
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

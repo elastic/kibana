@@ -8,6 +8,39 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
+const v1Schema = schema.object({
+  has_errors: schema.boolean(),
+  error_messages: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  runs: schema.number(),
+  count_total: schema.number(),
+  count_by_type: schema.recordOf(schema.string(), schema.number()),
+  count_gen_ai_provider_types: schema.recordOf(schema.string(), schema.number()),
+  count_active_total: schema.number(),
+  count_active_by_type: schema.recordOf(schema.string(), schema.number()),
+  count_active_alert_history_connectors: schema.number(),
+  count_active_email_connectors_by_service_type: schema.recordOf(schema.string(), schema.number()),
+  count_actions_namespaces: schema.number(),
+  count_actions_executions_per_day: schema.number(),
+  count_actions_executions_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
+  count_actions_executions_failed_per_day: schema.number(),
+  count_actions_executions_failed_by_type_per_day: schema.recordOf(
+    schema.string(),
+    schema.number()
+  ),
+  avg_execution_time_per_day: schema.number(),
+  avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
+  count_connector_types_by_action_run_outcome_per_day: schema.recordOf(
+    schema.string(),
+    schema.recordOf(schema.string(), schema.number())
+  ),
+});
+
+const v2Schema = v1Schema.extends({
+  error_messages: schema.maybe(
+    schema.oneOf([schema.recordOf(schema.string(), schema.any()), schema.arrayOf(schema.string())])
+  ),
+});
+
 /**
  * WARNING: Do not modify the existing versioned schema(s) below, instead define a new version (ex: 2, 3, 4).
  * This is required to support zero-downtime upgrades and rollbacks. See https://github.com/elastic/kibana/issues/155764.
@@ -42,39 +75,17 @@ export const stateSchemaByVersion = {
       count_connector_types_by_action_run_outcome_per_day:
         state.count_connector_types_by_action_run_outcome_per_day || {},
     }),
-    schema: schema.object({
-      has_errors: schema.boolean(),
-      error_messages: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-      runs: schema.number(),
-      count_total: schema.number(),
-      count_by_type: schema.recordOf(schema.string(), schema.number()),
-      count_gen_ai_provider_types: schema.recordOf(schema.string(), schema.number()),
-      count_active_total: schema.number(),
-      count_active_by_type: schema.recordOf(schema.string(), schema.number()),
-      count_active_alert_history_connectors: schema.number(),
-      count_active_email_connectors_by_service_type: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      count_actions_namespaces: schema.number(),
-      count_actions_executions_per_day: schema.number(),
-      count_actions_executions_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      count_actions_executions_failed_per_day: schema.number(),
-      count_actions_executions_failed_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      avg_execution_time_per_day: schema.number(),
-      avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      count_connector_types_by_action_run_outcome_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-    }),
+    schema: v1Schema,
+  },
+  2: {
+    up: (state: Record<string, unknown>) => {
+      return state;
+    },
+    schema: v2Schema,
   },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+const latestTaskStateSchema = stateSchemaByVersion[2].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

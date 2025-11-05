@@ -29,6 +29,7 @@ export type {
 export type {
   ConnectorWithExtraFindData as FindActionResult,
   Connector,
+  ConnectorType,
 } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';

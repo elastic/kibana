@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export const TABLE_TAB = '[data-test-subj="securitySolutionDocumentDetailsFlyoutTableTab"]';
-
-export const FILTER_INPUT =
-  '[data-test-subj="securitySolutionDocumentDetailsFlyoutBody"] [data-test-subj="search-input"]';
-
 export const RULE_CUSTOMIZATIONS_DIFF_FLYOUT = '[data-test-subj="ruleCustomizationsDiffFlyout"]';

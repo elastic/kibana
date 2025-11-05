@@ -1,5 +1,5 @@
-# Define which plugins should be run or skipped in Scout CI pipeline
-ui_tests:
+# Define which plugins and packages should be run or skipped in Kibana CI pipeline
+plugins:
   enabled:
     - apm
     - discover_enhanced
@@ -7,7 +7,14 @@ ui_tests:
     - observability
     - observability_onboarding
     - painless_lab
+    - profiling
     - security_solution
     - streams_app
     - slo
   disabled:
+
+packages:
+  enabled:
+    - kbn-streamlang-tests
+  disabled:
+    - kbn-scout # Internal scout tests are run in advance to validate Scout integrity (see .buildkite/scripts/steps/test/scout_test_run_builder.sh)

@@ -285,6 +285,7 @@ describe('LogViewsClient class', () => {
           "getTimeField": [Function],
           "id": "LOG_DATA_VIEW",
           "isTimeBased": [Function],
+          "managed": false,
           "matchedIndices": Array [],
           "metaFields": Array [
             "_id",

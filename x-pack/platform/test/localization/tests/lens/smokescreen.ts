@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
@@ -147,18 +148,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   function getTranslationDe(term: string, field?: string, values: number = 3) {
     switch (term) {
       case 'legacyMetric':
-        return 'Legacy-Metrik';
+        // xpack.lens.legacyMetric.label
+        return 'Veraltete Metrik';
       case 'datatable':
+        // xpack.lens.datatable.label
         return 'Tabelle';
       case 'bar':
-        return 'Bar'; // 'Säulendiagramm'; Not translated yet.
+        // xpack.lens.xyVisualization.barLabel
+        return 'Balkendiagramm';
       case 'line':
-        return 'Zeile';
+        // xpack.lens.xyVisualization.lineLabel
+        return 'Liniendiagramm';
       case 'pie':
-        return 'Torte';
+        // xpack.lens.pie.pielabel
+        return 'Kreisdiagramm';
       case 'treemap':
+        // xpack.lens.pie.treemaplabel
         return 'Treemap';
       case 'heatmap':
+        // xpack.lens.heatmap.heatmapLabel
         return 'Heatmap';
       case 'Number':
         return 'Zahl';
@@ -167,19 +175,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'Linear':
         return 'Linear';
       case 'Records':
-        return 'Aufzeichnungen';
+        // xpack.lens.indexPattern.records
+        return 'Einträge';
       case 'records':
+        // xpack.lens.indexPattern.records
         return 'Einträge';
       case 'moving_average':
+        // xpack.lens.indexPattern.movingAverage
         return 'Gleitender Durchschnitt';
       case 'average':
+        // xpack.dataVisualizer.index.lensChart.averageOfLabel
         return field ? `Durchschnitt von ${field}` : `Durchschnitt`;
       case 'max':
-        // return field ? `${field} Maximum` : 'Maximum';
+        // xpack.dataVisualizer.index.lensChart.maximumOfLabel
         return field ? `Maximal ${field}` : 'Maximum';
       case 'terms':
         return field ? `Top ${values} values of ${field}` : 'Top values'; // Not translated yet
       case 'sum':
+        // xpack.maps.aggType.sumLabel
         return 'Summe';
       default:
         return term;
@@ -394,12 +407,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat(termTranslator('Percent'));
       await lens.editDimensionColor('#ff0000');
-      await lens.openVisualOptions();
+
+      await lens.openStyleSettingsFlyout();
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
 
       await lens.assertMissingValues(termTranslator('Linear'));
+
+      await lens.closeFlyoutWithBackButton();
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -479,8 +495,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await lens.openTextOptions();
+      await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
+      await lens.closeFlyoutWithBackButton();
 
       // check for value labels
       let data = await lens.getCurrentChartDebugState('xyVisChart');
@@ -496,7 +513,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should override axis title', async () => {
       const axisTitle = 'overridden axis';
-      await lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await lens.openStyleSettingsFlyout();
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
@@ -509,6 +526,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
+
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from line chart to pie chart and to bar chart', async () => {
@@ -688,7 +707,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        '-',
+        NULL_LABEL,
         '222,420.00',
         '702,050.00',
         '1,879,613.33',
@@ -914,10 +933,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
       await lens.switchToVisualization('pie', termTranslator('pie'));
 
-      const hasVisualOptionsButton = await lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(true);
+      await lens.openStyleSettingsFlyout();
 
-      await lens.openVisualOptions();
       await retry.try(async () => {
         expect(await lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });

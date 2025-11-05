@@ -22,5 +22,6 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/ui-theme",
     "@kbn/react-kibana-context-render",
+    "@kbn/i18n",
   ]
 }

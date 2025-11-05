@@ -1,0 +1,53 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createAgentRequestExample:
+          description: "Example request for creating a custom agent with special prompt and tools"
+          value: 
+            id: created-agent-id
+            name: Search Index Helper
+            description: Hi! I can help you search the data within the indices starting with
+              "content-" prefix.
+            labels:
+            - custom-indices
+            - department-search
+            avatar_color: "#BFDBFF"
+            avatar_symbol: SI
+            configuration:
+              instructions: You are a custom agent that wants to help searching data using all
+                indices starting with prefix "content-".
+              tools:
+              - tool_ids:
+                - platform.core.search
+                - platform.core.list_indices
+                - platform.core.get_index_mapping
+                - platform.core.get_document_by_id
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          createAgentResponseExample:
+            description: "Example response returning the definition of an agent created as a result of the request"
+            value: 
+              id: created-agent-id
+              type: chat
+              name: Search Index Helper
+              description: Hi! I can help you search the data within the indices starting with
+                "content-" prefix.
+              labels:
+              - custom-indices
+              - department-search
+              avatar_color: "#BFDBFF"
+              avatar_symbol: SI
+              configuration:
+                instructions: You are a custom agent that wants to help searching data using all
+                  indices starting with prefix "content-".
+                tools:
+                - tool_ids:
+                  - platform.core.search
+                  - platform.core.list_indices
+                  - platform.core.get_index_mapping
+                  - platform.core.get_document_by_id

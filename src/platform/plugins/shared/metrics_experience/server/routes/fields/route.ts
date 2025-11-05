@@ -17,7 +17,7 @@ import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getFieldsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/fields',
-  security: { authz: { requiredPrivileges: ['read'] } },
+  security: { authz: { enabled: false, reason: 'Authorization provided by Elasticsearch' } },
   params: z.object({
     query: z.object({
       index: z.string().default('metrics-*'),
@@ -47,8 +47,7 @@ export const getFieldsRoute = createRoute({
         plugin: 'metrics_experience',
       }),
       indexPattern: params.query.index,
-      from: params.query.from,
-      to: params.query.to,
+      timerange: { from: params.query.from, to: params.query.to },
       fields: params.query.fields,
       page,
       size,

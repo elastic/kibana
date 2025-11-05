@@ -8,5 +8,7 @@
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  loadTestFile(require.resolve('./get_prebuilt_rules_status'));
+  describe('Rules Management - Prebuilt Rules Upgrade Notifications (Customization Enabled)', function () {
+    loadTestFile(require.resolve('./get_prebuilt_rules_status'));
+  });
 };

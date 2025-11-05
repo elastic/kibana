@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/cases-ai",
-  "owner": "@elastic/obs-ux-management-team",
-  "group": "platform",
-  "visibility": "shared"
-}

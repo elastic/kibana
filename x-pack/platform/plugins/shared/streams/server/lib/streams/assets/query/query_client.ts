@@ -10,7 +10,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { buildEsqlQuery } from '@kbn/streams-schema';
-import { map, partition } from 'lodash';
+import { isEqual, map, partition } from 'lodash';
 import pLimit from 'p-limit';
 import type { QueryLink } from '../../../../../common/assets';
 import type { EsqlRuleParams } from '../../../rules/esql/types';
@@ -20,7 +20,10 @@ import { ASSET_ID, ASSET_TYPE } from '../fields';
 import { getRuleIdFromQueryLink } from './helpers/query';
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
-  return currentQuery.kql.query !== nextQuery.kql.query;
+  return (
+    currentQuery.kql.query !== nextQuery.kql.query ||
+    !isEqual(currentQuery.feature, nextQuery.feature)
+  );
 }
 
 function toQueryLink(query: StreamQuery, stream: string): QueryLink {
@@ -229,7 +232,7 @@ export class QueryClient {
 
     const { rulesClient } = this.dependencies;
     await rulesClient
-      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink) })
+      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink), ignoreInternalRuleTypes: false })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 400) {
           return;

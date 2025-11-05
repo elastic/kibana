@@ -171,3 +171,7 @@ PUT kbn:/internal/core/_settings
 > ```yaml
 > coreApp.allowDynamicConfigOverrides: true
 > ```
+
+## Usage in Cloud
+
+Feature flags aren't whitelisted in Cloud, meaning that in production environments, users have to go through Support. Support sets feature flags as user setting overrides following a standard process for enabling non-whitelisted settings.

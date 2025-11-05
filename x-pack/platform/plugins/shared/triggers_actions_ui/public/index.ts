@@ -49,7 +49,6 @@ export type {
 
 export {
   AlertHistoryDefaultIndexName,
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
   ActionConnectorMode,
@@ -123,3 +122,5 @@ export type { BulkOperationAttributes, BulkOperationResponse } from './types';
 export { transformRule } from './application/lib/rule_api/common_transformations';
 
 export { validateActionFilterQuery } from './application/lib/value_validators';
+
+export { RULE_PREBUILD_DESCRIPTION_FIELDS } from './application/sections/rule_details/components/rule_detail_description_type';

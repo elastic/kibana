@@ -18,6 +18,7 @@ import {
   Subject,
   switchMap,
   tap,
+  withLatestFrom,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -223,6 +224,9 @@ export function getDataStateContainer({
   const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
     autoRefreshDone = fn;
   };
+
+  const lastReloadRequestTime$ = new Subject<number | undefined>();
+
   const fetch$ = getFetch$({
     setAutoRefreshDone,
     data,
@@ -230,6 +234,7 @@ export function getDataStateContainer({
     refetch$,
     searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
+    lastReloadRequestTime$,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
@@ -247,16 +252,24 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        mergeMap(async ({ options }) => {
+        withLatestFrom(lastReloadRequestTime$),
+        mergeMap(async ([{ options }, lastReloadRequestTime]) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
 
-          const searchSessionId =
-            (options.fetchMore && dataRequestParams.searchSessionId) ||
-            searchSessionManager.getNextSearchSessionId();
+          let searchSessionId: string;
+          let isSearchSessionRestored: boolean;
+
+          if (options.fetchMore && dataRequestParams.searchSessionId) {
+            searchSessionId = dataRequestParams.searchSessionId;
+            isSearchSessionRestored = dataRequestParams.isSearchSessionRestored;
+          } else {
+            ({ searchSessionId, isSearchSessionRestored } =
+              searchSessionManager.getNextSearchSessionId());
+          }
 
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
@@ -301,6 +314,8 @@ export function getDataStateContainer({
                 timeRangeAbsolute: timefilter.getAbsoluteTime(),
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
+                isSearchSessionRestored,
+                lastReloadRequestTime,
               },
             })
           );
@@ -323,11 +338,12 @@ export function getDataStateContainer({
             disableNextFetchOnStateChange$.next(false);
           }
 
+          abortController = new AbortController();
+
           // Trigger chart fetching after the pre fetch state has been updated
           // to ensure state values that would affect data fetching are set
           fetchChart$.next();
 
-          abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
 

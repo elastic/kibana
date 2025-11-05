@@ -14,8 +14,8 @@ import { Observable } from 'rxjs';
 import { useVisualizeAppState } from './use_visualize_app_state';
 import type { VisualizeServices, SavedVisInstance } from '../../types';
 import { visualizeAppStateStub } from '../stubs';
-import { VisualizeConstants } from '../../../../common/constants';
 import { createVisualizeServicesMock } from '../mocks';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 
 jest.mock('../utils');
 jest.mock('../create_visualize_app_state');

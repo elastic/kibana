@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IContextContainer } from '@kbn/core-http-server';
+import type {
+  IContextContainer,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core-http-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type ContextContainerMock = jest.Mocked<IContextContainer>;
 
 const createContextMock = (mockContext: any = {}) => {
-  const contextMock: ContextContainerMock = {
+  const contextMock: ContextContainerMock = lazyObject({
     registerContext: jest.fn(),
-    createHandler: jest.fn(),
-  };
-  contextMock.createHandler.mockImplementation(
-    (pluginId, handler) =>
-      (...args) =>
-        Promise.resolve(handler(mockContext, ...args))
-  );
+    createHandler: jest.fn().mockImplementation(
+      (pluginId, handler) =>
+        (
+          ...args: [KibanaRequest<unknown, unknown, unknown, any>, response: KibanaResponseFactory]
+        ) =>
+          Promise.resolve(handler(mockContext, ...args))
+    ),
+  });
   return contextMock;
 };
 

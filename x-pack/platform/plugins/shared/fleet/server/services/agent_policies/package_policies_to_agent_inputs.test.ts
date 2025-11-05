@@ -15,6 +15,7 @@ const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
   name: 'mock_package',
   version: '0.0.0',
+  release: 'beta',
   policy_templates: [
     {
       multiple: true,
@@ -24,6 +25,7 @@ packageInfoCache.set('mock_package-0.0.0', {
 packageInfoCache.set('limited_package-0.0.0', {
   name: 'limited_package',
   version: '0.0.0',
+  release: 'ga',
   policy_templates: [
     {
       multiple: false,
@@ -210,6 +212,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
           },
         },
         streams: [
@@ -267,6 +270,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
           },
         },
         streams: [
@@ -294,6 +298,8 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            policy_template: 'some-template',
+            release: 'beta',
           },
         },
         streams: [
@@ -317,6 +323,8 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'limited_package',
             version: '0.0.0',
+            release: 'ga',
+            policy_template: 'some-template',
           },
         },
         streams: [
@@ -368,6 +376,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
           },
         },
         inputVar: 'input-value',
@@ -660,6 +669,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
           },
         },
         name: 'mock_package-policy',
@@ -695,6 +705,8 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
+            policy_template: 'some-template',
           },
         },
         name: 'mock_package-policy',
@@ -789,6 +801,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
           },
         },
         name: 'mock_package-policy',
@@ -861,6 +874,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
           },
         },
         inputVar: 'input-value',
@@ -875,6 +889,8 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
+            policy_template: 'some-template',
           },
         },
         name: 'mock_package-policy',
@@ -937,6 +953,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package',
             version: '0.0.0',
+            release: 'beta',
           },
         },
         inputVar: 'input-value',
@@ -1025,6 +1042,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'mock_package_agentless',
             version: '0.0.0',
+            policy_template: 'some-template',
           },
         },
         name: 'mock_package_agentless-policy',

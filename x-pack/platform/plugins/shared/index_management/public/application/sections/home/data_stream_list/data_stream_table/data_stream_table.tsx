@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useState, Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -12,6 +13,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
+  useEuiTheme,
   EuiLink,
   EuiTextColor,
   EuiFlexGroup,
@@ -61,6 +63,16 @@ interface Props {
 const INFINITE_AS_ICON = true;
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    bulkDeleteButton: css`
+      color: ${euiTheme.colors.danger};
+    `,
+  };
+};
+
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
   reload,
@@ -71,6 +83,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   onViewFilterChange,
   viewFilters,
 }) => {
+  const styles = useStyles();
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
   const [dataStreamsToEditDataRetention, setDataStreamsToEditDataRetention] = useState<
@@ -316,7 +329,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       }),
       icon: 'trash',
       onClick: () => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name)),
-      className: 'dataStreamsBulkDeleteButton',
+      css: styles.bulkDeleteButton,
       'data-test-subj': 'deleteDataStreamsButton',
     });
   }
@@ -334,7 +347,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         />
       ) : undefined,
     toolsRight: [
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" key="includeStats">
         <EuiFlexItem grow={false}>
           <EuiSwitch
             label={i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel', {
@@ -361,6 +374,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       <FilterListButton<DataStreamFilterName>
         filters={viewFilters}
         onChange={onViewFilterChange}
+        key="filterListButton"
       />,
       <EuiButton
         color="success"

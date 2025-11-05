@@ -112,8 +112,12 @@ const DashboardRendererComponent = ({
       getInitialInput: () => {
         return initialInput.value;
       },
-      getIncomingEmbeddable: () =>
-        embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
+      getIncomingEmbeddables: () => {
+        const incoming = embeddable
+          .getStateTransfer()
+          .getIncomingEmbeddablePackage(APP_UI_ID, true);
+        return incoming;
+      },
       getEmbeddableAppContext: (dashboardId?: string) => ({
         getCurrentPath: () =>
           dashboardId ? `${DASHBOARDS_PATH}/${dashboardId}/edit` : `${DASHBOARDS_PATH}/create`,

@@ -9,6 +9,7 @@
 
 import type { ParseOptions } from '../parser';
 import type { ESQLAstExpression, ESQLProperNode } from '../types';
+import type { SynthLiteralFragment } from './synth_literal_fragment';
 
 export type SynthGenerator<N extends ESQLProperNode> = (src: string, opts?: ParseOptions) => N;
 
@@ -39,7 +40,19 @@ export type SynthTemplateHole =
   /**
    * A string will be converted to a string literal AST node.
    */
-  | string;
+  | string
+
+  /**
+   * A boolean will be converted to a boolean literal (TRUE/FALSE) AST node.
+   */
+  | boolean
+
+  /**
+   * A literal fragment can be used to insert raw strings into the query.
+   * Use it for inserting keywords or other query elements that are "smaller"
+   * than a full AST node.
+   */
+  | SynthLiteralFragment;
 
 /**
  * A developer-friendly way to specify nested column names in ESQL queries.

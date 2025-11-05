@@ -396,6 +396,11 @@ Choose sensible defaults. When uncertain, ask API callers to make informed decis
 
 Changing the value of a default may, in some cases, have a devastating result similar to a breaking change.
 
+**Should be returned in the response (most of the time)**
+
+Public API configurable defaults should be returned in the response. Internal defaults do not need to be returned.
+Refer to <DocLink id="kibHttpApiTfGuidelines" section="return-as-much-as-you-can-and-handle-defaults-carefully" text="Terraform's guidelines on defaults" /> to learn more.
+
 ### Validation
 
 **Runtime validation should be as narrow as feasible**

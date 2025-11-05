@@ -19,10 +19,4 @@ export const ENABLEMENT_MODAL_ENTITY_STORE_SWITCH =
 export const ENABLEMENT_MODAL_CONFIRM_BUTTON =
   '[data-test-subj="entityStoreEnablementModalButton"]';
 
-export const ENABLEMENT_RISK_ENGINE_INITIALIZING_PANEL =
-  '[data-test-subj="riskEngineInitializingPanel"]';
-
-export const ENABLEMENT_ENTITY_STORE_INITIALIZING_PANEL =
-  '[data-test-subj="entityStoreInitializingPanel"]';
-
 export const ENTITIES_LIST_PANEL = '[data-test-subj="entitiesListPanel"]';

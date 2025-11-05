@@ -35,6 +35,12 @@
       "end": {
         "type": "date"
       },
+      "initiator": {
+        "type": "keyword"
+      },
+      "initiatorId": {
+        "type": "keyword"
+      },
       "rule": {
         "properties": {
           "alertTypeId": {
@@ -624,12 +630,18 @@
         "fields": {
           "keyword": {
             "type": "keyword"
+          },
+          "text": {
+            "type": "text"
           }
         },
         "type": "unsigned_long"
       },
       "observables": {
         "properties": {
+          "description": {
+            "type": "keyword"
+          },
           "typeKey": {
             "type": "keyword"
           },
@@ -639,11 +651,17 @@
         },
         "type": "nested"
       },
+      "total_observables": {
+        "type": "integer"
+      },
       "owner": {
         "type": "keyword"
       },
       "settings": {
         "properties": {
+          "extractObservables": {
+            "type": "boolean"
+          },
           "syncAlerts": {
             "type": "boolean"
           }
@@ -670,6 +688,9 @@
         "type": "integer"
       },
       "total_comments": {
+        "type": "integer"
+      },
+      "total_events": {
         "type": "integer"
       },
       "updated_at": {
@@ -718,6 +739,9 @@
             "type": "keyword"
           }
         }
+      },
+      "eventId": {
+        "type": "keyword"
       },
       "externalReferenceAttachmentTypeId": {
         "type": "keyword"
@@ -1049,6 +1073,40 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "data_stream-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_id": {
+        "type": "keyword"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "job_info": {
+        "properties": {
+          "job_id": {
+            "type": "keyword"
+          },
+          "job_type": {
+            "type": "keyword"
+          },
+          "status": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
+      "metadata": {
+        "properties": {}
+      },
+      "result": {
+        "properties": {}
       }
     }
   },
@@ -2556,6 +2614,9 @@
   },
   "ingest_manager_settings": {
     "properties": {
+      "action_secret_storage_requirements_met": {
+        "type": "boolean"
+      },
       "delete_unenrolled_agents": {
         "properties": {
           "enabled": {
@@ -2590,6 +2651,26 @@
       },
       "use_space_awareness_migration_status": {
         "index": false,
+        "type": "keyword"
+      }
+    }
+  },
+  "integration-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_count": {
+        "type": "integer"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {}
+      },
+      "status": {
         "type": "keyword"
       }
     }
@@ -2698,6 +2779,9 @@
   "maintenance-window": {
     "dynamic": false,
     "properties": {
+      "createdBy": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -3114,6 +3198,9 @@
       "dataViewId": {
         "type": "keyword"
       },
+      "enableResetToZero": {
+        "type": "boolean"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -3123,6 +3210,17 @@
       "filter": {
         "dynamic": false,
         "properties": {}
+      },
+      "filters": {
+        "properties": {
+          "entity_types": {
+            "type": "keyword"
+          },
+          "filter": {
+            "type": "text"
+          }
+        },
+        "type": "nested"
       },
       "identifierType": {
         "type": "keyword"

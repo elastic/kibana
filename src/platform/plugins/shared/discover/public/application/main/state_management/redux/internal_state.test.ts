@@ -6,18 +6,20 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
   selectTabRuntimeState,
+  selectTab,
 } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createTabsStorageManager } from '../tabs_storage_manager';
+import { DiscoverSearchSessionManager } from '../discover_search_session';
 
 describe('InternalStateStore', () => {
   const createTestStore = async () => {
@@ -29,11 +31,15 @@ describe('InternalStateStore', () => {
       storage: services.storage,
     });
     const store = createInternalStateStore({
-      services: createDiscoverServicesMock(),
+      services,
       customizationContext: mockCustomizationContext,
       runtimeStateManager,
       urlStateStorage,
       tabsStorageManager,
+      searchSessionManager: new DiscoverSearchSessionManager({
+        history: services.history,
+        session: services.data.search.session,
+      }),
     });
     await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
 
@@ -78,10 +84,20 @@ describe('InternalStateStore', () => {
     expect(tabsState.byId[tabsState.unsafeCurrentId].label).toBe(params.tabLabel);
     expect(tabsState.byId[tabsState.unsafeCurrentId].initialAppState).toEqual(params.appState);
     expect(tabsState.byId[tabsState.unsafeCurrentId].globalState).toEqual(params.globalState);
-    expect(tabsState.byId[tabsState.unsafeCurrentId].dataRequestParams).toEqual({
+    expect(tabsState.byId[tabsState.unsafeCurrentId].initialInternalState).toEqual({
       searchSessionId: params.searchSessionId,
-      timeRangeAbsolute: undefined,
-      timeRangeRelative: undefined,
     });
+  });
+
+  it('should set control state', async () => {
+    const { store } = await createTestStore();
+    await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    expect(selectTab(store.getState(), tabId).controlGroupState).toBeUndefined();
+
+    store.dispatch(
+      internalStateActions.setControlGroupState({ tabId, controlGroupState: mockControlState })
+    );
+    expect(selectTab(store.getState(), tabId).controlGroupState).toEqual(mockControlState);
   });
 });

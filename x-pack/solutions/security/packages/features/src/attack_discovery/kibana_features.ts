@@ -7,7 +7,6 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 
 import { APP_ID, ATTACK_DISCOVERY_FEATURE_ID, SERVER_APP_ID } from '../constants';
@@ -30,14 +29,13 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
   ),
   order: 1400,
   category: DEFAULT_APP_CATEGORIES.security,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   minimumLicense: 'enterprise',
   alerting: alertingFeatures,
   privileges: {
     all: {
-      api: ['elasticAssistant'],
+      api: ['elasticAssistant'], // only required by legacy internal API routes authz
       app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
@@ -45,7 +43,7 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
         read: [],
       },
       alerting: {
-        rule: { all: alertingFeatures },
+        rule: { read: alertingFeatures },
         alert: { all: alertingFeatures },
       },
       ui: [],

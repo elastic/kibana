@@ -38,7 +38,6 @@ jest.mock('@kbn/esql-utils', () => {
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
-    isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
   };
@@ -106,6 +105,14 @@ describe('ValueControlForm', () => {
         'Medium'
       );
       expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
+
+      // control type radio should be rendered and default to 'single'
+      const selectionTypeContainer = await findByTestId('esqlControlSelectionType');
+      expect(selectionTypeContainer).toBeInTheDocument();
+      const singleRadioButton = within(selectionTypeContainer).getByLabelText(
+        'Only allow a single selection'
+      );
+      expect(singleRadioButton).toBeChecked();
 
       // control grow switch should be rendered and default to 'false'
       expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
@@ -288,6 +295,54 @@ describe('ValueControlForm', () => {
             })
           );
         });
+      });
+
+      it('should preserve custom esqlQuery when editing an existing VALUES_FROM_QUERY control', async () => {
+        const customQuery = 'FROM custom-logs* | STATS BY custom_field';
+        const initialState = {
+          grow: false,
+          width: 'medium',
+          title: 'Custom Query Control',
+          availableOptions: [],
+          selectedOptions: [], // Start with empty to trigger the useEffect
+          variableName: 'customVar',
+          variableType: ESQLVariableType.VALUES,
+          esqlQuery: customQuery,
+          controlType: EsqlControlType.VALUES_FROM_QUERY,
+        } as ESQLControlState;
+
+        const getESQLResultsMock = getESQLResults as jest.Mock;
+        getESQLResultsMock.mockClear();
+
+        render(
+          <KibanaContextProvider services={services}>
+            <IntlProvider locale="en">
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+                initialState={initialState}
+              />
+            </IntlProvider>
+          </KibanaContextProvider>
+        );
+
+        await waitFor(() => {
+          // Verify that getESQLResults was called with the custom query
+          expect(getESQLResultsMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              esqlQuery: customQuery,
+            })
+          );
+        });
+
+        // Custom query is displayed in the query editor
+        const queryEditor = await waitFor(() =>
+          document.querySelector('[data-test-subj*="queryInput"]')
+        );
+        if (queryEditor) {
+          expect(queryEditor.textContent).toContain('custom-logs');
+        }
       });
     });
   });

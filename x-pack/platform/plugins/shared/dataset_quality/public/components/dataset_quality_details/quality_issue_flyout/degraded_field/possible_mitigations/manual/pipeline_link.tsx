@@ -92,6 +92,7 @@ export function CreateEditPipelineLink({
               iconType="copy"
               data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
               onClick={onClickHandler}
+              aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
             />
           }
           readOnly={true}

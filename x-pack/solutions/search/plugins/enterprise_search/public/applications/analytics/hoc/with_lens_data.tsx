@@ -15,7 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 import type { TimeRange } from '@kbn/es-query';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 import type { AnalyticsCollection } from '../../../../common/types/analytics';
 
@@ -35,11 +35,7 @@ interface WithLensDataParams<Props, OutputState> {
     isLoading: boolean,
     adapters?: Partial<DefaultInspectorAdapters>
   ) => OutputState;
-  getAttributes: (
-    dataView: DataView,
-    formulaApi: FormulaPublicApi,
-    props: Props
-  ) => TypedLensByValueInput['attributes'];
+  getAttributes: (dataView: DataView, props: Props) => TypedLensByValueInput['attributes'];
   initialValues: OutputState;
 }
 
@@ -55,11 +51,7 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
     const { lens } = useValues(KibanaLogic);
     const [dataView, setDataView] = useState<DataView | null>(null);
     const [data, setData] = useState<OutputState>(initialValues);
-    const [formula, setFormula] = useState<FormulaPublicApi | null>(null);
-    const attributes = useMemo(
-      () => dataView && formula && getAttributes(dataView, formula, props),
-      [dataView, formula, props]
-    );
+    const attributes = useMemo(() => dataView && getAttributes(dataView, props), [dataView, props]);
     const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
       const [min, max] = range;
 
@@ -75,14 +67,6 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
         setDataView(await findOrCreateDataView(props.collection));
       })();
     }, [props]);
-    useEffect(() => {
-      (async () => {
-        if (lens?.stateHelperApi) {
-          const helper = await lens.stateHelperApi();
-          setFormula(helper.formula);
-        }
-      })();
-    }, []);
 
     if (!lens) return null;
 
