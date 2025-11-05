@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import * as Either from 'fp-ts/Either';
 import type * as TaskEither from 'fp-ts/TaskEither';
 
@@ -18,7 +19,7 @@ export const waitForDelay = ({
   delayInSec,
 }: WaitForDelayParams): TaskEither.TaskEither<never, 'wait_succeeded'> => {
   return () => {
-    return delay(delayInSec)
+    return timer(delayInSec * 1000)
       .then(() => Either.right('wait_succeeded' as const))
       .catch((err) => {
         // will never happen
@@ -26,6 +27,3 @@ export const waitForDelay = ({
       });
   };
 };
-
-const delay = (delayInSec: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, delayInSec * 1000));
