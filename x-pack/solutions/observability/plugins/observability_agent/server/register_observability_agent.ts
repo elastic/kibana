@@ -29,7 +29,7 @@ import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled
 
 export const OBSERVABILITY_AGENT_ID = 'platform.core.observability';
 
-export const OBSERVABILITY_AGENT_NAME = 'Observability agent';
+export const OBSERVABILITY_AGENT_NAME = 'Observability Agent';
 
 export const OBSERVABILITY_AGENT_DESCRIPTION = 'Agent specialized in logs, metrics, and traces';
 
