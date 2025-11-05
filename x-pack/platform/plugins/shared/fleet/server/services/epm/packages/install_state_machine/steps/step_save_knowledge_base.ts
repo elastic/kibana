@@ -20,6 +20,7 @@ import {
   type ArchiveIterator,
   type ArchiveEntry,
 } from '../../../../../../common/types/models/epm';
+import type { EsAssetReference } from '../../../../../types';
 import { updateEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
 import { licenseService } from '../../../../license';
@@ -72,7 +73,9 @@ async function extractKnowledgeBaseFromArchive(
   return knowledgeBaseItems;
 }
 
-export async function stepSaveKnowledgeBase(context: InstallContext): Promise<void> {
+export async function stepSaveKnowledgeBase(
+  context: InstallContext
+): Promise<{ esReferences: EsAssetReference[] }> {
   const { packageInstallContext, esClient, savedObjectsClient, logger } = context;
   const { packageInfo, archiveIterator } = packageInstallContext;
 
@@ -88,14 +91,14 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
     logger.debug(
       `Knowledge base step: Skipping knowledge base save - installIntegrationsKnowledge experimental feature is disabled`
     );
-    return;
+    return { esReferences };
   }
 
   // Check if user has appropriate license for knowledge base functionality
   // You can adjust the license requirement as needed (e.g., isGoldPlus(), isPlatinum(), isEnterprise())
   if (!licenseService.isEnterprise()) {
     logger.debug(`Knowledge base step: Skipping knowledge base save - requires Enterprise license`);
-    return;
+    return { esReferences };
   }
 
   // Extract knowledge base content directly from the archive
@@ -140,8 +143,8 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
       throw new FleetError(`Error saving knowledge base content: ${error}`);
     }
   }
-  // Update context with the new esReferences
-  context.esReferences = esReferences;
+
+  return { esReferences };
 }
 
 export async function cleanupKnowledgeBaseStep(context: InstallContext) {

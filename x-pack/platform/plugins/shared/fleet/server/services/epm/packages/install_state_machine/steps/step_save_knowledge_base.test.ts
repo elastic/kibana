@@ -483,7 +483,7 @@ describe('stepSaveKnowledgeBase', () => {
       const mockArchiveIterator = createMockArchiveIterator(entries);
       const context = createMockContext(mockArchiveIterator);
 
-      await stepSaveKnowledgeBase(context);
+      const result = await stepSaveKnowledgeBase(context);
 
       expect(updateEsAssetReferences).toHaveBeenCalledWith(savedObjectsClient, 'test-package', [], {
         assetsToAdd: [
@@ -492,8 +492,8 @@ describe('stepSaveKnowledgeBase', () => {
         ],
       });
 
-      // Check that context was updated with new references
-      expect(context.esReferences).toEqual([
+      // Check that the return value contains the new references
+      expect(result.esReferences).toEqual([
         { id: 'test-package-guide.md', type: 'knowledge_base' },
         { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
       ]);
