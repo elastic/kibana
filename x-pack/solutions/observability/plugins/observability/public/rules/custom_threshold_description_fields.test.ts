@@ -13,9 +13,12 @@ import { getDescriptionFields } from './custom_threshold_description_fields';
 describe('custom threshold getDescriptionFields', () => {
   const mockDataViewIndexPatternField = jest.fn();
   const mockCustomQueryField = jest.fn();
+  const mockQueryFiltersField = jest.fn();
+
   const mockPrebuildFields = {
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: mockDataViewIndexPatternField,
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: mockCustomQueryField,
+    dataViewIndexPattern: mockDataViewIndexPatternField,
+    customQuery: mockCustomQueryField,
+    queryFilters: mockQueryFiltersField,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
@@ -26,7 +29,6 @@ describe('custom threshold getDescriptionFields', () => {
     const result = getDescriptionFields({
       rule: undefined as unknown as Rule<CustomThresholdParams>,
       prebuildFields: mockPrebuildFields,
-      http: {} as HttpSetup,
     });
 
     expect(result).toEqual([]);
@@ -47,7 +49,6 @@ describe('custom threshold getDescriptionFields', () => {
     const result = getDescriptionFields({
       rule: mockRule,
       prebuildFields: undefined,
-      http: {} as HttpSetup,
     });
 
     expect(result).toEqual([]);
@@ -57,7 +58,6 @@ describe('custom threshold getDescriptionFields', () => {
     const result = getDescriptionFields({
       rule: undefined as unknown as Rule<CustomThresholdParams>,
       prebuildFields: undefined,
-      http: {} as HttpSetup,
     });
 
     expect(result).toEqual([]);
@@ -71,7 +71,6 @@ describe('custom threshold getDescriptionFields', () => {
     const result = getDescriptionFields({
       rule: mockRule,
       prebuildFields: mockPrebuildFields,
-      http: {} as HttpSetup,
     });
 
     expect(result).toEqual([]);
@@ -93,14 +92,13 @@ describe('custom threshold getDescriptionFields', () => {
     const result = getDescriptionFields({
       rule: mockRule,
       prebuildFields: mockPrebuildFields,
-      http: {} as HttpSetup,
     });
 
     expect(mockDataViewIndexPatternField).toHaveBeenCalledWith('logs-*');
     expect(result).toEqual([mockIndexReturnValue]);
   });
 
-  it('should reeturn the query when searchConfiguration.query.query is a string', () => {
+  it('should return the query when searchConfiguration.query.query is a string', () => {
     const mockRule = {
       params: {
         searchConfiguration: {
@@ -117,7 +115,6 @@ describe('custom threshold getDescriptionFields', () => {
     const result = getDescriptionFields({
       rule: mockRule,
       prebuildFields: mockPrebuildFields,
-      http: {} as HttpSetup,
     });
 
     expect(mockCustomQueryField).toHaveBeenCalledWith('status:error');
@@ -150,5 +147,45 @@ describe('custom threshold getDescriptionFields', () => {
     expect(mockDataViewIndexPatternField).toHaveBeenCalledWith('logs-*');
     expect(mockCustomQueryField).toHaveBeenCalledWith('status:error');
     expect(result).toEqual([mockIndexReturnValue, mockQueryReturnValue]);
+  });
+
+  it('should return the filters when searchConfiguration.filter is provided', () => {
+    const mockRule = {
+      params: {
+        searchConfiguration: {
+          filter: [
+            {
+              query: { match: { status: 'error' } },
+              meta: {
+                disabled: false,
+              },
+            },
+          ],
+          index: 'logs-*',
+          query: {
+            query: 'status:error',
+          },
+        },
+      },
+    } as unknown as Rule<CustomThresholdParams>;
+
+    const mockIndexReturnValue = { type: 'dataViewIndexPattern', value: 'logs-*' };
+    const mockQueryReturnValue = { type: 'customQuery', value: 'status:error' };
+    const mockFiltersReturnValue = { type: 'queryFilters', value: 'filters representation' };
+    mockDataViewIndexPatternField.mockReturnValue(mockIndexReturnValue);
+    mockCustomQueryField.mockReturnValue(mockQueryReturnValue);
+    mockQueryFiltersField.mockReturnValue(mockFiltersReturnValue);
+
+    const result = getDescriptionFields({
+      rule: mockRule,
+      prebuildFields: mockPrebuildFields,
+    });
+
+    expect(mockDataViewIndexPatternField).toHaveBeenCalledWith('logs-*');
+    expect(mockQueryFiltersField).toHaveBeenCalledWith({
+      filters: mockRule.params.searchConfiguration.filter,
+      dataViewId: 'logs-*',
+    });
+    expect(result).toEqual([mockIndexReturnValue, mockQueryReturnValue, mockFiltersReturnValue]);
   });
 });
