@@ -80,7 +80,7 @@ export const dashboardClient = {
       version: DASHBOARD_API_VERSION,
       body: JSON.stringify({
         ...searchBody,
-        search: searchBody.search ? `${searchBody.search}*` : undefined
+        search: searchBody.search ? `${searchBody.search}*` : undefined,
       }),
     });
   },

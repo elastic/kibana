@@ -51,6 +51,6 @@ export function getServiceDefinition(): ServicesDefinition {
           schema: getDashboardUpdateRequestAttributesSchema(),
         },
       },
-    }
+    },
   };
 }
