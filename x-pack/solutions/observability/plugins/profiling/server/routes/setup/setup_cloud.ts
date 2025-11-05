@@ -6,7 +6,7 @@
  */
 
 import type { CloudSetupState } from '@kbn/profiling-data-access-plugin/common/cloud_setup';
-import { enableResourceManagement, setMaximumBuckets } from '../../lib/setup/cluster_settings';
+import { enableResourceManagement } from '../../lib/setup/cluster_settings';
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
@@ -23,7 +23,6 @@ export async function setupCloud({
 }) {
   const executeAdminFunctions = [
     ...(setupState.resource_management.enabled ? [] : [enableResourceManagement]),
-    ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
   ];
 
   const executeViewerFunctions = [

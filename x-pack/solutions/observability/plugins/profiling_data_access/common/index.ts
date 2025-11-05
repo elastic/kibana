@@ -6,7 +6,6 @@
  */
 
 export { getApmPolicy, ELASTIC_CLOUD_APM_POLICY } from './get_apm_policy';
-export { MAX_BUCKETS } from './cluster_settings';
 export {
   getCollectorPolicy,
   getSymbolizerPolicy,

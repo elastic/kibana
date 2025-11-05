@@ -7,8 +7,6 @@
 
 import type { PartialSetupState, ProfilingSetupOptions } from './setup';
 
-export const MAX_BUCKETS = 150000;
-
 export async function validateResourceManagement({
   client,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
