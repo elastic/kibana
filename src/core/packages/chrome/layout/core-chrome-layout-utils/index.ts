@@ -13,4 +13,9 @@ export {
   scrollTo,
   scrollToTop,
   scrollToBottom,
+  isAppScroll,
+  isWindowScroll,
+  getViewportHeight,
+  getViewportBoundaries,
+  getScrollPosition,
 } from './src/scroll';

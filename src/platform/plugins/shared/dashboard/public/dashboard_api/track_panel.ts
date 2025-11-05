@@ -8,7 +8,14 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import { scrollToTop, scrollToBottom, scrollTo } from '@kbn/core-chrome-layout-utils';
+import {
+  scrollToTop,
+  scrollToBottom,
+  scrollTo,
+  getScrollContainer,
+  getViewportBoundaries,
+  getScrollPosition,
+} from '@kbn/core-chrome-layout-utils';
 
 export const highlightAnimationDuration = 2000;
 
@@ -43,7 +50,7 @@ export function initializeTrackPanel(
       }
 
       setExpandedPanelId(panelId);
-      scrollPosition$.next(window.scrollY);
+      scrollPosition$.next(getScrollPosition());
     },
     focusedPanelId$,
     highlightPanelId$,
@@ -69,15 +76,16 @@ export function initializeTrackPanel(
 
       untilLoaded(id).then(() => {
         if (scrollPosition$.value !== undefined) {
-          scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
+          const container = getScrollContainer();
+          scrollTo({ top: scrollPosition$.value, behavior: 'smooth' }, container);
           scrollPosition$.next(undefined);
         } else {
-          const dashboardTop = dashboardContainerRef$.value?.getBoundingClientRect().top || 0;
-          const clientBottom = window.innerHeight;
+          const container = getScrollContainer();
+          const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries(container);
           const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 
           // only scroll if panel is not fully visible within the current viewport
-          if (panelTop < dashboardTop || panelBottom > clientBottom) {
+          if (panelTop < viewportTop || panelBottom > viewportBottom) {
             panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
           }
         }

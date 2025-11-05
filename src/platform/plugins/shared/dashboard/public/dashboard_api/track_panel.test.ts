@@ -95,7 +95,6 @@ describe('track panel', () => {
       expect(scrollPosition$.value).toBe(undefined);
 
       await scrollToPanel(mockPanelRef);
-      expect(mockDashboardContainerRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.scrollIntoView).toHaveBeenCalledWith({
         block: 'start',
@@ -119,13 +118,11 @@ describe('track panel', () => {
       expect(scrollPosition$.value).toBe(undefined);
 
       await scrollToPanel(mockPanelRef);
-      expect(mockDashboardContainerRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.scrollIntoView).toHaveBeenCalledWith({
         block: 'start',
         behavior: 'smooth',
       });
-      // expect(querySelectorSpy).toHaveBeenCalledWith('.dashboardContainer');s
       expect(scrollToPanelId$.value).toBe(undefined);
     });
 
@@ -144,7 +141,6 @@ describe('track panel', () => {
       window.innerHeight = 600;
 
       await scrollToPanel(mockPanelRef);
-      expect(mockDashboardContainerRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.getBoundingClientRect).toHaveBeenCalled();
       expect(mockPanelRef.scrollIntoView).not.toHaveBeenCalled();
       expect(scrollToPanelId$.value).toBe(undefined);

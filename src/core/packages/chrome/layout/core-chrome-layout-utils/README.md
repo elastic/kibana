@@ -12,9 +12,19 @@ All scroll methods accept an optional `container` parameter to override this def
 
 ## Methods
 
+### Scroll Methods
 - `getScrollContainer(): ScrollContainer` - Get the main scroll container
 - `scrollTo(opts, container?)` - Scroll to a specific position
 - `scrollToTop(opts?, container?)` - Scroll to the top
 - `scrollToBottom(opts?, container?)` - Scroll to the bottom
 
-All methods accept `behavior?: ScrollBehavior` option for controlling scroll animation.
+All scroll methods accept `behavior?: ScrollBehavior` option for controlling scroll animation.
+
+### Viewport Methods
+- `getScrollPosition(container?): number` - Get the current scroll position of a container
+- `getViewportHeight(container?): number` - Get the visible height of a container's viewport
+- `getViewportBoundaries(container?): { top: number; bottom: number }` - Get the top and bottom boundaries of a viewport (useful for visibility checks)
+
+### Type Guards
+- `isAppScroll(container): boolean` - Check if a scroll container is an HTMLElement
+- `isWindowScroll(container): boolean` - Check if a scroll container is the window object

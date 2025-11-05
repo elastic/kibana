@@ -11,11 +11,21 @@ import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants'
 
 export type ScrollContainer = HTMLElement | Window;
 
-const isHTMLElement = (container: ScrollContainer): container is HTMLElement => {
-  return container instanceof HTMLElement || !isWindow(container);
+/**
+ * Type guard to check if a scroll container is an HTMLElement.
+ * @param container - The container to check
+ * @returns true if the container is an HTMLElement
+ */
+export const isAppScroll = (container: ScrollContainer): container is HTMLElement => {
+  return container instanceof HTMLElement || !isWindowScroll(container);
 };
 
-const isWindow = (container: ScrollContainer): container is Window => {
+/**
+ * Type guard to check if a scroll container is the window object.
+ * @param container - The container to check
+ * @returns true if the container is the window object
+ */
+export const isWindowScroll = (container: ScrollContainer): container is Window => {
   return container === window;
 };
 
@@ -25,6 +35,55 @@ const isWindow = (container: ScrollContainer): container is Window => {
  */
 export const getScrollContainer = (): ScrollContainer => {
   return document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) || window;
+};
+
+/**
+ * Gets the visible height of a scroll container's viewport.
+ * @param container - The container to measure. Defaults to the main application scroll container
+ * @returns The viewport height in pixels
+ */
+export const getViewportHeight = (container: ScrollContainer = getScrollContainer()): number => {
+  if (isAppScroll(container)) {
+    return container.clientHeight;
+  } else {
+    return window.innerHeight;
+  }
+};
+
+/**
+ * Gets the vertical boundaries of a scroll container's viewport.
+ * Useful for checking if elements are visible within the viewport.
+ * @param container - The container to measure. Defaults to the main application scroll container
+ * @returns An object with top and bottom pixel values relative to the document
+ */
+export const getViewportBoundaries = (
+  container: ScrollContainer = getScrollContainer()
+): { top: number; bottom: number } => {
+  if (isAppScroll(container)) {
+    const rect = container.getBoundingClientRect();
+    return {
+      top: rect.top,
+      bottom: rect.top + container.clientHeight,
+    };
+  } else {
+    return {
+      top: 0,
+      bottom: window.innerHeight,
+    };
+  }
+};
+
+/**
+ * Gets the current scroll position of a container.
+ * @param container - The container to measure. Defaults to the main application scroll container
+ * @returns The current vertical scroll position in pixels
+ */
+export const getScrollPosition = (container: ScrollContainer = getScrollContainer()): number => {
+  if (isAppScroll(container)) {
+    return container.scrollTop;
+  } else {
+    return window.scrollY;
+  }
 };
 
 /**
@@ -42,7 +101,7 @@ export const scrollTo = (
   },
   container: ScrollContainer = getScrollContainer()
 ) => {
-  if (isHTMLElement(container)) {
+  if (isAppScroll(container)) {
     container.scrollTo({ top: opts.top, behavior: opts.behavior });
   } else {
     window.scrollTo({ top: opts.top, behavior: opts.behavior });
@@ -76,7 +135,7 @@ export const scrollToBottom = (
   } = {},
   container: ScrollContainer = getScrollContainer()
 ) => {
-  const scrollHeight = isHTMLElement(container)
+  const scrollHeight = isAppScroll(container)
     ? container.scrollHeight
     : document.documentElement.scrollHeight;
   scrollTo({ top: scrollHeight, behavior: opts.behavior }, container);
