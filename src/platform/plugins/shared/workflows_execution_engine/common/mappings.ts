@@ -37,10 +37,6 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     createdAt: {
       type: 'date',
     },
-    error: {
-      type: 'text',
-      index: false,
-    },
     createdBy: {
       type: 'keyword',
     },
@@ -89,10 +85,6 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     duration: {
       // milliseconds
       type: 'long',
-    },
-    output: {
-      type: 'object',
-      enabled: false,
     },
   },
 };
