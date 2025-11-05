@@ -60,7 +60,7 @@ export const getStepIconType = (stepType: string) => {
       iconType = 'tokenBoolean';
       break;
     default:
-      iconType = 'info';
+      iconType = 'document';
       break;
   }
   return iconType;

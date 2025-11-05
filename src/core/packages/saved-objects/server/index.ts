@@ -73,7 +73,6 @@ export type {
 } from './src/saved_objects_type';
 export type {
   ISavedObjectsSerializer,
-  SavedObjectsRawDocSource,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
@@ -156,4 +155,5 @@ export type {
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-api-server';
