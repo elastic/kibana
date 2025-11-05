@@ -10,7 +10,6 @@
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { logger } from 'elastic-apm-node';
 import { keyTo } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
