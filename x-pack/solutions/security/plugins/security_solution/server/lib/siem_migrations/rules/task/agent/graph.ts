@@ -46,20 +46,20 @@ export function getRuleMigrationAgent({
     // Nodes
     .addNode('resolveDependencies', resolveDependenciesNode)
     .addNode('createSemanticQuery', createSemanticQueryNode)
-    .addNode('tools', resolveDepsToolNode)
+    .addNode('resolveDepsTools', resolveDepsToolNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
     .addConditionalEdges(START, getVendorRouter('qradar'), {
-      true: 'resolveDependencies',
-      false: 'createSemanticQuery',
+      is_qradar: 'resolveDependencies',
+      is_not_qradar: 'createSemanticQuery',
     })
     // .addEdge(START, 'createSemanticQuery')
     .addConditionalEdges('resolveDependencies', toolRouter, {
-      true: 'tools',
-      false: 'createSemanticQuery',
+      hasToolCalls: 'resolveDepsTools',
+      noToolCalls: 'createSemanticQuery',
     })
-    .addEdge('tools', 'resolveDependencies')
+    .addEdge('resolveDepsTools', 'resolveDependencies')
     .addConditionalEdges('createSemanticQuery', skipPrebuiltRuleConditional, [
       'matchPrebuiltRule',
       'translationSubGraph',
@@ -98,8 +98,8 @@ export function toolRouter(state: MigrateRuleState): string {
 
   // If the LLM makes a tool call, then perform an action
   if (lastMessage?.tool_calls?.length) {
-    return 'true';
+    return 'hasToolCalls';
   }
   // Otherwise, we stop (reply to the user)
-  return 'false';
+  return 'noToolCalls';
 }

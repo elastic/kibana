@@ -52,8 +52,8 @@ export function getTranslateRuleGraph({
     .addNode('translationResult', translationResultNode)
     // Edges
     .addConditionalEdges(START, getVendorRouter('splunk'), {
-      true: 'inlineQuery',
-      false: 'retrieveIntegrations',
+      is_splunk: 'inlineQuery',
+      is_not_splunk: 'retrieveIntegrations',
     })
     .addConditionalEdges('inlineQuery', translatableRouter, [
       'retrieveIntegrations',
@@ -101,8 +101,8 @@ const validationRouter = (state: TranslateRuleState) => {
 export function getVendorRouter(vendor: OriginalRule['vendor']) {
   return function qradarConditionalEdge(state: TranslateRuleState): string {
     if (state.original_rule.vendor === vendor) {
-      return 'true';
+      return `is_${vendor}`;
     }
-    return 'false';
+    return `is_not_${vendor}`;
   };
 }

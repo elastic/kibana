@@ -11,8 +11,8 @@ import type { MigrateRuleState } from '../types';
 export function getVendorRouter(vendor: OriginalRule['vendor']) {
   return function qradarConditionalEdge(state: MigrateRuleState): string {
     if (state.original_rule.vendor === vendor) {
-      return 'true';
+      return `is_${vendor}`;
     }
-    return 'false';
+    return `is_not_${vendor}`;
   };
 }
