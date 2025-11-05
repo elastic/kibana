@@ -8,7 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { createAutomaticImportAgent } from '../../agents';
-import { createIngestPipelineGeneratorAgent, textToEcsSubAgent } from '../../agents/sub_agents';
+import {
+  createIngestPipelineGeneratorAgent,
+  logsAnalyzerSubAgent,
+  textToEcsSubAgent,
+} from '../../agents/sub_agents';
 import { createFetchSamplesTool, createIngestPipelineValidatorTool } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
@@ -56,7 +60,7 @@ export class AgentService {
     // 4. Create and invoke the agent
     const automaticImportAgent = createAutomaticImportAgent({
       model: this.model,
-      subagents: [pipelineGeneratorSubAgent, textToEcsSubAgent],
+      subagents: [logsAnalyzerSubAgent, pipelineGeneratorSubAgent, textToEcsSubAgent],
     });
 
     const result = await automaticImportAgent.invoke({
