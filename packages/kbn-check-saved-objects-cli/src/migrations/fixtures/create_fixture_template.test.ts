@@ -13,7 +13,7 @@ function mkModelVersion(props: Array<{ path: string[]; type: any }>) {
   return {
     schemas: {
       create: {
-        getPropSchemas: () => props,
+        getSchemaStructure: () => props,
       },
     },
   } as any;
