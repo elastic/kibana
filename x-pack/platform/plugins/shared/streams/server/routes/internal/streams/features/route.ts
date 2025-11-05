@@ -14,7 +14,8 @@ import type {
 } from '@kbn/storage-adapter';
 import { conditionSchema } from '@kbn/streamlang';
 import { generateStreamDescription } from '@kbn/streams-ai';
-import { type Observable, from, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { from, map, switchMap } from 'rxjs';
 import { createServerRoute } from '../../../create_server_route';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -315,19 +316,49 @@ export const identifyFeaturesRoute = createServerRoute({
       streamsClient.getStream(name),
     ]);
 
+    const esClient = scopedClusterClient.asCurrentUser;
+
+    const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+    const signal = getRequestAbortSignal(request);
+
     return from(
       runFeatureIdentification({
         start: start.getTime(),
         end: end.getTime(),
-        esClient: scopedClusterClient.asCurrentUser,
-        inferenceClient: inferenceClient.bindTo({ connectorId }),
+        esClient,
+        inferenceClient: boundInferenceClient,
         logger,
         stream,
         features: hits,
-        signal: getRequestAbortSignal(request),
+        signal,
       })
     ).pipe(
-      map(({ features }) => {
+      switchMap(({ features }) => {
+        return from(
+          Promise.all(
+            features.map(async (feature) => {
+              const description = await generateStreamDescription({
+                stream,
+                start: start.getTime(),
+                end: end.getTime(),
+                esClient,
+                inferenceClient: boundInferenceClient,
+                feature: {
+                  ...feature,
+                  description: '',
+                },
+                signal,
+              });
+
+              return {
+                ...feature,
+                description,
+              };
+            })
+          )
+        );
+      }),
+      map((features) => {
         return {
           type: 'identified_features',
           features,

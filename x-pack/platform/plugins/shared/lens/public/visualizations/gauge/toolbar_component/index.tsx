@@ -19,6 +19,11 @@ import { type GaugeVisualizationState } from '../constants';
 import { AppearanceSettings } from './appearance_settings';
 import { TitlesAndTextSettings } from './titles_and_text_settings';
 
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
+
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -89,5 +94,3 @@ const TitlesAndTextPopover = (props: VisualizationToolbarProps<GaugeVisualizatio
     </ToolbarPopover>
   );
 };
-
-export { GaugeFlyoutToolbar } from './flyout_toolbar';
