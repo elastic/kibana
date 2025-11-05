@@ -9,8 +9,8 @@
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { getTimeFieldFromESQLQuery, getIndexPatternFromESQLQuery } from './query_parsing_helpers';
-
+import { getTimeFieldFromESQLQuery } from './query_parsing_helpers';
+import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
   if (crypto.subtle) {
