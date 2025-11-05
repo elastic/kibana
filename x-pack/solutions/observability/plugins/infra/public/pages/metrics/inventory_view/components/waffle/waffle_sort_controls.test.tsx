@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WaffleSortControls } from './waffle_sort_controls';
 import type { WaffleSortOption } from '../../hooks/use_waffle_options';
@@ -47,11 +47,9 @@ describe('WaffleSortControls', () => {
     const waffleSortByDropdown = screen.getByTestId('waffleSortByDropdown');
     await user.click(waffleSortByDropdown);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('waffleSortByName')).toBeInTheDocument();
-      expect(screen.getByTestId('waffleSortByValue')).toBeInTheDocument();
-      expect(screen.getByTestId('waffleSortByDirection')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('waffleSortByName')).toBeInTheDocument();
+    expect(screen.getByTestId('waffleSortByValue')).toBeInTheDocument();
+    expect(screen.getByTestId('waffleSortByDirection')).toBeInTheDocument();
   });
 
   it('calls onChange with name sort when "Sort by name" is clicked', async () => {
@@ -120,16 +118,23 @@ describe('WaffleSortControls', () => {
         <WaffleSortControls sort={{ by: 'name', direction: 'asc' }} onChange={mockOnChange} />
       );
 
-      const waffleSortByDropdown = screen.getByTestId('waffleSortByDropdown');
+      let waffleSortByDropdown = screen.getByTestId('waffleSortByDropdown');
+      expect(waffleSortByDropdown).toHaveTextContent('Name');
+
       await user.click(waffleSortByDropdown);
 
       const waffleSortByValue = await screen.findByTestId('waffleSortByValue');
+      expect(waffleSortByValue).toHaveTextContent('Metric value');
+
       fireEvent.click(waffleSortByValue);
 
       const valueSortAsc: WaffleSortOption = { by: 'value', direction: 'asc' };
       expect(mockOnChange).toHaveBeenCalledWith(valueSortAsc);
 
       rerender(<WaffleSortControls sort={valueSortAsc} onChange={mockOnChange} />);
+
+      waffleSortByDropdown = screen.getByTestId('waffleSortByDropdown');
+      expect(waffleSortByDropdown).toHaveTextContent('Metric value');
 
       await user.click(waffleSortByDropdown);
 
