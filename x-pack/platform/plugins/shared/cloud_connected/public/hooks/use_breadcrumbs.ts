@@ -6,21 +6,44 @@
  */
 
 import { useEffect } from 'react';
-import type { ChromeStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type { ChromeStart, ApplicationStart } from '@kbn/core/public';
 import { PLUGIN_NAME } from '../../common';
 
-export const useBreadcrumbs = (chrome: ChromeStart) => {
+const SERVICES_BREADCRUMB = i18n.translate('xpack.cloudConnected.breadcrumbs.services', {
+  defaultMessage: 'Services',
+});
+
+export const useBreadcrumbs = (
+  chrome: ChromeStart,
+  application: ApplicationStart,
+  pathname: string
+) => {
   useEffect(() => {
-    chrome.setBreadcrumbs([
+    const isServicesPage = pathname === '/services';
+
+    const breadcrumbs = [
       {
         text: 'Kibana',
         href: '/',
       },
       {
         text: PLUGIN_NAME,
+        ...(isServicesPage
+          ? {
+              href: application.getUrlForApp('cloud_connected', { path: '/' }),
+            }
+          : {}),
       },
-    ]);
+    ];
 
-    chrome.docTitle.change(PLUGIN_NAME);
-  }, [chrome]);
+    if (isServicesPage) {
+      breadcrumbs.push({
+        text: SERVICES_BREADCRUMB,
+      });
+    }
+
+    chrome.setBreadcrumbs(breadcrumbs);
+    chrome.docTitle.change(isServicesPage ? SERVICES_BREADCRUMB : PLUGIN_NAME);
+  }, [chrome, application, pathname]);
 };

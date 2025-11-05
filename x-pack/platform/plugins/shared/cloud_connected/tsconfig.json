@@ -17,6 +17,7 @@
     "@kbn/i18n",
     "@kbn/management-plugin",
     "@kbn/react-kibana-context-render",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/shared-ux-router"
   ]
 }
