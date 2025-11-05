@@ -10,9 +10,9 @@
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 
 import { loadConnectorsThunk } from './load_connectors_thunk';
-import type { ConnectorsResponse } from '../../../../../entities/connectors/model/types';
-import { createMockStore, getMockServices } from '../__mocks__/store.mock';
-import type { MockServices, MockStore } from '../__mocks__/store.mock';
+import type { ConnectorsResponse } from '../../../../connectors/model/types';
+import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
+import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setConnectors } from '../slice';
 
 // Mock the schema functions

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createStartServicesMock } from '../../../../../mocks';
-import type { WorkflowsServices } from '../../../../../types';
-import { createWorkflowDetailStore } from '../store';
+import { createStartServicesMock } from '../../../../mocks';
+import type { WorkflowsServices } from '../../../../types';
+import { createWorkflowsStore } from '../store';
 import type { RootState } from '../types';
 
 export const createMockStore = (services?: WorkflowsServices) => {
   const mockServices = services || createStartServicesMock();
-  const store = createWorkflowDetailStore(mockServices);
+  const store = createWorkflowsStore(mockServices);
 
   // Attach services to the store for easy access in tests
   (store as any).mockServices = mockServices;

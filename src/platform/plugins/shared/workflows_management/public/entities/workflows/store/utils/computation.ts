@@ -12,8 +12,8 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
-import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema';
+import { parseWorkflowYamlToJSON } from '../../../../../common/lib/yaml_utils';
+import type { WorkflowZodSchemaLooseType } from '../../../../../common/schema';
 import type { ComputedData } from '../types';
 
 export const performComputation = (

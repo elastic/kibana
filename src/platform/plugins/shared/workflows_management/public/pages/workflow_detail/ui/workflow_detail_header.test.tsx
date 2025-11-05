@@ -11,13 +11,13 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
-import { createMockStore } from '../../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _setComputedDataInternal,
   setWorkflow,
   setYamlString,
-} from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+} from '../../../entities/workflows/store/workflow_detail/slice';
+import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
 const mockUseParams = jest.fn();

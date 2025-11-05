@@ -9,8 +9,8 @@
 
 import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { createWorkflowDetailStore } from './store';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { createWorkflowsStore } from './store';
+import { useKibana } from '../../../hooks/use_kibana';
 
 /**
  * Provides a workflow detail Redux store context to child components.
@@ -18,7 +18,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
  */
 export function WorkflowDetailStoreProvider({ children }: React.PropsWithChildren) {
   const { services } = useKibana(); // Services are pre-wired in the Kibana services context, they never change.
-  const workflowDetailStore = useMemo(() => createWorkflowDetailStore(services), [services]);
+  const workflowsStore = useMemo(() => createWorkflowsStore(services), [services]);
 
-  return <Provider store={workflowDetailStore}>{children}</Provider>;
+  return <Provider store={workflowsStore}>{children}</Provider>;
 }

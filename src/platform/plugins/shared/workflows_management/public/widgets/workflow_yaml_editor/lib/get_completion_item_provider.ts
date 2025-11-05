@@ -48,8 +48,6 @@ import {
   generateRRuleTriggerSnippet,
   generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
-import type { WorkflowDetailState } from './store';
-import type { StepPropInfo } from './store/utils/build_workflow_lookup';
 import {
   LIQUID_BLOCK_END_REGEX,
   LIQUID_BLOCK_FILTER_REGEX,
@@ -62,6 +60,8 @@ import {
 } from '../../../../common/lib/regex';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
+import type { WorkflowDetailState } from '../../../entities/workflows/store';
+import type { StepPropInfo } from '../../../entities/workflows/store/utils/build_workflow_lookup';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 
 // Cache for built-in step types extracted from schema

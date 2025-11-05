@@ -12,8 +12,8 @@ import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
-import { performComputation } from './store/utils/computation';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { performComputation } from '../../../entities/workflows/store/utils/computation';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {

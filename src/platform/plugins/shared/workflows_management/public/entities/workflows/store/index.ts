@@ -9,14 +9,13 @@
 // Re-export everything from the individual modules
 export type * from './types';
 // Action creators
-export * from './slice';
+export * from './workflow_detail/slice';
 // Store
-export { createWorkflowDetailStore } from './store';
+export { createWorkflowsStore as createWorkflowDetailStore } from './store';
 
 // Selectors
-export * from './selectors';
+export * from './workflow_detail/selectors';
 
 // Middleware (if needed for custom store setup)
-export { workflowComputationMiddleware } from './middleware';
 export type { WorkflowLookup, StepInfo } from './utils/build_workflow_lookup';
 export { WorkflowDetailStoreProvider } from './provider';

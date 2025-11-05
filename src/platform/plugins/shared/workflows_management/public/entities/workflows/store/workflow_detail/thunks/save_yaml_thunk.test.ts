@@ -11,8 +11,8 @@ import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
 
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { saveYamlThunk } from './save_yaml_thunk';
-import { createMockStore, getMockServices } from '../__mocks__/store.mock';
-import type { MockServices, MockStore } from '../__mocks__/store.mock';
+import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
+import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setWorkflow, setYamlString } from '../slice';
 
 // Mock the loadWorkflowThunk

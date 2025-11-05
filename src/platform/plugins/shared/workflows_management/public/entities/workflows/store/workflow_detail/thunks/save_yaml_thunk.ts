@@ -14,9 +14,9 @@ import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
+import type { RootState } from '../../types';
 import { selectWorkflowId, selectYamlString } from '../selectors';
 import { setWorkflow } from '../slice';
-import type { RootState } from '../types';
 
 export type SaveYamlParams = void;
 export type SaveYamlResponse = void;

@@ -8,8 +8,8 @@
  */
 
 import { testWorkflowThunk } from './test_workflow_thunk';
-import { createMockStore, getMockServices } from '../__mocks__/store.mock';
-import type { MockServices, MockStore } from '../__mocks__/store.mock';
+import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
+import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 
 describe('testWorkflowThunk', () => {
   let store: MockStore;
