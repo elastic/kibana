@@ -10,5 +10,6 @@
     "@kbn/test",
     "@kbn/repo-info",
     "@kbn/observability-synthetics-test-data",
+    "@kbn/exploratory-view-plugin",
   ]
 }
