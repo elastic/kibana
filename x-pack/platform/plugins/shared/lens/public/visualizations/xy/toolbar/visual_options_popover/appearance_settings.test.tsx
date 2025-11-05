@@ -7,16 +7,15 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI, XYDataLayerConfig } from '@kbn/lens-common';
-import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
-import type { SeriesType, State } from '../../types';
-import type { VisualOptionsPopoverProps } from '.';
-import { VisualOptionsPopover } from '.';
+import type { FramePublicAPI, XYDataLayerConfig, XYState } from '@kbn/lens-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
-describe('Visual options popover', () => {
+import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
+import type { SeriesType, State } from '../../types';
+import { XyAppearanceSettings } from './appearance_settings';
+
+describe('Appearance settings', () => {
   let frame: FramePublicAPI;
 
   function testState(): State {
@@ -44,20 +43,14 @@ describe('Visual options popover', () => {
     };
   });
 
-  const renderVisualOptionsPopover = (overrideProps?: Partial<VisualOptionsPopoverProps>) => {
+  const renderComponent = (
+    overrideProps?: Partial<{
+      state: XYState;
+      setState: (newState: XYState) => void;
+    }>
+  ) => {
     const state = testState();
-    return render(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={state}
-        {...overrideProps}
-      />
-    );
-  };
-
-  const openAppearancePopover = async () => {
-    await userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
+    return render(<XyAppearanceSettings setState={jest.fn()} state={state} {...overrideProps} />);
   };
 
   it.each<{
@@ -94,8 +87,8 @@ describe('Visual options popover', () => {
     }) => {
       const state = testState();
       (state.layers[0] as XYDataLayerConfig).seriesType = seriesType as SeriesType;
-      renderVisualOptionsPopover({ state });
-      await openAppearancePopover();
+      renderComponent({ state });
+
       if (showsMissingValues) {
         expect(screen.getByText('Missing values')).toBeInTheDocument();
       } else {

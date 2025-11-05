@@ -7,12 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { TooltipWrapper } from '@kbn/visualization-utils';
 import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
-import type { FramePublicAPI } from '@kbn/lens-common';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
 import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
-import { ToolbarPopover } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
@@ -22,7 +19,6 @@ import {
   flipSeriesType,
   getBarSeriesLayers,
   hasAreaSeries,
-  hasHistogramSeries,
   hasNonBarSeries,
   isBarLayer,
   isHorizontalChart,
@@ -51,56 +47,10 @@ export function getValueLabelDisableReason({
   });
 }
 
-const PANEL_STYLE = {
-  width: 500,
-};
-
-export interface VisualOptionsPopoverProps {
+export const XyAppearanceSettings: React.FC<{
   state: XYState;
   setState: (newState: XYState) => void;
-  datasourceLayers: FramePublicAPI['datasourceLayers'];
-}
-
-export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = (props) => {
-  const { state, datasourceLayers } = props;
-  const dataLayers = getDataLayers(state.layers);
-  const isAreaPercentage = dataLayers.some(
-    ({ seriesType }) => seriesType === 'area_percentage_stacked'
-  );
-
-  const isHasNonBarSeries = hasNonBarSeries(dataLayers);
-  const isHistogramSeries = Boolean(hasHistogramSeries(dataLayers, datasourceLayers));
-
-  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage;
-  const isCurveTypeEnabled = isHasNonBarSeries || isAreaPercentage;
-
-  const valueLabelsDisabledReason = getValueLabelDisableReason({
-    isAreaPercentage,
-    isHistogramSeries,
-  });
-
-  const isDisabled = !isFittingEnabled && !isCurveTypeEnabled && isHasNonBarSeries;
-
-  return (
-    <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.shared.appearanceLabel', {
-          defaultMessage: 'Appearance',
-        })}
-        type="visualOptions"
-        groupPosition="none"
-        buttonDataTestSubj="lnsVisualOptionsButton"
-        data-test-subj="lnsVisualOptionsPopover"
-        isDisabled={isDisabled}
-        panelStyle={PANEL_STYLE}
-      >
-        <XyAppearanceSettings {...props} />
-      </ToolbarPopover>
-    </TooltipWrapper>
-  );
-};
-
-export const XyAppearanceSettings: React.FC<VisualOptionsPopoverProps> = ({ state, setState }) => {
+}> = ({ state, setState }) => {
   const dataLayers = getDataLayers(state.layers);
   const isAreaPercentage = dataLayers.some(
     ({ seriesType }) => seriesType === 'area_percentage_stacked'
