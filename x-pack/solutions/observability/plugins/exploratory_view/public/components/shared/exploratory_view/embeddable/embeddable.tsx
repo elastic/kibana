@@ -241,6 +241,7 @@ const Wrapper = styled.div<{
 }>`
   height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `100%;`)};
   position: relative;
+  min-width: 80px;
   &&& {
     > :nth-child(2) {
       height: ${(props) =>
@@ -260,16 +261,16 @@ const Wrapper = styled.div<{
             : 'center;'};
       }
       justify-content: flex-end;
-      .legacyMtrVis__container {
+      &__container {
         padding: 0;
-        > :nth-child(2) {
+        [data-test-subj='metric_label'] {
           ${({ noLabel }) =>
             noLabel &&
             ` display: none;
         `}
         }
       }
-      .legacyMtrVis__value {
+      &__value {
         line-height: ${({ lineHeight }) => lineHeight}px !important;
         font-size: ${({ fontSize }) => fontSize}px !important;
       }

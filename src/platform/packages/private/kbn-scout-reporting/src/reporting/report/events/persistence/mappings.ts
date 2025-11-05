@@ -45,7 +45,7 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
         type: 'text',
       },
       slug: {
-        type: 'wildcard',
+        type: 'keyword',
       },
     },
   },
@@ -93,6 +93,20 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
       },
     },
   },
+  triggered_from_build: {
+    type: 'object',
+    properties: {
+      id: {
+        type: 'wildcard',
+      },
+      number: {
+        type: 'integer',
+      },
+      pipeline_slug: {
+        type: 'keyword',
+      },
+    },
+  },
 };
 
 export const fileInfoProperties: Record<PropertyName, MappingProperty> = {
@@ -119,6 +133,20 @@ export const reporterProperties: Record<PropertyName, MappingProperty> = {
 export const testRunProperties: Record<PropertyName, MappingProperty> = {
   id: {
     type: 'wildcard',
+  },
+  target: {
+    type: 'object',
+    properties: {
+      type: {
+        type: 'keyword',
+      },
+      mode: {
+        type: 'keyword',
+      },
+    },
+  },
+  fully_parallel: {
+    type: 'boolean',
   },
   status: {
     type: 'keyword',

@@ -2526,7 +2526,7 @@ paths:
                       type: object
                       properties:
                         blob:
-                          maxLength: 1000
+                          maxLength: 10000
                           type: string
                       required:
                         - blob
@@ -3507,7 +3507,7 @@ paths:
                       type: object
                       properties:
                         blob:
-                          maxLength: 1000
+                          maxLength: 10000
                           type: string
                       required:
                         - blob
