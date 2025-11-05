@@ -10,14 +10,7 @@
 import type { Preview } from '@storybook/react';
 import * as jest from 'jest-mock';
 import { decorators } from './decorators';
-import {
-  AMSTERDAM_DARK,
-  AMSTERDAM_LIGHT,
-  BOREALIS_DARK,
-  BOREALIS_LIGHT,
-  DEFAULT_THEME,
-  THEME_TITLES,
-} from './themes';
+import { BOREALIS_DARK, BOREALIS_LIGHT, DEFAULT_THEME, THEME_TITLES } from './themes';
 
 // @ts-expect-error
 window.jest = jest;
@@ -42,16 +35,6 @@ const preview: Preview = {
             value: BOREALIS_DARK,
             icon: 'heart',
             title: THEME_TITLES[BOREALIS_DARK],
-          },
-          {
-            value: AMSTERDAM_LIGHT,
-            icon: 'hearthollow',
-            title: THEME_TITLES[AMSTERDAM_LIGHT],
-          },
-          {
-            value: AMSTERDAM_DARK,
-            icon: 'heart',
-            title: THEME_TITLES[AMSTERDAM_DARK],
           },
         ],
       },

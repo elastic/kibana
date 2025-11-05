@@ -191,6 +191,12 @@ export const FEATURE_NAME_MAP: Record<string, string> = {
       defaultMessage: 'Stack Rules',
     }
   ),
+  [AlertConsumers.ALERTS]: i18n.translate(
+    'responseOpsRuleForm.ruleForm.ruleFormConsumerSelection.alerts',
+    {
+      defaultMessage: 'All',
+    }
+  ),
 };
 
 export const CONSUMER_SELECT_COMBO_BOX_TITLE = i18n.translate(

@@ -9,11 +9,9 @@
     "public/**/*.tsx",
     "server/**/*.ts",
     "common/**/*.ts",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin",
@@ -32,6 +30,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/fields-metadata-plugin",
-    "@kbn/i18n-react",
+    "@kbn/i18n-react"
   ]
 }
