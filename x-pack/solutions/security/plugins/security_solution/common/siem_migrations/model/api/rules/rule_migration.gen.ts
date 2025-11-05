@@ -315,7 +315,14 @@ export const StartRuleMigrationRequestBody = z.object({
    * The optional indicator to retry the rule translation based on this filter criteria.
    */
   retry: RuleMigrationRetryFilter.optional(),
-  ids: z.array(NonEmptyString).optional(),
+  /**
+   * Selected rules to retry migration on.
+   */
+  selection: z
+    .object({
+      ids: z.array(NonEmptyString),
+    })
+    .optional(),
 });
 export type StartRuleMigrationRequestBodyInput = z.input<typeof StartRuleMigrationRequestBody>;
 

@@ -461,11 +461,17 @@ paths:
                 retry:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationRetryFilter'
                   description: The optional indicator to retry the rule translation based on this filter criteria.
-                ids:
-                  type: array
-                  items:
-                    description: The list of rule item id
-                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                selection:
+                  type: object
+                  description: Selected rules to retry migration on.
+                  required:
+                    - ids
+                  properties:
+                    ids:
+                      type: array
+                      items:
+                        description: The list of rule item id
+                        $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates the migration start request has been processed successfully.
