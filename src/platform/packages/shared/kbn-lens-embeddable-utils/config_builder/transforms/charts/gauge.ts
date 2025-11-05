@@ -40,7 +40,7 @@ import { isEsqlTableTypeDataset } from '../../utils';
 const ACCESSOR = 'metric_formula_accessor';
 const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
-function getAccessorName(type: 'max' | 'min' | 'goal') {
+function getAccessorName(type: 'metric' | 'max' | 'min' | 'goal') {
   return `${ACCESSOR}_${type}`;
 }
 
@@ -50,7 +50,7 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
-    metricAccessor: ACCESSOR,
+    metricAccessor: getAccessorName('metric'),
     minAccessor: layer.metric.min ? getAccessorName('min') : undefined,
     maxAccessor: layer.metric.max ? getAccessorName('max') : undefined,
     goalAccessor: layer.metric.goal ? getAccessorName('goal') : undefined,
@@ -97,47 +97,45 @@ function reverseBuildVisualizationState(
     metric: isEsqlTableTypeDataset(dataset)
       ? {
           ...getValueApiColumn(visualization.metricAccessor, layer as TextBasedLayer),
-          min: visualization.minAccessor
-            ? { ...getValueApiColumn(visualization.minAccessor, layer as TextBasedLayer) }
-            : undefined,
-          max: visualization.maxAccessor
-            ? { ...getValueApiColumn(visualization.maxAccessor, layer as TextBasedLayer) }
-            : undefined,
-          goal: visualization.goalAccessor
-            ? { ...getValueApiColumn(visualization.goalAccessor, layer as TextBasedLayer) }
-            : undefined,
+          ...(visualization.minAccessor
+            ? { min: getValueApiColumn(visualization.minAccessor, layer as TextBasedLayer) }
+            : {}),
+          ...(visualization.maxAccessor
+            ? { max: getValueApiColumn(visualization.maxAccessor, layer as TextBasedLayer) }
+            : {}),
+          ...(visualization.goalAccessor
+            ? { goal: getValueApiColumn(visualization.goalAccessor, layer as TextBasedLayer) }
+            : {}),
         }
       : {
-          metric: {
-            ...(operationFromColumn(
-              visualization.metricAccessor,
-              layer as FormBasedLayer
-            ) as LensApiAllMetricOperations),
-            min: visualization.minAccessor
-              ? {
-                  ...(operationFromColumn(
-                    visualization.minAccessor,
-                    layer as FormBasedLayer
-                  ) as LensApiAllMetricOperations),
-                }
-              : undefined,
-            max: visualization.maxAccessor
-              ? {
-                  ...(operationFromColumn(
-                    visualization.maxAccessor,
-                    layer as FormBasedLayer
-                  ) as LensApiAllMetricOperations),
-                }
-              : undefined,
-            goal: visualization.goalAccessor
-              ? {
-                  ...(operationFromColumn(
-                    visualization.goalAccessor,
-                    layer as FormBasedLayer
-                  ) as LensApiAllMetricOperations),
-                }
-              : undefined,
-          },
+          ...(operationFromColumn(
+            visualization.metricAccessor,
+            layer as FormBasedLayer
+          ) as LensApiAllMetricOperations),
+          ...(visualization.minAccessor
+            ? {
+                min: operationFromColumn(
+                  visualization.minAccessor,
+                  layer as FormBasedLayer
+                ) as LensApiAllMetricOperations,
+              }
+            : {}),
+          ...(visualization.maxAccessor
+            ? {
+                max: operationFromColumn(
+                  visualization.maxAccessor,
+                  layer as FormBasedLayer
+                ) as LensApiAllMetricOperations,
+              }
+            : {}),
+          ...(visualization.goalAccessor
+            ? {
+                goal: operationFromColumn(
+                  visualization.goalAccessor,
+                  layer as FormBasedLayer
+                ) as LensApiAllMetricOperations,
+              }
+            : {}),
         },
   } as GaugeState;
 
