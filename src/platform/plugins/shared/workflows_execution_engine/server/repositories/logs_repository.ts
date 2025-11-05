@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../../../common';
+import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../../common';
 
 export interface WorkflowLogEvent {
   '@timestamp'?: string;
