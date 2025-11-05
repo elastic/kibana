@@ -151,6 +151,10 @@ export const simulationMachine = setup({
       target: '.idle',
       actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSteps' }],
     },
+    'simulation.receive_steps': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
+    },
     'simulation.receive_samples': [
       {
         guard: { type: '!hasSamples', params: ({ event }) => event },
@@ -205,15 +209,6 @@ export const simulationMachine = setup({
         },
       ],
       target: '.idle',
-    },
-    'dataSources.*': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
-    },
-    // Handle adding/reordering steps
-    'step.*': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
     'step.change': {
       target: '.debouncingChanges',

@@ -251,7 +251,7 @@ export const streamEnrichmentMachine = setup({
     },
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendStepsEventToSimulator: enqueueActions(
-      ({ context, enqueue }, params: { type: StreamEnrichmentEvent['type'] }) => {
+      ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
         const simulationMode = getActiveSimulationMode(context);
         const isPartialSimulation = simulationMode === 'partial';
         /**
@@ -263,7 +263,7 @@ export const streamEnrichmentMachine = setup({
           enqueue('sendResetEventToSimulator');
         } else {
           enqueue.sendTo('simulator', {
-            type: params.type,
+            type: params?.type ?? 'simulation.receive_steps',
             steps: getStepsForSimulation({ stepRefs: context.stepRefs, isPartialSimulation }),
           });
         }
@@ -350,7 +350,11 @@ export const streamEnrichmentMachine = setup({
     ready: {
       id: 'ready',
       type: 'parallel',
-      entry: [{ type: 'setupSteps' }, { type: 'setupDataSources' }],
+      entry: [
+        { type: 'setupSteps' },
+        { type: 'setupDataSources' },
+        { type: 'sendStepsEventToSimulator' },
+      ],
       on: {
         'stream.received': {
           target: '#ready',
@@ -422,7 +426,7 @@ export const streamEnrichmentMachine = setup({
             'dataSources.select': {
               actions: [
                 ({ context, event }) => selectDataSource(context.dataSourcesRefs, event.id),
-                { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                { type: 'sendStepsEventToSimulator' },
               ],
             },
             'dataSource.change': {
@@ -480,7 +484,7 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         { type: 'addDataSource', params: ({ event }) => event },
                         raise({ type: 'url.sync' }),
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                     'dataSource.delete': {
@@ -499,7 +503,7 @@ export const streamEnrichmentMachine = setup({
               initial: 'idle',
               states: {
                 idle: {
-                  entry: [{ type: 'sendStepsEventToSimulator', params: ({ event }) => event }],
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
                   on: {
                     'step.edit': {
                       guard: 'hasSimulatePrivileges',
@@ -528,7 +532,7 @@ export const streamEnrichmentMachine = setup({
                           type: 'duplicateProcessor',
                           params: ({ event }) => event,
                         },
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                     'step.addProcessor': {
@@ -545,7 +549,7 @@ export const streamEnrichmentMachine = setup({
                 },
                 creating: {
                   id: 'creatingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator', params: ({ event }) => event }],
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
                   on: {
                     'step.change': {
                       actions: [
@@ -569,7 +573,7 @@ export const streamEnrichmentMachine = setup({
                 },
                 editing: {
                   id: 'editingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator', params: ({ event }) => event }],
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
                   on: {
                     'step.change': {
                       actions: [

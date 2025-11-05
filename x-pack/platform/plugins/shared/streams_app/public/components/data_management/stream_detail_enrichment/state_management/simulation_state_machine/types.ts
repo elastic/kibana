@@ -42,8 +42,6 @@ export interface SampleDocumentWithUIAttributes {
 }
 
 export type SimulationEvent =
-  | { type: 'dataSources.add'; steps: StreamlangStepWithUIAttributes[] }
-  | { type: 'dataSources.select'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
@@ -52,13 +50,10 @@ export type SimulationEvent =
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] }
+  | { type: 'simulation.receive_steps'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'simulation.reset' }
-  | { type: 'step.add'; steps: StreamlangStepWithUIAttributes[] }
-  | { type: 'step.cancel'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.change'; steps: StreamlangStepWithUIAttributes[] }
-  | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] }
-  | { type: 'step.edit'; steps: StreamlangStepWithUIAttributes[] }
-  | { type: 'step.save'; steps: StreamlangStepWithUIAttributes[] };
+  | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
