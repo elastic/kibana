@@ -49,7 +49,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`
-    width: 100%;
     align-self: end;
     max-inline-size: 80%;
     background-color: ${euiTheme.colors.backgroundBasePrimary};
