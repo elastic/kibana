@@ -6,7 +6,10 @@
  */
 
 import type { UseQueryOptions } from '@kbn/react-query';
-import type { ReviewRuleInstallationResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  ReviewRuleInstallationRequestBody,
+  ReviewRuleInstallationResponseBody,
+} from '../../../../../common/api/detection_engine/prebuilt_rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
@@ -18,11 +21,13 @@ import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuil
  * @returns useQuery result
  */
 export const usePrebuiltRulesInstallReview = (
+  request: ReviewRuleInstallationRequestBody,
   options?: UseQueryOptions<ReviewRuleInstallationResponseBody>
 ) => {
   const { addError } = useAppToasts();
 
-  return useFetchPrebuiltRulesInstallReviewQuery({
+  return useFetchPrebuiltRulesInstallReviewQuery(request, {
+    // TODO: Add better error message
     onError: (error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
     ...options,
   });
