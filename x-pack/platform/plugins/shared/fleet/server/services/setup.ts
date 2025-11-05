@@ -148,12 +148,7 @@ async function createLock(
       logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
     }
   } catch (error) {
-    // Check if this is a conflict (lock already exists) - another instance got it first
-    if (error.isBoom && error.output.statusCode === 409) {
-      logger.info('Fleet setup lock already exists, abort setup');
-      return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
-    }
-    // Let other errors (timeout, connection, etc.) propagate for retry
+    // Let all errors (timeout, connection, conflict, etc.) propagate for retry
     logger.warn(`Error creating fleet setup lock: ${error}`);
     throw error;
   }
