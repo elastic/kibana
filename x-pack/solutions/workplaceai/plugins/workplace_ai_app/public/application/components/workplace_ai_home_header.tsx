@@ -17,15 +17,17 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { useCurrentUser } from '../hooks/use_current_user';
+import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import headerHeroSvg from '../../assets/header_hero.svg';
 import mcpEndpointSVG from '../../assets/mcp_endpoint.svg';
 
 export const WorkplaceAIHomeHeader: React.FC = () => {
   const user = useCurrentUser();
+  const elasticsearchUrl = useElasticsearchUrl();
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xl">
-      <EuiFlexItem grow={6}>
+      <EuiFlexItem grow={7}>
         <EuiTitle size="l">
           <h1>Welcome, {user?.full_name || user?.username || 'User'}</h1>
         </EuiTitle>
@@ -41,8 +43,8 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
         {/* Configuration Buttons Row */}
         <EuiFlexGroup gutterSize="s" wrap>
           <EuiFlexItem grow={false} justifyContent="center">
-            <EuiCodeBlock isCopyable transparentBackground paddingSize="none" fontSize="m">
-              elastic.deployment.url
+            <EuiCodeBlock isCopyable paddingSize="none" fontSize="m">
+              {elasticsearchUrl}
             </EuiCodeBlock>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -85,7 +87,7 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
       </EuiFlexItem>
 
       {/* Hero Illustration */}
-      <EuiFlexItem grow={4}>
+      <EuiFlexItem grow={3}>
         <EuiImage src={headerHeroSvg} alt="Workplace AI Hero" size="l" />
       </EuiFlexItem>
     </EuiFlexGroup>
