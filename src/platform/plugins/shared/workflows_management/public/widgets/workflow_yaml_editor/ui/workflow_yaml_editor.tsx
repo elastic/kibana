@@ -11,6 +11,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import classnames from 'classnames';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -70,8 +71,14 @@ import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_comman
 import { navigateToErrorPosition } from '../lib/utils';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
-import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
-import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
+import {
+  EXECUTION_YAML_SNAPSHOT_CLASS,
+  useWorkflowEditorStyles,
+} from '../styles/use_workflow_editor_styles';
+import {
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '../styles/use_workflows_monaco_theme';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -88,7 +95,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
-  theme: 'workflows-subdued',
+  theme: WORKFLOWS_MONACO_EDITOR_THEME,
   padding: {
     top: 24,
     bottom: 16,
@@ -544,6 +551,8 @@ export const WorkflowYAMLEditor = ({
     }
   }, [workflowJsonSchemaStrict, notifications]);
 
+  const editorClassName = classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml });
+
   return (
     <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
@@ -591,7 +600,7 @@ export const WorkflowYAMLEditor = ({
           </EuiFlexGroup>
         </div>
       )}
-      <div css={styles.editorContainer}>
+      <div css={styles.editorContainer} className={editorClassName}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
