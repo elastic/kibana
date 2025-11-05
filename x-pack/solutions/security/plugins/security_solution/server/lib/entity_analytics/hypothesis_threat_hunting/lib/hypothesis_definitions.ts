@@ -37,10 +37,22 @@ export const hypothesisDefinitions: ThreatHuntingHypothesis[] = [
         ],
       },
     ],
-    tags: ['powerhell', 'lateral_movement', 'reconnaissance'],
+    tags: ['powershell', 'lateral_movement', 'reconnaissance'],
     _meta: {
       mappingsVersion: 1,
     },
   },
   // Additional hypothesis definitions can be added here
 ];
+
+const randomTag = (allTags: string[]) => allTags[Math.floor(Math.random() * allTags.length)];
+
+export const hypothesisDefinitionsScaled: ThreatHuntingHypothesis[] = Array.from(
+  { length: 1000 },
+  (_, i) => ({
+    ...hypothesisDefinitions[0],
+    title: `${hypothesisDefinitions[0].title} #${i + 1}`,
+    id: `hypothesis-${i + 1}`,
+    tags: [randomTag(hypothesisDefinitions[0].tags || []), `auto_${i + 1}`],
+  })
+);

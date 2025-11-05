@@ -6,7 +6,7 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { hypothesisDefinitions } from '../lib/hypothesis_definitions';
+import { hypothesisDefinitionsScaled } from '../lib/hypothesis_definitions';
 import { ThreatHuntingHypothesisDescriptorClient } from '../saved_objects/threat_hunting_hypothesis_descriptor';
 import { createLoggerService } from '../utils/logger_service';
 
@@ -28,6 +28,7 @@ export const createThreatHuntingHypothesesInitService = (
 ) => {
   const loggingService = createLoggerService(logger, 'threat_hunting_initialisation');
   const init = async (): Promise<void> => {
+    const started = performance.now();
     /**
      * On startup - pull from the hardcoded list of Hypothesis Definitions
      * and create the necessary saved objects.
@@ -37,16 +38,26 @@ export const createThreatHuntingHypothesesInitService = (
       soClient,
       namespace: 'default', // TODO pull in multiple from deps object. Keep it slim.
     });
+    const hypothesisDefinitions = hypothesisDefinitionsScaled;
     loggingService.info('Starting Threat Hunting Hypotheses definitions initialisation');
     // TODO: audit logging
     try {
       // await descriptor.bulkUpsert(hypothesisDefinitions); TODO: update to this.
       // This is where you will want to use update service instead of calling the SO client directly.
-      await descriptor.bulkCreate(hypothesisDefinitions); // POC v1 prove you can save down the hardcoded list.
-      loggingService.info('Successfully created x Threat Hunting Hypotheses definitions');
+      loggingService.info(
+        `Creating ${hypothesisDefinitions.length} Threat Hunting Hypotheses definitions`
+      );
+      const created = await descriptor.bulkCreate(hypothesisDefinitions); // POC v1 prove you can save down the hardcoded list.
+      const elapsed = (performance.now() - started) / 1000;
+      loggingService.info(
+        `Successfully created ${
+          created.saved_objects.length
+        } Threat Hunting Hypotheses definitions in time: ${elapsed.toFixed(2)}s`
+      );
+      loggingService.info(`Saved Objects: ${JSON.stringify(created.saved_objects)}`);
     } catch (error) {
       loggingService.error(
-        `Failed to create x Threat Hunting Hypotheses definitions: ${error.message}`
+        `Failed to create Threat Hunting Hypotheses definitions: ${error.message}`
       );
     }
   };
