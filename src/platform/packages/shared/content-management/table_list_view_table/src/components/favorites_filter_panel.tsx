@@ -11,15 +11,15 @@ import React from 'react';
 import { EuiFilterButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface FavoritesFilterPanelProps {
+interface FavoritesFilterButtonProps {
   isFavoritesOnly: boolean;
   onToggleFavorites: () => void;
 }
 
-export function FavoritesFilterPanel({
+export function FavoritesFilterButton({
   isFavoritesOnly,
   onToggleFavorites,
-}: FavoritesFilterPanelProps) {
+}: FavoritesFilterButtonProps) {
   return (
     <EuiFilterButton
       iconType={isFavoritesOnly ? 'starFilled' : 'starEmpty'}
