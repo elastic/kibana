@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StateGraph, START as _START_, END as _END_ } from '@langchain/langgraph';
+import { StateGraph, START as _START_, END as _END_, MemorySaver } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
@@ -19,6 +19,8 @@ import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
+
+const checkpointer = new MemorySaver();
 
 export const createAgentGraph = ({
   chatModel,
@@ -124,7 +126,9 @@ export const createAgentGraph = ({
     })
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
     .addEdge(steps.answerAgent, _END_)
-    .compile();
+    .compile({
+      checkpointer,
+    });
 
   return graph;
 };

@@ -7,21 +7,20 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
-import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
+import {
+  createUserMessage,
+  isStreamEvent,
+  toolsToLangchain,
+} from '@kbn/onechat-genai-utils/langchain';
 import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
-import {
-  addRoundCompleteEvent,
-  extractRound,
-  selectProviderTools,
-  conversationToLangchainMessages,
-  prepareConversation,
-} from '../utils';
+import { addRoundCompleteEvent, conversationToLangchainMessages, extractRound, prepareConversation, selectProviderTools } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
+import { advanceState } from './advance_state';
 
 const chatAgentGraphName = 'default-onechat-agent';
 
@@ -41,6 +40,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
     conversation,
+    conversationId,
     agentConfiguration,
     capabilities,
     runId = uuidv4(),
@@ -78,15 +78,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
   const graphRecursionLimit = cycleLimit * 2 + 8;
 
+  const initialMessages = [createUserMessage(nextInput.message)];
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     attachmentsService: attachments,
   });
 
-  const initialMessages = conversationToLangchainMessages({
+  /* const initialMessages = conversationToLangchainMessages({
     conversation: processedConversation,
-  });
+  }); */
 
   const agentGraph = createAgentGraph({
     logger,
@@ -97,6 +98,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities: resolvedCapabilities,
   });
 
+  const revertToCheckpoint = await advanceState(agentGraph, {
+    threadId: conversationId,
+  });
+
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
@@ -105,6 +110,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       version: 'v2',
       signal: abortSignal,
       runName: chatAgentGraphName,
+      configurable: {
+        thread_id: conversationId,
+      },
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
@@ -137,8 +145,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   events$.subscribe({
     next: (event) => events.emit(event),
-    error: () => {
-      // error will be handled by function return, we just need to trap here
+    complete: async () => {
+      await advanceState(agentGraph, {
+        threadId: conversationId,
+      });
+    },
+    error: async () => {
+    await revertToCheckpoint() // if there are errors we need to revert to the checkpoint to maintain correct message state
     },
   });
 
