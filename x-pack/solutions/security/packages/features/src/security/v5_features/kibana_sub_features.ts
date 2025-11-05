@@ -71,9 +71,6 @@ export const getSecurityV5SubFeaturesMap = ({
   );
 
   // Remove disabled experimental features
-  if (!experimentalFeatures.defendInsightsPolicyResponseFailure) {
-    securitySubFeaturesMap.delete(SecuritySubFeatureId.workflowInsights);
-  }
   if (!experimentalFeatures.trustedDevices) {
     securitySubFeaturesMap.delete(SecuritySubFeatureId.trustedDevices);
   }

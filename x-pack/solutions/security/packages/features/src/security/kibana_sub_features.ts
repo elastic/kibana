@@ -680,8 +680,6 @@ export const globalArtifactManagementSubFeature = (
 };
 
 export const socManagementSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: false,
-  privilegesTooltip: undefined,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.socManagement',
     { defaultMessage: 'SOC Management' }

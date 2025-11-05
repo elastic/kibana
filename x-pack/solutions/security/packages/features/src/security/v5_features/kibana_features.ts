@@ -35,7 +35,6 @@ export const getSecurityV5BaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  // scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   description: i18n.translate(
