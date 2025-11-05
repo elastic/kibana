@@ -37,6 +37,52 @@ describe('FiltersSections', () => {
       )
     ).toBeInTheDocument();
   });
+
+  it('clears SuggestionsSelect value when EuiSelect value changes', async () => {
+    jest.mock('../../../../shared/suggestions_select', () => ({
+      SuggestionsSelect: (props: {
+        defaultValue: string | undefined;
+        onChange: (arg0: string | undefined) => void;
+      }) => (
+        <input
+          data-testid="comboBoxSearchInput"
+          value={props.defaultValue}
+          onChange={(e) => props.onChange(e.target.value)}
+        />
+      ),
+    }));
+
+    const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo' }];
+    const onChangeFilters = jest.fn();
+
+    const { getByLabelText, getByTestId, rerender } = render(
+      <FiltersSection filters={initialFilters} onChangeFilters={onChangeFilters} />,
+      { wrapper: Wrapper }
+    );
+
+    const select = getByLabelText('Choose a field to filter by');
+    const suggestionsSelect = getByTestId(`comboBoxSearchInput`) as HTMLSelectElement;
+    expect(suggestionsSelect.value).toBe('foo');
+
+    await act(async () => {
+      fireEvent.change(select, { target: { value: 'transaction.type' } });
+    });
+
+    expect(onChangeFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: '' }]);
+
+    await act(async () => {
+      rerender(
+        <FiltersSection
+          filters={[{ key: 'transaction.type', value: '' }]}
+          onChangeFilters={onChangeFilters}
+        />
+      );
+    });
+
+    const suggestionsSelect2 = getByTestId(`comboBoxSearchInput`) as HTMLSelectElement;
+    expect(suggestionsSelect2.value).toBe('');
+  });
+
   it('empties the key and the value, when I have only 1 filter and I delete the filter', () => {});
   it('when many filters, it deletes the proper filter', async () => {
     const initialFilters: Filter[] = [
