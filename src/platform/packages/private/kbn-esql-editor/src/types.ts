@@ -8,7 +8,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -127,7 +126,6 @@ export interface EsqlPluginStartBase {
 
 export interface ESQLEditorDeps {
   core: CoreStart;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   storage: Storage;
   uiActions: UiActionsStart;
