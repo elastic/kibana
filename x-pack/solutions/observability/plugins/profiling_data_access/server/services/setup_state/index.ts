@@ -73,7 +73,6 @@ export async function getSetupState({
   };
 }
 
-export function createSetupState(params: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: SetupStateParams) =>
-    getSetupState({ ...params, esClient, soClient, spaceId });
+export function createSetupState(serviceParams: RegisterServicesParams) {
+  return async (params: SetupStateParams) => getSetupState({ ...serviceParams, ...params });
 }

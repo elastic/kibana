@@ -143,14 +143,14 @@ export function registerSetupRoute({
 
           logger.debug('[DONE] Setting up Universal Profiling on Cloud');
         } else {
-          logger.debug('Setting up self-managed Universal Profiling');
+          logger.debug('Setting up self-managed/serverless Universal Profiling');
 
           await setupSelfManaged({
             setupState,
             setupParams: commonSetupParams,
           });
 
-          logger.debug('[DONE] Setting up self-managed Universal Profiling');
+          logger.debug('[DONE] Setting up self-managed/serverless Universal Profiling');
         }
 
         // Wait until Profiling ES plugin creates all resources
