@@ -83,10 +83,11 @@ export function runCli() {
           sourceDir,
           buildDir,
           kibanaVersion,
+          quiet: true,
         };
 
         await Tasks.initTargets(context);
-        await Tasks.buildBazelPackages(context);
+        await Tasks.buildWebpackPackages(context);
         await Tasks.optimize(context);
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
@@ -160,10 +161,11 @@ export function runCli() {
           sourceDir,
           buildDir: '',
           kibanaVersion: 'kibana',
+          quiet: false,
         };
 
         await Tasks.initDev(context);
-        await Tasks.buildBazelPackages(context);
+        await Tasks.buildWebpackPackages(context);
         await Tasks.optimize(context);
       },
     })

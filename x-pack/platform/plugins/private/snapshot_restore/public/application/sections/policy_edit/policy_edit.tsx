@@ -213,7 +213,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
           <EuiCallOut
             size="m"
             color="warning"
-            iconType="iInCircle"
+            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.snapshotRestore.editPolicy.managedPolicyWarningTitle"

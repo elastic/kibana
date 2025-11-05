@@ -24,7 +24,11 @@ import { isEmpty } from 'lodash';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
-import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+  syntheticsParamType,
+} from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
@@ -195,9 +199,7 @@ export class SyntheticsService {
                   await service.pushConfigs();
                 } else {
                   if (!service.isAllowed) {
-                    service.logger.error(
-                      'User is not allowed to access Synthetics service. Please contact support.'
-                    );
+                    service.logger.debug('User is not allowed to access Synthetics service.');
                   }
                 }
               } catch (e) {
@@ -299,7 +301,7 @@ export class SyntheticsService {
 
     return await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
       {
-        type: syntheticsMonitorType,
+        type: [legacySyntheticsMonitorTypeSingle, syntheticsMonitorSavedObjectType],
         perPage: pageSize,
         namespaces: [ALL_SPACES_ID],
       }
@@ -314,10 +316,12 @@ export class SyntheticsService {
   }
 
   async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
+    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+      server: this.server,
+    });
     // do not check for api key validity if inspecting
     if (!isValid && !inspect) {
-      this.server.logger.error(
+      this.server.logger.debug(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;

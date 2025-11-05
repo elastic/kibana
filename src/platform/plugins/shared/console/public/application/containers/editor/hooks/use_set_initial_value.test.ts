@@ -78,7 +78,7 @@ describe('useSetInitialValue', () => {
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
-        hash: '?load_from=https://www.elastic.co/some-data',
+        hash: '?load_from=https://www.elastic.co/docs/some-data',
       },
     });
 
@@ -99,7 +99,7 @@ describe('useSetInitialValue', () => {
       );
     });
 
-    expect(fetch).toHaveBeenCalledWith(new URL('https://www.elastic.co/some-data'));
+    expect(fetch).toHaveBeenCalledWith(new URL('https://www.elastic.co/docs/some-data'));
     // The remote data should be appended to the initial value in the editor
     expect(setValueMock).toHaveBeenCalledWith('initial value\n\nremote data');
   });
@@ -108,7 +108,7 @@ describe('useSetInitialValue', () => {
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
-        hash: '?load_from=https://not.elastic.com/some-data',
+        hash: '?load_from=https://not.elastic.com/docs/some-data',
       },
     });
 

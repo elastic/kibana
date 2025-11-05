@@ -139,7 +139,6 @@ import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
@@ -150,6 +149,7 @@ import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import { ACTION_CREATE_ESQL_CHART } from './trigger_actions/open_lens_config/constants';
+import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 export type { SaveProps } from './app_plugin';
 

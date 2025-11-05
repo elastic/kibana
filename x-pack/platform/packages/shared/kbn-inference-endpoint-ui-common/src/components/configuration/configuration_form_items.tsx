@@ -22,23 +22,25 @@ import { ConfigurationField } from './configuration_field';
 import * as LABELS from '../../translations';
 
 interface ConfigurationFormItemsProps {
-  isLoading: boolean;
-  items: ConfigEntryView[];
-  setConfigEntry: (key: string, value: string | number | boolean | null) => void;
+  descriptionLinks?: Record<string, React.ReactNode>;
   direction?: 'column' | 'row' | 'rowReverse' | 'columnReverse' | undefined;
   isEdit?: boolean;
+  isLoading: boolean;
   isPreconfigured?: boolean;
   isInternalProvider?: boolean;
+  items: ConfigEntryView[];
+  setConfigEntry: (key: string, value: string | number | boolean | null) => void;
 }
 
 export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
-  isLoading,
-  items,
-  setConfigEntry,
+  descriptionLinks,
   direction,
   isEdit,
   isPreconfigured,
   isInternalProvider,
+  isLoading,
+  items,
+  setConfigEntry,
 }) => {
   return (
     <EuiFlexGroup direction={direction} data-test-subj="configuration-fields">
@@ -57,8 +59,9 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
           <p>{label}</p>
         );
 
-        const helpText =
-          isInternalProvider && key === 'model_id' && !isPreconfigured ? (
+        let helpText: string | React.ReactNode | null = description;
+        if (isInternalProvider && key === 'model_id' && !isPreconfigured) {
+          helpText = (
             <>
               {description}{' '}
               <EuiLink
@@ -69,9 +72,16 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
                 {LABELS.LEARN_MORE}
               </EuiLink>
             </>
-          ) : (
-            description
           );
+        } else if (typeof description === 'string' && descriptionLinks && descriptionLinks[key]) {
+          const regex = /\{.*\}/;
+          const substrings = description.split(regex);
+          helpText = (
+            <>
+              {substrings[0]} {descriptionLinks[key]} {substrings.slice(1)}
+            </>
+          );
+        }
 
         const optionalLabel = !required ? (
           <EuiText color="subdued" size="xs">

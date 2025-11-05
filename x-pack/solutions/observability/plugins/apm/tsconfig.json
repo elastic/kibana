@@ -138,6 +138,8 @@
     "@kbn/object-utils",
     "@kbn/presentation-containers",
     "@kbn/apm-sources-access-plugin",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

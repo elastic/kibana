@@ -16,7 +16,7 @@ import React, {
   useContext,
 } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, euiMaxBreakpoint, useEuiTheme } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
@@ -48,6 +48,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   border,
   ...rest
 }) => {
+  const themeContext = useEuiTheme();
   const [config, setConfig] = useState<{ hasFooter: boolean; hasContent: boolean }>({
     hasContent: false,
     hasFooter: false,
@@ -91,7 +92,16 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   }
 
   return (
-    <EuiFlexItem css={styles.flyoutColumn} style={dynamicStyles}>
+    <EuiFlexItem
+      css={css({
+        height: '100%',
+        overflow: 'hidden',
+        [euiMaxBreakpoint(themeContext, 'm')]: {
+          height: 'auto',
+        },
+      })}
+      style={dynamicStyles}
+    >
       <flyoutPanelContext.Provider value={{ registerContent, registerFooter }}>
         <div
           css={[
@@ -122,10 +132,6 @@ export const useFlyoutPanelContext = (): Context => {
 };
 
 const styles = {
-  flyoutColumn: css({
-    height: '100%',
-    overflow: 'hidden',
-  }),
   flyoutPanel: css({
     height: '100%',
     overflowY: 'auto',

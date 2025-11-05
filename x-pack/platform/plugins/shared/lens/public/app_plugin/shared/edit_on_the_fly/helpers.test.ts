@@ -6,6 +6,7 @@
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getESQLResults, formatESQLColumns } from '@kbn/esql-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
@@ -74,6 +75,10 @@ describe('Lens inline editing helpers', () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
     mockStartDependencies.data.dataViews = dataViews;
+    const uiSettingsMock = {
+      get: jest.fn(),
+    } as unknown as IUiSettingsClient;
+
     const dataviewSpecArr = [
       {
         id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
@@ -96,6 +101,7 @@ describe('Lens inline editing helpers', () => {
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
@@ -112,6 +118,7 @@ describe('Lens inline editing helpers', () => {
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
@@ -128,6 +135,7 @@ describe('Lens inline editing helpers', () => {
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
@@ -235,6 +243,10 @@ describe('Lens inline editing helpers', () => {
       dataViews,
     };
 
+    const uiSettingsMock = {
+      get: jest.fn(),
+    } as unknown as IUiSettingsClient;
+
     it('returns the columns if the array is not empty in the response', async () => {
       mockFetchData.mockImplementation(() => {
         return {
@@ -244,7 +256,12 @@ describe('Lens inline editing helpers', () => {
           },
         };
       });
-      const gridAttributes = await getGridAttrs(query, dataviewSpecArr, startDependencies.data);
+      const gridAttributes = await getGridAttrs(
+        query,
+        dataviewSpecArr,
+        startDependencies.data,
+        uiSettingsMock
+      );
       expect(gridAttributes.columns).toStrictEqual(queryResponseColumns);
     });
 
@@ -268,7 +285,12 @@ describe('Lens inline editing helpers', () => {
         };
       });
       mockformatESQLColumns.mockImplementation(() => emptyColumns);
-      const gridAttributes = await getGridAttrs(query, dataviewSpecArr, startDependencies.data);
+      const gridAttributes = await getGridAttrs(
+        query,
+        dataviewSpecArr,
+        startDependencies.data,
+        uiSettingsMock
+      );
       expect(gridAttributes.columns).toStrictEqual(emptyColumns);
     });
   });

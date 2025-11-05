@@ -1,6 +1,6 @@
 # E
 
-The E function returns Euler's number.
+Returns Euler’s number.
 
 ## Syntax
 
@@ -8,7 +8,7 @@ The E function returns Euler's number.
 
 ### Parameters
 
-This function does not require any parameters.
+This function does not take any parameters.
 
 ## Examples
 
@@ -16,8 +16,4 @@ This function does not require any parameters.
 ROW E()
 ```
 
-```esql
-FROM employees
-| EVAL euler_number = E()
-| KEEP euler_number
-```
+This example returns Euler’s number.

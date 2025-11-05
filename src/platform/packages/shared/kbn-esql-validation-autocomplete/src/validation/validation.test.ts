@@ -265,7 +265,7 @@ describe('validation logic', () => {
 
     // The following block tests a case that is allowed in Kibana
     // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/ast_parser.ts
-    describe('ESQL query can be empty', () => {
+    describe('EMPTY query does NOT produce syntax error', () => {
       testErrorsAndWarnings('', []);
       testErrorsAndWarnings(' ', []);
       testErrorsAndWarnings('     ', []);
@@ -275,7 +275,7 @@ describe('validation logic', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
           testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'explain', 'row', 'from', 'show'}`,
+            `SyntaxError: mismatched input '${command}' expecting {'row', 'from', 'show'}`,
           ])
       );
     });

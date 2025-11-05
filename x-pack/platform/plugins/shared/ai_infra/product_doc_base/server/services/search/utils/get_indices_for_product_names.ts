@@ -6,16 +6,21 @@
  */
 
 import {
-  productDocIndexPattern,
   getProductDocIndexName,
+  DocumentationProduct,
   type ProductName,
 } from '@kbn/product-doc-common';
 
 export const getIndicesForProductNames = (
-  productNames: ProductName[] | undefined
+  productNames: ProductName[] | undefined,
+  inferenceId?: string
 ): string | string[] => {
   if (!productNames || !productNames.length) {
-    return productDocIndexPattern;
+    return Object.values(DocumentationProduct).map((productName: ProductName) =>
+      getProductDocIndexName(productName, inferenceId)
+    );
   }
-  return productNames.map(getProductDocIndexName);
+  return productNames.map((productName: ProductName) =>
+    getProductDocIndexName(productName, inferenceId)
+  );
 };

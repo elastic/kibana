@@ -16,7 +16,7 @@ export const DeprecatedPrompt = () => {
       <EuiEmptyPrompt
         color="primary"
         data-test-subj="jobListDeprecatedPrompt"
-        iconType="iInCircle"
+        iconType="info"
         title={
           <h1>
             <FormattedMessage
@@ -40,7 +40,7 @@ export const DeprecatedPrompt = () => {
             href={documentationLinks.fleet.datastreamsDownsampling}
             target="_blank"
             fill
-            iconType="help"
+            iconType="question"
             data-test-subj="rollupDeprecatedPromptDocsLink"
           >
             <FormattedMessage

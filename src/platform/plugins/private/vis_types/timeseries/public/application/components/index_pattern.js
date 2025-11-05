@@ -204,7 +204,7 @@ export const IndexPattern = ({
                         "Last value" will match only the documents for the specified interval from the end of the timerange.'
                       />
                     }
-                    type="questionInCircle"
+                    type="question"
                   />
                 </>
               }
@@ -341,7 +341,7 @@ export const IndexPattern = ({
                         }}
                       />
                     }
-                    type="questionInCircle"
+                    type="question"
                   />
                 </>
               }

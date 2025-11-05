@@ -49,8 +49,12 @@ The following processing commands are available:
   function and can group using grouping functions.
 - SORT: sorts the row in a table by a column. Expressions are not supported.
 - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL.
+- LOOKUP JOIN: Joins data from a query results table with matching records from a specified lookup index.
 
 ## Functions and operators
+
+### Join functions
+
 
 ### Grouping functions
 
@@ -193,7 +197,7 @@ MV_MEDIAN: returns the median value of a multivalued field
 MV_MEDIAN_ABSOLUTE_DEVIATION: returns the median absolute deviation of a multivalued field
 MV_MIN: returns the min value of a multivalued field
 MV_PERCENTILE: returns the specified percentile of a multivalued field
-MV_SLIDE: extract a subset of a multivalued field using specified start and end index values
+MV_SLICE: extract a subset of a multivalued field using specified start and end index values
 MV_SORT: sorts a multivalued field in lexicographical order.
 MV_SUM: returns the sum of all values of a multivalued field
 MV_ZIP: combines the values from two multivalued fields with a specified delimiter
@@ -358,4 +362,16 @@ FROM personal_info
 | EVAL birth=DATE_PARSE("yyyy-MM-dd", birth_date)
 | KEEP user_name, birth
 | SORT birth
+```
+
+
+**Look up and join the `source.ip` field in `firewall_logs` with the `source.ip` field in `threat_list`, filters rows to include only those with non-null `threat_level`, sorts the results by `timestamp`, and keeps only the `source.ip`, `action`, `threat_level`, and `threat_type` fields.**
+
+```esql
+FROM firewall_logs
+| LOOKUP JOIN threat_list ON source.ip
+| WHERE threat_level IS NOT NULL
+| SORT timestamp
+| KEEP source.ip, action, threat_level, threat_type
+| LIMIT 10
 ```

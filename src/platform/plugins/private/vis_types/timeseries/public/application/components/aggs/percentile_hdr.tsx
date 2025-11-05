@@ -32,7 +32,7 @@ export const PercentileHdr = ({ value, onChange }: PercentileHdrProps) => (
               defaultMessage="HDR Histogram (High Dynamic Range Histogram) is an alternative implementation that can be useful when calculating percentile ranks for latency measurements as it can be faster than the t-digest implementation with the trade-off of a larger memory footprint. Number of significant value digits parameter specifies the resolution of values for the histogram in number of significant digits"
             />
           }
-          type="questionInCircle"
+          type="question"
         />
       </>
     }

@@ -748,7 +748,9 @@ describe('Fleet integrations', () => {
           message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
         },
         {
-          date: '2020-10-31',
+          // Test exact "too far in the past" boundary - exactly 18 months ago (without +1 day)
+          // This tests the precise boundary condition rather than an arbitrary old date
+          date: moment.utc().subtract(18, 'months').format('YYYY-MM-DD'),
           message:
             'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.',
         },
@@ -771,6 +773,16 @@ describe('Fleet integrations', () => {
         },
         {
           date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
+        },
+        {
+          // Test exact cutoff boundary with buffer to prevent flakiness around midnight
+          // Add 30 minutes buffer to account for time elapsed between test setup and API call
+          date: moment
+            .utc()
+            .add(30, 'minutes')
+            .subtract(18, 'months')
+            .add(1, 'day')
+            .format('YYYY-MM-DD'),
         },
       ])(
         'should return bad request for invalid endpoint package policy global manifest values',

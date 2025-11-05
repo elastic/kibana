@@ -18,7 +18,7 @@ tags:
 
 ## LATRODECTUS at a glance
 
-First [discovered](https://medium.com/walmartglobaltech/icedid-gets-loaded-af073b7b6d39) by Walmart researchers in October of 2023, [LATRODECTUS](https://malpedia.caad.fkie.fraunhofer.de/details/win.unidentified_111) is a malware loader gaining popularity among cybercriminals. While this is considered a new family, there is a strong link between LATRODECTUS and [ICEDID](https://www.elastic.co/security-labs/thawing-the-permafrost-of-icedid-summary) due to behavioral and developmental similarities, including a command handler that downloads and executes encrypted payloads like ICEDID. Proofpoint and Team Cymru built upon this connection to discover a [strong link](https://www.proofpoint.com/us/blog/threat-insight/latrodectus-spider-bytes-ice) between the network infrastructure used by both the operators of ICEDID and LATRODECTUS.
+First [discovered](https://medium.com/walmartglobaltech/icedid-gets-loaded-af073b7b6d39) by Walmart researchers in October of 2023, LATRODECTUS is a malware loader gaining popularity among cybercriminals. While this is considered a new family, there is a strong link between LATRODECTUS and [ICEDID](https://www.elastic.co/security-labs/thawing-the-permafrost-of-icedid-summary) due to behavioral and developmental similarities, including a command handler that downloads and executes encrypted payloads like ICEDID. Proofpoint and Team Cymru built upon this connection to discover a [strong link](https://www.proofpoint.com/us/blog/threat-insight/latrodectus-spider-bytes-ice) between the network infrastructure used by both the operators of ICEDID and LATRODECTUS.
 
 LATRODECTUS offers a comprehensive range of standard capabilities that threat actors can utilize to deploy further payloads, conducting various activities after initial compromise. The code base isn’t obfuscated and contains only 11 command handlers focused on enumeration and execution. This type of loader represents a recent wave observed by our team such as [PIKABOT](https://www.elastic.co/security-labs/pikabot-i-choose-you), where the code is more lightweight and direct with a limited number of handlers. 
 
@@ -37,7 +37,7 @@ Beginning early March of 2024, Elastic Security Labs observed an increase in ema
 
 ![](/assets/images/spring-cleaning-with-latrodectus/image44.png)
 
-With major changes in the loader space during the past year, such as the [QBOT](https://www.elastic.co/security-labs/qbot-malware-analysis) takedown and [ICEDID](https://www.elastic.co/security-labs/unpacking-icedid) dropping off, we are seeing new loaders such as [PIKABOT](https://www.elastic.co/security-labs/pikabot-i-choose-you) and [LATRODECTUS](https://malpedia.caad.fkie.fraunhofer.de/details/win.unidentified_111) have emerged as possible replacements.
+With major changes in the loader space during the past year, such as the [QBOT](https://www.elastic.co/security-labs/qbot-malware-analysis) takedown and [ICEDID](https://www.elastic.co/security-labs/unpacking-icedid) dropping off, we are seeing new loaders such as [PIKABOT](https://www.elastic.co/security-labs/pikabot-i-choose-you) and LATRODECTUS have emerged as possible replacements.
 
 ## LATRODECTUS analysis
 

@@ -234,7 +234,7 @@ describe('color_telemetry_helpers', () => {
     });
   });
 
-  describe('unassigned terms', () => {
+  describe('unassigned terms with no assignments always loops', () => {
     it('unassigned terms changed from loop to palette', () => {
       expect(
         getColorMappingTelemetryEvents(
@@ -244,12 +244,13 @@ describe('color_telemetry_helpers', () => {
           },
           DEFAULT_COLOR_MAPPING_CONFIG
         )
-      ).toEqual(['color_mapping_unassigned_terms_palette']);
+      ).toEqual(['color_mapping_unassigned_terms_loop']);
     });
     it('unassigned terms changed from palette to loop', () => {
       expect(
         getColorMappingTelemetryEvents(DEFAULT_COLOR_MAPPING_CONFIG, {
           ...DEFAULT_COLOR_MAPPING_CONFIG,
+          assignments: [exampleAssignment()],
           specialAssignments: specialAssignmentsPalette,
         })
       ).toEqual(['color_mapping_unassigned_terms_loop']);
@@ -263,7 +264,7 @@ describe('color_telemetry_helpers', () => {
           },
           DEFAULT_COLOR_MAPPING_CONFIG
         )
-      ).toEqual(['color_mapping_unassigned_terms_custom']);
+      ).toEqual(['color_mapping_unassigned_terms_loop']);
     });
     it('unassigned terms changed from custom color to another custom color', () => {
       expect(
@@ -274,7 +275,7 @@ describe('color_telemetry_helpers', () => {
             specialAssignments: specialAssignmentsCustom2,
           }
         )
-      ).toEqual(['color_mapping_unassigned_terms_custom']);
+      ).toEqual(['color_mapping_unassigned_terms_loop']);
     });
   });
 });

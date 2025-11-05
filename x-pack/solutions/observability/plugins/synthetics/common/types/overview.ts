@@ -29,7 +29,7 @@ export interface OverviewTrend {
   median: number | null;
 }
 
-export type TrendTable = Record<string, OverviewTrend | null | 'loading'>;
+export type TrendTable = Record<string, OverviewTrend | null | 'loading' | undefined>;
 
 export interface GetTrendPayload {
   trendStats: TrendTable;

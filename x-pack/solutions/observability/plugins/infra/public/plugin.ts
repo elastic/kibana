@@ -35,6 +35,7 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -85,6 +86,8 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
+    const isLogsStreamEnabled = core.uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
+
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
@@ -130,7 +133,7 @@ export class Plugin implements InfraClientPluginClass {
       )
     );
 
-    const logRoutes = getLogsAppRoutes();
+    const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/solutions/observability/plugins/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
@@ -352,10 +355,13 @@ const getLogsNavigationEntries = ({
     });
   }
 
+  // Display Stream nav entry when Logs Stream is enabled
+  if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));
   // Display always Logs Anomalies and Logs Categories entries
   entries.push(createNavEntryFromRoute(routes.logsAnomalies));
   entries.push(createNavEntryFromRoute(routes.logsCategories));
-  entries.push(createNavEntryFromRoute(routes.settings));
+  // Display Logs Settings entry when Logs Stream is not enabled
+  if (!routes.stream) entries.push(createNavEntryFromRoute(routes.settings));
 
   return entries;
 };

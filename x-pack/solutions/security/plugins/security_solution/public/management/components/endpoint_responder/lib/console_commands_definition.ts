@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CustomScriptSelector } from '../../console_argument_selectors/custom_script_selector';
+import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
@@ -700,7 +700,8 @@ const adjustCommandsForCrowdstrike = ({
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
               exclusiveOr: true,
-              SelectorComponent: CustomScriptSelector('crowdstrike'),
+              selectorShowTextValue: true,
+              SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
               required: false,
@@ -767,7 +768,8 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.scriptName.about,
               mustHaveValue: 'truthy',
-              SelectorComponent: CustomScriptSelector('microsoft_defender_endpoint'),
+              selectorShowTextValue: true,
+              SelectorComponent: CustomScriptSelector,
             },
             Args: {
               required: false,

@@ -20,7 +20,7 @@ export const EsqlInfoIcon = memo(function EsqlInfoIcon(): JSX.Element {
   const [isPopoverOpen, { off: closePopover, on: togglePopover }] = useBoolean(false);
 
   const button = (
-    <EuiButtonIcon iconType="iInCircle" onClick={togglePopover} aria-label={i18n.ARIA_LABEL} />
+    <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={i18n.ARIA_LABEL} />
   );
 
   return (

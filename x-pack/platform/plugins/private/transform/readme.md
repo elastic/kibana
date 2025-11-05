@@ -8,7 +8,6 @@ To use the transforms feature, you must have at least a Basic license. For more
 info, refer to
 [Set up transforms](https://www.elastic.co/guide/en/elasticsearch/reference/current/transform-setup.html).
 
-
 ## Setup local environment
 
 ### Kibana
@@ -56,9 +55,9 @@ different configurations on sample data.
 1. Click the Elastic logo in the upper left hand corner of your browser to
    navigate to the Kibana home page.
 
-1. Click *Load a data set and a Kibana dashboard*.
+1. Click _Load a data set and a Kibana dashboard_.
 
-1. Pick a data set or feel free to click *Add* on all of the available sample
+1. Pick a data set or feel free to click _Add_ on all of the available sample
    data sets.
 
 These data sets are now ready to be used for creating transforms in Kibana.
@@ -113,33 +112,33 @@ commands are
 
 With PATH_TO_CONFIG and other options as follows.
 
-1. Functional UI tests with `Trial` license:
+1.  Functional UI tests with `Trial` license:
 
-    Group | PATH_TO_CONFIG
-    ----- | --------------
-    creation - index pattern | `src/platform/test/functional/apps/transform/creation/index_pattern/config.ts`
-    creation - runtime mappings, saved searches | `src/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts`
-    edit, clone | `src/platform/test/functional/apps/transform/edit_clone/config.ts`
-    feature controls | `src/platform/test/functional/apps/transform/feature_controls/config.ts`
-    permissions | `src/platform/test/functional/apps/transform/permissions/config.ts`
-    actions | `src/platform/test/functional/apps/transform/actions/config.ts`
+    | Group                                       | PATH_TO_CONFIG                                                                                 |
+    | ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+    | creation - index pattern                    | `src/platform/test/functional/apps/transform/creation/index_pattern/config.ts`                 |
+    | creation - runtime mappings, saved searches | `src/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts` |
+    | edit, clone                                 | `src/platform/test/functional/apps/transform/edit_clone/config.ts`                             |
+    | feature controls                            | `src/platform/test/functional/apps/transform/feature_controls/config.ts`                       |
+    | permissions                                 | `src/platform/test/functional/apps/transform/permissions/config.ts`                            |
+    | actions                                     | `src/platform/test/functional/apps/transform/actions/config.ts`                                |
 
 1.  Functional UI tests with `Basic` license:
 
-    Group | PATH_TO_CONFIG
-    ----- | --------------
-    creation - index pattern | `test/functional_basic/apps/transform/creation/index_pattern/config.ts`
-    creation - runtime mappings, saved searches | `test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts`
-    edit, clone | `test/functional_basic/apps/transform/edit_clone/config.ts`
-    feature controls | `test/functional_basic/apps/transform/feature_controls/config.ts`
-    permissions | `test/functional_basic/apps/transform/permissions/config.ts`
-    actions | `test/functional_basic/apps/transform/actions/config.ts`
+    | Group                                       | PATH_TO_CONFIG                                                                          |
+    | ------------------------------------------- | --------------------------------------------------------------------------------------- |
+    | creation - index pattern                    | `test/functional_basic/apps/transform/creation/index_pattern/config.ts`                 |
+    | creation - runtime mappings, saved searches | `test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts` |
+    | edit, clone                                 | `test/functional_basic/apps/transform/edit_clone/config.ts`                             |
+    | feature controls                            | `test/functional_basic/apps/transform/feature_controls/config.ts`                       |
+    | permissions                                 | `test/functional_basic/apps/transform/permissions/config.ts`                            |
+    | actions                                     | `test/functional_basic/apps/transform/actions/config.ts`                                |
 
-1. API integration tests with `Trial` license:
+1.  API integration tests with `Trial` license:
 
     - PATH_TO_CONFIG: `src/platform/test/api_integration/apis/transform/config.ts`
 
-1. API integration tests with `Basic` license:
+1.  API integration tests with `Basic` license:
 
     - PATH_TO_CONFIG: `test/api_integration_basic/config.ts`
     - Add `--include-tag transform` to the test runner command
@@ -151,4 +150,4 @@ With PATH_TO_CONFIG and other options as follows.
          node scripts/functional_tests_server --config src/platform/test/accessibility/config.ts
          node scripts/functional_test_runner.js --config src/platform/test/accessibility/config.ts --grep=transform
 
-    Transform accessibility tests are located in `x-pack/test/accessibility/apps/group2`.
+    Transform accessibility tests are located in `x-pack/platform/test/accessibility/apps/group2`.

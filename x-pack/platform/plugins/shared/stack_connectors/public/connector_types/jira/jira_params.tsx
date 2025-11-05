@@ -32,6 +32,13 @@ import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
 
+const summaryFieldLabel = i18n.translate(
+  'xpack.stackConnectors.components.jira.summaryFieldLabel',
+  {
+    defaultMessage: 'Summary',
+  }
+);
+
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,
   actionParams,
@@ -286,9 +293,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             Number(errors['subActionParams.incident.summary'].length) > 0 &&
             incident.summary !== undefined
           }
-          label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
-            defaultMessage: 'Summary',
-          })}
+          label={summaryFieldLabel}
+          aria-label={summaryFieldLabel}
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -399,7 +405,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   data-test-subj="otherFieldsHelpTooltip"
                   aria-label={i18n.translate(

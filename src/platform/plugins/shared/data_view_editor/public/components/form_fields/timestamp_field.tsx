@@ -114,16 +114,19 @@ export const TimestampField = ({ options$, isLoadingOptions$, matchedIndices$ }:
           }
         }
 
+        const isComboBoxInvalid = !isDisabled && isInvalid;
+
         return (
           <>
             <EuiFormRow
               label={label}
               error={isDisabled ? null : errorMessage}
-              isInvalid={!isDisabled && isInvalid}
+              isInvalid={isComboBoxInvalid}
               fullWidth
             >
               <>
                 <EuiComboBox<string>
+                  isInvalid={isComboBoxInvalid}
                   placeholder={i18n.translate(
                     'indexPatternEditor.editor.form.runtimeType.placeholderLabel',
                     {

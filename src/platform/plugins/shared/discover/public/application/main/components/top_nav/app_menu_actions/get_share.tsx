@@ -24,10 +24,12 @@ export const getShareAppMenuItem = ({
   discoverParams,
   services,
   stateContainer,
+  hasIntegrations,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
+  hasIntegrations: boolean;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -136,17 +138,7 @@ export const getShareAppMenuItem = ({
       },
       sharingData: {
         isTextBased: isEsqlMode,
-        locatorParams: [
-          {
-            id: locator.id,
-            params: isEsqlMode
-              ? {
-                  ...params,
-                  timeRange: timefilter.getAbsoluteTime(), // Will be used when generating CSV on server. See `filtersFromLocator`.
-                }
-              : params,
-          },
-        ],
+        locatorParams: [{ id: locator.id, params }],
         ...searchSourceSharingData,
         // CSV reports can be generated without a saved search so we provide a fallback title
         title:
@@ -180,7 +172,7 @@ export const getShareAppMenuItem = ({
     },
   ];
 
-  if (Boolean(services.share?.availableIntegrations('search', 'export')?.length)) {
+  if (hasIntegrations) {
     menuItems.unshift({
       id: AppMenuActionId.export,
       type: AppMenuActionType.primary,

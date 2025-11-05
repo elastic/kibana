@@ -20,7 +20,7 @@ interface Props {
 }
 
 export const MigrateIlmPolicyCallOut: FunctionComponent<Props> = ({ toasts }) => {
-  const { isLoading, recheckStatus, status } = useIlmPolicyStatus(true);
+  const { isLoading, recheckStatus, status } = useIlmPolicyStatus();
 
   if (isLoading || !status || status === 'ok') {
     return null;

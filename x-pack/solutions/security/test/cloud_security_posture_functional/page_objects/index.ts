@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpack/functional/page_objects';
+import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { FindingsPageProvider } from './findings_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
 import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';

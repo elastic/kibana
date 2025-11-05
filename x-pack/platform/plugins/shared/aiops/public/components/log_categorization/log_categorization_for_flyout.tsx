@@ -359,7 +359,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                           <EuiIcon
                             size="s"
                             color="subdued"
-                            type="questionInCircle"
+                            type="question"
                             className="eui-alignTop"
                           />
                         </EuiFlexItem>
@@ -391,7 +391,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                           <EuiIcon
                             size="s"
                             color="subdued"
-                            type="questionInCircle"
+                            type="question"
                             className="eui-alignTop"
                           />
                         </EuiFlexItem>

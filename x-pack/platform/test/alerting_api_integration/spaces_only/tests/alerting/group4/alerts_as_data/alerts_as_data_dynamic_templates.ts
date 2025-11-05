@@ -23,7 +23,6 @@ import {
   ObjectRemover,
 } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataDynamicTemplatesTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');

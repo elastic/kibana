@@ -13,6 +13,7 @@ const features = [
   { id: 'feature2', category: { id: 'enterpriseSearch' } },
   { id: 'feature3', category: { id: 'securitySolution' } },
   { id: 'feature4', category: { id: 'should_not_be_returned' } }, // not a solution, it should never appeared in the disabled features
+  { id: 'feature6', category: { id: 'observability' }, deprecated: true },
 ] as KibanaFeature[];
 
 describe('#withSpaceSolutionDisabledFeatures', () => {
@@ -84,6 +85,19 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
       );
 
       expect(result).toEqual(['feature1']); // "baz" from the spaceDisabledFeatures should not be removed
+    });
+
+    test('it does not include deprecated features in space disabled features', () => {
+      const spaceDisabledFeatures: string[] = [];
+      const spaceSolution = 'security';
+
+      const result = withSpaceSolutionDisabledFeatures(
+        features,
+        spaceDisabledFeatures,
+        spaceSolution
+      );
+
+      expect(result).not.toContain('feature6');
     });
   });
 });

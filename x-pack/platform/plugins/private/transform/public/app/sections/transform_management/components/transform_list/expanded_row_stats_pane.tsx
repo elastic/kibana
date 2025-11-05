@@ -39,7 +39,7 @@ const NoStatsFallbackTabContent = ({
       <EuiCallOut
         size="s"
         color="warning"
-        iconType="iInCircle"
+        iconType="info"
         title={
           <FormattedMessage
             id="xpack.transform.transformList.noStatsAvailable"

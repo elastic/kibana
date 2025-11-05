@@ -36,5 +36,6 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/presentation-publishing",
     "@kbn/response-ops-rules-apis",
+    "@kbn/react-query"
   ]
 }

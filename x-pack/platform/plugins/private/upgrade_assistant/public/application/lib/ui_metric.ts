@@ -25,6 +25,8 @@ export const UIM_REINDEX_READONLY_CLICK = 'reindex_readonly_click';
 export const UIM_REINDEX_UNFREEZE_CLICK = 'reindex_unfreeze_click';
 export const UIM_REINDEX_READONLY_RETRY_CLICK = 'reindex_readonly_retry_click';
 export const UIM_REINDEX_UNFREEZE_RETRY_CLICK = 'reindex_unfreeze_retry_click';
+export const UIM_REINDEX_DELETE_CLICK = 'reindex_delete_click';
+export const UIM_REINDEX_DELETE_RETRY_CLICK = 'reindex_delete_retry_click';
 
 // Data Streams Reindexing
 export const UIM_DATA_STREAM_REINDEX_OPEN_FLYOUT_CLICK = 'data_stream_reindex_open_flyout_click';

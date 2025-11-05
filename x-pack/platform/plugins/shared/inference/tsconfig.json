@@ -18,6 +18,9 @@
     ".storybook/**/*.js"
   ],
   "kbn_references": [
+    {
+      "path": "../../../../../src/setup_node_env/tsconfig.json"
+    },
     "@kbn/i18n",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
@@ -38,8 +41,11 @@
     "@kbn/expressions-plugin",
     "@kbn/inference-langchain",
     "@kbn/sse-utils-server",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-is-defined",
     "@kbn/sse-utils-client",
     "@kbn/zod",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/core-ui-settings-common"
   ]
 }

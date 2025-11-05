@@ -70,8 +70,8 @@ export const FilterGroupContextMenu = () => {
         },
         String(counter)
       );
-      controlGroup?.updateInput(newInput);
     }
+    controlGroup?.updateInput(newInput);
 
     switchToViewMode();
     setShowFiltersChangedBanner(false);

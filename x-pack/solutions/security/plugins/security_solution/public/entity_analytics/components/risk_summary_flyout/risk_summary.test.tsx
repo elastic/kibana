@@ -197,7 +197,7 @@ describe('FlyoutRiskSummary', () => {
     );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
-    expect((lensAttributes.state.query as Query).query).toEqual('host.name: test');
+    expect((lensAttributes.state.query as Query).query).toEqual('host.name: "test"');
     expect(firstColumn).toEqual(
       expect.objectContaining({
         sourceField: 'host.risk.calculated_score_norm',
@@ -274,7 +274,7 @@ describe('FlyoutRiskSummary', () => {
     );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
-    expect((lensAttributes.state.query as Query).query).toEqual('user.name: test');
+    expect((lensAttributes.state.query as Query).query).toEqual('user.name: "test"');
     expect(firstColumn).toEqual(
       expect.objectContaining({
         sourceField: 'user.risk.calculated_score_norm',

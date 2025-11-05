@@ -6,6 +6,9 @@
  */
 
 import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux';
+import { v4 as uuidv4 } from 'uuid';
+
+import type { IHttpFetchError } from '@kbn/core/public';
 import type { State } from '../../../common/store/types';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import type { inputsModel } from '../../../common/store/inputs';
@@ -61,4 +64,40 @@ export async function ensureTimelineIsSaved({
 
   // Make sure we're returning the most updated version of the timeline
   return selectTimelineById(store.getState(), localTimelineId);
+}
+
+export function isHttpFetchError(
+  error: unknown
+): error is IHttpFetchError<{ status_code: number }> {
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'body' in error &&
+    error.body !== null &&
+    typeof error.body === 'object' &&
+    `status_code` in error.body &&
+    typeof error.body.status_code === 'number'
+  );
+}
+
+export function extractTimelineIdsAndVersions(timeline: TimelineModel) {
+  // When a timeline hasn't been saved yet, its `savedObectId` is not defined.
+  // In that case, we want to overwrite all locally created properties for the
+  // timeline id, the timeline template id and the timeline template version.
+  //
+
+  let templateTimelineId = timeline.savedObjectId ? timeline.templateTimelineId : null;
+
+  // if not templateTimelineId is given and we know that the timelineType is `template`,
+  // we should generate one to handle template duplicate case
+  if (!templateTimelineId && timeline.timelineType === 'template') {
+    templateTimelineId = uuidv4();
+  }
+
+  return {
+    timelineId: timeline.savedObjectId ?? null,
+    timelineVersion: timeline.version,
+    templateTimelineId,
+    templateTimelineVersion: timeline.savedObjectId ? timeline.templateTimelineVersion : null,
+  };
 }

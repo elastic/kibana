@@ -7,11 +7,16 @@
 
 import React from 'react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { useGetScheduledList } from './use_get_scheduled_list';
 import { testQueryClient } from '../test_utils/test_query_client';
+import { useKibana } from '@kbn/reporting-public';
+
+jest.mock('@kbn/reporting-public', () => ({
+  useKibana: jest.fn(),
+}));
 
 jest.mock('../apis/get_scheduled_reports_list', () => ({
   getScheduledReportsList: jest.fn(),
@@ -26,12 +31,17 @@ describe('useGetScheduledList', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        http,
+      },
+    });
   });
 
   it('calls getScheduledList with correct arguments', async () => {
     (getScheduledReportsList as jest.Mock).mockResolvedValueOnce({ data: [] });
 
-    const { result } = renderHook(() => useGetScheduledList({ http, index: 1, size: 10 }), {
+    const { result } = renderHook(() => useGetScheduledList({}), {
       wrapper,
     });
 
@@ -41,8 +51,8 @@ describe('useGetScheduledList', () => {
 
     expect(getScheduledReportsList).toBeCalledWith({
       http,
-      index: 1,
-      size: 10,
+      page: 1,
+      perPage: 50,
     });
   });
 });

@@ -15,13 +15,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { RuleUpgradeEventTypes } from '../../../../../common/lib/telemetry/events/rule_upgrade/types';
 import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/rule_upgrade_state';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { PopoverItems } from '../../../../../common/components/popover_items';
-import { useUiSetting$ } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { IntegrationsPopover } from '../../../../common/components/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
@@ -184,7 +185,8 @@ const createUpgradeButtonColumn = (
   openRulePreview: UpgradePrebuiltRulesTableActions['openRulePreview'],
   loadingRules: RuleSignatureId[],
   isDisabled: boolean,
-  isPrebuiltRulesCustomizationEnabled: boolean
+  isPrebuiltRulesCustomizationEnabled: boolean,
+  telemetry: ReturnType<typeof useKibana>['services']['telemetry']
 ): TableColumn => ({
   field: 'rule_id',
   name: <RulesTableEmptyColumnName name={i18n.UPDATE_RULE_BUTTON} />,
@@ -220,7 +222,12 @@ const createUpgradeButtonColumn = (
       <EuiButtonEmpty
         size="s"
         disabled={isUpgradeButtonDisabled}
-        onClick={() => upgradeRules([ruleId])}
+        onClick={() => {
+          telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeSingleButtonClick, {
+            hasBaseVersion: record.has_base_version === true,
+          });
+          upgradeRules([ruleId]);
+        }}
         data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
       >
         {isRuleUpgrading ? spinner : i18n.UPDATE_RULE_BUTTON}
@@ -241,6 +248,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isUpgradingSecurityPackages;
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
+  const { telemetry } = useKibana().services;
 
   return useMemo(
     () => [
@@ -277,7 +285,8 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
               openRulePreview,
               loadingRules,
               isDisabled,
-              isRulesCustomizationEnabled
+              isRulesCustomizationEnabled,
+              telemetry
             ),
           ]
         : []),
@@ -290,6 +299,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
       loadingRules,
       isDisabled,
       isRulesCustomizationEnabled,
+      telemetry,
     ]
   );
 };

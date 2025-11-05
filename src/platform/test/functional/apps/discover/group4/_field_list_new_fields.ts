@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await es.transport.request({
         path: '/my-index-000001',
         method: 'DELETE',
@@ -90,7 +90,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('the new record was found', async () => {
         await queryBar.submitQuery();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
-        return (await discover.getHitCountInt()) === 2;
+        return (
+          (await discover.getHitCountInt()) === 2 &&
+          (await unifiedFieldList.getSidebarSectionFieldNames('available')).length === 3
+        );
       });
 
       expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([

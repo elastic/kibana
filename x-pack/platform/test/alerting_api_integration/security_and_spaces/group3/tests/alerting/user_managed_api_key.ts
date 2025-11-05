@@ -19,7 +19,6 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { SuperuserAtSpace1 } from '../../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function userManagedApiKeyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');

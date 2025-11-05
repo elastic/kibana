@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiButton,
@@ -35,14 +35,22 @@ import { useKibana } from '../../hooks/use_kibana';
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
 import queryRulesDarkImg from '../../assets/query-rules-context-alt-dark.svg';
 import backgroundPanelImg from '../../assets/query-rule-panel-background.svg';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import backgroundPaneDarklImg from '../../assets/query-rule-panel-background-dark.svg';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
 }
 export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
+  const usageTracker = useUsageTracker();
   const { application, share, console: consolePlugin } = useKibana().services;
   const { euiTheme, colorMode } = useEuiTheme();
+
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.emptyPromptLoaded);
+  }, [usageTracker]);
+
   const gradientOverlay = css({
     background: `linear-gradient(180deg, ${transparentize(
       euiTheme.colors.backgroundBasePlain,
@@ -101,7 +109,10 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                     data-test-subj="searchQueryRulesEmptyPromptGetStartedButton"
                     color="primary"
                     fill
-                    onClick={getStartedAction}
+                    onClick={() => {
+                      usageTracker?.click(AnalyticsEvents.gettingStartedButtonClicked);
+                      getStartedAction();
+                    }}
                   >
                     <FormattedMessage
                       id="xpack.queryRules.emptyPrompt.getStartedButton"
@@ -240,6 +251,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                       defaultMessage: 'Create in Console',
                     })}
                     showIcon
+                    data-test-subj={AnalyticsEvents.createInConsoleClicked}
                   />
                 </EuiFlexItem>
               </EuiHideFor>

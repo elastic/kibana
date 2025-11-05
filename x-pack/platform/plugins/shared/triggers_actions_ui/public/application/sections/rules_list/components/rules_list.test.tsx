@@ -40,7 +40,7 @@ import {
   ruleType,
   getDisabledByLicenseRuleTypeFromApi,
 } from './test_helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
 import { getFormattedDuration } from '../../../lib/monitoring_utils';
 

@@ -50,6 +50,7 @@ To debug Kea state in-browser, Kea recommends [Redux Devtools](https://v2.keajs.
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
 Jest tests can be run from the root kibana directory, however, since the tests take so long to run you will likely want to apply the appropriate Jest configuration file to test only your changes. For example:
+
 - `x-pack/solutions/search/plugins/enterprise_search/common/jest.config.js`
 - `x-pack/solutions/search/plugins/enterprise_search/public/jest.config.js`
 - `x-pack/solutions/search/plugins/enterprise_search/server/jest.config.js`
@@ -137,4 +138,4 @@ To track what Cypress is doing while running tests, you can pass in `--config vi
 
 See [our functional test runner README](../../../../test/functional_enterprise_search).
 
-Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../../../test/accessibility/apps/group3/enterprise_search.ts).
+Our automated accessibility tests can be found in [x-pack/solutions/search/test/accessibility/apps](../../test/accessibility/apps/enterprise_search.ts).

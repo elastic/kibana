@@ -30,6 +30,16 @@ describe('registerUserContext', () => {
     authentication.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
   });
 
+  test('registers the context provider for the global session ID', () => {
+    registerUserContext(analytics, authentication, 'cloudId');
+
+    expect(analytics.registerContextProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'global_session', // We know this from the @elastic/ebt internal implementation
+      })
+    );
+  });
+
   test('register the context provider for the cloud user with hashed user ID when security is available', async () => {
     registerUserContext(analytics, authentication, 'cloudId');
 

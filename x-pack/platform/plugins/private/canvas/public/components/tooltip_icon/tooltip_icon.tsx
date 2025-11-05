@@ -26,7 +26,7 @@ export const TooltipIcon: FC<Props> = ({ icon = IconType.info, ...rest }) => {
   const icons = {
     [IconType.error]: { type: 'error', color: 'danger' },
     [IconType.warning]: { type: 'warning', color: 'warning' },
-    [IconType.info]: { type: 'iInCircle', color: 'default' },
+    [IconType.info]: { type: 'info', color: 'default' },
   };
 
   return <EuiIconTip {...rest} type={icons[icon].type} color={icons[icon].color} />;

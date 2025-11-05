@@ -499,6 +499,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'ai:anonymizationSettings': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
@@ -646,6 +650,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'genAiSettings:defaultAIConnector': {
+    type: 'keyword',
+    _meta: {
+      description: 'Default AI connector',
+    },
+  },
+  'genAiSettings:defaultAIConnectorOnly': {
+    type: 'boolean',
+    _meta: {
+      description: 'Restrict to default AI connector only',
+    },
+  },
   'observability:searchExcludedDataTiers': {
     type: 'array',
     items: {
@@ -659,22 +675,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
-  'cases:incrementalIdDisplay:enabled': {
+  'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
-      description: 'Display the incremental id of a case in the relevant pages',
-    },
-  },
-  'observability:enableStreamsUI': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Streams UI.',
-    },
-  },
-  'observability:streamsEnableSignificantEvents': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable significant events in streams.',
+      description: 'Enable diagnostic mode',
     },
   },
 };

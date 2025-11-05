@@ -79,14 +79,18 @@ export class PainlessTinyMathParser {
   replaceCharactersWithAggMap(inputString: string, aggMap: AggMap): string {
     let parsedInputString = inputString;
     // Iterate over aggregation names and replace them with equation
+    // Sort by length (longest first) to handle cases like 'aa' and 'a' correctly
     Object.keys(aggMap)
-      .sort()
-      .reverse()
+      .sort((a, b) => b.length - a.length)
       .forEach((metricName) => {
-        parsedInputString = parsedInputString.replaceAll(
-          metricName,
-          aggMap[metricName].operationWithField
-        );
+        // Use word boundaries to ensure we only replace the metric name as an identifier,
+        // not as part of other text (e.g., within filter strings).
+        // We need to escape special regex characters in the metric name.
+        const escapedMetricName = metricName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Use \b for word boundaries, but also handle cases where metric name might be
+        // preceded/followed by operators or parentheses
+        const regex = new RegExp(`(?<![a-zA-Z0-9_])${escapedMetricName}(?![a-zA-Z0-9_])`, 'g');
+        parsedInputString = parsedInputString.replace(regex, aggMap[metricName].operationWithField);
       });
 
     return parsedInputString;

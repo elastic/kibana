@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { UninstallResponse } from '@kbn/product-doc-base-plugin/common/http_api/installation';
@@ -21,12 +21,13 @@ export function useUninstallProductDoc() {
   } = useKibana().services;
   const queryClient = useQueryClient();
 
-  return useMutation<UninstallResponse, ServerError, void>(
+  return useMutation<UninstallResponse, ServerError, string>(
     [REACT_QUERY_KEYS.UNINSTALL_PRODUCT_DOC],
-    () => {
-      return productDocBase!.installation.uninstall();
+    (inferenceId: string) => {
+      return productDocBase!.installation.uninstall({ inferenceId });
     },
     {
+      networkMode: 'always',
       onSuccess: () => {
         toasts.addSuccess(
           i18n.translate(

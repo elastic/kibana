@@ -51,7 +51,6 @@ export const CrawlCustomSettingsFlyoutDomainConfigLogic = kea<
     domainConfigs: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onRecieveDomainConfigData: (_, { domainConfigs }) => domainConfigs,
       },
     ],

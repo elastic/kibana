@@ -6,7 +6,12 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSavedObjectType,
+  legacyMonitorAttributes,
+} from '../../../common/types/saved_objects';
 import { ConfigKey, MonitorFiltersResult } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
@@ -16,22 +21,28 @@ type Buckets = Array<{
 }>;
 
 interface AggsResponse {
-  monitorTypes: {
-    buckets: Buckets;
-  };
-  locations: {
-    buckets: Buckets;
-  };
-  tags: {
-    buckets: Buckets;
-  };
-  projects: {
-    buckets: Buckets;
-  };
-  schedules: {
-    buckets: Buckets;
-  };
+  monitorTypes?: { buckets: Buckets };
+  monitorTypesLegacy?: { buckets: Buckets };
+  locations?: { buckets: Buckets };
+  locationsLegacy?: { buckets: Buckets };
+  tags?: { buckets: Buckets };
+  tagsLegacy?: { buckets: Buckets };
+  projects?: { buckets: Buckets };
+  projectsLegacy?: { buckets: Buckets };
+  schedules?: { buckets: Buckets };
+  schedulesLegacy?: { buckets: Buckets };
 }
+
+const mergeBuckets = (...bucketSets: Array<Buckets | undefined>) => {
+  const map = new Map<string, number>();
+  for (const buckets of bucketSets) {
+    buckets?.forEach(({ key, doc_count: docCount }) => {
+      const k = String(key);
+      map.set(k, (map.get(k) ?? 0) + docCount);
+    });
+  }
+  return Array.from(map.entries()).map(([label, count]) => ({ label, count }));
+};
 
 export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersResult> = () => ({
   method: 'GET',
@@ -44,42 +55,35 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersR
   handler: async ({ savedObjectsClient, request }): Promise<any> => {
     const showFromAllSpaces = request.query?.showFromAllSpaces;
     const data = await savedObjectsClient.find({
-      type: syntheticsMonitorType,
+      type: [legacySyntheticsMonitorTypeSingle, syntheticsMonitorSavedObjectType],
       perPage: 0,
       aggs,
       ...(showFromAllSpaces ? { namespaces: ['*'] } : {}),
     });
 
-    const { monitorTypes, tags, locations, projects, schedules } =
-      (data?.aggregations as AggsResponse) ?? {};
+    const {
+      monitorTypes,
+      monitorTypesLegacy,
+      tags,
+      tagsLegacy,
+      locations,
+      locationsLegacy,
+      projects,
+      projectsLegacy,
+      schedules,
+      schedulesLegacy,
+    } = (data?.aggregations as AggsResponse) ?? {};
+
     return {
-      monitorTypes:
-        monitorTypes?.buckets?.map(({ key, doc_count: count }) => ({
-          label: key,
-          count,
-        })) ?? [],
-      tags:
-        tags?.buckets?.map(({ key, doc_count: count }) => ({
-          label: key,
-          count,
-        })) ?? [],
-      locations:
-        locations?.buckets?.map(({ key, doc_count: count }) => ({
-          label: key,
-          count,
-        })) ?? [],
-      projects:
-        projects?.buckets
-          ?.filter(({ key }) => key)
-          .map(({ key, doc_count: count }) => ({
-            label: key,
-            count,
-          })) ?? [],
-      schedules:
-        schedules?.buckets?.map(({ key, doc_count: count }) => ({
-          label: String(key),
-          count,
-        })) ?? [],
+      monitorTypes: mergeBuckets(monitorTypes?.buckets, monitorTypesLegacy?.buckets),
+      tags: mergeBuckets(tags?.buckets, tagsLegacy?.buckets),
+      locations: mergeBuckets(locations?.buckets, locationsLegacy?.buckets),
+      projects: mergeBuckets(projects?.buckets, projectsLegacy?.buckets).filter(
+        ({ label }) => label
+      ),
+      schedules: mergeBuckets(schedules?.buckets, schedulesLegacy?.buckets).map(
+        ({ label, count }) => ({ label: String(label), count })
+      ),
     };
   },
 });
@@ -87,31 +91,61 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersR
 const aggs = {
   monitorTypes: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_TYPE}.keyword`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
+      size: 10000,
+    },
+  },
+  monitorTypesLegacy: {
+    terms: {
+      field: `${legacyMonitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
     },
   },
   tags: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.TAGS}`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.TAGS}`,
+      size: 10000,
+    },
+  },
+  tagsLegacy: {
+    terms: {
+      field: `${legacyMonitorAttributes}.${ConfigKey.TAGS}`,
       size: 10000,
     },
   },
   locations: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.LOCATIONS}.id`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.LOCATIONS}.id`,
+      size: 10000,
+    },
+  },
+  locationsLegacy: {
+    terms: {
+      field: `${legacyMonitorAttributes}.${ConfigKey.LOCATIONS}.id`,
       size: 10000,
     },
   },
   projects: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.PROJECT_ID}`,
+      size: 10000,
+    },
+  },
+  projectsLegacy: {
+    terms: {
+      field: `${legacyMonitorAttributes}.${ConfigKey.PROJECT_ID}`,
       size: 10000,
     },
   },
   schedules: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.SCHEDULE}.number`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.SCHEDULE}.number`,
+      size: 10000,
+    },
+  },
+  schedulesLegacy: {
+    terms: {
+      field: `${legacyMonitorAttributes}.${ConfigKey.SCHEDULE}.number`,
       size: 10000,
     },
   },

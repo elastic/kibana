@@ -278,7 +278,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   values={{
                     toolTip: (
                       <EuiIconTip
-                        type="iInCircle"
+                        type="info"
                         iconProps={{
                           className: 'eui-alignTop',
                         }}

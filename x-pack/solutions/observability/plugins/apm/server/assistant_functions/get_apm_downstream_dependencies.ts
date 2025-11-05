@@ -61,11 +61,13 @@ export function registerGetApmDownstreamDependenciesFunction({
     },
     async ({ arguments: args }, signal) => {
       return {
-        content: await getAssistantDownstreamDependencies({
-          arguments: args,
-          apmEventClient,
-          randomSampler,
-        }),
+        content: {
+          dependencies: await getAssistantDownstreamDependencies({
+            arguments: args,
+            apmEventClient,
+            randomSampler,
+          }),
+        },
       };
     }
   );

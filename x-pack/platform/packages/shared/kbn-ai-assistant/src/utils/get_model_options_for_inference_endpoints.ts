@@ -10,8 +10,6 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
-  ELSER_IN_EIS_INFERENCE_ID,
-  E5_LARGE_IN_EIS_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 
 export interface ModelOptionsData {
@@ -50,21 +48,6 @@ export const e5SmallDescription = i18n.translate(
   }
 );
 
-const e5LargeTitle = i18n.translate(
-  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.e5largeTitle',
-  {
-    defaultMessage: 'E5-large (multilingual)',
-  }
-);
-
-const e5LargeDescription = i18n.translate(
-  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.e5largeDescription',
-  {
-    defaultMessage:
-      'E5 is an NLP model by Elastic designed to enhance multilingual semantic search by focusing on query context rather than keywords. E5-large is an optimized version for Intel® silicon.',
-  }
-);
-
 const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
   string,
   { title: string; description: string }
@@ -73,17 +56,9 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
     title: elserTitle,
     description: elserDescription,
   },
-  [ELSER_IN_EIS_INFERENCE_ID]: {
-    title: elserTitle,
-    description: elserDescription,
-  },
   [E5_SMALL_INFERENCE_ID]: {
     title: e5SmallTitle,
     description: e5SmallDescription,
-  },
-  [E5_LARGE_IN_EIS_INFERENCE_ID]: {
-    title: e5LargeTitle,
-    description: e5LargeDescription,
   },
 };
 
@@ -92,21 +67,8 @@ export const getModelOptionsForInferenceEndpoints = ({
 }: {
   endpoints: InferenceAPIConfigResponse[];
 }): ModelOptionsData[] => {
-  const hasElserEIS = endpoints.some((ep) => ep.inference_id === ELSER_IN_EIS_INFERENCE_ID);
-  const hasE5EIS = endpoints.some((ep) => ep.inference_id === E5_LARGE_IN_EIS_INFERENCE_ID);
-
   return endpoints
     .filter((endpoint) => {
-      // if ELSER exists in EIS, skip the other ELSER model
-      if (endpoint.inference_id === ELSER_ON_ML_NODE_INFERENCE_ID && hasElserEIS) {
-        return false;
-      }
-
-      // if e5-large exists in EIS, skip the e5-small
-      if (endpoint.inference_id === E5_SMALL_INFERENCE_ID && hasE5EIS) {
-        return false;
-      }
-
       // Only include preconfigured endpoints and skip custom endpoints
       return Boolean(PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id]);
     })

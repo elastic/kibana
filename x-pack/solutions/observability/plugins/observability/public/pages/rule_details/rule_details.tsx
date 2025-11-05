@@ -250,6 +250,7 @@ export function RuleDetailsPage() {
             requestRefresh={refetch}
             healthColor={getHealthColor(rule.executionStatus.status)}
             statusMessage={ruleStatusMessage}
+            autoRecoverAlerts={ruleType?.autoRecoverAlerts}
           />
         </EuiFlexItem>
 

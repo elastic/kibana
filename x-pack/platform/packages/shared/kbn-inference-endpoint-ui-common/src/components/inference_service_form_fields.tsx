@@ -30,7 +30,11 @@ import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
-import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
+import {
+  DEFAULT_TASK_TYPE,
+  ServiceProviderKeys,
+  serviceProviderLinkComponents,
+} from '../constants';
 import { SelectableProvider } from './providers/selectable';
 import {
   TaskTypeOption,
@@ -43,6 +47,15 @@ import { AdditionalOptionsFields } from './additional_options_fields';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
+
+const providerConfigConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
+      isBlocking: true,
+    },
+  ],
+};
 
 interface InferenceServicesProps {
   http: HttpSetup;
@@ -359,17 +372,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   return !isLoading ? (
     <>
-      <UseField
-        path="config.provider"
-        config={{
-          validations: [
-            {
-              validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
-              isBlocking: true,
-            },
-          ],
-        }}
-      >
+      <UseField path="config.provider" config={providerConfigConfig}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
           const selectInput = providerSuperSelect(isInvalid);
@@ -410,6 +413,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           <ConfigurationFormItems
             isLoading={false}
             direction="column"
+            descriptionLinks={serviceProviderLinkComponents[config.provider as ServiceProviderKeys]}
             items={requiredProviderFormFields}
             setConfigEntry={onSetProviderConfigEntry}
             isEdit={isEdit}
@@ -429,12 +433,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           <EuiSpacer size="m" />
           <EuiHorizontalRule margin="xs" />
           <ProviderSecretHiddenField
-            providerSchema={providerSchema}
+            requiredProviderFormFields={requiredProviderFormFields}
             setRequiredProviderFormFields={setRequiredProviderFormFields}
             isSubmitting={isSubmitting}
           />
           <ProviderConfigHiddenField
-            providerSchema={providerSchema}
+            requiredProviderFormFields={requiredProviderFormFields}
             setRequiredProviderFormFields={setRequiredProviderFormFields}
             isSubmitting={isSubmitting}
           />

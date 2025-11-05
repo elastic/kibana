@@ -7,7 +7,10 @@
 import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
-import { savedObjectsAdapter } from '../../saved_objects';
+import {
+  getSyntheticsDynamicSettings,
+  setSyntheticsDynamicSettings,
+} from '../../saved_objects/synthetics_settings';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { DynamicSettingsAttributes } from '../../runtime_types/settings';
@@ -20,8 +23,9 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
   validate: false,
   handler: async ({ savedObjectsClient }) => {
-    const dynamicSettingsAttributes: DynamicSettingsAttributes =
-      await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
+    const dynamicSettingsAttributes: DynamicSettingsAttributes = await getSyntheticsDynamicSettings(
+      savedObjectsClient
+    );
     return fromSettingsAttribute(dynamicSettingsAttributes);
   },
 });
@@ -35,9 +39,9 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () 
   writeAccess: true,
   handler: async ({ savedObjectsClient, request }): Promise<DynamicSettingsAttributes> => {
     const newSettings = request.body;
-    const prevSettings = await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
+    const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
 
-    const attr = await savedObjectsAdapter.setSyntheticsDynamicSettings(savedObjectsClient, {
+    const attr = await setSyntheticsDynamicSettings(savedObjectsClient, {
       ...prevSettings,
       ...newSettings,
     } as DynamicSettingsAttributes);

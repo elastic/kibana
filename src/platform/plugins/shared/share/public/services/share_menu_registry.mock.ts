@@ -29,7 +29,7 @@ const createStartMock = (): jest.Mocked<ShareMenuRegistryStart> => {
       (_objectType: string, _groupId?: string) => [] as ShareActionIntents[]
     ),
     resolveShareItemsForShareContext: jest.fn(
-      (_props: ShareContext & { isServerless: boolean }) => [] as ShareConfigs[]
+      async (_props: ShareContext & { isServerless: boolean }) => [] as ShareConfigs[]
     ),
   };
   return start;

@@ -13,4 +13,4 @@ export * from './policy_list';
 export * from './page_reference';
 export * from './responder';
 export * from './fleet';
-export * from './types';
+export type * from './types';

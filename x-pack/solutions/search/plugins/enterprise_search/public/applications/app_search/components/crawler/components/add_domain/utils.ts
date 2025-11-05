@@ -52,6 +52,7 @@ export const getDomainWithProtocol = async (domain: string) => {
       if (httpCheckData.valid) {
         return `http://${domain}`;
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing as later validation steps will catch errors
     }

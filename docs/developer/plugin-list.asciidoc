@@ -603,7 +603,7 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/private/graph/README.md[graph]
-|This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests.
+|This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/platform/test/functional/apps/graph contains additional functional tests.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/private/grokdebugger/README.md[grokdebugger]
@@ -640,6 +640,10 @@ the infrastructure monitoring use-case within Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/integration_assistant/README.md[integrationAssistant]
 |Team owner: Security Integrations Scalability
+
+
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/intercepts/README.md[intercepts]
+|Contains business logic and orchestration for displaying the intercept dialog suited to the needs of Kibana, and is made available so that other solution teams might leverage this to register and schedule an intercept of their choosing
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
@@ -750,6 +754,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md[productDocBase]
 |This plugin contains the product documentation base service.
+
+
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/product_intercept/README.md[productIntercept]
+|This is a standalone plugin that leverages the intercept plugin to display product intercept used to gather information that is turn used to compute CSAT about user's experience of Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling/README.md[profiling]

@@ -98,7 +98,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
                 defaultMessage: 'Waiting for connection',
               })}
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
             />
           </EuiFlexItem>
         ) : null}

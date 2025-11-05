@@ -155,7 +155,7 @@ export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpe
           <EuiPanel grow={false} paddingSize="l">
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="iInCircle" />
+                <EuiIcon type="info" />
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>

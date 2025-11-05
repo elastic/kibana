@@ -144,6 +144,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             prepend={!isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined}
             css={css`
               padding-right: 56px !important;
+              ${compressed ? 'font-size: 0.9rem;' : ''}
             `}
           />
         </EuiFormRow>

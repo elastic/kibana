@@ -271,6 +271,7 @@ export function WorkspacePanelWrapper({
           alignItems="center"
           justifyContent="center"
           direction="column"
+          className="lnsWorkspacePanelWrapper__contentFlexGroup"
           css={css`
             height: 100%;
           `}

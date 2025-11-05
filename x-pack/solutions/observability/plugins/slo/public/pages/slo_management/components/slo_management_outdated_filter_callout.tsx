@@ -19,7 +19,7 @@ export function SloOutdatedFilterCallout() {
   return (
     <EuiCallOut color="primary">
       <EuiText>
-        <EuiIcon type="iInCircle" />{' '}
+        <EuiIcon type="info" />{' '}
         {i18n.translate('xpack.slo.outdatedSloFilterCallout.title', {
           defaultMessage:
             "You're currently viewing only outdated SLOs. You can reset them from the action menu to bring them up to date.",

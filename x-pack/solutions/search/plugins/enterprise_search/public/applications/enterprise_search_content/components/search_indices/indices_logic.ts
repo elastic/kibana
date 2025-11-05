@@ -151,13 +151,11 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     },
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
-  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     deleteModalIndexName: [
       '',
       {
         closeDeleteModal: () => '',
-        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteModal: (_, { indexName }) => indexName,
       },
     ],
@@ -185,9 +183,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       },
       {
         apiSuccess: (
-          // @ts-expect-error upgrade typescript v5.1.6
           _,
-          // @ts-expect-error upgrade typescript v5.1.6
           { meta, onlyShowSearchOptimizedIndices, returnHiddenIndices, searchQuery }
         ) => ({
           from: meta.page.from,
@@ -196,7 +192,6 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
           searchQuery,
           size: meta.page.size,
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => ({
           ...state,
           from: (newPageIndex - 1) * state.size,

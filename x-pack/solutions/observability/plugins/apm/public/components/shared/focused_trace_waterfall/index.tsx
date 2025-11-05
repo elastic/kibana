@@ -67,21 +67,22 @@ function getTraceItems(items: NonNullable<FocusedTrace['traceItems']>) {
 
 export function FocusedTraceWaterfall({ items, onErrorClick }: Props) {
   const reparentedItems = reparentDocumentToRoot(items.traceItems);
-  if (!reparentedItems) {
-    return null;
-  }
-  const traceItems = getTraceItems(reparentedItems);
+  const traceItems = reparentedItems ? getTraceItems(reparentedItems) : [];
 
   return (
     <>
       <TraceWaterfall
         traceItems={traceItems}
         showAccordion={false}
-        highlightedTraceId={reparentedItems.focusedTraceDoc.id}
+        highlightedTraceId={reparentedItems?.focusedTraceDoc.id}
         onErrorClick={onErrorClick}
       />
-      <EuiSpacer />
-      <TraceSummary summary={items.summary} />
+      {reparentedItems ? (
+        <>
+          <EuiSpacer />
+          <TraceSummary summary={items.summary} />
+        </>
+      ) : null}
     </>
   );
 }

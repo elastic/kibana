@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './api';
+export type * from './api';
 
 export * from '@kbn/index-lifecycle-management-common-shared';
 

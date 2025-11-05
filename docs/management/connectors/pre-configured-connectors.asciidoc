@@ -35,12 +35,12 @@ connector:
       actionTypeId: .slack      <2>
       name: 'Slack #xyz'        <3>
       secrets:
-        webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
+        webhookUrl: '<WEBHOOK_URL>' <1>
     webhook-service:
       actionTypeId: .webhook
       name: 'Email service'
       config:                   <4>
-        url: 'https://email-alert-service.elastic.co'
+        url: '<SERVICE_URL>' <1>
         method: post
         headers:
           header1: value1
@@ -150,7 +150,7 @@ xpack.actions.preconfigured:
     name: preconfigured-bedrock-connector-type
     actionTypeId: .bedrock
     config:
-      apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <1>
+      apiUrl: <REQUEST_URL> <1>
       defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0 <2>
     secrets:
       accessKey: key-value <3>
@@ -174,9 +174,9 @@ xpack.actions.preconfigured:
     name: preconfigured-d3security-connector-type
     actionTypeId: .d3security
     config:
-      url: https://testurl.com/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents <1>
+      url: <URL> <1>
     secrets:
-      token: superlongtoken <2>
+      token: <TOKEN> <2>
 --
 <1> The D3 Security API request URL.
 <2> The D3 Security token.
@@ -329,7 +329,7 @@ xpack.actions.preconfigured:
     name: preconfigured-openai-connector-type
     actionTypeId: .gen-ai
     config:
-      apiUrl: https://api.openai.com/v1/chat/completions <1>
+      apiUrl: <REQUEST_URL> <1>
       apiProvider: 'OpenAI' <2>
       defaultModel: gpt-4o <3>
     secrets:
@@ -353,7 +353,7 @@ xpack.actions.preconfigured:
     name: preconfigured-resilient-connector-type
     actionTypeId: .resilient
     config:
-      apiUrl: https://elastic.resilient.net <1>
+      apiUrl: <API_URL> <1>
       orgId: ES <2>
     secrets:
       apiKeyId: testuser <3>
@@ -396,7 +396,7 @@ xpack.actions.preconfigured:
     name: preconfigured-jira-connector-type
     actionTypeId: .jira
     config:
-      apiUrl: https://elastic.atlassian.net <1>
+      apiUrl: <JIRA_INSTANCE_URL> <1>
       projectKey: ES <2>
     secrets:
       email: testuser <3>
@@ -420,7 +420,7 @@ xpack.actions.preconfigured:
     name: preconfigured-teams-connector-type
     actionTypeId: .teams
     secrets:
-      webhookUrl: 'https://outlook.office.com/webhook/abcd@0123456/IncomingWebhook/abcdefgh/ijklmnopqrstuvwxyz' <1>
+      webhookUrl: '<WEBHOOK_URL>' <1>
 --
 <1> The URL of the incoming webhook.
 
@@ -437,7 +437,7 @@ xpack.actions.preconfigured:
     name: preconfigured-opsgenie-connector-type
     actionTypeId: .opsgenie
     config:
-      apiUrl: https://api.opsgenie.com <1>
+      apiUrl: <OPSGENIE_URL> <1>
     secrets:
       apiKey: apikey <2>
 --
@@ -457,7 +457,7 @@ xpack.actions.preconfigured:
     name: preconfigured-pagerduty-connector-type
     actionTypeId: .pagerduty
     config:
-      apiUrl: https://test.host <1>
+      apiUrl: <API_URL> <1>
     secrets:
       routingKey: testroutingkey <2>
 --
@@ -655,7 +655,7 @@ xpack.actions.preconfigured:
     name: preconfigured-slack-webhook-connector-type
     actionTypeId: .slack
     secrets:
-      webhookUrl: 'https://hooks.slack.com/services/xxxx/xxxx/xxxx' <1>
+      webhookUrl: '<SLACK_WEBHOOK_URL>' <1>
 --
 <1> The Slack webhook URL.
 
@@ -685,7 +685,7 @@ xpack.actions.preconfigured:
     name: preconfigured-swimlane-connector-type
     actionTypeId: .swimlane
     config:
-      apiUrl: https://elastic.swimlaneurl.us <1>
+      apiUrl: <SWIMLANE_INSTANCE_URL> <1>
       appId: app-id <2>
       mappings: <3>
         alertIdConfig:
@@ -744,9 +744,9 @@ my-tines:
     name: preconfigured-tines-connector-type
     actionTypeId: .tines
     config:
-      url: https://some-tenant-2345.tines.com <1>
+      url: <TENANT_URL> <1>
     secrets:
-      email: some.address@test.com <2>
+      email: some.address@example.com <2>
       token: ausergeneratedapitoken <3>
 --
 <1> The Tines tenant URL.
@@ -766,7 +766,7 @@ xpack.actions.preconfigured:
     name: preconfigured-torq-connector-type
     actionTypeId: .torq
     config:
-      webhookIntegrationUrl: https://hooks.torq.io/v1/somehook <1>
+      webhookIntegrationUrl: <WEBHOOK_URL> <1>
     secrets:
       token: mytorqtoken <2>
 --
@@ -786,7 +786,7 @@ xpack.actions.preconfigured:
     name: preconfigured-webhook-connector-type
     actionTypeId: .webhook
     config:
-      url: https://test.host <1>
+      url: <WEB_SERVICE_URL> <1>
       method: post <2>
       headers: <3>
         testheader: testvalue
@@ -867,7 +867,7 @@ xpack.actions.preconfigured:
     name: preconfigured-xmatters-connector-type
     actionTypeId: .xmatters
     config:
-      configUrl: https://test.host <1>
+      configUrl: <REQUEST_URL> <1>
       usesBasic: true <2>
     secrets:
       user: testuser <3>
@@ -889,7 +889,7 @@ xpack.actions.preconfigured:
     config:
       usesBasic: false <1>
     secrets:
-      secretsUrl: https://test.host?apiKey=1234-abcd <2>
+      secretsUrl: <SECRETS_URL> <2>
 --
 <1> Indicates whether the connector uses HTTP basic authentication. Set to `false` to use URL authentication. Defaults to `true`.
 <2> The request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.

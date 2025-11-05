@@ -49,7 +49,7 @@ export const IlmRetentionTab = () => {
 
   return (
     <div>
-      <EuiCallOut title={CALLOUT_TITLE} iconType="iInCircle">
+      <EuiCallOut title={CALLOUT_TITLE} iconType="info">
         <p>
           <FormattedMessage
             id="xpack.synthetics.settingsRoute.retentionCalloutDescription"

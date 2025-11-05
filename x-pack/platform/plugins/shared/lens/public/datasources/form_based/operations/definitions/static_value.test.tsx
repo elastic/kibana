@@ -248,7 +248,6 @@ describe('static_value', () => {
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
-        scale: 'ratio',
         params: { value: '100' },
         references: [],
       });
@@ -264,7 +263,6 @@ describe('static_value', () => {
             dataType: 'number',
             operationType: 'static_value',
             isBucketed: false,
-            scale: 'ratio',
             params: { value: '23' },
             references: [],
           } as StaticValueIndexPatternColumn,
@@ -274,7 +272,6 @@ describe('static_value', () => {
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
-        scale: 'ratio',
         params: { value: '23' },
         references: [],
       });
@@ -294,7 +291,6 @@ describe('static_value', () => {
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
-        scale: 'ratio',
         params: { value: '23' },
         references: [],
       });
@@ -311,7 +307,6 @@ describe('static_value', () => {
               dataType: 'number',
               operationType: 'static_value',
               isBucketed: false,
-              scale: 'ratio',
               params: { value: '23' },
               references: [],
             } as StaticValueIndexPatternColumn,
@@ -323,7 +318,6 @@ describe('static_value', () => {
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
-        scale: 'ratio',
         params: { value: '53' },
         references: [],
       });

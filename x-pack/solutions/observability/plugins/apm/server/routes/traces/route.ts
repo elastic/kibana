@@ -35,7 +35,7 @@ import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceItems } from './get_unified_trace_items';
-import { getUnifiedTraceErrors } from './get_unified_trace_errors';
+import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -140,21 +140,23 @@ const unifiedTracesByIdRoute = createApmServerRoute({
   ): Promise<{
     traceItems: TraceItem[];
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
+    const [apmEventClient, logsClient] = await Promise.all([
+      getApmEventClient(resources),
+      createLogsClient(resources),
+    ]);
+
     const { params, config } = resources;
     const { traceId } = params.path;
     const { start, end } = params.query;
 
-    const unifiedTraceErrors = await getUnifiedTraceErrors({ apmEventClient, traceId, start, end });
-
-    const traceItems = await getUnifiedTraceItems({
+    const { traceItems } = await getUnifiedTraceItems({
       apmEventClient,
+      logsClient,
       traceId,
       start,
       end,
       maxTraceItemsFromUrlParam: params.query.maxTraceItems,
       config,
-      unifiedTraceErrors,
     });
 
     return {
@@ -179,22 +181,24 @@ const focusedTraceRoute = createApmServerRoute({
     traceItems?: FocusedTraceItems;
     summary: { services: number; traceEvents: number; errors: number };
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
+    const [apmEventClient, logsClient] = await Promise.all([
+      getApmEventClient(resources),
+      createLogsClient(resources),
+    ]);
+
     const { params, config } = resources;
     const { traceId, docId } = params.path;
     const { start, end } = params.query;
 
-    const unifiedTraceErrors = await getUnifiedTraceErrors({ apmEventClient, traceId, start, end });
-
-    const [traceItems, traceSummaryCount] = await Promise.all([
+    const [{ traceItems, unifiedTraceErrors }, traceSummaryCount] = await Promise.all([
       getUnifiedTraceItems({
         apmEventClient,
+        logsClient,
         traceId,
         start,
         end,
         maxTraceItemsFromUrlParam: params.query.maxTraceItems,
         config,
-        unifiedTraceErrors,
       }),
       getTraceSummaryCount({ apmEventClient, start, end, traceId }),
     ]);

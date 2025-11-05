@@ -10,7 +10,7 @@
 export type {
   DocView,
   DocViewFilterFn,
-  DocViewRenderFn,
   DocViewRenderProps,
+  DocViewerComponent,
   FieldRecordLegacy,
 } from './services/types';

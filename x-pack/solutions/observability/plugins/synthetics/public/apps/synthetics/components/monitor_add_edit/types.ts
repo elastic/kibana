@@ -34,7 +34,7 @@ export interface Step {
 export type StepMap = Record<FormMonitorType, Step[]>;
 
 export * from '../../../../../common/runtime_types/monitor_management';
-export * from '../../../../../common/types/monitor_validation';
+export type * from '../../../../../common/types/monitor_validation';
 
 export interface FormLocation {
   id: string;
@@ -168,4 +168,5 @@ export interface FieldMap {
   [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;
   [ConfigKey.LABELS]: FieldMeta<ConfigKey.LABELS>;
   [ConfigKey.MAINTENANCE_WINDOWS]: FieldMeta<ConfigKey.MAINTENANCE_WINDOWS>;
+  [ConfigKey.KIBANA_SPACES]: FieldMeta<ConfigKey.KIBANA_SPACES>;
 }

@@ -1490,7 +1490,7 @@ components:
       type: string
     ExceptionListHumanId:
       $ref: '#/components/schemas/NonEmptyString'
-      description: Human readable string identifier, e.g. `trusted-linux-processes`
+      description: The exception list's human readable string identifier, `endpoint_list`.
     ExceptionListId:
       $ref: '#/components/schemas/NonEmptyString'
     ExceptionListItem:

@@ -161,7 +161,7 @@ export function ServiceOverviewDependenciesTable({
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignCenter"
             content={i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitleTip', {
               defaultMessage:
@@ -178,6 +178,7 @@ export function ServiceOverviewDependenciesTable({
       showPerPageOptions={showPerPageOptions}
       initialPageSize={5}
       showSparkPlots={showSparkPlots}
+      saveTableOptionsToUrl={false}
     />
   );
 }

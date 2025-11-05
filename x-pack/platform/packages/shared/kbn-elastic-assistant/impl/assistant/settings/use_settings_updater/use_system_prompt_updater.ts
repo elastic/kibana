@@ -14,7 +14,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
-import { InfiniteData, QueryObserverResult } from '@tanstack/react-query';
+import { InfiniteData, QueryObserverResult } from '@kbn/react-query';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConversationApiConfig } from '../../use_conversation/helpers';
@@ -59,6 +59,11 @@ interface SystemPromptUpdater {
   selectedSystemPrompt?: SystemPromptSettings;
   systemPromptSettings: SystemPromptSettings[];
 }
+
+const DEFAULT_SYSTEM_PROMPT_SETTINGS: SystemPromptSettings[] = [];
+const DEFAULT_SYSTEM_PROMPT_SETTINGS_UPDATES: SystemPromptSettings[] = [];
+const DEFAULT_PROMPTS_BULK_ACTIONS: PromptsPerformBulkActionRequestBody = {};
+
 export const useSystemPromptUpdater = ({
   allPrompts,
   connectors,
@@ -71,13 +76,15 @@ export const useSystemPromptUpdater = ({
   toasts,
 }: Params): SystemPromptUpdater => {
   // server equivalent
-  const [systemPromptSettings, setSystemPromptSettings] = useState<SystemPromptSettings[]>([]);
+  const [systemPromptSettings, setSystemPromptSettings] = useState<SystemPromptSettings[]>(
+    DEFAULT_SYSTEM_PROMPT_SETTINGS
+  );
   // local updates
   const [systemPromptSettingsUpdates, setSystemPromptSettingsUpdates] = useState<
     SystemPromptSettings[]
-  >([]);
+  >(DEFAULT_SYSTEM_PROMPT_SETTINGS_UPDATES);
   const [promptsBulkActions, setPromptsBulkActions] = useState<PromptsPerformBulkActionRequestBody>(
-    {}
+    DEFAULT_PROMPTS_BULK_ACTIONS
   );
   // System Prompt Selection State
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<
@@ -105,7 +112,6 @@ export const useSystemPromptUpdater = ({
     filter,
   });
   useEffect(() => {
-    if (!Object.keys(data).length && !systemPrompts.length) return;
     const updateSystemPromptSettings = (prev: SystemPromptSettings[]) => {
       const updatedSettings = systemPrompts.map((p) => {
         const conversations = Object.values(data).filter(
@@ -121,14 +127,9 @@ export const useSystemPromptUpdater = ({
       return prev;
     };
 
-    setSystemPromptSettings(updateSystemPromptSettings);
+    setSystemPromptSettings((prev) => updateSystemPromptSettings(prev));
+    setSystemPromptSettingsUpdates((prev) => updateSystemPromptSettings(prev));
   }, [data, systemPrompts]);
-
-  useEffect(() => {
-    if (systemPromptSettings.length) {
-      setSystemPromptSettingsUpdates(systemPromptSettings);
-    }
-  }, [systemPromptSettings]);
 
   const onSystemPromptSelect = useCallback(
     (systemPrompt?: SystemPromptSettings | string) => {

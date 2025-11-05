@@ -24,11 +24,7 @@ export function FieldFinalSideHelpInfo(): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
   const button = (
-    <EuiButtonIcon
-      iconType="questionInCircle"
-      onClick={togglePopover}
-      aria-label="Open help popover"
-    />
+    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
   );
 
   return (

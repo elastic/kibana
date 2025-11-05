@@ -446,6 +446,7 @@ export function LayerPanel(props: LayerPanelProps) {
               />
             )}
             <ESQLEditor
+              uiSettings={core.uiSettings}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
               datasourceMap={datasourceMap}
@@ -554,7 +555,7 @@ export function LayerPanel(props: LayerPanelProps) {
                             }}
                             position="top"
                             size="s"
-                            type="questionInCircle"
+                            type="question"
                           />
                         </>
                       )}

@@ -11,10 +11,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
 import {
-  SavedObjectSaveModal,
   OnSaveProps,
   SaveResult,
   showSaveModal,
+  SavedObjectSaveModalWithSaveResult,
 } from '@kbn/saved-objects-plugin/public';
 import { getNotifications } from '../../services';
 import {
@@ -152,7 +152,7 @@ export class AttributeService {
       };
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
         showSaveModal(
-          <SavedObjectSaveModal
+          <SavedObjectSaveModalWithSaveResult
             onSave={onSave}
             onClose={() => {}}
             title={get(

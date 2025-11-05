@@ -39,11 +39,11 @@ export const getIconFromType = (type: string | null | undefined) => {
     case 'geo_point':
       return 'tokenGeo';
     case 'object':
-      return 'tokenQuestionInCircle';
+      return 'tokenQuestion';
     case 'float':
       return 'tokenNumber';
     default:
-      return 'tokenQuestionInCircle';
+      return 'tokenQuestion';
   }
 };
 
@@ -65,7 +65,7 @@ const columns: Array<EuiBasicTableColumn<FieldObject>> = [
                 />
               </EuiToolTip>
             ) : (
-              <EuiIcon type="questionInCircle" />
+              <EuiIcon type="question" />
             )}
           </EuiFlexItem>
 

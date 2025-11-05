@@ -8,7 +8,7 @@
     width: 100%;
     position: sticky;
     z-index: $euiZLevel3;
-    top: var(--euiFixedHeadersOffset, 0);
+    top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
     background: $euiPageBackgroundColor;
   }
 }

@@ -127,7 +127,7 @@ export const ApiKeyConfig: React.FC<{
         <></>
       ) : indexName === '' ? (
         <EuiCallOut
-          iconType="iInCircle"
+          iconType="info"
           title={i18n.translate(
             'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.waitingForAttachedIndex',
             {

@@ -741,6 +741,62 @@ describe('LensVisService attributes', () => {
     });
   });
 
+  it('should allow modifying attributes with getModifiedVisAttributes', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: false,
+      getModifiedVisAttributes: (attributes) => ({
+        ...attributes,
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      }),
+    });
+    expect(lensVis.visContext?.attributes).toEqual(
+      expect.objectContaining({
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      })
+    );
+  });
+
+  it('should not allow modifying attributes with getModifiedVisAttributes if externalVisContext is applied', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: false,
+    });
+    const lensVis2 = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: false,
+      externalVisContext: lensVis.visContext,
+      getModifiedVisAttributes: (attributes) => ({
+        ...attributes,
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      }),
+    });
+    expect(lensVis2.visContext?.attributes).not.toEqual(
+      expect.objectContaining({
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      })
+    );
+  });
+
   it('should return suggestion title', async () => {
     const lensVis = await getLensVisMock({
       filters,

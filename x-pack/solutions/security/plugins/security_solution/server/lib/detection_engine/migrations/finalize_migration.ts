@@ -16,7 +16,6 @@ import { updateMigrationSavedObject } from './update_migration_saved_object';
 /**
  * Finalizes a given migration:
  *   * validates that the migration has completed successfully
- *   * deletes the reindex task document
  *   * applies the deletion policy to the old index
  *   * swaps aliases on the old/new index
  *

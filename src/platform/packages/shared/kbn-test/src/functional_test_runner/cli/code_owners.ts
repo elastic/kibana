@@ -15,8 +15,6 @@ import ignore from 'ignore';
 
 const TEST_DIRECTORIES = [
   'test',
-  'x-pack/test',
-  'x-pack/test_serverless',
   'src/platform/test',
   'x-pack/platform/test',
   'x-pack/solutions/search/test',

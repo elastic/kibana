@@ -210,7 +210,7 @@ export const ConnectorSyncRules: React.FC = () => {
                       { defaultMessage: 'Configuration' }
                     )}
                     color="warning"
-                    iconType="iInCircle"
+                    iconType="info"
                   >
                     <EuiText size="s">
                       <p>

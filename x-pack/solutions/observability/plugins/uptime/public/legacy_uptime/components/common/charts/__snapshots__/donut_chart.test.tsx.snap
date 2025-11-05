@@ -31,6 +31,9 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
             "areaSeriesStyle": Object {
               "area": Object {
+                "dimmed": Object {
+                  "opacity": 0.25,
+                },
                 "opacity": 0.3,
                 "visible": true,
               },
@@ -59,11 +62,20 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": "auto",
               },
               "line": Object {
+                "dimmed": Object {
+                  "opacity": 0.25,
+                },
+                "focused": Object {
+                  "strokeWidth": 1,
+                },
                 "opacity": 1,
                 "strokeWidth": 2,
                 "visible": true,
               },
               "point": Object {
+                "dimmed": Object {
+                  "opacity": 0.25,
+                },
                 "fill": "__use__series__color__",
                 "opacity": 1,
                 "radius": 3,
@@ -180,6 +192,9 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
             "bubbleSeriesStyle": Object {
               "point": Object {
+                "dimmed": Object {
+                  "opacity": 0.25,
+                },
                 "fill": "__use__series__color__",
                 "opacity": 1,
                 "radius": 2,
@@ -432,11 +447,20 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": "auto",
               },
               "line": Object {
+                "dimmed": Object {
+                  "opacity": 0.25,
+                },
+                "focused": Object {
+                  "strokeWidth": 1,
+                },
                 "opacity": 1,
                 "strokeWidth": 2,
                 "visible": true,
               },
               "point": Object {
+                "dimmed": Object {
+                  "opacity": 0.25,
+                },
                 "fill": "__use__series__color__",
                 "opacity": 1,
                 "radius": 3,

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { fireEvent, screen } from '@testing-library/react';
 
 import { DeleteRuleModal } from './delete_rule_modal';
 
 describe('DeleteRuleModal', () => {
-  const deleteRuleAtIndex = jest.fn(() => {});
+  const deleteRuleAtIndex = jest.fn();
 
   const requiredProps = {
     ruleIndex: 0,
@@ -19,36 +20,49 @@ describe('DeleteRuleModal', () => {
   };
 
   test('renders as delete button when not visible', () => {
-    const props = {
-      ...requiredProps,
-    };
+    const { container } = renderWithI18n(<DeleteRuleModal {...requiredProps} />);
 
-    const component = shallowWithIntl(<DeleteRuleModal {...props} />);
-
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders modal after clicking delete rule link', () => {
-    const props = {
-      ...requiredProps,
-    };
+    const { container } = renderWithI18n(<DeleteRuleModal {...requiredProps} />);
 
-    const wrapper = shallowWithIntl(<DeleteRuleModal {...props} />);
-    wrapper.find('EuiLink').simulate('click');
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    // Find and click the delete link
+    const deleteLink = screen.getByTestId('deleteRuleModalLink');
+    fireEvent.click(deleteLink);
+
+    // Modal should be visible now
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders as delete button after opening and closing modal', () => {
-    const props = {
-      ...requiredProps,
-    };
+    const { container } = renderWithI18n(<DeleteRuleModal {...requiredProps} />);
 
-    const wrapper = shallowWithIntl(<DeleteRuleModal {...props} />);
-    wrapper.find('EuiLink').simulate('click');
-    const instance = wrapper.instance();
-    instance.closeModal();
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    // Open the modal
+    const deleteLink = screen.getByTestId('deleteRuleModalLink');
+    fireEvent.click(deleteLink);
+
+    // Find and click the cancel button
+    const cancelButton = screen.getByTestId('confirmModalCancelButton');
+    fireEvent.click(cancelButton);
+
+    // Modal should be closed now
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  test('calls deleteRuleAtIndex when confirm button is clicked', () => {
+    renderWithI18n(<DeleteRuleModal {...requiredProps} />);
+
+    // Open the modal
+    const deleteLink = screen.getByTestId('deleteRuleModalLink');
+    fireEvent.click(deleteLink);
+
+    // Find and click the delete button
+    const deleteButton = screen.getByTestId('confirmModalConfirmButton');
+    fireEvent.click(deleteButton);
+
+    // Verify the function was called with the correct index
+    expect(deleteRuleAtIndex).toHaveBeenCalledWith(0);
   });
 });

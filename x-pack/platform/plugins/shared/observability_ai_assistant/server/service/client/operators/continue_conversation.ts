@@ -7,23 +7,38 @@
 
 import { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
-import { last, pick, take } from 'lodash';
+import { last, omit, pick, take } from 'lodash';
 import {
   catchError,
   concat,
   EMPTY,
   from,
   isObservable,
+  map,
   Observable,
   of,
   OperatorFunction,
   shareReplay,
   switchMap,
+  tap,
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
-import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { Connector } from '@kbn/actions-plugin/server';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
+import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
+import type { ToolCallEvent } from '../../../analytics/tool_call';
+import { toolCallEventType } from '../../../analytics/tool_call';
+import {
+  CompatibleJSONSchema,
+  createFunctionNotFoundError,
+  Message,
+  MessageAddEvent,
+  MessageRole,
+  StreamingChatResponseEventType,
+} from '../../../../common';
 import {
   createFunctionLimitExceededError,
   MessageOrChatEvent,
@@ -40,7 +55,9 @@ import { extractMessages } from './extract_messages';
 
 const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
-function executeFunctionAndCatchError({
+const EXIT_LOOP_FUNCTION_NAME = 'exit_loop';
+
+export function executeFunctionAndCatchError({
   name,
   args,
   functionClient,
@@ -50,6 +67,9 @@ function executeFunctionAndCatchError({
   logger,
   connectorId,
   simulateFunctionCalling,
+  analytics,
+  connector,
+  scopes,
 }: {
   name: string;
   args: string | undefined;
@@ -60,6 +80,9 @@ function executeFunctionAndCatchError({
   logger: Logger;
   connectorId: string;
   simulateFunctionCalling: boolean;
+  analytics: AnalyticsServiceStart;
+  connector?: Connector;
+  scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -85,6 +108,13 @@ function executeFunctionAndCatchError({
   );
 
   return executeFunctionResponse$.pipe(
+    tap(() => {
+      analytics.reportEvent<ToolCallEvent>(toolCallEventType, {
+        toolName: name,
+        connector: getInferenceConnectorInfo(connector),
+        scopes,
+      });
+    }),
     catchError((error) => {
       logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
       // We want to catch the error only when a promise occurs
@@ -124,17 +154,42 @@ function executeFunctionAndCatchError({
   );
 }
 
-function getFunctionDefinitions({
+function getFunctionOptions({
   functionClient,
-  functionLimitExceeded,
   disableFunctions,
+  functionLimitExceeded,
 }: {
   functionClient: ChatFunctionClient;
-  functionLimitExceeded: boolean;
   disableFunctions: boolean;
-}) {
-  if (functionLimitExceeded || disableFunctions === true) {
-    return [];
+  functionLimitExceeded: boolean;
+}): {
+  functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+  functionCall?: string;
+} {
+  if (disableFunctions === true) {
+    return {};
+  }
+
+  if (functionLimitExceeded) {
+    return {
+      functionCall: EXIT_LOOP_FUNCTION_NAME,
+      functions: [
+        {
+          name: EXIT_LOOP_FUNCTION_NAME,
+          description: `You've run out of tool calls. Call this tool, and explain to the user you've run out of budget.`,
+          parameters: {
+            type: 'object',
+            properties: {
+              response: {
+                type: 'string',
+                description: 'Your textual response',
+              },
+            },
+            required: ['response'],
+          },
+        },
+      ],
+    };
   }
 
   const systemFunctions = functionClient
@@ -148,7 +203,7 @@ function getFunctionDefinitions({
     .concat(actions)
     .map((definition) => pick(definition, 'name', 'description', 'parameters'));
 
-  return allDefinitions;
+  return { functions: allDefinitions };
 }
 
 export function continueConversation({
@@ -163,6 +218,9 @@ export function continueConversation({
   disableFunctions,
   connectorId,
   simulateFunctionCalling,
+  analytics,
+  connector,
+  scopes,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -175,18 +233,22 @@ export function continueConversation({
   disableFunctions: boolean;
   connectorId: string;
   simulateFunctionCalling: boolean;
+  analytics: AnalyticsServiceStart;
+  connector?: Connector;
+  scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
   const functionLimitExceeded = functionCallsLeft <= 0;
 
-  const functionDefinitions = getFunctionDefinitions({
-    functionLimitExceeded,
+  const functionOptions = getFunctionOptions({
     functionClient,
     disableFunctions,
+    functionLimitExceeded,
   });
 
   const lastMessage = last(initialMessages)?.message;
+
   const isUserMessage = lastMessage?.role === MessageRole.User;
 
   return executeNextStep().pipe(handleEvents());
@@ -200,9 +262,9 @@ export function continueConversation({
 
       return chat(operationName, {
         messages: initialMessages,
-        functions: functionDefinitions,
         connectorId,
         stream: true,
+        ...functionOptions,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
@@ -278,12 +340,40 @@ export function continueConversation({
       logger,
       connectorId,
       simulateFunctionCalling,
+      analytics,
+      connector,
+      scopes,
     });
   }
 
   function handleEvents(): OperatorFunction<MessageOrChatEvent, MessageOrChatEvent> {
     return (events$) => {
-      const shared$ = events$.pipe(shareReplay());
+      const shared$ = events$.pipe(
+        shareReplay(),
+        map((event) => {
+          if (event.type === StreamingChatResponseEventType.MessageAdd) {
+            const message = event.message;
+
+            if (message.message.function_call?.name === EXIT_LOOP_FUNCTION_NAME) {
+              const args = JSON.parse(message.message.function_call.arguments ?? '{}') as {
+                response: string;
+              };
+
+              return {
+                ...event,
+                message: {
+                  ...message,
+                  message: {
+                    ...omit(message.message, 'function_call', 'content'),
+                    content: args.response ?? `The model returned an empty response`,
+                  },
+                },
+              } satisfies MessageAddEvent;
+            }
+          }
+          return event;
+        })
+      );
 
       return concat(
         shared$,
@@ -305,6 +395,9 @@ export function continueConversation({
               disableFunctions,
               connectorId,
               simulateFunctionCalling,
+              analytics,
+              connector,
+              scopes,
             });
           })
         )

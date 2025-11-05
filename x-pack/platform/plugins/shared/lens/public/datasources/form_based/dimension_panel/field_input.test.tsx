@@ -55,7 +55,6 @@ function getReferenceBasedOperationColumn(
     operationType: 'differences',
     isBucketed: false,
     references: ['colX'],
-    scale: 'ratio',
   };
 }
 
@@ -65,7 +64,6 @@ function getManagedBasedOperationColumn(): ReferenceBasedIndexPatternColumn {
     dataType: 'number',
     operationType: 'static_value',
     isBucketed: false,
-    scale: 'ratio',
     params: { value: 100 },
     references: [],
   } as ReferenceBasedIndexPatternColumn;

@@ -13,16 +13,18 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SlackActionParams, SlackSecrets } from '../types';
 import { PostMessageParams } from '../../../common/slack_api/types';
+import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
+import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 
 export const subtype = [
   {
-    id: '.slack',
+    id: SLACK_CONNECTOR_ID,
     name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {
       defaultMessage: 'Webhook',
     }),
   },
   {
-    id: '.slack_api',
+    id: SLACK_API_CONNECTOR_ID,
     name: i18n.translate('xpack.stackConnectors.components.slack.webApi', {
       defaultMessage: 'Web API',
     }),
@@ -31,7 +33,7 @@ export const subtype = [
 
 export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
-    id: '.slack',
+    id: SLACK_CONNECTOR_ID,
     subtype,
     modalWidth: 675,
     iconClass: 'logoSlack',

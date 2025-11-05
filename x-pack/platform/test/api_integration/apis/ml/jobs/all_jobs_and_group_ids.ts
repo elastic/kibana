@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('get all job and group IDs', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       for (const job of testSetupJobConfigs) {

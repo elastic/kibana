@@ -58,6 +58,7 @@ const verifySnapshotUpgrade = async (
   snapshot: { snapshotId: string; jobId: string }
 ): Promise<{
   isSuccessful: boolean;
+  hasDeprecation: boolean;
   error?: errors.ResponseError;
 }> => {
   const { snapshotId, jobId } = snapshot;
@@ -73,31 +74,26 @@ const verifySnapshotUpgrade = async (
     if (typeof mlSnapshotDeprecations === 'undefined' || mlSnapshotDeprecations.length === 0) {
       return {
         isSuccessful: true,
+        hasDeprecation: false,
       };
     }
 
-    const isSuccessful = Boolean(
-      mlSnapshotDeprecations.find((snapshotDeprecation) => {
-        // This regex will match all the bracket pairs from the deprecation message, at the moment
-        // that should match 3 pairs: snapshotId, jobId and version in which the snapshot was made.
-        const regex = /(?<=\[).*?(?=\])/g;
-        const matches = snapshotDeprecation.message.match(regex);
-
-        if (matches?.length === 3) {
-          // If there is no matching snapshot, we assume the deprecation was resolved successfully
-          return matches[0] === snapshotId && matches[1] === jobId ? false : true;
-        }
-
-        return false;
-      })
-    );
+    const hasDeprecation = mlSnapshotDeprecations.some((snapshotDeprecation) => {
+      // This regex will match all the bracket pairs from the deprecation message, at the moment
+      // that should match 3 pairs: snapshotId, jobId and version in which the snapshot was made.
+      const regex = /(?<=\[).*?(?=\])/g;
+      const matches = snapshotDeprecation.message.match(regex);
+      return matches?.length === 3 && matches[0] === snapshotId && matches[1] === jobId;
+    });
 
     return {
-      isSuccessful,
+      isSuccessful: !hasDeprecation,
+      hasDeprecation,
     };
   } catch (e) {
     return {
       isSuccessful: false,
+      hasDeprecation: false,
       error: e,
     };
   }
@@ -231,8 +227,24 @@ export function registerMlSnapshotRoutes({
 
         const foundSnapshots = await findMlOperation(savedObjectsClient, snapshotId);
 
-        // If snapshot is *not* found in SO, assume there has not been an upgrade operation started
+        // If snapshot is *not* found in SO can be because update operation was not started or was completed
         if (typeof foundSnapshots === 'undefined' || foundSnapshots.total === 0) {
+          const { hasDeprecation, isSuccessful } = await verifySnapshotUpgrade(esClient, {
+            snapshotId,
+            jobId,
+          });
+
+          if (isSuccessful && !hasDeprecation) {
+            // No deprecation exists for this snapshot and has been successfully upgraded, so it was already completed
+            return response.ok({
+              body: {
+                snapshotId,
+                jobId,
+                nodeId: undefined,
+                status: 'complete',
+              },
+            });
+          }
           return response.ok({
             body: {
               snapshotId,

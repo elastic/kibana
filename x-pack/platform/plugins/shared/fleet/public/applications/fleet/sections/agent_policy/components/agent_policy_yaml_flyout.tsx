@@ -102,7 +102,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
                 }
                 size="m"
                 color="primary"
-                iconType="iInCircle"
+                iconType="info"
               >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.secretsDescription"

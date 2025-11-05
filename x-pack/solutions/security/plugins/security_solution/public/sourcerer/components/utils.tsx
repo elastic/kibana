@@ -35,7 +35,7 @@ export const CurrentPatternsMessage = ({
             />
           }
         >
-          <EuiIcon type="questionInCircle" title={i18n.INACTIVE_PATTERNS} />
+          <EuiIcon type="question" title={i18n.INACTIVE_PATTERNS} />
         </EuiToolTip>
       ) : null,
     [activePatterns, deadPatterns.length, selectedPatterns, timelineType]

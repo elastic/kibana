@@ -21,7 +21,6 @@ import {
  * Eventhough security is disabled, this test checks the API behavior.
  */
 
-// eslint-disable-next-line import/no-default-export
 export default function createUpdateApiKeyTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 

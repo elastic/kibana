@@ -10,11 +10,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldHoverActionPopover } from './field_hover_popover_action';
 
 export interface FieldWithActionsProps {
   field: string;
   fieldMetadata?: PartialFieldMetadataPlain;
+  fieldMapping?: DataViewField;
   formattedValue: string;
   label: string;
   value: string;
@@ -26,6 +28,7 @@ export interface FieldWithActionsProps {
 export function FieldWithActions({
   field,
   fieldMetadata,
+  fieldMapping,
   formattedValue,
   label,
   value,
@@ -72,7 +75,12 @@ export function FieldWithActions({
 
         <EuiFlexItem grow={2}>
           {showActions ? (
-            <FieldHoverActionPopover title={value} value={value} field={field}>
+            <FieldHoverActionPopover
+              title={value}
+              value={value}
+              field={field}
+              fieldMapping={fieldMapping}
+            >
               {fieldContent}
             </FieldHoverActionPopover>
           ) : (

@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, ReactElement, useState, useMemo } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -51,8 +52,54 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>();
   const [labelPopoverDisabled, setLabelPopoverDisabled] = useState(false);
+
+  const [searchTerm, _setSearchTerm] = useState<string>(); // current value to show in the search input
+  const [searchTermDebounced, _setSearchTermDebounced] = useState<string>(); // debounced value to filter options less often when typing
+
+  const setSearchTermDebounced = useMemo(
+    () => debounce(_setSearchTermDebounced, 300),
+    [_setSearchTermDebounced]
+  );
+
+  const setSearchTerm = useCallback(
+    (value: string) => {
+      _setSearchTerm(value);
+      setSearchTermDebounced(value);
+    },
+    [_setSearchTerm, setSearchTermDebounced]
+  );
+
+  const filteredOptions = useMemo(
+    function filterOptionsForSearchValue() {
+      if (!searchable || !searchTermDebounced || !optionMatcher) {
+        return options;
+      }
+
+      return options.filter((option) => {
+        return optionMatcher({
+          option,
+          searchValue: searchTermDebounced,
+          normalizedSearchValue: searchTermDebounced,
+        });
+      });
+    },
+    [searchable, options, searchTermDebounced, optionMatcher]
+  );
+
+  const closePopover = useCallback(() => {
+    setIsOpen(false);
+    _setSearchTerm(undefined);
+    _setSearchTermDebounced(undefined);
+  }, [setIsOpen, _setSearchTerm, _setSearchTermDebounced]);
+
+  const togglePopover = useCallback(() => {
+    if (isOpen) {
+      closePopover();
+    } else {
+      setIsOpen(true);
+    }
+  }, [isOpen, closePopover, setIsOpen]);
 
   const disableLabelPopover = useCallback(() => setLabelPopoverDisabled(true), []);
 
@@ -70,10 +117,10 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       onChange?.(
         chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
       );
-      setIsOpen(false);
+      closePopover();
       disableLabelPopover();
     },
-    [disableLabelPopover, onChange]
+    [disableLabelPopover, onChange, closePopover]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
@@ -89,7 +136,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
                 defaultMessage: 'Search',
               }
             ),
-            onChange: (value) => setSearchTerm(value),
+            onChange: setSearchTerm,
           }
         : undefined,
     [dataTestSubj, searchable, setSearchTerm]
@@ -132,13 +179,13 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
             data-selected-value={dataSelectedValue}
             aria-label={popoverTitle}
             label={buttonLabel}
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={togglePopover}
             onBlur={enableLabelPopover}
           />
         </EuiToolTip>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>
@@ -147,9 +194,9 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
         singleSelection
         aria-label={popoverTitle}
         data-test-subj={`${dataTestSubj}Selectable`}
-        options={options}
+        isPreFiltered={searchable}
+        options={filteredOptions}
         onChange={onSelectionChange}
-        optionMatcher={optionMatcher}
         listProps={{
           truncationProps: { truncation: 'middle' },
           isVirtualized: searchable,

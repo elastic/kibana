@@ -171,7 +171,8 @@ export const getHttpInput = ({
     'ssl.supported_protocols': { type: 'yaml' },
     location_id: { value: 'fleet_managed', type: 'text' },
     location_name: { value: 'Fleet managed', type: 'text' },
-    ...commonVars,
+    max_attempts: { type: 'integer', value: 2 },
+    maintenance_windows: { type: 'yaml' },
     id: { type: 'text' },
     origin: { type: 'text' },
     ipv4: { type: 'bool', value: true },
@@ -285,6 +286,7 @@ export const getHttpInput = ({
     'check.response.status': ['200', '201'],
     ipv4: true,
     ipv6: true,
+    maintenance_windows: null,
     mode: 'any',
     ...(isTLSEnabled
       ? {

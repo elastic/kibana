@@ -145,6 +145,13 @@ const isExcludedAriaLabel = i18n.translate(
   }
 );
 
+const actionsLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.actionsLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
 const editLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.table.editLabel', {
   defaultMessage: 'Edit',
 });
@@ -233,7 +240,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
       <span>
         &nbsp;
         <EuiIconTip
-          type="questionInCircle"
+          type="question"
           color="primary"
           aria-label={additionalInfoAriaLabel}
           content={field.info.map((info: string, i: number) => (
@@ -477,7 +484,7 @@ class TableClass extends PureComponent<
         render: (value: string) => this.renderBooleanTemplate(value, isExcludedAriaLabel),
       },
       {
-        name: '',
+        name: actionsLabel,
         actions: [
           {
             name: editLabel,
@@ -488,16 +495,11 @@ class TableClass extends PureComponent<
             'data-test-subj': 'editFieldFormat',
             available: (field) => field.isUserEditable,
           },
-        ],
-        width: '40px',
-      },
-      {
-        name: '',
-        actions: [
           {
             name: deleteLabel,
             description: deleteDescription,
             icon: 'trash',
+            color: 'danger',
             onClick: (field) => {
               const toDelete = [field.name];
               if (field.spec?.runtimeField?.fields) {
@@ -513,7 +515,7 @@ class TableClass extends PureComponent<
             available: showDelete,
           },
         ],
-        width: '40px',
+        width: '80px',
       },
     ];
 

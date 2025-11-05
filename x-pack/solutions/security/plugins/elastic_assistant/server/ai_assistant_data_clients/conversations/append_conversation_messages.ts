@@ -5,98 +5,102 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 
-import { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
-import { getConversation } from './get_conversation';
+import type { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
+import type {
+  DocumentsDataWriter,
+  BulkOperationError,
+} from '../../lib/data_stream/documents_data_writer';
+import { transformESToConversations } from './transforms';
+import type { EsConversationSchema } from './types';
+import type { UpdateConversationSchema } from './update_conversation';
+import { getUpdateScript } from './helpers';
 
 export interface AppendConversationMessagesParams {
-  esClient: ElasticsearchClient;
+  dataWriter: DocumentsDataWriter;
   logger: Logger;
-  conversationIndex: string;
   existingConversation: ConversationResponse;
   messages: Message[];
+  authenticatedUser?: AuthenticatedUser;
 }
 
 export const appendConversationMessages = async ({
-  esClient,
+  dataWriter,
   logger,
-  conversationIndex,
   existingConversation,
   messages,
+  authenticatedUser,
 }: AppendConversationMessagesParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
+  const params = transformToUpdateScheme(
+    updatedAt,
+    [...(existingConversation.messages ?? []), ...messages],
+    existingConversation
+  );
 
-  const params = transformToUpdateScheme(updatedAt, [
-    ...(existingConversation.messages ?? []),
-    ...messages,
-  ]);
-  try {
-    const response = await esClient.updateByQuery({
-      conflicts: 'proceed',
-      index: conversationIndex,
-      query: {
-        ids: {
-          values: [existingConversation.id ?? ''],
-        },
-      },
-      refresh: true,
-      script: {
-        lang: 'painless',
-        params: {
-          ...params,
-        },
-        source: `
-          if (params.assignEmpty == true || params.containsKey('messages')) {
-            def messages = [];
-            for (message in params.messages) {
-              def newMessage = [:];
-              newMessage['@timestamp'] = message['@timestamp'];
-              newMessage.content = message.content;
-              newMessage.is_error = message.is_error;
-              newMessage.reader = message.reader;
-              newMessage.role = message.role;
-              if (message.trace_data != null) {
-                newMessage.trace_data = message.trace_data;
-              }
-              if (message.metadata != null) {
-                newMessage.metadata = message.metadata;
-              }
-              messages.add(newMessage);
-            }
-            ctx._source.messages = messages;
-          }
-          ctx._source.updated_at = params.updated_at;
-        `,
-      },
-    });
-    if (response.failures && response.failures.length > 0) {
-      logger.error(
-        `Error appending conversation messages: ${response.failures.map(
-          (f) => f.id
-        )} for conversation by ID: ${existingConversation.id}`
-      );
-      return null;
-    }
+  const { errors, docs_updated: docsUpdated } = await dataWriter.bulk<
+    UpdateConversationSchema,
+    never
+  >({
+    documentsToUpdate: [params],
+    getUpdateScript: (document: UpdateConversationSchema) =>
+      getUpdateScript({ conversation: document }),
+    authenticatedUser,
+  });
 
-    const updatedConversation = await getConversation({
-      esClient,
-      conversationIndex,
-      id: existingConversation.id,
-      logger,
-    });
-    return updatedConversation;
-  } catch (err) {
+  if (errors && errors.length > 0) {
     logger.error(
-      `Error appending conversation messages: ${err} for conversation by ID: ${existingConversation.id}`
+      `Error appending conversation messages: ${errors.map(
+        (err: BulkOperationError) => err.message
+      )} for conversation by ID: ${existingConversation.id}`
     );
-    throw err;
+    return null;
   }
+
+  const updatedConversation = transformESToConversations(
+    docsUpdated as EsConversationSchema[]
+  )?.[0];
+
+  return updatedConversation;
 };
 
-export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) => {
+export const transformToUpdateScheme = (
+  updatedAt: string,
+  messages: Message[],
+  existingConversation: ConversationResponse
+) => {
   return {
+    id: existingConversation.id,
     updated_at: updatedAt,
+    // Preserve all existing conversation fields
+    ...(existingConversation.title ? { title: existingConversation.title } : {}),
+    ...(existingConversation.apiConfig
+      ? {
+          api_config: {
+            action_type_id: existingConversation.apiConfig.actionTypeId,
+            connector_id: existingConversation.apiConfig.connectorId,
+            default_system_prompt_id: existingConversation.apiConfig.defaultSystemPromptId,
+            model: existingConversation.apiConfig.model,
+            provider: existingConversation.apiConfig.provider,
+          },
+        }
+      : {}),
+    ...(existingConversation.excludeFromLastConversationStorage != null
+      ? {
+          exclude_from_last_conversation_storage:
+            existingConversation.excludeFromLastConversationStorage,
+        }
+      : {}),
+    ...(existingConversation.replacements
+      ? {
+          replacements: Object.keys(existingConversation.replacements).map((key) => ({
+            uuid: key,
+            value: existingConversation.replacements?.[key] ?? '',
+          })),
+        }
+      : {}),
+    // Update messages with the new combined list
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
       content: message.content,

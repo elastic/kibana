@@ -25,6 +25,7 @@ export const auditbeatNoResults: PatternRollup = {
       managed: true,
       policy: 'auditbeat',
       phase: 'hot',
+      skip: true,
     },
     'auditbeat-custom-empty-index-1': {
       index: 'auditbeat-custom-empty-index-1',
@@ -90,6 +91,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       managed: true,
       policy: 'auditbeat',
       phase: 'hot',
+      skip: true,
     },
     'auditbeat-custom-empty-index-1': {
       index: 'auditbeat-custom-empty-index-1',

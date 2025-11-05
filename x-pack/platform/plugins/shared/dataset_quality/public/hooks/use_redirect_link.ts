@@ -6,13 +6,13 @@
  */
 
 import { AppStatus } from '@kbn/core-application-browser';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
-  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+  type SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
-  SingleDatasetLocatorParams,
-} from '@kbn/deeplinks-observability';
+} from '@kbn/deeplinks-observability/locators';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { AggregateQuery, Query, buildPhraseFilter } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, buildPhraseFilter } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -24,7 +24,7 @@ import { BasicDataStream, DataStreamSelector, TimeRangeConfig } from '../../comm
 import { useKibanaContextForPlugin } from '../utils';
 import { SendTelemetryFn } from './use_redirect_link_telemetry';
 
-export const useRedirectLink = <T extends BasicDataStream>({
+export const useRedirectLink = <T extends BasicDataStream | string>({
   dataStreamStat,
   query,
   timeRangeConfig,
@@ -74,6 +74,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
       !forceDiscover &&
       isLogsExplorerAppAccessible &&
       !!logsExplorerLocator &&
+      typeof dataStreamStat !== 'string' &&
       dataStreamStat.type === 'logs';
     const config = isLogsExplorerAvailable
       ? buildLogsExplorerConfig({
@@ -178,7 +179,7 @@ const buildLogsExplorerConfig = <T extends BasicDataStream>({
   return { routerLinkProps: logsExplorerLinkProps, navigate: navigateToLogsExplorer };
 };
 
-const buildDiscoverConfig = <T extends BasicDataStream>({
+const buildDiscoverConfig = <T extends BasicDataStream | string>({
   locatorClient,
   dataStreamStat,
   query,
@@ -198,28 +199,17 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
   navigate: () => void;
   routerLinkProps: RouterLinkProps;
 } => {
-  const dataViewNamespace = `${selector ? dataStreamStat.namespace : '*'}`;
-  const dataViewSelector = selector ? `${selector}` : '';
-  const dataViewId = `${dataStreamStat.type}-${dataStreamStat.name}-${dataViewNamespace}${dataViewSelector}`;
-  const dataViewTitle = dataStreamStat.integration
-    ? `[${dataStreamStat.integration.title}] ${dataStreamStat.name}-${dataViewNamespace}${dataViewSelector}`
-    : `${dataViewId}`;
+  const { dataViewId, dataViewTitle } = getDataView({
+    dataStreamStat,
+    selector,
+  });
 
-  const filters = selector
-    ? []
-    : [
-        buildPhraseFilter(
-          {
-            name: 'data_stream.namespace',
-            type: 'string',
-          },
-          dataStreamStat.namespace,
-          {
-            id: dataViewId,
-            title: dataViewTitle,
-          }
-        ),
-      ];
+  const filters = getFilters({
+    dataStreamStat,
+    dataViewId,
+    dataViewTitle,
+    selector,
+  });
 
   const params: DiscoverAppLocatorParams = {
     timeRange: {
@@ -258,4 +248,59 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
   });
 
   return { routerLinkProps: discoverLinkProps, navigate: navigateToDiscover };
+};
+
+const getDataView = <T extends BasicDataStream | string>({
+  dataStreamStat,
+  selector,
+}: {
+  dataStreamStat: T;
+  selector?: DataStreamSelector;
+}): { dataViewId: string; dataViewTitle: string } => {
+  if (dataStreamStat && typeof dataStreamStat === 'string') {
+    return { dataViewId: dataStreamStat, dataViewTitle: dataStreamStat };
+  }
+
+  const { name, namespace, type, integration } = dataStreamStat as BasicDataStream;
+
+  const dataViewNamespace = `${namespace || '*'}`;
+  const dataViewSelector = selector ? `${selector}` : '';
+  const dataViewId = `${type}-${name}-${dataViewNamespace}${dataViewSelector}`;
+  const dataViewTitle = integration
+    ? `[${integration.title}] ${name}-${dataViewNamespace}${dataViewSelector}`
+    : `${dataViewId}`;
+
+  return { dataViewId, dataViewTitle };
+};
+
+const getFilters = <T extends BasicDataStream | string>({
+  dataStreamStat,
+  dataViewId,
+  dataViewTitle,
+  selector,
+}: {
+  dataStreamStat: T;
+  dataViewId: string;
+  dataViewTitle: string;
+  selector?: DataStreamSelector;
+}): Filter[] => {
+  if (dataStreamStat && typeof dataStreamStat === 'string') {
+    return [];
+  }
+
+  return selector
+    ? []
+    : [
+        buildPhraseFilter(
+          {
+            name: 'data_stream.namespace',
+            type: 'string',
+          },
+          (dataStreamStat as BasicDataStream).namespace,
+          {
+            id: dataViewId,
+            title: dataViewTitle,
+          }
+        ),
+      ];
 };

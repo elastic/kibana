@@ -182,7 +182,7 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
               defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
             })}
           >
-            <EuiIcon size="m" color="subdued" type="iInCircle" />
+            <EuiIcon size="m" color="subdued" type="info" />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
