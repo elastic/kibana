@@ -71,7 +71,7 @@ export function LogsOverviewHeader({
     <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center" wrap={true}>
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
-        renderFlyoutStreamProcessingLink({ doc: hit })}
+        renderFlyoutStreamProcessingLink({ dataView, doc: hit })}
       {formattedDoc[fieldConstants.LOG_LEVEL_FIELD] && (
         <HoverActionPopover
           value={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]}

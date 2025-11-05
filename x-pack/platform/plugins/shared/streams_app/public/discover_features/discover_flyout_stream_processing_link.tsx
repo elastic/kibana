@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import {
   EuiLoadingSpinner,
@@ -19,18 +19,25 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
-import type { SampleDocument } from '@kbn/streams-schema';
+import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { isMetadataField } from '@kbn/fields-metadata-plugin/common';
 import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
+  dataView: DataView;
   doc: DataTableRecord;
+  fieldFormats: FieldFormatsStart;
   locator: StreamsAppLocator;
   streamsRepositoryClient: StreamsRepositoryClient;
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
+  dataView,
   doc,
+  fieldFormats,
   locator,
   streamsRepositoryClient,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
@@ -44,6 +51,8 @@ export function DiscoverFlyoutStreamProcessingLink({
 
   if (!value || error) return null;
 
+  const formattedDoc = formatDoc(doc, dataView, fieldFormats);
+
   const href = locator.getRedirectUrl({
     name: value,
     managementTab: 'processing',
@@ -56,7 +65,7 @@ export function DiscoverFlyoutStreamProcessingLink({
           name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
             defaultMessage: 'Discover document',
           }),
-          documents: [doc.flattened as SampleDocument],
+          documents: [formattedDoc],
           storageKey: `streams:${value}__discover-document`,
         },
       ],
@@ -85,4 +94,15 @@ export function DiscoverFlyoutStreamProcessingLink({
       </EuiToolTip>
     </EuiLink>
   );
+}
+
+function formatDoc(doc: DataTableRecord, dataView: DataView, fieldFormats: FieldFormatsStart) {
+  const fieldsToFormat = Object.keys(doc.flattened).filter(
+    (fieldName) => !isMetadataField(fieldName) && fieldName !== '_score'
+  );
+
+  return getFormattedFields(doc, fieldsToFormat, {
+    dataView,
+    fieldFormats,
+  });
 }

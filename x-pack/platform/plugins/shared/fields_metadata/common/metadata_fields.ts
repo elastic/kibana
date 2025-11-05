@@ -121,3 +121,5 @@ export const MetadataFields = {
       'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-tier-field.html',
   },
 };
+
+export const MetadataFieldNames = Object.keys(MetadataFields);
