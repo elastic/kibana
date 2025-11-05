@@ -14,6 +14,6 @@ test.describe('App Features for Security Complete', { tag: ['@svlSecurity'] }, (
 
   test('should have AI Assistant available', async ({ page, pageObjects }) => {
     await page.gotoApp('security', { path: '/get_started' });
-    await expect(pageObjects.assistantPage.assistantButton).toBeVisible();
+    await expect(pageObjects.assistantPage.locators.assistantButton).toBeVisible();
   });
 });

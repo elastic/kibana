@@ -36,7 +36,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         await page.gotoApp('security', { path: '/get_started' });
         await pageObjects.assistantPage.open();
-        await pageObjects.assistantPage.expectNewConversation(true, 'New chat');
+        await pageObjects.assistantPage.assertions.expectNewConversation(true, 'New chat');
       }
     );
 
@@ -47,8 +47,8 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Create OpenAI connector through the UI
-        await pageObjects.assistantPage.createOpenAIConnector('My OpenAI Connector');
-        await pageObjects.assistantPage.expectConnectorSelected('My OpenAI Connector');
+        await pageObjects.assistantPage.connectors.createOpenAIConnector('My OpenAI Connector');
+        await pageObjects.assistantPage.assertions.expectConnectorSelected('My OpenAI Connector');
       }
     );
   }
@@ -83,9 +83,9 @@ spaceTest.describe(
       await page.gotoApp('security', { path: '/get_started' });
       await pageObjects.assistantPage.open();
 
-      await pageObjects.assistantPage.expectNewConversation(false, 'New chat');
-      await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
-      await pageObjects.assistantPage.expectUserPromptEmpty();
+      await pageObjects.assistantPage.assertions.expectNewConversation(false, 'New chat');
+      await pageObjects.assistantPage.assertions.expectConnectorSelected(azureConnectorName);
+      await pageObjects.assistantPage.assertions.expectUserPromptEmpty();
     });
 
     spaceTest(
@@ -110,9 +110,9 @@ spaceTest.describe(
         // Open assistant from rule context
         await pageObjects.assistantPage.openFromRule();
 
-        await pageObjects.assistantPage.expectConversationTitle(`Detection Rules - ${ruleName}`);
-        await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
-        await pageObjects.assistantPage.expectPromptContext(0, RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
+        await pageObjects.assistantPage.assertions.expectConversationTitle(`Detection Rules - ${ruleName}`);
+        await pageObjects.assistantPage.assertions.expectConnectorSelected(azureConnectorName);
+        await pageObjects.assistantPage.assertions.expectPromptContext(0, RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
       }
     );
 
@@ -156,9 +156,9 @@ spaceTest.describe(
         // Open assistant from alert context
         await pageObjects.assistantPage.openFromAlert();
 
-        await pageObjects.assistantPage.expectConversationTitleContains('New Rule Test');
-        await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
-        await pageObjects.assistantPage.expectPromptContext(0, 'Alert (from summary)');
+        await pageObjects.assistantPage.assertions.expectConversationTitleContains('New Rule Test');
+        await pageObjects.assistantPage.assertions.expectConnectorSelected(azureConnectorName);
+        await pageObjects.assistantPage.assertions.expectPromptContext(0, 'Alert (from summary)');
       }
     );
 
@@ -177,10 +177,10 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Select the conversation
-        await pageObjects.assistantPage.selectConversation(mockConvo.title);
+        await pageObjects.assistantPage.conversations.selectConversation(mockConvo.title);
 
         // Should show missing connector callout
-        await expect(pageObjects.assistantPage.connectorMissingCallout).toBeVisible();
+        await expect(pageObjects.assistantPage.locators.connectorMissingCallout).toBeVisible();
       }
     );
   }
@@ -272,10 +272,10 @@ spaceTest.describe.serial(
 
         // Open assistant from alert context
         await pageObjects.assistantPage.openFromAlert();
-        await pageObjects.assistantPage.expectConversationTitleContains('New Rule Test');
+        await pageObjects.assistantPage.assertions.expectConversationTitleContains('New Rule Test');
 
         // Send a message to ensure conversation is created
-        await pageObjects.assistantPage.submitMessage();
+        await pageObjects.assistantPage.messaging.submitMessage();
 
         // Close assistant and alert flyout before navigating to different page
         await pageObjects.assistantPage.close();
@@ -284,7 +284,7 @@ spaceTest.describe.serial(
 
         // Open assistant again - should show last conversation
         await pageObjects.assistantPage.open();
-        await pageObjects.assistantPage.expectConversationTitleContains('New Rule Test');
+        await pageObjects.assistantPage.assertions.expectConversationTitleContains('New Rule Test');
 
         // Close assistant before test ends to ensure clean state for afterEach cleanup
         await pageObjects.assistantPage.close();
@@ -301,42 +301,42 @@ spaceTest.describe.serial(
         await pageObjects.assistantPage.open();
 
         // Select first conversation and send message
-        await pageObjects.assistantPage.selectConversation(mockConvo1Title);
-        await pageObjects.assistantPage.selectConnector(azureConnectorName);
-        await pageObjects.assistantPage.typeAndSendMessage('hello');
-        await pageObjects.assistantPage.expectMessageSent('hello');
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.conversations.selectConversation(mockConvo1Title);
+        await pageObjects.assistantPage.connectors.selectConnector(azureConnectorName);
+        await pageObjects.assistantPage.messaging.typeAndSendMessage('hello');
+        await pageObjects.assistantPage.assertions.expectMessageSent('hello');
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
 
         // Select second conversation and send message
-        await pageObjects.assistantPage.selectConversation(mockConvo2Title);
-        await pageObjects.assistantPage.selectConnector(bedrockConnectorName);
-        await pageObjects.assistantPage.typeAndSendMessage('goodbye');
-        await pageObjects.assistantPage.expectMessageSent('goodbye');
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.conversations.selectConversation(mockConvo2Title);
+        await pageObjects.assistantPage.connectors.selectConnector(bedrockConnectorName);
+        await pageObjects.assistantPage.messaging.typeAndSendMessage('goodbye');
+        await pageObjects.assistantPage.assertions.expectMessageSent('goodbye');
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
 
         // Switch back to first conversation - should retain state
-        await pageObjects.assistantPage.selectConversation(mockConvo1Title);
+        await pageObjects.assistantPage.conversations.selectConversation(mockConvo1Title);
         // Wait for conversation to fully load before checking state
         // Wait for connector selector to be visible as an indicator that conversation has loaded
-        await pageObjects.assistantPage.connectorSelector
+        await pageObjects.assistantPage.locators.connectorSelector
           .waitFor({ state: 'visible', timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
           .catch(() => {
             // Ignore timeout - continue anyway
           });
-        await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
-        await pageObjects.assistantPage.expectMessageSent('hello');
+        await pageObjects.assistantPage.assertions.expectConnectorSelected(azureConnectorName);
+        await pageObjects.assistantPage.assertions.expectMessageSent('hello');
 
         // Switch back to second conversation - should retain state
-        await pageObjects.assistantPage.selectConversation(mockConvo2Title);
+        await pageObjects.assistantPage.conversations.selectConversation(mockConvo2Title);
         // Wait for conversation to fully load before checking state
         // Wait for connector selector to be visible as an indicator that conversation has loaded
-        await pageObjects.assistantPage.connectorSelector
+        await pageObjects.assistantPage.locators.connectorSelector
           .waitFor({ state: 'visible', timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
           .catch(() => {
             // Ignore timeout - continue anyway
           });
-        await pageObjects.assistantPage.expectConnectorSelected(bedrockConnectorName);
-        await pageObjects.assistantPage.expectMessageSent('goodbye');
+        await pageObjects.assistantPage.assertions.expectConnectorSelected(bedrockConnectorName);
+        await pageObjects.assistantPage.assertions.expectMessageSent('goodbye');
       }
     );
 
@@ -347,7 +347,7 @@ spaceTest.describe.serial(
         await pageObjects.assistantPage.open();
 
         // Create and title a new conversation
-        await pageObjects.assistantPage.createAndTitleConversation('Something else');
+        await pageObjects.assistantPage.conversations.createAndTitleConversation('Something else');
       }
     );
   }

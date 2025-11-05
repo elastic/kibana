@@ -81,19 +81,19 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Assert no prompt is selected by default
-        await pageObjects.assistantPage.expectEmptySystemPrompt();
+        await pageObjects.assistantPage.assertions.expectEmptySystemPrompt();
 
         // Select custom prompt 2
-        await pageObjects.assistantPage.selectSystemPrompt(customPrompt2.name);
-        await pageObjects.assistantPage.expectSystemPromptSelected(customPrompt2.name);
+        await pageObjects.assistantPage.prompts.selectSystemPrompt(customPrompt2.name);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSelected(customPrompt2.name);
 
         // Select custom prompt 1
-        await pageObjects.assistantPage.selectSystemPrompt(customPrompt1.name);
-        await pageObjects.assistantPage.expectSystemPromptSelected(customPrompt1.name);
+        await pageObjects.assistantPage.prompts.selectSystemPrompt(customPrompt1.name);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSelected(customPrompt1.name);
 
         // Clear the system prompt
-        await pageObjects.assistantPage.clearSystemPrompt();
-        await pageObjects.assistantPage.expectEmptySystemPrompt();
+        await pageObjects.assistantPage.prompts.clearSystemPrompt();
+        await pageObjects.assistantPage.assertions.expectEmptySystemPrompt();
       }
     );
 
@@ -104,34 +104,34 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Select a system prompt
-        await pageObjects.assistantPage.selectSystemPrompt(customPrompt2.name);
+        await pageObjects.assistantPage.prompts.selectSystemPrompt(customPrompt2.name);
 
         // Clear the system prompt
-        await pageObjects.assistantPage.clearSystemPrompt();
+        await pageObjects.assistantPage.prompts.clearSystemPrompt();
 
         // Send a message
-        await pageObjects.assistantPage.typeAndSendMessage('hello');
+        await pageObjects.assistantPage.messaging.typeAndSendMessage('hello');
 
         // Assert message was sent without system prompt
-        await pageObjects.assistantPage.expectMessageSent('hello');
+        await pageObjects.assistantPage.assertions.expectMessageSent('hello');
 
         // Wait for error response (expected in test environment)
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
 
         // Reset the conversation
-        await pageObjects.assistantPage.resetConversation();
+        await pageObjects.assistantPage.conversations.resetConversation();
 
         // Verify system prompt is still empty
-        await pageObjects.assistantPage.expectEmptySystemPrompt();
+        await pageObjects.assistantPage.assertions.expectEmptySystemPrompt();
 
         // Send another message
-        await pageObjects.assistantPage.typeAndSendMessage('hello');
+        await pageObjects.assistantPage.messaging.typeAndSendMessage('hello');
 
         // Assert message was sent
-        await pageObjects.assistantPage.expectMessageSent('hello');
+        await pageObjects.assistantPage.assertions.expectMessageSent('hello');
 
         // Wait for error response
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
       }
     );
 
@@ -143,43 +143,43 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Select first conversation
-        await pageObjects.assistantPage.selectConversation(mockConvo1.title);
+        await pageObjects.assistantPage.conversations.selectConversation(mockConvo1.title);
 
         // Select the Azure connector
-        await pageObjects.assistantPage.selectConnector('Azure OpenAI Scout test connector');
+        await pageObjects.assistantPage.connectors.selectConnector('Azure OpenAI Scout test connector');
 
         // Select a system prompt
-        await pageObjects.assistantPage.selectSystemPrompt(customPrompt2.name);
+        await pageObjects.assistantPage.prompts.selectSystemPrompt(customPrompt2.name);
 
         // Send a message
-        await pageObjects.assistantPage.typeAndSendMessage('hello');
+        await pageObjects.assistantPage.messaging.typeAndSendMessage('hello');
 
         // Assert system prompt was sent
-        await pageObjects.assistantPage.expectSystemPromptSent(customPrompt2.content);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSent(customPrompt2.content);
 
         // Assert message was sent after system prompt
-        await pageObjects.assistantPage.expectMessageSent('hello', true);
+        await pageObjects.assistantPage.assertions.expectMessageSent('hello', true);
 
         // Wait for error response
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
 
         // Reset the conversation
-        await pageObjects.assistantPage.resetConversation();
+        await pageObjects.assistantPage.conversations.resetConversation();
 
         // Verify system prompt persists
-        await pageObjects.assistantPage.expectSystemPromptSelected(customPrompt2.name);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSelected(customPrompt2.name);
 
         // Switch to second conversation
-        await pageObjects.assistantPage.selectConversation(mockConvo2.title);
+        await pageObjects.assistantPage.conversations.selectConversation(mockConvo2.title);
 
         // Verify no system prompt is selected
-        await pageObjects.assistantPage.expectEmptySystemPrompt();
+        await pageObjects.assistantPage.assertions.expectEmptySystemPrompt();
 
         // Switch back to first conversation
-        await pageObjects.assistantPage.selectConversation(mockConvo1.title);
+        await pageObjects.assistantPage.conversations.selectConversation(mockConvo1.title);
 
         // Verify system prompt is still selected
-        await pageObjects.assistantPage.expectSystemPromptSelected(customPrompt2.name);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSelected(customPrompt2.name);
       }
     );
 
@@ -190,26 +190,26 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Create a system prompt without setting default conversations
-        await pageObjects.assistantPage.createSystemPrompt(testPrompt.name, testPrompt.content);
+        await pageObjects.assistantPage.prompts.createSystemPrompt(testPrompt.name, testPrompt.content);
 
         // Verify the prompt is not automatically selected (no default conversation was set)
-        await pageObjects.assistantPage.expectEmptySystemPrompt();
+        await pageObjects.assistantPage.assertions.expectEmptySystemPrompt();
 
         // Manually select the created prompt
-        await pageObjects.assistantPage.selectSystemPrompt(testPrompt.name);
-        await pageObjects.assistantPage.expectSystemPromptSelected(testPrompt.name);
+        await pageObjects.assistantPage.prompts.selectSystemPrompt(testPrompt.name);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSelected(testPrompt.name);
 
         // Send a message
-        await pageObjects.assistantPage.typeAndSendMessage('hello');
+        await pageObjects.assistantPage.messaging.typeAndSendMessage('hello');
 
         // Assert system prompt was sent
-        await pageObjects.assistantPage.expectSystemPromptSent(testPrompt.content);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSent(testPrompt.content);
 
         // Assert message was sent after system prompt
-        await pageObjects.assistantPage.expectMessageSent('hello', true);
+        await pageObjects.assistantPage.assertions.expectMessageSent('hello', true);
 
         // Wait for error response
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
       }
     );
 
@@ -221,52 +221,52 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Create first titled conversation
-        await pageObjects.assistantPage.createAndTitleConversation('Lucky title');
-        await pageObjects.assistantPage.resetConversation();
+        await pageObjects.assistantPage.conversations.createAndTitleConversation('Lucky title');
+        await pageObjects.assistantPage.conversations.resetConversation();
 
         // Create second titled conversation
-        await pageObjects.assistantPage.createAndTitleConversation('Lovely title');
-        await pageObjects.assistantPage.resetConversation();
+        await pageObjects.assistantPage.conversations.createAndTitleConversation('Lovely title');
+        await pageObjects.assistantPage.conversations.resetConversation();
 
         // Current conversation is 'Lovely title'
         // Create system prompt and set it as default for both conversations
-        await pageObjects.assistantPage.createSystemPrompt(testPrompt.name, testPrompt.content, [
+        await pageObjects.assistantPage.prompts.createSystemPrompt(testPrompt.name, testPrompt.content, [
           'Lucky title',
           'Lovely title',
         ]);
 
         // Verify the prompt is automatically selected (current conversation is in default list)
-        await pageObjects.assistantPage.expectSystemPromptSelected(testPrompt.name);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSelected(testPrompt.name);
 
         // Send a message
-        await pageObjects.assistantPage.typeAndSendMessage('hello');
+        await pageObjects.assistantPage.messaging.typeAndSendMessage('hello');
 
         // Assert system prompt was sent
-        await pageObjects.assistantPage.expectSystemPromptSent(testPrompt.content);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSent(testPrompt.content);
 
         // Assert message was sent after system prompt
-        await pageObjects.assistantPage.expectMessageSent('hello', true);
+        await pageObjects.assistantPage.assertions.expectMessageSent('hello', true);
 
         // Wait for error response before switching conversations
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
 
         // Switch to 'Lucky title' conversation
-        await pageObjects.assistantPage.selectConversation('Lucky title');
+        await pageObjects.assistantPage.conversations.selectConversation('Lucky title');
 
         // Verify the prompt is also selected in this conversation
-        await pageObjects.assistantPage.expectSystemPromptSelected(testPrompt.name);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSelected(testPrompt.name);
 
         // Send another message
-        await pageObjects.assistantPage.typeAndSendMessage('hello');
+        await pageObjects.assistantPage.messaging.typeAndSendMessage('hello');
 
         // Assert system prompt was sent
-        await pageObjects.assistantPage.expectSystemPromptSent(testPrompt.content);
+        await pageObjects.assistantPage.assertions.expectSystemPromptSent(testPrompt.content);
 
         // Assert message was sent after system prompt
-        await pageObjects.assistantPage.expectMessageSent('hello', true);
+        await pageObjects.assistantPage.assertions.expectMessageSent('hello', true);
 
         // Wait for error response
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
       }
     );
   }
@@ -313,19 +313,19 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Create a quick prompt
-        await pageObjects.assistantPage.createQuickPrompt(testPrompt.name, testPrompt.content);
+        await pageObjects.assistantPage.prompts.createQuickPrompt(testPrompt.name, testPrompt.content);
 
         // Verify quick prompt badge is visible
-        await pageObjects.assistantPage.expectQuickPromptVisible(testPrompt.name);
+        await pageObjects.assistantPage.assertions.expectQuickPromptVisible(testPrompt.name);
 
         // Send the quick prompt
-        await pageObjects.assistantPage.sendQuickPrompt(testPrompt.name);
+        await pageObjects.assistantPage.prompts.sendQuickPrompt(testPrompt.name);
 
         // Assert the prompt content was sent as a message
-        await pageObjects.assistantPage.expectMessageSent(testPrompt.content);
+        await pageObjects.assistantPage.assertions.expectMessageSent(testPrompt.content);
 
         // Wait for error response
-        await pageObjects.assistantPage.expectErrorResponse();
+        await pageObjects.assistantPage.assertions.expectErrorResponse();
       }
     );
 
@@ -336,12 +336,12 @@ spaceTest.describe(
         await pageObjects.assistantPage.open();
 
         // Create a quick prompt with 'Alert (from view)' context
-        await pageObjects.assistantPage.createQuickPrompt(testPrompt.name, testPrompt.content, [
+        await pageObjects.assistantPage.prompts.createQuickPrompt(testPrompt.name, testPrompt.content, [
           'Alert (from view)',
         ]);
 
         // Verify the quick prompt badge is NOT visible in the general context
-        await pageObjects.assistantPage.expectQuickPromptNotVisible(testPrompt.name);
+        await pageObjects.assistantPage.assertions.expectQuickPromptNotVisible(testPrompt.name);
 
         // Create a detection rule to generate alerts
         const timestamp = Date.now();
@@ -388,13 +388,13 @@ spaceTest.describe(
         await pageObjects.assistantPage.openFromAlert();
 
         // Verify the quick prompt badge IS visible in alert context
-        await pageObjects.assistantPage.expectQuickPromptVisible(testPrompt.name);
+        await pageObjects.assistantPage.assertions.expectQuickPromptVisible(testPrompt.name);
 
         // Click the quick prompt badge
-        await pageObjects.assistantPage.quickPromptBadge(testPrompt.name).click();
+        await pageObjects.assistantPage.locators.quickPromptBadge(testPrompt.name).click();
 
         // Verify the prompt content is in the user prompt textarea
-        await pageObjects.assistantPage.expectUserPromptText(testPrompt.content);
+        await pageObjects.assistantPage.assertions.expectUserPromptText(testPrompt.content);
       }
     );
 

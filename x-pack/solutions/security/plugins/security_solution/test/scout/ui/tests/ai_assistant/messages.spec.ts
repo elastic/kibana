@@ -94,10 +94,10 @@ spaceTest.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, (
       await assistantPage.open();
 
       // Select the conversation with the KQL query
-      await assistantPage.selectConversation(mockConvo.title);
+      await assistantPage.conversations.selectConversation(mockConvo.title);
 
       // Verify "Send to Timeline" button is disabled on Get Started page
-      await expect(assistantPage.sendToTimelineButton).toBeDisabled();
+      await expect(assistantPage.locators.sendToTimelineButton).toBeDisabled();
 
       // Navigate to Cases page (which has timeline)
       await page.gotoApp('security/cases');
@@ -112,7 +112,7 @@ spaceTest.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, (
       await assistantPage.open();
 
       // Send the query to timeline
-      await assistantPage.sendQueryToTimeline();
+      await assistantPage.messaging.sendQueryToTimeline();
 
       // Verify the timeline query is populated with the expected query
       await pageObjects.timelinePage.expectQueryText(mockTimelineQuery);

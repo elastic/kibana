@@ -38,10 +38,10 @@ spaceTest.describe.skip('AI Assistant - Basic License', { tag: ['@ess'] }, () =>
       await pageObjects.assistantPage.open();
 
       // Verify upgrade callout is visible
-      await pageObjects.assistantPage.expectUpgradeCallout();
+      await pageObjects.assistantPage.assertions.expectUpgradeCallout();
 
       // Verify conversation is read-only
-      await pageObjects.assistantPage.expectConversationReadOnly();
+      await pageObjects.assistantPage.assertions.expectConversationReadOnly();
     }
   );
 });

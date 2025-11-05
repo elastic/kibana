@@ -16,6 +16,6 @@ spaceTest.describe('App Features for Security Essentials', { tag: ['@svlSecurity
     await page.gotoApp('security', { path: '/get_started' });
 
     // AI Assistant button should not be visible in Security Essentials tier
-    await expect(pageObjects.assistantPage.assistantButton).not.toBeVisible();
+    await expect(pageObjects.assistantPage.locators.assistantButton).not.toBeVisible();
   });
 });

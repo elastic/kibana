@@ -10,7 +10,7 @@ import { createLazyPageObject } from '@kbn/scout';
 import { AlertsTablePage } from './alerts_table';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { SecurityNavigation } from './security_navigation';
-import { AssistantPage } from './assistant_page';
+import { AssistantPage } from './assistant';
 import { SecurityCommonPage } from './security_common';
 import { RulesManagementPage } from './rules_management_page';
 import { TimelinePage } from './timeline_page';
