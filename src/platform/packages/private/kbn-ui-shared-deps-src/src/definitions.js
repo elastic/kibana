@@ -134,7 +134,7 @@ const externals = {
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
-  '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
+  '@kbn/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
   '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',

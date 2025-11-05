@@ -74,6 +74,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
           bannerId.current,
           toMountPoint(
             <EuiCallOut
+              announceOnMount
               color="warning"
               iconType="info"
               title={

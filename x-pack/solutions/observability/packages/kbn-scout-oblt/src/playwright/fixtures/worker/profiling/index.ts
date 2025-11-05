@@ -12,6 +12,10 @@ import { format as formatUrl } from 'url';
 import { ProfilingUsername } from './create_profiling_users/authentication';
 import { PROFILING_TEST_PASSWORD } from './create_profiling_users/authentication';
 import { createProfilingApiClient } from './api_supertest';
+
+export { profilingSetupFixture } from './profiling_setup_fixture';
+export type { ProfilingSetupFixture } from './profiling_setup_fixture';
+
 export interface ProfilingClientFixture {
   adminUser(options: {
     endpoint: string;
@@ -65,3 +69,4 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
     { scope: 'worker' },
   ],
 });
+

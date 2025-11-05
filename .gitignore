@@ -22,6 +22,7 @@ target
 .claude
 .cursor
 .windsurf
+claude.md
 *.iml
 *.log
 types.eslint.config.js
@@ -66,7 +67,7 @@ webpackstats.json
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
-!/config/serverless.workplace_ai.yml
+!/config/serverless.workplaceai.yml
 !/config/serverless.oblt.yml
 !/config/serverless.oblt.complete.yml
 !/config/serverless.oblt.logs_essentials.yml

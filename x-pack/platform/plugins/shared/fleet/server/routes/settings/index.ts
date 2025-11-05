@@ -65,6 +65,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             request: GetSpaceSettingsRequestSchema,
             response: {
               200: {
+                description: 'OK: A successful request.',
                 body: () => SpaceSettingsResponseSchema,
               },
             },
@@ -96,6 +97,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             request: PutSpaceSettingsRequestSchema,
             response: {
               200: {
+                description: 'OK: A successful request.',
                 body: () => SpaceSettingsResponseSchema,
               },
             },
@@ -125,12 +127,15 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetSettingsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => SettingsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: notFoundResponse,
             },
           },
@@ -158,12 +163,15 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: PutSettingsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => SettingsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: notFoundResponse,
             },
           },
@@ -191,9 +199,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetEnrollmentSettingsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetEnrollmentSettingsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

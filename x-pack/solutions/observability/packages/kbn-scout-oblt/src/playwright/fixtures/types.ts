@@ -13,7 +13,7 @@ import type {
   ScoutWorkerFixtures,
 } from '@kbn/scout';
 import type { ObltPageObjects } from '../page_objects';
-import type { SloDataFixture, ProfilingClientFixture } from './worker';
+import type { SloDataFixture, ProfilingSetupFixture, ProfilingClientFixture } from './worker';
 
 export interface ObltTestFixtures extends ScoutTestFixtures {
   pageObjects: ObltPageObjects;
@@ -25,6 +25,7 @@ export interface ObltWorkerFixtures extends ScoutWorkerFixtures {
   apiServices: ObltApiServicesFixture;
   sloData: SloDataFixture;
   profilingClient: ProfilingClientFixture;
+  profilingSetup: ProfilingSetupFixture;
 }
 
 export interface ObltParallelTestFixtures extends ScoutParallelTestFixtures {
@@ -34,4 +35,5 @@ export interface ObltParallelTestFixtures extends ScoutParallelTestFixtures {
 export interface ObltParallelWorkerFixtures extends ScoutParallelWorkerFixtures {
   apiServices: ObltApiServicesFixture;
   profilingClient: ProfilingClientFixture;
+  profilingSetup: ProfilingSetupFixture;
 }

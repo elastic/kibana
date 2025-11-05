@@ -23,7 +23,7 @@ const defaultMonacoYamlOptions: MonacoYamlOptions = {
 };
 
 interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
-  onChange: (value: string | undefined) => void;
+  onChange: (value: string) => void;
   schemas: MonacoYamlOptions['schemas'] | null;
 }
 
@@ -67,5 +67,4 @@ export const YamlEditor = React.memo(({ value, onChange, ...props }: YamlEditorP
     <CodeEditor languageId="yaml" value={internalValue} onChange={onChangeInternal} {...props} />
   );
 });
-
 YamlEditor.displayName = 'YamlEditor';
