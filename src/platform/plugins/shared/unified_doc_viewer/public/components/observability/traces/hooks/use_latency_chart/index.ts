@@ -45,43 +45,6 @@ export function getTransactionDistributionChartData({
   return transactionDistributionChartData;
 }
 
-interface GetLatencyChartParams {
-  core: CoreStart;
-  signal: AbortSignal;
-  transactionName: string;
-  transactionType: string;
-  serviceName: string;
-}
-
-const getTransactionLatencyChart = ({
-  core,
-  signal,
-  transactionName,
-  transactionType,
-  serviceName,
-}: GetLatencyChartParams): Promise<{
-  overallHistogram?: HistogramItem[];
-  percentileThresholdValue?: number;
-}> => {
-  const { data } = getUnifiedDocViewerServices();
-  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
-
-  return core.http.post('/internal/apm/latency/overall_distribution/transactions', {
-    body: JSON.stringify({
-      transactionName,
-      transactionType,
-      serviceName,
-      chartType: 'transactionLatency',
-      end: timeFilter.to,
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      percentileThreshold: 95,
-      start: timeFilter.from,
-    }),
-    signal,
-  });
-};
-
 export interface LatencyChartData {
   distributionChartData: DurationDistributionChartData[];
   percentileThresholdValue?: number;
@@ -163,8 +126,14 @@ export const useLatencyChart = ({
   transactionType,
   isOtelSpan = false,
 }: UseLatencyChartParams) => {
-  const { core } = getUnifiedDocViewerServices();
+  const { core, data, discoverShared } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
+  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
+
+  const fetchLatencyOverallTransactionDistributionFeature =
+    discoverShared.features.registry.getById(
+      'observability-traces-fetch-latency-overall-transaction-distribution'
+    );
 
   const { loading, value, error } = useAbortableAsync<LatencyChartData | undefined>(
     async ({ signal }) => {
@@ -172,21 +141,33 @@ export const useLatencyChart = ({
         return undefined;
       }
 
-      if (transactionName && transactionType) {
-        const result = await getTransactionLatencyChart({
-          core,
-          signal,
-          transactionName,
-          transactionType,
-          serviceName,
-        });
+      if (
+        transactionName &&
+        transactionType &&
+        fetchLatencyOverallTransactionDistributionFeature?.fetchLatencyOverallTransactionDistribution
+      ) {
+        const result =
+          await fetchLatencyOverallTransactionDistributionFeature.fetchLatencyOverallTransactionDistribution(
+            {
+              transactionName,
+              transactionType,
+              serviceName,
+              start: timeFilter.from,
+              end: timeFilter.to,
+            },
+            signal
+          );
+
+        if (!result) {
+          return undefined;
+        }
 
         return {
           distributionChartData: getTransactionDistributionChartData({
             euiTheme,
             transactionHistogram: result.overallHistogram,
           }),
-          percentileThresholdValue: result.percentileThresholdValue,
+          percentileThresholdValue: result.percentileThresholdValue ?? undefined,
         };
       }
 
