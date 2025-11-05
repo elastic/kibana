@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';

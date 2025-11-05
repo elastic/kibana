@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { isSchema } from '@kbn/streams-schema';
 import { useDebounceFn } from '@kbn/react-hooks';
