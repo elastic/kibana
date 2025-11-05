@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { loggerMock } from '@kbn/logging-mocks';
 
-import type { Logger } from '@kbn/core/server';
 import { externalServiceMock, apiParams } from './mock';
 import type { ExternalService } from './types';
 import { api } from './api';
-let mockedLogger: jest.Mocked<Logger>;
 
 describe('api', () => {
+  const mockedLogger = loggerMock.create();
   let externalService: jest.Mocked<ExternalService>;
 
   beforeEach(() => {
@@ -24,7 +24,6 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -51,7 +50,6 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -65,7 +63,6 @@ describe('api', () => {
 
     test('it calls createIncident correctly', async () => {
       const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
-      // @ts-expect-error upgrade typescript v5.9.3
       await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.createIncident).toHaveBeenCalledWith({
@@ -83,7 +80,6 @@ describe('api', () => {
 
     test('it calls createComment correctly', async () => {
       const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
-      // @ts-expect-error upgrade typescript v5.9.3
       await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
@@ -109,7 +105,6 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params: apiParams,
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -136,7 +131,6 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -150,7 +144,6 @@ describe('api', () => {
 
     test('it calls updateIncident correctly', async () => {
       const params = { ...apiParams };
-      // @ts-expect-error upgrade typescript v5.9.3
       await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.updateIncident).toHaveBeenCalledWith({
@@ -169,7 +162,6 @@ describe('api', () => {
 
     test('it calls updateIncident correctly without mapping', async () => {
       const params = { ...apiParams };
-      // @ts-expect-error upgrade typescript v5.9.3
       await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.updateIncident).toHaveBeenCalledWith({
@@ -188,7 +180,6 @@ describe('api', () => {
 
     test('it calls createComment correctly', async () => {
       const params = { ...apiParams };
-      // @ts-expect-error upgrade typescript v5.9.3
       await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
@@ -210,7 +201,6 @@ describe('api', () => {
 
     test('it calls createComment correctly without mapping', async () => {
       const params = { ...apiParams };
-      // @ts-expect-error upgrade typescript v5.9.3
       await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {

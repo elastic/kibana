@@ -71,7 +71,7 @@ describe('useFetchAlertsFieldsQuery', () => {
         initialProps: {
           ruleTypeIds: ['apm'],
           enabled: false,
-        },
+        } as { ruleTypeIds: string[]; enabled?: boolean },
       }
     );
 
@@ -81,7 +81,6 @@ describe('useFetchAlertsFieldsQuery', () => {
 
     expect(ReactQuery.useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
 
-    // @ts-expect-error upgrade typescript v5.9.3
     rerender({ ruleTypeIds: ['apm'] });
 
     expect(ReactQuery.useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));

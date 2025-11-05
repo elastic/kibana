@@ -71,8 +71,7 @@ describe('EventLogListCellRenderer', () => {
   });
 
   afterAll(() => {
-    // @ts-expect-error upgrade typescript v5.9.3
-    window.location = originalLocation;
+    window.location = originalLocation as string & Location;
   });
 
   beforeEach(() => {

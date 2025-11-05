@@ -13,9 +13,9 @@ import {
   recordResponseCreate,
   recordResponseUpdate,
 } from './mocks';
-import type { Logger } from '@kbn/logging';
+import { loggerMock } from '@kbn/logging-mocks';
 
-let mockedLogger: jest.Mocked<Logger>;
+const mockedLogger = loggerMock.create();
 
 describe('api', () => {
   let externalService: jest.Mocked<ExternalService>;
@@ -29,7 +29,6 @@ describe('api', () => {
       const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
       const res = await api.pushToService({
         externalService,
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         params,
       });
@@ -61,7 +60,6 @@ describe('api', () => {
       };
       const res = await api.pushToService({
         externalService,
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         params,
       });
@@ -74,7 +72,6 @@ describe('api', () => {
     test('updates existing record', async () => {
       const res = await api.pushToService({
         externalService,
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         params: apiParams,
       });
@@ -99,7 +96,6 @@ describe('api', () => {
 
     test('it calls createRecord correctly', async () => {
       const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
-      // @ts-expect-error upgrade typescript v5.9.3
       await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.createRecord).toHaveBeenCalledWith({
@@ -120,7 +116,6 @@ describe('api', () => {
         .mockReturnValue('2021-06-15T18:02:29.404Z');
 
       const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
-      // @ts-expect-error upgrade typescript v5.9.3
       await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {

@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { loggerMock } from '@kbn/logging-mocks';
 
-import type { Logger } from '@kbn/core/server';
 import { externalServiceMock, apiParams, serviceNowCommonFields, serviceNowChoices } from './mocks';
 import type { ExternalService } from './types';
 import { api } from './api';
-let mockedLogger: jest.Mocked<Logger>;
 
 describe('api', () => {
+  const mockedLogger = loggerMock.create();
   let externalService: jest.Mocked<ExternalService>;
 
   beforeEach(() => {
@@ -27,7 +27,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -61,7 +60,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -84,7 +82,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: { username: 'elastic', password: 'elastic' },
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -115,7 +112,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -163,7 +159,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -211,7 +206,6 @@ describe('api', () => {
         params: apiParams,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -241,7 +235,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -261,7 +254,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -291,7 +283,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -337,7 +328,6 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -387,7 +377,6 @@ describe('api', () => {
             correlation_id: null,
           },
         },
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -408,7 +397,6 @@ describe('api', () => {
             correlation_id: apiParams.incident.correlation_id,
           },
         },
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -429,7 +417,6 @@ describe('api', () => {
             correlation_id: null,
           },
         },
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -448,7 +435,6 @@ describe('api', () => {
             correlation_id: apiParams.incident.correlation_id,
           },
         },
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -464,7 +450,6 @@ describe('api', () => {
       const res = await api.getFields({
         externalService,
         params: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
       expect(res).toEqual(serviceNowCommonFields);
@@ -476,7 +461,6 @@ describe('api', () => {
       const res = await api.getChoices({
         externalService,
         params: { fields: ['priority'] },
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
       expect(res).toEqual(serviceNowChoices);
@@ -490,7 +474,6 @@ describe('api', () => {
         params: {
           externalId: 'incident-1',
         },
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
       expect(res).toEqual({

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { externalServiceSIRMock, sirParams } from '../lib/servicenow/mocks';
 import type { ExternalServiceSIR } from '../lib/servicenow/types';
 import { ObservableTypes } from '../lib/servicenow/types';
 import { api, combineObservables, formatObservables, prepareParams } from './api';
-let mockedLogger: jest.Mocked<Logger>;
+const mockedLogger = loggerMock.create();
 
 describe('api_sir', () => {
   let externalService: jest.Mocked<ExternalServiceSIR>;
@@ -195,7 +195,6 @@ describe('api_sir', () => {
         params,
         config: { usesTableApi: false },
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -225,7 +224,6 @@ describe('api_sir', () => {
         params,
         config: { usesTableApi: false },
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -254,7 +252,6 @@ describe('api_sir', () => {
         params,
         config: { usesTableApi: true },
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -280,7 +277,6 @@ describe('api_sir', () => {
         params,
         config: { usesTableApi: false },
         secrets: {},
-        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });

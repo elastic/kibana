@@ -265,8 +265,8 @@ export function createWorkloadAggregator({
         const value = bucket as TaskTypeWithStatusBucket;
         const taskDef = taskDefinitions.get(value.key as string);
         if (taskDef) {
-          // @ts-expect-error upgrade typescript v5.9.3
-          const cost = value.doc_count * taskDef?.cost ?? TaskCost.Normal;
+          const cost =
+            value.doc_count * taskDef?.cost ? value.doc_count * taskDef?.cost : TaskCost.Normal;
 
           totalCost += cost;
           return Object.assign(acc, {
@@ -541,8 +541,7 @@ function getTotalCost(taskTypeBuckets: TaskTypeBucket[], definitions: TaskTypeDi
   for (const bucket of taskTypeBuckets) {
     const taskDef = definitions.get(bucket.key as string);
     if (taskDef) {
-      // @ts-expect-error upgrade typescript v5.9.3
-      cost += bucket.doc_count * taskDef?.cost ?? TaskCost.Normal;
+      cost += bucket.doc_count * taskDef?.cost ? bucket.doc_count * taskDef?.cost : TaskCost.Normal;
     } else {
       // task type is not registered with dictionary, do not add to cost
     }
