@@ -286,7 +286,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       const { fetchRootItemByTraceId } = await import(
         './services/rest/fetch_trace_root_item_by_trace_id'
       );
-      const { fetchSpan } = await import('./services/rest/span');
+      const { fetchSpan } = await import('./services/rest/fetch_span');
       const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
 
       const { createCallApmApi } = await import('./services/rest/create_call_apm_api');
