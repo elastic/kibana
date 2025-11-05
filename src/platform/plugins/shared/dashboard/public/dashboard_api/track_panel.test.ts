@@ -109,7 +109,7 @@ describe('track panel', () => {
       mockPanelRef.getBoundingClientRect = jest.fn(
         () =>
           ({
-            top: 0,
+            top: -100,
             bottom: 400,
           } as DOMRect)
       );
