@@ -106,6 +106,7 @@ export const getAssistantCleanupService = ({
       await esClient.deleteByQuery({
         index: indexPattern,
         ignore_unavailable: true,
+        conflicts: 'proceed', // Continue even if there are version conflicts
         query: {
           match_all: {},
         },

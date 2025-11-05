@@ -115,7 +115,7 @@ spaceTest.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, (
       await assistantPage.messaging.sendQueryToTimeline();
 
       // Verify the timeline query is populated with the expected query
-      await pageObjects.timelinePage.expectQueryText(mockTimelineQuery);
+      await pageObjects.timelinePage.assertions.expectQueryText(mockTimelineQuery);
     }
   );
 });

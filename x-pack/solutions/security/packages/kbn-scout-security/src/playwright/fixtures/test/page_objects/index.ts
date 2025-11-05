@@ -13,7 +13,7 @@ import { SecurityNavigation } from './security_navigation';
 import { AssistantPage } from './assistant';
 import { SecurityCommonPage } from './security_common';
 import { RulesManagementPage } from './rules_management';
-import { TimelinePage } from './timeline_page';
+import { TimelinePage } from './timeline';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
