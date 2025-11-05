@@ -10,9 +10,19 @@ import { hypothesisDefinitions } from '../lib/hypothesis_definitions';
 import { ThreatHuntingHypothesisDescriptorClient } from '../saved_objects/threat_hunting_hypothesis_descriptor';
 import { createLoggerService } from '../utils/logger_service';
 
-export type InitialisationService = ReturnType<typeof createInitialisationService>;
+export type ThreatHuntingHypothesesService = ReturnType<
+  typeof createThreatHuntingHypothesesInitService
+>;
 
-export const createInitialisationService = (
+export const initThreatHuntingHypothesisDefinitions = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
+) => {
+  const initService = createThreatHuntingHypothesesInitService(savedObjectsClient, logger);
+  await initService.init();
+};
+
+export const createThreatHuntingHypothesesInitService = (
   soClient: SavedObjectsClientContract,
   logger: Logger
 ) => {
