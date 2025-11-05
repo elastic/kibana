@@ -46981,6 +46981,30 @@
                         "id": {
                           "type": "string"
                         },
+                        "ilm_migration_status": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "logs": {
+                              "enum": [
+                                "success"
+                              ],
+                              "type": "string"
+                            },
+                            "metrics": {
+                              "enum": [
+                                "success"
+                              ],
+                              "type": "string"
+                            },
+                            "synthetics": {
+                              "enum": [
+                                "success"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "output_secret_storage_requirements_met": {
                           "type": "boolean"
                         },
@@ -47186,6 +47210,30 @@
                         },
                         "id": {
                           "type": "string"
+                        },
+                        "ilm_migration_status": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "logs": {
+                              "enum": [
+                                "success"
+                              ],
+                              "type": "string"
+                            },
+                            "metrics": {
+                              "enum": [
+                                "success"
+                              ],
+                              "type": "string"
+                            },
+                            "synthetics": {
+                              "enum": [
+                                "success"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         },
                         "output_secret_storage_requirements_met": {
                           "type": "boolean"
