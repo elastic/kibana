@@ -57,6 +57,9 @@ The User Token connector must have these scopes:
 - Can access all channels the user is already a member of
 - Works for public channels, private channels, and DMs
 
+**Direct Messages (DMs):**
+When summarizing Direct Messages, ALWAYS include the name of the user(s) the DM is with in your summary. The channel field for DMs will be formatted as "DM with [User Name]" or "DM with [User1, User2, ...]" for group DMs. Make sure to explicitly mention who each DM conversation is with when summarizing.
+
 The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 Optionally filters by keywords for user mentions or project names.`,
     schema: slackDigestSchema,

@@ -568,152 +568,323 @@ export const createExternalService = (
       const hasAllowedChannels = allowedChannelIds && allowedChannelIds.length > 0;
       const allChannels: SlackConversation[] = [];
 
-      // Process channels if we have allowed channels configured (optimized path)
-      if (hasAllowedChannels) {
-        // OPTIMIZED PATH: Try conversations.info for each allowed channel, then verify membership
-        // by attempting to fetch history. This avoids fetching all channels and hitting rate limits.
-        logger.info(
-          `[Slack Service] Checking ${allowedChannelIds.length} allowed channels directly (optimized to avoid rate limits)`
-        );
+      // Map to store DM participant user IDs (conversation ID -> array of user IDs)
+      // For 'im' (1-on-1 DM): array with 1 user ID (the other participant)
+      // For 'mpim' (group DM): array with multiple user IDs (all participants except authenticated user)
+      const dmParticipantsMap = new Map<string, string[]>();
 
-        // Try each allowed channel ID directly
-        for (const channelId of allowedChannelIds) {
-          try {
-            // Throttle to avoid rate limits
-            await throttleRequest();
-            // First, get channel info
-            const channelInfoResult = await validChannelId(channelId);
-            if (
-              channelInfoResult.status === 'ok' &&
-              channelInfoResult.data?.ok &&
-              channelInfoResult.data.channel
-            ) {
-              const channel = channelInfoResult.data.channel;
+      // Helper function to fetch conversations for a type using conversations.list
+      const fetchConversationsForType = async (type: string): Promise<SlackConversation[]> => {
+        let cursor: string | undefined;
+        let hasMore = true;
+        let typePageCount = 0;
+        const maxTypePages = 50; // Safety limit
+        const typeChannels: SlackConversation[] = [];
 
-              // Verify the user is actually a member by attempting a small history fetch
-              // This is necessary because conversations.info can return channel info even
-              // if the user isn't a member
-              await throttleRequest();
-              const testHistoryResult = await getConversationsHistory({
-                channel: channelId,
-                oldest: since,
-                limit: 1, // Just fetch 1 message to verify access
-              });
+        while (hasMore && typePageCount < maxTypePages) {
+          typePageCount++;
+          // Throttle to avoid rate limits
+          await throttleRequest();
+          const conversationsResult = await getConversationsList({
+            types: type,
+            cursor,
+            excludeArchived: true,
+            limit: 200,
+          });
 
-              // Only add channel if we can successfully fetch history (user is a member)
-              if (testHistoryResult.status === 'ok' && testHistoryResult.data?.ok) {
-                allChannels.push({
-                  id: channel.id,
-                  name: channel.name,
-                  is_channel: channel.is_channel,
-                  is_archived: channel.is_archived,
-                  is_private: channel.is_private,
-                });
-                logger.debug(
-                  `[Slack Service] Verified access to channel: ${channel.name} (${channel.id})`
-                );
-              } else {
-                const error = testHistoryResult.data?.error;
-                logger.warn(
-                  `[Slack Service] User token cannot access channel ${channel.name} (${
-                    channel.id
-                  }): ${error || 'unknown error'}. User may not be a member.`
-                );
-              }
-            } else {
+          // Handle retry results (rate limiting)
+          if (conversationsResult.status === 'error' && conversationsResult.retry) {
+            const waitMs = waitForRetry(conversationsResult.retry);
+            const waitSeconds = Math.ceil(waitMs / 1000);
+            logger.warn(
+              `Rate limited while fetching ${type} conversations, waiting ${waitSeconds} seconds`
+            );
+            await new Promise((resolve) => setTimeout(resolve, waitMs));
+            // Retry the same request without incrementing page count
+            continue;
+          }
+
+          if (
+            conversationsResult.status === 'ok' &&
+            conversationsResult.data?.ok &&
+            conversationsResult.data.channels
+          ) {
+            typeChannels.push(...conversationsResult.data.channels);
+            cursor = conversationsResult.data.response_metadata?.next_cursor;
+            hasMore = !!cursor;
+          } else {
+            // Check if it's a scope error (log and continue to next type)
+            if (conversationsResult.data?.error === 'missing_scope') {
               logger.warn(
-                `[Slack Service] Failed to get channel info for ${channelId}: ${
-                  channelInfoResult.data?.error || 'unknown error'
-                }`
+                `Missing scope for ${type} conversations: ${conversationsResult.data.error}. Skipping this type.`
               );
             }
-          } catch (error) {
-            logger.warn(`[Slack Service] Error checking channel ${channelId}: ${error}`);
+            hasMore = false;
           }
         }
-
-        // Log summary (channels are already filtered since we only add accessible ones)
-        logger.info(
-          `[Slack Service] Verified access to ${allChannels.length} of ${allowedChannelIds.length} allowed channels`
-        );
-
-        // Log details about found channels
-        if (allChannels.length > 0) {
-          const channelDetails = allChannels.map((ch) => `${ch.name} (${ch.id})`).join(', ');
-          logger.info(`[Slack Service] Processing channels: ${channelDetails}`);
+        if (typePageCount >= maxTypePages) {
+          logger.warn(`Reached maximum pages limit (${maxTypePages}) for ${type}, stopping`);
         }
+        return typeChannels;
+      };
 
-        // Log which allowed channels were not accessible
-        const foundChannelIds = new Set(allChannels.map((c) => c.id));
-        const missingChannels = allowedChannelIds!.filter((id) => !foundChannelIds.has(id));
-        if (missingChannels.length > 0) {
-          logger.warn(
-            `[Slack Service] ${
-              missingChannels.length
-            } allowed channel IDs were not accessible: ${missingChannels.join(
-              ', '
-            )}. The user associated with this token may not be a member of these channels.`
+      // Separate channel types from DM types
+      // Channel types can use the optimized path when allowedChannels is configured
+      // DM types always use the standard path (can't be in allowedChannels)
+      const channelTypes = types.filter((t) => t === 'public_channel' || t === 'private_channel');
+      const dmTypes = types.filter((t) => t === 'im' || t === 'mpim');
+
+      // Process channel types (public_channel, private_channel)
+      if (channelTypes.length > 0) {
+        if (hasAllowedChannels) {
+          // OPTIMIZED PATH: Try conversations.info for each allowed channel, then verify membership
+          // by attempting to fetch history. This avoids fetching all channels and hitting rate limits.
+          logger.info(
+            `[Slack Service] Checking ${allowedChannelIds.length} allowed channels directly (optimized to avoid rate limits)`
           );
-        }
-      } else {
-        // STANDARD PATH: Fetch all conversations using conversations.list (for backwards compatibility)
-        logger.warn(
-          `[Slack Service] No allowed channels configured. Will fetch from ALL conversations (this may be slow for large workspaces).`
-        );
 
-        for (const type of types) {
-          let cursor: string | undefined;
-          let hasMore = true;
-          let typePageCount = 0;
-          const maxTypePages = 50; // Safety limit
-          while (hasMore && typePageCount < maxTypePages) {
-            typePageCount++;
-            // Throttle to avoid rate limits
-            await throttleRequest();
-            const conversationsResult = await getConversationsList({
-              types: type,
-              cursor,
-              excludeArchived: true,
-              limit: 200,
-            });
+          // Try each allowed channel ID directly
+          for (const channelId of allowedChannelIds) {
+            try {
+              // Throttle to avoid rate limits
+              await throttleRequest();
+              // First, get channel info
+              const channelInfoResult = await validChannelId(channelId);
+              if (
+                channelInfoResult.status === 'ok' &&
+                channelInfoResult.data?.ok &&
+                channelInfoResult.data.channel
+              ) {
+                const channel = channelInfoResult.data.channel;
 
-            // Handle retry results (rate limiting)
-            if (conversationsResult.status === 'error' && conversationsResult.retry) {
-              const waitMs = waitForRetry(conversationsResult.retry);
-              const waitSeconds = Math.ceil(waitMs / 1000);
-              logger.warn(
-                `Rate limited while fetching ${type} conversations, waiting ${waitSeconds} seconds`
-              );
-              await new Promise((resolve) => setTimeout(resolve, waitMs));
-              // Retry the same request without incrementing page count
-              continue;
-            }
+                // Verify the user is actually a member by attempting a small history fetch
+                // This is necessary because conversations.info can return channel info even
+                // if the user isn't a member
+                await throttleRequest();
+                const testHistoryResult = await getConversationsHistory({
+                  channel: channelId,
+                  oldest: since,
+                  limit: 1, // Just fetch 1 message to verify access
+                });
 
-            if (
-              conversationsResult.status === 'ok' &&
-              conversationsResult.data?.ok &&
-              conversationsResult.data.channels
-            ) {
-              allChannels.push(...conversationsResult.data.channels);
-              cursor = conversationsResult.data.response_metadata?.next_cursor;
-              hasMore = !!cursor;
-            } else {
-              // Check if it's a scope error (log and continue to next type)
-              if (conversationsResult.data?.error === 'missing_scope') {
+                // Only add channel if we can successfully fetch history (user is a member)
+                if (testHistoryResult.status === 'ok' && testHistoryResult.data?.ok) {
+                  allChannels.push({
+                    id: channel.id,
+                    name: channel.name,
+                    is_channel: channel.is_channel,
+                    is_archived: channel.is_archived,
+                    is_private: channel.is_private,
+                  });
+                  logger.debug(
+                    `[Slack Service] Verified access to channel: ${channel.name} (${channel.id})`
+                  );
+                } else {
+                  const error = testHistoryResult.data?.error;
+                  logger.warn(
+                    `[Slack Service] User token cannot access channel ${channel.name} (${
+                      channel.id
+                    }): ${error || 'unknown error'}. User may not be a member.`
+                  );
+                }
+              } else {
                 logger.warn(
-                  `Missing scope for ${type} conversations: ${conversationsResult.data.error}. Skipping this type.`
+                  `[Slack Service] Failed to get channel info for ${channelId}: ${
+                    channelInfoResult.data?.error || 'unknown error'
+                  }`
                 );
               }
-              hasMore = false;
+            } catch (error) {
+              logger.warn(`[Slack Service] Error checking channel ${channelId}: ${error}`);
             }
           }
-          if (typePageCount >= maxTypePages) {
-            logger.warn(`Reached maximum pages limit (${maxTypePages}) for ${type}, stopping`);
+
+          // Log summary (channels are already filtered since we only add accessible ones)
+          logger.info(
+            `[Slack Service] Verified access to ${allChannels.length} of ${allowedChannelIds.length} allowed channels`
+          );
+
+          // Log details about found channels
+          if (allChannels.length > 0) {
+            const channelDetails = allChannels.map((ch) => `${ch.name} (${ch.id})`).join(', ');
+            logger.info(`[Slack Service] Processing channels: ${channelDetails}`);
+          }
+
+          // Log which allowed channels were not accessible
+          const foundChannelIds = new Set(allChannels.map((c) => c.id));
+          const missingChannels = allowedChannelIds!.filter((id) => !foundChannelIds.has(id));
+          if (missingChannels.length > 0) {
+            logger.warn(
+              `[Slack Service] ${
+                missingChannels.length
+              } allowed channel IDs were not accessible: ${missingChannels.join(
+                ', '
+              )}. The user associated with this token may not be a member of these channels.`
+            );
+          }
+        } else {
+          // STANDARD PATH: Fetch all channels using conversations.list
+          logger.info(
+            `[Slack Service] No allowed channels configured. Will fetch from ALL channel conversations (this may be slow for large workspaces).`
+          );
+
+          for (const type of channelTypes) {
+            const typeChannels = await fetchConversationsForType(type);
+            allChannels.push(...typeChannels);
           }
         }
       }
 
-      logger.info(`[Slack Service] Step 2 complete: ${allChannels.length} total channels found`);
+      // Process DM types (im, mpim) - always use standard path since DMs can't be in allowedChannels
+      // Limit the number of DMs to avoid rate limiting (users can have hundreds/thousands of DMs)
+      // Each DM requires a history fetch, so we limit to stay well under rate limits
+      const maxDMsToProcess = 20; // Limit to most recent 20 DMs per type to stay within rate limits
+      if (dmTypes.length > 0) {
+        logger.info(
+          `[Slack Service] Fetching DMs (${dmTypes.join(
+            ', '
+          )}) using standard path (DMs are not included in allowed channels). Limiting to ${maxDMsToProcess} most recent DMs to avoid rate limits.`
+        );
+        for (const type of dmTypes) {
+          const typeChannels = await fetchConversationsForType(type);
+          // Limit the number of DMs we process (conversations.list returns most recent first)
+          const limitedDMs = typeChannels.slice(0, maxDMsToProcess);
+          allChannels.push(...limitedDMs);
+          if (typeChannels.length > maxDMsToProcess) {
+            logger.info(
+              `[Slack Service] Found ${typeChannels.length} ${type} conversations, processing only the ${maxDMsToProcess} most recent to avoid rate limits`
+            );
+          } else {
+            logger.info(`[Slack Service] Found ${typeChannels.length} ${type} conversations`);
+          }
+        }
+      }
+
+      logger.info(
+        `[Slack Service] Step 2 complete: ${allChannels.length} total conversations found`
+      );
+
+      // Fetch participant info for DMs (im and mpim) to enable user attribution
+      // Identify DMs by checking flags OR by channel ID prefix (DM channel IDs start with 'D')
+      const dmChannels = allChannels.filter(
+        (ch) => ch.is_im || ch.is_mpim || (!ch.name && ch.id && ch.id.startsWith('D'))
+      );
+      const allParticipantIds = new Set<string>(); // Collect all unique participant IDs
+
+      if (dmChannels.length > 0) {
+        logger.debug(`[Slack Service] Fetching participant info for ${dmChannels.length} DMs`);
+        for (const dmChannel of dmChannels) {
+          try {
+            // Throttle to avoid rate limits
+            await throttleRequest();
+            const infoResult = await validChannelId(dmChannel.id);
+
+            if (infoResult.status === 'ok' && infoResult.data?.ok && infoResult.data.channel) {
+              const channelInfo = infoResult.data.channel as any; // Type assertion to access DM-specific fields
+              const participantIds: string[] = [];
+
+              // For 'im' (1-on-1 DM), use the 'user' field
+              if (channelInfo.user) {
+                participantIds.push(channelInfo.user);
+                allParticipantIds.add(channelInfo.user);
+              }
+              // For 'mpim' (group DM), use the 'members' array (exclude the authenticated user if needed)
+              else if (channelInfo.members && Array.isArray(channelInfo.members)) {
+                // members array contains all participants including the authenticated user
+                // We'll include all members and let the formatting decide which to display
+                participantIds.push(...channelInfo.members);
+                channelInfo.members.forEach((id: string) => allParticipantIds.add(id));
+              }
+
+              if (participantIds.length > 0) {
+                dmParticipantsMap.set(dmChannel.id, participantIds);
+                logger.debug(
+                  `[Slack Service] Stored participant IDs for DM ${
+                    dmChannel.id
+                  }: ${participantIds.join(', ')}`
+                );
+              } else {
+                const dmType = channelInfo.user ? 'im' : channelInfo.members ? 'mpim' : 'unknown';
+                logger.debug(
+                  `[Slack Service] No participant IDs found for DM ${dmChannel.id} (type: ${dmType})`
+                );
+              }
+            }
+          } catch (error) {
+            logger.debug(
+              `[Slack Service] Failed to fetch participant info for DM ${dmChannel.id}: ${error}. Continuing without participant info.`
+            );
+            // Continue without participant info for this DM - not critical
+          }
+        }
+        logger.info(
+          `[Slack Service] Fetched participant info for ${dmParticipantsMap.size}/${dmChannels.length} DMs`
+        );
+
+        // Fetch user info for DM participants if we don't already have them
+        // This ensures we have names for DM attribution even if full user fetch was skipped
+        if (allParticipantIds.size > 0) {
+          const missingParticipantIds = Array.from(allParticipantIds).filter(
+            (id) => !userMap.has(id)
+          );
+          if (missingParticipantIds.length > 0) {
+            logger.debug(
+              `[Slack Service] Fetching user info for ${missingParticipantIds.length} DM participants`
+            );
+            // Fetch users list to get participant names (we'll filter to needed IDs after)
+            // Note: We can't fetch specific users by ID, so we'll fetch a batch and filter
+            // For efficiency, we'll just fetch a reasonable number of pages to hopefully get our participants
+            try {
+              let userCursor: string | undefined;
+              let hasMoreUsers = true;
+              let userPageCount = 0;
+              const maxUserPagesForDMs = 3; // Limit pages to avoid rate limits
+
+              while (
+                hasMoreUsers &&
+                userPageCount < maxUserPagesForDMs &&
+                missingParticipantIds.some((id) => !userMap.has(id))
+              ) {
+                userPageCount++;
+                await throttleRequest();
+                const usersResult = await getUsersList({ cursor: userCursor, limit: 200 });
+
+                if (
+                  usersResult.status === 'ok' &&
+                  usersResult.data?.ok &&
+                  usersResult.data.members
+                ) {
+                  for (const user of usersResult.data.members) {
+                    // Only add users we need (participants) to avoid unnecessary memory usage
+                    if (missingParticipantIds.includes(user.id)) {
+                      userMap.set(user.id, {
+                        name: user.name,
+                        real_name: user.profile?.display_name || user.real_name || user.name,
+                      });
+                    }
+                  }
+                  userCursor = usersResult.data.response_metadata?.next_cursor;
+                  hasMoreUsers = !!userCursor;
+                } else {
+                  hasMoreUsers = false;
+                }
+              }
+
+              const foundParticipants = missingParticipantIds.filter((id) => userMap.has(id));
+              if (foundParticipants.length > 0) {
+                logger.debug(
+                  `[Slack Service] Found user info for ${foundParticipants.length}/${missingParticipantIds.length} DM participants`
+                );
+              }
+            } catch (error) {
+              logger.debug(
+                `[Slack Service] Failed to fetch user info for DM participants: ${error}. Continuing without participant names.`
+              );
+              // Continue without participant names - not critical
+            }
+          }
+        }
+      }
 
       // Use allChannels as filteredChannels (already filtered if using allowed channels)
       const filteredChannels = allChannels;
@@ -733,10 +904,11 @@ export const createExternalService = (
 
       for (let i = 0; i < filteredChannels.length; i++) {
         const channel = filteredChannels[i];
+        const channelDisplayName = channel.name || channel.id; // DMs might not have names
         logger.debug(
-          `[Slack Service] Processing channel ${i + 1}/${filteredChannels.length}: ${
-            channel.name
-          } (${channel.id})`
+          `[Slack Service] Processing channel ${i + 1}/${
+            filteredChannels.length
+          }: ${channelDisplayName} (${channel.id})`
         );
         try {
           let cursor: string | undefined;
@@ -761,8 +933,9 @@ export const createExternalService = (
             if (historyResult.status === 'error' && historyResult.retry) {
               const waitMs = waitForRetry(historyResult.retry);
               const waitSeconds = Math.ceil(waitMs / 1000);
+              const channelDisplayName = channel.name || channel.id; // DMs might not have names
               logger.warn(
-                `Rate limited while fetching messages from ${channel.name}, waiting ${waitSeconds} seconds`
+                `Rate limited while fetching messages from ${channelDisplayName}, waiting ${waitSeconds} seconds`
               );
               await new Promise((resolve) => setTimeout(resolve, waitMs));
               // Retry the same request without incrementing page count
@@ -933,8 +1106,63 @@ export const createExternalService = (
       logger.debug(`[Slack Service] Formatting ${allMessages.length} messages`);
       const formattedMessages = allMessages.map((item) => {
         const userInfo = userMap.get(item.message.user);
+
+        // Determine channel display name
+        let channelDisplayName = item.channel.name || item.channel.id;
+
+        // If this is a DM, include participant names in the channel name
+        const participantIds = dmParticipantsMap.get(item.channel.id);
+        if (participantIds && participantIds.length > 0) {
+          // Get participant names from userMap
+          const participantNames = participantIds
+            .map((userId) => {
+              const participantInfo = userMap.get(userId);
+              const name = participantInfo?.real_name || participantInfo?.name;
+              if (!name && userId) {
+                logger.debug(
+                  `[Slack Service] Missing user info for DM participant ${userId} in channel ${item.channel.id}`
+                );
+              }
+              return name || userId;
+            })
+            .filter((name) => name && name !== 'unknown'); // Remove any undefined/null/unknown names
+
+          if (participantNames.length > 0) {
+            // Filter out the authenticated user's ID if it appears in the list (for group DMs)
+            // We can't easily identify the authenticated user, so we'll include all participants
+            if (participantNames.length === 1) {
+              channelDisplayName = `DM with ${participantNames[0]}`;
+            } else {
+              channelDisplayName = `DM with ${participantNames.join(', ')}`;
+            }
+            logger.debug(
+              `[Slack Service] Formatted DM channel ${item.channel.id} as "${channelDisplayName}" with ${participantNames.length} participant(s)`
+            );
+          } else {
+            // Fallback if we don't have participant names yet
+            channelDisplayName = `DM (${participantIds.length} participant${
+              participantIds.length > 1 ? 's' : ''
+            })`;
+            logger.debug(
+              `[Slack Service] DM channel ${
+                item.channel.id
+              } has participant IDs but no names found: ${participantIds.join(', ')}`
+            );
+          }
+        } else {
+          // Check if this might be a DM that we didn't populate in dmParticipantsMap
+          // This could happen if the channel wasn't in dmChannels list or participant fetch failed
+          const channelId = item.channel.id;
+          const mightBeDM = !item.channel.name || channelId.startsWith('D');
+          if (mightBeDM) {
+            logger.debug(
+              `[Slack Service] Message from channel ${channelId} (might be DM) but not found in dmParticipantsMap`
+            );
+          }
+        }
+
         return {
-          channel: item.channel.name,
+          channel: channelDisplayName,
           channel_id: item.channel.id,
           text: item.message.text,
           user: item.message.user || 'unknown',
