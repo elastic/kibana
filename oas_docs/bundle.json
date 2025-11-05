@@ -46501,6 +46501,21 @@
                           },
                           "type": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "type": "object"
                           }
                         },
                         "required": [
@@ -46699,6 +46714,21 @@
                           },
                           "type": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "type": "object"
                           }
                         },
                         "required": [
