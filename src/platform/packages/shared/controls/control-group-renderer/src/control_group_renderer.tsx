@@ -74,7 +74,6 @@ export const ControlGroupRenderer = ({
   }>();
 
   const lastSavedState$Ref = useRef(new BehaviorSubject<{ [id: string]: StickyControlState }>({}));
-  const [loaded, setLoaded] = useState<boolean>(true);
 
   /** Creation options management */
   const initialState = useInitialControlGroupState(getCreationOptions, lastSavedState$Ref);
@@ -200,7 +199,7 @@ export const ControlGroupRenderer = ({
   }, [parentApi, input$, uiActions]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
-  return !parentApi || !loaded ? null : (
+  return !parentApi ? null : (
     <ControlsRenderer parentApi={parentApi as ControlsRendererParentApi} />
   );
 };
