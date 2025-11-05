@@ -229,7 +229,7 @@ export const spawnStep = <
 >(
   step: StreamlangStepWithUIAttributes,
   assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
-  options?: { isNew: boolean }
+  options?: { isNew: boolean; startInDraft?: boolean }
 ) => {
   const { spawn, self } = assignArgs;
 
@@ -239,6 +239,7 @@ export const spawnStep = <
       parentRef: self,
       step,
       isNew: options?.isNew ?? false,
+      startInDraft: options?.startInDraft ?? true,
     },
   });
 };

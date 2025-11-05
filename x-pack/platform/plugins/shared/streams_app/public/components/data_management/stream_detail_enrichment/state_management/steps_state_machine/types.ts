@@ -24,6 +24,7 @@ export interface StepInput {
   parentRef: StepParentActor;
   step: StreamlangStepWithUIAttributes;
   isNew?: boolean;
+  startInDraft?: boolean;
 }
 
 export type StepParentActor = ActorRef<Snapshot<unknown>, StepToParentEvent>;
@@ -41,6 +42,7 @@ export interface StepContext {
   // Additional resources to interact with the processor, these aren't persisted but facilitate certain UI functionality.
   resources?: ProcessorResources;
   isNew: boolean;
+  startInDraft: boolean;
   isUpdated?: boolean;
 }
 

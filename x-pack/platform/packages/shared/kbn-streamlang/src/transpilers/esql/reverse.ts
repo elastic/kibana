@@ -26,6 +26,8 @@ import type { Condition } from '../../../types/conditions';
 import { esqlAstExpressionToCondition } from './esql_ast_to_condition';
 import { literalToJs } from './literals';
 
+type WhereWithSteps = Condition & { steps: StreamlangProcessorDefinition[] };
+
 function isName(command: ESQLCommand, name: string) {
   return command.name?.toLowerCase() === name.toLowerCase();
 }
@@ -201,8 +203,25 @@ export function esqlToStreamlangSteps(
   const steps: StreamlangStep[] = [];
 
   let activeCondition: Condition | undefined;
-  const withWhere = <T extends StreamlangProcessorDefinition>(proc: T): T =>
-    activeCondition ? ({ ...proc, where: activeCondition } as T) : proc;
+  // Track the current where block segment and how many children it has
+  let currentWhere: WhereWithSteps | null = null;
+  let currentWhereChildren = 0;
+
+  const emitAction = (proc: StreamlangProcessorDefinition) => {
+    if (activeCondition) {
+      // Ensure a where segment exists for this action
+      if (!currentWhere) {
+        const newBlock = { where: { ...(activeCondition as Condition), steps: [] as StreamlangProcessorDefinition[] } as WhereWithSteps };
+        steps.push(newBlock as StreamlangStep);
+        currentWhere = newBlock.where;
+        currentWhereChildren = 0;
+      }
+      currentWhere.steps.push(proc);
+      currentWhereChildren += 1;
+    } else {
+      steps.push(proc);
+    }
+  };
 
   for (const cmd of root.commands) {
     const command = cmd;
@@ -215,6 +234,20 @@ export function esqlToStreamlangSteps(
       if (!cond) continue;
       // WHERE compounds for subsequent processors
       activeCondition = activeCondition ? { and: [activeCondition, cond] } : cond;
+
+      // If there is no current where block, or the current block already has children,
+      // start a new segment. Otherwise (current block exists but is still empty), just
+      // update its condition.
+      if (!currentWhere || currentWhereChildren > 0) {
+        const newBlock = { where: { ...(activeCondition as Condition), steps: [] as StreamlangProcessorDefinition[] } as WhereWithSteps };
+        steps.push(newBlock as StreamlangStep);
+        currentWhere = newBlock.where;
+        currentWhereChildren = 0;
+      } else {
+        const updated: WhereWithSteps = { ...(activeCondition as Condition), steps: currentWhere.steps };
+        (steps[steps.length - 1] as any).where = updated;
+        currentWhere = updated; 
+      }
       continue;
     }
 
@@ -223,7 +256,7 @@ export function esqlToStreamlangSteps(
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
         const grok: GrokProcessor = { action: 'grok', from: colName(field), patterns: [pattern] };
-        steps.push(withWhere(grok));
+        emitAction(grok);
       }
       continue;
     }
@@ -233,7 +266,7 @@ export function esqlToStreamlangSteps(
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
         const dissect: DissectProcessor = { action: 'dissect', from: colName(field), pattern };
-        steps.push(withWhere(dissect));
+        emitAction(dissect);
       }
       continue;
     }
@@ -250,7 +283,7 @@ export function esqlToStreamlangSteps(
         const rightCol = right ? asColumn(right) : undefined;
         if (rightCol) {
           const setCopy: SetProcessor = { action: 'set', to: colName(target), copy_from: colName(rightCol) };
-          steps.push(withWhere(setCopy));
+          emitAction(setCopy);
           continue;
         }
         // Map EVAL target = DATE_PARSE(source, pattern)
@@ -266,7 +299,7 @@ export function esqlToStreamlangSteps(
               to: colName(target),
               formats: [pattern],
             };
-            steps.push(withWhere(dateProc));
+            emitAction(dateProc);
             continue;
           }
         }
@@ -274,7 +307,7 @@ export function esqlToStreamlangSteps(
         if (right && isLiteral(right)) {
           const value = literalToJs(right);
           const setVal: SetProcessor = { action: 'set', to: colName(target), value };
-          steps.push(withWhere(setVal));
+          emitAction(setVal);
         }
       }
       continue;
@@ -289,13 +322,13 @@ export function esqlToStreamlangSteps(
         const newName = asStringLiteral(newRef) || (asColumn(newRef) ? colName(asColumn(newRef)!) : undefined);
         if (oldCol && newName) {
           const rename: RenameProcessor = { action: 'rename', from: colName(oldCol), to: newName };
-          steps.push(withWhere(rename));
+          emitAction(rename);
         }
       }
       continue;
     }
   }
-  // If only WHERE clauses were present, materialize as a top-level where block
+  // If only WHERE clauses were present, ensure a where block exists
   if (steps.length === 0 && activeCondition) {
     steps.push({ where: { ...activeCondition, steps: [] } });
   }

@@ -23,6 +23,34 @@ function colName(col: ESQLColumn): string {
   return col.parts && col.parts.length ? col.parts.join('.') : col.text;
 }
 
+function stripEnclosing(str: string): string {
+  const s = str.trim();
+  if ((s.startsWith('`') && s.endsWith('`')) || (s.startsWith('"') && s.endsWith('"')))
+    return s.slice(1, -1);
+  if (s.startsWith('[') && s.endsWith(']')) return s.slice(1, -1).trim();
+  return s;
+}
+
+function asFieldName(item: ESQLAstItem): string | undefined {
+  // Normal column node
+  if (isColumn(item)) return colName(item);
+
+  // Sometimes bracketed/quoted identifiers are parsed as literals
+  if (isLiteral(item)) {
+    const raw = String(literalToJs(item));
+    if (!raw) return undefined;
+    return stripEnclosing(raw);
+  }
+
+  // Fallback: some identifier variants surface as generic nodes with a `text` property
+  const text = (item as any)?.text;
+  if (typeof text === 'string' && text.trim() !== '') {
+    return stripEnclosing(text);
+  }
+
+  return undefined;
+}
+
 function isSingleAstItem(item: ESQLAstItem): item is ESQLSingleAstItem {
   return !Array.isArray(item);
 }
@@ -88,14 +116,27 @@ function makeBinary(
 }
 
 function likeToFilter(field: string, pattern: string): FilterCondition | undefined {
-  // Map anchored LIKE patterns to Streamlang text operators
+  // Map ES|QL LIKE patterns to Streamlang text operators
+  // Tolerate '*' wildcards in addition to '%'. Ignore '_' single-char wildcard for now.
   const hasPercent = pattern.includes('%');
+  const hasStar = pattern.includes('*');
   const hasUnderscore = pattern.includes('_');
   if (hasUnderscore) return undefined;
-  if (!hasPercent) return { field, eq: pattern };
-  const startsWithPercent = pattern.startsWith('%');
-  const endsWithPercent = pattern.endsWith('%');
-  const core = pattern.replace(/^%|%$/g, '');
+
+  // Normalize: if user used '*' only, convert anchors to '%'
+  let normalized = pattern;
+  if (hasStar && !hasPercent) {
+    normalized = pattern.replace(/\*/g, '%');
+  }
+
+  if (!normalized.includes('%')) {
+    return { field, eq: normalized };
+  }
+
+  const startsWithPercent = normalized.startsWith('%');
+  const endsWithPercent = normalized.endsWith('%');
+  const core = normalized.replace(/^%|%$/g, '');
+  if (!core.length) return undefined;
   if (startsWithPercent && endsWithPercent) return { field, contains: core };
   if (endsWithPercent) return { field, startsWith: core };
   if (startsWithPercent) return { field, endsWith: core };
@@ -150,7 +191,7 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
     const name = getFuncName(expr).toUpperCase();
     if (name === 'NOT IN') {
       const args = getArgs(expr);
-      const col = args && isColumn(args[0]) ? args[0] : undefined;
+      const col = args && (isColumn(args[0]) ? args[0] : undefined);
       if (!col) return undefined;
       const rhsNode = (args.length > 1 ? (args[1] as unknown as { type?: string; values?: ESQLAstItem[] }) : undefined);
       let rhsItems: ESQLAstItem[] = [];
@@ -174,7 +215,7 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
   // IN(column, [literals...]) -> OR of equality
   if (isFunc(expr, 'in')) {
     const args = getArgs(expr);
-    const col = args && isColumn(args[0]) ? args[0] : undefined;
+    const col = args && (isColumn(args[0]) ? args[0] : undefined);
     if (!col) return undefined;
     const rhsNode = (args.length > 1 ? (args[1] as unknown as { type?: string; values?: ESQLAstItem[] }) : undefined);
     let rhsItems: ESQLAstItem[] = [];
@@ -214,11 +255,17 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
     const name = getFuncName(expr).toUpperCase();
     if (name === 'IS NULL') {
       const col = getArgs(expr)?.[0];
-      if (col && isColumn(col)) return { field: colName(col), exists: false };
+      if (col) {
+        const field = asFieldName(col as ESQLAstItem);
+        if (field) return { field, exists: false };
+      }
     }
     if (name === 'IS NOT NULL') {
       const col = getArgs(expr)?.[0];
-      if (col && isColumn(col)) return { field: colName(col), exists: true };
+      if (col) {
+        const field = asFieldName(col as ESQLAstItem);
+        if (field) return { field, exists: true };
+      }
     }
   }
 

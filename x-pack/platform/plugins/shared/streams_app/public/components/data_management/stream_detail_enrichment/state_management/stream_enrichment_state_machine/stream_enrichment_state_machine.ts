@@ -22,7 +22,6 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import type { StreamlangStep } from '@kbn/streamlang';
 import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -680,10 +679,12 @@ export const createStreamEnrichmentMachineImplementations = ({
       const isWired = getStreamTypeFromDefinition(context.definition.stream) === 'wired';
       const appendedRefs = urlState.processorsToAppend.map((processor: StreamlangProcessorDefinition) => {
         const converted = stepConverter.toUIDefinition(processor, { parentId: null });
-        if (isActionBlock(converted) && converted.where) {
+        if (isWhereBlock(converted)) {
+          converted.where = rewriteConditionFieldsToOtel(converted.where, isWired) as typeof converted.where;
+        } else if (isActionBlock(converted) && 'where' in converted && converted.where) {
           converted.where = rewriteConditionFieldsToOtel(converted.where, isWired);
         }
-        return spawnStep(converted, { spawn, self }, { isNew: true });
+        return spawnStep(converted, { spawn, self }, { isNew: true, startInDraft: false });
       });
 
       return {
@@ -707,14 +708,14 @@ export const createStreamEnrichmentMachineImplementations = ({
         return {};
       }
       const isWired = getStreamTypeFromDefinition(context.definition.stream) === 'wired';
-      const appendRefs = urlState.stepsToAppend.map((step: StreamlangStep) => {
-        const converted = stepConverter.toUIDefinition(step, { parentId: null });
-        if (isActionBlock(converted) && converted.where) {
-          converted.where = rewriteConditionFieldsToOtel(converted.where, isWired);
-        } else if (isWhereBlock(converted)) {
+      const flatUiSteps = convertStepsForUI({ steps: urlState.stepsToAppend } as any);
+      const appendRefs = flatUiSteps.map((converted: StreamlangStepWithUIAttributes) => {
+        if (isWhereBlock(converted)) {
           converted.where = rewriteConditionFieldsToOtel(converted.where, isWired) as typeof converted.where;
+        } else if (isActionBlock(converted) && 'where' in converted && converted.where) {
+          converted.where = rewriteConditionFieldsToOtel(converted.where, isWired);
         }
-        return spawnStep(converted, { spawn, self }, { isNew: true });
+        return spawnStep(converted, { spawn, self }, { isNew: true, startInDraft: false });
       });
       return {
         stepRefs: [...context.stepRefs, ...appendRefs],
