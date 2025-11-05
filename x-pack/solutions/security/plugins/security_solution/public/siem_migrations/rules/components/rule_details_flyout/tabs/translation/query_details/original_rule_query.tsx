@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import xmlFormatter from 'xml-formatter';
 import type { RuleMigrationRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { QueryHeader } from './header';
 import { QueryViewer } from './query_viewer';
@@ -16,45 +17,31 @@ interface OriginalRuleQueryProps {
   migrationRule: RuleMigrationRule;
 }
 
-const prettifyXml = function (sourceXml: string) {
-  try {
-    const xmlDoc = new DOMParser().parseFromString(sourceXml, 'application/xml');
-    const xsltDoc = new DOMParser().parseFromString(
-      `<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-  <xsl:output method="xml" indent="yes"/>
-  <xsl:strip-space elements="*"/>
-  <xsl:template match="@*|node()">
-    <xsl:copy>
-      <xsl:apply-templates select="@*|node()"/>
-    </xsl:copy>
-  </xsl:template>
-</xsl:stylesheet>`,
-      'application/xml'
-    );
-
-    const xsltProcessor = new XSLTProcessor();
-    xsltProcessor.importStylesheet(xsltDoc);
-    const resultDoc = xsltProcessor.transformToDocument(xmlDoc);
-    const resultXml = new XMLSerializer().serializeToString(resultDoc);
-    console.log(`Serialized XML: ${resultXml}`);
-    return resultXml;
-  } catch (err) {
-    console.error(err);
-    return sourceXml;
-  }
-};
-
 export const OriginalRuleQuery: React.FC<OriginalRuleQueryProps> = React.memo(
   ({ migrationRule }) => {
+    const { title, tooltip } = useMemo(
+      () => ({
+        title:
+          migrationRule.original_rule.vendor === 'splunk'
+            ? i18n.SPLUNK_QUERY_TITLE
+            : i18n.QRADAR_RULE_TITLE,
+        tooltip:
+          migrationRule.original_rule.vendor === 'splunk'
+            ? i18n.SPLUNK_QUERY_TOOLTIP
+            : i18n.QRADAR_RULE_TITLE_TOOLTIP,
+      }),
+      [migrationRule.original_rule.vendor]
+    );
+
     return (
       <>
-        <QueryHeader title={i18n.SPLUNK_QUERY_TITLE} tooltip={i18n.SPLUNK_QUERY_TOOLTIP} />
+        <QueryHeader title={title} tooltip={tooltip} />
         <EuiHorizontalRule data-test-subj="queryHorizontalRule" margin="xs" />
         <QueryViewer
           ruleName={migrationRule.original_rule.title}
           query={
             migrationRule.original_rule.query_language === 'xml'
-              ? prettifyXml(migrationRule.original_rule.query)
+              ? xmlFormatter(migrationRule.original_rule.query)
               : migrationRule.original_rule.query
           }
           language={migrationRule.original_rule.query_language}
