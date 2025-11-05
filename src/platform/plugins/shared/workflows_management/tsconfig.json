@@ -64,7 +64,8 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/react-query",
     "@kbn/core-http-server",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/core-http-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
