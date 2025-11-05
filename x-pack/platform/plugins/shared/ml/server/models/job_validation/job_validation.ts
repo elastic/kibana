@@ -10,22 +10,23 @@ import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
+import type { MessageId, JobValidationMessage } from '@kbn/ml-common-constants/messages';
+import { getMessages } from '@kbn/ml-common-constants/messages';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { MlClient } from '@kbn/ml-client';
+import { basicJobValidation } from '@kbn/ml-common-utils/job_utils/basic_job_validation';
+import { uniqWithIsEqual } from '@kbn/ml-common-utils/job_utils/uniq_with_is_equal';
+import type { validateJobSchema } from '@kbn/ml-server-api-schemas/job_validation_schema';
+import { getDatafeedAggregations, getIndicesOptions } from '@kbn/ml-common-utils/datafeed_utils';
 
 import { fieldsServiceProvider } from '../fields_service';
-import type { MessageId, JobValidationMessage } from '../../../common/constants/messages';
-import { getMessages } from '../../../common/constants/messages';
-
-import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
 import { validateDatafeedPreviewWithMessages } from './validate_datafeed_preview';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
-import type { validateJobSchema } from '../../routes/schemas/job_validation_schema';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { MlClient } from '../../lib/ml_client';
-import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
+
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;

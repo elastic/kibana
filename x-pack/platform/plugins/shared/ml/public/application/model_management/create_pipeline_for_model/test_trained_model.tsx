@@ -7,19 +7,23 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
+
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { TestTrainedModelContent } from '../test_models/test_trained_model_content';
-import { useMlKibana } from '../../contexts/kibana';
-import { type InferecePipelineCreationState } from './state';
+
+import { type InferencePipelineCreationState } from './state';
 
 interface ContentProps {
   model: TrainedModelItem;
-  handlePipelineConfigUpdate: (configUpdate: Partial<InferecePipelineCreationState>) => void;
+  handlePipelineConfigUpdate: (configUpdate: Partial<InferencePipelineCreationState>) => void;
   externalPipelineConfig?: estypes.IngestPipeline;
 }
 

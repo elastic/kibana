@@ -122,6 +122,11 @@
     "@kbn/licensing-types",
     "@kbn/apm-types",
     "@kbn/react-query",
+    "@kbn/ml-common-types",
+    "@kbn/ml-embeddables",
+    "@kbn/ml-ui-actions",
+    "@kbn/ml-locator",
+    "@kbn/ml-node-checks"
   ],
   "exclude": ["target/**/*"]
 }

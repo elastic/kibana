@@ -15,10 +15,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     return comp;
   },
 }));
-jest.mock('../../../capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-hooks/capabilities/use_permission_check', () => ({
   usePermissionCheck: () => [true, true],
 }));
-jest.mock('../../../contexts/kibana/kibana_context', () => ({
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: () => ({
     services: {
       docLinks: {

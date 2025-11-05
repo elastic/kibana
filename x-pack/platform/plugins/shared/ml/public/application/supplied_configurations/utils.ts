@@ -6,8 +6,9 @@
  */
 
 import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
-import type { Module } from '../../../common/types/modules';
-import { stringMatch } from '../util/string_utils';
+
+import type { Module } from '@kbn/ml-common-types/modules';
+import { stringMatch } from '@kbn/ml-common-utils/string_utils/string_match';
 
 export function filterModules(items: Module[], clauses: Clause[]) {
   if (clauses.length === 0) {

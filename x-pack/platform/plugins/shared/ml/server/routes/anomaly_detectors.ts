@@ -7,9 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
@@ -25,7 +23,9 @@ import {
   updateModelSnapshotBodySchema,
   forceQuerySchema,
   getAnomalyDetectorsResponse,
-} from './schemas/anomaly_detectors_schema';
+} from '@kbn/ml-server-api-schemas/anomaly_detectors_schema';
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**

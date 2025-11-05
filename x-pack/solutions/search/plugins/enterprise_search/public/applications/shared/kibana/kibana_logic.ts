@@ -27,7 +27,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { IndexMappingProps } from '@kbn/index-management-shared-types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 import type { ConnectorDefinition } from '@kbn/search-connectors';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';

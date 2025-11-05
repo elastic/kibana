@@ -7,15 +7,20 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { EuiButton, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import dfaImage from './data_frame_analytics_kibana.png';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
-import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
+import { useMlManagementLocator } from '../../../../../contexts/kibana';
 import { MLEmptyPromptCard } from '../../../../../components/overview/ml_empty_prompt_card';
+
+import dfaImage from './data_frame_analytics_kibana.png';
 
 export const TrainedAnalysisTitle = () => (
   <EuiTitle size="s">

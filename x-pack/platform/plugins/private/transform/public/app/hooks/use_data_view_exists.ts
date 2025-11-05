@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
 
 import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 

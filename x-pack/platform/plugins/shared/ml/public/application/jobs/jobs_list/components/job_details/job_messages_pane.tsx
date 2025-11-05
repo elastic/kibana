@@ -7,15 +7,18 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
+
 import { JobMessages } from '../../../../components/job_messages';
-import type { JobMessage } from '../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useMlApi } from '../../../../contexts/kibana';
-import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { blurButtonOnClick } from '../../../../util/component_utils';
 interface JobMessagesPaneProps {
   jobId: string;

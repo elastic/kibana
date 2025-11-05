@@ -8,7 +8,7 @@
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { useMlKibana } from './kibana_context';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 /**
  * Set of reasonable defaults for formatters for the ML app.

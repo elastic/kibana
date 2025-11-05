@@ -15,7 +15,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/ml-plugin",
     "@kbn/ml-trained-models-utils",
     "@kbn/shared-ux-router",
     "@kbn/core-http-server",
@@ -38,6 +37,7 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/object-utils",
     "@kbn/react-query",
+    "@kbn/ml-plugin-contracts",
   ],
   "exclude": [
     "target/**/*",

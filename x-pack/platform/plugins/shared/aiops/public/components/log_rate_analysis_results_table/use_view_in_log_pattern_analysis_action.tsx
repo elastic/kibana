@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +34,7 @@ const viewInLogPatternAnalysisMessage = i18n.translate(
 export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableItemAction => {
   const { application, share, data } = useAiopsAppContext();
 
-  const mlLocator = useMemo(() => share?.url.locators.get('ML_APP_LOCATOR'), [share?.url.locators]);
+  const mlLocator = useMemo(() => share?.url.locators.get(ML_APP_LOCATOR), [share?.url.locators]);
 
   // We cannot rely on the time range from AiOps App context because it is not always in sync with the time range used for analysis.
   // E.g. In the case of an embeddable inside cases, the time range is fixed and not coming from the time picker.

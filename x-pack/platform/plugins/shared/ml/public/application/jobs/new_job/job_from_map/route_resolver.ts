@@ -9,7 +9,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { MlApi } from '../../../services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { QuickGeoJobCreator } from './quick_create_job';
 
 import { getDefaultQuery, getRisonValue } from '../utils/new_job_utils';

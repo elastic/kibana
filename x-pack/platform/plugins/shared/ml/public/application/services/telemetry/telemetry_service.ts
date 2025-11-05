@@ -6,9 +6,9 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
 import { trainedModelsEbtEvents } from './events';
 import { TelemetryClient } from './telemetry_client';
-import type { ITelemetryClient } from './types';
 
 interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;

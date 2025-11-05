@@ -13,8 +13,8 @@ import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } fr
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
 
-import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 
 import { isManagedJob } from '../../../jobs_utils';

@@ -9,7 +9,8 @@ import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlHref } from '@kbn/ml-locator/use_ml_href';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {

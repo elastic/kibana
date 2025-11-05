@@ -6,19 +6,21 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
-import { listTypeSchema } from './schemas/management_schema';
 
-import { jobServiceProvider } from '../models/job_service';
-import { checksFactory } from '../saved_objects';
+import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type {
   AnomalyDetectionManagementItems,
   AnalyticsManagementItems,
   TrainedModelsManagementItems,
-} from '../../common/types/management';
+} from '@kbn/ml-common-types/management';
+import { listTypeSchema } from '@kbn/ml-server-api-schemas/management_schema';
+
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
+import { jobServiceProvider } from '../models/job_service';
+import { checksFactory } from '../saved_objects';
+
 import { filterForEnabledFeatureModels } from './trained_models';
 
 /**

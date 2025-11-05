@@ -7,9 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { cloneDeep } from 'lodash';
 
 import {
   EuiButton,
@@ -23,12 +21,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
 
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
+
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
-import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map((j) => j.id);

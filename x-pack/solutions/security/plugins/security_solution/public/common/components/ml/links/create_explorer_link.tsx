@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useMlHref } from '@kbn/ml-plugin/public';
+import { useMlHref } from '@kbn/ml-locator/use_ml_href';
 import type { Anomaly } from '../types';
 import { useKibana } from '../../../lib/kibana';
 

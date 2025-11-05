@@ -8,17 +8,13 @@
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
-import { getSeverityType, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
+import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
-
-import type { ModelPlotOutputResults } from '../../../../services/results_service';
-import {
-  mlResultsServiceProvider,
-  type MlResultsService,
-} from '../../../../services/results_service';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
+import type { ModelPlotOutputResults, MlResultsService } from '@kbn/ml-services/results_service';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service';
 
 import type { JobCreatorType } from '../job_creator';
 import { isMultiMetricJobCreator } from '../job_creator';

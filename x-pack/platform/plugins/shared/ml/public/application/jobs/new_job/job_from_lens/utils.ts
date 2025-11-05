@@ -13,16 +13,16 @@ import type {
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
 import type { Query } from '@kbn/es-query';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { MlManagementLocatorInternal } from '../../../../locator/ml_management_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
 
 export const COMPATIBLE_SERIES_TYPES = [
   'line',

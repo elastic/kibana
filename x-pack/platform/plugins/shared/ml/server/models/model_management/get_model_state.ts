@@ -6,7 +6,7 @@
  */
 
 import { DEPLOYMENT_STATE, MODEL_STATE, type ModelState } from '@kbn/ml-trained-models-utils';
-import type { NLPModelItem } from '../../../common/types/trained_models';
+import type { NLPModelItem } from '@kbn/ml-common-types/trained_models';
 
 /**
  * Resolves result model state based on the state of each deployment.

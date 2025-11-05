@@ -17,7 +17,7 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const FunctionHelpPopover = memo(() => {
   const {

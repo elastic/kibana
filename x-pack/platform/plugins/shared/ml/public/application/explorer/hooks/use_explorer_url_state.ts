@@ -6,10 +6,12 @@
  */
 
 import { useMemo } from 'react';
+
 import { usePageUrlState, type UrlStateService } from '@kbn/ml-url-state';
+import type { ExplorerAppState } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
 import { resolveSeverityFormat } from '../../components/controls/select_severity/severity_format_resolver';
-import type { ExplorerAppState } from '../../../../common/types/locator';
-import { ML_PAGES } from '../../../../common/constants/locator';
 
 export type AnomalyExplorerUrlStateService = UrlStateService<ExplorerAppState>;
 

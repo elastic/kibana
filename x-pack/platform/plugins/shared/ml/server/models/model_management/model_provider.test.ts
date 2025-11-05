@@ -7,13 +7,14 @@
 
 import { modelsProvider } from './models_provider';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import downloadTasksResponse from './__mocks__/mock_download_tasks.json';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import { mlLog } from '../../lib/log';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { ExistingModelBase } from '../../../common/types/trained_models';
+import type { ExistingModelBase } from '@kbn/ml-common-types/trained_models';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../lib/log');

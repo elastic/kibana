@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { takeRight } from 'lodash';
+
+import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
@@ -30,14 +31,15 @@ import {
   ALERT_ANOMALY_TIMESTAMP,
   ALERT_TOP_INFLUENCERS,
   ALERT_TOP_RECORDS,
-  ML_ALERT_TYPES,
-} from '../../../common/constants/alerts';
-import { PLUGIN_ID } from '../../../common/constants/app';
-import { MINIMUM_FULL_LICENSE } from '../../../common/license';
-import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
+} from '@kbn/ml-common-constants/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import type { InfluencerAnomalyAlertDoc } from '@kbn/ml-common-types/alerts';
+import { type RecordAnomalyAlertDoc } from '@kbn/ml-common-types/alerts';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-server-api-schemas/alerting_schema';
+import { MINIMUM_FULL_LICENSE } from '@kbn/ml-license/constants';
+
 import type { RegisterAlertParams } from './register_ml_alerts';
-import type { InfluencerAnomalyAlertDoc } from '../../../common/types/alerts';
-import { type RecordAnomalyAlertDoc } from '../../../common/types/alerts';
 import type { AnomalyDetectionRuleState } from './alerting_service';
 
 /**

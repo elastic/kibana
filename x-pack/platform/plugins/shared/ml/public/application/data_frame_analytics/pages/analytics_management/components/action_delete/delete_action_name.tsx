@@ -7,9 +7,12 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiToolTip } from '@elastic/eui';
-import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
+
+import { i18n } from '@kbn/i18n';
+import { createPermissionFailureMessage } from '@kbn/ml-services/capabilities/check_capabilities';
+
 import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 import { isDataFrameAnalyticsRunning } from '../analytics_list/common';
 

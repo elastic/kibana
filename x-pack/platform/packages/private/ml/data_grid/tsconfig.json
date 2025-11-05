@@ -35,5 +35,6 @@
     "@kbn/ml-query-utils",
     "@kbn/ml-date-utils",
     "@kbn/charts-theme",
+    "@kbn/ml-common-types",
   ]
 }

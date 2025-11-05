@@ -16,11 +16,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { JobOverride } from '@kbn/ml-common-types/modules';
 import type { JobOverrides, ModuleJobUI } from '../page';
 import { SAVE_STATE } from '../page';
 import { JobItem } from './job_item';
 import { EditJob } from './edit_job';
-import type { JobOverride } from '../../../../../../common/types/modules';
 
 interface ModuleJobsProps {
   jobs: ModuleJobUI[];

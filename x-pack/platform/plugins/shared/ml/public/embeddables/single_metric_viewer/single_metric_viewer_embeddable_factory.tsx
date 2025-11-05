@@ -5,34 +5,38 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { openLazyFlyout } from '@kbn/presentation-util';
-
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
-import {
-  apiHasExecutionContext,
-  initializeTimeRangeManager,
-  initializeTitleManager,
-  timeRangeComparators,
-  titleComparators,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
+
+import { openLazyFlyout } from '@kbn/presentation-util';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { timeRangeComparators } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
+import {
+  initializeTitleManager,
+  titleComparators,
+} from '@kbn/presentation-publishing/interfaces/titles/title_manager';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import { initializeTimeRangeManager } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+
+import type { MlStartDependencies } from '../../plugin';
+import { getSingleMetricViewerComponent } from '../../shared_components/single_metric_viewer';
+
 import type { SingleMetricViewerEmbeddableApi } from '../types';
+import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
+
 import {
   initializeSingleMetricViewerControls,
   singleMetricViewerComparators,
 } from './single_metric_viewer_controls_initializer';
 import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_data_fetcher';
 import { getServices } from './get_services';
-import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
-import { getSingleMetricViewerComponent } from '../../shared_components/single_metric_viewer';
 import { EmbeddableSingleMetricViewerUserInput } from './single_metric_viewer_setup_flyout';
 import type { SingleMetricViewerEmbeddableState } from './types';
 

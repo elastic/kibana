@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { useMlManagementHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlManagementHref } from '@kbn/ml-locator/use_ml_management_href';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 

@@ -9,14 +9,14 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
-import type { MlCoreSetup } from '../plugin';
-import type { AnomalyChartsFieldSelectionContext } from '../embeddables';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils/entity_field_operations';
+import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from '@kbn/ml-ui-actions';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-} from '../embeddables';
-import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
+} from '@kbn/ml-embeddables/constants';
+import type { MlCoreSetup } from '../plugin';
+import type { AnomalyChartsFieldSelectionContext } from '../embeddables/types';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 

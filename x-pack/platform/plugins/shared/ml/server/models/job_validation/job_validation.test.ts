@@ -9,7 +9,8 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 import type { ValidateJobPayload } from './job_validation';

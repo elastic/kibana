@@ -5,24 +5,19 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useRef, type FC } from 'react';
+import { BehaviorSubject } from 'rxjs';
+
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
-import React, { useEffect, useMemo, useRef, type FC } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import type { TypeOf } from '@kbn/config-schema';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from '../embeddables';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
-import type { anomalySwimlanePropsSchema } from '../../server/embeddable/schemas';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import type { AnomalySwimLaneProps } from '@kbn/ml-common-types/anomaly_swim_lane';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
 
-type AnomalySwimlaneEmbeddableCustomInputProps = TypeOf<typeof anomalySwimlanePropsSchema>;
-
-export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInputProps {
-  id?: string;
-  executionContext: KibanaExecutionContext;
-}
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 
 export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   id,
@@ -52,8 +47,10 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
       jobIds,
       swimlaneType: 'overall',
       refreshConfig,
+      viewBy,
+      timeRange,
     };
-  }, [jobIds, refreshConfig, swimlaneType, viewBy]);
+  }, [jobIds, refreshConfig, swimlaneType, viewBy, timeRange]);
 
   useEffect(
     function syncState() {

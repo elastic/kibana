@@ -6,11 +6,12 @@
  */
 
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { type ElasticModels } from './application/services/elastic_models_service';
-import type { MlPluginSetup, MlPluginStart } from './plugin';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { IElasticModels } from '@kbn/ml-trained-models-utils';
+
 import type { AnomalySwimLane } from './shared_components';
 
-const createElasticModelsMock = (): jest.Mocked<ElasticModels> => {
+const createElasticModelsMock = (): jest.Mocked<IElasticModels> => {
   return {
     getELSER: jest.fn().mockResolvedValue({
       version: 2,
@@ -23,20 +24,21 @@ const createElasticModelsMock = (): jest.Mocked<ElasticModels> => {
       description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
       model_id: '.elser_model_2',
     }),
-  } as unknown as jest.Mocked<ElasticModels>;
+  } as unknown as jest.Mocked<IElasticModels>;
 };
 
 const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
   return {
     locator: sharePluginMock.createLocator(),
-    elasticModels: createElasticModelsMock(),
+    getElasticModels: () => Promise.resolve(createElasticModelsMock()),
   };
 };
 
 const createStartContract = (): jest.Mocked<MlPluginStart> => {
   return {
     locator: sharePluginMock.createLocator(),
-    elasticModels: createElasticModelsMock(),
+    getMlApi: jest.fn(),
+    getElasticModels: () => Promise.resolve(createElasticModelsMock()),
     components: {
       AnomalySwimLane: jest.fn() as unknown as jest.Mocked<typeof AnomalySwimLane>,
     },

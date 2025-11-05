@@ -11,8 +11,8 @@ import { useGeneratedHtmlId } from '@elastic/eui';
 import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
-import { useMlKibana } from '../kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { ML_APPLY_TIME_RANGE_CONFIG } from '@kbn/ml-common-types/storage';
 import {
   JobSelectorFlyoutContent,
   type JobSelectionResult,

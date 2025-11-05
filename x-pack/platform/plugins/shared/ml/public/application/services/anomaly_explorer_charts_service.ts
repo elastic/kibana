@@ -7,29 +7,30 @@
 
 import type { Observable } from 'rxjs';
 import { map as mapObservable } from 'rxjs';
+
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { SeriesConfigWithMetadata } from '../../../common/types/results';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
-import type { MlApi } from './ml_api_service';
-
-const MAX_CHARTS_PER_ROW = 4;
-const OPTIMAL_CHART_WIDTH = 550;
+import {
+  DEFAULT_MAX_SERIES_TO_PLOT,
+  MAX_CHARTS_PER_ROW,
+  OPTIMAL_CHART_WIDTH,
+} from './anomaly_explorer_charts_service_constants';
 
 export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {
   return isPopulatedObject(arg, ['bucketSpanSeconds', 'detectorLabel']);
 };
-
-export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
 
 /**
  * Service for retrieving anomaly explorer charts data.

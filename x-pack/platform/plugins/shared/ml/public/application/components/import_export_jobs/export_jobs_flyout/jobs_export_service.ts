@@ -8,10 +8,11 @@
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import type { MlApi } from '../../../services/ml_api_service';
-import type { JobType } from '../../../../../common/types/saved_objects';
-import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
-import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { GLOBAL_CALENDAR } from '@kbn/ml-common-constants/calendars';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
 export type JobDependencies = Array<{ jobId: string; calendarIds: string[]; filterIds: string[] }>;
 export type FiltersPerJob = Array<{ jobId: string; filterIds: string[] }>;

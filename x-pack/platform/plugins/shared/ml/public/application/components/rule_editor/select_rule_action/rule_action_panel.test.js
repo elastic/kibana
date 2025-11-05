@@ -9,12 +9,12 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils/detector_rule';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { RuleActionPanel } from './rule_action_panel';
 
-jest.mock('../../../services/job_service', () => 'mlJobService');
+jest.mock('@kbn/ml-services/job_service', () => 'mlJobService');
 
 // Mock the call for loading a filter.
 // The mock is hoisted to the top, so need to prefix the filter variable

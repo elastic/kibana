@@ -6,18 +6,21 @@
  */
 
 import type { FC } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
+
 import type { EuiTableFieldDataColumnType, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 
-import { useMlKibana, useMlManagementLocator } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type {
   RecognizeModuleResult,
   RecognizeModuleResultDataView,
-} from '../../../../common/types/modules';
+} from '@kbn/ml-common-types/modules';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
+import { useMlManagementLocator } from '../../contexts/kibana';
 
 interface Props {
   matchingDataViews: RecognizeModuleResult;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote.json';
+import jobConfig from '@kbn/ml-common-types/__mocks__/job_config_farequote.json';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 import { AnnotationsTable } from './annotations_table';
 import React from 'react';
@@ -18,7 +18,7 @@ const mockAnnotationUpdatesService = {
 
 const mockReact = React;
 
-jest.mock('../../../services/job_service', () => {
+jest.mock('@kbn/ml-services/job_service', () => {
   const mockMlJobService = {
     getJob: jest.fn(),
   };
@@ -27,7 +27,7 @@ jest.mock('../../../services/job_service', () => {
   };
 });
 
-jest.mock('../../../services/ml_api_service', () => {
+jest.mock('@kbn/ml-services/ml_api_service', () => {
   const { of } = require('rxjs');
   const mockAnnotations$ = of({ annotations: [] });
   return {

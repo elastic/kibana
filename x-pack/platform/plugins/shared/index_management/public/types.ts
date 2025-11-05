@@ -15,7 +15,7 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';

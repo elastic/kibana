@@ -18,16 +18,24 @@ import {
   filter,
 } from 'rxjs';
 import { isEqual, sortBy, uniq } from 'lodash';
+
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 // FIXME get rid of the static import
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import type { AnomalyExplorerSwimLaneUrlState } from '@kbn/ml-common-types/locator';
+import type { MlJobService } from '@kbn/ml-services/job_service';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+
 import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
 import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import type { Refresh } from '../routing/use_refresh';
+import { StateService } from '../services/state_service';
+
 import type {
   AppStateSelectedCells,
   ExplorerJob,
@@ -35,12 +43,7 @@ import type {
   ViewBySwimLaneData,
 } from './explorer_utils';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import type { AnomalyExplorerSwimLaneUrlState } from '../../../common/types/locator';
-import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
-import type { MlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
-import type { Refresh } from '../routing/use_refresh';
-import { StateService } from '../services/state_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 interface SwimLanePagination {

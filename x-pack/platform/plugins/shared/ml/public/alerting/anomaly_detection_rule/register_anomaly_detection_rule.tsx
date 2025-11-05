@@ -11,19 +11,19 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { lazy } from 'react';
-import type { MlCapabilities } from '../../../common/types/capabilities';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import type { MlCoreSetup } from '../../plugin';
-import { ML_ALERT_TYPES } from '../../../common';
-import type { MlAnomalyDetectionAlertParams } from '../../../common/types/alerts';
 import { validateLookbackInterval, validateTopNBucket } from '../validators';
+
+const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
 
 export function registerAnomalyDetectionRule(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
   getStartServices: MlCoreSetup['getStartServices'],
   mlCapabilities: MlCapabilities
 ) {
-  const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
-
   triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {

@@ -26,7 +26,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { ReindexWithPipeline } from '../ml_inference/components/reindex_with_pipeline';
 
 const MANAGEMENT_APP_ID = 'management';

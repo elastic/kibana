@@ -16,7 +16,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
-import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+import { kibanaContextMock } from '@kbn/ml-kibana-context/__mocks__/kibana_context';
 import { BehaviorSubject } from 'rxjs';
 
 const utilityProps = {

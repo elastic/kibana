@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { stringMatch } from '../../util/string_utils';
+import { stringMatch } from '@kbn/ml-common-utils/string_utils/string_match';
+
 import type {
   TermClause,
   FieldClause,

@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { map } from 'rxjs';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
+import type { trainedModelsApiProvider } from '@kbn/ml-services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
-import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
-import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 const DEFAULT_MASK_TOKEN = '[MASK]';
 

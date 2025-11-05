@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React, { memo, useEffect, useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import type { estypes } from '@elastic/elasticsearch';
 
+import type { estypes } from '@elastic/elasticsearch';
 import {
   useEuiTheme,
   EuiAccordion,
@@ -29,16 +29,17 @@ import {
   EuiPanel,
   htmlIdGenerator,
 } from '@elastic/eui';
-
 import type { IngestDocument } from '@elastic/elasticsearch/lib/api/types';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
 
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
-import { useMlApi, useMlKibana } from '../../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { isValidJson } from '@kbn/ml-common-utils/validation_utils';
+
 import { getPipelineConfig } from '../get_pipeline_config';
-import { isValidJson } from '../../../../../common/util/validation_utils';
 import type { MlInferenceState } from '../types';
 import { checkIndexExists } from '../retry_create_data_view';
 import { type TestPipelineMode, TEST_PIPELINE_MODE } from '../types';

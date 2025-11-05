@@ -7,19 +7,23 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
+import { getMlNodeCount } from '../../../ml_nodes_check';
+
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import {
   type NavigateToApp,
   getADSettingsBreadcrumbs,
   getMlManagementBreadcrumb,
 } from '../../breadcrumbs';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { getMlNodeCount } from '../../../ml_nodes_check';
 
 enum MODE {
   NEW,

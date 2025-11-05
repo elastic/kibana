@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+
 import {
   EuiTitle,
   EuiSpacer,
@@ -17,16 +17,20 @@ import {
   EuiFlexItem,
   EuiLink,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { PageTitle } from '../../../../components/page_title';
-import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
+import { PageTitle } from '../../../../components/page_title';
+import { useMlManagementLocator } from '../../../../contexts/kibana';
 import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
 

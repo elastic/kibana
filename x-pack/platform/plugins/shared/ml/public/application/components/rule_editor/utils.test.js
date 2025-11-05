@@ -10,7 +10,7 @@ import {
   ML_DETECTOR_RULE_APPLIES_TO,
   ML_DETECTOR_RULE_OPERATOR,
   ML_DETECTOR_RULE_FILTER_TYPE,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/detector_rule';
 
 import { isValidRule, buildRuleDescription, getAppliesToValueFromAnomaly } from './utils';
 

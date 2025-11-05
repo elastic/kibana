@@ -7,23 +7,23 @@
 
 import fs from 'fs';
 import Boom from '@hapi/boom';
+import moment from 'moment';
+import { merge, intersection } from 'lodash';
+
 import numeral from '@elastic/numeral';
+
 import type {
   KibanaRequest,
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import moment from 'moment';
-import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { CompatibleModule } from '../../../common/constants/app';
-import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
-import { getAuthorizationHeader } from '../../lib/request_authorization';
-import type { MlClient } from '../../lib/ml_client';
-import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
-import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import type { CompatibleModule } from '@kbn/ml-common-constants/app';
+import type { AnalysisLimits } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { RecognizeModuleResultDataView } from '@kbn/ml-common-types/modules';
+import { ML_MODULE_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import type {
   KibanaObjects,
   KibanaObjectConfig,
@@ -42,21 +42,23 @@ import type {
   GeneralDatafeedsOverride,
   JobSpecificOverride,
   RecognizeResult,
-} from '../../../common/types/modules';
-import { isGeneralJobOverride } from '../../../common/types/modules';
-import {
-  getLatestDataOrBucketTimestamp,
-  prefixDatafeedId,
-  splitIndexPatternNames,
-} from '../../../common/util/job_utils';
+} from '@kbn/ml-common-types/modules';
+import { isGeneralJobOverride } from '@kbn/ml-common-types/modules';
+import type { JobExistResult, JobStat } from '@kbn/ml-common-types/data_recognizer';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { MlClient } from '@kbn/ml-client';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
+import { getLatestDataOrBucketTimestamp } from '@kbn/ml-common-utils/job_utils/get_latest_data_or_bucket_timestamp';
+import { prefixDatafeedId } from '@kbn/ml-common-utils/job_utils/prefix_datafeed_id';
+import { splitIndexPatternNames } from '@kbn/ml-common-utils/job_utils/split_index_pattern_names';
+import { resultsServiceProvider } from '@kbn/ml-server-services/results_service';
+
+import { getAuthorizationHeader } from '../../lib/request_authorization';
+
 import { mlLog } from '../../lib/log';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
-import { resultsServiceProvider } from '../results_service';
-import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import type { MLSavedObjectService } from '../../saved_objects';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';

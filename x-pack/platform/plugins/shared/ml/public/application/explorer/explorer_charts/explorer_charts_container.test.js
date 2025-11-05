@@ -17,7 +17,7 @@ import { ExplorerChartsContainer, getEntitiesQuery } from './explorer_charts_con
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
-import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+import { kibanaContextMock } from '@kbn/ml-kibana-context/__mocks__/kibana_context';
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 

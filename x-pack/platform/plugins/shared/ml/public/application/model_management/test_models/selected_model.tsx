@@ -11,6 +11,8 @@ import React, { useMemo, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 
 import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { NerInference } from './models/ner';
 import { QuestionAnsweringInference } from './models/question_answering';
 
@@ -23,13 +25,12 @@ import {
 
 import { TextEmbeddingInference } from './models/text_embedding';
 
-import { useMlApi } from '../../contexts/kibana';
 import { type TestTrainedModelsContextType } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
 import type { InferrerType } from './models';
 import type { INPUT_TYPE } from './models/inference_base';
 import { TextExpansionInference } from './models/text_expansion';
-import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
+import { type InferencePipelineCreationState } from '../create_pipeline_for_model/state';
 import {
   getInferencePropertiesFromPipelineConfig,
   isMlIngestInferenceProcessor,
@@ -41,7 +42,7 @@ interface Props {
   model: estypes.MlTrainedModelConfig;
   inputType: INPUT_TYPE;
   deploymentId: string;
-  handlePipelineConfigUpdate?: (configUpdate: Partial<InferecePipelineCreationState>) => void;
+  handlePipelineConfigUpdate?: (configUpdate: Partial<InferencePipelineCreationState>) => void;
   externalPipelineConfig?: estypes.IngestPipeline;
   setCurrentContext?: React.Dispatch<TestTrainedModelsContextType>;
 }

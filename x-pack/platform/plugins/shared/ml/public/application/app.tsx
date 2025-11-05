@@ -6,8 +6,9 @@
  */
 
 import React, { type FC, useMemo } from 'react';
-import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
+import useLifecycles from 'react-use/lib/useLifecycles';
+import useObservable from 'react-use/lib/useObservable';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -16,19 +17,18 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-import useLifecycles from 'react-use/lib/useLifecycles';
-import useObservable from 'react-use/lib/useObservable';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
-import { ML_STORAGE_KEYS } from '../../common/types/storage';
+import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '@kbn/ml-common-constants/app';
+import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
+import { getMlGlobalServices } from '@kbn/ml-services/get_services';
+import type { StartServices } from '@kbn/ml-kibana-context';
+import { setLicenseCache } from '@kbn/ml-license/check_license';
+
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider, MlServerInfoContextProvider } from './contexts/ml';
-import type { StartServices } from './contexts/kibana';
-import { getMlGlobalServices } from './util/get_services';
 import { MlTelemetryContextProvider } from './contexts/ml/ml_telemetry_context';
 import type { ManagementSectionId } from './management';
 
@@ -38,7 +38,7 @@ export type MlDependencies = Omit<
 > &
   MlStartDependencies;
 
-interface AppProps {
+export interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
   appMountParams: ManagementAppMountParams | AppMountParameters;
@@ -50,12 +50,6 @@ interface AppProps {
 }
 
 const localStorage = new Storage(window.localStorage);
-
-export interface MlServicesContext {
-  mlServices: MlGlobalServices;
-}
-
-export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 export const App: FC<AppProps> = ({
   coreStart,
@@ -173,34 +167,4 @@ export const App: FC<AppProps> = ({
       </ApplicationUsageTrackingProvider>
     </KibanaRenderContextProvider>
   );
-};
-
-export const renderApp = (
-  coreStart: CoreStart,
-  deps: MlDependencies,
-  appMountParams: AppMountParameters,
-  isServerless: boolean,
-  mlFeatures: MlFeatures,
-  experimentalFeatures: ExperimentalFeatures,
-  nlpSettings: NLPSettings
-) => {
-  appMountParams.onAppLeave((actions) => actions.default());
-
-  ReactDOM.render(
-    <App
-      coreStart={coreStart}
-      deps={deps}
-      appMountParams={appMountParams}
-      isServerless={isServerless}
-      mlFeatures={mlFeatures}
-      experimentalFeatures={experimentalFeatures}
-      nlpSettings={nlpSettings}
-    />,
-    appMountParams.element
-  );
-
-  return () => {
-    ReactDOM.unmountComponentAtNode(appMountParams.element);
-    deps.data.search.session.clear();
-  };
 };

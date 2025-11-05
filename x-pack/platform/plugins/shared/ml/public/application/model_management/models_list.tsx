@@ -39,26 +39,25 @@ import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useEuiMaxBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
-import type {
-  DFAModelItem,
-  NLPModelItem,
-  TrainedModelItem,
-  TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { ML_ELSER_CALLOUT_DISMISSED } from '@kbn/ml-common-types/storage';
 import {
+  type DFAModelItem,
+  type NLPModelItem,
+  type TrainedModelItem,
+  type TrainedModelUIItem,
   isBaseNLPModelItem,
   isBuiltInModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import type { ModelsBarStats } from '../components/stats_bar';
 import { StatsBar } from '../components/stats_bar';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
-import { useMlKibana } from '../contexts/kibana';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useRefresh } from '../routing/use_refresh';
 import { ModelsTableToConfigMapping } from './config_mapping';
@@ -70,7 +69,6 @@ import { useInitTrainedModelsService } from './hooks/use_init_trained_models_ser
 import { ModelStatusIndicator } from './model_status_indicator';
 import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_list';
 import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
-import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
 
 interface PageUrlState {

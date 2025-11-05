@@ -5,9 +5,12 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
+
 import { EuiButtonEmpty } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 
 export const SynchronizeSavedObjectsButton = ({ refreshJobs }: { refreshJobs: () => void }) => {

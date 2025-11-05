@@ -7,9 +7,11 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
-import { useMlKibana } from '../../contexts/kibana/kibana_context';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const SyncToAllSpacesWarning: FC = () => {
   const {

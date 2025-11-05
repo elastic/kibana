@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/data-service-server",
+    "@kbn/es-query-server",
+    "@kbn/presentation-publishing-schemas",
+  ]
+}

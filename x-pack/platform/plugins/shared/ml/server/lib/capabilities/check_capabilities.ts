@@ -7,17 +7,18 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { once } from 'lodash';
-import type { MlClient } from '../ml_client';
-import { mlLog } from '../log';
 import type {
   MlCapabilities,
   MlCapabilitiesResponse,
   ResolveMlCapabilities,
   MlCapabilitiesKey,
-} from '../../../common/types/capabilities';
-import { adminMlCapabilities } from '../../../common/types/capabilities';
+} from '@kbn/ml-common-types/capabilities';
+import { adminMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { MlClient } from '@kbn/ml-client';
+
+import type { MlLicense } from '@kbn/ml-license';
+import { mlLog } from '../log';
 import { upgradeCheckProvider } from './upgrade';
-import type { MlLicense } from '../../../common/license';
 import {
   InsufficientMLCapabilities,
   UnknownMLCapabilitiesError,

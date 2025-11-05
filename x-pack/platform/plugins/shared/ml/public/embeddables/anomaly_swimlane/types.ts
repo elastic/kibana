@@ -13,18 +13,18 @@ import type {
   PublishesWritableTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { apiIsOfType } from '@kbn/presentation-publishing';
-import type { TypeOf } from '@kbn/config-schema';
-import type { SwimlaneType } from '../../application/explorer/explorer_constants';
-
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
-import type { AnomalySwimlaneEmbeddableUserInput, MlEmbeddableBaseApi } from '../types';
+import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import type {
-  anomalySwimLaneEmbeddableStateSchema,
-  anomalySwimlaneEmbeddableStateViewBySchema,
-} from '../../../server/embeddable/schemas';
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimlaneEmbeddableUserInput,
+} from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
+import type { SwimlaneType } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+
+import type { MlEmbeddableBaseApi } from '../types';
 
 export interface AnomalySwimLaneComponentApi {
   jobIds: PublishingSubject<JobId[]>;
@@ -57,13 +57,6 @@ export function isSwimLaneEmbeddableContext(arg: unknown): arg is AnomalySwimLan
   );
 }
 
-/**
- * Persisted state for the Anomaly Swim Lane Embeddable.
- */
-export type AnomalySwimLaneEmbeddableState = TypeOf<typeof anomalySwimLaneEmbeddableStateSchema>;
-export type AnomalySwimlaneEmbeddableStateViewBy = TypeOf<
-  typeof anomalySwimlaneEmbeddableStateViewBySchema
->;
 /**
  * The subset of the Anomaly Swim Lane Embeddable state that is actually used by the swimlane embeddable.
  *

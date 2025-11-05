@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS } from '../../common/constants/cases';
+import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS } from '@kbn/ml-common-constants/cases';
+import { PLUGIN_ICON } from '@kbn/ml-common-constants/app';
 import type { MlStartDependencies } from '../plugin';
-import { PLUGIN_ICON } from '../../common/constants/app';
 import { getAnomalyChartsServiceDependencies } from '../embeddables/anomaly_charts/get_anomaly_charts_services_dependencies';
 
 export function registerAnomalyChartsCasesAttachment(

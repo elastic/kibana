@@ -7,24 +7,27 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { useStorage } from '@kbn/ml-local-storage';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
+import { ML_OVERVIEW_PANELS } from '@kbn/ml-common-types/storage';
+import type { GetDataFrameAnalyticsStatsResponseError } from '@kbn/ml-services/ml_api_service/data_frame_analytics';
+
 import { type AnalyticStatsBarStats } from '../../../components/stats_bar';
 import {
   OverviewStatsBar,
   type StatEntry,
 } from '../../../components/collapsible_panel/collapsible_panel';
-import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
-import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
 import { AnalyticsTable } from './table';
 import { useGetAnalytics } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { useMlManagementLocator } from '../../../contexts/kibana';
 import { useRefresh } from '../../../routing/use_refresh';
-import type { GetDataFrameAnalyticsStatsResponseError } from '../../../services/ml_api_service/data_frame_analytics';
 import { AnalyticsEmptyPrompt } from '../../../data_frame_analytics/pages/analytics_management/components/empty_prompt';
 import { overviewPanelDefaultState } from '../../overview_page';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';

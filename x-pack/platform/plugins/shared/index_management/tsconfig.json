@@ -46,7 +46,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/index-management-shared-types",
     "@kbn/utility-types",
-    "@kbn/ml-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/rollup",
@@ -65,7 +64,11 @@
     "@kbn/inference-common",
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/failure-store-modal",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/ml-common-types",
+    "@kbn/ml-plugin-contracts",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

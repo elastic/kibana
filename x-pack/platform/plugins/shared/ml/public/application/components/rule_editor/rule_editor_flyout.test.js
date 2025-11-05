@@ -6,7 +6,7 @@
  */
 
 // Mock the services required for reading and writing job data.
-jest.mock('../../services/job_service', () => ({
+jest.mock('@kbn/ml-services/job_service', () => ({
   mlJobServiceFactory: () => ({
     getJob: () => {
       return {
@@ -45,7 +45,7 @@ jest.mock('../../services/job_service', () => ({
     },
   }),
 }));
-jest.mock('../../capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 

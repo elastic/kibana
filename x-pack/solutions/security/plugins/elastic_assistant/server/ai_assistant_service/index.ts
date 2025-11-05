@@ -16,7 +16,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { Subject } from 'rxjs';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
@@ -90,7 +90,7 @@ export interface AIAssistantServiceOpts {
   elserInferenceId?: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   soClientPromise: Promise<SavedObjectsClientContract>;
-  ml: MlPluginSetup;
+  ml: MlServerPluginSetup;
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
   productDocManager: Promise<ProductDocBaseStartContract['management']>;

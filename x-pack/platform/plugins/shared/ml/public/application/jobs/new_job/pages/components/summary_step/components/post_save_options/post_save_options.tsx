@@ -13,12 +13,12 @@ import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { DATAFEED_STATE } from '@kbn/ml-common-constants/states';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import type { JobRunner } from '../../../../../common/job_runner';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { DATAFEED_STATE } from '../../../../../../../../../common/constants/states';
 import { MlAnomalyAlertFlyout } from '../../../../../../../../alerting/ml_alerting_flyout';
 
 interface Props {

@@ -97,7 +97,7 @@ jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));
 
-jest.mock('../../../contexts/kibana/kibana_context', () => {
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => {
   return {
     useMlKibana: () => {
       return {

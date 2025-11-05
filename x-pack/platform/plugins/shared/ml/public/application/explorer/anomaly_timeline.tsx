@@ -7,6 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import useObservable from 'react-use/lib/useObservable';
+
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -25,10 +28,9 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
-import useDebounce from 'react-use/lib/useDebounce';
 import type { Query } from '@kbn/es-query';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -40,14 +42,16 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import type { SwimlaneType } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
+
+import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/get_default_swimlane_panel_title';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import type { AnomalySwimLaneEmbeddableState } from '../..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
-import type { SwimlaneType } from './explorer_constants';
-import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
-import { useMlKibana } from '../contexts/kibana';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
 import {

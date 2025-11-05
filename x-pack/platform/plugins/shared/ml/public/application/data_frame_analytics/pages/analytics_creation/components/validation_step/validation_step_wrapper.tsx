@@ -16,11 +16,11 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { CalloutMessage, ValidateAnalyticsJobResponse } from '@kbn/ml-validators';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { ValidationStep } from './validation_step';
 import { ValidationStepDetails } from './validation_step_details';
 import { ANALYTICS_STEPS } from '../../page';
-import { useMlApi } from '../../../../../contexts/kibana';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 export interface ValidationSummary {

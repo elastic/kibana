@@ -6,11 +6,13 @@
  */
 
 import { get } from 'lodash';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { type AggFieldNamePair, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
-import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
+import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils/constants';
 
 type DtrIndex = number;
 type TimeStamp = number;

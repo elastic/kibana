@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import type { MlPluginSetup, MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup, MlTrainedModels } from '@kbn/ml-plugin/server';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -72,10 +72,10 @@ jest.mock('../../lib/ml/start_ml_model_deployment', () => ({
 jest.mock('../../lib/ml/start_ml_model_download', () => ({
   startMlModelDownload: jest.fn(),
 }));
-jest.mock('@kbn/ml-plugin/server/saved_objects/service', () => ({
+jest.mock('@kbn/ml-saved-objects/service', () => ({
   mlSavedObjectServiceFactory: jest.fn(),
 }));
-jest.mock('@kbn/ml-plugin/server/lib/ml_client/ml_client', () => ({
+jest.mock('@kbn/ml-client/ml_client', () => ({
   getMlClient: jest.fn(),
 }));
 
@@ -176,7 +176,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
-    let mockMl: MlPluginSetup;
+    let mockMl: MlServerPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -996,7 +996,7 @@ describe('Enterprise Search Managed Indices', () => {
 
   describe('GET /internal/enterprise_search/pipelines/ml_inference', () => {
     let mockTrainedModelsProvider: MlTrainedModels;
-    let mockMl: MlPluginSetup;
+    let mockMl: MlServerPluginSetup;
 
     beforeEach(() => {
       const context = {
@@ -1052,7 +1052,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('POST /internal/enterprise_search/ml/models/{modelName}', () => {
-    let mockMl: MlPluginSetup;
+    let mockMl: MlServerPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1074,7 +1074,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      } as unknown as jest.Mocked<MlServerPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1116,7 +1116,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('POST /internal/enterprise_search/ml/models/{modelName}/deploy', () => {
-    let mockMl: MlPluginSetup;
+    let mockMl: MlServerPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1138,7 +1138,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      } as unknown as jest.Mocked<MlServerPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1180,7 +1180,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/ml/models', () => {
-    let mockMl: MlPluginSetup;
+    let mockMl: MlServerPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1201,7 +1201,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      } as unknown as jest.Mocked<MlServerPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1232,7 +1232,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/ml/models/{modelName}', () => {
-    let mockMl: MlPluginSetup;
+    let mockMl: MlServerPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1253,7 +1253,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<MlPluginSetup>;
+      } as unknown as jest.Mocked<MlServerPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,

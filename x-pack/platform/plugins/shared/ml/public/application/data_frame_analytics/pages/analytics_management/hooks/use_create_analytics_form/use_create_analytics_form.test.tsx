@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useCreateAnalyticsForm } from './use_create_analytics_form';
-import { kibanaContextMock } from '../../../../../contexts/kibana/__mocks__/kibana_context';
+import { kibanaContextMock } from '@kbn/ml-kibana-context/__mocks__/kibana_context';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const getRenderHook = () =>

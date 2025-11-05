@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SearchFilterConfig } from '@elastic/eui';
-import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type {
   ManagementListResponse,
   ManagementItems,
   AnalyticsManagementItems,
   AnomalyDetectionManagementItems,
   TrainedModelsManagementItems,
-} from '../../../../../../../common/types/management';
+} from '@kbn/ml-common-types/management';
 
 export function getFilters(mlSavedObjectType: MlSavedObjectType, items: ManagementListResponse) {
   switch (mlSavedObjectType) {

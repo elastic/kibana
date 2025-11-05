@@ -56,7 +56,7 @@ export const LogAnalysisModuleListCard: React.FC<{
     if (link?.url && isComponentMounted()) {
       setViewInMlLink(link.url);
     }
-  }, [jobId, ml?.managementLocator, toasts, isComponentMounted]);
+  }, [jobId, ml, toasts, isComponentMounted]);
 
   useEffect(
     function getMlAnomalyDetectionJobLink() {

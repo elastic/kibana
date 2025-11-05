@@ -21,7 +21,7 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -38,7 +38,7 @@ export interface PluginsSetup {
   globalSearch: GlobalSearchPluginSetup;
   licensing: LicensingPluginStart;
   logsShared: LogsSharedPluginSetup;
-  ml?: MlPluginSetup;
+  ml?: MlServerPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -57,6 +57,6 @@ export interface RouteDependencies {
   globalConfigService: GlobalConfigService;
   licensing?: LicensingPluginStart;
   log: Logger;
-  ml?: MlPluginSetup;
+  ml?: MlServerPluginSetup;
   router: IRouter;
 }

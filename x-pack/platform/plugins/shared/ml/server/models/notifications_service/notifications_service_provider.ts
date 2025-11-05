@@ -7,19 +7,19 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import type { MlFeatures } from '../../../common/constants/app';
-import type { MLSavedObjectService } from '../../saved_objects';
-import type { NotificationItem, NotificationSource } from '../../../common/types/notifications';
-import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import type {
-  MessagesSearchParams,
-  NotificationsCountParams,
-} from '../../routes/schemas/notifications_schema';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
+import { ML_NOTIFICATION_INDEX_PATTERN } from '@kbn/ml-common-constants/index_patterns';
+import type { NotificationItem, NotificationSource } from '@kbn/ml-common-types/notifications';
 import type {
   MlNotificationMessageLevel,
   NotificationsCountResponse,
   NotificationsSearchResponse,
-} from '../../../common/types/notifications';
+} from '@kbn/ml-common-types/notifications';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
+import type {
+  MessagesSearchParams,
+  NotificationsCountParams,
+} from '@kbn/ml-server-api-schemas/notifications_schema';
 
 const MAX_NOTIFICATIONS_SIZE = 10000;
 

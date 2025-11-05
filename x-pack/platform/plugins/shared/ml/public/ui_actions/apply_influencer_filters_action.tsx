@@ -12,11 +12,12 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-ui-actions';
+import { VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
 import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
-import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
-import type { SwimLaneDrilldownContext } from '../embeddables';
+import type { SwimLaneDrilldownContext } from '../embeddables/types';
 import type { MlCoreSetup } from '../plugin';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';
 

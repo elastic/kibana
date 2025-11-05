@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
-import { jobAuditMessagesProvider } from '../models/job_audit_messages';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import {
   jobAuditMessagesQuerySchema,
   jobAuditMessagesJobIdSchema,
   clearJobAuditMessagesBodySchema,
-} from './schemas/job_audit_messages_schema';
+} from '@kbn/ml-server-api-schemas/job_audit_messages_schema';
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
+import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 
 /**
  * Routes for job audit message routes

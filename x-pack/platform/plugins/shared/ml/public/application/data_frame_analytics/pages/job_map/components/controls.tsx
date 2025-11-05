@@ -8,9 +8,8 @@
 import type { FC } from 'react';
 import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import type cytoscape from 'cytoscape';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -29,17 +28,18 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import { CytoscapeContext } from './cytoscape';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
-import {
-  useMlLocator,
-  useNotifications,
-  useNavigateToPath,
-  useMlKibana,
-} from '../../../../contexts/kibana';
+import { useMlLocator, useNotifications, useNavigateToPath } from '../../../../contexts/kibana';
 import { useEnabledFeatures } from '../../../../contexts/ml';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -47,7 +47,6 @@ import {
   DeleteActionModal,
 } from '../../analytics_management/components/action_delete';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
-import { useMlIndexUtils } from '../../../../util/index_service';
 
 interface Props {
   details: Record<string, any>;

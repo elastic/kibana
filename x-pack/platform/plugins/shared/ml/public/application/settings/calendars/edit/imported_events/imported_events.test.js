@@ -10,7 +10,9 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ImportedEvents } from './imported_events';
 
-jest.mock('../../../../capabilities/check_capabilities');
+jest.mock('@kbn/ml-hooks/capabilities/use_permission_check', () => ({
+  usePermissionCheck: jest.fn(() => [true, true]),
+}));
 
 const testProps = {
   events: [

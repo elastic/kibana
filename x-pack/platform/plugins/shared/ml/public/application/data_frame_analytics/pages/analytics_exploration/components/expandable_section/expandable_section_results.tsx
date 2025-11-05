@@ -7,13 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { escapeKuery } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiDataGridColumn, EuiDataGridProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -26,8 +23,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { escapeKuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import type { RowCountRelation, UseIndexDataReturnType } from '@kbn/ml-data-grid';
 import { type DataGridItem, DataGrid, INDEX_STATUS } from '@kbn/ml-data-grid';
@@ -37,14 +37,13 @@ import {
   isRegressionAnalysis,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
-
-import type { estypes } from '@elastic/elasticsearch';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { replaceStringTokens } from '@kbn/ml-common-utils/string_utils/replace_string_tokens';
 
 import type { useColorRange } from '../../../../../components/color_range_legend';
 import { ColorRangeLegend } from '../../../../../components/color_range_legend';
-import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
 
@@ -52,11 +51,10 @@ import {
   replaceTokensInDFAUrlValue,
   openCustomUrlWindow,
 } from '../../../../../util/custom_url_utils';
-import { replaceStringTokens } from '../../../../../util/string_utils';
+import { DataViewPrompt } from '../data_view_prompt';
 
 import type { ExpandableSectionProps } from '.';
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '.';
-import { DataViewPrompt } from '../data_view_prompt';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',

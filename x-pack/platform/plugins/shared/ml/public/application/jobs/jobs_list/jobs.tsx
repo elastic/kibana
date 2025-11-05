@@ -7,29 +7,33 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import { JobsListView } from './components/jobs_list_view';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana } from '../../contexts/kibana';
 import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
-import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
+import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
+import { ExportJobsFlyout } from '../../components/import_export_jobs';
+import { PageTitle } from '../../components/page_title';
+
+import { JobsActionMenu } from '../components/jobs_action_menu';
 import {
   AnomalyDetectionSettingsButton,
   SuppliedConfigurationsButton,
   SynchronizeSavedObjectsButton,
 } from './components/top_level_actions';
 import { NewJobButton } from './components/new_job_button';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
-import { ExportJobsFlyout } from '../../components/import_export_jobs';
-import { PageTitle } from '../../components/page_title';
+import { JobsListView } from './components/jobs_list_view';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL;

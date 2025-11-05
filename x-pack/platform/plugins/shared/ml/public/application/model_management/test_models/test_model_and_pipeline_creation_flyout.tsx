@@ -7,13 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
+
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
+
+import { CreatePipelineForModelFlyout } from '../create_pipeline_for_model/create_pipeline_for_model_flyout';
 import {
   type TestTrainedModelsContextType,
   TestTrainedModelsContext,
 } from './test_trained_models_context';
 import { TestTrainedModelFlyout } from './test_flyout';
-import { CreatePipelineForModelFlyout } from '../create_pipeline_for_model/create_pipeline_for_model_flyout';
 
 interface Props {
   model: TrainedModelItem;

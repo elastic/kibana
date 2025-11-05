@@ -14,11 +14,12 @@ export {
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
   type SparseDataAggregation,
-  ES_AGGREGATION,
   KIBANA_AGGREGATION,
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from './aggregation_types';
+
+export { ES_AGGREGATION } from './es_aggregation';
 
 export {
   aggregationTypeTransform,
@@ -33,10 +34,10 @@ export {
   showActualForFunction,
   showTypicalForFunction,
   type MlEntityField,
-  type MlEntityFieldOperation,
-  ML_ENTITY_FIELD_OPERATIONS,
   ML_ENTITY_FIELD_TYPE,
 } from './anomaly_utils';
+
+export { type MlEntityFieldOperation, ML_ENTITY_FIELD_OPERATIONS } from './entity_field_operations';
 
 export {
   ML_ANOMALY_RESULT_TYPE,
@@ -85,9 +86,9 @@ export {
   type NewJobCapsResponse,
   type RollupFields,
   type SplitField,
-  EVENT_RATE_FIELD_ID,
-  METRIC_AGG_TYPE,
 } from './fields';
+
+export { EVENT_RATE_FIELD_ID, METRIC_AGG_TYPE } from './fields_constants';
 
 export { getFormattedSeverityScore } from './get_formatted_severity_score';
 export { getSeverity } from './get_severity';

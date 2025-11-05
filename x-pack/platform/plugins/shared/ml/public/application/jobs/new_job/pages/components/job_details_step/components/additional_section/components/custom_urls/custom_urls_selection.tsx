@@ -7,15 +7,18 @@
 
 import type { FC } from 'react';
 import React, { useContext, useMemo } from 'react';
+
+import { EuiLink } from '@elastic/eui';
+
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { CustomUrlsDescription } from '../../../../../../../../../components/custom_urls/custom_urls_description';
 import { useDashboardService } from '../../../../../../../../../services/dashboard_service';
 import { CustomUrls } from '../../../../../../../../../components/custom_urls/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
-import type { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
-import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 
 export const CustomUrlsSelection: FC = () => {
   const {

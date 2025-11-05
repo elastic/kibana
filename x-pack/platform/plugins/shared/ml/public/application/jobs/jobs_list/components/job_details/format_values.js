@@ -6,9 +6,10 @@
  */
 
 import numeral from '@elastic/numeral';
+
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { timeFormatter } from '@kbn/ml-date-utils';
-import { toLocaleString } from '../../../../util/string_utils';
+import { toLocaleString } from '@kbn/ml-common-utils/string_utils/to_locale_string';
 
 const DATA_FORMAT = '0.0 b';
 

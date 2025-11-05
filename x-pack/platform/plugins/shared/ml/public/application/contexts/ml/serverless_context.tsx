@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
-import type { ExperimentalFeatures, MlFeatures } from '../../../../common/constants/app';
+import type { ExperimentalFeatures, MlFeatures } from '@kbn/ml-common-constants/app';
 
 export interface EnabledFeatures {
   showLogsSuppliedConfigurationsInfo: boolean;

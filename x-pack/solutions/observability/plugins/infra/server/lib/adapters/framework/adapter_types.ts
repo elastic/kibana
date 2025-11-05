@@ -21,7 +21,7 @@ import type { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/ser
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
@@ -52,7 +52,7 @@ export interface InfraServerPluginSetupDeps {
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
-  ml?: MlPluginSetup;
+  ml?: MlServerPluginSetup;
   logsShared: LogsSharedPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
