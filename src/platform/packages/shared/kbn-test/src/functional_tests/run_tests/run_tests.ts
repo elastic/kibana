@@ -8,7 +8,6 @@
  */
 
 import Path from 'path';
-import { setTimeout } from 'timers/promises';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -109,94 +108,47 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         try {
           log.info('🚀 Starting Elasticsearch and Kibana in parallel...');
 
-          // Track ES readiness
-          let esReady = false;
-          let resumeKibana: (() => void) | null = null;
-
-          // Helper to pause Kibana when appropriate
-          const monitorAndControlKibana = async () => {
-            // Wait 15 seconds to allow:
-            // - ES to download/extract/start its server
-            // - Kibana to complete its initialization
-            // Before this point, both can work in parallel without interference
-            log.debug('Waiting 15 seconds before considering pausing Kibana...');
-            await setTimeout(15000);
-
-            if (esReady) {
-              log.debug('ES is ready, not pausing Kibana');
-              return; // ES already ready, no need to pause
-            }
-
-            // After 15 seconds, if ES isn't ready yet, pause Kibana
-            const kibanaProc = procs.getProc('kibana');
-            if (kibanaProc) {
-              const pid = kibanaProc.childProcess.pid;
-              if (pid) {
-                log.info(`⏸️  Pausing Kibana (pid: ${pid}) while waiting for Elasticsearch...`);
-                try {
-                  process.kill(pid, 'SIGSTOP');
-
-                  // Store resume function
-                  resumeKibana = () => {
-                    try {
-                      log.info(`▶️  Resuming Kibana (pid: ${pid}) now that ES is ready`);
-                      process.kill(pid, 'SIGCONT');
-                    } catch (err) {
-                      log.warning(`Failed to resume Kibana: ${err}`);
-                    }
-                  };
-                } catch (err) {
-                  log.warning(`Failed to pause Kibana: ${err}`);
-                }
-              }
-            }
-          };
-
           // Start both ES and Kibana in parallel
-          const [esShutdown] = await Promise.all([
-            // Start Elasticsearch
+          // Kibana has built-in retry logic for ES connections, so it will wait for ES to be ready
+          // Use Promise.allSettled to ensure both complete (or fail) before proceeding
+          const results = await Promise.allSettled([
+            // Start Elasticsearch - this completes when ES cluster health is yellow/green
             process.env.TEST_ES_DISABLE_STARTUP !== 'true'
               ? runElasticsearch({ ...options, log, config, onEarlyExit }).then((shutdown) => {
-                  esReady = true;
                   log.info('✅ Elasticsearch is ready');
-
-                  // Resume Kibana if it was paused
-                  if (resumeKibana) {
-                    resumeKibana();
-                    resumeKibana = null;
-                  }
-
                   return shutdown;
                 })
-              : Promise.resolve(undefined).then(() => {
-                  esReady = true;
-                  return undefined;
-                }),
+              : Promise.resolve(undefined),
 
-            // Start Kibana and monitor it
-            (async () => {
-              // Start monitoring in parallel (don't await)
-              monitorAndControlKibana();
-
-              // Start Kibana server
-              await runKibanaServer({
-                procs,
-                config,
-                logsDir: options.logsDir,
-                installDir: options.installDir,
-                onEarlyExit,
-                extraKbnOpts: [
-                  config.get('serverless')
-                    ? '--server.versioned.versionResolution=newest'
-                    : '--server.versioned.versionResolution=oldest',
-                ],
-              });
-
+            // Start Kibana - will retry ES connections until successful
+            runKibanaServer({
+              procs,
+              config,
+              logsDir: options.logsDir,
+              installDir: options.installDir,
+              onEarlyExit,
+              extraKbnOpts: [
+                config.get('serverless')
+                  ? '--server.versioned.versionResolution=newest'
+                  : '--server.versioned.versionResolution=oldest',
+              ],
+            }).then(() => {
               log.info('✅ Kibana is ready');
-            })(),
+            }),
           ]);
 
-          shutdownEs = esShutdown;
+          // Check if either service failed to start
+          const [esResult, kibanaResult] = results;
+
+          if (esResult.status === 'rejected') {
+            throw esResult.reason;
+          }
+
+          if (kibanaResult.status === 'rejected') {
+            throw kibanaResult.reason;
+          }
+
+          shutdownEs = esResult.value;
 
           if (abortCtrl.signal.aborted) {
             return;

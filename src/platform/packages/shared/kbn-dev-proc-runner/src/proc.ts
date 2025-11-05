@@ -199,6 +199,5 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     stopWasCalled() {
       return stopCalled;
     },
-    childProcess,
   };
 }
