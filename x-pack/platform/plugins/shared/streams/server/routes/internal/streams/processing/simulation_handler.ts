@@ -42,6 +42,7 @@ import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import type { RecursiveRecord } from '@kbn/streams-schema/src/shared/record_types';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
@@ -152,6 +153,53 @@ export type WithNameAndEsType<TObj = {}> = TObj & {
 };
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
+/**
+ * Detects and groups flattened geo_point fields (*.lat and *.lon) back into a single object.
+ * Elasticsearch's geo_point mapper requires coordinates as a single object: { lat: number, lon: number }
+ *
+ * This function automatically detects any field pairs ending in .lat and .lon and groups them together.
+ *
+ * @param flattenedDoc - A flattened document with separate lat/lon fields
+ * @returns Document with geo_point fields grouped as objects
+ *
+ * @example
+ * Input: { "source.geo.location.lat": 41.9, "source.geo.location.lon": 42.0, "other": "value" }
+ * Output: { "source.geo.location": { lat: 41.9, lon: 42.0 }, "other": "value" }
+ */
+const regroupGeoPointFields = (flattenedDoc: FlattenRecord): RecursiveRecord => {
+  const result: RecursiveRecord = {};
+  const processedGeoFields = new Set<string>();
+
+  for (const [key, value] of Object.entries(flattenedDoc)) {
+    // Check if this is a .lat field
+    if (key.endsWith('.lat')) {
+      const baseField = key.slice(0, -4); // Remove '.lat'
+      const lonKey = `${baseField}.lon`;
+
+      // Check if we have a corresponding .lon field with numeric values
+      if (
+        lonKey in flattenedDoc &&
+        !processedGeoFields.has(baseField) &&
+        typeof flattenedDoc[lonKey] === 'number' &&
+        typeof value === 'number'
+      ) {
+        // Group lat/lon into single object
+        result[baseField] = { lat: value, lon: flattenedDoc[lonKey] };
+        processedGeoFields.add(baseField);
+        processedGeoFields.add(lonKey);
+        continue;
+      }
+    }
+
+    // Check if this field was already processed as part of a geo_point
+    if (!processedGeoFields.has(key)) {
+      result[key] = value;
+    }
+  }
+
+  return result;
+};
+
 export const simulateProcessing = async ({
   params,
   scopedClusterClient,
@@ -223,7 +271,7 @@ const prepareSimulationDocs = (
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
-    _source: doc,
+    _source: regroupGeoPointFields(doc),
   }));
 };
 
