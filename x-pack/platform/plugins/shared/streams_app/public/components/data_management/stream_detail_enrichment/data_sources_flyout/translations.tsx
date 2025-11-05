@@ -144,10 +144,6 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.subtitle',
       { defaultMessage: 'Manually defined sample documents.' }
     ),
-    callout: i18n.translate('xpack.streams.enrichment.dataSources.customSamples.callout', {
-      defaultMessage:
-        'The custom samples will not be persisted. They will be lost when you leave the processing page.',
-    }),
     label: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.label',
       { defaultMessage: 'Documents' }

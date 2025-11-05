@@ -77,8 +77,6 @@ export const CustomSamplesDataSourceCard = ({
       subtitle={DATA_SOURCES_I18N.customSamples.subtitle}
       isForCompleteSimulation
     >
-      <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.customSamples.callout} />
-      <EuiSpacer size="m" />
       <NameField onChange={handleNameChange} value={dataSource.name} disabled={isDisabled} />
       <EuiFormRow
         label={DATA_SOURCES_I18N.customSamples.label}
