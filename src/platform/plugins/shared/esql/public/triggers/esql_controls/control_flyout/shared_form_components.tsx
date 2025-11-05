@@ -466,6 +466,7 @@ export function Footer({
   onCancelControl?: () => void;
 }) {
   const onCancel = useCallback(() => {
+    // esql_control_config_cancelled
     closeFlyout();
     onCancelControl?.();
   }, [closeFlyout, onCancelControl]);

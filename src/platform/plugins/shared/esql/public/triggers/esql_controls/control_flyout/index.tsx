@@ -156,6 +156,7 @@ export function ESQLControlsFlyout({
   }, []);
 
   const onCreateControl = useCallback(async () => {
+    // esql_control_config_saved
     if (controlState && controlState.availableOptions?.length) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
@@ -168,6 +169,7 @@ export function ESQLControlsFlyout({
         await onSaveControl?.(controlState, '');
       }
     }
+    // esql–control_applied
     closeFlyout();
   }, [
     controlState,
