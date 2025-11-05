@@ -19,12 +19,12 @@
   },
   "kbn_references": [
     "@kbn/cypress-config",
-    "@kbn/osquery-plugin",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
     "@kbn/cypress-test-helper",
     "@kbn/security-plugin",
     "@kbn/test",
     "@kbn/tooling-log",
+    "@kbn/osquery-plugin",
   ]
 }
