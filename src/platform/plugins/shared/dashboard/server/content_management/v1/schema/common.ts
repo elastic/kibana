@@ -205,14 +205,6 @@ export function getDashboardAPICreateResultSchema() {
   );
 }
 
-export function getDashboardResponseAttributesSchema() {
-  return schema.object({
-    ...getDashboardStateSchema(),
-    references: schema.maybe(schema.arrayOf(referenceSchema)),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
-  });
-}
-
 export function getDashboardStorageSchema() {
   return schema.object(
     {
