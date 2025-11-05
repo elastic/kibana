@@ -52,7 +52,8 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
         defaultMessage:
           'This action will update {agentPolicyCount, plural, one {# agent policy} other {# agent policies}} affecting {agentCount, plural, one {# agent} other {# agents}}',
         values: {
-          agentCount,agentPolicyCount,
+          agentCount,
+          agentPolicyCount,
         },
       })}
     >
