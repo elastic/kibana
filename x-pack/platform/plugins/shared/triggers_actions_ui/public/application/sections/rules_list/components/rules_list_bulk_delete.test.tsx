@@ -7,7 +7,7 @@
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   act,
   cleanup,

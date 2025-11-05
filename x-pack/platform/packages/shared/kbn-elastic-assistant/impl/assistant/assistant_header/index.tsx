@@ -6,11 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,

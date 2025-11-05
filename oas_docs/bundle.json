@@ -17603,6 +17603,26 @@
                                 "download": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "proxy_headers": {
+                                      "additionalProperties": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "boolean"
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ]
+                                      },
+                                      "nullable": true,
+                                      "type": "object"
+                                    },
+                                    "proxy_url": {
+                                      "type": "string"
+                                    },
                                     "secrets": {
                                       "additionalProperties": true,
                                       "properties": {
@@ -17812,7 +17832,23 @@
                                       },
                                       "type": "array"
                                     },
-                                    "proxy_headers": {},
+                                    "proxy_headers": {
+                                      "additionalProperties": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "boolean"
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ]
+                                      },
+                                      "nullable": true,
+                                      "type": "object"
+                                    },
                                     "proxy_url": {
                                       "type": "string"
                                     },
@@ -17866,8 +17902,7 @@
                                     }
                                   },
                                   "required": [
-                                    "hosts",
-                                    "proxy_headers"
+                                    "hosts"
                                   ],
                                   "type": "object"
                                 },
@@ -18073,7 +18108,23 @@
                                     },
                                     "type": "array"
                                   },
-                                  "proxy_headers": {},
+                                  "proxy_headers": {
+                                    "additionalProperties": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    },
+                                    "nullable": true,
+                                    "type": "object"
+                                  },
                                   "proxy_url": {
                                     "type": "string"
                                   },
@@ -18082,8 +18133,7 @@
                                   }
                                 },
                                 "required": [
-                                  "type",
-                                  "proxy_headers"
+                                  "type"
                                 ],
                                 "type": "object"
                               },
@@ -45660,7 +45710,6 @@
                   }
                 },
                 "required": [
-                  "proxy_headers",
                   "certificate_authorities",
                   "certificate",
                   "certificate_key"
