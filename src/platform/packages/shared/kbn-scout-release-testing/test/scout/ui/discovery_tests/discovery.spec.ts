@@ -132,24 +132,32 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     expect(actualInterval).toBe(expectedInterval);
   });
 
-  test('should show "no results"', async ({ pageObjects }) => {
+  test('should show "no results"', async ({ page, pageObjects }) => {
     await pageObjects.datePicker.setAbsoluteRange({
       from: defaultStartTime,
       to: endTimeNoResults,
     });
-    expect(await pageObjects.discover.hasNoResults('visible')).toBe(true);
+    await expect(page.testSubj.locator('discoverNoResults')).toBeVisible({
+      timeout: 5000,
+    });
   });
 
-  test('should suggest a new time range is picked', async ({ pageObjects, uiSettings }) => {
+  test('should suggest a new time range is picked', async ({ page, pageObjects, uiSettings }) => {
     await uiSettings.setDefaultTime({
       from: defaultStartTime,
       to: endTimeNoResults,
     });
     await pageObjects.discover.goto();
-    expect(await pageObjects.discover.hasNoResultsTimepicker('visible')).toBe(true);
+    await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeVisible({
+      timeout: 5000,
+    });
   });
 
-  test('should show matches when time range is expanded', async ({ pageObjects, uiSettings }) => {
+  test('should show matches when time range is expanded', async ({
+    page,
+    pageObjects,
+    uiSettings,
+  }) => {
     await uiSettings.setDefaultTime({
       from: defaultStartTime,
       to: endTimeNoResults,
@@ -157,7 +165,9 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await pageObjects.discover.goto();
     await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
-    expect(await pageObjects.discover.hasNoResults('hidden')).toBe(true);
+    await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeHidden({
+      timeout: 5000,
+    });
     await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
   });
 });
