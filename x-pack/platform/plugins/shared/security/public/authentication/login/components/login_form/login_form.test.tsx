@@ -552,7 +552,7 @@ describe('LoginForm', () => {
       expect((await rendered.findByTestId('loginErrorMessage')).textContent).toEqual(
         i18n.translate('xpack.security.noAuthProvidersForDomain', {
           defaultMessage:
-            'No authentication providers have been configured for this origin (http://localhost).',
+            'No authentication providers have been configured for this origin (https://some-host.com).',
         })
       );
     });

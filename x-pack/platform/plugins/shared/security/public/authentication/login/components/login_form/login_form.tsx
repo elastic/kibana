@@ -130,12 +130,12 @@ const assistanceCss = (theme: UseEuiTheme) => css`
   }
 `;
 
-const noProvidersMessage = i18n.translate('xpack.security.noAuthProvidersForDomain', {
-  defaultMessage: 'No authentication providers have been configured for this origin ({origin}).',
-  values: { origin: window.location.origin },
-});
-
 export class LoginForm extends Component<LoginFormProps, State> {
+  private readonly noProvidersMessage = i18n.translate('xpack.security.noAuthProvidersForDomain', {
+    defaultMessage: 'No authentication providers have been configured for this origin ({origin}).',
+    values: { origin: window.location.origin },
+  });
+
   private readonly validator: LoginValidator;
 
   /**
@@ -178,7 +178,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
         (this.availableProviders.length === 0
           ? {
               type: MessageType.Danger,
-              content: noProvidersMessage,
+              content: this.noProvidersMessage,
             }
           : { type: MessageType.None }),
       mode,
