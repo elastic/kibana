@@ -40,6 +40,7 @@ import { LogCategoriesResultContent } from './log_categories_result_content';
 export type LogCategoriesProps = LogCategoriesContentProps & {
   dependencies: LogCategoriesDependencies;
   documentFilters: QueryDslQueryContainer[];
+  nonHighlightingFilters?: QueryDslQueryContainer[];
   logsSource: ResolvedIndexNameLogsSourceConfiguration;
   // The time range could be made optional if we want to support an internal
   // time range picker
