@@ -81,7 +81,7 @@ export function ServiceDashboards() {
         );
         if (matchedDashboard) {
           result.push({
-            title: matchedDashboard.attributes.title,
+            title: matchedDashboard.data.title,
             ...serviceDashboard,
           });
         }
