@@ -12,6 +12,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { LARGE_INPUT } from './large_input';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -94,21 +95,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const request = await PageObjects.console.getEditorTextAtLine(2);
           return request === 'GET _search/bar';
         });
-      });
-
-      // flaky
-      it.skip('should go to line number when Ctrl+L is pressed', async () => {
-        await PageObjects.console.enterText(
-          '\nGET _search/foo\n{\n  "query": {\n    "match_all": {} \n} \n}'
-        );
-        await PageObjects.console.pressCtrlL();
-        // Sleep to allow the line number input to be focused
-        await PageObjects.common.sleep(1000);
-        const alert = await browser.getAlert();
-        await alert?.sendKeys('4');
-        await alert?.accept();
-        await PageObjects.common.sleep(1000);
-        expect(await PageObjects.console.getCurrentLineNumber()).to.be(4);
       });
 
       describe('open documentation', () => {
@@ -250,16 +236,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         unlinkSync(filePath);
       });
 
-      // It seems that the downloadPath is not being resolved correctly in the CI anymore?
-      // Also doesnt seem to work locally either.
-      it.skip('can export input as file', async () => {
+      it('can export input as file', async () => {
         await PageObjects.console.enterText('GET _search');
         await PageObjects.console.clickExportButton();
 
         // Wait for download to trigger
         await PageObjects.common.sleep(1000);
 
-        const downloadPath = resolve(REPO_ROOT, `target/functional-tests/downloads/console_export`);
+        const downloadPath = resolve(
+          REPO_ROOT,
+          `target/functional-tests/downloads/console_export.txt`
+        );
         await retry.try(async () => {
           const fileExists = existsSync(downloadPath);
           expect(fileExists).to.be(true);
@@ -272,6 +259,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Clean up downloaded file
         unlinkSync(downloadPath);
       });
+    });
+
+    it('should work fine with a large content', async () => {
+      await PageObjects.console.clearEditorText();
+
+      // We input the large content via file import since enterText() is slow and times out
+      const filePath = resolve(
+        REPO_ROOT,
+        `target/functional-tests/downloads/console_import_large_input`
+      );
+      writeFileSync(filePath, LARGE_INPUT, 'utf8');
+
+      // Set file to upload and wait for the editor to be updated
+      await PageObjects.console.setFileToUpload(filePath);
+      await PageObjects.console.acceptFileImport();
+      await PageObjects.common.sleep(1000);
+
+      // The autocomplete should still show up without causing stack overflow
+      await PageObjects.console.enterText(`GET _search\n`);
+      await PageObjects.console.enterText(`{\n\t"query": {`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.sleepForDebouncePeriod();
+      await PageObjects.console.promptAutocomplete();
+      expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+      // Clean up input file
+      unlinkSync(filePath);
     });
   });
 }
