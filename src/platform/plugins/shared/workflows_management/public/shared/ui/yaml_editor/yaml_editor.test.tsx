@@ -8,7 +8,9 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
+import type { MonacoYamlOptions } from 'monaco-yaml';
 import React from 'react';
+import type { CodeEditorProps, monaco } from '@kbn/code-editor';
 import { YamlEditor } from './yaml_editor';
 import { yamlLanguageService } from './yaml_language_service';
 
@@ -18,37 +20,38 @@ const mockUpdate = jest.fn();
 
 // Mock the yaml_language_service
 jest.mock('./yaml_language_service', () => {
-  let mockInstance: any = null;
-
-  const initialize = jest.fn().mockImplementation(async () => {
-    const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
-    mockInstance = await configureMonacoYamlSchema();
-    return mockInstance;
-  });
-
-  const update = jest.fn().mockImplementation(async (schemas) => {
-    if (!mockInstance) {
-      // Initialize if not already done
-      const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
-      // eslint-disable-next-line require-atomic-updates
-      mockInstance = await configureMonacoYamlSchema(schemas);
-    } else if (mockInstance.update) {
-      mockInstance.update({
-        completion: true,
-        hover: false,
-        validate: true,
-        schemas,
-      });
-    }
-  });
+  // Create a closure to hold the mock instance
+  const mockState = { instance: null };
 
   return {
     yamlLanguageService: {
-      initialize,
-      update,
+      initialize: jest.fn().mockImplementation(async () => {
+        const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
+        mockState.instance = await configureMonacoYamlSchema();
+        return mockState.instance;
+      }),
+      update: jest.fn().mockImplementation(async (schemas) => {
+        if (!mockState.instance) {
+          // Initialize if not already done
+          const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
+          // eslint-disable-next-line require-atomic-updates
+          mockState.instance = await configureMonacoYamlSchema(schemas);
+          // @ts-expect-error - mockState.instance is not typed
+        } else if (mockState.instance.update) {
+          // @ts-expect-error - mockState.instance is not typed
+          mockState.instance.update({
+            completion: true,
+            hover: false,
+            validate: true,
+            schemas,
+          });
+        }
+      }),
       clearSchemas: jest.fn().mockImplementation(async () => {
-        if (mockInstance && mockInstance.update) {
-          mockInstance.update({
+        // @ts-expect-error - mockState.instance is not typed
+        if (mockState.instance && mockState.instance.update) {
+          // @ts-expect-error - mockState.instance is not typed
+          mockState.instance.update({
             completion: true,
             hover: false,
             validate: true,
@@ -57,13 +60,15 @@ jest.mock('./yaml_language_service', () => {
         }
       }),
       dispose: jest.fn().mockImplementation(() => {
-        if (mockInstance && mockInstance.dispose) {
-          mockInstance.dispose();
+        // @ts-expect-error - mockState.instance is not typed
+        if (mockState.instance && mockState.instance.dispose) {
+          // @ts-expect-error - mockState.instance is not typed
+          mockState.instance.dispose();
         }
-        mockInstance = null;
+        mockState.instance = null;
       }),
-      getInstance: jest.fn().mockImplementation(() => mockInstance),
-      isInitialized: jest.fn().mockImplementation(() => mockInstance !== null),
+      getInstance: jest.fn().mockImplementation(() => mockState.instance),
+      isInitialized: jest.fn().mockImplementation(() => mockState.instance !== null),
     },
   };
 });
@@ -73,7 +78,7 @@ jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
-    CodeEditor: (props: any) => {
+    CodeEditor: (props: CodeEditorProps) => {
       // Use React from the outer scope
       const { useEffect } = jest.requireActual('react');
       const { editorWillUnmount, value, onChange } = props;
@@ -92,7 +97,10 @@ jest.mock('@kbn/code-editor', () => {
           <textarea
             data-testid="code-editor-textarea"
             value={value || ''}
-            onChange={(e) => onChange && onChange(e.target.value)}
+            onChange={(e) =>
+              onChange &&
+              onChange(e.target.value, {} as unknown as monaco.editor.IModelContentChangedEvent)
+            }
           />
         </div>
       );
@@ -103,7 +111,7 @@ jest.mock('@kbn/code-editor', () => {
 // Mock lodash debounce to execute immediately in tests
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
-  debounce: (fn: any) => fn,
+  debounce: (fn: Function) => fn,
 }));
 
 // Mock the configureMonacoYamlSchema function
@@ -124,7 +132,7 @@ describe('YamlEditor', () => {
     // Reset singleton by disposing the service
     yamlLanguageService.dispose();
     // Clear the dispose mock after calling it
-    (yamlLanguageService.dispose as jest.Mock).mockClear();
+    jest.mocked(yamlLanguageService.dispose).mockClear();
   });
 
   describe('monacoYaml singleton behavior', () => {
@@ -320,6 +328,96 @@ describe('YamlEditor', () => {
 
       // And schemas were cleared
       expect(yamlLanguageService.clearSchemas).toHaveBeenCalled();
+    });
+
+    it('should initialize singleton only once when multiple instances are rendered', async () => {
+      const onChange1 = jest.fn();
+      const onChange2 = jest.fn();
+      const onChange3 = jest.fn();
+
+      const schemas1 = [
+        {
+          uri: 'http://example.com/schema1.json',
+          schema: { type: 'object' },
+          fileMatch: ['*.yaml'],
+        },
+      ];
+
+      const schemas2 = [
+        {
+          uri: 'http://example.com/schema2.json',
+          schema: { type: 'array' },
+          fileMatch: ['*.yml'],
+        },
+      ];
+
+      // Clear mocks to ensure clean count
+      jest.clearAllMocks();
+      const monaco = jest.requireMock('@kbn/monaco');
+
+      // Render first instance
+      const { unmount: unmount1 } = render(
+        <YamlEditor
+          value="test1: value1"
+          onChange={onChange1}
+          schemas={schemas1 as MonacoYamlOptions['schemas']}
+        />
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Verify initialization happened
+      expect(yamlLanguageService.update).toHaveBeenCalledTimes(1);
+      expect(yamlLanguageService.update).toHaveBeenCalledWith(schemas1);
+      expect(monaco.configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
+
+      const singleton = yamlLanguageService.getInstance();
+      expect(singleton).not.toBeNull();
+
+      // Render second instance while first is still mounted
+      const { unmount: unmount2 } = render(
+        <YamlEditor
+          value="test2: value2"
+          onChange={onChange2}
+          schemas={schemas2 as MonacoYamlOptions['schemas']}
+        />
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Verify update was called but no new initialization
+      expect(yamlLanguageService.update).toHaveBeenCalledTimes(2);
+      expect(yamlLanguageService.update).toHaveBeenCalledWith(schemas2);
+      expect(monaco.configureMonacoYamlSchema).toHaveBeenCalledTimes(1); // Still only 1
+      expect(yamlLanguageService.getInstance()).toBe(singleton); // Same instance
+
+      // Render third instance
+      const { unmount: unmount3 } = render(
+        <YamlEditor
+          value="test3: value3"
+          onChange={onChange3}
+          schemas={schemas1 as MonacoYamlOptions['schemas']}
+        />
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Verify update was called again but still no new initialization
+      expect(yamlLanguageService.update).toHaveBeenCalledTimes(3);
+      expect(yamlLanguageService.update).toHaveBeenLastCalledWith(schemas1);
+      expect(monaco.configureMonacoYamlSchema).toHaveBeenCalledTimes(1); // Still only 1
+      expect(yamlLanguageService.getInstance()).toBe(singleton); // Still same instance
+
+      // Unmount all
+      unmount1();
+      unmount2();
+      unmount3();
+
+      // Verify clearSchemas was called for each unmount
+      expect(yamlLanguageService.clearSchemas).toHaveBeenCalledTimes(3);
+
+      // Singleton should still exist
+      expect(yamlLanguageService.getInstance()).toBe(singleton);
     });
   });
 
