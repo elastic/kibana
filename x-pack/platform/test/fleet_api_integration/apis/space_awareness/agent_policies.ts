@@ -219,7 +219,7 @@ export default function (providerContext: FtrProviderContext) {
               name: testSpaceOnlyPolicy.item.name,
               space_ids: ['default', TEST_SPACE_1],
             }),
-          /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
+          /409 Conflict Agent Policy\s.* already exists with name\s.*$/i
         );
       });
     });
