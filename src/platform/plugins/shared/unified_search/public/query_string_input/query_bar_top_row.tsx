@@ -233,7 +233,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     controlsWrapper: React.ReactNode;
   };
   /**
-   * Optional - Callback function invoked to open the current query in a new Discover tab
+   * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   useBackgroundSearchButton?: boolean;
