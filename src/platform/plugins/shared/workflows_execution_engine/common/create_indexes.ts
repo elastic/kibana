@@ -27,18 +27,20 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
   const { esClient, logger } = options;
   await createIndexWithMappings({
     esClient,
+    indexName: WORKFLOWS_EXECUTIONS_INDEX,
+    mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+    logger,
+  });
+  await createIndexWithMappings({
+    esClient,
     indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
     mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+    logger,
   });
   await createIndexWithMappings({
     esClient,
     indexName: WORKFLOWS_EXECUTION_LOGS_INDEX,
     mappings: WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS,
     logger,
-  });
-  await createIndexWithMappings({
-    esClient,
-    indexName: WORKFLOWS_EXECUTIONS_INDEX,
-    mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   });
 }
