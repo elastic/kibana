@@ -185,6 +185,9 @@ export interface ISavedObjectsRepository {
    * Performs a raw search against the saved objects indices, returning the raw Elasticsearch response
    * @param options {@link SavedObjectsSearchOptions} - options for the search operation
    * @returns the {@link SavedObjectsSearchResponse}
+   *
+   * @remarks While the `search` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Take care to ensure it is implemented correctly for your use case and appropriately stress tested. Carefully consider how you would like to use this method in your plugin to unlock value for users.
+   * @remarks See tutorial https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects-search
    */
   search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
     options: SavedObjectsSearchOptions
