@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   describe('Gauge', function describeIndexTests() {
     before(async () => {

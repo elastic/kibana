@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
 
