@@ -8,3 +8,4 @@
  */
 
 export { BackgroundSearchRestoredCallout } from './background_search_restored_callout';
+export { BackgroundTaskIcon } from './background_task_icon';

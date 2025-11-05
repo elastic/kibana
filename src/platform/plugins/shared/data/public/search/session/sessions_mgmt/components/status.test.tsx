@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { SearchSessionStatus } from '../../../../../common';
 import type { UISession } from '../types';
-import { LocaleWrapper } from '../__mocks__';
+import { LocaleWrapper, getUiSessionMock } from '../__mocks__';
 import { getStatusText, StatusIndicator } from './status';
 
 let tz: string;
@@ -24,7 +24,7 @@ mockNowTime.setTime(1607026176061);
 describe('Background Search Session management status labels', () => {
   beforeEach(() => {
     tz = 'Browser';
-    session = {
+    session = getUiSessionMock({
       name: 'amazing test',
       id: 'wtywp9u2802hahgp-gsla',
       restoreUrl: '/app/great-app-url/#45',
@@ -38,7 +38,7 @@ describe('Background Search Session management status labels', () => {
       restoreState: {},
       version: '8.0.0',
       idMapping: {},
-    };
+    });
   });
 
   describe('getStatusText', () => {

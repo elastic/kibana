@@ -101,6 +101,15 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
       ...doc,
       attributes: {
         ...doc.attributes,
+        idMapping: Object.fromEntries(
+          Object.entries(doc.attributes.idMapping).map(([searchHash, info]) => [
+            searchHash,
+            {
+              id: info.id,
+              strategy: info.strategy,
+            },
+          ])
+        ),
         version: '7.13.0',
       },
     };
@@ -112,7 +121,19 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
       attributes: { urlGeneratorId, ...otherAttrs },
     } = doc;
     const locatorId = getLocatorId(urlGeneratorId);
-    const attributes = { ...otherAttrs, locatorId };
+    const attributes = {
+      ...otherAttrs,
+      locatorId,
+      idMapping: Object.fromEntries(
+        Object.entries(doc.attributes.idMapping).map(([searchHash, info]) => [
+          searchHash,
+          {
+            id: info.id,
+            strategy: info.strategy,
+          },
+        ])
+      ),
+    };
     return { ...doc, attributes };
   },
   '8.6.0': (

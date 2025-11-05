@@ -23,18 +23,25 @@ import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
+import moment from 'moment';
 import type {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
   SearchSessionStatusResponse,
 } from '../../../common';
-import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE } from '../../../common';
+import {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  SEARCH_SESSION_TYPE,
+  SearchSessionStatus,
+  SearchStatus,
+} from '../../../common';
 import type { ISearchSessionService } from '../..';
 import { NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
-import { getSessionStatus } from './get_session_status';
+import type { SearchStatusWithInfo } from './get_session_status';
+import { getSessionStatus as getSessionStatusInternal } from './get_session_status';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -130,6 +137,7 @@ export class SearchSessionService implements ISearchSessionService {
       SEARCH_SESSION_TYPE,
       {
         sessionId,
+        status: SearchSessionStatus.IN_PROGRESS,
         expires: new Date(
           Date.now() + this.sessionConfig.defaultExpiration.asMilliseconds()
         ).toISOString(),
@@ -161,7 +169,7 @@ export class SearchSessionService implements ISearchSessionService {
   };
 
   public find = async (
-    { savedObjectsClient, asCurrentUserElasticsearchClient }: SearchSessionStatusDependencies,
+    deps: SearchSessionStatusDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
   ): Promise<SearchSessionsFindResponse> => {
@@ -182,22 +190,15 @@ export class SearchSessionService implements ISearchSessionService {
     const filterKueryNode =
       typeof options.filter === 'string' ? fromKueryExpression(options.filter) : options.filter;
     const filter = nodeBuilder.and(userFilters.concat(filterKueryNode ?? []));
-    const findResponse = await savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
+    const findResponse = await deps.savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
       filter,
       type: SEARCH_SESSION_TYPE,
     });
 
     const sessionStatuses = await Promise.all(
-      findResponse.saved_objects.map(async (so) => {
-        const sessionStatus = await getSessionStatus(
-          {
-            esClient: asCurrentUserElasticsearchClient,
-          },
-          so.attributes,
-          this.sessionConfig
-        );
-
+      findResponse.saved_objects.map((so) => {
+        const sessionStatus = this.getSessionStatus(deps, user, so);
         return sessionStatus;
       })
     );
@@ -288,7 +289,7 @@ export class SearchSessionService implements ISearchSessionService {
     searchId: string,
     options: ISearchOptions
   ) => {
-    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY } = options;
+    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY, startTime } = options;
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
     if (!searchRequest.params) return;
 
@@ -301,6 +302,8 @@ export class SearchSessionService implements ISearchSessionService {
     const searchInfo: SearchSessionRequestInfo = {
       id: searchId,
       strategy,
+      status: SearchStatus.IN_PROGRESS,
+      startTime: startTime ? moment.unix(startTime).toISOString() : undefined,
     };
 
     if (!this.trackIdBatchQueueMap.has(sessionId)) {
@@ -318,7 +321,11 @@ export class SearchSessionService implements ISearchSessionService {
               },
               {}
             );
-            this.update(queue[0].deps, queue[0].user, sessionId, { idMapping: batchedIdMapping })
+            this.update(queue[0].deps, queue[0].user, sessionId, {
+              idMapping: batchedIdMapping,
+              completed: undefined,
+              status: SearchSessionStatus.IN_PROGRESS,
+            })
               .then(() => {
                 queue.forEach((q) => q.resolve());
               })
@@ -371,13 +378,7 @@ export class SearchSessionService implements ISearchSessionService {
     this.logger.debug(`SearchSessionService: status | ${sessionId}`);
     const session = await this.get(deps, user, sessionId);
 
-    const sessionStatus = await getSessionStatus(
-      {
-        esClient: deps.asCurrentUserElasticsearchClient,
-      },
-      session.attributes,
-      this.sessionConfig
-    );
+    const sessionStatus = await this.getSessionStatus(deps, user, session);
 
     return { status: sessionStatus.status, errors: sessionStatus.errors };
   }
@@ -465,4 +466,78 @@ export class SearchSessionService implements ISearchSessionService {
       throw notFound();
     }
   };
+
+  private getSessionStatus = async (
+    searchSessionDeps: SearchSessionStatusDependencies,
+    user: AuthenticatedUser | null,
+    savedObject: SavedObject<SearchSessionSavedObjectAttributes>
+  ) => {
+    const sessionStatus = await getSessionStatusInternal(
+      {
+        esClient: searchSessionDeps.asCurrentUserElasticsearchClient,
+      },
+      savedObject.attributes,
+      this.sessionConfig
+    );
+    const updatedIdMapping = this.getUpdatedIdMappings(
+      savedObject,
+      sessionStatus.searchStatuses || []
+    );
+
+    if (!!updatedIdMapping) {
+      const hasUpdatedToComplete =
+        sessionStatus.status === SearchSessionStatus.COMPLETE && !savedObject.attributes.completed;
+      const latestCompletion = Object.values(updatedIdMapping).reduce<string | undefined>(
+        (res, curr) => {
+          if (!curr.completionTime) return res;
+          if (!res) return curr.completionTime;
+          return moment(curr.completionTime).isAfter(moment(res)) ? curr.completionTime : res;
+        },
+        undefined
+      );
+
+      await this.update(searchSessionDeps, user, savedObject.id, {
+        idMapping: updatedIdMapping,
+        completed: hasUpdatedToComplete ? latestCompletion : undefined,
+        status: sessionStatus.status,
+      });
+    }
+
+    return sessionStatus;
+  };
+
+  private getUpdatedIdMappings(
+    savedObject: SavedObject<SearchSessionSavedObjectAttributes>,
+    searchStatuses: SearchStatusWithInfo[]
+  ) {
+    let hasUpdated = false;
+    const idMapping = { ...savedObject.attributes.idMapping };
+
+    for (const searchStatus of searchStatuses) {
+      const requestHash = this.getRequestHashBySearchId(savedObject, searchStatus.id);
+      if (!requestHash) continue;
+
+      const search = idMapping[requestHash];
+      if (!search || search.status === searchStatus.status) continue;
+      idMapping[requestHash] = {
+        ...search,
+        status: searchStatus.status,
+        completionTime: searchStatus.completionTime,
+      };
+      hasUpdated = true;
+    }
+
+    return hasUpdated ? idMapping : null;
+  }
+
+  private getRequestHashBySearchId(
+    savedObject: SavedObject<SearchSessionSavedObjectAttributes>,
+    searchId: string
+  ) {
+    for (const [requestHash, info] of Object.entries(savedObject.attributes.idMapping)) {
+      if (info.id === searchId) return requestHash;
+    }
+
+    return null;
+  }
 }

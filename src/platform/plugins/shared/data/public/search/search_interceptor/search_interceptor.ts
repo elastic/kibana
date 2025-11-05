@@ -58,6 +58,7 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { defaultFreeze } from '@kbn/kibana-utils-plugin/common';
+import moment from 'moment';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -277,6 +278,7 @@ export class SearchInterceptor {
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
+    if (combined.startTime !== undefined) serializableOptions.startTime = combined.startTime;
 
     return serializableOptions;
   }
@@ -291,6 +293,7 @@ export class SearchInterceptor {
     searchAbortController: SearchAbortController
   ) {
     const { sessionId, strategy } = options;
+    const startTime = moment().utc().unix();
 
     const search = ({
       abortSignal = searchAbortController.getSignal(),
@@ -306,6 +309,7 @@ export class SearchInterceptor {
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,
+          startTime,
         }
       )
         .then((result) => {

@@ -9,7 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SearchSessionRequestInfo, SearchSessionRequestStatus } from '../../../common';
+import moment from 'moment';
+import { type SearchSessionRequestInfo, type SearchSessionRequestStatus } from '../../../common';
 import { SearchStatus } from './types';
 
 function requestByStrategy({
@@ -45,6 +46,10 @@ export async function getSearchStatus({
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
   try {
+    if (session.status === SearchStatus.COMPLETE) {
+      return { status: SearchStatus.COMPLETE, completionTime: session.completionTime };
+    }
+
     const apiResponse = await requestByStrategy({
       session,
       asyncId,
@@ -61,14 +66,19 @@ export async function getSearchStatus({
         }),
       };
     } else if (!response.is_running) {
+      const took = 'took' in response ? response.took : undefined;
+      const completionTime =
+        took && session.startTime
+          ? moment(session.startTime).add(took, 'ms').toISOString()
+          : undefined;
+
       return {
         status: SearchStatus.COMPLETE,
-        error: undefined,
+        completionTime,
       };
     } else {
       return {
         status: SearchStatus.IN_PROGRESS,
-        error: undefined,
       };
     }
   } catch (e) {

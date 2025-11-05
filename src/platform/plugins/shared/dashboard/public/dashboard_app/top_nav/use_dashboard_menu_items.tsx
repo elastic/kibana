@@ -15,6 +15,8 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
+import { BackgroundTaskIcon } from '@kbn/background-search';
+import React from 'react';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
@@ -40,6 +42,7 @@ export const useDashboardMenuItems = ({
   showResetChange?: boolean;
 }) => {
   const isMounted = useMountedState();
+  const inProgressSearches = useObservable(dataService.search.session.inProgressSearches$);
   const appId = useObservable(coreServices.application.currentAppId$);
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
@@ -213,7 +216,7 @@ export const useDashboardMenuItems = ({
       backgroundSearch: {
         ...topNavStrings.backgroundSearch,
         id: 'backgroundSearch',
-        iconType: 'backgroundTask',
+        iconType: () => <BackgroundTaskIcon inProgressSearches={inProgressSearches} />,
         iconOnly: true,
         testId: 'openBackgroundSearchFlyoutButton',
         run: () =>
@@ -282,6 +285,7 @@ export const useDashboardMenuItems = ({
     resetChanges,
     isResetting,
     appId,
+    inProgressSearches,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {

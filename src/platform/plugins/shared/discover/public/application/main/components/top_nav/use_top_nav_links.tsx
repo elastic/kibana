@@ -78,6 +78,7 @@ export const useTopNavLinks = ({
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
 }): TopNavMenuData[] => {
+  const inProgressSearches = useObservable(services.data.search.session.inProgressSearches$);
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -140,6 +141,7 @@ export const useTopNavLinks = ({
         services.capabilities.discover_v2.storeSearchSession
       ) {
         const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
+          inProgressSearches,
           onClick: () => {
             services.data.search.showSearchSessionsFlyout({
               appId,
@@ -216,6 +218,7 @@ export const useTopNavLinks = ({
       persistedDiscoverSession,
       hasShareIntegration,
       hasUnsavedChanges,
+      inProgressSearches,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

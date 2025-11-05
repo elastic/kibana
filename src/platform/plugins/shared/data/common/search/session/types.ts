@@ -14,6 +14,7 @@ import type { SearchSessionStatus, SearchStatus } from './status';
 export const SEARCH_SESSION_TYPE = 'search-session';
 export interface SearchSessionSavedObjectAttributes {
   sessionId: string;
+  status?: SearchSessionStatus;
   /**
    * User-facing session name to be displayed in session management
    */
@@ -31,6 +32,13 @@ export interface SearchSessionSavedObjectAttributes {
    * Expiration time of the session. Expiration itself is managed by Elasticsearch.
    */
   expires: string;
+
+  /**
+   * Only present if all the searches in the session are complete.
+   * The first time the session is checked after all searches are complete, this field is set.
+   * We can't base the value on the latest search because ES|QL async searches don't return that information.
+   */
+  completed?: string;
 
   /**
    * locatorId (see share.url.locators service)
@@ -77,14 +85,35 @@ export interface SearchSessionRequestInfo {
    * Search strategy used to submit the search request
    */
   strategy: string;
+  /**
+   * Search status - used to avoid extra calls to ES when tracking search IDs
+   */
+  status?: SearchStatus;
+  /**
+   * Start time of the search request in ISO format
+   */
+  startTime?: string;
+  /**
+   * Completion time of the search request in ISO format
+   */
+  completionTime?: string;
 }
 
-export interface SearchSessionRequestStatus {
-  status: SearchStatus;
-  /**
-   * An optional error. Set if status is set to error.
-   */
-  error?: string;
+export type SearchSessionRequestStatus =
+  | SearchSessionRequestInProgress
+  | SearchSessionRequestComplete
+  | SearchSessionRequestError;
+
+interface SearchSessionRequestInProgress {
+  status: SearchStatus.IN_PROGRESS;
+}
+export interface SearchSessionRequestComplete {
+  status: SearchStatus.COMPLETE;
+  completionTime?: string;
+}
+export interface SearchSessionRequestError {
+  status: SearchStatus.ERROR;
+  error: string;
 }
 
 /**

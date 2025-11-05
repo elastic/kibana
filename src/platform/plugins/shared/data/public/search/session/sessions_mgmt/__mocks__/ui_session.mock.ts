@@ -17,6 +17,7 @@ export function getUiSessionMock(overrides: Partial<UISession> = {}): UISession 
     appId: 'discover',
     created: '2023-10-01T12:00:00Z',
     expires: null,
+    completed: '2023-10-01T12:05:00Z',
     status: SearchSessionStatus.COMPLETE,
     idMapping: {},
     numSearches: 1,

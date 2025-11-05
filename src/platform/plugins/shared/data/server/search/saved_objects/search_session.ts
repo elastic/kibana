@@ -36,14 +36,19 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
       username: {
         type: 'keyword',
       },
+      status: {
+        type: 'keyword',
+      },
     },
   },
   schemas: {
     '8.8.0': schema.object({
       sessionId: schema.string(),
+      status: schema.maybe(schema.string()),
       name: schema.maybe(schema.string()),
       created: schema.string(),
       expires: schema.string(),
+      completed: schema.maybe(schema.string()),
       appId: schema.maybe(schema.string()),
       locatorId: schema.maybe(schema.string()),
       initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
@@ -53,6 +58,9 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
         schema.object({
           id: schema.string(),
           strategy: schema.string(),
+          status: schema.maybe(schema.string()),
+          startTime: schema.maybe(schema.string()),
+          completionTime: schema.maybe(schema.string()),
         })
       ),
       realmType: schema.maybe(schema.string()),
