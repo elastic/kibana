@@ -7,7 +7,10 @@
 
 import { type TypeOf, schema } from '@kbn/config-schema';
 
-import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/package_policy_schema';
+import {
+  PackagePolicyResponseSchema,
+  SimplifiedCreatePackagePolicyRequestBodySchema,
+} from '../models/package_policy_schema';
 
 export const CreateAgentlessPolicyRequestSchema = {
   query: schema.object({
@@ -45,6 +48,12 @@ export const CreateAgentlessPolicyRequestSchema = {
     output_id: undefined,
   }),
 };
+
+export const CreateAgentlessPolicyResponseSchema = schema.object({
+  item: PackagePolicyResponseSchema.extends({}),
+});
+
+export type CreateAgentlessPolicyResponse = TypeOf<typeof CreateAgentlessPolicyResponseSchema>;
 
 export interface CreateAgentlessPolicyRequest {
   body: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>;

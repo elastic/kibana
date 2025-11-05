@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { CreateAgentlessPolicyRequestSchema } from '../../../common/types/rest_spec/agentless_policy';
+import {
+  CreateAgentlessPolicyRequestSchema,
+  CreateAgentlessPolicyResponseSchema,
+} from '../../../common/types/rest_spec/agentless_policy';
 import { AGENTLESS_POLICIES_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
-import { CreatePackagePolicyResponseSchema } from '../../types';
+
 import { genericErrorResponse } from '../schema/errors';
 
 import { createAgentlessPolicyHandler } from './handler';
@@ -16,18 +19,19 @@ import { createAgentlessPolicyHandler } from './handler';
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // Create
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .post({
       path: AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN,
       summary: 'Create an agentless policy',
       options: {
         tags: ['oas-tag:Fleet agentless policies'],
-      },
-      // TODO add security
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'TODO add security',
+        availability: {
+          stability: 'experimental',
         },
+      },
+
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
       },
     })
     .addVersion(
@@ -38,7 +42,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               description: 'OK: A successful request.',
-              body: () => CreatePackagePolicyResponseSchema, // TODO
+              body: () => CreateAgentlessPolicyResponseSchema,
             },
             400: {
               description: 'A bad request.',
