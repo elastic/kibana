@@ -35,6 +35,7 @@ import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transf
 const compatibilityMap: Record<string, string> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
+  lnsGauge: 'gauge',
 };
 
 export class LensConfigBuilder {
