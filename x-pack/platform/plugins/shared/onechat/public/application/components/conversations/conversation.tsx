@@ -18,15 +18,14 @@ import { useSendMessage } from '../../context/send_message/send_message_context'
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
-
-const MAX_WIDTH = 800; // The size that the conversation container can grow up to.
+import { maxConversationWidthStyles } from './conversation.styles';
 
 const fullHeightStyles = css`
   height: 100%;
 `;
 const conversationContainerStyles = css`
   ${fullHeightStyles}
-  max-width: ${MAX_WIDTH}px;
+  ${maxConversationWidthStyles}
 `;
 
 export const Conversation: React.FC<{}> = () => {

@@ -23,8 +23,7 @@ import { ConversationInputForm } from './conversation_input/conversation_input_f
 import { docLinks } from '../../../../common/doc_links';
 import { WelcomeText } from '../common/welcome_text';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
-
-const MAX_WIDTH = 800; // The size that the container can grow up to.
+import { maxConversationWidthStyles } from './conversation.styles';
 
 interface QuickNavigationCard {
   key: string;
@@ -167,12 +166,12 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
 
   const containerStyles = css`
+    ${maxConversationWidthStyles}
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: ${euiTheme.size.l};
-    max-width: ${MAX_WIDTH}px;
   `;
 
   return (
