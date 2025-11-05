@@ -10,7 +10,6 @@
 import { type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
 import type { MutableRefObject } from 'react';
 import { setupConsoleErrorsProvider } from './console_errors_provider';
-import { setupConsoleLinkProvider } from './console_link_provider';
 import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import type { monaco } from '../../monaco_imports';
 import { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
@@ -44,7 +43,6 @@ export const ConsoleLang: LangModuleType = {
   onLanguage: () => {
     workerProxyService.setup();
     setupConsoleErrorsProvider(workerProxyService);
-    setupConsoleLinkProvider(CONSOLE_LANG_ID);
   },
   languageThemeResolver: buildConsoleTheme,
   getSuggestionProvider: (
@@ -98,9 +96,6 @@ export const ConsoleOutputLang: LangModuleType = {
   lexerRules: consoleOutputLexerRules,
   languageConfiguration: consoleOutputLanguageConfiguration,
   foldingRangeProvider,
-  onLanguage: () => {
-    setupConsoleLinkProvider(CONSOLE_OUTPUT_LANG_ID);
-  },
 };
 
 // Theme id is the same as lang id, as we register only one theme resolver that's color mode aware

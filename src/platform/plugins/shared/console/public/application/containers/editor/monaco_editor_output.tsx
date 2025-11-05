@@ -261,7 +261,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_OUTPUT_THEME_ID,
           automaticLayout: true,
-          // Enable clickable links with Cmd/Ctrl+Click
+          // Enable clickable links in the editor (Cmd/Ctrl+Click to open)
           links: true,
         }}
       />
