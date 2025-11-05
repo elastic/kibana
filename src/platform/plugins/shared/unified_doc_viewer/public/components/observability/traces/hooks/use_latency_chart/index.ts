@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
 
@@ -74,43 +73,6 @@ export const getSpanDistributionChartData = ({
       ]
     : [];
 
-interface GetSpanLatencyChartParams {
-  core: CoreStart;
-  signal: AbortSignal;
-  spanName: string;
-  serviceName: string;
-  isOtelSpan: boolean;
-}
-
-const getSpanLatencyChart = ({
-  core,
-  signal,
-  spanName,
-  serviceName,
-  isOtelSpan,
-}: GetSpanLatencyChartParams): Promise<{
-  overallHistogram?: HistogramItem[];
-  percentileThresholdValue?: number;
-}> => {
-  const { data } = getUnifiedDocViewerServices();
-  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
-
-  return core.http.post('/internal/apm/latency/overall_distribution/spans', {
-    body: JSON.stringify({
-      spanName,
-      serviceName,
-      chartType: 'spanLatency',
-      isOtel: isOtelSpan,
-      end: timeFilter.to,
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      percentileThreshold: 95,
-      start: timeFilter.from,
-    }),
-    signal,
-  });
-};
-
 interface UseLatencyChartParams {
   spanName?: string;
   serviceName?: string;
@@ -134,6 +96,10 @@ export const useLatencyChart = ({
     discoverShared.features.registry.getById(
       'observability-traces-fetch-latency-overall-transaction-distribution'
     );
+
+  const fetchLatencyOverallSpanDistributionFeature = discoverShared.features.registry.getById(
+    'observability-traces-fetch-latency-overall-span-distribution'
+  );
 
   const { loading, value, error } = useAbortableAsync<LatencyChartData | undefined>(
     async ({ signal }) => {
@@ -171,21 +137,32 @@ export const useLatencyChart = ({
         };
       }
 
-      if (spanName) {
-        const result = await getSpanLatencyChart({
-          core,
-          signal,
-          spanName,
-          serviceName,
-          isOtelSpan,
-        });
+      if (
+        spanName &&
+        fetchLatencyOverallSpanDistributionFeature?.fetchLatencyOverallSpanDistribution
+      ) {
+        const result =
+          await fetchLatencyOverallSpanDistributionFeature.fetchLatencyOverallSpanDistribution(
+            {
+              spanName,
+              serviceName,
+              isOtel: isOtelSpan,
+              start: timeFilter.from,
+              end: timeFilter.to,
+            },
+            signal
+          );
+
+        if (!result) {
+          return undefined;
+        }
 
         return {
           distributionChartData: getSpanDistributionChartData({
             euiTheme,
             spanHistogram: result.overallHistogram,
           }),
-          percentileThresholdValue: result.percentileThresholdValue,
+          percentileThresholdValue: result.percentileThresholdValue ?? undefined,
         };
       }
     },
