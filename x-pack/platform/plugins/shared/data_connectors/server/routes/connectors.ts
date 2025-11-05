@@ -124,18 +124,49 @@ export function registerConnectorRoutes(
 
         // Fetch secrets from OAuth service
         const secretsUrl = `https://localhost:8052/oauth/fetch_request_secrets?request_id=${request_id}`;
-        const secretsresponse = await axios.get(secretsUrl, {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          httpsAgent: new https.Agent({
-            rejectUnauthorized: false
-          })
-        });
+        const maxRetries = 5;
+        const retryDelay = 2000;
+        let secretsresponse;
+        let access_token: string | undefined;
 
-        const access_token = secretsresponse.data['access_token'];
-        const refresh_token = secretsresponse.data['refresh_token'];
-        const expires_in = secretsresponse.data['expires_in'];
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          try {
+            secretsresponse = await axios.get(secretsUrl, {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              httpsAgent: new https.Agent({
+                rejectUnauthorized: false
+              })
+            });
+
+            access_token = secretsresponse.data['access_token'];
+            
+            if (access_token) {
+              logger.info(`Access token found on attempt ${attempt}`);
+              break;
+            }
+
+            if (attempt < maxRetries) {
+              logger.info(`No access token found on attempt ${attempt}, retrying...`);
+              await new Promise(resolve => setTimeout(resolve, retryDelay));
+            }
+          } catch (err) {
+            if (attempt < maxRetries) {
+              logger.warn(`Error fetching secrets on attempt ${attempt}, retrying...`, err);
+              await new Promise(resolve => setTimeout(resolve, retryDelay));
+            } else {
+              throw err;
+            }
+          }
+        }
+
+        if (!access_token) {
+          throw new Error('Access token not found after 5 attempts');
+        }
+
+        const refresh_token = secretsresponse!.data['refresh_token'];
+        const expires_in = secretsresponse!.data['expires_in'];
 
         logger.info(`Secrets fetched for connector ${connector_id}`);
 

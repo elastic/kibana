@@ -34,10 +34,10 @@ steps:
       headers:
         Accept: application/json
         Authorization: "Bearer \${workplace_connector:${connectorId}:access_token}"
-  - name: 'Export Document Content'
+  - name: 'Download File'
     type: 'http'
     with:
-      url: "https://www.googleapis.com/drive/v3/files/{{ steps['Search Files'].output.data.files[0].id}}/export?mimeType=text/plain"
+      url: "https://www.googleapis.com/drive/v3/files/{{ steps['Search Files'].output.data.files[0].id }}/export?mimeType=text/plain"
       method: 'GET'
       headers:
         Authorization: "Bearer \${workplace_connector:${connectorId}:access_token}"

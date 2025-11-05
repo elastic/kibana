@@ -26,11 +26,13 @@ import { GoogleDriveLogo } from './google_drive_logo';
 export interface GoogleDriveConnectorFlyoutProps {
   onClose: () => void;
   isEditing?: boolean;
+  onConnectionSuccess?: () => void;
 }
 
 export const GoogleDriveConnectorFlyout: React.FC<GoogleDriveConnectorFlyoutProps> = ({
   onClose,
   isEditing = false,
+  onConnectionSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,15 +68,17 @@ export const GoogleDriveConnectorFlyout: React.FC<GoogleDriveConnectorFlyoutProp
           if (oauthWindow?.closed) {
             clearInterval(pollInterval);
             
-            await httpClient.get('/api/workplace_connectors/oauth/complete', {
-              query: {
-                request_id: requestId,
-                connector_id: connectorId,
-              },
+              await httpClient.get('/api/workplace_connectors/oauth/complete', {
+                query: {
+                  request_id: requestId,
+                  connector_id: connectorId,
+                },
             });
-            console.log('OAuth completed successfully');
-            setIsLoading(false);
-          }
+              console.log('OAuth completed successfully');
+              setIsLoading(false);
+              onConnectionSuccess?.();
+            }
+          
         } catch (err) {
           clearInterval(pollInterval);
           console.error('Failed to complete OAuth:', err);
