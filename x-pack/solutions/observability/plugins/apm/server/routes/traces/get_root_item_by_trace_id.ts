@@ -8,7 +8,7 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { TraceRootItem } from '@kbn/apm-types';
+import type { TraceRootSpan } from '@kbn/apm-types';
 import { maybe } from '../../../common/utils/maybe';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -33,7 +33,7 @@ export async function getRootItemByTraceId({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}): Promise<TraceRootItem | undefined> {
+}): Promise<TraceRootSpan | undefined> {
   const optionalFields = asMutableArray([
     TRANSACTION_DURATION,
     SPAN_DURATION,
@@ -93,5 +93,5 @@ export async function getRootItemByTraceId({
 
   return {
     duration: apmDuration ?? parseOtelDuration(otelDuration),
-  } as TraceRootItem;
+  } as TraceRootSpan;
 }

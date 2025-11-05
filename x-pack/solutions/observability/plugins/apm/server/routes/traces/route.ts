@@ -37,7 +37,7 @@ import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { normalizeErrors } from './normalize_errors';
-import { getRootItemByTraceId, type TraceRootItem } from './get_root_item_by_trace_id';
+import { getRootItemByTraceId, type TraceRootSpan } from './get_root_item_by_trace_id';
 import { getUnifiedTraceSpan } from './get_unified_trace_span';
 
 const tracesRoute = createApmServerRoute({
@@ -295,7 +295,7 @@ const rootItemByTraceIdRoute = createApmServerRoute({
     query: rangeRt,
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<TraceRootItem | undefined> => {
+  handler: async (resources): Promise<TraceRootSpan | undefined> => {
     const {
       params: {
         path: { traceId },

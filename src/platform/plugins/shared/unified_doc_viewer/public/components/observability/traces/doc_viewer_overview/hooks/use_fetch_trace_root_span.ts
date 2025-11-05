@@ -9,28 +9,28 @@
 
 import createContainer from 'constate';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { TraceRootItem } from '@kbn/apm-types';
+import type { TraceRootSpan } from '@kbn/apm-types';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 interface UseFetchTraceRootItemParams {
   traceId: string;
 }
 
-const useFetchTraceRootItem = ({ traceId }: UseFetchTraceRootItemParams) => {
+const useFetchTraceRootSpan = ({ traceId }: UseFetchTraceRootItemParams) => {
   const { data, discoverShared } = getUnifiedDocViewerServices();
   const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
-  const fetchRootItemByTraceId = discoverShared.features.registry.getById(
-    'observability-traces-fetch-root-item-by-trace-id'
+  const fetchRootSpanByTraceId = discoverShared.features.registry.getById(
+    'observability-traces-fetch-root-span-by-trace-id'
   );
 
-  const { loading, error, value } = useAbortableAsync<TraceRootItem | undefined>(
+  const { loading, error, value } = useAbortableAsync<TraceRootSpan | undefined>(
     async ({ signal }) => {
-      if (!fetchRootItemByTraceId || !traceId) {
+      if (!fetchRootSpanByTraceId || !traceId) {
         return undefined;
       }
 
-      return fetchRootItemByTraceId.fetchRootItemByTraceId(
+      return fetchRootSpanByTraceId.fetchRootSpanByTraceId(
         {
           traceId,
           start: timeFilter.from,
@@ -39,15 +39,15 @@ const useFetchTraceRootItem = ({ traceId }: UseFetchTraceRootItemParams) => {
         signal
       );
     },
-    [fetchRootItemByTraceId, traceId, timeFilter.from, timeFilter.to]
+    [fetchRootSpanByTraceId, traceId, timeFilter.from, timeFilter.to]
   );
 
   return {
     loading,
     error,
-    item: value,
+    span: value,
   };
 };
 
-export const [TraceRootItemProvider, useFetchTraceRootItemContext] =
-  createContainer(useFetchTraceRootItem);
+export const [TraceRootSpanProvider, useFetchTraceRootSpanContext] =
+  createContainer(useFetchTraceRootSpan);

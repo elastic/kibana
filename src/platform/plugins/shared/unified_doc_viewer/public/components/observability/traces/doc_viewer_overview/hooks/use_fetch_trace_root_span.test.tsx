@@ -9,15 +9,15 @@
 
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import type { TraceRootItem } from '@kbn/apm-types';
-import { TraceRootItemProvider, useFetchTraceRootItemContext } from './use_fetch_trace_root_item';
+import type { TraceRootSpan } from '@kbn/apm-types';
+import { TraceRootSpanProvider, useFetchTraceRootSpanContext } from './use_fetch_trace_root_span';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
-const mockFetchRootItemByTraceId = jest.fn<Promise<TraceRootItem | undefined>, any>();
+const mockFetchRootSpanByTraceId = jest.fn<Promise<TraceRootSpan | undefined>, any>();
 const mockGetAbsoluteTime = jest.fn(() => ({
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-01T01:00:00.000Z',
@@ -25,11 +25,11 @@ const mockGetAbsoluteTime = jest.fn(() => ({
 
 const mockGetById: jest.Mock<
   | {
-      fetchRootItemByTraceId: jest.Mock<Promise<TraceRootItem | undefined>>;
+      fetchRootSpanByTraceId: jest.Mock<Promise<TraceRootSpan | undefined>>;
     }
   | undefined
 > = jest.fn(() => ({
-  fetchRootItemByTraceId: mockFetchRootItemByTraceId,
+  fetchRootSpanByTraceId: mockFetchRootSpanByTraceId,
 }));
 
 (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
@@ -54,37 +54,37 @@ const mockGetById: jest.Mock<
 beforeEach(() => {
   jest.clearAllMocks();
   mockGetById.mockReturnValue({
-    fetchRootItemByTraceId: mockFetchRootItemByTraceId,
+    fetchRootSpanByTraceId: mockFetchRootSpanByTraceId,
   });
 });
 
-describe('useFetchTraceRootItem hook', () => {
+describe('useFetchTraceRootSpan hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <TraceRootItemProvider traceId="test-trace">{children}</TraceRootItemProvider>
+    <TraceRootSpanProvider traceId="test-trace">{children}</TraceRootSpanProvider>
   );
 
   it('should return undefined when feature is not registered', async () => {
     mockGetById.mockReturnValue(undefined);
 
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.item).toBeUndefined();
-    expect(mockFetchRootItemByTraceId).not.toHaveBeenCalled();
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchRootSpanByTraceId).not.toHaveBeenCalled();
   });
 
   it('should start with loading true and item as undefined', async () => {
-    mockFetchRootItemByTraceId.mockImplementation(
+    mockFetchRootSpanByTraceId.mockImplementation(
       () => new Promise(() => {}) // Never resolves to keep loading
     );
 
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootSpanContext(), { wrapper });
 
     expect(result.current.loading).toBe(true);
-    expect(result.current.item).toBeUndefined();
-    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchRootSpanByTraceId).toHaveBeenCalledWith(
       {
         traceId: 'test-trace',
         start: '2023-01-01T00:00:00.000Z',
@@ -96,32 +96,32 @@ describe('useFetchTraceRootItem hook', () => {
 
   it('should return undefined when traceId is empty', async () => {
     const emptyTraceIdWrapper = ({ children }: { children: React.ReactNode }) => (
-      <TraceRootItemProvider traceId="">{children}</TraceRootItemProvider>
+      <TraceRootSpanProvider traceId="">{children}</TraceRootSpanProvider>
     );
 
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), {
+    const { result } = renderHook(() => useFetchTraceRootSpanContext(), {
       wrapper: emptyTraceIdWrapper,
     });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.item).toBeUndefined();
-    expect(mockFetchRootItemByTraceId).not.toHaveBeenCalled();
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchRootSpanByTraceId).not.toHaveBeenCalled();
   });
 
   it('should update item when data is fetched successfully', async () => {
-    const mockItem: TraceRootItem = { duration: 1000 };
-    mockFetchRootItemByTraceId.mockResolvedValue(mockItem);
+    const mockSpan: TraceRootSpan = { duration: 1000 };
+    mockFetchRootSpanByTraceId.mockResolvedValue(mockSpan);
 
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.item).toEqual(mockItem);
-    expect(result.current.item?.duration).toBe(1000);
-    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+    expect(result.current.span).toEqual(mockSpan);
+    expect(result.current.span?.duration).toBe(1000);
+    expect(mockFetchRootSpanByTraceId).toHaveBeenCalledWith(
       {
         traceId: 'test-trace',
         start: '2023-01-01T00:00:00.000Z',
@@ -132,51 +132,51 @@ describe('useFetchTraceRootItem hook', () => {
   });
 
   it('should handle when item is not found (returns undefined)', async () => {
-    mockFetchRootItemByTraceId.mockResolvedValue(undefined);
+    mockFetchRootSpanByTraceId.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.item).toBeUndefined();
-    expect(mockFetchRootItemByTraceId).toHaveBeenCalledTimes(1);
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchRootSpanByTraceId).toHaveBeenCalledTimes(1);
   });
 
   it('should handle errors and set error state', async () => {
     const errorMessage = 'Fetch error';
-    mockFetchRootItemByTraceId.mockRejectedValue(new Error(errorMessage));
+    mockFetchRootSpanByTraceId.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe(errorMessage);
-    expect(result.current.item).toBeUndefined();
-    expect(mockFetchRootItemByTraceId).toHaveBeenCalledTimes(1);
+    expect(result.current.span).toBeUndefined();
+    expect(mockFetchRootSpanByTraceId).toHaveBeenCalledTimes(1);
   });
 
   it('should refetch when traceId changes', async () => {
-    const mockItem1: TraceRootItem = { duration: 1000 };
-    const mockItem2: TraceRootItem = { duration: 2000 };
-    mockFetchRootItemByTraceId.mockResolvedValueOnce(mockItem1).mockResolvedValueOnce(mockItem2);
+    const mockSpan1: TraceRootSpan = { duration: 1000 };
+    const mockSpan2: TraceRootSpan = { duration: 2000 };
+    mockFetchRootSpanByTraceId.mockResolvedValueOnce(mockSpan1).mockResolvedValueOnce(mockSpan2);
 
     const wrapper1 = ({ children }: { children: React.ReactNode }) => (
-      <TraceRootItemProvider traceId="trace-1">{children}</TraceRootItemProvider>
+      <TraceRootSpanProvider traceId="trace-1">{children}</TraceRootSpanProvider>
     );
     const wrapper2 = ({ children }: { children: React.ReactNode }) => (
-      <TraceRootItemProvider traceId="trace-2">{children}</TraceRootItemProvider>
+      <TraceRootSpanProvider traceId="trace-2">{children}</TraceRootSpanProvider>
     );
 
-    const { result: result1 } = renderHook(() => useFetchTraceRootItemContext(), {
+    const { result: result1 } = renderHook(() => useFetchTraceRootSpanContext(), {
       wrapper: wrapper1,
     });
 
     await waitFor(() => !result1.current.loading);
-    expect(result1.current.item?.duration).toBe(1000);
-    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+    expect(result1.current.span?.duration).toBe(1000);
+    expect(mockFetchRootSpanByTraceId).toHaveBeenCalledWith(
       {
         traceId: 'trace-1',
         start: '2023-01-01T00:00:00.000Z',
@@ -185,13 +185,13 @@ describe('useFetchTraceRootItem hook', () => {
       expect.any(AbortSignal)
     );
 
-    const { result: result2 } = renderHook(() => useFetchTraceRootItemContext(), {
+    const { result: result2 } = renderHook(() => useFetchTraceRootSpanContext(), {
       wrapper: wrapper2,
     });
 
     await waitFor(() => !result2.current.loading);
-    expect(result2.current.item?.duration).toBe(2000);
-    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+    expect(result2.current.span?.duration).toBe(2000);
+    expect(mockFetchRootSpanByTraceId).toHaveBeenCalledWith(
       {
         traceId: 'trace-2',
         start: '2023-01-01T00:00:00.000Z',
@@ -199,20 +199,20 @@ describe('useFetchTraceRootItem hook', () => {
       },
       expect.any(AbortSignal)
     );
-    expect(mockFetchRootItemByTraceId).toHaveBeenCalledTimes(2);
+    expect(mockFetchRootSpanByTraceId).toHaveBeenCalledTimes(2);
   });
 
-  it('should pass AbortSignal to fetchRootItemByTraceId', async () => {
-    mockFetchRootItemByTraceId.mockImplementation(({ signal }: { signal: AbortSignal }) => {
+  it('should pass AbortSignal to fetchRootSpanByTraceId', async () => {
+    mockFetchRootSpanByTraceId.mockImplementation(({ signal }: { signal: AbortSignal }) => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return Promise.resolve({ duration: 1000 });
     });
 
-    const { result } = renderHook(() => useFetchTraceRootItemContext(), { wrapper });
+    const { result } = renderHook(() => useFetchTraceRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
-    expect(mockFetchRootItemByTraceId).toHaveBeenCalledWith(
+    expect(mockFetchRootSpanByTraceId).toHaveBeenCalledWith(
       expect.objectContaining({
         traceId: 'test-trace',
         start: '2023-01-01T00:00:00.000Z',

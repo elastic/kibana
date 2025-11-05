@@ -11,7 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
-import type { SpanLinks, ErrorsByTraceId, TraceRootItem, SpanDocument } from '@kbn/apm-types';
+import type { SpanLinks, ErrorsByTraceId, TraceRootSpan, SpanDocument } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { HistogramItem } from '@kbn/apm-types-shared';
 import type { FeaturesRegistry } from '../../../common';
@@ -73,16 +73,16 @@ export interface ObservabilityTracesFetchErrorsFeature {
   ) => Promise<ErrorsByTraceId>;
 }
 
-export interface ObservabilityTracesFetchRootItemByTraceIdFeature {
-  id: 'observability-traces-fetch-root-item-by-trace-id'; // Todo should I change this for span and not item?
-  fetchRootItemByTraceId: (
+export interface ObservabilityTracesFetchRootSpanByTraceIdFeature {
+  id: 'observability-traces-fetch-root-span-by-trace-id';
+  fetchRootSpanByTraceId: (
     params: {
       traceId: string;
       start: string;
       end: string;
     },
     signal: AbortSignal
-  ) => Promise<TraceRootItem | undefined>;
+  ) => Promise<TraceRootSpan | undefined>;
 }
 
 export interface ObservabilityTracesFetchSpanFeature {
@@ -186,7 +186,7 @@ export type DiscoverFeature =
   | ObservabilityLogEventsFeature
   | ObservabilityTracesSpanLinksFeature
   | ObservabilityTracesFetchErrorsFeature
-  | ObservabilityTracesFetchRootItemByTraceIdFeature
+  | ObservabilityTracesFetchRootSpanByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
   | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature

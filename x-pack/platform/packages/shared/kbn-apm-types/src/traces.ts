@@ -7,7 +7,7 @@
 
 import type { Span } from './es_schemas/ui/span';
 
-export interface TraceRootItem {
+export interface TraceRootSpan {
   duration: number;
 }
 
