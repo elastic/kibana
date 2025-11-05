@@ -902,8 +902,8 @@ export class AlertsClient {
     }
 
     if (scriptOps.length === 0) {
-      this.logger.debug(`patchTags: No alerts found to update in index=${index}`);
-      return { updated: 0, errors: [], message: 'No alerts found to update.' };
+      this.logger.debug(`patchTags: No tags to update in index=${index}`);
+      return { updated: 0, errors: [], message: 'No tags to update.' };
     }
 
     const script = {

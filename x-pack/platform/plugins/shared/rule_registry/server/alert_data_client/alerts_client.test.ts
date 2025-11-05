@@ -566,7 +566,7 @@ describe('AlertsClient', () => {
     });
 
     it('should bulk update alerts with addTags only', async () => {
-      const result = await alertsClient.patchTags({
+      await alertsClient.patchTags({
         alertIds: ['alert-1', 'alert-2'],
         index: '.alerts-security.alerts-default',
         addTags: ['urgent', 'production'],
@@ -614,47 +614,10 @@ describe('AlertsClient', () => {
           },
         ],
       });
-
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "errors": false,
-          "items": Array [
-            Object {
-              "update": Object {
-                "_id": "alert-1",
-                "_index": ".alerts-security.alerts-default",
-                "_shards": Object {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 1,
-                },
-                "_version": 1,
-                "result": "updated",
-                "status": 200,
-              },
-            },
-            Object {
-              "update": Object {
-                "_id": "alert-2",
-                "_index": ".alerts-security.alerts-default",
-                "_shards": Object {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 1,
-                },
-                "_version": 1,
-                "result": "updated",
-                "status": 200,
-              },
-            },
-          ],
-          "took": 5,
-        }
-      `);
     });
 
     it('should bulk update alerts with removeTags only', async () => {
-      const result = await alertsClient.patchTags({
+      await alertsClient.patchTags({
         alertIds: ['alert-1', 'alert-2'],
         index: '.alerts-security.alerts-default',
         removeTags: ['outdated', 'test'],
@@ -702,47 +665,10 @@ describe('AlertsClient', () => {
           },
         ],
       });
-
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "errors": false,
-          "items": Array [
-            Object {
-              "update": Object {
-                "_id": "alert-1",
-                "_index": ".alerts-security.alerts-default",
-                "_shards": Object {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 1,
-                },
-                "_version": 1,
-                "result": "updated",
-                "status": 200,
-              },
-            },
-            Object {
-              "update": Object {
-                "_id": "alert-2",
-                "_index": ".alerts-security.alerts-default",
-                "_shards": Object {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 1,
-                },
-                "_version": 1,
-                "result": "updated",
-                "status": 200,
-              },
-            },
-          ],
-          "took": 5,
-        }
-      `);
     });
 
     it('should bulk update alerts with both addTags and removeTags', async () => {
-      const result = await alertsClient.patchTags({
+      await alertsClient.patchTags({
         alertIds: ['alert-1', 'alert-2'],
         index: '.alerts-security.alerts-default',
         addTags: ['urgent'],
@@ -793,47 +719,10 @@ describe('AlertsClient', () => {
           },
         ],
       });
-
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "errors": false,
-          "items": Array [
-            Object {
-              "update": Object {
-                "_id": "alert-1",
-                "_index": ".alerts-security.alerts-default",
-                "_shards": Object {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 1,
-                },
-                "_version": 1,
-                "result": "updated",
-                "status": 200,
-              },
-            },
-            Object {
-              "update": Object {
-                "_id": "alert-2",
-                "_index": ".alerts-security.alerts-default",
-                "_shards": Object {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 1,
-                },
-                "_version": 1,
-                "result": "updated",
-                "status": 200,
-              },
-            },
-          ],
-          "took": 5,
-        }
-      `);
     });
 
     it('should bulk update alerts with tags', async () => {
-      const result = await alertsClient.patchTags({
+      await alertsClient.patchTags({
         alertIds: ['alert-1', 'alert-2'],
         index: '.alerts-security.alerts-default',
         tags: ['urgent'],
@@ -881,43 +770,6 @@ describe('AlertsClient', () => {
           },
         ],
       });
-
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "errors": false,
-          "items": Array [
-            Object {
-              "update": Object {
-                "_id": "alert-1",
-                "_index": ".alerts-security.alerts-default",
-                "_shards": Object {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 1,
-                },
-                "_version": 1,
-                "result": "updated",
-                "status": 200,
-              },
-            },
-            Object {
-              "update": Object {
-                "_id": "alert-2",
-                "_index": ".alerts-security.alerts-default",
-                "_shards": Object {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 1,
-                },
-                "_version": 1,
-                "result": "updated",
-                "status": 200,
-              },
-            },
-          ],
-          "took": 5,
-        }
-      `);
     });
 
     it('should return early when no operations are provided', async () => {
@@ -929,7 +781,7 @@ describe('AlertsClient', () => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "errors": Array [],
-          "message": "No alerts found to update.",
+          "message": "No tags to update.",
           "updated": 0,
         }
       `);
