@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SpanDocument } from '@kbn/apm-types';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { SPAN_ID, TRACE_ID, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+
+export async function getUnifiedTraceSpan({
+  spanId,
+  traceId,
+  apmEventClient,
+}: {
+  spanId: string;
+  traceId: string;
+  apmEventClient: APMEventClient;
+}): Promise<SpanDocument | undefined> {
+  const params = {
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    fields: ['*'],
+    query: {
+      bool: {
+        filter: [...termQuery(SPAN_ID, spanId), ...termQuery(TRACE_ID, traceId)],
+        should: [
+          { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.span, ProcessorEvent.transaction] } },
+          { bool: { must_not: { exists: { field: PROCESSOR_EVENT } } } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  };
+  const resp = await apmEventClient.search('get_unified_trace_span', params, {
+    skipProcessorEventFilter: true,
+  });
+
+  const hit = resp.hits.hits[0];
+
+  if (!hit) {
+    return undefined;
+  }
+
+  const _id = hit?._id;
+  const _index = hit?._index;
+
+  const event = unflattenKnownApmEventFields(hit?.fields, []);
+
+  return {
+    ...event,
+    _id,
+    _index,
+  };
+}
