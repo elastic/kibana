@@ -89,7 +89,7 @@ describe('sanitizeSvg', () => {
 
     // Notice that DOMPurify may change self-closing tags to explicit closing tags
     expect(resultStr).toEqual(
-      '<svg height="100" width="100"><circle r="40" cy="50" cx="50"></circle></svg>'
+      '<svg width="100" height="100"><circle cx="50" cy="50" r="40"></circle></svg>'
     );
   });
 
