@@ -50,8 +50,14 @@ export interface WorkflowToolFormData extends BaseToolFormData {
   workflow_id: string;
 }
 
+export interface McpToolFormData extends BaseToolFormData {
+  type: ToolType.mcp;
+  configuration: Record<string, unknown>;
+}
+
 export type ToolFormData =
   | EsqlToolFormData
   | BuiltinToolFormData
   | IndexSearchToolFormData
-  | WorkflowToolFormData;
+  | WorkflowToolFormData
+  | McpToolFormData;
