@@ -10,7 +10,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import { cloudConnectorService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
-import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../../../common/services';
 import type {
   GetCloudConnectorsResponse,
   GetOneCloudConnectorResponse,
@@ -28,27 +27,6 @@ import type {
   DeleteCloudConnectorRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
 
-/**
- * Helper to safely convert schema-validated body to typed CreateCloudConnectorRequest
- * Uses type guards to narrow the generic Record type to specific CloudConnectorVars union types
- */
-function toCreateCloudConnectorRequest(
-  body: TypeOf<typeof CreateCloudConnectorRequestSchema.body>
-): CreateCloudConnectorRequest {
-  const { name, cloudProvider, vars } = body;
-
-  // Schema validation has already verified structure; use type guards to narrow the type
-  if (cloudProvider === 'aws' && isAwsCloudConnectorVars(vars)) {
-    return { name, cloudProvider, vars };
-  }
-  if (cloudProvider === 'azure' && isAzureCloudConnectorVars(vars)) {
-    return { name, cloudProvider, vars };
-  }
-
-  // This should never happen due to schema validation, but provides type safety
-  throw new Error(`Invalid cloud provider or vars structure: ${cloudProvider}`);
-}
-
 export const createCloudConnectorHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -64,7 +42,8 @@ export const createCloudConnectorHandler: FleetRequestHandler<
     logger.info('Creating cloud connector');
     const cloudConnector = await cloudConnectorService.create(
       internalSoClient,
-      toCreateCloudConnectorRequest(request.body)
+      // Type assertion is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
+      request.body as unknown as CreateCloudConnectorRequest
     );
     logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
     const body: CreateCloudConnectorResponse = {
