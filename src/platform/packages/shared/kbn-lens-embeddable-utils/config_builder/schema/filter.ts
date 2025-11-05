@@ -59,3 +59,5 @@ export const unifiedSearchFilterSchema = schema.object({
   meta: schema.object({}),
   language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
 });
+
+export type UnifiedSearchFilterType = typeof unifiedSearchFilterSchema.type;
