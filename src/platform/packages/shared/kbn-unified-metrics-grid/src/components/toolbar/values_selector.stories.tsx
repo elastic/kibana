@@ -48,7 +48,7 @@ const mockClient: MetricsExperienceClient = {
     ],
   }),
   getFields: async (params, signal) => ({ fields: [], total: 0, page: 1 }),
-  getIndexPatternMetadata: async (params, signal) => ({
+  getIndexPatternMetadata: async (params: Record<string, any>, signal: AbortSignal | null) => ({
     indexPatternMetadata: {},
   }),
 } as MetricsExperienceClient;
