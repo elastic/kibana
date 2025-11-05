@@ -18,12 +18,9 @@ import {
   type KibanaMigratorTestKit,
   defaultKibanaTaskIndex,
   defaultKibanaIndex,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
-import {
-  getRelocatingMigratorTestKit,
-  kibanaSplitIndex,
-} from '../kibana_migrator_test_kit.fixtures';
+import { getRelocatingMigratorTestKit, kibanaSplitIndex } from '@kbn/migrator-test-kit/fixtures';
 import { delay } from '../test_utils';
 import '../jest_matchers';
 

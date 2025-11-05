@@ -116,11 +116,8 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       method,
       headers,
       signal: this.stepExecutionRuntime.abortController.signal,
+      ...(body && { data: body }),
     };
-
-    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
-      config.data = body;
-    }
 
     // Apply fetcher options if provided
     if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
