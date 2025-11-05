@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -12,6 +14,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
@@ -34,6 +38,8 @@ import { isActiveTimeline } from '../../../../../helpers';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { EventsCountBadge } from '../shared/layout';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
 
 /**
  * TODO: This component is a pared down duplicate of the logic used in timeline/tabs/query/index.tsx
@@ -47,6 +53,7 @@ const emptyFieldsList: string[] = [];
 export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string }> = ({
   timelineId,
 }) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterKuerySelector(), []);
   const getInputsTimeline = useMemo(() => inputsSelectors.getTimelineSelector(), []);
@@ -88,15 +95,24 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
 
   const dispatch = useDispatch();
   const {
-    browserFields,
+    browserFields: oldBrowserFields,
     dataViewId,
     loading: loadingSourcerer,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
-    selectedPatterns,
+    selectedPatterns: oldSelectedPatterns,
     sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const experimentalBrowserfields = useBrowserFields(DataViewManagerScopeName.timeline);
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserfields : oldBrowserFields;
+  const runtimeMappings: RunTimeMappings = newDataViewPickerEnabled
+    ? (experimentalDataView?.getRuntimeMappings() as RunTimeMappings) ?? {}
+    : (sourcererDataView.runtimeFieldMap as RunTimeMappings) ?? {};
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.timeline);
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently
    * and consequently it cannot be the part of common redux state
@@ -182,7 +198,7 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
     indexNames: selectedPatterns,
     language: kqlQuery.language,
     limit: 0, // We only care about the totalCount here
-    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     startDate: start,

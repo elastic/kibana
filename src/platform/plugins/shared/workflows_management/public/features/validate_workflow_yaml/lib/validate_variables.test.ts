@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowYaml } from '@kbn/workflows';
-import type { VariableItem, YamlValidationResult } from '../model/types';
-import { validateVariables } from './validate_variables';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 
 // Mock the imports
 jest.mock('../../workflow_context/lib/get_context_for_path');
 jest.mock('./validate_variable');
 
-import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
 import { validateVariable } from './validate_variable';
+import { validateVariables } from './validate_variables';
+import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
+import type { VariableItem, YamlValidationResult } from '../model/types';
 
 const mockGetContextSchemaForPath = getContextSchemaForPath as jest.MockedFunction<
   typeof getContextSchemaForPath
@@ -45,7 +45,7 @@ describe('validateVariables', () => {
     name: 'Test Workflow',
     version: '1',
     enabled: true,
-    triggers: [{ type: 'manual', enabled: true }],
+    triggers: [{ type: 'manual' }],
     steps: [
       {
         name: 'Test Step',

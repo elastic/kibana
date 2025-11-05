@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
-import type { SavedSearch as SavedSearchCommon, SavedSearchAttributes } from '../../common';
+import type { SavedSearch as SavedSearchCommon } from '../../common';
 
 /** @public **/
 export interface SavedSearch extends SavedSearchCommon {
@@ -20,8 +19,3 @@ export interface SavedSearch extends SavedSearchCommon {
     errorJSON?: string;
   };
 }
-
-export type SavedSearchByValueAttributes = Omit<SavedSearchAttributes, 'description'> & {
-  description?: string;
-  references: Reference[];
-};

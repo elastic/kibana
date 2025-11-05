@@ -443,7 +443,13 @@ function getRuntimeMappings(
   return Object.fromEntries(
     getConditionFields(condition)
       .filter((field) => !mappedFields.includes(field.name))
-      .map((field) => [field.name, { type: field.type === 'string' ? 'keyword' : 'double' }])
+      .map((field) => [
+        field.name,
+        {
+          type:
+            field.type === 'boolean' ? 'boolean' : field.type === 'number' ? 'double' : 'keyword',
+        },
+      ])
   );
 }
 

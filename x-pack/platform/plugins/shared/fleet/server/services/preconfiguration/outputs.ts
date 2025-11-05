@@ -224,7 +224,7 @@ export async function cleanPreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingOutputs = await outputService.list(soClient);
+  const existingOutputs = await outputService.list();
   const existingPreconfiguredOutput = existingOutputs.items.filter(
     (o) => o.is_preconfigured === true
   );
@@ -261,7 +261,7 @@ export async function cleanPreconfiguredOutputs(
       );
     } else {
       logger.info(`Deleting preconfigured output ${output.id}`);
-      await outputService.delete(soClient, output.id, { fromPreconfiguration: true });
+      await outputService.delete(output.id, { fromPreconfiguration: true });
     }
   }
 }

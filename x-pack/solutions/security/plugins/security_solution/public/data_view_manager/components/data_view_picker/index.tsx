@@ -65,6 +65,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const savedDataViews = useSavedDataViews();
 
   const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
+  const isExploreSourcerer = scope === DataViewManagerScopeName.explore;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const dataViewId = dataView?.id;
@@ -84,8 +85,18 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
           },
         });
       }
+
+      if (isExploreSourcerer) {
+        updateUrlParam({
+          [DataViewManagerScopeName.explore]: {
+            id,
+            // NOTE: Boolean filter for removing empty patterns
+            selectedPatterns: indexPattern.split(',').filter(Boolean),
+          },
+        });
+      }
     },
-    [isDefaultSourcerer, scope, selectDataView, updateUrlParam]
+    [isDefaultSourcerer, isExploreSourcerer, scope, selectDataView, updateUrlParam]
   );
 
   const handleCreateNewDataView = useCallback(
@@ -108,7 +119,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
       const dataViewInstance = await data.dataViews.get(dataViewId);
       // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
-      data.dataViews.clearInstanceCache(dataViewId);
+      if (dataViewInstance.isPersisted?.()) {
+        data.dataViews.clearInstanceCache(dataViewId);
+      }
 
       closeFieldEditor.current = await dataViewFieldEditor.openEditor({
         ctx: {

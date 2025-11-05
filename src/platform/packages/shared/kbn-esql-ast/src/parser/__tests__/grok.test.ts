@@ -28,4 +28,24 @@ describe('GROK', () => {
       });
     });
   });
+
+  it('parses command with multiple patterns', () => {
+    const src = `
+FROM logs
+| GROK message "%{IP:client_ip}", "%{WORD:method}", "%{NUMBER:status}"`;
+    const { ast, errors } = EsqlQuery.fromSrc(src);
+    const grok = Walker.match(ast, { type: 'command', name: 'grok' });
+
+    expect(errors.length).toBe(0);
+    expect(grok).toMatchObject({
+      type: 'command',
+      name: 'grok',
+      args: [
+        { type: 'column', name: 'message' },
+        { type: 'literal', literalType: 'keyword' },
+        { type: 'literal', literalType: 'keyword' },
+        { type: 'literal', literalType: 'keyword' },
+      ],
+    });
+  });
 });

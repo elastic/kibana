@@ -19,6 +19,7 @@ import {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
+import type { CriteriaField, Influencer } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '../../../common/types/anomalies';
 import { getIndicesOptions } from '../../../common/util/datafeed_utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
@@ -39,17 +40,6 @@ import { anomalyChartsDataProvider } from './anomaly_charts';
 // ML Results dashboards.
 
 const DEFAULT_MAX_EXAMPLES = 500;
-
-export interface CriteriaField {
-  fieldType?: string;
-  fieldName: string;
-  fieldValue: any;
-}
-
-interface Influencer {
-  fieldName: string;
-  fieldValue: any;
-}
 
 /**
  * Extracts typical and actual values from the anomaly record.

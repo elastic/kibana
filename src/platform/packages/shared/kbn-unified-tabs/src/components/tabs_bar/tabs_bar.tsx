@@ -22,9 +22,6 @@ import { css } from '@emotion/react';
 import type { DropResult } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
@@ -40,17 +37,11 @@ import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
 import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
 import { TabsEventDataKeys } from '../../event_data_keys';
-
-const DROPPABLE_ID = 'unifiedTabsOrder';
+import { OptionalDraggable } from './optional_draggable';
+import { OptionalDroppable } from './optional_droppable';
 
 const growingFlexItemCss = css`
   min-width: 0;
-`;
-
-const droppableCss = css`
-  display: flex;
-  align-items: center;
-  wrap: no-wrap;
 `;
 
 enum shortcutActions {
@@ -63,7 +54,15 @@ enum shortcutActions {
 
 export type TabsBarProps = Pick<
   TabProps,
-  'getTabMenuItems' | 'getPreviewData' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
+  | 'getTabMenuItems'
+  | 'getPreviewData'
+  | 'onLabelEdited'
+  | 'onSelect'
+  | 'onClose'
+  | 'tabContentId'
+  | 'disableCloseButton'
+  | 'disableInlineLabelEditing'
+  | 'disableDragAndDrop'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
@@ -76,6 +75,8 @@ export type TabsBarProps = Pick<
   onReorder: (items: TabItem[], movedTabId: string) => void;
   onEBTEvent: (event: TabsEBTEvent) => void;
   onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
+  customNewTabButton?: React.ReactElement;
+  disableTabsBarMenu?: boolean;
 };
 
 export interface TabsBarApi {
@@ -102,6 +103,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onClose,
       getPreviewData,
       onEBTEvent,
+      customNewTabButton,
+      disableCloseButton = false,
+      disableInlineLabelEditing = false,
+      disableDragAndDrop = false,
+      disableTabsBarMenu = false,
     },
     componentRef
   ) => {
@@ -271,76 +277,83 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} css={growingFlexItemCss}>
               <div ref={setTabsContainerElement} role="tablist" css={tabsContainerCss}>
-                <EuiDragDropContext onDragEnd={onDragEnd}>
-                  <EuiDroppable
-                    droppableId={DROPPABLE_ID}
-                    direction="horizontal"
-                    css={droppableCss}
-                    grow
-                  >
-                    {() =>
-                      items.map((item, index) => (
-                        <EuiDraggable
-                          key={item.id}
-                          draggableId={item.id}
-                          index={index}
-                          usePortal
-                          hasInteractiveChildren
-                          customDragHandle="custom"
-                        >
-                          {({ dragHandleProps }, { isDragging }) => (
-                            <Tab
-                              key={item.id}
-                              item={item}
-                              isSelected={selectedItem?.id === item.id}
-                              isUnsaved={unsavedItemIds?.includes(item.id)}
-                              isDragging={isDragging}
-                              dragHandleProps={dragHandleProps}
-                              tabContentId={tabContentId}
-                              tabsSizeConfig={tabsSizeConfig}
-                              services={services}
-                              getTabMenuItems={getTabMenuItems}
-                              getPreviewData={getPreviewData}
-                              onLabelEdited={onLabelEdited}
-                              onSelect={onSelect}
-                              onSelectedTabKeyDown={onSelectedTabKeyDown}
-                              onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                            />
-                          )}
-                        </EuiDraggable>
-                      ))
-                    }
-                  </EuiDroppable>
-                </EuiDragDropContext>
+                {/*
+                  OptionalDroppable provides the drag-drop context wrapper.
+                  When disableDragAndDrop=false, it sets up EuiDragDropContext and EuiDroppable.
+                  When false, it renders a plain flex container with consistent styling.
+                  This eliminates conditional rendering logic from this file.
+                */}
+                <OptionalDroppable disableDragAndDrop={disableDragAndDrop} onDragEnd={onDragEnd}>
+                  {/* Render each tab, optionally wrapped with drag functionality */}
+                  {items.map((item, index) => (
+                    /*
+                      OptionalDraggable uses render prop pattern to conditionally wrap each tab with EuiDraggable.
+                    */
+                    <OptionalDraggable
+                      item={item}
+                      index={index}
+                      disableDragAndDrop={disableDragAndDrop}
+                      key={item.id}
+                    >
+                      {/* Render prop receives drag-related props when drag is enabled */}
+                      {({ dragHandleProps, isDragging }) => (
+                        <Tab
+                          item={item}
+                          isSelected={selectedItem?.id === item.id}
+                          isUnsaved={unsavedItemIds?.includes(item.id)}
+                          isDragging={isDragging}
+                          dragHandleProps={dragHandleProps}
+                          tabContentId={tabContentId}
+                          tabsSizeConfig={tabsSizeConfig}
+                          services={services}
+                          getTabMenuItems={getTabMenuItems}
+                          getPreviewData={getPreviewData}
+                          onLabelEdited={onLabelEdited}
+                          onSelect={onSelect}
+                          onSelectedTabKeyDown={onSelectedTabKeyDown}
+                          onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                          disableCloseButton={disableCloseButton}
+                          disableInlineLabelEditing={disableInlineLabelEditing}
+                          disableDragAndDrop={disableDragAndDrop}
+                        />
+                      )}
+                    </OptionalDraggable>
+                  ))}
+                </OptionalDroppable>
               </div>
             </EuiFlexItem>
             {!!scrollLeftButton && <EuiFlexItem grow={false}>{scrollLeftButton}</EuiFlexItem>}
             {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
             {!hasReachedMaxItemsCount && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    data-test-subj="unifiedTabs_tabsBar_newTabBtn"
-                    iconType="plus"
-                    color="text"
-                    aria-label={addButtonLabel}
-                    onClick={onAdd}
-                  />
-                </EuiToolTip>
+                {!customNewTabButton && (
+                  <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      data-test-subj="unifiedTabs_tabsBar_newTabBtn"
+                      iconType="plus"
+                      color="text"
+                      aria-label={addButtonLabel}
+                      onClick={onAdd}
+                    />
+                  </EuiToolTip>
+                )}
+                {customNewTabButton ?? null}
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TabsBarMenu
-            items={items}
-            selectedItem={selectedItem}
-            recentlyClosedItems={recentlyClosedItems}
-            onSelect={onSelect}
-            onSelectRecentlyClosed={onSelectRecentlyClosed}
-            onClearRecentlyClosed={onClearRecentlyClosed}
-          />
-        </EuiFlexItem>
+        {!disableTabsBarMenu && (
+          <EuiFlexItem grow={false}>
+            <TabsBarMenu
+              items={items}
+              selectedItem={selectedItem}
+              recentlyClosedItems={recentlyClosedItems}
+              onSelect={onSelect}
+              onSelectRecentlyClosed={onSelectRecentlyClosed}
+              onClearRecentlyClosed={onClearRecentlyClosed}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
 

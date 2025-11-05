@@ -8,7 +8,7 @@
  */
 
 import { fromTermsLensApiToLensState, fromTermsLensStateToAPI } from './top_values';
-import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { TermsIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiTermsOperation } from '../../schema/bucket_ops';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 

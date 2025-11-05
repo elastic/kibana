@@ -106,19 +106,30 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'healthy',
-            rollup: 'healthy',
-            summary: 'healthy',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'healthy',
+              rollup: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     const { container } = renderComponent();
@@ -129,19 +140,30 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'unhealthy',
-            summary: 'healthy',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -155,19 +177,29 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'missing',
-            summary: 'healthy',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'missing',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -181,19 +213,30 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'healthy',
-            summary: 'unhealthy',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -207,19 +250,29 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'healthy',
-            summary: 'missing',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'missing',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -233,19 +286,29 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'unhealthy',
-            summary: 'missing',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'missing',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -268,19 +331,29 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'missing',
-            summary: 'unhealthy',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'missing',
+              },
+              summary: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -303,19 +376,30 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'unhealthy',
-            summary: 'unhealthy',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -338,19 +422,28 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'missing',
-            summary: 'missing',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'missing',
+              },
+              summary: {
+                status: 'missing',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -371,19 +464,29 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'missing',
-            summary: 'healthy',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'missing',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();
@@ -401,19 +504,30 @@ describe('SloHealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: [
-        {
-          sloId: 'test-slo-id',
-          sloRevision: 1,
-          sloName: 'Test SLO',
-          health: {
-            overall: 'unhealthy',
-            rollup: 'unhealthy',
-            summary: 'healthy',
+      data: {
+        total: 1,
+        perPage: 10,
+        page: 0,
+        data: [
+          {
+            sloId: 'test-slo-id',
+            sloRevision: 1,
+            sloName: 'Test SLO',
+            health: {
+              overall: 'unhealthy',
+              rollup: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+            },
+            state: 'running',
           },
-          state: 'running',
-        },
-      ],
+        ],
+      },
     });
 
     renderComponent();

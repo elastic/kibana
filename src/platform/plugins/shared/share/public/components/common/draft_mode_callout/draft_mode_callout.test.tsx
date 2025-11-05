@@ -9,17 +9,12 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { DraftModeCallout } from './draft_mode_callout';
 
 describe('DraftModeCallout', () => {
   describe('Default case', () => {
     it('renders a default callout when custom props are not present', () => {
-      render(
-        <I18nProvider>
-          <DraftModeCallout />
-        </I18nProvider>
-      );
+      render(<DraftModeCallout />);
       const callout = screen.getByTestId('unsavedChangesDraftModeCallOut');
       expect(callout).toMatchSnapshot();
     });
@@ -28,9 +23,7 @@ describe('DraftModeCallout', () => {
   describe('Custom content case', () => {
     it('renders a callout with custom content when custom props are present', () => {
       render(
-        <I18nProvider>
-          <DraftModeCallout message={'Custom message'} data-test-subj="customDraftModeCallOut" />
-        </I18nProvider>
+        <DraftModeCallout message={'Custom message'} data-test-subj="customDraftModeCallOut" />
       );
       const callout = screen.getByTestId('customDraftModeCallOut');
       expect(screen.getByText('Custom message')).toBeInTheDocument();
@@ -38,18 +31,22 @@ describe('DraftModeCallout', () => {
     });
   });
 
-  describe('Node override case', () => {
-    it('renders a component override when a node prop is provided', () => {
-      render(
-        <I18nProvider>
-          <DraftModeCallout
-            node={<p data-test-subj="overriddenDraftModeCallOut">Component override</p>}
-          />
-        </I18nProvider>
-      );
-      const callout = screen.getByTestId('overriddenDraftModeCallOut');
-      expect(screen.getByText('Component override')).toBeInTheDocument();
-      expect(callout).toMatchSnapshot();
+  describe('Save button case', () => {
+    it('renders a save button when onSave is present', () => {
+      render(<DraftModeCallout saveButtonProps={{ onSave: jest.fn() }} />);
+      const saveButton = screen.getByRole('button', { name: 'Save changes' });
+      expect(saveButton).toBeInTheDocument();
+    });
+    it('renders a loading state when isSaving is true', () => {
+      render(<DraftModeCallout saveButtonProps={{ onSave: jest.fn(), isSaving: true }} />);
+      const saveButton = screen.getByRole('button', { name: 'Save changes' });
+      expect(saveButton).toBeDisabled();
+    });
+    it('renders a custom label when a label is provided', () => {
+      const customLabel = 'Custom label';
+      render(<DraftModeCallout saveButtonProps={{ onSave: jest.fn(), label: customLabel }} />);
+      const saveButton = screen.getByRole('button', { name: customLabel });
+      expect(saveButton).toBeInTheDocument();
     });
   });
 });

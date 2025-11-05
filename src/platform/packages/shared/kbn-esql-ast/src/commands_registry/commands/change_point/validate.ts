@@ -8,7 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { errors } from '../../../definitions/utils';
-import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLAstChangePointCommand,
+  ESQLMessage,
+} from '../../../types';
 import { isColumn, isOptionNode } from '../../../ast/is';
 import type { SupportedDataType } from '../../../definitions/types';
 import { isNumericType } from '../../../definitions/types';
@@ -16,15 +21,16 @@ import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
+  const changePointCommand = command as ESQLAstChangePointCommand;
   const messages: ESQLMessage[] = [];
 
   // validate change point value column
-  const valueArg = command.args[0];
+  const valueArg = changePointCommand.args[0];
   if (isColumn(valueArg)) {
     const columnName = valueArg.name;
     let valueColumnType: SupportedDataType | 'unknown' | undefined;
@@ -40,11 +46,11 @@ export const validate = (
 
   // validate ON column
   const defaultOnColumnName = '@timestamp';
-  const onColumn = command.args.find((arg) => isOptionNode(arg) && arg.name === 'on');
+  const onColumn = changePointCommand.args.find((arg) => isOptionNode(arg) && arg.name === 'on');
   const hasDefaultOnColumn = context?.columns.has(defaultOnColumnName);
   if (!onColumn && !hasDefaultOnColumn) {
     messages.push({
-      location: command.location,
+      location: changePointCommand.location,
       text: i18n.translate('kbn-esql-ast.esql.validation.changePointOnFieldMissing', {
         defaultMessage: '[CHANGE_POINT] Default {defaultOnColumnName} column is missing',
         values: { defaultOnColumnName },
@@ -57,7 +63,10 @@ export const validate = (
   messages.push(
     ...validateCommandArguments(
       // exclude AS option from generic validation
-      { ...command, args: command.args.filter((arg) => !(isOptionNode(arg) && arg.name === 'as')) },
+      {
+        ...changePointCommand,
+        args: changePointCommand.args.filter((arg) => !(isOptionNode(arg) && arg.name === 'as')),
+      },
       ast,
       context,
       callbacks

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import type { GRID_RESOLUTION } from '../../../../common/constants';
 import { AGG_TYPE, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
@@ -76,7 +76,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     }
 
     this.setState({
-      fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      fields: indexPattern.fields.filter((field) => !isNestedField(field)),
     });
   }
 

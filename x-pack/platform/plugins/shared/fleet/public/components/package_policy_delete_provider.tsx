@@ -278,6 +278,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         {packagePolicyPackage?.type === 'input' && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               color="warning"
               iconType="alert"
               title={
@@ -294,6 +295,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         {(hasMultipleAgentPolicies || isShared) && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               color="warning"
               iconType="alert"
               title={
@@ -316,6 +318,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         ) : agentsCount && agentPolicies ? (
           <>
             <EuiCallOut
+              announceOnMount={false}
               color="danger"
               data-test-subj="affectedAgentsCallOut"
               title={

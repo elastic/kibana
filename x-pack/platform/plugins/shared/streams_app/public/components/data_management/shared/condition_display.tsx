@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiBadge,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { Condition, FilterCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
@@ -22,7 +30,13 @@ import {
 import { css } from '@emotion/css';
 import { ConditionEditor } from './condition_editor';
 
-export const ConditionPanel = ({ condition }: { condition: Condition }) => {
+export const ConditionPanel = ({
+  condition,
+  keywordWrapper,
+}: {
+  condition: Condition;
+  keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel
@@ -32,7 +46,12 @@ export const ConditionPanel = ({ condition }: { condition: Condition }) => {
         border-radius: ${euiTheme.size.s};
       `}
     >
-      <ConditionDisplay condition={condition} showKeyword={true} keyword="WHERE" />
+      <ConditionDisplay
+        condition={condition}
+        showKeyword={true}
+        keyword="WHERE"
+        keywordWrapper={keywordWrapper}
+      />
     </EuiPanel>
   );
 };
@@ -57,16 +76,18 @@ interface ConditionDisplayProps {
   condition: Condition;
   showKeyword?: boolean;
   keyword?: string;
+  keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
 }
 
 export const ConditionDisplay = ({
   condition,
   showKeyword = false,
   keyword = 'WHERE',
+  keywordWrapper = (children: React.ReactNode) => children,
 }: ConditionDisplayProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-      {showKeyword && <OperatorText operator={keyword} bold />}
+      {showKeyword && keywordWrapper(<OperatorText operator={keyword} bold />)}
       <RecursiveConditionDisplay condition={condition} />
     </EuiFlexGroup>
   );
@@ -153,7 +174,17 @@ const RecursiveConditionDisplay = ({
     }
 
     // Fallback for any unknown condition types
-    return <BadgeItem text={JSON.stringify(condition)} />;
+    const jsonStringifiedCondition = JSON.stringify(condition);
+    return (
+      <EuiToolTip
+        content={jsonStringifiedCondition}
+        anchorClassName={css`
+          max-width: 100%;
+        `}
+      >
+        <BadgeItem text={jsonStringifiedCondition} />
+      </EuiToolTip>
+    );
   };
 
   return (
