@@ -131,6 +131,16 @@ export function useFetchAgentsData() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Sync URL kuery param with session storage search to maintain shareable state
+  useEffect(() => {
+    const currentUrlKuery = (urlParams.kuery as string) || '';
+    if (search && search !== currentUrlKuery) {
+      history.replace({
+        search: toUrlParams({ ...urlParams, kuery: search }),
+      });
+    }
+  }, [search, urlParams, history, toUrlParams]);
+
   // Flag to indicate if filters are applied by comparing with default state
   const isUsingFilter = useMemo(() => {
     return (

@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { isMatch } from 'lodash';
 
 import type { Agent } from '../../../../types';
 
@@ -75,25 +76,16 @@ export const useSessionAgentListState = (): SessionAgentListState => {
       const latestState = sessionState;
       const updates: Partial<AgentListTableState> = {};
 
-      // Check if pagination has actually changed
-      if (
-        changes.page &&
-        (changes.page.index !== latestState.page.index ||
-          changes.page.size !== latestState.page.size)
-      ) {
+      // Check if pagination has actually changed using isMatch for partial deep compare
+      if (changes.page && !isMatch(latestState.page, changes.page)) {
         updates.page = {
           index: changes.page.index,
           size: changes.page.size,
         };
       }
 
-      // Check if sort has actually changed
-      if (
-        changes.sort &&
-        (!latestState.sort ||
-          changes.sort.field !== latestState.sort.field ||
-          changes.sort.direction !== latestState.sort.direction)
-      ) {
+      // Check if sort has actually changed using isMatch for partial deep compare
+      if (changes.sort && !isMatch(latestState.sort, changes.sort)) {
         updates.sort = {
           field: changes.sort.field,
           direction: changes.sort.direction,
