@@ -165,7 +165,7 @@ export const simpleFilterConditionSchema = schema.oneOf(
  */
 export const filterGroupSchema = schema.object(
   {
-    type: schema.oneOf([schema.literal('AND'), schema.literal('OR')]),
+    type: schema.oneOf([schema.literal('and'), schema.literal('or')]),
     conditions: schema.arrayOf(
       schema.oneOf([
         simpleFilterConditionSchema,
