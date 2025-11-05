@@ -10,7 +10,7 @@
 export { timeRangeSchema } from './src/time_range';
 export { querySchema } from './src/query';
 export { appStateSchema, globalStateSchema, filterSchema } from './src/filter/stored_filter';
-export { simpleFilterSchema } from './src/filter/simplified_filter';
+export { simpleFilterSchema } from './src/filter/simple_filter';
 
 // Re-export filter operator constants for server-side use
 export {

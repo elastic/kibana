@@ -28,7 +28,7 @@ import type {
   rawDSLFilterSchema,
   filterValueSchema,
   rangeValueSchema,
-} from './filter/simplified_filter';
+} from './filter/simple_filter';
 
 export type TimeRange = Writable<TypeOf<typeof timeRangeSchema>>;
 export type AbsoluteTimeRange = TypeOf<typeof absoluteTimeRangeSchema>;
