@@ -31,8 +31,6 @@ steps:
     label: Build Kibana Distribution
     agents:
       machineType: c3d-standard-16-lssd
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
