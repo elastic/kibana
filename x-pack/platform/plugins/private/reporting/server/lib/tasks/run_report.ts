@@ -399,16 +399,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       encryptedHeaders: task.payload.headers,
     });
 
+    // We use this internal timeout mechanism (vs relying solely on the task manager cancel function)
+    // to handle scheduled exports that have been configured to retry multiple times within a single task run
+    // because task manager does not retry recurring tasks.
     let jobTimedOut: boolean = false;
-    const throwTimeoutException = (): Promise<void> => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          cancellationToken.cancel();
-          jobTimedOut = true;
-          resolve();
-        }, this.queueTimeout);
-      });
-    };
+    const timerId = setTimeout(() => {
+      cancellationToken.cancel();
+      jobTimedOut = true;
+    }, this.queueTimeout);
 
     const runTaskPromise = exportType.runTask({
       jobId: task.id,
@@ -419,8 +417,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       stream,
     });
 
-    await Promise.race([runTaskPromise, throwTimeoutException()]);
-    return { result: await runTaskPromise, timedOut: jobTimedOut };
+    try {
+      const result = await runTaskPromise;
+      return { result, timedOut: jobTimedOut };
+    } finally {
+      clearTimeout(timerId);
+    }
   }
 
   protected async completeJob(
