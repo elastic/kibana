@@ -120,8 +120,6 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - wait
-
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
@@ -143,6 +141,13 @@ steps:
       preemptible: true
       diskSizeGb: 100
     key: build_api_docs
+    depends_on:
+      - build
+      - check_types
+      - linting
+      - linting_with_types
+      - quick_checks
+      - check_oas_snapshot
     timeout_in_minutes: 90
     retry:
       automatic:
