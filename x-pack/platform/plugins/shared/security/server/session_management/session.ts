@@ -284,10 +284,7 @@ export class Session {
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
    */
-  async update(
-    request: KibanaRequest,
-    sessionValue: Readonly<SessionValue>
-  ) {
+  async update(request: KibanaRequest, sessionValue: Readonly<SessionValue>) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     const sessionLogger = this.getLoggerForSID(sessionValue.sid);
     if (!sessionCookieValue) {
