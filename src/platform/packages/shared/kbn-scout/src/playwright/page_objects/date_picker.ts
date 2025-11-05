@@ -47,11 +47,6 @@ export class DatePicker {
     }
   }
 
-  async clickSubmitButton() {
-    await this.page.testSubj.click('querySubmitButton');
-    await this.page.testSubj.waitForSelector('unifiedHistogramRendered', { state: 'visible' });
-  }
-
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
     await this.showStartEndTimes();
     // we start with end date
@@ -79,7 +74,7 @@ export class DatePicker {
       this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
       `Date picker 'end date' should be set correctly`
     ).toHaveText(to);
-    await this.clickSubmitButton();
+    await this.page.testSubj.click('querySubmitButton');
   }
 
   async getTimeConfig(): Promise<{ start: string; end: string }> {
