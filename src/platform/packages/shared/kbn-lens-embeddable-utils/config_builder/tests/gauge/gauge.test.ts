@@ -8,13 +8,46 @@
  */
 
 import { gaugeStateSchema } from '../../schema/charts/gauge';
-import { validateConverter } from '../validate';
+import { validateAPIConverter, validateConverter } from '../validate';
+import {
+  basicGaugeWithAdHocDataView,
+  basicGaugeWithDataView,
+  comprehensiveEsqlGauge,
+  comprehensiveGaugeWithAdHocDataView,
+  comprehensiveGaugeWithDataView,
+  esqlGauge,
+} from './lens_api_config.mock';
 import { gaugeAttributes } from './lens_state_config.mock';
 
 describe('Gauge', () => {
   describe('validateConverter', () => {
     it('should convert a gauge chart with full config', () => {
       validateConverter(gaugeAttributes, gaugeStateSchema);
+    });
+  });
+  describe('validateAPIConverter', () => {
+    it('should convert a basic legacy metric chart with ad hoc dataView', () => {
+      validateAPIConverter(basicGaugeWithAdHocDataView, gaugeStateSchema);
+    });
+
+    it('should convert a basic legacy metric chart with dataView', () => {
+      validateAPIConverter(basicGaugeWithDataView, gaugeStateSchema);
+    });
+
+    it('should convert a ESQL-based legacy metric chart', () => {
+      validateAPIConverter(esqlGauge, gaugeStateSchema);
+    });
+
+    it('should convert a comprehensive legacy metric chart with ad hoc data view', () => {
+      validateAPIConverter(comprehensiveGaugeWithAdHocDataView, gaugeStateSchema);
+    });
+
+    it('should convert a comprehensive legacy metric chart with data view', () => {
+      validateAPIConverter(comprehensiveGaugeWithDataView, gaugeStateSchema);
+    });
+
+    it('should convert a comprehensive ESQL-based legacy metric chart', () => {
+      validateAPIConverter(comprehensiveEsqlGauge, gaugeStateSchema);
     });
   });
 });
