@@ -29,7 +29,9 @@ import type {
   ConversationsListResponse,
   ConversationsHistoryResponse,
   ConversationsRepliesResponse,
+  ConversationsMembersResponse,
   UsersListResponse,
+  UserInfoResponse,
   ChannelDigestResponse,
   SlackMessage,
   SlackConversation,
@@ -392,6 +394,45 @@ export const createExternalService = (
     }
   };
 
+  const getConversationsMembers = async (params: {
+    channel: string;
+    cursor?: string;
+    limit?: number;
+  }): Promise<ConnectorTypeExecutorResult<ConversationsMembersResponse>> => {
+    try {
+      const { channel, cursor, limit = 100 } = params;
+
+      const queryParams = new URLSearchParams();
+      queryParams.append('channel', channel);
+      if (cursor) queryParams.append('cursor', cursor);
+      queryParams.append('limit', limit.toString());
+
+      const url = `${SLACK_URL}conversations.members?${queryParams.toString()}`;
+
+      const result: AxiosResponse<ConversationsMembersResponse> = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url,
+        logger,
+        headers,
+        configurationUtilities,
+        connectorUsageCollector,
+      });
+
+      // Only log errors
+      if (!result.data.ok) {
+        logger.debug(
+          `[Slack Service] conversations.members error for channel ${channel}: ${result.data.error}`
+        );
+      }
+
+      return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
+    } catch (error) {
+      logger.warn(`[Slack Service] getConversationsMembers error: ${error}`);
+      return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
+    }
+  };
+
   const getUsersList = async (params: {
     cursor?: string;
     limit?: number;
@@ -431,6 +472,41 @@ export const createExternalService = (
     }
   };
 
+  const getUserInfo = async (params: {
+    user: string;
+  }): Promise<ConnectorTypeExecutorResult<UserInfoResponse>> => {
+    try {
+      const { user } = params;
+
+      if (!user || user.length === 0) {
+        return buildSlackExecutorErrorResponse({
+          slackApiError: new Error('The user id is empty'),
+          logger,
+        });
+      }
+
+      const queryParams = new URLSearchParams();
+      queryParams.append('user', user);
+
+      const url = `${SLACK_URL}users.info?${queryParams.toString()}`;
+
+      const result: AxiosResponse<UserInfoResponse> = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url,
+        logger,
+        headers,
+        configurationUtilities,
+        connectorUsageCollector,
+      });
+
+      return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
+    } catch (error) {
+      logger.warn(`[Slack Service] getUserInfo error: ${error}`);
+      return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
+    }
+  };
+
   const getChannelDigest = async (params: {
     since: number;
     types: string[];
@@ -466,103 +542,8 @@ export const createExternalService = (
         await new Promise((resolve) => setTimeout(resolve, throttleDelay));
       };
 
-      // Step 1: Fetch user information (optional, but helpful for user name mapping)
-      // Note: We fetch users in batches but don't fail if we hit rate limits
-      // User mapping will be incomplete but we can still proceed with messages
-      // OPTIMIZATION: Skip user fetching entirely to reduce API calls and prevent rate limits
-      // User names can be fetched lazily when needed, or we can proceed with user IDs
-      logger.debug(
-        `[Slack Service] Step 1: Skipping user list fetch to avoid rate limits (user names will be IDs if not mapped)`
-      );
-      const skipUserFetch = true; // Set to false to enable user fetching
-
-      if (!skipUserFetch) {
-        try {
-          let userCursor: string | undefined;
-          let hasMoreUsers = true;
-          let userPageCount = 0;
-          const maxUserPages = 5; // Reduced from 50 to limit API calls (fetches up to 1000 users)
-          let consecutiveErrors = 0;
-          const maxConsecutiveErrors = 3; // Stop after 3 consecutive non-retry errors
-
-          while (
-            hasMoreUsers &&
-            userPageCount < maxUserPages &&
-            consecutiveErrors < maxConsecutiveErrors
-          ) {
-            userPageCount++;
-            // Throttle to avoid rate limits
-            await throttleRequest();
-            const usersResult = await getUsersList({ cursor: userCursor, limit: 200 });
-
-            // Handle retry results (rate limiting)
-            if (usersResult.status === 'error' && usersResult.retry) {
-              const waitMs = waitForRetry(usersResult.retry);
-              const waitSeconds = Math.ceil(waitMs / 1000);
-              logger.warn(
-                `Rate limited while fetching users, waiting ${waitSeconds} seconds before retry`
-              );
-              await new Promise((resolve) => setTimeout(resolve, waitMs));
-              // Retry the same request without incrementing page count
-              consecutiveErrors = 0; // Reset error count on retry
-              continue;
-            }
-
-            if (usersResult.status === 'ok' && usersResult.data?.ok && usersResult.data.members) {
-              for (const user of usersResult.data.members) {
-                userMap.set(user.id, {
-                  name: user.name,
-                  real_name: user.profile?.display_name || user.real_name || user.name,
-                });
-              }
-              userCursor = usersResult.data.response_metadata?.next_cursor;
-              hasMoreUsers = !!userCursor;
-              consecutiveErrors = 0; // Reset on success
-              // Only log every 10 pages or on completion to reduce noise
-              if (userPageCount % 10 === 0 || !hasMoreUsers) {
-                logger.debug(
-                  `[Slack Service] Fetched ${usersResult.data.members.length} users (page ${userPageCount}), total users: ${userMap.size}, has_more: ${hasMoreUsers}`
-                );
-              }
-            } else {
-              consecutiveErrors++;
-              // Check if it's a scope error (non-critical, continue)
-              if (usersResult.data?.error === 'missing_scope') {
-                logger.warn(
-                  `Missing scope for users.list: ${usersResult.data.error}. Stopping user fetch.`
-                );
-                hasMoreUsers = false;
-              } else {
-                if (consecutiveErrors >= maxConsecutiveErrors) {
-                  logger.warn(
-                    `Too many consecutive errors fetching users (${consecutiveErrors}/${maxConsecutiveErrors}), stopping user fetch. Continuing with messages.`
-                  );
-                  hasMoreUsers = false;
-                } else {
-                  // No cursor on error, so no more pages
-                  hasMoreUsers = false;
-                }
-              }
-            }
-          }
-          if (userPageCount >= maxUserPages) {
-            logger.warn(
-              `Reached maximum user pages limit (${maxUserPages}), stopping user fetch. Continuing with messages.`
-            );
-          }
-          logger.debug(
-            `[Slack Service] Step 1 complete: ${userMap.size} users mapped (may be incomplete)`
-          );
-        } catch (userError) {
-          logger.warn(
-            `Failed to fetch user list: ${userError}. Continuing without complete user mapping.`
-          );
-          // Continue without user mapping - not critical
-        }
-      }
-
-      // Step 2: Fetch conversations for each type
-      logger.debug(`[Slack Service] Step 2: Fetching conversations for types: ${types.join(', ')}`);
+      // Step 1: Fetch conversations for each type
+      logger.debug(`[Slack Service] Step 1: Fetching conversations for types: ${types.join(', ')}`);
 
       // Check if we should use allowed channels (optimization: fetch only specific channels)
       const hasAllowedChannels = allowedChannelIds && allowedChannelIds.length > 0;
@@ -574,7 +555,10 @@ export const createExternalService = (
       const dmParticipantsMap = new Map<string, string[]>();
 
       // Helper function to fetch conversations for a type using conversations.list
-      const fetchConversationsForType = async (type: string): Promise<SlackConversation[]> => {
+      const fetchConversationsForType = async (
+        type: string,
+        maxResults?: number
+      ): Promise<SlackConversation[]> => {
         let cursor: string | undefined;
         let hasMore = true;
         let typePageCount = 0;
@@ -582,6 +566,11 @@ export const createExternalService = (
         const typeChannels: SlackConversation[] = [];
 
         while (hasMore && typePageCount < maxTypePages) {
+          // Stop early if we've reached the max results limit
+          if (maxResults && typeChannels.length >= maxResults) {
+            break;
+          }
+
           typePageCount++;
           // Throttle to avoid rate limits
           await throttleRequest();
@@ -612,6 +601,13 @@ export const createExternalService = (
             typeChannels.push(...conversationsResult.data.channels);
             cursor = conversationsResult.data.response_metadata?.next_cursor;
             hasMore = !!cursor;
+
+            // Stop early if we've reached the max results limit after adding this page
+            if (maxResults && typeChannels.length >= maxResults) {
+              // Trim to exactly maxResults
+              const trimmed = typeChannels.slice(0, maxResults);
+              return trimmed;
+            }
           } else {
             // Check if it's a scope error (log and continue to next type)
             if (conversationsResult.data?.error === 'missing_scope') {
@@ -746,28 +742,26 @@ export const createExternalService = (
           )}) using standard path (DMs are not included in allowed channels). Limiting to ${maxDMsToProcess} most recent DMs to avoid rate limits.`
         );
         for (const type of dmTypes) {
-          const typeChannels = await fetchConversationsForType(type);
-          // Limit the number of DMs we process (conversations.list returns most recent first)
-          const limitedDMs = typeChannels.slice(0, maxDMsToProcess);
-          allChannels.push(...limitedDMs);
-          if (typeChannels.length > maxDMsToProcess) {
-            logger.info(
-              `[Slack Service] Found ${typeChannels.length} ${type} conversations, processing only the ${maxDMsToProcess} most recent to avoid rate limits`
-            );
-          } else {
-            logger.info(`[Slack Service] Found ${typeChannels.length} ${type} conversations`);
-          }
+          // Pass maxResults to stop fetching once we have 20 DMs (conversations.list returns most recent first)
+          const typeChannels = await fetchConversationsForType(type, maxDMsToProcess);
+          allChannels.push(...typeChannels);
+          logger.info(`[Slack Service] Found ${typeChannels.length} ${type} conversations`);
         }
       }
 
       logger.info(
-        `[Slack Service] Step 2 complete: ${allChannels.length} total conversations found`
+        `[Slack Service] Step 1 complete: ${allChannels.length} total conversations found`
       );
 
       // Fetch participant info for DMs (im and mpim) to enable user attribution
-      // Identify DMs by checking flags OR by channel ID prefix (DM channel IDs start with 'D')
+      // Identify DMs by checking flags OR by channel ID prefix:
+      // - 'D' prefix = 1-on-1 DMs (im)
+      // - 'C' prefix = group DMs (mpim)
       const dmChannels = allChannels.filter(
-        (ch) => ch.is_im || ch.is_mpim || (!ch.name && ch.id && ch.id.startsWith('D'))
+        (ch) =>
+          ch.is_im ||
+          ch.is_mpim ||
+          (!ch.name && ch.id && (ch.id.startsWith('D') || ch.id.startsWith('C')))
       );
       const allParticipantIds = new Set<string>(); // Collect all unique participant IDs
 
@@ -775,40 +769,86 @@ export const createExternalService = (
         logger.debug(`[Slack Service] Fetching participant info for ${dmChannels.length} DMs`);
         for (const dmChannel of dmChannels) {
           try {
-            // Throttle to avoid rate limits
-            await throttleRequest();
-            const infoResult = await validChannelId(dmChannel.id);
+            const participantIds: string[] = [];
 
-            if (infoResult.status === 'ok' && infoResult.data?.ok && infoResult.data.channel) {
-              const channelInfo = infoResult.data.channel as any; // Type assertion to access DM-specific fields
-              const participantIds: string[] = [];
+            // For group DMs (mpim), use conversations.members API
+            // Group DMs can have IDs starting with 'C', but we check is_mpim flag to be sure
+            if (dmChannel.is_mpim || (dmChannel.id.startsWith('C') && !dmChannel.name)) {
+              // Throttle to avoid rate limits
+              await throttleRequest();
 
-              // For 'im' (1-on-1 DM), use the 'user' field
-              if (channelInfo.user) {
-                participantIds.push(channelInfo.user);
-                allParticipantIds.add(channelInfo.user);
-              }
-              // For 'mpim' (group DM), use the 'members' array (exclude the authenticated user if needed)
-              else if (channelInfo.members && Array.isArray(channelInfo.members)) {
-                // members array contains all participants including the authenticated user
-                // We'll include all members and let the formatting decide which to display
-                participantIds.push(...channelInfo.members);
-                channelInfo.members.forEach((id: string) => allParticipantIds.add(id));
+              // Fetch members using conversations.members API
+              let cursor: string | undefined;
+              let hasMore = true;
+              const allMembers: string[] = [];
+
+              while (hasMore) {
+                const membersResult = await getConversationsMembers({
+                  channel: dmChannel.id,
+                  cursor,
+                  limit: 100,
+                });
+
+                // Handle retry results (rate limiting)
+                if (membersResult.status === 'error' && membersResult.retry) {
+                  const waitMs = waitForRetry(membersResult.retry);
+                  const waitSeconds = Math.ceil(waitMs / 1000);
+                  logger.warn(
+                    `Rate limited while fetching members for group DM ${dmChannel.id}, waiting ${waitSeconds} seconds`
+                  );
+                  await new Promise((resolve) => setTimeout(resolve, waitMs));
+                  // Retry the same request
+                  continue;
+                }
+
+                if (
+                  membersResult.status === 'ok' &&
+                  membersResult.data?.ok &&
+                  membersResult.data.members
+                ) {
+                  allMembers.push(...membersResult.data.members);
+                  cursor = membersResult.data.response_metadata?.next_cursor;
+                  hasMore = !!cursor;
+                } else {
+                  logger.debug(
+                    `[Slack Service] Failed to fetch members for group DM ${dmChannel.id}: ${
+                      membersResult.data?.error || 'unknown error'
+                    }`
+                  );
+                  hasMore = false;
+                }
               }
 
-              if (participantIds.length > 0) {
-                dmParticipantsMap.set(dmChannel.id, participantIds);
-                logger.debug(
-                  `[Slack Service] Stored participant IDs for DM ${
-                    dmChannel.id
-                  }: ${participantIds.join(', ')}`
-                );
-              } else {
-                const dmType = channelInfo.user ? 'im' : channelInfo.members ? 'mpim' : 'unknown';
-                logger.debug(
-                  `[Slack Service] No participant IDs found for DM ${dmChannel.id} (type: ${dmType})`
-                );
+              if (allMembers.length > 0) {
+                participantIds.push(...allMembers);
+                allMembers.forEach((id: string) => allParticipantIds.add(id));
               }
+            } else {
+              // For 1-on-1 DMs (channels starting with 'D'), use conversations.info
+              // Throttle to avoid rate limits
+              await throttleRequest();
+              const infoResult = await validChannelId(dmChannel.id);
+
+              if (infoResult.status === 'ok' && infoResult.data?.ok && infoResult.data.channel) {
+                const channelInfo = infoResult.data.channel as any; // Type assertion to access DM-specific fields
+
+                // For 'im' (1-on-1 DM), use the 'user' field
+                if (channelInfo.user) {
+                  participantIds.push(channelInfo.user);
+                  allParticipantIds.add(channelInfo.user);
+                }
+              }
+            }
+
+            if (participantIds.length > 0) {
+              dmParticipantsMap.set(dmChannel.id, participantIds);
+              logger.debug(
+                `[Slack Service] Stored participant IDs for DM ${
+                  dmChannel.id
+                }: ${participantIds.join(', ')}`
+              );
+            } else {
+              logger.debug(`[Slack Service] No participant IDs found for DM ${dmChannel.id}`);
             }
           } catch (error) {
             logger.debug(
@@ -821,67 +861,71 @@ export const createExternalService = (
           `[Slack Service] Fetched participant info for ${dmParticipantsMap.size}/${dmChannels.length} DMs`
         );
 
-        // Fetch user info for DM participants if we don't already have them
-        // This ensures we have names for DM attribution even if full user fetch was skipped
+        // Fetch user info for DM participants using getUserInfo (targeted fetching)
         if (allParticipantIds.size > 0) {
           const missingParticipantIds = Array.from(allParticipantIds).filter(
             (id) => !userMap.has(id)
           );
           if (missingParticipantIds.length > 0) {
             logger.debug(
-              `[Slack Service] Fetching user info for ${missingParticipantIds.length} DM participants`
+              `[Slack Service] Fetching user info for ${missingParticipantIds.length} DM participants using users.info`
             );
-            // Fetch users list to get participant names (we'll filter to needed IDs after)
-            // Note: We can't fetch specific users by ID, so we'll fetch a batch and filter
-            // For efficiency, we'll just fetch a reasonable number of pages to hopefully get our participants
-            try {
-              let userCursor: string | undefined;
-              let hasMoreUsers = true;
-              let userPageCount = 0;
-              const maxUserPagesForDMs = 3; // Limit pages to avoid rate limits
-
-              while (
-                hasMoreUsers &&
-                userPageCount < maxUserPagesForDMs &&
-                missingParticipantIds.some((id) => !userMap.has(id))
-              ) {
-                userPageCount++;
+            let fetchedCount = 0;
+            for (const participantId of missingParticipantIds) {
+              try {
                 await throttleRequest();
-                const usersResult = await getUsersList({ cursor: userCursor, limit: 200 });
+                const userInfoResult = await getUserInfo({ user: participantId });
 
-                if (
-                  usersResult.status === 'ok' &&
-                  usersResult.data?.ok &&
-                  usersResult.data.members
-                ) {
-                  for (const user of usersResult.data.members) {
-                    // Only add users we need (participants) to avoid unnecessary memory usage
-                    if (missingParticipantIds.includes(user.id)) {
-                      userMap.set(user.id, {
-                        name: user.name,
-                        real_name: user.profile?.display_name || user.real_name || user.name,
-                      });
-                    }
+                // Handle retry results (rate limiting)
+                if (userInfoResult.status === 'error' && userInfoResult.retry) {
+                  const waitMs = waitForRetry(userInfoResult.retry);
+                  const waitSeconds = Math.ceil(waitMs / 1000);
+                  logger.warn(
+                    `Rate limited while fetching user info for ${participantId}, waiting ${waitSeconds} seconds`
+                  );
+                  await new Promise((resolve) => setTimeout(resolve, waitMs));
+                  // Retry the same request
+                  const retryResult = await getUserInfo({ user: participantId });
+                  if (
+                    retryResult.status === 'ok' &&
+                    retryResult.data?.ok &&
+                    retryResult.data.user
+                  ) {
+                    const user = retryResult.data.user;
+                    userMap.set(user.id, {
+                      name: user.name,
+                      real_name: user.profile?.display_name || user.real_name || user.name,
+                    });
+                    fetchedCount++;
                   }
-                  userCursor = usersResult.data.response_metadata?.next_cursor;
-                  hasMoreUsers = !!userCursor;
+                } else if (
+                  userInfoResult.status === 'ok' &&
+                  userInfoResult.data?.ok &&
+                  userInfoResult.data.user
+                ) {
+                  const user = userInfoResult.data.user;
+                  userMap.set(user.id, {
+                    name: user.name,
+                    real_name: user.profile?.display_name || user.real_name || user.name,
+                  });
+                  fetchedCount++;
                 } else {
-                  hasMoreUsers = false;
+                  logger.debug(
+                    `[Slack Service] Failed to fetch user info for participant ${participantId}: ${
+                      userInfoResult.data?.error || 'unknown error'
+                    }`
+                  );
                 }
-              }
-
-              const foundParticipants = missingParticipantIds.filter((id) => userMap.has(id));
-              if (foundParticipants.length > 0) {
+              } catch (error) {
                 logger.debug(
-                  `[Slack Service] Found user info for ${foundParticipants.length}/${missingParticipantIds.length} DM participants`
+                  `[Slack Service] Error fetching user info for participant ${participantId}: ${error}. Continuing without this participant's name.`
                 );
+                // Continue to next participant - not critical
               }
-            } catch (error) {
-              logger.debug(
-                `[Slack Service] Failed to fetch user info for DM participants: ${error}. Continuing without participant names.`
-              );
-              // Continue without participant names - not critical
             }
+            logger.info(
+              `[Slack Service] Fetched user info for ${fetchedCount}/${missingParticipantIds.length} DM participants`
+            );
           }
         }
       }
@@ -889,9 +933,9 @@ export const createExternalService = (
       // Use allChannels as filteredChannels (already filtered if using allowed channels)
       const filteredChannels = allChannels;
 
-      // Step 3: Fetch messages from each channel
+      // Step 2: Fetch messages from each channel
       logger.info(
-        `[Slack Service] Step 3: Fetching messages from ${filteredChannels.length} channels`
+        `[Slack Service] Step 2: Fetching messages from ${filteredChannels.length} channels`
       );
       const allMessages: Array<{
         channel: { id: string; name: string };
@@ -1099,8 +1143,83 @@ export const createExternalService = (
         }
       }
       logger.info(
-        `[Slack Service] Step 3 complete: ${allMessages.length} total messages from ${filteredChannels.length} channels`
+        `[Slack Service] Step 2 complete: ${allMessages.length} total messages from ${filteredChannels.length} channels`
       );
+
+      // Fetch user info for message authors and thread reply authors that we don't already have
+      const allMessageUserIds = new Set<string>();
+      for (const item of allMessages) {
+        if (item.message.user) {
+          allMessageUserIds.add(item.message.user);
+        }
+        if (item.thread_replies) {
+          for (const reply of item.thread_replies) {
+            if (reply.user) {
+              allMessageUserIds.add(reply.user);
+            }
+          }
+        }
+      }
+
+      const missingMessageUserIds = Array.from(allMessageUserIds).filter((id) => !userMap.has(id));
+
+      if (missingMessageUserIds.length > 0) {
+        logger.debug(
+          `[Slack Service] Fetching user info for ${missingMessageUserIds.length} message authors using users.info`
+        );
+        let fetchedCount = 0;
+        for (const userId of missingMessageUserIds) {
+          try {
+            await throttleRequest();
+            const userInfoResult = await getUserInfo({ user: userId });
+
+            // Handle retry results (rate limiting)
+            if (userInfoResult.status === 'error' && userInfoResult.retry) {
+              const waitMs = waitForRetry(userInfoResult.retry);
+              const waitSeconds = Math.ceil(waitMs / 1000);
+              logger.warn(
+                `Rate limited while fetching user info for ${userId}, waiting ${waitSeconds} seconds`
+              );
+              await new Promise((resolve) => setTimeout(resolve, waitMs));
+              // Retry the same request
+              const retryResult = await getUserInfo({ user: userId });
+              if (retryResult.status === 'ok' && retryResult.data?.ok && retryResult.data.user) {
+                const user = retryResult.data.user;
+                userMap.set(user.id, {
+                  name: user.name,
+                  real_name: user.profile?.display_name || user.real_name || user.name,
+                });
+                fetchedCount++;
+              }
+            } else if (
+              userInfoResult.status === 'ok' &&
+              userInfoResult.data?.ok &&
+              userInfoResult.data.user
+            ) {
+              const user = userInfoResult.data.user;
+              userMap.set(user.id, {
+                name: user.name,
+                real_name: user.profile?.display_name || user.real_name || user.name,
+              });
+              fetchedCount++;
+            } else {
+              logger.debug(
+                `[Slack Service] Failed to fetch user info for message author ${userId}: ${
+                  userInfoResult.data?.error || 'unknown error'
+                }`
+              );
+            }
+          } catch (error) {
+            logger.debug(
+              `[Slack Service] Error fetching user info for message author ${userId}: ${error}. Continuing without this user's name.`
+            );
+            // Continue to next user - not critical
+          }
+        }
+        logger.info(
+          `[Slack Service] Fetched user info for ${fetchedCount}/${missingMessageUserIds.length} message authors`
+        );
+      }
 
       // Format results
       logger.debug(`[Slack Service] Formatting ${allMessages.length} messages`);
@@ -1181,6 +1300,29 @@ export const createExternalService = (
         };
       });
 
+      // Log summary of formatted messages to verify DM attribution
+      const dmMessages = formattedMessages.filter((msg) => msg.channel.startsWith('DM with'));
+      const uniqueDMChannels = new Set(dmMessages.map((msg) => msg.channel));
+      logger.info(
+        `[Slack Service] Formatted ${
+          dmMessages.length
+        } messages from DMs with attributions: ${Array.from(uniqueDMChannels).join(', ')}`
+      );
+
+      // Log a sample of DM messages to verify they're in the response
+      if (dmMessages.length > 0) {
+        const sampleDMs = dmMessages.slice(0, 3);
+        logger.info(
+          `[Slack Service] Sample DM messages in response: ${JSON.stringify(
+            sampleDMs.map((msg) => ({
+              channel: msg.channel,
+              channel_id: msg.channel_id,
+              text_preview: msg.text.substring(0, 50) + '...',
+            }))
+          )}`
+        );
+      }
+
       const digestResponse: ChannelDigestResponse = {
         ok: true,
         total: formattedMessages.length,
@@ -1208,7 +1350,9 @@ export const createExternalService = (
     getConversationsList,
     getConversationsHistory,
     getConversationsReplies,
+    getConversationsMembers,
     getUsersList,
+    getUserInfo,
     getChannelDigest,
   };
 };

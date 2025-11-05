@@ -96,6 +96,13 @@ export interface ConversationsRepliesResponse extends SlackAPiResponse {
   messages?: SlackMessage[];
 }
 
+export interface ConversationsMembersResponse extends SlackAPiResponse {
+  members?: string[];
+  response_metadata?: {
+    next_cursor?: string;
+  };
+}
+
 export interface SlackUser {
   id: string;
   name: string;
@@ -108,6 +115,10 @@ export interface SlackUser {
 
 export interface UsersListResponse extends SlackAPiResponse {
   members?: SlackUser[];
+}
+
+export interface UserInfoResponse extends SlackAPiResponse {
+  user?: SlackUser;
 }
 
 export interface ChannelDigestMessage {
@@ -170,10 +181,16 @@ export interface SlackApiService {
     channel: string;
     ts: string;
   }) => Promise<ConnectorTypeExecutorResult<ConversationsRepliesResponse>>;
+  getConversationsMembers: (params: {
+    channel: string;
+    cursor?: string;
+    limit?: number;
+  }) => Promise<ConnectorTypeExecutorResult<ConversationsMembersResponse>>;
   getUsersList: (params: {
     cursor?: string;
     limit?: number;
   }) => Promise<ConnectorTypeExecutorResult<UsersListResponse>>;
+  getUserInfo: (params: { user: string }) => Promise<ConnectorTypeExecutorResult<UserInfoResponse>>;
   getChannelDigest: (params: {
     since: number;
     types: string[];
