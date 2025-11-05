@@ -135,9 +135,17 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const getTestId = useTestIdGenerator(dataTestSubj);
     const http = useHttp();
 
+    const isCompleted = useMemo(() => {
+      return agentId ? action.agentState[agentId]?.isCompleted : action.isCompleted;
+    }, [action.agentState, action.isCompleted, agentId]);
+
+    const wasSuccessful = useMemo(() => {
+      return agentId ? action.agentState[agentId]?.wasSuccessful : action.wasSuccessful;
+    }, [action.agentState, action.wasSuccessful, agentId]);
+
     const shouldFetchFileInfo: boolean = useMemo(() => {
-      return action.isCompleted && action.wasSuccessful;
-    }, [action.isCompleted, action.wasSuccessful]);
+      return isCompleted && wasSuccessful;
+    }, [isCompleted, wasSuccessful]);
 
     const downloadUrl: string = useMemo(() => {
       return `${http.basePath.get()}${resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
@@ -154,7 +162,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
       enabled: canAccessFileDownloadLink && shouldFetchFileInfo,
     });
 
-    if (!canAccessFileDownloadLink || !action.isCompleted || !action.wasSuccessful) {
+    if (!canAccessFileDownloadLink || !isCompleted || !wasSuccessful) {
       return null;
     }
 
