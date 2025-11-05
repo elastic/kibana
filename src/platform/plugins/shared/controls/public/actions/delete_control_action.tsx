@@ -84,6 +84,7 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
 
+    // esql_control_removed
     confirmDeleteControl().then((confirmed) => {
       if (confirmed) {
         embeddable.parentApi.removePanel(embeddable.uuid);
