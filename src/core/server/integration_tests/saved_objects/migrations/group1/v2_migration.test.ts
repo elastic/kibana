@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { join } from 'path';
 import { omit } from 'lodash';
 import JSON5 from 'json5';
@@ -34,7 +35,6 @@ import {
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
 } from '@kbn/migrator-test-kit/fixtures';
-import { delay } from '../test_utils';
 import { expectDocumentsMigratedToHighestVersion } from '@kbn/migrator-test-kit/expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
@@ -49,7 +49,7 @@ describe('v2 migration', () => {
   afterAll(async () => {
     if (esServer) {
       await esServer.stop();
-      await delay(5); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
+      await timer(5_000); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
     }
   });
 
