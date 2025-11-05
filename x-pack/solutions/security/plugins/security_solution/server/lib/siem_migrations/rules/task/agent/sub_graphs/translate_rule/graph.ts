@@ -86,6 +86,11 @@ const validationRouter = (state: TranslateRuleState) => {
   if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
+  if (state.original_rule.vendor === 'qradar') {
+    // we do not need ecs mapping for qradar rules
+    return 'translationResult';
+  }
+
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }

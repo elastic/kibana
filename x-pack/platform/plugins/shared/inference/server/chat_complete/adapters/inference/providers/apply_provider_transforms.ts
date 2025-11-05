@@ -15,7 +15,6 @@ export const applyProviderTransforms = (
   options: CreateOpenAIRequestOptions
 ): CreateOpenAIRequestOptions => {
   let provider = getProvider(options.connector);
-  console.log(`Applying provider transforms for provider: ${provider}`);
   if (provider === InferenceEndpointProvider.Elastic) {
     // retrieve the underlying provider used by elastic
     provider = getElasticModelProvider(options.connector);
@@ -32,13 +31,7 @@ const applyBedrockTransforms = (
   options: CreateOpenAIRequestOptions
 ): CreateOpenAIRequestOptions => {
   if (options.tools) {
-    console.log(
-      `Applying Bedrock tool schema fixes to tools: ${JSON.stringify(options.tools, null, 2)}`
-    );
     options.tools = Object.entries(options.tools).reduce((tools, [toolName, toolDef]) => {
-      console.log(
-        `Fixing schema for tool ${toolName}: ${JSON.stringify({ toolName, toolDef }, null, 2)}`
-      );
       tools[toolName] = {
         ...toolDef,
         schema: toolDef.schema ? fixSchemaArrayProperties(toolDef.schema) : undefined,

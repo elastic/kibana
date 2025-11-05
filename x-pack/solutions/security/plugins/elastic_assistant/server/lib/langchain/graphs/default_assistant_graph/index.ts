@@ -79,23 +79,46 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const createLlmInstance = async () => {
     const connector = await actionsClient.get({ id: connectorId });
     const defaultModel = connector?.config?.defaultModel;
-    return inference.getChatModel({
-      request,
-      connectorId,
-      chatModelOptions: {
-        model: request.body.model || defaultModel,
-        signal: abortSignal,
-        temperature: getDefaultArguments(llmType).temperature,
-        // prevents the agent from retrying on failure
-        // failure could be due to bad connector, we should deliver that result to the client asap
-        maxRetries: 0,
-        telemetryMetadata: {
-          pluginId: 'security_ai_assistant',
-        },
-        // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
-        // timeout,
-      },
-    });
+    return !inferenceChatModelDisabled
+      ? inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {
+            model: request.body.model,
+            signal: abortSignal,
+            temperature: getDefaultArguments(llmType).temperature,
+            // prevents the agent from retrying on failure
+            // failure could be due to bad connector, we should deliver that result to the client asap
+            maxRetries: 0,
+            telemetryMetadata: {
+              pluginId: 'security_ai_assistant',
+            },
+            // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+            // timeout,
+          },
+        })
+      : new llmClass({
+          actionsClient,
+          connectorId,
+          llmType,
+          logger,
+          // possible client model override,
+          // let this be undefined otherwise so the connector handles the model
+          model: request.body.model ?? defaultModel,
+          // ensure this is defined because we default to it in the language_models
+          // This is where the LangSmith logs (Metadata > Invocation Params) are set
+          temperature: getDefaultArguments(llmType).temperature,
+          signal: abortSignal,
+          streaming: isStream,
+          // prevents the agent from retrying on failure
+          // failure could be due to bad connector, we should deliver that result to the client asap
+          maxRetries: 0,
+          convertSystemMessageToHumanContent: false,
+          timeout,
+          telemetryMetadata: {
+            pluginId: 'security_ai_assistant',
+          },
+        });
   };
 
   const anonymizationFieldsRes =
@@ -188,10 +211,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       tools.push(...kbTools);
     }
   }
-
-  console.log(
-    `All tools bound to assistant graph: ${JSON.stringify({ tools, assistantTools }, null, 2)}`
-  );
 
   const defaultSystemPrompt = await localGetPrompt({
     actionsClient,
