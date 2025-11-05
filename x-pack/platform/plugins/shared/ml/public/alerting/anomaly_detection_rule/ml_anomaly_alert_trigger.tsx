@@ -152,9 +152,9 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       const isBucketType = ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET;
 
       if (isBucketType) {
-        if (ruleParams.customFilter) {
-          setSavedFilterForNonBucketTypes(ruleParams.customFilter);
-          setRuleParams('customFilter', null);
+        if (ruleParams.kqlQueryString) {
+          setSavedFilterForNonBucketTypes(ruleParams.kqlQueryString);
+          setRuleParams('kqlQueryString', null);
 
           setKqlFieldUsage({
             hasAnomalyScoreFilter: false,
@@ -162,8 +162,8 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
           });
         }
       } else {
-        if (savedFilterForNonBucketTypes && !ruleParams.customFilter) {
-          setRuleParams('customFilter', savedFilterForNonBucketTypes);
+        if (savedFilterForNonBucketTypes && !ruleParams.kqlQueryString) {
+          setRuleParams('kqlQueryString', savedFilterForNonBucketTypes);
         }
       }
     },
@@ -253,13 +253,13 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         disabled={kqlFieldUsage.hasAnomalyScoreFilter}
       />
       <AnomalyKqlFilter
-        value={ruleParams.customFilter}
-        onChange={onAlertParamChange('customFilter')}
+        value={ruleParams.kqlQueryString}
+        onChange={onAlertParamChange('kqlQueryString')}
         jobConfigs={jobConfigs}
         resultType={ruleParams.resultType}
         jobId={ruleParams.jobSelection?.jobIds?.[0]}
         onFieldUsageChange={setKqlFieldUsage}
-        errors={Array.isArray(errors.customFilter) ? errors.customFilter : []}
+        errors={Array.isArray(errors.kqlQueryString) ? errors.kqlQueryString : []}
         disabled={ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET}
       />
       <EuiSpacer size="m" />

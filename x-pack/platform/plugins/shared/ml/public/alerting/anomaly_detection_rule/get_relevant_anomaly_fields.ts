@@ -7,6 +7,12 @@
 
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
+import {
+  BASE_RECORD_FILTER_FIELDS,
+  INFLUENCER_FILTER_FIELDS,
+  TOP_LEVEL_ACTUAL_TYPICAL_FIELDS,
+  NESTED_ACTUAL_TYPICAL_FIELDS,
+} from '@kbn/ml-anomaly-utils/alerting/filter_field_constants';
 import type { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 
 /**
@@ -23,18 +29,8 @@ export function getRelevantAnomalyFields(
   }
 
   if (resultType === ML_ANOMALY_RESULT_TYPE.INFLUENCER) {
-    return ['influencer_field_name', 'influencer_field_value', 'influencer_score'];
+    return [...INFLUENCER_FILTER_FIELDS];
   }
-
-  // For RECORD result type
-  const baseRecordFields = [
-    'record_score',
-    'initial_record_score',
-    'function',
-    'field_name',
-    'influencers.influencer_field_name',
-    'influencers.influencer_field_values',
-  ];
 
   // Determine if this is a pure population job (single detector with over_field)
   const isPurePopulationJob =
@@ -45,14 +41,10 @@ export function getRelevantAnomalyFields(
     });
 
   // Add actual/typical fields based on job type
-  const recordFields = [...baseRecordFields];
-  if (isPurePopulationJob) {
-    // Pure population job, use nested paths
-    recordFields.push('causes.actual', 'causes.typical');
-  } else {
-    // Non-population or mixed, use top-level fields
-    recordFields.push('actual', 'typical');
-  }
+  const recordFields: string[] = [
+    ...BASE_RECORD_FILTER_FIELDS,
+    ...(isPurePopulationJob ? NESTED_ACTUAL_TYPICAL_FIELDS : TOP_LEVEL_ACTUAL_TYPICAL_FIELDS),
+  ];
 
   const detectorFields = new Set<string>();
 
@@ -64,19 +56,16 @@ export function getRelevantAnomalyFields(
         if (detector.partition_field_name) {
           detectorFields.add('partition_field_name');
           detectorFields.add('partition_field_value');
-          detectorFields.add(detector.partition_field_name);
         }
 
         if (detector.by_field_name) {
           detectorFields.add('by_field_name');
           detectorFields.add('by_field_value');
-          detectorFields.add(detector.by_field_name);
         }
 
         if (detector.over_field_name) {
           detectorFields.add('over_field_name');
           detectorFields.add('over_field_value');
-          detectorFields.add(detector.over_field_name);
         }
       });
     });

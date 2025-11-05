@@ -1,0 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Base record fields that are always available for filtering anomaly records,
+ * regardless of job configuration.
+ */
+export const BASE_RECORD_FILTER_FIELDS = [
+  'initial_record_score',
+  'function',
+  'field_name',
+  // influencers is a nested field, so we need to include the path for validation reasons
+  'influencers',
+  'influencers.influencer_field_name',
+  'influencers.influencer_field_values',
+] as const;
+
+/**
+ * Influencer fields available for filtering anomaly influencers.
+ */
+export const INFLUENCER_FILTER_FIELDS = [
+  'influencer_field_name',
+  'influencer_field_value',
+] as const;
+
+/**
+ * Detector field names used in anomaly records.
+ */
+export const DETECTOR_FILTER_FIELD_NAMES = [
+  'partition_field_name',
+  'partition_field_value',
+  'by_field_name',
+  'by_field_value',
+  'over_field_name',
+  'over_field_value',
+] as const;
+
+/**
+ * Actual/typical value fields for non-population jobs.
+ */
+export const TOP_LEVEL_ACTUAL_TYPICAL_FIELDS = ['actual', 'typical'] as const;
+
+/**
+ * Nested field for population jobs (actual/typical are nested under causes).
+ */
+export const NESTED_ACTUAL_TYPICAL_FIELDS = ['causes', 'causes.actual', 'causes.typical'] as const;

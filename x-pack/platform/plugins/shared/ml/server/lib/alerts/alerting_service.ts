@@ -83,7 +83,7 @@ interface AnomalyESQueryParams {
   includeInterimResults: boolean;
   /** Source index from the datafeed. Required for retrieving field types for formatting results. */
   indexPattern: string;
-  customFilter?: string;
+  kqlQueryString?: string;
 }
 
 const TIME_RANGE_PADDING = 10;
@@ -92,12 +92,12 @@ const TIME_RANGE_PADDING = 10;
  * Parse KQL filter and convert to Elasticsearch Query DSL.
  */
 function parseCustomKqlFilter(
-  customFilter: string | null | undefined
+  kqlQueryString: string | null | undefined
 ): QueryDslQueryContainer | undefined {
-  if (!customFilter) return undefined;
+  if (!kqlQueryString) return undefined;
 
   try {
-    const ast = fromKueryExpression(customFilter);
+    const ast = fromKueryExpression(kqlQueryString);
     return toElasticsearchQuery(ast);
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -689,9 +689,9 @@ export function alertingServiceProvider(
 
     const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
-    const parsedCustomFilter = parseCustomKqlFilter(params.customFilter);
+    const parsedCustomFilter = parseCustomKqlFilter(params.kqlQueryString);
 
-    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(params.customFilter);
+    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(params.kqlQueryString);
 
     const effectiveSeverity = anomalyAlertFieldUsage.hasAnomalyScoreFilter ? 0 : params.severity;
 
@@ -845,7 +845,7 @@ export function alertingServiceProvider(
       resultType: params.resultType,
       indexPattern: datafeeds![0]!.indices[0],
       anomalyScoreThreshold: params.severity,
-      customFilter: params.customFilter ?? undefined,
+      kqlQueryString: params.kqlQueryString ?? undefined,
     };
   };
 
@@ -867,12 +867,12 @@ export function alertingServiceProvider(
       anomalyScoreField,
       includeInterimResults,
       anomalyScoreThreshold,
-      customFilter,
+      kqlQueryString,
     } = params;
 
-    const parsedCustomFilter = parseCustomKqlFilter(customFilter);
+    const parsedCustomFilter = parseCustomKqlFilter(kqlQueryString);
 
-    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(customFilter);
+    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(kqlQueryString);
 
     const effectiveSeverity = anomalyAlertFieldUsage.hasAnomalyScoreFilter
       ? 0

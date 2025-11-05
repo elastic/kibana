@@ -46,6 +46,20 @@ export {
 } from './constants';
 
 export {
+  BASE_RECORD_FILTER_FIELDS,
+  INFLUENCER_FILTER_FIELDS,
+  DETECTOR_FILTER_FIELD_NAMES,
+  TOP_LEVEL_ACTUAL_TYPICAL_FIELDS,
+  NESTED_ACTUAL_TYPICAL_FIELDS,
+} from './alerting/filter_field_constants';
+
+export {
+  ANOMALY_DETECTION_ALLOWED_FIELDS,
+  getAllowedAnomalyFields,
+  validateCustomFilterFields,
+} from './alerting/custom_filter_validation';
+
+export {
   isMlKibanaUrlConfigWithTimeRange,
   type MlCustomUrlAnomalyRecordDoc,
   type MlKibanaUrlConfig,
