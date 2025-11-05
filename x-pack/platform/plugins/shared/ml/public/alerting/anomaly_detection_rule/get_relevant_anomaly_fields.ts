@@ -12,6 +12,7 @@ import {
   INFLUENCER_FILTER_FIELDS,
   TOP_LEVEL_ACTUAL_TYPICAL_FIELDS,
   NESTED_ACTUAL_TYPICAL_FIELDS,
+  DETECTOR_FILTER_FIELDS,
 } from '@kbn/ml-anomaly-utils/alerting/filter_field_constants';
 import type { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 
@@ -54,18 +55,21 @@ export function getRelevantAnomalyFields(
 
       detectors.forEach((detector) => {
         if (detector.partition_field_name) {
-          detectorFields.add('partition_field_name');
-          detectorFields.add('partition_field_value');
+          detectorFields.add(DETECTOR_FILTER_FIELDS.PARTITION_FIELD_NAME);
+          detectorFields.add(DETECTOR_FILTER_FIELDS.PARTITION_FIELD_VALUE);
+          detectorFields.add(detector.partition_field_name);
         }
 
         if (detector.by_field_name) {
-          detectorFields.add('by_field_name');
-          detectorFields.add('by_field_value');
+          detectorFields.add(DETECTOR_FILTER_FIELDS.BY_FIELD_NAME);
+          detectorFields.add(DETECTOR_FILTER_FIELDS.BY_FIELD_VALUE);
+          detectorFields.add(detector.by_field_name);
         }
 
         if (detector.over_field_name) {
-          detectorFields.add('over_field_name');
-          detectorFields.add('over_field_value');
+          detectorFields.add(DETECTOR_FILTER_FIELDS.OVER_FIELD_NAME);
+          detectorFields.add(DETECTOR_FILTER_FIELDS.OVER_FIELD_VALUE);
+          detectorFields.add(detector.over_field_name);
         }
       });
     });

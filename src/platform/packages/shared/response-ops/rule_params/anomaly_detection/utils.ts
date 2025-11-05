@@ -14,7 +14,7 @@ import { validateKQLStringFilter } from '../common/utils';
 
 /**
  * Validates the kqlQueryString for anomaly detection rules.
- * Validates both KQL syntax and field allowlist.
+ * Validates both KQL syntax and checks against disallowed fields.
  */
 export function validateAnomalyDetectionCustomFilter(
   kqlQueryString: string | null,

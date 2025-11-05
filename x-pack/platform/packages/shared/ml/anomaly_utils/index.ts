@@ -48,16 +48,13 @@ export {
 export {
   BASE_RECORD_FILTER_FIELDS,
   INFLUENCER_FILTER_FIELDS,
-  DETECTOR_FILTER_FIELD_NAMES,
+  DETECTOR_FILTER_FIELDS,
   TOP_LEVEL_ACTUAL_TYPICAL_FIELDS,
   NESTED_ACTUAL_TYPICAL_FIELDS,
+  DISALLOWED_FILTER_FIELDS,
 } from './alerting/filter_field_constants';
 
-export {
-  ANOMALY_DETECTION_ALLOWED_FIELDS,
-  getAllowedAnomalyFields,
-  validateCustomFilterFields,
-} from './alerting/custom_filter_validation';
+export { validateCustomFilterFields } from './alerting/custom_filter_validation';
 
 export {
   isMlKibanaUrlConfigWithTimeRange,

@@ -13,8 +13,6 @@ export const BASE_RECORD_FILTER_FIELDS = [
   'initial_record_score',
   'function',
   'field_name',
-  // influencers is a nested field, so we need to include the path for validation reasons
-  'influencers',
   'influencers.influencer_field_name',
   'influencers.influencer_field_values',
 ] as const;
@@ -30,14 +28,14 @@ export const INFLUENCER_FILTER_FIELDS = [
 /**
  * Detector field names used in anomaly records.
  */
-export const DETECTOR_FILTER_FIELD_NAMES = [
-  'partition_field_name',
-  'partition_field_value',
-  'by_field_name',
-  'by_field_value',
-  'over_field_name',
-  'over_field_value',
-] as const;
+export const DETECTOR_FILTER_FIELDS = {
+  PARTITION_FIELD_NAME: 'partition_field_name',
+  PARTITION_FIELD_VALUE: 'partition_field_value',
+  BY_FIELD_NAME: 'by_field_name',
+  BY_FIELD_VALUE: 'by_field_value',
+  OVER_FIELD_NAME: 'over_field_name',
+  OVER_FIELD_VALUE: 'over_field_value',
+} as const;
 
 /**
  * Actual/typical value fields for non-population jobs.
@@ -47,4 +45,11 @@ export const TOP_LEVEL_ACTUAL_TYPICAL_FIELDS = ['actual', 'typical'] as const;
 /**
  * Nested field for population jobs (actual/typical are nested under causes).
  */
-export const NESTED_ACTUAL_TYPICAL_FIELDS = ['causes', 'causes.actual', 'causes.typical'] as const;
+export const NESTED_ACTUAL_TYPICAL_FIELDS = ['causes.actual', 'causes.typical'] as const;
+
+export const DISALLOWED_FILTER_FIELDS = [
+  'job_id',
+  'is_interim',
+  'record_score',
+  'influencer_score',
+] as const;
