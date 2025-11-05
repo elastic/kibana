@@ -47,6 +47,10 @@ export function validateSchemaChanges({ baselineSha, roots, reporter }: TaskCont
           },
           title: `Downloading /${baselineSha}/${path} from Github`,
           enabled: (_) => Boolean(!isPullRequestPipeline || root.configChanged),
+          retry: {
+            delay: 2000,
+            tries: 5,
+          },
         },
         {
           task: async () => {
