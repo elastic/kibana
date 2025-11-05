@@ -12,7 +12,6 @@ import { ActionModalProvider } from '../../../context/action_modal';
 import type { ViewType } from '../types';
 import { SloListCardView } from './card_view/slo_list_card_view';
 import { SloListCompactView } from './compact_view/slo_list_compact_view';
-import { HealthCallout } from './health_callout/health_callout';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
 import { SloListView } from './slo_list_view/slo_list_view';
@@ -59,9 +58,6 @@ export function SlosView({ sloList, loading, error, view }: Props) {
 function Wrapper({ children, sloList }: { children: React.ReactNode } & Pick<Props, 'sloList'>) {
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <HealthCallout />
-      </EuiFlexItem>
       <EuiFlexItem>
         <ActionModalProvider>{children}</ActionModalProvider>
       </EuiFlexItem>

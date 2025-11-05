@@ -14,6 +14,7 @@ import type { SearchState } from '../hooks/use_url_search_state';
 import { SLOSortBy } from './common/sort_by_select';
 import { SloGroupBy } from './slo_list_group_by';
 import type { ViewType } from '../types';
+import { HealthCallout } from './health_callout/health_callout';
 
 interface Props {
   onChangeView: (view: ViewType) => void;
@@ -62,44 +63,49 @@ export function ToggleSLOView({
   const rangeEnd = Math.min(total, pageSize * (pageIndex - 1) + pageSize);
 
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={true}>
-        {(!state.groupBy || state.groupBy === 'ungrouped') && (
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.slo.overview.pagination.description"
-              defaultMessage="Showing {currentCount} of {total} {slos}"
-              values={{
-                currentCount: <strong>{`${rangeStart}-${rangeEnd}`}</strong>,
-                total,
-                slos: (
-                  <strong>
-                    <FormattedMessage id="xpack.slo.overview.slos.label" defaultMessage="SLOs" />
-                  </strong>
-                ),
-              }}
-            />
-          </EuiText>
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SLOSortBy state={state} onStateChange={onStateChange} loading={loading} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SloGroupBy state={state} onStateChange={onStateChange} loading={loading} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          buttonSize="compressed"
-          legend={i18n.translate('xpack.slo.toggleSLOView.euiButtonGroup.sloView', {
-            defaultMessage: 'SLO View',
-          })}
-          options={toggleButtonsIcons}
-          idSelected={view}
-          onChange={(id) => onChangeView(id as ViewType)}
-          isIconOnly
-          isDisabled={loading}
-        />
+    <EuiFlexGroup direction="column">
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={true}>
+          {(!state.groupBy || state.groupBy === 'ungrouped') && (
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.slo.overview.pagination.description"
+                defaultMessage="Showing {currentCount} of {total} {slos}"
+                values={{
+                  currentCount: <strong>{`${rangeStart}-${rangeEnd}`}</strong>,
+                  total,
+                  slos: (
+                    <strong>
+                      <FormattedMessage id="xpack.slo.overview.slos.label" defaultMessage="SLOs" />
+                    </strong>
+                  ),
+                }}
+              />
+            </EuiText>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SLOSortBy state={state} onStateChange={onStateChange} loading={loading} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SloGroupBy state={state} onStateChange={onStateChange} loading={loading} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.slo.toggleSLOView.euiButtonGroup.sloView', {
+              defaultMessage: 'SLO View',
+            })}
+            options={toggleButtonsIcons}
+            idSelected={view}
+            onChange={(id) => onChangeView(id as ViewType)}
+            isIconOnly
+            isDisabled={loading}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexItem>
+        <HealthCallout />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
