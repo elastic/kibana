@@ -69,4 +69,3 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
     { scope: 'worker' },
   ],
 });
-
