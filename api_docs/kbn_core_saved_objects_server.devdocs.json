@@ -9206,6 +9206,22 @@
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
               },
               {
+                "plugin": "@kbn/migrator-test-kit",
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/fixtures/index.ts"
+              },
+              {
+                "plugin": "@kbn/migrator-test-kit",
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/fixtures/index.ts"
+              },
+              {
+                "plugin": "@kbn/migrator-test-kit",
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/fixtures/index.ts"
+              },
+              {
+                "plugin": "@kbn/migrator-test-kit",
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/fixtures/index.ts"
+              },
+              {
                 "plugin": "eventAnnotation",
                 "path": "src/platform/plugins/private/event_annotation/server/saved_objects.ts"
               },
