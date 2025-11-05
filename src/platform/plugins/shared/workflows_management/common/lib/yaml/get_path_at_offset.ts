@@ -16,6 +16,7 @@ export function getPathAtOffset(
   absolutePosition: number
 ): Array<string | number> {
   let path: Array<string | number> = [];
+  let deepestLevel = -1;
 
   if (!document.contents) {
     return [];
@@ -27,9 +28,25 @@ export function getPathAtOffset(
         return;
       }
       if (absolutePosition >= node.range[0] && absolutePosition <= node.range[2]) {
+        // Skip empty scalars in incomplete YAML
+        if (node.value === '') {
+          return;
+        }
         path = getPathFromAncestors(ancestors, node);
-
         return visit.BREAK;
+      }
+    },
+    Map(key, node, ancestors) {
+      if (!node.range) {
+        return;
+      }
+      // For Map nodes, we track the deepest one containing the position
+      // This handles incomplete YAML where there might not be a scalar at the position
+      if (absolutePosition >= node.range[0] && absolutePosition <= node.range[2]) {
+        if (ancestors.length > deepestLevel) {
+          deepestLevel = ancestors.length;
+          path = getPathFromAncestors(ancestors, node);
+        }
       }
     },
   });

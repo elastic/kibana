@@ -38,4 +38,76 @@ describe('getPathAtOffset', () => {
     const result = getPathAtOffset(parseDocument(yaml), offset);
     expect(result).toEqual(['steps', 0]);
   });
+
+  it('should handle deeply nested structures', () => {
+    const yaml = `steps:
+      - name: outer_step
+        type: if
+        steps:
+          - name: inner_step
+            with:
+              nested:
+                deep:
+                  value: test|<-`;
+    const offset = yaml.indexOf('|<-');
+    const result = getPathAtOffset(parseDocument(yaml), offset);
+    expect(result).toEqual(['steps', 0, 'steps', 0, 'with', 'nested', 'deep', 'value']);
+  });
+
+  it('should handle arrays within objects', () => {
+    const yaml = `config:
+      items:
+        - first|<-
+        - second
+        - third`;
+    const offset = yaml.indexOf('|<-');
+    const result = getPathAtOffset(parseDocument(yaml), offset);
+    expect(result).toEqual(['config', 'items', 0]);
+  });
+
+  it('should return empty array for empty document', () => {
+    const result = getPathAtOffset(parseDocument(''), 0);
+    expect(result).toEqual([]);
+  });
+
+  it('should return empty array when no node found at offset', () => {
+    const yaml = `steps:
+      - name: test`;
+    const result = getPathAtOffset(parseDocument(yaml), 1000);
+    expect(result).toEqual([]);
+  });
+
+  it('should handle offset at the beginning of a key', () => {
+    const yaml = `steps:
+      - name|<-: test_step
+        type: noop`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    expect(result).toEqual(['steps', 0, 'name']);
+  });
+
+  it('should handle offset in multiline strings', () => {
+    const yaml = `steps:
+      - name: test_step
+        description: |
+          This is a
+          multiline|<-
+          description`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    expect(result).toEqual(['steps', 0, 'description']);
+  });
+
+  it('should skip empty scalars from incomplete yaml', () => {
+    const yaml = `steps:
+      - name:
+        |<-
+        type: test`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    expect(result).toEqual(['steps', 0]);
+  });
 });
