@@ -14,12 +14,12 @@ import type { z } from '@kbn/zod';
 import { buildWorkflowLookup } from './build_workflow_lookup';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
 import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema';
-import type { WorkflowEditorState } from '../types';
+import type { ComputedData } from '../types';
 
 export const performComputation = (
   yamlString: string | undefined,
-  schemLoose: WorkflowZodSchemaLooseType
-): WorkflowEditorState['computed'] | undefined => {
+  schemaLoose: WorkflowZodSchemaLooseType
+): ComputedData | undefined => {
   if (!yamlString) {
     return;
   }
@@ -31,7 +31,7 @@ export const performComputation = (
     const yamlDoc = YAML.parseDocument(yamlString, { lineCounter, keepSourceTokens: true });
 
     // Parse workflow JSON for graph creation
-    const parsingResult = parseWorkflowYamlToJSON(yamlString, schemLoose as z.ZodSchema);
+    const parsingResult = parseWorkflowYamlToJSON(yamlString, schemaLoose as z.ZodSchema);
 
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);

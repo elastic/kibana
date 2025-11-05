@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 136
- * Metric groups: 438
+ * Registry groups: 137
+ * Metric groups: 483
  * Hardcoded fields: 34
- * Total fields: 1155
+ * Total fields: 1177
  *
  * @internal
  *
- * WARNING: This object contains 1155+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1177+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1113,7 +1113,7 @@ export const semconvFlat = {
   'container.image.tags': {
     name: 'container.image.tags',
     description:
-      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
+      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
     type: 'keyword',
     example: 'v1.27.1,3.5.7-0',
   },
@@ -1391,12 +1391,6 @@ export const semconvFlat = {
     description: 'Describes a class of error the operation ended with.',
     type: 'keyword',
     example: 'timeout',
-  },
-  'event.name': {
-    name: 'event.name',
-    description: 'Identifies the class / type of event.',
-    type: 'keyword',
-    example: 'browser.mouse.click',
   },
   event_name: {
     name: 'event_name',
@@ -4229,62 +4223,44 @@ export const semconvFlat = {
     description: 'Storage resource requested for the container.',
     type: 'double',
   },
-  'metrics.k8s.cronjob.active_jobs': {
-    name: 'metrics.k8s.cronjob.active_jobs',
+  'metrics.k8s.cronjob.job.active': {
+    name: 'metrics.k8s.cronjob.job.active',
     description: 'The number of actively running jobs for a cronjob.',
     type: 'double',
   },
-  'metrics.k8s.daemonset.current_scheduled_nodes': {
-    name: 'metrics.k8s.daemonset.current_scheduled_nodes',
+  'metrics.k8s.daemonset.node.current_scheduled': {
+    name: 'metrics.k8s.daemonset.node.current_scheduled',
     description:
       'Number of nodes that are running at least 1 daemon pod and are supposed to run the daemon pod.',
     type: 'double',
   },
-  'metrics.k8s.daemonset.desired_scheduled_nodes': {
-    name: 'metrics.k8s.daemonset.desired_scheduled_nodes',
+  'metrics.k8s.daemonset.node.desired_scheduled': {
+    name: 'metrics.k8s.daemonset.node.desired_scheduled',
     description:
       'Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod).',
     type: 'double',
   },
-  'metrics.k8s.daemonset.misscheduled_nodes': {
-    name: 'metrics.k8s.daemonset.misscheduled_nodes',
+  'metrics.k8s.daemonset.node.misscheduled': {
+    name: 'metrics.k8s.daemonset.node.misscheduled',
     description:
       'Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod.',
     type: 'double',
   },
-  'metrics.k8s.daemonset.ready_nodes': {
-    name: 'metrics.k8s.daemonset.ready_nodes',
+  'metrics.k8s.daemonset.node.ready': {
+    name: 'metrics.k8s.daemonset.node.ready',
     description:
       'Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready.',
     type: 'double',
   },
-  'metrics.k8s.deployment.available_pods': {
-    name: 'metrics.k8s.deployment.available_pods',
+  'metrics.k8s.deployment.pod.available': {
+    name: 'metrics.k8s.deployment.pod.available',
     description:
       'Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment.',
     type: 'double',
   },
-  'metrics.k8s.deployment.desired_pods': {
-    name: 'metrics.k8s.deployment.desired_pods',
+  'metrics.k8s.deployment.pod.desired': {
+    name: 'metrics.k8s.deployment.pod.desired',
     description: 'Number of desired replica pods in this deployment.',
-    type: 'double',
-  },
-  'metrics.k8s.hpa.current_pods': {
-    name: 'metrics.k8s.hpa.current_pods',
-    description:
-      'Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler.',
-    type: 'double',
-  },
-  'metrics.k8s.hpa.desired_pods': {
-    name: 'metrics.k8s.hpa.desired_pods',
-    description:
-      'Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler.',
-    type: 'double',
-  },
-  'metrics.k8s.hpa.max_pods': {
-    name: 'metrics.k8s.hpa.max_pods',
-    description:
-      'The upper limit for the number of replica pods to which the autoscaler can scale up.',
     type: 'double',
   },
   'metrics.k8s.hpa.metric.target.cpu.average_utilization': {
@@ -4302,34 +4278,52 @@ export const semconvFlat = {
     description: 'Target value for CPU resource in HPA config.',
     type: 'double',
   },
-  'metrics.k8s.hpa.min_pods': {
-    name: 'metrics.k8s.hpa.min_pods',
+  'metrics.k8s.hpa.pod.current': {
+    name: 'metrics.k8s.hpa.pod.current',
+    description:
+      'Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.pod.desired': {
+    name: 'metrics.k8s.hpa.pod.desired',
+    description:
+      'Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.pod.max': {
+    name: 'metrics.k8s.hpa.pod.max',
+    description:
+      'The upper limit for the number of replica pods to which the autoscaler can scale up.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.pod.min': {
+    name: 'metrics.k8s.hpa.pod.min',
     description:
       'The lower limit for the number of replica pods to which the autoscaler can scale down.',
     type: 'double',
   },
-  'metrics.k8s.job.active_pods': {
-    name: 'metrics.k8s.job.active_pods',
+  'metrics.k8s.job.pod.active': {
+    name: 'metrics.k8s.job.pod.active',
     description: 'The number of pending and actively running pods for a job.',
     type: 'double',
   },
-  'metrics.k8s.job.desired_successful_pods': {
-    name: 'metrics.k8s.job.desired_successful_pods',
+  'metrics.k8s.job.pod.desired_successful': {
+    name: 'metrics.k8s.job.pod.desired_successful',
     description: 'The desired number of successfully finished pods the job should be run with.',
     type: 'double',
   },
-  'metrics.k8s.job.failed_pods': {
-    name: 'metrics.k8s.job.failed_pods',
+  'metrics.k8s.job.pod.failed': {
+    name: 'metrics.k8s.job.pod.failed',
     description: 'The number of pods which reached phase Failed for a job.',
     type: 'double',
   },
-  'metrics.k8s.job.max_parallel_pods': {
-    name: 'metrics.k8s.job.max_parallel_pods',
+  'metrics.k8s.job.pod.max_parallel': {
+    name: 'metrics.k8s.job.pod.max_parallel',
     description: 'The max desired number of pods the job should run at any given time.',
     type: 'double',
   },
-  'metrics.k8s.job.successful_pods': {
-    name: 'metrics.k8s.job.successful_pods',
+  'metrics.k8s.job.pod.successful': {
+    name: 'metrics.k8s.job.pod.successful',
     description: 'The number of pods which reached phase Succeeded for a job.',
     type: 'double',
   },
@@ -4351,11 +4345,6 @@ export const semconvFlat = {
   'metrics.k8s.node.allocatable.memory': {
     name: 'metrics.k8s.node.allocatable.memory',
     description: 'Amount of memory allocatable on the node.',
-    type: 'double',
-  },
-  'metrics.k8s.node.allocatable.pods': {
-    name: 'metrics.k8s.node.allocatable.pods',
-    description: 'Amount of pods allocatable on the node.',
     type: 'double',
   },
   'metrics.k8s.node.condition.status': {
@@ -4422,6 +4411,11 @@ export const semconvFlat = {
   'metrics.k8s.node.network.io': {
     name: 'metrics.k8s.node.network.io',
     description: 'Network bytes for the Node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.pod.allocatable': {
+    name: 'metrics.k8s.node.pod.allocatable',
+    description: 'Amount of pods allocatable on the node.',
     type: 'double',
   },
   'metrics.k8s.node.uptime': {
@@ -4536,25 +4530,25 @@ export const semconvFlat = {
     description: 'Pod volume usage.',
     type: 'double',
   },
-  'metrics.k8s.replicaset.available_pods': {
-    name: 'metrics.k8s.replicaset.available_pods',
+  'metrics.k8s.replicaset.pod.available': {
+    name: 'metrics.k8s.replicaset.pod.available',
     description:
       'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replicaset.',
     type: 'double',
   },
-  'metrics.k8s.replicaset.desired_pods': {
-    name: 'metrics.k8s.replicaset.desired_pods',
+  'metrics.k8s.replicaset.pod.desired': {
+    name: 'metrics.k8s.replicaset.pod.desired',
     description: 'Number of desired replica pods in this replicaset.',
     type: 'double',
   },
-  'metrics.k8s.replicationcontroller.available_pods': {
-    name: 'metrics.k8s.replicationcontroller.available_pods',
+  'metrics.k8s.replicationcontroller.pod.available': {
+    name: 'metrics.k8s.replicationcontroller.pod.available',
     description:
       'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller.',
     type: 'double',
   },
-  'metrics.k8s.replicationcontroller.desired_pods': {
-    name: 'metrics.k8s.replicationcontroller.desired_pods',
+  'metrics.k8s.replicationcontroller.pod.desired': {
+    name: 'metrics.k8s.replicationcontroller.pod.desired',
     description: 'Number of desired replica pods in this replication controller.',
     type: 'double',
   },
@@ -4678,24 +4672,24 @@ export const semconvFlat = {
       'The storage requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
-  'metrics.k8s.statefulset.current_pods': {
-    name: 'metrics.k8s.statefulset.current_pods',
+  'metrics.k8s.statefulset.pod.current': {
+    name: 'metrics.k8s.statefulset.pod.current',
     description:
       'The number of replica pods created by the statefulset controller from the statefulset version indicated by currentRevision.',
     type: 'double',
   },
-  'metrics.k8s.statefulset.desired_pods': {
-    name: 'metrics.k8s.statefulset.desired_pods',
+  'metrics.k8s.statefulset.pod.desired': {
+    name: 'metrics.k8s.statefulset.pod.desired',
     description: 'Number of desired replica pods in this statefulset.',
     type: 'double',
   },
-  'metrics.k8s.statefulset.ready_pods': {
-    name: 'metrics.k8s.statefulset.ready_pods',
+  'metrics.k8s.statefulset.pod.ready': {
+    name: 'metrics.k8s.statefulset.pod.ready',
     description: 'The number of replica pods created for this statefulset with a Ready Condition.',
     type: 'double',
   },
-  'metrics.k8s.statefulset.updated_pods': {
-    name: 'metrics.k8s.statefulset.updated_pods',
+  'metrics.k8s.statefulset.pod.updated': {
+    name: 'metrics.k8s.statefulset.pod.updated',
     description:
       'Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision.',
     type: 'double',
@@ -4896,6 +4890,106 @@ export const semconvFlat = {
   'metrics.nodejs.eventloop.utilization': {
     name: 'metrics.nodejs.eventloop.utilization',
     description: 'Event loop utilization.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.cpu.limit.hard': {
+    name: 'metrics.openshift.clusterquota.cpu.limit.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.cpu.limit.used': {
+    name: 'metrics.openshift.clusterquota.cpu.limit.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.cpu.request.hard': {
+    name: 'metrics.openshift.clusterquota.cpu.request.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.cpu.request.used': {
+    name: 'metrics.openshift.clusterquota.cpu.request.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.ephemeral_storage.limit.hard': {
+    name: 'metrics.openshift.clusterquota.ephemeral_storage.limit.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.ephemeral_storage.limit.used': {
+    name: 'metrics.openshift.clusterquota.ephemeral_storage.limit.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.ephemeral_storage.request.hard': {
+    name: 'metrics.openshift.clusterquota.ephemeral_storage.request.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.ephemeral_storage.request.used': {
+    name: 'metrics.openshift.clusterquota.ephemeral_storage.request.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.hugepage_count.request.hard': {
+    name: 'metrics.openshift.clusterquota.hugepage_count.request.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.hugepage_count.request.used': {
+    name: 'metrics.openshift.clusterquota.hugepage_count.request.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.memory.limit.hard': {
+    name: 'metrics.openshift.clusterquota.memory.limit.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.memory.limit.used': {
+    name: 'metrics.openshift.clusterquota.memory.limit.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.memory.request.hard': {
+    name: 'metrics.openshift.clusterquota.memory.request.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.memory.request.used': {
+    name: 'metrics.openshift.clusterquota.memory.request.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.object_count.hard': {
+    name: 'metrics.openshift.clusterquota.object_count.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.object_count.used': {
+    name: 'metrics.openshift.clusterquota.object_count.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.persistentvolumeclaim_count.hard': {
+    name: 'metrics.openshift.clusterquota.persistentvolumeclaim_count.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.persistentvolumeclaim_count.used': {
+    name: 'metrics.openshift.clusterquota.persistentvolumeclaim_count.used',
+    description: 'The current observed total usage of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.storage.request.hard': {
+    name: 'metrics.openshift.clusterquota.storage.request.hard',
+    description: 'The enforced hard limit of the resource across all projects.',
+    type: 'double',
+  },
+  'metrics.openshift.clusterquota.storage.request.used': {
+    name: 'metrics.openshift.clusterquota.storage.request.used',
+    description: 'The current observed total usage of the resource across all projects.',
     type: 'double',
   },
   'metrics.otel.sdk.exporter.log.exported': {
@@ -5120,7 +5214,7 @@ export const semconvFlat = {
   },
   'metrics.system.disk.io': {
     name: 'metrics.system.disk.io',
-    description: 'TODO.',
+    description: 'Disk bytes transferred.',
     type: 'double',
   },
   'metrics.system.disk.io_time': {
@@ -5135,7 +5229,8 @@ export const semconvFlat = {
   },
   'metrics.system.disk.merged': {
     name: 'metrics.system.disk.merged',
-    description: 'TODO.',
+    description:
+      'The number of disk reads/writes merged into single physical disk access operations.',
     type: 'double',
   },
   'metrics.system.disk.operation_time': {
@@ -5145,7 +5240,7 @@ export const semconvFlat = {
   },
   'metrics.system.disk.operations': {
     name: 'metrics.system.disk.operations',
-    description: 'TODO.',
+    description: 'Disk operations count.',
     type: 'double',
   },
   'metrics.system.filesystem.limit': {
@@ -5160,7 +5255,7 @@ export const semconvFlat = {
   },
   'metrics.system.filesystem.utilization': {
     name: 'metrics.system.filesystem.utilization',
-    description: 'TODO.',
+    description: 'Fraction of filesystem bytes used.',
     type: 'double',
   },
   'metrics.system.linux.memory.available': {
@@ -5192,12 +5287,12 @@ export const semconvFlat = {
   },
   'metrics.system.memory.utilization': {
     name: 'metrics.system.memory.utilization',
-    description: 'TODO.',
+    description: 'Percentage of memory bytes in use.',
     type: 'double',
   },
   'metrics.system.network.connection.count': {
     name: 'metrics.system.network.connection.count',
-    description: 'TODO.',
+    description: 'The number of connections.',
     type: 'double',
   },
   'metrics.system.network.errors': {
@@ -5207,12 +5302,12 @@ export const semconvFlat = {
   },
   'metrics.system.network.io': {
     name: 'metrics.system.network.io',
-    description: 'TODO.',
+    description: 'The number of bytes transmitted and received.',
     type: 'double',
   },
   'metrics.system.network.packet.count': {
     name: 'metrics.system.network.packet.count',
-    description: 'TODO.',
+    description: 'The number of packets transferred.',
     type: 'double',
   },
   'metrics.system.network.packet.dropped': {
@@ -5222,12 +5317,12 @@ export const semconvFlat = {
   },
   'metrics.system.paging.faults': {
     name: 'metrics.system.paging.faults',
-    description: 'TODO.',
+    description: 'The number of page faults.',
     type: 'double',
   },
   'metrics.system.paging.operations': {
     name: 'metrics.system.paging.operations',
-    description: 'TODO.',
+    description: 'The number of paging operations.',
     type: 'double',
   },
   'metrics.system.paging.usage': {
@@ -5237,7 +5332,7 @@ export const semconvFlat = {
   },
   'metrics.system.paging.utilization': {
     name: 'metrics.system.paging.utilization',
-    description: 'TODO.',
+    description: 'Swap (unix) or pagefile (windows) utilization.',
     type: 'double',
   },
   'metrics.system.process.count': {
@@ -5519,6 +5614,18 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'fp_44709d6fcb',
   },
+  'openshift.clusterquota.name': {
+    name: 'openshift.clusterquota.name',
+    description: 'The name of the cluster quota.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'openshift.clusterquota.uid': {
+    name: 'openshift.clusterquota.uid',
+    description: 'The UID of the cluster quota.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
   'opentracing.ref_type': {
     name: 'opentracing.ref_type',
     description: 'Parent-child Reference type',
@@ -5647,6 +5754,13 @@ export const semconvFlat = {
     name: 'pprof.mapping.has_line_numbers',
     description: 'Indicates that there are line numbers related to this mapping.',
     type: 'boolean',
+  },
+  'pprof.profile.comment': {
+    name: 'pprof.profile.comment',
+    description:
+      'Free-form text associated with the profile. This field should not be used to store any machine-readable information, it is only for human-friendly content.',
+    type: 'keyword',
+    example: 'hello world,bazinga',
   },
   'process.args_count': {
     name: 'process.args_count',
@@ -6755,7 +6869,7 @@ export const semconvFlat = {
   'vcs.repository.url.full': {
     name: 'vcs.repository.url.full',
     description:
-      'The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.',
+      'The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.',
     type: 'keyword',
     example: 'https://github.com/opentelemetry/open-telemetry-collector-contrib',
   },

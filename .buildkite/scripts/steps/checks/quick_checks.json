@@ -1,0 +1,88 @@
+[
+  {
+    "script": ".buildkite/scripts/steps/checks/ts_projects.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/packages.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/verify_notice.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/plugin_list_docs.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/event_log.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/telemetry.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/jest_configs.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/bundle_limits.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/i18n.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/file_casing.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/licenses.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/test_projects.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/test_hardening.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/ftr_configs.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/yarn_deduplicate.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/prettier_topology.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/renovate.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/native_modules.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/styled_components_mapping.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/dependencies_missing_owner.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/validate_pipelines.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/dependencies_diff.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/verify_codeowners.sh",
+    "mayChangeFiles": true
+  }
+]

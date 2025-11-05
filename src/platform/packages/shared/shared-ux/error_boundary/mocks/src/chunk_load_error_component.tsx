@@ -27,8 +27,8 @@ export const ChunkLoadErrorComponent = () => {
   };
 
   return (
-    <EuiButton onClick={handleClick} fill={true} data-test-subj="clickForErrorBtn">
-      Click for error
+    <EuiButton color="danger" onClick={handleClick} fill={true} data-test-subj="clickForErrorBtn">
+      Throw error
     </EuiButton>
   );
 };

@@ -51,11 +51,8 @@ import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams } from '../../common';
-import type { DashboardState, GridData } from '../../server/content_management';
-import type {
-  LoadDashboardReturn,
-  SaveDashboardReturn,
-} from '../services/dashboard_content_management_service/types';
+import type { DashboardAPIGetOut, DashboardState, GridData } from '../../server/content_management';
+import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 
@@ -87,7 +84,7 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
+  validateLoadedSavedObject?: (result: DashboardAPIGetOut) => 'valid' | 'invalid' | 'redirected';
 
   fullScreenMode?: boolean;
   isEmbeddedExternally?: boolean;
@@ -162,8 +159,6 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  controlGroupReload$: Subject<void>;
-  panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;

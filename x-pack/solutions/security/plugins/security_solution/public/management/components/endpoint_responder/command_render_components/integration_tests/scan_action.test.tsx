@@ -243,16 +243,19 @@ describe('When using scan action from response actions console', () => {
     });
   });
 
-  it.each(['ra_scan_error_not-found', 'ra_scan_error_invalid-input', 'ra_scan_error_queue-quota'])(
-    'should show detailed error if `scan` failure returned code: %s',
-    async (outputCode) => {
-      const mockData = apiMocks.responseProvider.actionDetails({
-        path: '/api/endpoint/action/agent-a',
-      }).data;
+  it.each([
+    'ra_scan_error_not-found',
+    'ra_scan_error_invalid-input',
+    'ra_scan_error_queue-quota',
+    'ra_scan_error_processing',
+    'ra_scan_error_processing-interrupted',
+  ])('should show detailed error if `scan` failure returned code: %s', async (outputCode) => {
+    const mockData = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/agent-a',
+    }).data;
 
-      const actionDetailsApiResponseMock: ReturnType<
-        typeof apiMocks.responseProvider.actionDetails
-      > = {
+    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
+      {
         data: {
           ...mockData,
           id: '123',
@@ -282,16 +285,15 @@ describe('When using scan action from response actions console', () => {
         },
       };
 
-      apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
-      await render();
-      await enterConsoleCommand(renderResult, user, 'scan --path="/error/path"');
+    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+    await render();
+    await enterConsoleCommand(renderResult, user, 'scan --path="/error/path"');
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('scan-actionFailure').textContent).toMatch(
-          // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
-          new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
-        );
-      });
-    }
-  );
+    await waitFor(() => {
+      expect(renderResult.getByTestId('scan-actionFailure').textContent).toMatch(
+        // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
+        new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
+      );
+    });
+  });
 });

@@ -62,7 +62,6 @@ export const v2EaseFooterItems: NodeDefinition<AppDeepLinkId, string, string>[] 
           },
           {
             cloudLink: 'userAndRoles',
-            title: i18nStrings.stackManagement.access.usersAndRoles,
           },
         ],
       },
