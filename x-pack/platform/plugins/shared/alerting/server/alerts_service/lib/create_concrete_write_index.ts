@@ -212,15 +212,35 @@ export async function findOrSetConcreteWriteIndex(
     return concreteWriteIndex;
   }
 
+  if (!isHidden) {
+    logger.debug(`Indices for alias ${alias} exist but some are not set as hidden`);
+    logger.debug(`Attempting to set index aliases as hidden for alias: ${alias}.`);
+  }
+
   const actions: IndicesUpdateAliasesAction[] = [];
   const lastIndex = concreteIndices.length - 1;
   const sortedConcreteIndices = sortBy(concreteIndices, ['index']);
   const concreteIndex = sortedConcreteIndices[lastIndex];
 
-  if (!isHidden) {
-    logger.debug(`Indices for alias ${alias} exist but some are not set as hidden`);
-    for (let i = 0; i < lastIndex; i++) {
-      const index = sortedConcreteIndices[i];
+  for (let i = 0; i < sortedConcreteIndices.length; i++) {
+    const index = sortedConcreteIndices[i];
+    if (!concreteWriteIndex && i === lastIndex) {
+      logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
+      actions.push(
+        { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
+        {
+          add: {
+            index: concreteIndex.index,
+            alias: concreteIndex.alias,
+            is_write_index: true,
+            is_hidden: true,
+          },
+        }
+      );
+      logger.debug(
+        `Attempting to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
+      );
+    } else if (!index.isHidden) {
       actions.push({
         add: {
           index: index.index,
@@ -230,34 +250,6 @@ export async function findOrSetConcreteWriteIndex(
         },
       });
     }
-    logger.debug(`Attempting to set index aliases as hidden for alias: ${alias}.`);
-  }
-
-  if (!concreteWriteIndex) {
-    logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
-    actions.push(
-      { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
-      {
-        add: {
-          index: concreteIndex.index,
-          alias: concreteIndex.alias,
-          is_write_index: true,
-          is_hidden: true,
-        },
-      }
-    );
-    logger.debug(
-      `Attempting to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
-    );
-  } else if (!isHidden) {
-    actions.push({
-      add: {
-        index: concreteIndex.index,
-        alias: concreteIndex.alias,
-        is_write_index: concreteIndex.isWriteIndex,
-        is_hidden: true,
-      },
-    });
   }
 
   try {

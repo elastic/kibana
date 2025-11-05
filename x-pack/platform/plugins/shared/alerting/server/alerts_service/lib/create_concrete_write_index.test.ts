@@ -1244,25 +1244,9 @@ describe('setConcreteWriteIndex', () => {
         {
           add: {
             alias: '.alerts-test.alerts-default',
-            index: '.internal.alerts-test.alerts-default-000002',
-            is_hidden: true,
-            is_write_index: false,
-          },
-        },
-        {
-          add: {
-            alias: '.alerts-test.alerts-default',
             index: '.internal.alerts-test.alerts-default-000003',
             is_hidden: true,
             is_write_index: true,
-          },
-        },
-        {
-          add: {
-            alias: '.alerts-test.alerts-default',
-            index: '.internal.alerts-test.alerts-default-000004',
-            is_hidden: true,
-            is_write_index: false,
           },
         },
       ],
@@ -1318,14 +1302,6 @@ describe('setConcreteWriteIndex', () => {
           add: {
             alias: '.alerts-test.alerts-default',
             index: '.internal.alerts-test.alerts-default-000001',
-            is_hidden: true,
-            is_write_index: false,
-          },
-        },
-        {
-          add: {
-            alias: '.alerts-test.alerts-default',
-            index: '.internal.alerts-test.alerts-default-000002',
             is_hidden: true,
             is_write_index: false,
           },
