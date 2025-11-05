@@ -6935,6 +6935,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/migrator-test-kit@link:src/platform/packages/private/kbn-migrator-test-kit":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-agg-utils@link:x-pack/platform/packages/private/ml/agg_utils":
   version "0.0.0"
   uid ""
@@ -7408,6 +7412,10 @@
   uid ""
 
 "@kbn/react-mute-legacy-root-warning@link:src/platform/packages/private/kbn-react-mute-legacy-root-warning":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-query@link:src/platform/packages/shared/kbn-react-query":
   version "0.0.0"
   uid ""
 
