@@ -24,7 +24,7 @@ interface PreviewLinkProps {
   children?: React.ReactNode;
 }
 
-export enum FlowTargetSourceDest {
+enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
