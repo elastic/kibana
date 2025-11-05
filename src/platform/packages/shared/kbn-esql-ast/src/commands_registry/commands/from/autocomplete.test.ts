@@ -64,8 +64,8 @@ describe('FROM Autocomplete', () => {
   });
   describe('... <sources> ...', () => {
     test('suggests visible indices on space', async () => {
-      await fromExpectSuggestions('from /', visibleIndices, mockCallbacks);
-      await fromExpectSuggestions('FROM /', visibleIndices, mockCallbacks);
+      await fromExpectSuggestions('from /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('FROM /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
       await fromExpectSuggestions('from /index', visibleIndices, mockCallbacks);
     });
 
@@ -74,13 +74,13 @@ describe('FROM Autocomplete', () => {
     });
 
     test('does create suggestions after a closed quote', async () => {
-      await fromExpectSuggestions('FROM "lolz", ', visibleIndices, mockCallbacks);
+      await fromExpectSuggestions('FROM "lolz", ', [...visibleIndices, '(FROM $0)'], mockCallbacks);
     });
 
     test('doesnt suggest indices twice', async () => {
       await fromExpectSuggestions(
         'from index, ',
-        visibleIndices.filter((i) => i !== 'index'),
+        [...visibleIndices.filter((i) => i !== 'index'), '(FROM $0)'],
         mockCallbacks
       );
     });
@@ -110,8 +110,8 @@ describe('FROM Autocomplete', () => {
       const expectedSuggestions = visibleDataSources.map((source) => source.name);
       mockContext.sources = visibleDataSources;
 
-      await fromExpectSuggestions('from ', expectedSuggestions, mockCallbacks);
-      await fromExpectSuggestions('FROM ', expectedSuggestions, mockCallbacks);
+      await fromExpectSuggestions('from ', [...expectedSuggestions, '(FROM $0)'], mockCallbacks);
+      await fromExpectSuggestions('FROM ', [...expectedSuggestions, '(FROM $0)'], mockCallbacks);
       await fromExpectSuggestions(
         'FROM a,/',
         expectedSuggestions.filter((i) => i !== 'a'),
@@ -119,7 +119,7 @@ describe('FROM Autocomplete', () => {
       );
       await fromExpectSuggestions(
         'from a, /',
-        expectedSuggestions.filter((i) => i !== 'a'),
+        [...expectedSuggestions.filter((i) => i !== 'a'), '(FROM $0)'],
         mockCallbacks
       );
       await fromExpectSuggestions('from *,/', expectedSuggestions, mockCallbacks);

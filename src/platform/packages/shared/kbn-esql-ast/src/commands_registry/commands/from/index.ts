@@ -29,5 +29,6 @@ export const fromCommand = {
     }),
     declaration: 'FROM index_pattern [METADATA fields]',
     examples: ['FROM logs', 'FROM logs-*', 'FROM logs_*, events-*'],
+    isSubqueryEntryPoint: true,
   },
 };

@@ -573,10 +573,25 @@ export class CstToAstConverter {
     const commands: ast.ESQLCommand[] = [];
 
     if (fromCommandCtx) {
-      const fromCommand = this.fromFromCommand(fromCommandCtx);
+      // When parsing queries with nested empty subqueries like "FROM a, (FROM b, ())",
+      // ANTLR incorrectly identifies the empty parentheses "()" as a fromCommand context.
+      // This phantom context contains only closing parentheses (e.g., ")" or "))")
+      // without any actual FROM keyword, which would lead to malformed AST nodes.
 
-      if (fromCommand) {
-        commands.push(fromCommand);
+      // Solution: Verify that the context actually contains the "FROM" keyword before processing.
+      const fromCommandText = fromCommandCtx.getText();
+      const hasFromKeyword = /FROM/i.test(fromCommandText);
+      const hasValidText = textExistsAndIsValid(fromCommandText);
+
+      if (hasFromKeyword) {
+        const fromCommand = this.fromFromCommand(fromCommandCtx);
+
+        if (fromCommand) {
+          if (!hasValidText) {
+            fromCommand.incomplete = true;
+          }
+          commands.push(fromCommand);
+        }
       }
     }
 

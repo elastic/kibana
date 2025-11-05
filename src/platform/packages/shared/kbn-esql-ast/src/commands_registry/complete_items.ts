@@ -101,6 +101,15 @@ export const withCompleteItem: ISuggestionItem = withAutoSuggest({
   sortText: '1',
 });
 
+export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: '(FROM ...)',
+  text: '(FROM $0)',
+  asSnippet: true,
+  kind: 'Method',
+  detail: 'FROM',
+  sortText: 'D',
+});
+
 export const minMaxValueCompleteItem: ISuggestionItem = {
   label: 'minmax',
   text: 'minmax',

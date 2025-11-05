@@ -110,6 +110,13 @@ export function isRestartingExpression(text: string) {
 }
 
 /**
+ * Does the text end with whitespace?
+ */
+export function endsWithSpace(text: string): boolean {
+  return /\s$/.test(text);
+}
+
+/**
  * Take a column name like "`my``column`"" and return "my`column"
  */
 export function unescapeColumnName(columnName: string) {

@@ -79,6 +79,11 @@ export interface ICommandMetadata {
   types?: Array<{ name: string; description: string }>; // Optional property for command-specific types
   license?: LicenseType; // Optional property indicating the license for the command's availability
   observabilityTier?: string; // Optional property indicating the observability tier availability
+  subqueryRestrictions?: {
+    allowedInside: boolean; // Command is allowed inside subqueries
+    allowedOutside: boolean; // Command is allowed outside subqueries (at root level)
+  };
+  isSubqueryEntryPoint?: boolean; // Indicates command can start a subquery (e.g., FROM, ROW, SHOW)
 }
 
 /**
@@ -178,14 +183,35 @@ export class CommandRegistry implements ICommandRegistry {
 
   /**
    * Retrieves all registered commands, including their methods and metadata.
+   * Filters commands based on subquery context and restrictions.
    * @returns An array of ICommand objects representing all registered commands.
    */
-  public getAllCommands(): ICommand[] {
-    return Array.from(this.commands.entries()).map(([name, { methods, metadata }]) => ({
+  public getAllCommands(options?: {
+    isCursorInSubquery?: boolean;
+    isStartingSubquery?: boolean;
+  }): ICommand[] {
+    const allCommands = Array.from(this.commands.entries(), ([name, { methods, metadata }]) => ({
       name,
       methods,
       metadata,
     }));
+
+    const isCursorInSubquery = options?.isCursorInSubquery ?? false;
+    const isStartingSubquery = options?.isStartingSubquery ?? false;
+
+    // When starting a subquery, only show commands that can be entry points
+    const filtered = isStartingSubquery
+      ? allCommands.filter(({ metadata }) => metadata.isSubqueryEntryPoint === true)
+      : allCommands;
+
+    // Then apply subquery restrictions
+    return filtered.filter(({ metadata: { subqueryRestrictions: restrictions } }) => {
+      if (!restrictions) {
+        return true;
+      }
+
+      return isCursorInSubquery ? restrictions.allowedInside : restrictions.allowedOutside;
+    });
   }
 
   /**
