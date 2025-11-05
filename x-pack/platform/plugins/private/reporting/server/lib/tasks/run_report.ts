@@ -497,7 +497,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     return ({ taskInstance, fakeRequest }: RunContext) => {
       let jobId: string;
       let output: PerformJobResults;
-      let cancellationToken: CancellationToken;
+      let cancellationToken: CancellationToken | undefined;
       const { retryAt: taskRetryAt, startedAt: taskStartedAt } = taskInstance;
 
       return {
@@ -586,7 +586,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                     task,
                     fakeRequest,
                     taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
-                    cancellationToken,
+                    cancellationToken: cancellationToken!,
                     stream,
                   }),
                   this.throwIfKibanaShutsDown(),
@@ -639,7 +639,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               }
             );
 
-            cancellationToken.cancel();
+            if (cancellationToken) {
+              cancellationToken.cancel();
+            }
 
             if (isLastAttempt) {
               this.logger.info(
@@ -675,7 +677,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           if (jobId) {
             this.logger.get(jobId).warn(`Cancelling job ${jobId}...`);
           }
-          cancellationToken.cancel();
+          if (cancellationToken) {
+            cancellationToken.cancel();
+          }
         },
       };
     };
