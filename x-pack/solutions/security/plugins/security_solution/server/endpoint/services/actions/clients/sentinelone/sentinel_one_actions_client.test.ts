@@ -13,7 +13,6 @@ import { ResponseActionsNotSupportedError } from '../errors';
 import type { SentinelOneActionsClientOptionsMock } from './mocks';
 import { sentinelOneMock } from './mocks';
 import {
-  ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
@@ -141,82 +140,7 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Disabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        false;
-      await s1ActionsClient.isolate(createS1IsolationOptions());
-
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
-        1,
-        {
-          document: {
-            '@timestamp': expect.any(String),
-            EndpointActions: {
-              action_id: expect.any(String),
-              data: {
-                command: 'isolate',
-                comment: 'test comment',
-                parameters: undefined,
-                hosts: {
-                  '1-2-3': {
-                    name: 'sentinelone-1460',
-                  },
-                },
-              },
-              expiration: expect.any(String),
-              input_type: 'sentinel_one',
-              type: 'INPUT_ACTION',
-            },
-            agent: {
-              id: ['1-2-3'],
-              policy: [
-                {
-                  agentId: '1-2-3',
-                  agentPolicyId: expect.any(String),
-                  elasticAgentId: '1-2-3',
-                  integrationPolicyId: expect.any(String),
-                },
-              ],
-            },
-            originSpaceId: 'default',
-            tags: [],
-            user: { id: 'foo' },
-            meta: {
-              agentId: '1-2-3',
-              agentUUID: '1-2-3',
-              hostName: 'sentinelone-1460',
-            },
-          },
-          index: ENDPOINT_ACTIONS_INDEX,
-          refresh: 'wait_for',
-        },
-        { meta: true }
-      );
-
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
-        document: {
-          '@timestamp': expect.any(String),
-          EndpointActions: {
-            action_id: expect.any(String),
-            data: { command: 'isolate' },
-            input_type: 'sentinel_one',
-            started_at: expect.any(String),
-            completed_at: expect.any(String),
-          },
-          agent: { id: ['1-2-3'] },
-          error: undefined,
-        },
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
-        refresh: 'wait_for',
-      });
-    });
-
-    it('should write action request (only) to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Enabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        true;
+    it('should write action request (only) to endpoint indexes', async () => {
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -316,81 +240,7 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Disabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        false;
-      await s1ActionsClient.release(createS1IsolationOptions());
-
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
-        1,
-        {
-          document: {
-            '@timestamp': expect.any(String),
-            EndpointActions: {
-              action_id: expect.any(String),
-              data: {
-                command: 'unisolate',
-                comment: 'test comment',
-                parameters: undefined,
-                hosts: {
-                  '1-2-3': {
-                    name: 'sentinelone-1460',
-                  },
-                },
-              },
-              expiration: expect.any(String),
-              input_type: 'sentinel_one',
-              type: 'INPUT_ACTION',
-            },
-            agent: {
-              id: ['1-2-3'],
-              policy: [
-                {
-                  agentId: '1-2-3',
-                  agentPolicyId: expect.any(String),
-                  elasticAgentId: '1-2-3',
-                  integrationPolicyId: expect.any(String),
-                },
-              ],
-            },
-            originSpaceId: 'default',
-            tags: [],
-            user: { id: 'foo' },
-            meta: {
-              agentId: '1-2-3',
-              agentUUID: '1-2-3',
-              hostName: 'sentinelone-1460',
-            },
-          },
-          index: ENDPOINT_ACTIONS_INDEX,
-          refresh: 'wait_for',
-        },
-        { meta: true }
-      );
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
-        document: {
-          '@timestamp': expect.any(String),
-          EndpointActions: {
-            action_id: expect.any(String),
-            data: { command: 'unisolate' },
-            input_type: 'sentinel_one',
-            started_at: expect.any(String),
-            completed_at: expect.any(String),
-          },
-          agent: { id: ['1-2-3'] },
-          error: undefined,
-        },
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
-        refresh: 'wait_for',
-      });
-    });
-
-    it('should write action request (only) to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Enabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        true;
+    it('should write action request (only) to endpoint indexes', async () => {
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -1422,22 +1272,7 @@ describe('SentinelOneActionsClient class', () => {
     let getFileReqOptions: ResponseActionGetFileRequestBody;
 
     beforeEach(() => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
-
       getFileReqOptions = responseActionsClientMock.createGetFileOptions();
-    });
-
-    it('should error if feature flag is not enabled', async () => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
-
-      await expect(s1ActionsClient.getFile(getFileReqOptions)).rejects.toHaveProperty(
-        'message',
-        'get-file not supported for sentinel_one agent type. Feature disabled'
-      );
     });
 
     it('should call the fetch agent files connector method with expected params', async () => {
@@ -1481,9 +1316,6 @@ describe('SentinelOneActionsClient class', () => {
         responseActionsClientMock.createNormalizedExternalConnectorClient(subActionsClient);
       connectorActionsMock =
         classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
       s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
 
       const executeMockFn = (subActionsClient.execute as jest.Mock).getMockImplementation();
@@ -1695,21 +1527,8 @@ describe('SentinelOneActionsClient class', () => {
       });
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
-      // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         true;
-    });
-
-    it('should throw error if getFile feature flag is disabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
-
-      await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
-        'File downloads are not supported for sentinel_one get-file. Feature disabled'
-      );
     });
 
     it('should throw error if action id is not for an agent type of sentinelOne', async () => {
@@ -1806,9 +1625,6 @@ describe('SentinelOneActionsClient class', () => {
       s1DataGenerator = new SentinelOneDataGenerator('seed');
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
-      // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         true;
 
@@ -1856,19 +1672,6 @@ describe('SentinelOneActionsClient class', () => {
             };
           }
         }
-      );
-    });
-
-    it('should throw error if get-file feature flag is disabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        false;
-
-      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'File downloads are not supported for sentinel_one get-file. Feature disabled'
       );
     });
 
@@ -1999,7 +1802,6 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error readonly prop assignment
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         false;
-
       await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
         `'runscript' response action not supported for [sentinel_one]. Feature disabled`
       );
@@ -2026,6 +1828,27 @@ describe('SentinelOneActionsClient class', () => {
 
       await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
         'Script ID [1466645476786791838] not found'
+      );
+    });
+
+    it('should throw an error if script does not support OS of agent', async () => {
+      const executeMockImplementation = connectorActionsMock.execute.getMockImplementation()!;
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
+          const scriptsApiResponse = sentinelOneMock.createSentinelOneGetRemoteScriptsApiResponse();
+
+          scriptsApiResponse.data[0].osTypes = ['windows'];
+          scriptsApiResponse.data[0].scriptName = 'terminate something';
+
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: scriptsApiResponse,
+          });
+        }
+        return executeMockImplementation.call(connectorActionsMock, options);
+      });
+
+      await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
+        'Script [terminate something] not supported for OS type [linux]'
       );
     });
 
@@ -2124,24 +1947,10 @@ describe('SentinelOneActionsClient class', () => {
     let killProcessActionRequest: KillOrSuspendProcessRequestBody;
 
     beforeEach(() => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
-        true;
-
       killProcessActionRequest = responseActionsClientMock.createKillProcessOptions({
         // @ts-expect-error TS2322 due to type being overloaded to handle kill/suspend process and specific option for S1
         parameters: { process_name: 'foo' },
       });
-    });
-
-    it('should throw an error if feature flag is disabled', async () => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
-        false;
-
-      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
-        `kill-process not supported for sentinel_one agent type. Feature disabled`
-      );
     });
 
     it('should throw an error if `process_name` is not defined (manual mode)', async () => {
@@ -2318,21 +2127,7 @@ describe('SentinelOneActionsClient class', () => {
     let processesActionRequest: GetProcessesRequestBody;
 
     beforeEach(() => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        true;
-
       processesActionRequest = responseActionsClientMock.createRunningProcessesOptions();
-    });
-
-    it('should error if feature flag is disabled', async () => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        false;
-
-      await expect(s1ActionsClient.runningProcesses(processesActionRequest)).rejects.toThrow(
-        `processes not supported for sentinel_one agent type. Feature disabled`
-      );
     });
 
     it('should error if host is running Windows', async () => {
@@ -2513,7 +2308,6 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error update readonly property
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         false;
-
       await expect(s1ActionsClient.getCustomScripts()).rejects.toThrow(
         "'runscript' response action not supported for [sentinel_one]"
       );
@@ -2575,10 +2369,6 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assignment to readonly prop
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
 
       (

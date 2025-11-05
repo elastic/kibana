@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/public';
 import { getIndexState } from '@kbn/upgrade-assistant-pkg-server';
 import { Version } from '@kbn/upgrade-assistant-pkg-common';
@@ -170,7 +170,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('can resume after reindexing was stopped right after creating the new index', async () => {
+    // This test no longer works because the reindex api will error if you're trying to reindex into an existing index.
+    // Need to find another method of testing this.
+    it.skip('can resume after reindexing was stopped right after creating the new index', async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       // This new index is the new soon to be created reindexed index. We create it

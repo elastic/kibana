@@ -16,4 +16,6 @@ export type {
   RoleIndexPrivilege,
   RoleRemoteIndexPrivilege,
   RoleRemoteClusterPrivilege,
+  RoleKibanaApplication,
+  RoleTransformError,
 } from './role';

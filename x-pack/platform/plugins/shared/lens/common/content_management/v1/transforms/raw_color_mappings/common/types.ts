@@ -92,6 +92,7 @@ interface DeprecatedColorMappingGradientColorMode {
  * @deprecated Use `ColorMapping.Config`
  */
 export interface DeprecatedColorMappingConfig {
+  assignmentMode?: 'auto';
   paletteId: string;
   colorMode: DeprecatedColorMappingCategoricalColorMode | DeprecatedColorMappingGradientColorMode;
   assignments: Array<

@@ -22,39 +22,6 @@ interface NestedSecondaryMenuProps {
   initialPanel?: string;
 }
 
-const NestedSecondaryMenuRoot: FC<NestedSecondaryMenuProps> = ({
-  children,
-  initialPanel = 'main',
-}) => {
-  const [currentPanel, setCurrentPanel] = useState(initialPanel);
-  const [panelStack, setPanelStack] = useState<string[]>([]);
-
-  const goToPanel = useCallback(
-    (panelId: string) => {
-      setPanelStack((prev) => [...prev, currentPanel]);
-      setCurrentPanel(panelId);
-    },
-    [currentPanel]
-  );
-
-  const goBack = useCallback(() => {
-    const previousPanel = panelStack[panelStack.length - 1];
-    if (previousPanel) {
-      setCurrentPanel(previousPanel);
-      setPanelStack((prev) => prev.slice(0, -1));
-    }
-  }, [panelStack]);
-
-  const contextValue = {
-    currentPanel,
-    goToPanel,
-    goBack,
-    canGoBack: panelStack.length > 0,
-  };
-
-  return <NestedMenuContext.Provider value={contextValue}>{children}</NestedMenuContext.Provider>;
-};
-
 interface NestedSecondaryMenuComponent extends FC<NestedSecondaryMenuProps> {
   Panel: typeof Panel;
   Header: typeof Header;
@@ -63,8 +30,49 @@ interface NestedSecondaryMenuComponent extends FC<NestedSecondaryMenuProps> {
   Section: typeof SecondaryMenu.Section;
 }
 
-export const NestedSecondaryMenu: NestedSecondaryMenuComponent =
-  NestedSecondaryMenuRoot as NestedSecondaryMenuComponent;
+export const NestedSecondaryMenu: NestedSecondaryMenuComponent = ({
+  children,
+  initialPanel = 'main',
+}) => {
+  const [currentPanel, setCurrentPanel] = useState(initialPanel);
+  const [panelStack, setPanelStack] = useState<Array<{ id: string; returnFocusId?: string }>>([]);
+  const [returnFocusId, setReturnFocusId] = useState<string | undefined>();
+
+  const goToPanel = useCallback(
+    (panelId: string, focusId?: string) => {
+      setPanelStack((prev) => [
+        ...prev,
+        { id: currentPanel, returnFocusId: focusId || returnFocusId },
+      ]);
+      setCurrentPanel(panelId);
+      setReturnFocusId(undefined);
+    },
+    [currentPanel, returnFocusId]
+  );
+
+  const goBack = useCallback(() => {
+    setPanelStack((prev) => {
+      const previousPanel = prev[prev.length - 1];
+      if (!previousPanel) return prev;
+
+      setCurrentPanel(previousPanel.id);
+      setReturnFocusId(previousPanel.returnFocusId);
+
+      return prev.slice(0, -1);
+    });
+  }, []);
+
+  const contextValue = {
+    canGoBack: panelStack.length > 0,
+    currentPanel,
+    goBack,
+    goToPanel,
+    panelStackDepth: panelStack.length,
+    returnFocusId,
+  };
+
+  return <NestedMenuContext.Provider value={contextValue}>{children}</NestedMenuContext.Provider>;
+};
 
 NestedSecondaryMenu.Panel = Panel;
 NestedSecondaryMenu.Header = Header;

@@ -48,7 +48,7 @@ export async function sendUpgradeAgentAction({
 
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: now,
     data,

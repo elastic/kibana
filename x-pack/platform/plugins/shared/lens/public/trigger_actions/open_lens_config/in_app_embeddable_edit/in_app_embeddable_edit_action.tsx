@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { noop } from 'lodash';
+import type { VisualizationMap, DatasourceMap } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { VisualizationMap, DatasourceMap } from '../../../types';
 import type { InlineEditLensEmbeddableContext } from './types';
 import { ACTION_EDIT_LENS_EMBEDDABLE } from '../constants';
 import { mountInlinePanel } from '../../../react_embeddable/mount';
@@ -49,6 +49,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     onUpdate,
     onApply,
     onCancel,
+    applyButtonLabel,
   }: InlineEditLensEmbeddableContext) {
     mountInlinePanel({
       core: this.core,
@@ -65,6 +66,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
             onApply,
             onCancel,
             closeFlyout,
+            applyButtonLabel,
           });
         }
       },

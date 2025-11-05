@@ -12,6 +12,8 @@ import { ReindexServiceServerPlugin } from './plugin';
 export type { ReindexServiceServerPluginStart } from './types';
 export { REINDEX_SERVICE_BASE_PATH } from '../common';
 
+export { config } from './config';
+
 export const plugin = async (ctx: PluginInitializerContext) => {
   return new ReindexServiceServerPlugin(ctx);
 };

@@ -11,7 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { CustomizablePalette } from '@kbn/coloring';
 import { css } from '@emotion/react';
-import type { VisualizationDimensionEditorProps } from '../../types';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import { PalettePanelContainer } from '../../shared_components';
 import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';

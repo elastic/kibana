@@ -46,10 +46,6 @@ export interface DataViewPickerProps {
    */
   adHocDataViews?: DataView[];
   /**
-   * Data views managed by the application
-   */
-  managedDataViews?: DataView[];
-  /**
    * Saved data views
    */
   savedDataViews?: DataViewListItem[];
@@ -63,10 +59,11 @@ export interface DataViewPickerProps {
    */
   onAddField?: () => void;
   /**
-   * Callback that is called when the user clicks the create dataview option.
+   * Callback that is called when the user creates a new data view through the picker menu.
+   * The first parameter is the created data view
    * Also works as a flag to show the create dataview button.
    */
-  onDataViewCreated?: () => void;
+  onDataViewCreated?: (createdDataView: DataView) => void;
 
   onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
   /**
@@ -87,7 +84,6 @@ export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
-  managedDataViews,
   savedDataViews,
   onChangeDataView,
   onEditDataView,
@@ -112,7 +108,6 @@ export const DataViewPicker = ({
       onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}
-      managedDataViews={managedDataViews}
       savedDataViews={savedDataViews}
       selectableProps={selectableProps}
       isDisabled={isDisabled}

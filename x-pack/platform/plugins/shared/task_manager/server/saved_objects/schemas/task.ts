@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { isInterval } from '../../lib/intervals';
-import { scheduleRruleSchemaV1, scheduleRruleSchemaV2 } from './rrule';
+import { scheduleRruleSchemaV1, scheduleRruleSchemaV2, scheduleRruleSchemaV3 } from './rrule';
 
 export function validateDuration(duration: string) {
   if (!isInterval(duration)) {
@@ -76,4 +76,8 @@ export const taskSchemaV5 = taskSchemaV4.extends({
 
 export const taskSchemaV6 = taskSchemaV5.extends({
   schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchemaV2])),
+});
+
+export const taskSchemaV7 = taskSchemaV6.extends({
+  schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchemaV3])),
 });

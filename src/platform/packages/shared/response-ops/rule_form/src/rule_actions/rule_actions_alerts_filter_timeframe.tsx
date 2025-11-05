@@ -155,6 +155,10 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
 
   const [startH, startM] = useMemo(() => timeframe.hours.start.split(':').map(Number), [timeframe]);
   const [endH, endM] = useMemo(() => timeframe.hours.end.split(':').map(Number), [timeframe]);
+  const timezoneLabel = i18n.translate(
+    'responseOpsRuleForm.ruleForm.ruleActionsAlertsFilterTimeframeTimezoneLabel',
+    { defaultMessage: 'Timezone' }
+  );
 
   return (
     <>
@@ -193,6 +197,7 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
             <EuiFlexItem grow={2}>
               <EuiDatePickerRange
                 fullWidth
+                data-test-subj="alertsFilterTimeframe"
                 startDateControl={
                   <EuiDatePicker
                     showTimeSelect
@@ -201,7 +206,6 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
                     timeFormat={timeFormat}
                     selected={moment().set('hour', startH).set('minute', startM)}
                     onChange={onChangeHours('start')}
-                    data-test-subj="alertsFilterTimeframeStart"
                   />
                 }
                 endDateControl={
@@ -212,17 +216,14 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
                     timeFormat={timeFormat}
                     selected={moment().set('hour', endH).set('minute', endM)}
                     onChange={onChangeHours('end')}
-                    data-test-subj="alertsFilterTimeframeEnd"
                   />
                 }
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiComboBox
-                prepend={i18n.translate(
-                  'responseOpsRuleForm.ruleForm.ruleActionsAlertsFilterTimeframeTimezoneLabel',
-                  { defaultMessage: 'Timezone' }
-                )}
+                aria-label={timezoneLabel}
+                prepend={timezoneLabel}
                 singleSelection={{ asPlainText: true }}
                 options={TIMEZONE_OPTIONS}
                 selectedOptions={selectedTimezone}

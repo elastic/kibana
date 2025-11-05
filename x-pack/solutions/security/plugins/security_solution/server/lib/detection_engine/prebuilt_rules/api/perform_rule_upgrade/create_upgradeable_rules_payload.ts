@@ -113,6 +113,7 @@ export const createModifiedPrebuiltRuleAssets = ({
               ruleId,
               ruleName: upgradeableRule.target.name,
               hasBaseVersion: !!upgradeableRule.base,
+              isCustomized,
               fieldsDiff: calculatedRuleDiff,
             });
 

@@ -7,6 +7,8 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
+import pRetry from 'p-retry';
 
 import {
   AGENT_ACTIONS_INDEX,
@@ -16,9 +18,11 @@ import {
   type FleetServerAgent,
 } from '@kbn/fleet-plugin/common';
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
-import { asyncForEach } from '@kbn/std';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+
+const DELETE_RETRIES = 3;
 
 export async function expectToRejectWithNotFound(fn: any) {
   await expectToRejectWithError(fn, /404 "Not Found"/);
@@ -37,61 +41,89 @@ export async function expectToRejectWithError(fn: any, errRegexp: RegExp) {
 
 export async function cleanFleetIndices(esClient: Client) {
   await Promise.all([
-    esClient.deleteByQuery({
-      index: ENROLLMENT_API_KEYS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
-    esClient.deleteByQuery({
-      index: AGENTS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
-    esClient.deleteByQuery({
-      index: AGENT_ACTIONS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
+    pRetry(
+      () =>
+        esClient.deleteByQuery({
+          index: ENROLLMENT_API_KEYS_INDEX,
+          q: '*',
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+      { retries: DELETE_RETRIES }
+    ),
+    pRetry(
+      () =>
+        esClient.deleteByQuery({
+          index: AGENTS_INDEX,
+          q: '*',
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+      { retries: DELETE_RETRIES }
+    ),
+    pRetry(
+      () =>
+        esClient.deleteByQuery({
+          index: AGENT_ACTIONS_INDEX,
+          q: '*',
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+      { retries: DELETE_RETRIES }
+    ),
   ]);
 }
 
 export async function cleanFleetAgents(esClient: Client) {
-  await esClient.deleteByQuery({
-    index: AGENTS_INDEX,
-    q: '*',
-    ignore_unavailable: true,
-    refresh: true,
-  });
+  await pRetry(
+    () =>
+      esClient.deleteByQuery({
+        index: AGENTS_INDEX,
+        q: '*',
+        ignore_unavailable: true,
+        refresh: true,
+      }),
+    { retries: DELETE_RETRIES }
+  );
 }
 
 export async function cleanFleetAgentPolicies(esClient: Client) {
-  await esClient.deleteByQuery({
-    index: AGENT_POLICY_INDEX,
-    q: '*',
-    refresh: true,
-    ignore_unavailable: true,
-  });
+  await pRetry(
+    () =>
+      esClient.deleteByQuery({
+        index: AGENT_POLICY_INDEX,
+        q: '*',
+        refresh: true,
+        ignore_unavailable: true,
+      }),
+    { retries: DELETE_RETRIES }
+  );
 }
 
 export async function cleanFleetActionIndices(esClient: Client) {
   try {
     await Promise.all([
-      esClient.deleteByQuery({
-        index: AGENT_ACTIONS_INDEX,
-        q: '*',
-        ignore_unavailable: true,
-        refresh: true,
-      }),
-      esClient.deleteByQuery(
-        {
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          q: '*',
-          refresh: true,
-        },
-        ES_INDEX_OPTIONS
+      pRetry(
+        () =>
+          esClient.deleteByQuery({
+            index: AGENT_ACTIONS_INDEX,
+            q: '*',
+            ignore_unavailable: true,
+            refresh: true,
+          }),
+        { retries: DELETE_RETRIES }
+      ),
+      pRetry(
+        () =>
+          esClient.deleteByQuery(
+            {
+              index: AGENT_ACTIONS_RESULTS_INDEX,
+              q: '*',
+              refresh: true,
+            },
+            ES_INDEX_OPTIONS
+          ),
+        { retries: DELETE_RETRIES }
       ),
     ]);
   } catch (error) {
@@ -145,4 +177,17 @@ export async function makeAgentsUpgradeable(esClient: Client, agentIds: string[]
       },
     });
   });
+}
+
+export async function createTestSpace(ftrProvider: FtrProviderContext, spaceId: string) {
+  const spaces = ftrProvider.getService('spaces');
+  const space = await spaces.get(spaceId).catch((err) => {
+    if (err.message.includes('404 Not Found')) {
+      return undefined;
+    }
+    throw err;
+  });
+  if (!space) {
+    await spaces.createTestSpace(spaceId);
+  }
 }

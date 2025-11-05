@@ -132,7 +132,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
         }
       }}
     >
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
@@ -141,6 +141,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
           >
             <EuiButton
               data-test-subj="graphDatasourceButton"
+              size="s"
               css={css`
                 max-width: 320px;
                 ${euiBreakpoint(euiThemeContext, ['xs', 's'])} {
@@ -213,6 +214,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             <EuiButton
               fill
               type="submit"
+              size="s"
               disabled={isLoading || !currentIndexPattern || !selectedFields.length}
               data-test-subj="graph-explore-button"
             >

@@ -339,7 +339,7 @@ describe('Pipeline Editor', () => {
 
       const processorDescriptions = {
         userProvided: 'my script',
-        default: 'Sets value of "test" to "test"',
+        default: 'Sets value of "test" to test',
         none: 'No description',
       };
 
@@ -435,10 +435,10 @@ describe('Pipeline Editor', () => {
         onUpdate,
       });
       expect(testBed.find(`processors>0.inlineTextInputNonEditableText`).text()).toBe(
-        'Sets value of "test" to "{"test":"test"}"'
+        'Sets value of "test" to {"test":"test"}'
       );
       expect(testBed.find(`processors>1.inlineTextInputNonEditableText`).text()).toBe(
-        'Appends "{"test":"test"}" to the "test" field'
+        'Appends {"test":"test"} to the "test" field'
       );
     });
   });

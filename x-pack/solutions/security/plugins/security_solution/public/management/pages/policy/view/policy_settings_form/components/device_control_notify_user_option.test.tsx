@@ -14,6 +14,7 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
+import type { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
 import {
   NOTIFY_USER_SECTION_TITLE,
@@ -136,6 +137,26 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
     expect(formProps.onChange).toHaveBeenLastCalledWith({
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
+    });
+  });
+
+  describe('and access level is not deny_all', () => {
+    it.each<[DeviceControlAccessLevel, string]>([
+      ['audit', 'Allow read, write and execute'],
+      ['read_only', 'Read only'],
+      ['no_execute', 'Read and write'],
+    ])('should NOT render when access level is %s (%s)', (accessLevel) => {
+      formProps.policy.windows.device_control!.usb_storage = accessLevel;
+      formProps.policy.mac.device_control!.usb_storage = accessLevel;
+      render();
+      expect(renderResult.queryByTestId('test')).toBeNull();
+    });
+
+    it('should render when access level is deny_all (Block all)', () => {
+      formProps.policy.windows.device_control!.usb_storage = 'deny_all';
+      formProps.policy.mac.device_control!.usb_storage = 'deny_all';
+      render();
+      expect(renderResult.queryByTestId('test')).not.toBeNull();
     });
   });
 

@@ -15,6 +15,7 @@ import { createFlyout } from '../components/create_flyout';
 import { IndexUpdateService } from '../index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
 import { EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from './constants';
+import { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
 
 export function createEditLookupIndexContentAction(
   dependencies: EditLookupIndexFlyoutDeps
@@ -32,10 +33,18 @@ export function createEditLookupIndexContentAction(
     async execute(context: EditLookupIndexContentContext) {
       const { coreStart, data, fileUpload } = dependencies;
 
+      const indexEditorTelemetryService = new IndexEditorTelemetryService(
+        coreStart.analytics,
+        context.canEditIndex,
+        context.doesIndexExist,
+        context.triggerSource
+      );
+
       const indexUpdateService = new IndexUpdateService(
         coreStart.http,
         data,
         coreStart.notifications,
+        indexEditorTelemetryService,
         context.canEditIndex
       );
 
@@ -59,14 +68,14 @@ export function createEditLookupIndexContentAction(
 
       const fileManager = new FileUploadManager(
         fileUpload,
-        coreStart.http,
+        coreStart,
         data,
-        coreStart.notifications,
         null,
         false,
         true,
         existingIndexName,
         { index: { mode: 'lookup' } },
+        'lookup-index-editor',
         // On index searchable
         undefined,
         // On all docs searchable
@@ -78,7 +87,16 @@ export function createEditLookupIndexContentAction(
       const storage = new Storage(localStorage);
 
       try {
-        createFlyout({ ...dependencies, indexUpdateService, fileManager, storage }, context);
+        createFlyout(
+          {
+            ...dependencies,
+            indexUpdateService,
+            indexEditorTelemetryService,
+            fileManager,
+            storage,
+          },
+          context
+        );
       } catch (e) {
         return Promise.reject(e);
       }

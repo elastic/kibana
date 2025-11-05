@@ -10,11 +10,13 @@
  * to extract information for display in dashboards.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import type { MlSeverityType } from './anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
 import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
+import type { mlEntityFieldSchema } from './schemas';
 
 /**
  * Enum of entity field types
@@ -22,7 +24,7 @@ import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_
 export enum ML_ENTITY_FIELD_TYPE {
   BY = 'by',
   OVER = 'over',
-  PARTITON = 'partition',
+  PARTITION = 'partition',
 }
 
 /**
@@ -42,28 +44,7 @@ export type MlEntityFieldOperation =
 /**
  * Interface of an entity field
  */
-export interface MlEntityField {
-  /**
-   * The field name
-   */
-  fieldName: string;
-  /**
-   * The field value
-   */
-  fieldValue: string | number | undefined;
-  /**
-   * Optional field type
-   */
-  fieldType?: ML_ENTITY_FIELD_TYPE;
-  /**
-   * Optional entity field operation
-   */
-  operation?: MlEntityFieldOperation;
-  /**
-   * Optional cardinality of field
-   */
-  cardinality?: number;
-}
+export type MlEntityField = TypeOf<typeof mlEntityFieldSchema>;
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = [
@@ -229,7 +210,7 @@ export function getEntityFieldList(record: MlAnomalyRecordDoc): MlEntityField[] 
     entityFields.push({
       fieldName: record.partition_field_name,
       fieldValue: record.partition_field_value,
-      fieldType: ML_ENTITY_FIELD_TYPE.PARTITON,
+      fieldType: ML_ENTITY_FIELD_TYPE.PARTITION,
     });
   }
 

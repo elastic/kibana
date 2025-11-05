@@ -24,6 +24,7 @@ import type {
   ContentReferences,
   MessageMetadata,
   ScreenContext,
+  InterruptValue,
 } from '@kbn/elastic-assistant-common';
 import {
   replaceAnonymizedValuesWithOriginalValues,
@@ -49,6 +50,7 @@ import { buildResponse, getLlmType } from './utils';
 import type {
   AgentExecutorParams,
   AssistantDataClients,
+  OnLlmResponse,
   StaticReturnType,
 } from '../lib/langchain/executors/types';
 import { getLangChainMessages } from '../lib/langchain/helpers';
@@ -182,6 +184,7 @@ export interface AppendAssistantMessageToConversationParams {
   contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
+  interruptValue?: InterruptValue;
 }
 export const appendAssistantMessageToConversation = async ({
   conversationsDataClient,
@@ -191,6 +194,7 @@ export const appendAssistantMessageToConversation = async ({
   contentReferences,
   isError = false,
   traceData = {},
+  interruptValue = undefined,
 }: AppendAssistantMessageToConversationParams) => {
   const conversation = await conversationsDataClient.getConversation({ id: conversationId });
   if (!conversation) {
@@ -199,6 +203,7 @@ export const appendAssistantMessageToConversation = async ({
 
   const metadata: MessageMetadata = {
     ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
+    interruptValue,
   };
 
   await conversationsDataClient.appendConversationMessages({
@@ -248,11 +253,7 @@ export interface LangChainExecuteParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<unknown, unknown, any>;
   logger: Logger;
-  onLlmResponse?: (
-    content: string,
-    traceData?: Message['traceData'],
-    isError?: boolean
-  ) => Promise<void>;
+  onLlmResponse?: OnLlmResponse;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
@@ -329,7 +330,7 @@ export const langChainExecute = async ({
     abortSignal,
     assistantContext,
     dataClients,
-    alertsIndexPattern: request.body.alertsIndexPattern,
+    alertsIndexPattern: request.body.alertsIndexPattern || '.alerts-security.alerts-default',
     core: context.core,
     actionsClient,
     assistantTools,
@@ -353,7 +354,7 @@ export const langChainExecute = async ({
     responseLanguage,
     savedObjectsClient,
     screenContext,
-    size: request.body.size,
+    size: request.body.size || 10,
     systemPrompt,
     timeout,
     telemetry,

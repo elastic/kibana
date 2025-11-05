@@ -25,8 +25,12 @@ export const fuseCommand = {
       defaultMessage:
         'Combines multiple result sets with different scoring functions into a single result set.',
     }),
-    declaration: `FUSE`,
-    examples: ['… FORK (LIMIT 1) (LIMIT 2) | FUSE'],
+    declaration: `FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>`,
+    examples: [
+      `…| FUSE`,
+      `…| FUSE linear`,
+      `…| FUSE linear WITH { "weights": { "fork1": 0.7, "fork2": 0.3 }, "normalizer": "minmax" }`,
+    ],
     hidden: true,
     preview: true,
     name: 'fuse',

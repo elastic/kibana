@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
 import { Paginate } from '../paginate';
@@ -102,7 +103,14 @@ export const Datatable: FC<Props> = ({
         </div>
         {paginate && (
           <div className="canvasDataTable__footer">
-            <EuiPagination pageCount={totalPages} activePage={pageNumber} onPageClick={setPage} />
+            <EuiPagination
+              aria-label={i18n.translate('xpack.canvas.canvasDatatable.pagination.ariaLabel', {
+                defaultMessage: 'Data table pages',
+              })}
+              pageCount={totalPages}
+              activePage={pageNumber}
+              onPageClick={setPage}
+            />
           </div>
         )}
       </div>

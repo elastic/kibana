@@ -28,7 +28,6 @@ it('build default and oss dist for current platform, without packages, by defaul
   expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
@@ -70,7 +69,6 @@ it('builds packages if --all-platforms is passed', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
@@ -112,7 +110,6 @@ it('limits packages if --rpm passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--rpm'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
@@ -154,7 +151,6 @@ it('limits packages if --deb passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--deb'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
@@ -197,7 +193,6 @@ it('limits packages if --docker passed with --all-platforms', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
@@ -247,7 +242,6 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
   ).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
@@ -290,7 +284,6 @@ it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
@@ -333,7 +326,6 @@ it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', ()
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,

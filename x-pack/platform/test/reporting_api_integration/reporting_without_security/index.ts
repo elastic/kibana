@@ -17,5 +17,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./csv/job_apis_csv'));
     loadTestFile(require.resolve('./schedule'));
+    loadTestFile(require.resolve('./roll_datastream'));
   });
 }

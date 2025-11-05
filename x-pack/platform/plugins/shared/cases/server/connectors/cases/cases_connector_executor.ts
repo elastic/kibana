@@ -801,7 +801,10 @@ export class CasesConnectorExecutor {
       /**
        * TODO: Turn on for Security solution
        */
-      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts: false },
+      settings: caseFieldsFromTemplate?.settings ?? {
+        syncAlerts: false,
+        extractObservables: false,
+      },
       ...(caseFieldsFromTemplate?.assignees
         ? { assignees: caseFieldsFromTemplate?.assignees }
         : {}),

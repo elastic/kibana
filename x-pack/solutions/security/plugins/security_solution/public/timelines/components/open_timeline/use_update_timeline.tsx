@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
-import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import type { Note } from '../../../../common/api/timeline';
@@ -40,7 +40,7 @@ import type { UpdateTimeline } from './types';
 export const useUpdateTimeline = () => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   return useCallback(
     // NOTE: this is only enabled for the data view picker test

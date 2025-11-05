@@ -14,11 +14,19 @@ import { i18n } from '@kbn/i18n';
 import { isPlaceholderColumn } from '../utils';
 import type { KibanaContextExtra } from '../types';
 
-const fieldAlreadyExistsError = (columnName: string) =>
-  i18n.translate('indexEditor.addColumn.duplicatedName', {
-    defaultMessage: 'Field name {columnName} already exists',
-    values: { columnName },
-  });
+const errorCodes = {
+  DUPLICATED_FIELD_ERROR: 'DUPLICATED_FIELD_ERROR',
+} as const;
+
+type ErrorCode = keyof typeof errorCodes;
+
+export const errorMessages: Record<ErrorCode, (columnName: string) => string> = {
+  [errorCodes.DUPLICATED_FIELD_ERROR]: (columnName: string) =>
+    i18n.translate('indexEditor.addColumn.duplicatedName', {
+      defaultMessage: 'Field name {columnName} already exists',
+      values: { columnName },
+    }),
+};
 
 export const useAddColumnName = (initialColumnName = '') => {
   const {
@@ -34,7 +42,7 @@ export const useAddColumnName = (initialColumnName = '') => {
       columnName !== initialColumnName &&
       columns.some((existingColumn) => existingColumn.name === columnName)
     ) {
-      return fieldAlreadyExistsError(columnName);
+      return errorCodes.DUPLICATED_FIELD_ERROR;
     }
 
     return null;

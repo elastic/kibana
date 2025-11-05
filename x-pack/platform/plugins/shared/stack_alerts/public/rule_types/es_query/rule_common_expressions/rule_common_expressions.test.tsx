@@ -93,7 +93,6 @@ describe('RuleCommonExpressions', () => {
         }}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRunFn}
-        onChangeSourceFields={() => {}}
       />
     );
 

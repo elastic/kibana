@@ -5,13 +5,7 @@
  * 2.0.
  */
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import {
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiSelectable,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiSelectable, useGeneratedHtmlId } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -46,26 +40,24 @@ export const FilterGroup = ({
   );
 
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        id={filterGroupPopoverId}
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-      >
-        <EuiSelectable aria-label={filterGroupButtonLabel} options={items} onChange={onChange}>
-          {(list) => (
-            <div
-              css={css`
-                min-width: 220px;
-              `}
-            >
-              {list}
-            </div>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiPopover
+      id={filterGroupPopoverId}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+    >
+      <EuiSelectable aria-label={filterGroupButtonLabel} options={items} onChange={onChange}>
+        {(list) => (
+          <div
+            css={css`
+              min-width: 220px;
+            `}
+          >
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };

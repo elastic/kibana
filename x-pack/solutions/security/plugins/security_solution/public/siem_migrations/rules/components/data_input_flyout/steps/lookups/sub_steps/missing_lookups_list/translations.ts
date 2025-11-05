@@ -11,17 +11,3 @@ export const LOOKUPS_DATA_INPUT_COPY_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.missingLookupsList.title',
   { defaultMessage: 'Lookups found in your rules' }
 );
-
-export const LOOKUPS_SPLUNK_APP = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.missingLookupsList.appSection',
-  { defaultMessage: 'Splunk App for Lookup File Editing' }
-);
-
-export const COPY_LOOKUP_NAME_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.missingLookupsList.copyLookupNameTooltip',
-  { defaultMessage: 'Copy lookup name' }
-);
-export const CLEAR_EMPTY_LOOKUP_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.missingLookupsList.clearEmptyLookupTooltip',
-  { defaultMessage: 'Mark the lookup as empty' }
-);

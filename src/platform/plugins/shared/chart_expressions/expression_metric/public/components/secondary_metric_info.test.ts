@@ -8,8 +8,7 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { VisParams } from '@kbn/visualizations-plugin/common';
-
+import type { VisParams } from '@kbn/visualizations-common';
 import { getMetricFormatter } from './helpers';
 import { getSecondaryMetricInfo } from './secondary_metric_info';
 import type {

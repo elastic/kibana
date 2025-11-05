@@ -209,7 +209,7 @@ describe('Search Sessions Management API', () => {
       await api.fetchTableData();
 
       expect(mockCoreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Fetching the Search Session info timed out after 1 seconds'
+        'Fetching the Background Search info timed out after 1 seconds'
       );
     });
   });
@@ -237,7 +237,7 @@ describe('Search Sessions Management API', () => {
       await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'The search session was deleted.',
+        title: 'The background search was deleted.',
       });
     });
 
@@ -253,7 +253,7 @@ describe('Search Sessions Management API', () => {
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),
-        { title: 'Failed to delete the search session!' }
+        { title: 'Failed to delete the background search!' }
       );
     });
   });

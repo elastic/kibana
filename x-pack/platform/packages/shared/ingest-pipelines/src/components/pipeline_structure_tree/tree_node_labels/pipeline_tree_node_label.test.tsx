@@ -16,7 +16,7 @@ describe('PipelineTreeNodeLabel', () => {
     );
 
     const label = getByTestId('pipelineTreeNode-test-pipeline');
-    expect(label).toBeInTheDocument();
+    expect(label.textContent).toBe('test-pipeline');
   });
 
   it('renders managed icon when isManaged is true', () => {
@@ -50,5 +50,15 @@ describe('PipelineTreeNodeLabel', () => {
 
     expect(getByTestId('pipelineTreeNode-both-managedIcon')).toBeInTheDocument();
     expect(getByTestId('pipelineTreeNode-both-deprecatedIcon')).toBeInTheDocument();
+  });
+
+  it('truncates long pipeline names', () => {
+    const longName = 'a'.repeat(100);
+    const { getByTestId } = render(
+      <PipelineTreeNodeLabel pipelineName={longName} isManaged={false} isDeprecated={false} />
+    );
+
+    const label = getByTestId(`pipelineTreeNode-${longName}`);
+    expect(label.textContent).toBe(`${longName.slice(0, 30)}...`);
   });
 });

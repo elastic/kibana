@@ -22,3 +22,5 @@ export { suggest } from './src/autocomplete/autocomplete';
  * for the ES|QL language
  */
 export { getPolicyHelper, getSourcesHelper } from './src/shared/resources_helpers';
+// Hover function
+export { getHoverItem } from './src/hover';

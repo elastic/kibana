@@ -27,7 +27,7 @@
       "tags": [],
       "label": "AIAssistantManagementSelectionPluginPublicSetup",
       "description": [],
-      "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.ts",
+      "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -41,7 +41,7 @@
       "tags": [],
       "label": "AIAssistantManagementSelectionPluginPublicStart",
       "description": [],
-      "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.ts",
+      "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -58,9 +58,42 @@
             "AIAssistantType",
             ">"
           ],
-          "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.ts",
+          "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "aiAssistantManagementSelection",
+          "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.openChat$",
+          "type": "Object",
+          "tags": [],
+          "label": "openChat$",
+          "description": [],
+          "signature": [
+            "Observable",
+            "<{ assistant: ",
+            "AIAssistantType",
+            "; }>"
+          ],
+          "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "aiAssistantManagementSelection",
+          "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.completeOpenChat",
+          "type": "Function",
+          "tags": [],
+          "label": "completeOpenChat",
+          "description": [],
+          "signature": [
+            "() => void"
+          ],
+          "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

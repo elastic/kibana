@@ -16,13 +16,14 @@ import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_know
 
 interface Props {
   display?: 'mini' | 'refresh';
+  fill?: boolean;
 }
 
 /**
  * Self-contained component that renders a button to set up the knowledge base.
  *
  */
-export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }: Props) => {
+export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display, fill }: Props) => {
   const {
     http,
     toasts,
@@ -59,6 +60,12 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
         iconType="refresh"
         onClick={onInstallKnowledgeBase}
         size="xs"
+        aria-label={i18n.translate(
+          'xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton',
+          {
+            defaultMessage: 'Setup Knowledge Base',
+          }
+        )}
         css={css`
           margin-left: 8px;
         `}
@@ -86,7 +93,7 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
         <EuiButton
           color="primary"
           data-test-subj="setup-knowledge-base-button"
-          fill
+          fill={fill ?? true}
           disabled={!kbStatus?.is_setup_available}
           isLoading={isSetupInProgress}
           iconType="importAction"

@@ -112,7 +112,7 @@ export async function canUseOutputForIntegration(
       allowedOutputTypesForPackagePolicy.includes(type)
     );
 
-    const output = await outputService.get(soClient, outputId);
+    const output = await outputService.get(outputId);
 
     if (!allowedOutputTypes.includes(output.type)) {
       return {

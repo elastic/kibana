@@ -304,7 +304,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                                       />
                                     }
                                   >
-                                    <EuiBadge color="hollow">
+                                    <EuiBadge color="hollow" tabIndex={0}>
                                       <FormattedMessage
                                         id="xpack.ml.trainedModels.addModelFlyout.recommendedDownloadLabel"
                                         defaultMessage="Recommended"

@@ -124,7 +124,20 @@ paths:
 
 components:
   schemas:
-    SetAlertsStatusByIds:
+    ReasonEnum:
+      type: string
+      enum:
+        [
+          'false_positive',
+          'duplicate',
+          'true_positive',
+          'benign_positive',
+          'automated_closure',
+          'other'
+        ]
+      description: 'The reason for closing the alerts'
+
+    SetAlertsStatusByIdsBase:
       type: object
       properties:
         signal_ids:
@@ -136,17 +149,44 @@ components:
             minLength: 1
           minItems: 1
         status:
-          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatusExceptClosed'
       required: [signal_ids, status]
 
-    SetAlertsStatusByQuery:
+    CloseAlertsByIds:
+      type: object
+      properties:
+        signal_ids:
+          type: array
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
+          items:
+            type: string
+            format: nonempty
+            minLength: 1
+          minItems: 1
+        status:
+          type: string
+          enum: [closed]
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+      required: [signal_ids, status]
+
+    SetAlertsStatusByIds:
+      oneOf:
+        - $ref: '#/components/schemas/CloseAlertsByIds'
+        - $ref: '#/components/schemas/SetAlertsStatusByIdsBase'
+      discriminator:
+        propertyName: status
+        mapping:
+          closed: '#/components/schemas/CloseAlertsByIds'
+
+    SetAlertsStatusByQueryBase:
       type: object
       properties:
         query:
           type: object
           additionalProperties: true
         status:
-          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatusExceptClosed'
         conflicts:
           type: string
           enum:
@@ -154,3 +194,31 @@ components:
             - proceed
           default: abort
       required: [query, status]
+
+    CloseAlertsByQuery:
+      type: object
+      properties:
+        query:
+          type: object
+          additionalProperties: true
+        status:
+          type: string
+          enum: [closed]
+        conflicts:
+          type: string
+          enum:
+            - abort
+            - proceed
+          default: abort
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+      required: [query, status]
+
+    SetAlertsStatusByQuery:
+      oneOf:
+        - $ref: '#/components/schemas/CloseAlertsByQuery'
+        - $ref: '#/components/schemas/SetAlertsStatusByQueryBase'
+      discriminator:
+        propertyName: status
+        mapping:
+          closed: '#/components/schemas/CloseAlertsByQuery'

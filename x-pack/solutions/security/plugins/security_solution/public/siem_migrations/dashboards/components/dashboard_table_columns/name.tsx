@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { SecurityPageName } from '../../../../../common';
-import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import React, { useCallback } from 'react';
+import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
@@ -16,10 +14,16 @@ import type { TableColumn } from './constants';
 
 interface NameProps {
   dashboard: DashboardMigrationDashboard;
+  openDashboardDetailsFlyout: (dashboard: DashboardMigrationDashboard) => void;
 }
 
-const Name = ({ dashboard }: NameProps) => {
+const Name = ({ dashboard, openDashboardDetailsFlyout }: NameProps) => {
   const title = dashboard.elastic_dashboard?.title ?? dashboard.original_dashboard.title;
+
+  const onClick = useCallback(() => {
+    openDashboardDetailsFlyout(dashboard);
+  }, [dashboard, openDashboardDetailsFlyout]);
+
   if (dashboard.status === SiemMigrationStatus.FAILED) {
     return (
       <EuiText data-test-subj="dashboardNameFailed" color="danger" size="s">
@@ -27,31 +31,27 @@ const Name = ({ dashboard }: NameProps) => {
       </EuiText>
     );
   }
-  const dashboardId = dashboard.elastic_dashboard?.id;
-  if (!dashboardId) {
-    return (
-      <EuiText data-test-subj="dashboardNameNotInstalled" size="s">
-        {title}
-      </EuiText>
-    );
-  }
 
   return (
-    <SecuritySolutionLinkAnchor
-      deepLinkId={SecurityPageName.dashboards}
-      path={dashboardId}
-      data-test-subj="viewDashboard"
-    >
-      {title}
-    </SecuritySolutionLinkAnchor>
+    <EuiToolTip content={i18n.VIEW_DASHBOARD_TRANSLATION_SUMMARY_TOOLTIP}>
+      <EuiLink onClick={onClick} data-test-subj="viewDashboardTranslationSummary">
+        {title}
+      </EuiLink>
+    </EuiToolTip>
   );
 };
 
-export const createNameColumn = (): TableColumn => {
+export type CreateNameColumnParams = Pick<NameProps, 'openDashboardDetailsFlyout'>;
+
+export const createNameColumn = ({
+  openDashboardDetailsFlyout,
+}: CreateNameColumnParams): TableColumn => {
   return {
-    field: 'elastic_dashboard.title',
+    field: 'original_dashboard.title',
     name: i18n.COLUMN_NAME,
-    render: (_, dashboard: DashboardMigrationDashboard) => <Name dashboard={dashboard} />,
+    render: (_, dashboard: DashboardMigrationDashboard) => (
+      <Name dashboard={dashboard} openDashboardDetailsFlyout={openDashboardDetailsFlyout} />
+    ),
     sortable: true,
     truncateText: true,
     width: '50%',

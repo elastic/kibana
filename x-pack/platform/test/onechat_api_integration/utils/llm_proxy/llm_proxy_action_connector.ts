@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
+import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
 
 export async function createLlmProxyActionConnector(
-  getService: OneChatFtrProviderContext['getService'],
+  getService: OneChatApiFtrProviderContext['getService'],
   { port }: { port: number }
 ) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -16,7 +16,7 @@ export async function createLlmProxyActionConnector(
   const logger = getService('log');
 
   const internalReqHeader = samlAuth.getInternalRequestHeader();
-  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
   try {
     const res = await supertestWithoutAuth
@@ -45,14 +45,14 @@ export async function createLlmProxyActionConnector(
 }
 
 export async function deleteActionConnector(
-  getService: OneChatFtrProviderContext['getService'],
+  getService: OneChatApiFtrProviderContext['getService'],
   { actionId }: { actionId: string }
 ) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
 
   const internalReqHeader = samlAuth.getInternalRequestHeader();
-  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
   return supertestWithoutAuth
     .delete(`/api/actions/connector/${actionId}`)
     .set(roleAuthc.apiKeyHeader)

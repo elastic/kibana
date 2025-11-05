@@ -316,7 +316,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         method: 'POST',
-        path: '/api/fleet/agents/agent1/migrate',
+        path: '/api/fleet/agents/agent2/migrate',
         scenarios: ALL_SCENARIOS,
         send: {
           enrollment_token: '1234',

@@ -30,9 +30,11 @@ import {
   EuiCodeBlock,
   useGeneratedHtmlId,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -48,7 +50,7 @@ export function StreamsSettingsFlyout({
   const {
     dependencies: {
       start: {
-        streams: { wiredStatus$, enableWiredMode, disableWiredMode },
+        streams: { getWiredStatus, enableWiredMode, disableWiredMode },
       },
     },
     core,
@@ -69,13 +71,24 @@ export function StreamsSettingsFlyout({
   const [isDisabling, setIsDisabling] = React.useState(false);
 
   React.useEffect(() => {
-    const sub = wiredStatus$.subscribe((status) => {
-      setWiredChecked(status.enabled === true);
-      setCanManageWiredElasticsearch(Boolean(status.can_manage));
-      setLoading(false);
-    });
-    return () => sub.unsubscribe();
-  }, [wiredStatus$]);
+    const fetchWiredStatus = async () => {
+      try {
+        const status = await getWiredStatus();
+        setWiredChecked(status.enabled === true);
+        setCanManageWiredElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.streams.streamsListView.fetchWiredStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching wired streams status',
+          }),
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWiredStatus();
+  }, [getWiredStatus, core.notifications.toasts]);
 
   const handleSwitchChange = async () => {
     if (wiredChecked) {
@@ -85,6 +98,7 @@ export function StreamsSettingsFlyout({
         setLoading(true);
         await enableWiredMode(signal);
         telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: true });
+        setWiredChecked(true);
         refreshStreams();
       } catch (error) {
         core.notifications.toasts.addError(error, {
@@ -106,6 +120,7 @@ export function StreamsSettingsFlyout({
     try {
       await disableWiredMode(signal);
       telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: false });
+      setWiredChecked(false);
       refreshStreams();
       setShowDisableModal(false);
       setDisableConfirmChecked(false);
@@ -138,6 +153,14 @@ export function StreamsSettingsFlyout({
     {
       id: `${shipperButtonGroupPrefix}__logstash`,
       label: 'Logstash',
+    },
+    {
+      id: `${shipperButtonGroupPrefix}__fleet`,
+      label: 'Fleet',
+    },
+    {
+      id: `${shipperButtonGroupPrefix}__curl`,
+      label: 'curl/HTTP',
     },
   ];
   const [selectedShipperId, setSelectedShipperId] = React.useState(
@@ -182,6 +205,11 @@ output.elasticsearch:
     action => "create"
   }
 }`,
+    [`${shipperButtonGroupPrefix}__curl`]: `POST /logs/_bulk
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "body": { "text": "Hello world!" }, "resource": { "attributes": { "host.name": "my-host-name" } } }
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "message": "Hello world!", "host.name": "my-host-name" }`,
   };
 
   return (
@@ -266,10 +294,22 @@ output.elasticsearch:
             </EuiText>
             <EuiText color="subdued" size="s">
               <p>
-                {i18n.translate('xpack.streams.streamsListView.shipperConfigDescription', {
-                  defaultMessage:
-                    'Send logs data to wired streams. Check the documentation for more info.',
-                })}
+                <FormattedMessage
+                  id="xpack.streams.streamsListView.shipperConfigDescription"
+                  defaultMessage="Send logs data to wired streams. <docLink>Check the documentation</docLink> for more info."
+                  values={{
+                    docLink: (...chunks: React.ReactNode[]) => (
+                      <EuiLink
+                        href={core.docLinks.links.observability.wiredStreams}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        external
+                      >
+                        {chunks}
+                      </EuiLink>
+                    ),
+                  }}
+                />
               </p>
             </EuiText>
             <EuiButtonGroup
@@ -283,14 +323,91 @@ output.elasticsearch:
               isFullWidth={false}
               data-test-subj="streamsShipperButtonGroup"
             />
-            <EuiCodeBlock
-              language="yaml"
-              isCopyable
-              paddingSize="m"
-              data-test-subj="streamsShipperConfigExample"
-            >
-              {shipperConfigExamples[selectedShipperId]}
-            </EuiCodeBlock>
+            {selectedShipperId.endsWith('__fleet') ? (
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamsListView.shipperConfigFleetDescription"
+                    defaultMessage="Use the <b>Custom Logs (Filestream)</b> integration to send data to Wired Streams:"
+                    values={{
+                      b: (chunks) => <b>{chunks}</b>,
+                    }}
+                  />
+                </p>
+                <ul>
+                  <li>
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep1',
+                      {
+                        defaultMessage:
+                          'Enable "Write to logs streams" for the output you want to use in the Fleet Settings tab.',
+                      }
+                    )}
+                  </li>
+                  <li>
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep2',
+                      {
+                        defaultMessage:
+                          'Add the Custom Logs (Filestream) integration to an agent policy.',
+                      }
+                    )}
+                  </li>
+                  <li>
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3',
+                      {
+                        defaultMessage:
+                          'Enable the \'Use the "logs" data stream\' setting in the integration configuration.',
+                      }
+                    )}
+                  </li>
+                  <li>
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep4',
+                      {
+                        defaultMessage:
+                          'Make sure the agent policy is using the output you configured in step 1.',
+                      }
+                    )}
+                  </li>
+                </ul>
+              </EuiText>
+            ) : (
+              <>
+                {selectedShipperId.endsWith('__curl') && (
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.streams.streamsListView.shipperConfigCurlDescription"
+                        defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
+                        values={{
+                          logsEndpoint: <code>/logs/</code>,
+                          bulkApiLink: (
+                            <EuiLink
+                              href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              external
+                            >
+                              Bulk API
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiText>
+                )}
+                <EuiCodeBlock
+                  language={selectedShipperId.endsWith('__curl') ? 'json' : 'yaml'}
+                  isCopyable
+                  paddingSize="m"
+                  data-test-subj="streamsShipperConfigExample"
+                >
+                  {shipperConfigExamples[selectedShipperId]}
+                </EuiCodeBlock>
+              </>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutBody>
       </EuiFlyout>
@@ -301,6 +418,7 @@ output.elasticsearch:
             setDisableConfirmChecked(false);
           }}
           aria-labelledby="streamsWiredDisableModalTitle"
+          data-test-subj="streamsWiredDisableModal"
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id="streamsWiredDisableModalTitle">
@@ -322,6 +440,7 @@ output.elasticsearch:
               label={i18n.translate('xpack.streams.streamsSettingsFlyout.disableModalCheckbox', {
                 defaultMessage: 'I understand this will delete all data and configuration.',
               })}
+              data-test-subj="streamsWiredDisableConfirmCheckbox"
             />
           </EuiModalBody>
           <EuiModalFooter>
@@ -331,6 +450,7 @@ output.elasticsearch:
                 setDisableConfirmChecked(false);
               }}
               disabled={isDisabling}
+              data-test-subj="streamsWiredDisableCancelButton"
             >
               {i18n.translate('xpack.streams.streamsSettingsFlyout.disableModalCancel', {
                 defaultMessage: 'Cancel',

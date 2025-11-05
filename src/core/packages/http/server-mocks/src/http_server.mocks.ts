@@ -16,29 +16,31 @@ import type {
   OnPreRoutingToolkit,
 } from '@kbn/core-http-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
-const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFactory> => ({
-  redirected: jest.fn(),
-  badRequest: jest.fn(),
-  unauthorized: jest.fn(),
-  forbidden: jest.fn(),
-  notFound: jest.fn(),
-  conflict: jest.fn(),
-  unprocessableContent: jest.fn(),
-  customError: jest.fn(),
-});
+const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFactory> =>
+  lazyObject({
+    redirected: jest.fn(),
+    badRequest: jest.fn(),
+    unauthorized: jest.fn(),
+    forbidden: jest.fn(),
+    notFound: jest.fn(),
+    conflict: jest.fn(),
+    unprocessableContent: jest.fn(),
+    customError: jest.fn(),
+  });
 
 type ToolkitMock = jest.Mocked<
   OnPreAuthToolkit & OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit
 >;
 
 const createToolkitMock = (): ToolkitMock => {
-  return {
+  return lazyObject({
     render: jest.fn(),
     next: jest.fn(),
     rewriteUrl: jest.fn(),
     authzResultNext: jest.fn(),
-  };
+  });
 };
 
 export const httpServerMock = {

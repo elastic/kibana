@@ -21,6 +21,7 @@ export {
 export { isESClientError } from './utils';
 export {
   FleetError as FleetError,
+  FleetVersionConflictError,
   OutputInvalidError as OutputInvalidError,
   AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
@@ -128,6 +129,18 @@ export class CloudConnectorInvalidVarsError extends FleetError {
   }
 }
 
+export class CloudConnectorDeleteError extends FleetError {
+  constructor(message: string) {
+    super(`Error deleting cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorUpdateError extends FleetError {
+  constructor(message: string) {
+    super(`Error updating cloud connector in Fleet, ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
@@ -226,6 +239,21 @@ export class ArtifactsElasticsearchError extends FleetError {
     } else {
       this.requestDetails = 'unable to determine request details';
     }
+  }
+}
+
+export class FleetElasticsearchError extends FleetErrorWithStatusCode {
+  constructor(esError: Error) {
+    let statusCode: number | undefined;
+    const message = esError.message;
+
+    // Extract the original ES status code and ensure we have meta with statusCode
+    if (isESClientError(esError)) {
+      statusCode = esError.meta.statusCode;
+    }
+
+    // Pass through the ES error message, status code, and original error as meta
+    super(message, statusCode, esError);
   }
 }
 

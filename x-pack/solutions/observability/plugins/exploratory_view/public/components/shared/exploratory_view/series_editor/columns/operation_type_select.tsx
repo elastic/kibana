@@ -127,6 +127,9 @@ export function OperationTypeComponent({
       valueOfSelected={operationType}
       options={options}
       onChange={onChange}
+      aria-label={i18n.translate('xpack.exploratoryView.expView.operationTypeSelect.ariaLabel', {
+        defaultMessage: 'Operation type',
+      })}
     />
   );
 }

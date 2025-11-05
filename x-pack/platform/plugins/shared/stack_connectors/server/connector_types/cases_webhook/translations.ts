@@ -39,3 +39,10 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
       message,
     },
   });
+
+export const OAUTH2_NOT_SUPPORTED = i18n.translate(
+  'xpack.stackConnectors.casesWebhook.oauth2NotSupported',
+  {
+    defaultMessage: 'OAuth2 authentication is not supported for cases webhook connector',
+  }
+);

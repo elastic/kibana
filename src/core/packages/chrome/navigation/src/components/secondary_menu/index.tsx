@@ -8,8 +8,8 @@
  */
 
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { FC, ReactNode } from 'react';
-import React from 'react';
+import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
+import React, { forwardRef } from 'react';
 import { css } from '@emotion/react';
 
 import { SecondaryMenuItemComponent } from './item';
@@ -25,7 +25,8 @@ export interface SecondaryMenuProps {
   title: string;
 }
 
-interface SecondaryMenuComponent extends FC<SecondaryMenuProps> {
+interface SecondaryMenuComponent
+  extends ForwardRefExoticComponent<SecondaryMenuProps & RefAttributes<HTMLDivElement>> {
   Item: typeof SecondaryMenuItemComponent;
   Section: typeof SecondaryMenuSectionComponent;
 }
@@ -33,42 +34,41 @@ interface SecondaryMenuComponent extends FC<SecondaryMenuProps> {
 /**
  * This menu is reused between the side nav panel and the side nav popover.
  */
-export const SecondaryMenu: SecondaryMenuComponent = ({
-  badgeType,
-  children,
-  isPanel = false,
-  title,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const headerStyle = useMenuHeaderStyle();
+const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
+  ({ badgeType, children, isPanel = false, title }, ref) => {
+    const { euiTheme } = useEuiTheme();
+    const headerStyle = useMenuHeaderStyle();
 
-  const titleWithBadgeStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.xs};
-  `;
+    const titleWithBadgeStyles = css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+    `;
 
-  return (
-    <>
-      <EuiTitle
-        css={css`
-          ${headerStyle}
-          background: ${isPanel
-            ? euiTheme.colors.backgroundBaseSubdued
-            : euiTheme.colors.backgroundBasePlain};
-          border-radius: ${euiTheme.border.radius.medium};
-        `}
-        size="xs"
-      >
-        <div css={titleWithBadgeStyles}>
-          <h4>{title}</h4>
-          {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
-        </div>
-      </EuiTitle>
-      {children}
-    </>
-  );
-};
+    return (
+      <div ref={ref}>
+        <EuiTitle
+          css={css`
+            ${headerStyle}
+            background: ${isPanel
+              ? euiTheme.colors.backgroundBaseSubdued
+              : euiTheme.colors.backgroundBasePlain};
+            border-radius: ${euiTheme.border.radius.medium};
+          `}
+          size="xs"
+        >
+          <div css={titleWithBadgeStyles}>
+            <h4>{title}</h4>
+            {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
+          </div>
+        </EuiTitle>
+        {children}
+      </div>
+    );
+  }
+);
 
-SecondaryMenu.Item = SecondaryMenuItemComponent;
-SecondaryMenu.Section = SecondaryMenuSectionComponent;
+export const SecondaryMenu = Object.assign(SecondaryMenuBase, {
+  Item: SecondaryMenuItemComponent,
+  Section: SecondaryMenuSectionComponent,
+}) satisfies SecondaryMenuComponent;

@@ -257,6 +257,12 @@ describe('commands', () => {
     test('around JOIN conditions', () => {
       assertPrint('FROM a | LEFT JOIN a /*1*/ /*2*/ /*3*/ /*4*/');
     });
+
+    test('supports binary expressions', () => {
+      assertPrint(
+        'FROM employees | LEFT JOIN a ON /*1*/ b /*2*/, /*3*/ c /*4*/ > /*5*/ d /*6*/, /*7*/ d.e.f /*8*/ == /*9*/ 42 /*10*/ AND /*11*/ NOT /*12*/ MATCH(/*13*/ g /*14*/, /*15*/ "hallo" /*16*/) /*17*/'
+      );
+    });
   });
 
   describe('DISSECT', () => {
@@ -277,5 +283,14 @@ describe('commands', () => {
         'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field1 /*4*/, /*5*/ field2 /*6*/ WITH /*7*/ {"id1": "value1"} /*8*/'
       );
     });
+  });
+});
+
+describe('subqueries (parens)', () => {
+  test('can print comments in complex subqueries', () => {
+    const query =
+      'FROM index1, /* before subquery */ (/* inside start */ FROM index2 /* after source */ | WHERE a > 10 /* after where */ | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10) /* after first subquery */, index3, (FROM index4 | STATS COUNT(*)) /* after second */ | WHERE d > 10 | STATS max = MAX(*) BY e | SORT max DESC';
+
+    assertPrint(query);
   });
 });

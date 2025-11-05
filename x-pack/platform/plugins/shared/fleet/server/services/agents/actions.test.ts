@@ -6,9 +6,9 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { merge } from 'lodash';
 
 import type { NewAgentAction, AgentActionType } from '../../../common/types';
-
 import { createAppContextStartContractMock, type MockedFleetAppContext } from '../../mocks';
 import { appContextService } from '../app_context';
 import { auditLoggingService } from '../audit_logging';
@@ -19,11 +19,16 @@ import {
   cancelAgentAction,
   createAgentAction,
   getAgentsByActionsIds,
+  transformDataSecrets,
 } from './actions';
 import { bulkUpdateAgents } from './crud';
 
 jest.mock('./crud');
 jest.mock('../audit_logging');
+jest.mock('../secrets', () => ({
+  isActionSecretStorageEnabled: jest.fn(),
+  toCompiledSecretRef: jest.fn((id: string) => `$co.elastic.secret{${id}}`),
+}));
 
 const mockedBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
@@ -96,8 +101,9 @@ describe('Agent actions', () => {
           ],
         },
       } as any);
+      const soClient = savedObjectsClientMock.create();
 
-      await createAgentAction(esClient, {
+      await createAgentAction(esClient, soClient, {
         id: 'action1',
         type: 'UPGRADE',
         agents: ['agent1'],
@@ -126,8 +132,9 @@ describe('Agent actions', () => {
             ],
           },
         } as any);
+        const soClient = savedObjectsClientMock.create();
 
-        await createAgentAction(esClient, {
+        await createAgentAction(esClient, soClient, {
           id: 'action1',
           type: actionType,
           agents: ['agent1'],
@@ -171,8 +178,9 @@ describe('Agent actions', () => {
           ],
         },
       } as any);
+      const soClient = savedObjectsClientMock.create();
 
-      await createAgentAction(esClient, {
+      await createAgentAction(esClient, soClient, {
         id: 'action1',
         type: actionType,
         agents: ['agent1'],
@@ -564,6 +572,36 @@ describe('Agent actions', () => {
       );
       const actionsIds = ['action2'];
       expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual(['agent3', 'agent4']);
+    });
+  });
+
+  describe('transformDataSecrets', () => {
+    it('should transform secret references from {id: string} to $co.elastic.secret{id}', () => {
+      const testAction: NewAgentAction = {
+        type: 'PRIVILEGE_LEVEL_CHANGE',
+        agents: ['agent1'],
+        data: {
+          user_info: {
+            username: 'user1',
+            groupname: 'group1',
+          },
+        },
+        secrets: {
+          user_info: {
+            password: {
+              id: 'passwordref1',
+            },
+          },
+        },
+      };
+      const testMergedData = merge(testAction.data, testAction.secrets);
+      expect(transformDataSecrets(testMergedData)).toEqual({
+        user_info: {
+          username: 'user1',
+          groupname: 'group1',
+          password: '$co.elastic.secret{passwordref1}',
+        },
+      });
     });
   });
 });

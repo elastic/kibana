@@ -13,13 +13,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { AggGroupNames } from '../agg_groups';
 import type { IAggConfigs } from '../agg_configs';
 import type { IAggType } from '../agg_type';
 import type { IAggConfig } from '../agg_config';
 import { createSamplerAgg } from '../utils/sampler';
 
-const MISSING_KEY_STRING = '__missing__';
 export const OTHER_NESTED_BUCKET_SEPARATOR = '╰┄►';
 const otherBucketRegexp = new RegExp(`^${OTHER_NESTED_BUCKET_SEPARATOR}`);
 
@@ -102,7 +102,7 @@ const getAggConfigResultMissingBuckets = (responseAggs: any, aggId: string) => {
   const resultBuckets: Array<Record<string, any>> = [];
   if (responseAggs[aggId]) {
     const matchingBucket = responseAggs[aggId].buckets.find(
-      (bucket: Record<string, any>) => bucket.key === MISSING_KEY_STRING
+      (bucket: Record<string, any>) => bucket.key === MISSING_TOKEN
     );
     if (matchingBucket) {
       resultBuckets.push(matchingBucket);
@@ -239,7 +239,7 @@ export const buildOtherBucketAgg = (
     const hasScriptedField = !!aggWithOtherBucket.params.field?.scripted;
     const hasMissingBucket = !!aggWithOtherBucket.params.missingBucket;
     const hasMissingBucketKey = agg.buckets.some(
-      (bucket: { key: string }) => bucket.key === MISSING_KEY_STRING
+      (bucket: { key: string }) => bucket.key === MISSING_TOKEN
     );
     if (
       aggWithOtherBucket.params.field &&
@@ -256,7 +256,7 @@ export const buildOtherBucketAgg = (
 
     // create not filters for all the buckets
     each(agg.buckets, (bucket) => {
-      if (bucket.key === MISSING_KEY_STRING) return;
+      if (bucket.key === MISSING_TOKEN) return;
       const filter = currentAgg.createFilter(currentAgg.getKey(bucket, bucket.key));
       filter.meta.negate = true;
       filters.push(filter);
@@ -333,7 +333,7 @@ export const mergeOtherBucketAggResponse = (
 
     if (
       aggResultBuckets.some(
-        (aggResultBucket: Record<string, any>) => aggResultBucket.key === MISSING_KEY_STRING
+        (aggResultBucket: Record<string, any>) => aggResultBucket.key === MISSING_TOKEN
       )
     ) {
       bucket.filters.push(
@@ -355,7 +355,7 @@ export const updateMissingBucket = (
     agg.id
   );
   aggResultBuckets.forEach((bucket) => {
-    bucket.key = MISSING_KEY_STRING;
+    bucket.key = MISSING_TOKEN;
   });
   return updatedResponse;
 };

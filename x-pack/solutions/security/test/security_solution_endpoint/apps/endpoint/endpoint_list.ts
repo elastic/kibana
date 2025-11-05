@@ -81,7 +81,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
-  describe('endpoint list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/236099
+  describe.skip('endpoint list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;

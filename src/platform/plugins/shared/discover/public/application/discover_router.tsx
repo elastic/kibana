@@ -13,6 +13,7 @@ import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { NotFoundRoute } from './not_found';
@@ -32,7 +33,13 @@ export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps)
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={services.history} data-test-subj="discover-react-router">
-          <DiscoverRoutes {...routeProps} />
+          <RedirectAppLinks
+            coreStart={{
+              application: services.core.application,
+            }}
+          >
+            <DiscoverRoutes {...routeProps} />
+          </RedirectAppLinks>
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>

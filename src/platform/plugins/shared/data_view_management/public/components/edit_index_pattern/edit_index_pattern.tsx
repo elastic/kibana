@@ -13,7 +13,6 @@ import { withRouter, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiBadge,
   EuiCallOut,
@@ -58,7 +57,7 @@ const mappingConflictHeader = i18n.translate(
 const securityDataView = i18n.translate(
   'indexPatternManagement.editIndexPattern.badge.securityDataViewTitle',
   {
-    defaultMessage: 'Security Data View',
+    defaultMessage: 'Security Solution',
   }
 );
 
@@ -175,17 +174,17 @@ export const EditIndexPattern = withRouter(
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         {dataView && (
-          <IndexHeader
-            indexPattern={dataView}
-            setDefault={() => dataViewMgmtService.setDefaultDataView()}
-            editIndexPatternClick={editPattern}
-            deleteIndexPatternClick={() => {
-              setFlyoutOpen(true);
-            }}
-            defaultIndex={defaultIndex}
-            canSave={userEditPermission}
-          >
-            <EuiHorizontalRule margin="none" />
+          <>
+            <IndexHeader
+              indexPattern={dataView}
+              setDefault={() => dataViewMgmtService.setDefaultDataView()}
+              editIndexPatternClick={editPattern}
+              deleteIndexPatternClick={() => {
+                setFlyoutOpen(true);
+              }}
+              defaultIndex={defaultIndex}
+              canSave={userEditPermission}
+            />
             <EuiSpacer size="l" />
             <EuiFlexGroup wrap gutterSize="l" alignItems="center">
               {Boolean(indexPattern.title) && (
@@ -210,7 +209,7 @@ export const EditIndexPattern = withRouter(
               )}
               {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>{securityDataView}</EuiBadge>
+                  <EuiBadge color="accent">{securityDataView}</EuiBadge>
                 </EuiFlexItem>
               )}
               {tags.map((tag) => (
@@ -225,10 +224,14 @@ export const EditIndexPattern = withRouter(
                     </EuiBadge>
                   ) : tag.key === 'rollup' ? (
                     <RollupDeprecationTooltip>
-                      <EuiBadge color="warning">{tag.name}</EuiBadge>
+                      <EuiBadge color="warning" data-test-subj={tag['data-test-subj']}>
+                        {tag.name}
+                      </EuiBadge>
                     </RollupDeprecationTooltip>
                   ) : (
-                    <EuiBadge color="hollow">{tag.name}</EuiBadge>
+                    <EuiBadge color="hollow" data-test-subj={tag['data-test-subj']}>
+                      {tag.name}
+                    </EuiBadge>
                   )}
                 </EuiFlexItem>
               ))}
@@ -237,6 +240,7 @@ export const EditIndexPattern = withRouter(
               <>
                 <EuiSpacer />
                 <EuiCallOut
+                  announceOnMount={false}
                   title={mappingConflictHeader}
                   color="warning"
                   iconType="warning"
@@ -257,7 +261,7 @@ export const EditIndexPattern = withRouter(
                 </EuiCallOut>
               </>
             )}
-          </IndexHeader>
+          </>
         )}
         <EuiSpacer size="xl" />
 

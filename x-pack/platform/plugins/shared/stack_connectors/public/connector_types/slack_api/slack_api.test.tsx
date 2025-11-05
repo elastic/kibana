@@ -9,8 +9,8 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registerConnectorTypes } from '..';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
 
 let connectorTypeModel: ConnectorTypeModel;
 const testBlock = {
@@ -28,7 +28,7 @@ beforeAll(async () => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(SLACK_API_CONNECTOR_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }
@@ -36,8 +36,40 @@ beforeAll(async () => {
 
 describe('connectorTypeRegistry.get works', () => {
   test('connector type static data is as expected', () => {
-    expect(connectorTypeModel.id).toEqual(SLACK_API_CONNECTOR_ID);
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
     expect(connectorTypeModel.iconClass).toEqual('logoSlack');
+  });
+});
+
+describe('hideInUi', () => {
+  test('should return true when slack is enabled in config', () => {
+    expect(
+      // @ts-expect-error
+      connectorTypeModel.getHideInUi([
+        // @ts-expect-error necessary fields only
+        { id: '.slack', enabledInConfig: true, enabledInLicense: true, name: 'Slack' },
+      ])
+    ).toEqual(true);
+  });
+
+  test('should return false when slack is disabled in config', () => {
+    expect(
+      // @ts-expect-error
+      connectorTypeModel.getHideInUi([
+        // @ts-expect-error necessary fields only
+        { id: '.slack', enabledInConfig: false, enabledInLicense: true, name: 'Slack' },
+      ])
+    ).toEqual(false);
+  });
+
+  test('should return false when slack is not found in config', () => {
+    expect(
+      // @ts-expect-error
+      connectorTypeModel.getHideInUi([
+        // @ts-expect-error necessary fields only
+        { id: '.cases', enabledInConfig: true, enabledInLicense: true, name: 'Cases' },
+      ])
+    ).toEqual(false);
   });
 });
 

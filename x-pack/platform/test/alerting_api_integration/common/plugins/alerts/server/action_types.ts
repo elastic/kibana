@@ -6,8 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { ActionType } from '@kbn/actions-plugin/server';
 import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
@@ -26,9 +25,9 @@ export function defineActionTypes(
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
-      params: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
+      params: { schema: z.object({}).strict().default({}) },
     },
     async executor() {
       return { status: 'ok', actionId: '' };
@@ -41,9 +40,9 @@ export function defineActionTypes(
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
-      params: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
+      params: { schema: z.object({}).strict().default({}) },
     },
     async executor() {
       // add a delay so the execution time is non-zero
@@ -58,18 +57,35 @@ export function defineActionTypes(
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
-      params: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
+      params: { schema: z.object({}).strict().default({}) },
     },
     async executor() {
       return { status: 'ok', actionId: '' };
     },
   };
 
+  const deprecatedActionType: ActionType = {
+    id: 'test.deprecated',
+    name: 'Test: Deprecated',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
+      params: { schema: z.object({}).strict().default({}) },
+    },
+    async executor() {
+      return { status: 'ok', actionId: '' };
+    },
+    isDeprecated: true,
+  };
+
   actions.registerType(noopActionType);
   actions.registerType(throwActionType);
   actions.registerType(cappedActionType);
+  actions.registerType(deprecatedActionType);
   actions.registerType(getIndexRecordActionType());
   actions.registerType(getDelayedActionType());
   actions.registerType(getFailingActionType());
@@ -93,20 +109,26 @@ export function defineActionTypes(
 }
 
 function getIndexRecordActionType() {
-  const paramsSchema = schema.object({
-    index: schema.string(),
-    reference: schema.string(),
-    message: schema.string(),
-  });
-  type ParamsType = TypeOf<typeof paramsSchema>;
-  const configSchema = schema.object({
-    unencrypted: schema.string(),
-  });
-  type ConfigType = TypeOf<typeof configSchema>;
-  const secretsSchema = schema.object({
-    encrypted: schema.string(),
-  });
-  type SecretsType = TypeOf<typeof secretsSchema>;
+  const paramsSchema = z
+    .object({
+      index: z.string(),
+      reference: z.string(),
+      message: z.string(),
+    })
+    .strict();
+  type ParamsType = z.infer<typeof paramsSchema>;
+  const configSchema = z
+    .object({
+      unencrypted: z.string(),
+    })
+    .strict();
+  type ConfigType = z.infer<typeof configSchema>;
+  const secretsSchema = z
+    .object({
+      encrypted: z.string(),
+    })
+    .strict();
+  type SecretsType = z.infer<typeof secretsSchema>;
   const result: ActionType<ConfigType, SecretsType, ParamsType> = {
     id: 'test.index-record',
     name: 'Test: Index Record',
@@ -143,17 +165,21 @@ function getIndexRecordActionType() {
 }
 
 function getHookedActionType() {
-  const paramsSchema = schema.object({});
-  type ParamsType = TypeOf<typeof paramsSchema>;
-  const configSchema = schema.object({
-    index: schema.string(),
-    source: schema.string(),
-  });
-  type ConfigType = TypeOf<typeof configSchema>;
-  const secretsSchema = schema.object({
-    encrypted: schema.string(),
-  });
-  type SecretsType = TypeOf<typeof secretsSchema>;
+  const paramsSchema = z.object({}).strict();
+  type ParamsType = z.infer<typeof paramsSchema>;
+  const configSchema = z
+    .object({
+      index: z.string(),
+      source: z.string(),
+    })
+    .strict();
+  type ConfigType = z.infer<typeof configSchema>;
+  const secretsSchema = z
+    .object({
+      encrypted: z.string(),
+    })
+    .strict();
+  type SecretsType = z.infer<typeof secretsSchema>;
   const result: ActionType<ConfigType, SecretsType, ParamsType> = {
     id: 'test.connector-with-hooks',
     name: 'Test: Connector with hooks',
@@ -233,18 +259,24 @@ function getHookedActionType() {
 }
 
 function getDelayedActionType() {
-  const paramsSchema = schema.object({
-    delayInMs: schema.number({ defaultValue: 1000 }),
-  });
-  type ParamsType = TypeOf<typeof paramsSchema>;
-  const configSchema = schema.object({
-    unencrypted: schema.string(),
-  });
-  type ConfigType = TypeOf<typeof configSchema>;
-  const secretsSchema = schema.object({
-    encrypted: schema.string(),
-  });
-  type SecretsType = TypeOf<typeof secretsSchema>;
+  const paramsSchema = z
+    .object({
+      delayInMs: z.number().default(1000),
+    })
+    .strict();
+  type ParamsType = z.infer<typeof paramsSchema>;
+  const configSchema = z
+    .object({
+      unencrypted: z.string(),
+    })
+    .strict();
+  type ConfigType = z.infer<typeof configSchema>;
+  const secretsSchema = z
+    .object({
+      encrypted: z.string(),
+    })
+    .strict();
+  type SecretsType = z.infer<typeof secretsSchema>;
   const result: ActionType<ConfigType, SecretsType, ParamsType> = {
     id: 'test.delayed',
     name: 'Test: Delayed',
@@ -274,19 +306,21 @@ function getDelayedActionType() {
 }
 
 function getFailingActionType() {
-  const paramsSchema = schema.object({
-    index: schema.string(),
-    reference: schema.string(),
-  });
-  type ParamsType = TypeOf<typeof paramsSchema>;
+  const paramsSchema = z
+    .object({
+      index: z.string(),
+      reference: z.string(),
+    })
+    .strict();
+  type ParamsType = z.infer<typeof paramsSchema>;
   const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.failing',
     name: 'Test: Failing',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
       params: {
         schema: paramsSchema,
       },
@@ -310,12 +344,14 @@ function getFailingActionType() {
 }
 
 function getRateLimitedActionType() {
-  const paramsSchema = schema.object({
-    index: schema.string(),
-    reference: schema.string(),
-    retryAt: schema.number(),
-  });
-  type ParamsType = TypeOf<typeof paramsSchema>;
+  const paramsSchema = z
+    .object({
+      index: z.string(),
+      reference: z.string(),
+      retryAt: z.number(),
+    })
+    .strict();
+  type ParamsType = z.infer<typeof paramsSchema>;
   const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.rate-limit',
     name: 'Test: Rate Limit',
@@ -323,8 +359,8 @@ function getRateLimitedActionType() {
     supportedFeatureIds: ['alerting'],
     maxAttempts: 2,
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
       params: {
         schema: paramsSchema,
       },
@@ -351,12 +387,14 @@ function getRateLimitedActionType() {
 }
 
 function getNoAttemptsRateLimitedActionType() {
-  const paramsSchema = schema.object({
-    index: schema.string(),
-    reference: schema.string(),
-    retryAt: schema.number(),
-  });
-  type ParamsType = TypeOf<typeof paramsSchema>;
+  const paramsSchema = z
+    .object({
+      index: z.string(),
+      reference: z.string(),
+      retryAt: z.number(),
+    })
+    .strict();
+  type ParamsType = z.infer<typeof paramsSchema>;
   const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.no-attempts-rate-limit',
     name: 'Test: Rate Limit',
@@ -364,8 +402,8 @@ function getNoAttemptsRateLimitedActionType() {
     supportedFeatureIds: ['alerting'],
     maxAttempts: 0,
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
       params: {
         schema: paramsSchema,
       },
@@ -393,22 +431,24 @@ function getNoAttemptsRateLimitedActionType() {
 }
 
 function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
-  const paramsSchema = schema.object({
-    callClusterAuthorizationIndex: schema.string(),
-    savedObjectsClientType: schema.string(),
-    savedObjectsClientId: schema.string(),
-    index: schema.string(),
-    reference: schema.string(),
-  });
-  type ParamsType = TypeOf<typeof paramsSchema>;
+  const paramsSchema = z
+    .object({
+      callClusterAuthorizationIndex: z.string(),
+      savedObjectsClientType: z.string(),
+      savedObjectsClientId: z.string(),
+      index: z.string(),
+      reference: z.string(),
+    })
+    .strict();
+  type ParamsType = z.infer<typeof paramsSchema>;
   const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.authorization',
     name: 'Test: Authorization',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
       params: {
         schema: paramsSchema,
       },
@@ -491,9 +531,9 @@ function getExcludedActionType() {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
-      params: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
+      params: { schema: z.object({}).strict().default({}) },
     },
     async executor({ actionId }) {
       return { status: 'ok', actionId };
@@ -510,13 +550,13 @@ function getSystemActionType() {
     supportedFeatureIds: ['alerting'],
     validate: {
       params: {
-        schema: schema.any(),
+        schema: z.any(),
       },
       config: {
-        schema: schema.any(),
+        schema: z.any(),
       },
       secrets: {
-        schema: schema.any(),
+        schema: z.any(),
       },
     },
     isSystemActionType: true,
@@ -544,16 +584,18 @@ function getSystemActionTypeWithKibanaPrivileges() {
         /**
          * Adapter: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
          */
-        schema: schema.object({
-          index: schema.maybe(schema.string()),
-          reference: schema.maybe(schema.string()),
-        }),
+        schema: z
+          .object({
+            index: z.string().optional(),
+            reference: z.string().optional(),
+          })
+          .strict(),
       },
       config: {
-        schema: schema.any(),
+        schema: z.any(),
       },
       secrets: {
-        schema: schema.any(),
+        schema: z.any(),
       },
     },
     isSystemActionType: true,
@@ -605,19 +647,21 @@ function getSystemActionTypeWithConnectorAdapter() {
          *
          * Adapter: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
          */
-        schema: schema.object({
-          myParam: schema.string(),
-          injected: schema.string(),
-          index: schema.maybe(schema.string()),
-          reference: schema.maybe(schema.string()),
-        }),
+        schema: z
+          .object({
+            myParam: z.string(),
+            injected: z.string(),
+            index: z.string().optional(),
+            reference: z.string().optional(),
+          })
+          .strict(),
       },
 
       config: {
-        schema: schema.any(),
+        schema: z.any(),
       },
       secrets: {
-        schema: schema.any(),
+        schema: z.any(),
       },
     },
     isSystemActionType: true,

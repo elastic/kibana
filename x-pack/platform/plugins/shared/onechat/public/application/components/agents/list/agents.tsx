@@ -11,39 +11,49 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiButton, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../../../common/doc_links';
 import { AgentsList } from './agents_list';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { DeleteAgentProvider } from '../../../context/delete_agent_context';
+import { TechPreviewTitle } from '../../common/tech_preview';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 export const OnechatAgents = () => {
   const { euiTheme } = useEuiTheme();
+  const { manageAgents } = useUiPrivileges();
   const headerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border: none;
   `;
   const { createOnechatUrl } = useNavigation();
   const headerButtons = [
-    <EuiButton
-      iconType="plus"
-      color="primary"
-      fill
-      iconSide="left"
-      href={createOnechatUrl(appPaths.agents.new)}
-    >
-      {i18n.translate('xpack.onechat.agents.newAgentButton', {
-        defaultMessage: 'New agent',
-      })}
-    </EuiButton>,
+    manageAgents && (
+      <EuiButton
+        iconType="plus"
+        color="primary"
+        fill
+        iconSide="left"
+        href={createOnechatUrl(appPaths.agents.new)}
+      >
+        {i18n.translate('xpack.onechat.agents.newAgentButton', {
+          defaultMessage: 'New agent',
+        })}
+      </EuiButton>
+    ),
   ];
   return (
     <DeleteAgentProvider>
       <KibanaPageTemplate>
         <KibanaPageTemplate.Header
           css={headerStyles}
-          pageTitle={i18n.translate('xpack.onechat.agents.title', {
-            defaultMessage: 'Agents',
-          })}
+          pageTitle={
+            <TechPreviewTitle
+              title={i18n.translate('xpack.onechat.agents.title', {
+                defaultMessage: 'Agents',
+              })}
+            />
+          }
           description={
             <FormattedMessage
               id="xpack.onechat.agents.description"
@@ -58,7 +68,7 @@ export const OnechatAgents = () => {
                 ),
                 learnMoreLink: (
                   <EuiLink
-                    href="#"
+                    href={docLinks.agentBuilderAgents}
                     target="_blank"
                     aria-label={i18n.translate(
                       'xpack.onechat.agents.agentsDocumentationAriaLabel',

@@ -7,7 +7,7 @@
 
 import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToolsTags } from '../../../hooks/tools/use_tool_tags';
@@ -56,13 +56,13 @@ const getToolsTableSearchConfig = ({
 
 export interface ToolsTableSearch {
   searchConfig: Search;
-  results: ToolDefinitionWithSchema[];
+  results: ToolDefinition[];
 }
 
 export const useToolsTableSearch = (): ToolsTableSearch => {
   const { tools } = useToolsService();
   const { tags } = useToolsTags();
-  const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
+  const [results, setResults] = useState<ToolDefinition[]>(tools);
   const [searchQuery, setSearchQuery] = useQueryState('search', {
     defaultValue: '',
     parse: toValidSearchQuery,

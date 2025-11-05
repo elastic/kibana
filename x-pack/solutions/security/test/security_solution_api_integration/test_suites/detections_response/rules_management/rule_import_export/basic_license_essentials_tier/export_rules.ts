@@ -15,7 +15,7 @@ import { deleteAllRules } from '../../../../../config/services/detections_respon
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   describe('@ess @serverless @serverlessQA export_rules', () => {
     describe('exporting rules', () => {
@@ -26,9 +26,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should set the response content types to be expected', async () => {
         const ruleToExport = getCustomQueryRuleParams();
 
-        await securitySolutionApi.createRule({ body: ruleToExport });
+        await detectionsApi.createRule({ body: ruleToExport });
 
-        await securitySolutionApi
+        await detectionsApi
           .exportRules({ query: {}, body: null })
           .expect(200)
           .expect('Content-Type', 'application/ndjson')
@@ -38,9 +38,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should export a single rule with a rule_id', async () => {
         const ruleToExport = getCustomQueryRuleParams();
 
-        await securitySolutionApi.createRule({ body: ruleToExport });
+        await detectionsApi.createRule({ body: ruleToExport });
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
@@ -52,15 +52,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('exports a set of custom rules via the _export API', async () => {
         await Promise.all([
-          securitySolutionApi
+          detectionsApi
             .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-id-1' }) })
             .expect(200),
-          securitySolutionApi
+          detectionsApi
             .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-id-2' }) })
             .expect(200),
         ]);
 
-        const { body: exportResult } = await securitySolutionApi
+        const { body: exportResult } = await detectionsApi
           .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
@@ -109,9 +109,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         };
 
-        await securitySolutionApi.createRule({ body: ruleToExport });
+        await detectionsApi.createRule({ body: ruleToExport });
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
@@ -124,9 +124,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should have export summary reflecting a number of rules', async () => {
         const ruleToExport = getCustomQueryRuleParams();
 
-        await securitySolutionApi.createRule({ body: ruleToExport });
+        await detectionsApi.createRule({ body: ruleToExport });
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
@@ -145,10 +145,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const ruleToExport1 = getCustomQueryRuleParams({ rule_id: 'rule-1' });
         const ruleToExport2 = getCustomQueryRuleParams({ rule_id: 'rule-2' });
 
-        await securitySolutionApi.createRule({ body: ruleToExport1 });
-        await securitySolutionApi.createRule({ body: ruleToExport2 });
+        await detectionsApi.createRule({ body: ruleToExport1 });
+        await detectionsApi.createRule({ body: ruleToExport2 });
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);

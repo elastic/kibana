@@ -31,7 +31,7 @@ export const AskAiAssistant = <T extends EntityType>({
 }: ExplainWithAiAssistantProps<T>) => {
   const entityField = EntityTypeToIdentifierField[entityType];
   const { data: anonymizationFields } = useFetchAnonymizationFields();
-  const isAssistantToolEnabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolEnabled');
+  const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
 
   const { anonymizedValues, replacements }: AnonymizedValues = useMemo(() => {
     if (!anonymizationFields.data) {
@@ -62,7 +62,7 @@ export const AskAiAssistant = <T extends EntityType>({
     replacements,
   });
 
-  if (aiAssistantDisable || !isAssistantToolEnabled) {
+  if (aiAssistantDisable || isAssistantToolDisabled) {
     return null;
   }
 

@@ -17,12 +17,12 @@ import {
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
-import { WebhookMethods } from '../../../common/auth/constants';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 
 import {
-  createServiceError,
+  addServiceMessageToError,
   getObjectValueByKeyAsString,
   stringifyObjValues,
   removeSlash,
@@ -159,7 +159,7 @@ export const createExternalService = (
 
       return { id, title };
     } catch (error) {
-      throw createServiceError(error, `Unable to get case with id ${id}`);
+      throw addServiceMessageToError(error, `Unable to get case with id ${id}`);
     }
   };
 
@@ -230,7 +230,7 @@ export const createExternalService = (
         pushedDate: new Date().toISOString(),
       };
     } catch (error) {
-      throw createServiceError(error, 'Unable to create case');
+      throw addServiceMessageToError(error, 'Unable to create case');
     }
   };
 
@@ -312,7 +312,7 @@ export const createExternalService = (
         pushedDate: new Date().toISOString(),
       };
     } catch (error) {
-      throw createServiceError(error, `Unable to update case with id ${incidentId}`);
+      throw addServiceMessageToError(error, `Unable to update case with id ${incidentId}`);
     }
   };
 
@@ -362,7 +362,10 @@ export const createExternalService = (
         res,
       });
     } catch (error) {
-      throw createServiceError(error, `Unable to create comment at case with id ${incidentId}`);
+      throw addServiceMessageToError(
+        error,
+        `Unable to create comment at case with id ${incidentId}`
+      );
     }
   };
 

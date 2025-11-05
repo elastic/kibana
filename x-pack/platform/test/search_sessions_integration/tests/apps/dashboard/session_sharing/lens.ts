@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Add a by ref lens panel to a new dashboard
       const lensTitle = 'Artistpreviouslyknownaslens';
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.filterEmbeddableNames(lensTitle);
       await find.clickByButtonText(lensTitle);
       await dashboardAddPanel.closeAddPanel();

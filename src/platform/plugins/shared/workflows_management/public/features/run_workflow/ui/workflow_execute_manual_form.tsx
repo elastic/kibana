@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowDetailDto, WorkflowInputSchema, WorkflowListItemDto } from '@kbn/workflows';
-import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
+import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
@@ -31,6 +32,27 @@ const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputS
             ? z.enum(input.options as [string, ...string[]])
             : z.enum(input.options as [string, ...string[]]).optional();
           break;
+        case 'array': {
+          const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
+          const { minItems, maxItems } = input;
+          const applyConstraints = (
+            schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
+          ) => {
+            let s = schema;
+            if (minItems != null) s = s.min(minItems);
+            if (maxItems != null) s = s.max(maxItems);
+            return s;
+          };
+          const arr = z.union(
+            arraySchemas.map(applyConstraints) as [
+              z.ZodArray<z.ZodString>,
+              z.ZodArray<z.ZodNumber>,
+              z.ZodArray<z.ZodBoolean>
+            ]
+          );
+          acc[input.name] = input.required ? arr : arr.optional();
+          break;
+        }
       }
       return acc;
     }, {} as Record<string, z.ZodType>)
@@ -38,27 +60,38 @@ const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputS
 };
 
 interface WorkflowExecuteManualFormProps {
-  workflow: WorkflowDetailDto | WorkflowListItemDto;
+  definition: WorkflowYaml | null;
   value: string;
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
 }
 
-const defaultWorkflowInputsMappings: Record<string, any> = {
+type WorkflowInputPlaceholder =
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | boolean[]
+  | ((input: z.infer<typeof WorkflowInputSchema>) => string);
+
+const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = {
   string: 'Enter a string',
   number: 0,
   boolean: false,
-  choice: (input: any) => `Select an option: ${input.options.join(', ')}`,
+  choice: (input: z.infer<typeof WorkflowInputSchema>) =>
+    `Select an option: ${(input as z.infer<typeof WorkflowInputChoiceSchema>).options.join(', ')}`,
+  array: (input: z.infer<typeof WorkflowInputSchema>) =>
+    'Enter array of strings, numbers or booleans',
 };
 
-const getDefaultWorkflowInput = (workflow: WorkflowDetailDto | WorkflowListItemDto): string => {
-  const inputPlaceholder: Record<string, any> = {};
+const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
+  const inputPlaceholder: Record<string, WorkflowInputPlaceholder> = {};
 
-  if (workflow?.definition!.inputs) {
-    workflow.definition!.inputs.forEach((input: any) => {
-      let placeholder: string | number | boolean | ((input: any) => string) =
-        defaultWorkflowInputsMappings[input.type];
+  if (definition.inputs) {
+    definition.inputs.forEach((input: z.infer<typeof WorkflowInputSchema>) => {
+      let placeholder: WorkflowInputPlaceholder = defaultWorkflowInputsMappings[input.type];
       if (typeof placeholder === 'function') {
         placeholder = placeholder(input);
       }
@@ -70,43 +103,52 @@ const getDefaultWorkflowInput = (workflow: WorkflowDetailDto | WorkflowListItemD
 };
 
 export const WorkflowExecuteManualForm = ({
-  workflow,
+  definition,
   value,
   setValue,
   errors,
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(
-    () => makeWorkflowInputsValidator(workflow?.definition!.inputs || []),
-    [workflow?.definition]
+    () => makeWorkflowInputsValidator(definition?.inputs || []),
+    [definition?.inputs]
   );
 
   const handleChange = useCallback(
     (data: string) => {
       setValue(data);
-      if (workflow?.definition!.inputs) {
+      if (definition?.inputs) {
         try {
           const res = inputsValidator.safeParse(JSON.parse(data));
           if (!res.success) {
             setErrors(
-              res.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
+              res.error.issues
+                .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+                .join(', ')
             );
           } else {
             setErrors(null);
           }
-        } catch (e: Error | any) {
-          setErrors(`Invalid JSON: ${e.message || e.toString()}`);
+        } catch (e: Error | unknown) {
+          setErrors(
+            i18n.translate('workflows.workflowExecuteManualForm.invalidJSONError', {
+              defaultMessage: 'Invalid JSON: {message}',
+              values: {
+                message: e instanceof Error ? e.message : String(e),
+              },
+            })
+          );
         }
       }
     },
-    [setValue, workflow?.definition, inputsValidator, setErrors]
+    [setValue, definition?.inputs, inputsValidator, setErrors]
   );
 
   useEffect(() => {
-    if (!value && workflow) {
-      handleChange(getDefaultWorkflowInput(workflow));
+    if (!value && definition) {
+      handleChange(getDefaultWorkflowInput(definition));
     }
-  }, [workflow, value, handleChange]);
+  }, [definition, value, handleChange]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -115,7 +157,13 @@ export const WorkflowExecuteManualForm = ({
       {errors && (
         <>
           <EuiFlexItem>
-            <EuiCallOut title="Input data is not valid" color="danger" iconType="help" size="s">
+            <EuiCallOut
+              announceOnMount
+              title="Input data is not valid"
+              color="danger"
+              iconType="help"
+              size="s"
+            >
               <p>{errors}</p>
             </EuiCallOut>
           </EuiFlexItem>
@@ -125,8 +173,12 @@ export const WorkflowExecuteManualForm = ({
       {/* Input Data Editor */}
       <EuiFlexItem>
         <EuiFormRow
-          label="Input Data"
-          helpText="JSON payload that will be passed to the workflow"
+          label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
+            defaultMessage: 'Input Data',
+          })}
+          helpText={i18n.translate('workflows.workflowExecuteManualForm.inputDataHelpText', {
+            defaultMessage: 'JSON payload that will be passed to the workflow',
+          })}
           fullWidth
         >
           <CodeEditor
@@ -137,9 +189,7 @@ export const WorkflowExecuteManualForm = ({
               maxLines: 10,
             }}
             width="100%"
-            editorDidMount={() => {}}
             onChange={handleChange}
-            suggestionProvider={undefined}
             dataTestSubj={'workflow-manual-json-editor'}
             options={{
               language: 'json',
@@ -157,12 +207,13 @@ export const WorkflowExecuteManualForm = ({
               wordWrapColumn: 80,
               wrappingIndent: 'indent',
               theme: 'vs-light',
-              quickSuggestions: {
-                other: true,
-                comments: false,
-                strings: true,
-              },
               formatOnType: true,
+              quickSuggestions: false,
+              suggestOnTriggerCharacters: false,
+              wordBasedSuggestions: false,
+              parameterHints: {
+                enabled: false,
+              },
             }}
           />
         </EuiFormRow>

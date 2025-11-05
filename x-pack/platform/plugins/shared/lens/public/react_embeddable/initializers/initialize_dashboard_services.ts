@@ -17,19 +17,20 @@ import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { isTextBasedLanguage } from '../helper';
 import type {
   LensComponentProps,
   LensPanelProps,
   LensRuntimeState,
-  LensEmbeddableStartServices,
   LensOverrides,
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
   LensApi,
   LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import { isTextBasedLanguage, transformOutputState } from '../helper';
+
+import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import type { StateManagementConfig } from './initialize_state_management';
 
@@ -52,6 +53,7 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
   style: 'skip',
   className: 'skip',
   forceDSL: 'skip',
+  esqlVariables: 'skip',
 };
 
 export interface DashboardServicesConfig {
@@ -130,12 +132,18 @@ export function initializeDashboardServices(
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
-        currentState.savedObjectId = newId;
-        return attributeService.extractReferences(currentState);
+        return {
+          rawState: {
+            ...currentState,
+            savedObjectId: newId,
+          },
+        };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return attributeService.extractReferences(byValueRuntimeState);
+        return {
+          rawState: transformOutputState(byValueRuntimeState),
+        };
       },
     },
     anyStateChange$: merge(

@@ -71,7 +71,15 @@ export type ControlGroupApi = PresentationContainer &
       controlStateTransform?: ControlStateTransform;
       onSave?: () => void;
     }) => void;
+    /**
+     * @returns a promise which is resolved when all controls children have finished initializing.
+     */
     untilInitialized: () => Promise<void>;
+
+    /**
+     * @returns a promise which is resolved when all initial selections have been initialized and published.
+     */
+    untilFiltersPublished: () => Promise<void>;
 
     /** Public getters */
     getEditorConfig: () => ControlGroupEditorConfig | undefined;

@@ -6,25 +6,23 @@
  */
 
 import moment from 'moment';
-
-jest.mock('./post_pagerduty', () => ({
-  postPagerduty: jest.fn(),
-}));
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { validateConfig, validateSecrets, validateParams } from '@kbn/actions-plugin/server/lib';
+import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { postPagerduty } from './post_pagerduty';
 import type { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type {
-  ActionParamsType,
-  PagerDutyConnectorType,
-  PagerDutyConnectorTypeExecutorOptions,
-} from '.';
+import type { PagerDutyConnectorType, PagerDutyConnectorTypeExecutorOptions } from '.';
+import type { ActionParamsType } from '@kbn/connector-schemas/pagerduty';
 import { getConnectorType } from '.';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+
+jest.mock('./post_pagerduty', () => ({
+  postPagerduty: jest.fn(),
+}));
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 const services: Services = actionsMock.createServices();
@@ -67,9 +65,18 @@ describe('validateConfig()', () => {
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
       validateConfig(connectorType, { shouldNotBeHere: true }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [shouldNotBeHere]: definition for this key is missing"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type config: [
+        {
+          \\"code\\": \\"unrecognized_keys\\",
+          \\"keys\\": [
+            \\"shouldNotBeHere\\"
+          ],
+          \\"path\\": [],
+          \\"message\\": \\"Unrecognized key(s) in object: 'shouldNotBeHere'\\"
+        }
+      ]"
+    `);
   });
 
   test('should validate and pass when the pagerduty url is added to allowedHosts', () => {
@@ -122,15 +129,35 @@ describe('validateSecrets()', () => {
   test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, { routingKey: false }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [routingKey]: expected value of type [string] but got [boolean]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"boolean\\",
+          \\"path\\": [
+            \\"routingKey\\"
+          ],
+          \\"message\\": \\"Expected string, received boolean\\"
+        }
+      ]"
+    `);
 
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"routingKey\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
   });
 });
 
@@ -156,11 +183,22 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(connectorType, { eventAction: 'ackynollage' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action params: [eventAction]: types that failed validation:
-- [eventAction.0]: expected value to equal [trigger]
-- [eventAction.1]: expected value to equal [resolve]
-- [eventAction.2]: expected value to equal [acknowledge]"
-`);
+      "error validating action params: [
+        {
+          \\"received\\": \\"ackynollage\\",
+          \\"code\\": \\"invalid_enum_value\\",
+          \\"options\\": [
+            \\"trigger\\",
+            \\"resolve\\",
+            \\"acknowledge\\"
+          ],
+          \\"path\\": [
+            \\"eventAction\\"
+          ],
+          \\"message\\": \\"Invalid enum value. Expected 'trigger' | 'resolve' | 'acknowledge', received 'ackynollage'\\"
+        }
+      ]"
+    `);
   });
 
   test('should validate and pass when valid timestamp has spaces', () => {
@@ -234,7 +272,15 @@ describe('validateParams()', () => {
         },
         { configurationUtilities }
       );
-    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: [
+        {
+          \\"code\\": \\"invalid_date\\",
+          \\"message\\": \\"error parsing timestamp \\\\\\"1963-09-55 90:23:45\\\\\\"\\",
+          \\"path\\": []
+        }
+      ]"
+    `);
   });
 
   test('should validate and throw error when dedupKey is missing on resolve', () => {
@@ -246,9 +292,15 @@ describe('validateParams()', () => {
         },
         { configurationUtilities }
       );
-    }).toThrowError(
-      `error validating action params: DedupKey is required when eventAction is "resolve"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: [
+        {
+          \\"code\\": \\"custom\\",
+          \\"message\\": \\"DedupKey is required when eventAction is \\\\\\"resolve\\\\\\"\\",
+          \\"path\\": []
+        }
+      ]"
+    `);
   });
 });
 
@@ -576,7 +628,7 @@ describe('execute()', () => {
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
-      throw new Error('doing some testing');
+      throw createTaskRunError(new Error('doing some testing'), TaskErrorSource.USER);
     });
 
     const actionId = 'some-action-id';
@@ -594,6 +646,7 @@ describe('execute()', () => {
     expect(actionResponse).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-action-id",
+        "errorSource": "user",
         "message": "error posting pagerduty event",
         "serviceMessage": "doing some testing",
         "status": "error",

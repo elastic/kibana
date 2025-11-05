@@ -12,7 +12,7 @@ import type {
   SavedDashboardPanel,
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { getReferencesForPanelId } from '../../../../../common';
 import { embeddableService, logger } from '../../../../kibana_services';
 
@@ -20,28 +20,31 @@ export function transformPanelsOut(
   panelsJSON: string = '{}',
   sections: SavedDashboardSection[] = [],
   references?: SavedObjectReference[]
-): DashboardAttributes['panels'] {
-  const panels = JSON.parse(panelsJSON);
-  const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
-    (prev, section) => {
-      const sectionId = section.gridData.i;
-      return { ...prev, [sectionId]: { ...section, panels: [] } };
-    },
-    {}
-  );
-  panels.forEach((panel: SavedDashboardPanel) => {
+): DashboardState['panels'] {
+  const topLevelPanels: DashboardPanel[] = [];
+  const sectionsMap: { [uuid: string]: DashboardSection } = {};
+  sections.forEach((section) => {
+    const { gridData: grid, ...restOfSection } = section;
+    const { i: sectionId, ...restOfGrid } = grid;
+    sectionsMap[sectionId] = {
+      ...restOfSection,
+      grid: restOfGrid,
+      panels: [],
+      uid: sectionId,
+    };
+  });
+
+  JSON.parse(panelsJSON).forEach((panel: SavedDashboardPanel) => {
     const filteredReferences = getReferencesForPanelId(panel.panelIndex, references ?? []);
     const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      (sectionsMap[sectionId] as DashboardSection).panels.push(
-        transformPanelProperties(panel, panelReferences)
-      );
+      sectionsMap[sectionId].panels.push(transformPanelProperties(panel, panelReferences));
     } else {
-      sectionsMap[panel.panelIndex] = transformPanelProperties(panel, panelReferences);
+      topLevelPanels.push(transformPanelProperties(panel, panelReferences));
     }
   });
-  return Object.values(sectionsMap);
+  return [...topLevelPanels, ...Object.values(sectionsMap)];
 }
 
 function transformPanelProperties(
@@ -57,7 +60,7 @@ function transformPanelProperties(
   }: SavedDashboardPanel,
   references?: SavedObjectReference[]
 ) {
-  const { sectionId, ...rest } = gridData; // drop section ID, if it exists
+  const { sectionId, i, ...restOfGrid } = gridData;
 
   const matchingReference =
     panelRefName && references
@@ -70,7 +73,7 @@ function transformPanelProperties(
 
   const transforms = embeddableService?.getTransforms(panelType);
 
-  const panelConfig = {
+  const config = {
     ...embeddableConfig,
     // <8.19 savedObjectId and title stored as siblings to embeddableConfig
     ...(savedObjectId !== undefined && { savedObjectId }),
@@ -80,7 +83,7 @@ function transformPanelProperties(
   let transformedPanelConfig;
   try {
     if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(panelConfig, references);
+      transformedPanelConfig = transforms.transformOut(config, references);
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError
@@ -90,10 +93,10 @@ function transformPanelProperties(
   }
 
   return {
-    gridData: rest,
-    panelConfig: transformedPanelConfig ? transformedPanelConfig : panelConfig,
-    panelIndex,
+    grid: restOfGrid,
+    config: transformedPanelConfig ? transformedPanelConfig : config,
+    uid: panelIndex,
     type: panelType,
-    version,
+    ...(version && { version }),
   };
 }

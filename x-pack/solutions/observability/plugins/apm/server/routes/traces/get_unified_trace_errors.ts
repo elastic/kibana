@@ -15,6 +15,8 @@ import {
   TRACE_ID,
   OTEL_EVENT_NAME,
   TIMESTAMP_US,
+  PROCESSOR_EVENT,
+  ID,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getApmTraceError } from './get_trace_items';
@@ -56,14 +58,16 @@ export async function getUnifiedTraceErrors({
   };
 }
 
-export const requiredFields = asMutableArray([SPAN_ID] as const);
+export const requiredFields = asMutableArray([SPAN_ID, ID] as const);
 export const optionalFields = asMutableArray([
   EXCEPTION_TYPE,
   EXCEPTION_MESSAGE,
   TIMESTAMP_US,
+  OTEL_EVENT_NAME,
 ] as const);
 
 interface OtelError {
+  event_name: string;
   span: {
     id: string;
   };
@@ -101,6 +105,7 @@ async function getUnprocessedOtelErrors({
           ...existsQuery(EXCEPTION_MESSAGE),
         ],
         minimum_should_match: 1,
+        must_not: { exists: { field: PROCESSOR_EVENT } },
       },
     },
     fields: [...requiredFields, ...optionalFields],
@@ -114,8 +119,10 @@ async function getUnprocessedOtelErrors({
       if (!event) return null;
 
       return {
-        id: event.span?.id,
+        id: hit._id,
+        spanId: event.span?.id,
         timestamp: event?.timestamp,
+        eventName: event?.event_name,
         error: {
           exception: {
             type: event.exception?.type,
@@ -129,7 +136,9 @@ async function getUnprocessedOtelErrors({
         doc
       ): doc is {
         id: string;
+        spanId: string;
         timestamp: TimestampUs | undefined;
+        eventName: string;
         error: { exception: { type: string | undefined; message: string | undefined } };
       } => !!doc
     );

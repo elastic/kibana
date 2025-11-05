@@ -29,7 +29,6 @@ import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../session/constants';
 
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');
@@ -931,7 +930,7 @@ describe('SearchInterceptor', () => {
           expect(SearchSessionIncompleteWarningMock).toHaveBeenCalledTimes(1);
           expect(mockCoreSetup.notifications.toasts.addWarning).toHaveBeenCalledWith(
             expect.objectContaining({
-              title: 'Your search session is still running',
+              title: 'Your background search is still running',
             }),
             expect.anything()
           );
@@ -953,11 +952,6 @@ describe('SearchInterceptor', () => {
 
       describe('when background search is enabled', () => {
         test('should show warning once if a search is not available during restore', async () => {
-          mockCoreStart.featureFlags.getBooleanValue.mockImplementation((featureFlag) => {
-            if (featureFlag === BACKGROUND_SEARCH_FEATURE_FLAG_KEY) return true;
-            return false;
-          });
-
           setup({
             isRestore: true,
             isStored: true,

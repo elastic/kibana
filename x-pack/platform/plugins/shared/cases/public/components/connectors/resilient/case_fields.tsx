@@ -20,6 +20,8 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
+import { generateJSONValidator } from '../validate_json';
+import { JsonEditorField } from '../json_editor_field';
 
 const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const { http } = useKibana().services;
@@ -129,6 +131,31 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
           },
         }}
       />
+
+      <UseField
+        path="fields.additionalFields"
+        component={JsonEditorField}
+        config={{
+          label: i18n.ADDITIONAL_FIELDS_LABEL,
+          validations: [
+            {
+              validator: generateJSONValidator({ maxAdditionalFields: 50 }),
+            },
+          ],
+        }}
+        componentProps={{
+          euiCodeEditorProps: {
+            fullWidth: true,
+            height: '200px',
+            options: {
+              fontSize: '12px',
+              renderValidationDecorations: 'off',
+            },
+          },
+          dataTestSubj: 'additionalFieldsEditor',
+        }}
+      />
+
       <EuiSpacer size="m" />
     </span>
   );

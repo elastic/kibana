@@ -6,13 +6,12 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { useContext, useEffect, useMemo, useState, type FC } from 'react';
+import React, { useContext, useEffect, useState, type FC } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { useGlobalUrlState } from '@kbn/ml-url-state/src/url_state';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import { useMlKibana } from '../contexts/kibana';
-import { mlResultsServiceProvider } from '../services/results_service';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useExplorerUrlState } from './hooks/use_explorer_url_state';
 import { AnomalyChartsStateService } from './anomaly_charts_state_service';
@@ -78,9 +77,6 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   const [, , tableSeverityUrlStateService] = useTableSeverity();
   const [, , tableIntervalUrlStateService] = useTableInterval();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApi), []);
-
   const [anomalyExplorerContextValue, setAnomalyExplorerContextValue] = useState<
     AnomalyExplorerContextValue | undefined
   >(undefined);
@@ -106,11 +102,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       timefilter
     );
 
-    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
-      timefilter,
-      mlApi,
-      mlResultsService
-    );
+    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(timefilter, mlApi);
 
     const chartsStateService = new AnomalyChartsStateService(
       anomalyExplorerCommonStateService,

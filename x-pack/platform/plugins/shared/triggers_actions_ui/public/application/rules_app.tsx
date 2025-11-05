@@ -30,8 +30,13 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { ruleDetailsRoute, createRuleRoute, editRuleRoute } from '@kbn/rule-data-utils';
-import { QueryClientProvider } from '@tanstack/react-query';
+import {
+  ruleDetailsRoute,
+  createRuleRoute,
+  editRuleRoute,
+  createRuleFromTemplateRoute,
+} from '@kbn/rule-data-utils';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -121,6 +126,11 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
       value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
     >
       <Routes>
+        <Route
+          exact
+          path={createRuleFromTemplateRoute}
+          component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
+        />
         <Route
           exact
           path={createRuleRoute}

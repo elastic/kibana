@@ -15,9 +15,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -114,28 +112,26 @@ export const getBurnRateEmbeddableFactory = ({
           const queryClient = new QueryClient();
 
           return (
-            <Router history={createBrowserHistory()}>
-              <KibanaContextProvider services={deps}>
-                <PluginContext.Provider
-                  value={{
-                    observabilityRuleTypeRegistry:
-                      pluginsStart.observability.observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate:
-                      pluginsStart.observabilityShared.navigation.PageTemplate,
-                    sloClient,
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    <BurnRate
-                      sloId={sloId}
-                      sloInstanceId={sloInstanceId}
-                      duration={duration}
-                      reloadSubject={reload$}
-                    />
-                  </QueryClientProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </Router>
+            <KibanaContextProvider services={deps}>
+              <PluginContext.Provider
+                value={{
+                  observabilityRuleTypeRegistry:
+                    pluginsStart.observability.observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate:
+                    pluginsStart.observabilityShared.navigation.PageTemplate,
+                  sloClient,
+                }}
+              >
+                <QueryClientProvider client={queryClient}>
+                  <BurnRate
+                    sloId={sloId}
+                    sloInstanceId={sloInstanceId}
+                    duration={duration}
+                    reloadSubject={reload$}
+                  />
+                </QueryClientProvider>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
           );
         },
       };

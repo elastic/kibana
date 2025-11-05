@@ -9,31 +9,30 @@
 
 import React from 'react';
 import { EuiLink, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
-  href: string;
+  href?: string;
   ['data-test-subj']?: string;
 }
 
 export function DocumentationLink({ href, ['data-test-subj']: dataTestSubj }: Props) {
+  const docsLink = href || 'https://www.elastic.co/kibana';
   return (
     <dl>
       <EuiTitle size="xxs">
         <dt className="eui-displayInline">
-          <FormattedMessage
-            id="sharedUXPackages.noDataViewsPrompt.learnMore"
-            defaultMessage="Want to learn more?"
-          />
+          {i18n.translate('sharedUXPackages.noDataViewsPrompt.learnMore', {
+            defaultMessage: 'Want to learn more?',
+          })}
         </dt>
       </EuiTitle>
       &emsp;
       <dd className="eui-displayInline">
-        <EuiLink href={href} target="_blank" data-test-subj={dataTestSubj} external>
-          <FormattedMessage
-            id="sharedUXPackages.noDataViewsPrompt.readDocumentation"
-            defaultMessage="Read the docs"
-          />
+        <EuiLink href={docsLink} target="_blank" data-test-subj={dataTestSubj} external>
+          {i18n.translate('sharedUXPackages.noDataViewsPrompt.readDocumentation', {
+            defaultMessage: 'Read the docs',
+          })}
         </EuiLink>
       </dd>
     </dl>

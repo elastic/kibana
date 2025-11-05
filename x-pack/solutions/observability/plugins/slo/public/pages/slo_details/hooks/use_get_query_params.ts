@@ -15,7 +15,6 @@ export const DELETE_SLO = 'delete';
 export const RESET_SLO = 'reset';
 export const ENABLE_SLO = 'enable';
 export const DISABLE_SLO = 'disable';
-export const ADD_TO_CASE = 'addToCase';
 
 export function useGetQueryParams() {
   const { search, pathname } = useLocation();
@@ -28,7 +27,6 @@ export function useGetQueryParams() {
   const resetSlo = searchParams.get(RESET_SLO);
   const enableSlo = searchParams.get(ENABLE_SLO);
   const disableSlo = searchParams.get(DISABLE_SLO);
-  const addToCaseSlo = searchParams.get(ADD_TO_CASE);
 
   const removeDeleteQueryParam = useCallback(() => {
     const qParams = new URLSearchParams(search);
@@ -82,19 +80,6 @@ export function useGetQueryParams() {
     }
   }, [disableSlo, history, pathname, search]);
 
-  const removeAddToCaseQueryParam = useCallback(() => {
-    const qParams = new URLSearchParams(search);
-
-    // remote addToCase param from url after initial load
-    if (addToCaseSlo === 'true') {
-      qParams.delete(ADD_TO_CASE);
-      history.replace({
-        pathname,
-        search: qParams.toString(),
-      });
-    }
-  }, [addToCaseSlo, history, pathname, search]);
-
   return {
     instanceId: !!instanceId && instanceId !== ALL_VALUE ? instanceId : undefined,
     remoteName: remoteName !== null ? remoteName : undefined,
@@ -106,7 +91,5 @@ export function useGetQueryParams() {
     removeEnableQueryParam,
     isDisablingSlo: disableSlo === 'true',
     removeDisableQueryParam,
-    isAddingToCase: addToCaseSlo === 'true',
-    removeAddToCaseQueryParam,
   };
 }

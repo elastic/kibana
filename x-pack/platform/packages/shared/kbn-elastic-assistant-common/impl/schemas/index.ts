@@ -23,17 +23,71 @@ export * from './common_attributes.gen';
 
 // Attack discovery Schemas
 export * from './attack_discovery/attack_discovery_alert.gen';
-export * from './attack_discovery/post_attack_discovery_bulk.route.gen';
-export * from './attack_discovery/find_attack_discoveries_route.gen';
+export * from './attack_discovery/routes/internal/post/post_attack_discovery_bulk.route.gen';
+export * from './attack_discovery/routes/internal/get/find_attack_discoveries_route.gen';
 export * from './attack_discovery/common_attributes.gen';
-export * from './attack_discovery/get_attack_discovery_route.gen';
-export * from './attack_discovery/post_attack_discovery_route.gen';
-export * from './attack_discovery/cancel_attack_discovery_route.gen';
-export * from './attack_discovery/crud_attack_discovery_schedules_route.gen';
-export * from './attack_discovery/get_attack_discovery_generations.route.gen';
-export * from './attack_discovery/post_attack_discovery_generations_dismiss.route.gen';
-export * from './attack_discovery/find_attack_discovery_schedules_route.gen';
-export * from './attack_discovery/schedules.gen';
+export * from './attack_discovery/routes/internal/post/post_attack_discovery_route.gen';
+export * from './attack_discovery/routes/internal/schedules/crud_attack_discovery_schedules_route.gen';
+export * from './attack_discovery/routes/internal/get/get_attack_discovery_generations.route.gen';
+export * from './attack_discovery/routes/internal/post/post_attack_discovery_generations_dismiss.route.gen';
+export * from './attack_discovery/routes/internal/schedules/find_attack_discovery_schedules_route.gen';
+export * from './attack_discovery/routes/internal/schedules/schedules.gen';
+
+export { AttackDiscoveryApiSchedule } from './attack_discovery/routes/public/schedules/schedules_api.gen';
+
+export { AttackDiscoveryApiAlert } from './attack_discovery/attack_discovery_api_alert.gen';
+
+export {
+  AttackDiscoveryFindRequestQuery,
+  AttackDiscoveryFindResponse,
+} from './attack_discovery/routes/public/get/find_attack_discoveries_route.gen';
+
+export {
+  PostAttackDiscoveryBulkRequestBody,
+  PostAttackDiscoveryBulkResponse,
+} from './attack_discovery/routes/public/post/post_attack_discovery_bulk_route.gen';
+
+export {
+  PostAttackDiscoveryGenerateRequestBody,
+  PostAttackDiscoveryGenerateResponse,
+} from './attack_discovery/routes/public/post/post_attack_discovery_generate.gen';
+
+export {
+  PostAttackDiscoveryGenerationsDismissRequestParams,
+  PostAttackDiscoveryGenerationsDismissResponse,
+} from './attack_discovery/routes/public/post/post_attack_discovery_generations_dismiss.route.gen';
+
+export {
+  GetAttackDiscoveryGenerationRequestParams,
+  GetAttackDiscoveryGenerationRequestQuery,
+  GetAttackDiscoveryGenerationResponse,
+} from './attack_discovery/routes/public/get/get_attack_discovery_generation_route.gen';
+
+export {
+  GetAttackDiscoveryGenerationsRequestQuery,
+  GetAttackDiscoveryGenerationsResponse,
+} from './attack_discovery/routes/public/get/get_attack_discovery_generations_route.gen';
+
+export {
+  FindAttackDiscoverySchedulesRequestQuery,
+  FindAttackDiscoverySchedulesResponse,
+} from './attack_discovery/routes/public/schedules/get/find_attack_discovery_schedules_route.gen';
+
+export {
+  CreateAttackDiscoverySchedulesRequestBody,
+  CreateAttackDiscoverySchedulesResponse,
+  DeleteAttackDiscoverySchedulesRequestParams,
+  DeleteAttackDiscoverySchedulesResponse,
+  DisableAttackDiscoverySchedulesRequestParams,
+  DisableAttackDiscoverySchedulesResponse,
+  EnableAttackDiscoverySchedulesRequestParams,
+  EnableAttackDiscoverySchedulesResponse,
+  GetAttackDiscoverySchedulesRequestParams,
+  GetAttackDiscoverySchedulesResponse,
+  UpdateAttackDiscoverySchedulesRequestParams,
+  UpdateAttackDiscoverySchedulesRequestBody,
+  UpdateAttackDiscoverySchedulesResponse,
+} from './attack_discovery/routes/public/schedules/crud_attack_discovery_schedules_route.gen';
 
 // Defend insight Schemas
 export * from './defend_insights';

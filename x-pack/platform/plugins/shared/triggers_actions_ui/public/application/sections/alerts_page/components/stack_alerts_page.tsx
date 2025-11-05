@@ -16,7 +16,7 @@ import {
   AlertConsumers,
   isSiemRuleType,
 } from '@kbn/rule-data-utils';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
@@ -255,9 +255,9 @@ const PageContentComponent: React.FC<PageContentProps> = ({
             ruleTypeIds={ruleTypeIds}
             consumers={consumers}
             query={esQuery}
-            initialSort={defaultAlertsTableSort}
+            sort={defaultAlertsTableSort}
             showAlertStatusWithFlapping
-            initialPageSize={20}
+            pageSize={20}
             showInspectButton
             renderActionsCell={AlertActionsCell}
             services={{

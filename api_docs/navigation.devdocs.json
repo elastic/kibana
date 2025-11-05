@@ -733,12 +733,13 @@
           {
             "parentPluginId": "navigation",
             "id": "def-public.TopNavMenuData.iconType",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | undefined"
+              "IconType",
+              " | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
@@ -810,6 +811,30 @@
             "signature": [
               "IntlShape",
               " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.splitButtonProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "splitButtonProps",
+            "description": [],
+            "signature": [
+              "(",
+              {
+                "pluginId": "@kbn/split-button",
+                "scope": "common",
+                "docId": "kibKbnSplitButtonPluginApi",
+                "section": "def-common.SplitButtonProps",
+                "text": "SplitButtonProps"
+              },
+              " & { run: ",
+              "TopNavMenuAction",
+              "; }) | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
@@ -1240,10 +1265,10 @@
           },
           {
             "parentPluginId": "navigation",
-            "id": "def-common.DEFAULT_ROUTES.chat",
+            "id": "def-common.DEFAULT_ROUTES.workplaceai",
             "type": "string",
             "tags": [],
-            "label": "chat",
+            "label": "workplaceai",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,

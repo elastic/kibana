@@ -151,7 +151,7 @@ const LogEntryContext: React.FC<{ context: LogEntry['context']; discoverLink?: s
         values={{
           file: (
             <EuiToolTip content={context['log.file.path']}>
-              <span>{shortenedFilePath}</span>
+              <span tabIndex={0}>{shortenedFilePath}</span>
             </EuiToolTip>
           ),
           host: context['host.name'],

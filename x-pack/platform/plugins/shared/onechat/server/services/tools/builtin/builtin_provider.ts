@@ -5,58 +5,112 @@
  * 2.0.
  */
 
+import type { UiSettingsServiceStart, SavedObjectsServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ToolType, createToolNotFoundError } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { InternalToolDefinition, ToolSource, ReadonlyToolTypeClient } from '../tool_provider';
+import type { ToolType } from '@kbn/onechat-common';
+import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common/tools/constants';
+import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
+import type { ToolProviderFn, ReadonlyToolProvider } from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
+import type {
+  AnyToolTypeDefinition,
+  ToolTypeDefinition,
+  BuiltinToolTypeDefinition,
+} from '../tool_types/definitions';
+import { isDisabledDefinition } from '../tool_types/definitions';
+import { convertTool } from './converter';
 
-export const createBuiltInToolSource = ({
+export const createBuiltinProviderFn =
+  ({
+    registry,
+    toolTypes,
+    uiSettings,
+    savedObjects,
+  }: {
+    registry: BuiltinToolRegistry;
+    toolTypes: AnyToolTypeDefinition[];
+    uiSettings: UiSettingsServiceStart;
+    savedObjects: SavedObjectsServiceStart;
+  }): ToolProviderFn<true> =>
+  async ({ request, space }) => {
+    const soClient = savedObjects.getScopedClient(request);
+    const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+    const createVisualizationsEnabled = await uiSettingsClient.get<boolean>(
+      AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID
+    );
+    return createBuiltinToolProvider({
+      registry,
+      toolTypes,
+      request,
+      space,
+      createVisualizationsEnabled,
+    });
+  };
+
+export const createBuiltinToolProvider = ({
   registry,
+  toolTypes,
+  request,
+  space,
+  createVisualizationsEnabled,
 }: {
   registry: BuiltinToolRegistry;
-}): ToolSource<ToolType.builtin> => {
+  toolTypes: AnyToolTypeDefinition[];
+  request: KibanaRequest;
+  space: string;
+  createVisualizationsEnabled: boolean;
+}): ReadonlyToolProvider => {
+  const definitionMap = toolTypes
+    .filter((def) => !isDisabledDefinition(def))
+    .reduce((map, def) => {
+      map[def.toolType] = def as ToolTypeDefinition | BuiltinToolTypeDefinition;
+      return map;
+    }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
+
+  const isToolEnabled = (toolId: string): boolean => {
+    if (toolId === platformCoreTools.createVisualization) {
+      return createVisualizationsEnabled;
+    }
+    return true;
+  };
+  const context = { spaceId: space, request };
+
   return {
     id: 'builtin',
-    toolTypes: [ToolType.builtin],
     readonly: true,
-    getClient: ({ request }) => createBuiltinToolClient({ registry, request }),
-  };
-};
-
-export const createBuiltinToolClient = ({
-  registry,
-}: {
-  registry: BuiltinToolRegistry;
-  request: KibanaRequest;
-}): ReadonlyToolTypeClient<{}> => {
-  return {
     has(toolId: string) {
-      return registry.has(toolId);
+      if (!registry.has(toolId)) {
+        return false;
+      }
+      return isToolEnabled(toolId);
     },
     get(toolId) {
       const tool = registry.get(toolId);
       if (!tool) {
         throw createToolNotFoundError({ toolId });
       }
-      return convertTool(tool);
+      if (!isToolEnabled(toolId)) {
+        throw createToolNotFoundError({ toolId });
+      }
+      const definition = definitionMap[tool.type];
+      if (!definition) {
+        throw createBadRequestError(`Unknown type for tool '${toolId}': '${tool.type}'`);
+      }
+      return convertTool({ tool, definition, context });
     },
     list() {
       const tools = registry.list();
-      return tools.map(convertTool);
+      return tools
+        .filter((tool) => {
+          // evict unknown tools - atm it's used for workflow tools if the plugin is disabled.
+          return definitionMap[tool.type];
+        })
+        .filter((tool) => isToolEnabled(tool.id))
+        .map((tool) => {
+          const definition = definitionMap[tool.type]!;
+          return convertTool({ tool, definition, context });
+        });
     },
-  };
-};
-
-export const convertTool = (tool: BuiltinToolDefinition): InternalToolDefinition => {
-  return {
-    id: tool.id,
-    type: ToolType.builtin,
-    description: tool.description,
-    tags: tool.tags,
-    configuration: {},
-    readonly: true,
-    schema: tool.schema,
-    handler: tool.handler,
   };
 };

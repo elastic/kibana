@@ -60,9 +60,6 @@ export const formatSyntheticsPolicy = (
     dataStream.enabled = true;
   }
 
-  // / filter out disabled inputs
-  formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
-
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
     if (configItem) {

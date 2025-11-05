@@ -102,8 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.setTime({ from, to });
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
-      await dashboard.loadSavedDashboard('few panels');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('few panels');
       await dashboard.waitForRenderComplete();
     });
 

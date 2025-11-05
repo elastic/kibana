@@ -20,10 +20,7 @@ import type {
 } from '@kbn/shared-ux-page-kibana-template-types';
 
 type PageHeader = NonNullable<KibanaPageTemplateProps['pageHeader']>;
-export type PageHeaderArguments = Pick<
-  PageHeader,
-  'iconType' | 'pageTitle' | 'description' | 'rightSideItems'
->;
+export type PageHeaderArguments = Pick<PageHeader, 'pageTitle' | 'description' | 'rightSideItems'>;
 
 type PropArguments = Pick<KibanaPageTemplateProps, 'isEmptyState'> & PageHeaderArguments;
 
@@ -35,11 +32,6 @@ export const pageHeaderArguments: ArgumentParams<PropArguments> = {
   isEmptyState: {
     control: { control: 'boolean' },
     defaultValue: false,
-  },
-  iconType: {
-    control: { control: 'radio' },
-    options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
-    defaultValue: undefined,
   },
   pageTitle: {
     control: { control: 'text' },
@@ -77,7 +69,6 @@ export class StorybookMock extends AbstractStorybookMock<
     const result: KibanaPageTemplateProps = {
       isEmptyState: this.getArgumentValue('isEmptyState', params),
       pageHeader: {
-        iconType: this.getArgumentValue('iconType', params),
         pageTitle: this.getArgumentValue('pageTitle', params),
         description: this.getArgumentValue('description', params),
         rightSideItems: this.getArgumentValue('rightSideItems', params)

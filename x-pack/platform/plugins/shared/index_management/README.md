@@ -52,8 +52,7 @@ interface IndexContent {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
   }) => ReturnType<FunctionComponent>;
-```
-- `setIndexMappingsContent(content: IndexContent)`: adds content to the mappings tab of the index details page. The content is displayed in the right bottom corner, below the mappings docs link. 
+``` 
 
 ## Index data enrichers
 The extensions service that allows to render additional UI elements in the indices list and on the index details page often

@@ -103,7 +103,7 @@ describe('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     filterInFromFlyoutBlockItem();
     closeFlyout();
     waitForViewToBeUpdated();
@@ -118,7 +118,7 @@ describe('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     filterOutFromFlyoutBlockItem();
     closeFlyout();
     waitForViewToBeUpdated();
@@ -133,7 +133,7 @@ describe('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     filterInFromFlyoutOverviewTable();
     closeFlyout();
     waitForViewToBeUpdated();
@@ -148,7 +148,7 @@ describe('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     filterOutFromFlyoutOverviewTable();
     closeFlyout();
     waitForViewToBeUpdated();
@@ -163,7 +163,7 @@ describe('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     navigateToFlyoutTableTab();
     filterInFromFlyoutTableTab();
     closeFlyout();
@@ -179,7 +179,7 @@ describe('Indicators query bar interaction', { tags: ['@ess'] }, () => {
 
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openFlyout();
+    openFlyout(5);
     navigateToFlyoutTableTab();
     filterOutFromFlyoutTableTab();
     closeFlyout();

@@ -26,14 +26,6 @@ Retrieve all documents from the `employees` index:
 FROM employees
 ```
 
-### Using Date Math
-
-Access indices, aliases, or data streams using date math. For example, retrieve today’s index for time series data:
-
-```esql
-FROM <logs-{now/d}>
-```
-
 ### Querying Multiple Data Streams, Indices, or Aliases
 
 Query multiple data streams, indices, or aliases using a comma-separated list or wildcards:
@@ -55,26 +47,5 @@ FROM cluster_one:employees-00001,cluster_two:other-employees-*
 Enable metadata fields by using the optional `METADATA` directive:
 
 ```esql
-FROM employees METADATA _id
+FROM employees METADATA _id, _score
 ```
-
-### Escaping Index Names
-
-Escape index names containing special characters using double quotes (`"`) or triple double quotes (`"""`):
-
-```esql
-FROM "this=that","""this[that"""
-```
-
-## Limitations
-
-- By default, the `FROM` command applies an implicit limit of 1,000 rows if no explicit `LIMIT` is specified. For example:
-  ```esql
-FROM employees
-```
-  is equivalent to:
-  ```esql
-FROM employees
-| LIMIT 1000
-```
-- Queries cannot return more than 10,000 rows, even if a higher `LIMIT` is specified. This is a configurable upper limit. For more details, refer to the [LIMIT command](#LIMIT).

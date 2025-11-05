@@ -5,15 +5,56 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import useAsync from 'react-use/lib/useAsync';
 import { AssetImage } from '../asset_image';
 import { useKibana } from '../../hooks/use_kibana';
 
-export const StreamsListEmptyPrompt = ({ onAddData }: { onAddData?: () => void }) => {
-  const { docLinks } = useKibana().core;
+export const StreamsListEmptyPrompt = () => {
+  const {
+    core: { docLinks, http },
+    dependencies: {
+      start: { spaces, share, cloud },
+    },
+  } = useKibana();
   const streamsDocsLink = docLinks.links.observability.logsStreams;
+
+  const observabilityOnboardingLocator =
+    share.url.locators.get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR);
+
+  // TODO: Replace with a locator when available
+  const securityOnboardingLink = `/app/security/${SecurityPageName.landing}`;
+  const agnosticOnboardingLink = '/app/integrations/browse';
+
+  const spaceObservable = useMemo(() => (spaces ? spaces.getActiveSpace$() : EMPTY), [spaces]);
+  const activeSpace = useObservable(spaceObservable);
+
+  const isObservabilitySpace =
+    cloud?.serverless?.projectType === 'observability' || activeSpace?.solution === 'oblt';
+  const isSecuritySpace =
+    cloud?.serverless?.projectType === 'security' || activeSpace?.solution === 'security';
+
+  const onboardingLink = useAsync(async () => {
+    if (observabilityOnboardingLocator && isObservabilitySpace) {
+      return await observabilityOnboardingLocator.getUrl({});
+    } else if (isSecuritySpace) {
+      return http.basePath.prepend(securityOnboardingLink);
+    }
+    return http.basePath.prepend(agnosticOnboardingLink);
+  }, [
+    observabilityOnboardingLocator,
+    isObservabilitySpace,
+    isSecuritySpace,
+    http.basePath,
+    securityOnboardingLink,
+  ]);
 
   return (
     <EuiEmptyPrompt
@@ -34,13 +75,13 @@ export const StreamsListEmptyPrompt = ({ onAddData }: { onAddData?: () => void }
         <p>
           {i18n.translate('xpack.streams.emptyState.body', {
             defaultMessage:
-              'Easily turn your data into clear, structured flows with simple tools for routing, field extraction, and retention. Just stream it into Elastic to get started and your new streams will appear here.',
+              'Streams provides a centralized UI that streamlines common tasks like rerouting data, extracting fields, or setting data retention, so you don’t need to navigate to multiple applications or manually configure underlying Elasticsearch components.',
           })}
         </p>
       }
       actions={
-        onAddData ? (
-          <EuiButton color="primary" fill onClick={onAddData}>
+        onboardingLink.value ? (
+          <EuiButton color="primary" fill href={onboardingLink.value}>
             {i18n.translate('xpack.streams.emptyState.addDataButton', {
               defaultMessage: 'Add data',
             })}

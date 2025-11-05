@@ -319,6 +319,7 @@ describe('case transforms', () => {
               "username": "elastic",
             },
           },
+          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.external_service).not.toHaveProperty('connector_id');
@@ -378,6 +379,7 @@ describe('case transforms', () => {
             "name": ".jira",
             "type": ".jira",
           },
+          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
@@ -404,6 +406,7 @@ describe('case transforms', () => {
             "name": "none",
             "type": ".none",
           },
+          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
@@ -465,6 +468,7 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ total_alerts: 10 }).attributes).toMatchInlineSnapshot(`
         Object {
           "total_alerts": 10,
+          "total_observables": 0,
         }
       `);
     });
@@ -473,6 +477,7 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ total_comments: 5 }).attributes).toMatchInlineSnapshot(`
         Object {
           "total_comments": 5,
+          "total_observables": 0,
         }
       `);
     });
@@ -693,6 +698,36 @@ describe('case transforms', () => {
       expect(
         transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.incremental_id
       ).not.toBeDefined();
+    });
+
+    it('returns the correct value for extractObservables when it is defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          settings: {
+            syncAlerts: true,
+            extractObservables: true,
+          },
+        },
+      });
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.settings
+          .extractObservables
+      ).toBe(true);
+    });
+
+    it('returns false for extractObservables when it is not defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          settings: {
+            syncAlerts: true,
+            extractObservables: undefined,
+          },
+        },
+      });
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.settings
+          .extractObservables
+      ).toBe(false);
     });
 
     it('does not return the total comments', () => {

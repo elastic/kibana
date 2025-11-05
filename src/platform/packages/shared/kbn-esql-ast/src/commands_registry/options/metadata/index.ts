@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommandOption, ESQLCommand } from '../../../types';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import type { ESQLCommandOption, ESQLAstAllCommands } from '../../../types';
 import type { ISuggestionItem } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
@@ -25,18 +25,17 @@ export const METADATA_FIELDS = [
   '_score',
 ];
 
-export const metadataSuggestion: ISuggestionItem = {
+export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'METADATA',
   text: 'METADATA ',
   kind: 'Reference',
   detail: i18n.translate('kbn-esql-ast.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
-  sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+  sortText: 'C',
+});
 
-export const getMetadataSuggestions = (command: ESQLCommand, queryText: string) => {
+export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {
   const metadataNode = command.args.find((arg) => isOptionNode(arg) && arg.name === 'metadata') as
     | ESQLCommandOption
     | undefined;
@@ -67,22 +66,22 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
           })),
         (fragment, rangeToReplace) => {
           const _suggestions = [
-            {
+            withAutoSuggest({
               ...pipeCompleteItem,
               text: fragment + ' | ',
               filterText: fragment,
-              command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
-            },
+            }),
           ];
           if (filteredMetaFields.length > 1) {
-            _suggestions.push({
-              ...commaCompleteItem,
-              text: fragment + ', ',
-              filterText: fragment,
-              command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
-            });
+            _suggestions.push(
+              withAutoSuggest({
+                ...commaCompleteItem,
+                text: fragment + ', ',
+                filterText: fragment,
+                rangeToReplace,
+              })
+            );
           }
           return _suggestions;
         }

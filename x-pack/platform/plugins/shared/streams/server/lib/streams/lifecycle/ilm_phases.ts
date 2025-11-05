@@ -46,7 +46,7 @@ export function ilmPhases({
     const sizeInBytes = ilmDetails
       .filter((detail) => detail.managed && detail.phase === phase.name)
       .map((detail) => indicesStats[detail.index!])
-      .reduce((size, stats) => size + (stats?.total?.store?.size_in_bytes ?? 0), 0);
+      .reduce((size, stats) => size + (stats?.total?.store?.total_data_set_size_in_bytes ?? 0), 0);
 
     const policyPhase = {
       name: phase.name,

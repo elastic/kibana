@@ -34,6 +34,7 @@ describe('BarDetails', () => {
   const mockItem = {
     name: 'Test Span',
     duration: 1234,
+    errors: [],
   } as unknown as TraceWaterfallItem;
 
   it('renders the span name and formatted duration', () => {
@@ -66,23 +67,26 @@ describe('BarDetails', () => {
       const mockItemWithError = {
         name: 'Test Span',
         duration: 1234,
-        errorCount: 1,
+        errors: [{ errorDocId: 'error-doc-id-1' }],
       } as unknown as TraceWaterfallItem;
       const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
       expect(getByTestId('apmBarDetailsErrorIcon')).toBeInTheDocument();
     });
 
     describe('and error click event', () => {
+      beforeAll(() => {
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          onErrorClick: () => {},
+        });
+      });
       it('renders errors button icont', () => {
         const mockItemWithError = {
           name: 'Test Span',
           duration: 1234,
-          errorCount: 1,
+          errors: [{ errorDocId: 'error-doc-id-1' }],
         } as unknown as TraceWaterfallItem;
-        const { getByTestId } = render(
-          <BarDetails item={mockItemWithError} left={10} onErrorClick={() => {}} />
-        );
-        expect(getByTestId('apmBarDetailsErrorButton')).toBeInTheDocument();
+        const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
+        expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
       });
     });
 
@@ -97,7 +101,7 @@ describe('BarDetails', () => {
         const mockItemWithError = {
           name: 'Test Span',
           duration: 1234,
-          errorCount: 1,
+          errors: [{ errorDocId: 'error-doc-id-1' }],
         } as unknown as TraceWaterfallItem;
 
         it('renders errors badge in with the correct string', () => {
@@ -105,7 +109,7 @@ describe('BarDetails', () => {
             <BarDetails item={mockItemWithError} left={10} />
           );
           expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
-          expect(getByText('View related error')).toBeInTheDocument();
+          expect(getByText('View error')).toBeInTheDocument();
         });
       });
 
@@ -114,7 +118,7 @@ describe('BarDetails', () => {
         const mockItemWithError = {
           name: 'Test Span',
           duration: 1234,
-          errorCount,
+          errors: [{ errorDocId: 'error-doc-id-1' }, { errorDocId: 'error-doc-id-2' }],
         } as unknown as TraceWaterfallItem;
 
         it('renders errors badge in with the correct string', () => {
@@ -122,7 +126,7 @@ describe('BarDetails', () => {
             <BarDetails item={mockItemWithError} left={10} />
           );
           expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
-          expect(getByText(`View ${errorCount} related errors`)).toBeInTheDocument();
+          expect(getByText(`View ${errorCount} errors`)).toBeInTheDocument();
         });
       });
     });
@@ -136,6 +140,7 @@ describe('BarDetails', () => {
         fieldName: 'fieldName',
         value: 'Error',
       },
+      errors: [],
     } as unknown as TraceWaterfallItem;
 
     it('renders failure badge', () => {
@@ -166,6 +171,7 @@ describe('BarDetails', () => {
       name: 'Test Span',
       duration: 1234,
       isOrphan: true,
+      errors: [],
     } as unknown as TraceWaterfallItem;
 
     it('renders an orphan span icon', () => {

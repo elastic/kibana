@@ -12,6 +12,9 @@ export enum ProductFeatureSecurityKey {
   /** Enables Configurations page for AI SOC */
   configurations = 'configurations',
 
+  /** Enables AI Value Report access */
+  aiValueReport = 'ai_value_report',
+
   /** Elastic endpoint detections, includes alerts, rules, investigations */
   detections = 'detections',
 
@@ -192,6 +195,7 @@ export enum SecuritySubFeatureId {
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
   workflowInsights = 'workflowInsightsSubFeature',
+  socManagement = 'socManagementSubFeature',
   hostIsolation = 'hostIsolationSubFeature',
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
@@ -212,4 +216,9 @@ export enum CasesSubFeatureId {
 export enum AssistantSubFeatureId {
   updateAnonymization = 'updateAnonymizationSubFeature',
   manageGlobalKnowledgeBase = 'manageGlobalKnowledgeBaseSubFeature',
+}
+
+/** Sub-features IDs for Security Attack Discovery */
+export enum AttackDiscoverySubFeatureId {
+  updateSchedule = 'updateScheduleSubFeature',
 }

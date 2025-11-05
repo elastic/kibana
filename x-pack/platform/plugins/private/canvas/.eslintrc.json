@@ -4,7 +4,6 @@
       "css",
       "kbn-canvas-height",
       "kbn-canvas-page",
-      "kbn-canvas-shareable",
       "kbn-canvas-url",
       "kbn-canvas-width"
     ] }]

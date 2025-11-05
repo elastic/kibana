@@ -23,6 +23,7 @@
     "@kbn/presentation-containers",
     "@kbn/analytics",
     "@kbn/content-management-utils",
+    "@kbn/config-schema",
   ],
   "exclude": ["target/**/*"]
 }

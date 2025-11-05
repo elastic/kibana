@@ -29,11 +29,14 @@ const TRUSTED_DEVICE_USERNAME_OS_ERROR =
   'Username field is only supported for Windows OS exclusively. Please select Windows OS only or choose a different field.';
 
 const TrustedDeviceFieldSchema = schema.oneOf([
-  schema.literal(TrustedDeviceConditionEntryField.USERNAME),
-  schema.literal(TrustedDeviceConditionEntryField.HOST),
   schema.literal(TrustedDeviceConditionEntryField.DEVICE_ID),
+  schema.literal(TrustedDeviceConditionEntryField.DEVICE_TYPE),
+  schema.literal(TrustedDeviceConditionEntryField.HOST),
   schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER),
+  schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER_ID),
   schema.literal(TrustedDeviceConditionEntryField.PRODUCT_ID),
+  schema.literal(TrustedDeviceConditionEntryField.PRODUCT_NAME),
+  schema.literal(TrustedDeviceConditionEntryField.USERNAME),
 ]);
 
 const TrustedDeviceEntrySchema = schema.object({

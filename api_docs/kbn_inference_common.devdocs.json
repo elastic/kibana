@@ -623,7 +623,11 @@
         "label": "createPrompt",
         "description": [],
         "signature": [
-          "(init: { name: string; description?: string | undefined; input: Zod.ZodType<TInput, Zod.ZodTypeDef, TInput>; }) => ",
+          "(init: { name: string; description?: string | undefined; input: ",
+          "ZodType",
+          "<TInput, ",
+          "ZodTypeDef",
+          ", TInput>; }) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -681,7 +685,10 @@
                 "label": "input",
                 "description": [],
                 "signature": [
-                  "Zod.ZodType<TInput, Zod.ZodTypeDef, TInput>"
+                  "ZodType",
+                  "<TInput, ",
+                  "ZodTypeDef",
+                  ", TInput>"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/create_prompt.ts",
                 "deprecated": false,
@@ -2320,7 +2327,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
+                  "{ id: TId; system?: string | undefined; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -2328,7 +2335,7 @@
                     "section": "def-common.ChatCompleteMetadata",
                     "text": "ChatCompleteMetadata"
                   },
-                  " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+                  " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -4155,7 +4162,10 @@
               "\nA zod schema that will validate and transform the input variables for a prompt."
             ],
             "signature": [
-              "Zod.ZodType<TInput, Zod.ZodTypeDef, TInput>"
+              "ZodType",
+              "<TInput, ",
+              "ZodTypeDef",
+              ", TInput>"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
             "deprecated": false,
@@ -5252,7 +5262,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
+              "{ id: TId; system?: string | undefined; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -5260,7 +5270,7 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -7452,7 +7462,7 @@
           "\nOptions used to call the {@link BoundChatCompleteAPI}"
         ],
         "signature": [
-          "{ abortSignal?: AbortSignal | undefined; metadata?: ",
+          "{ system?: string | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -7460,7 +7470,7 @@
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
           },
-          " | undefined; temperature?: number | undefined; system?: string | undefined; stream?: boolean | undefined; tools?: ",
+          " | undefined; temperature?: number | undefined; stream?: boolean | undefined; tools?: ",
           "ToolDefinitions",
           " | undefined; toolChoice?: ",
           {
@@ -7526,7 +7536,7 @@
           "\nOptions used to call the {@link BoundOutputAPI}"
         ],
         "signature": [
-          "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
+          "{ id: TId; system?: string | undefined; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -7534,7 +7544,7 @@
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
           },
-          " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+          " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -7567,7 +7577,9 @@
           "\nOptions used to call the {@link BoundPromptAPI}"
         ],
         "signature": [
-          "{ abortSignal?: AbortSignal | undefined; input: Zod.input<TPrompt[\"input\"]>; metadata?: ",
+          "{ abortSignal?: AbortSignal | undefined; input: ",
+          "input",
+          "<TPrompt[\"input\"]>; metadata?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
