@@ -154,15 +154,39 @@ describe('setupFleet', () => {
     expect(soClient.delete).not.toHaveBeenCalled();
   });
 
-  it('should return not initialized if lock could not be created', async () => {
+  it('should throw error if lock creation fails with conflict', async () => {
     soClient.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
     soClient.create.mockRejectedValue({ isBoom: true, output: { statusCode: 409 } } as any);
-    const result = await setupFleet(soClient, esClient, { useLock: true });
 
-    expect(result).toEqual({
-      isInitialized: false,
-      nonFatalErrors: [],
+    await expect(setupFleet(soClient, esClient, { useLock: true })).rejects.toMatchObject({
+      isBoom: true,
+      output: { statusCode: 409 },
     });
+
+    expect(soClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('should throw error if lock creation fails due to ES timeout', async () => {
+    soClient.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
+    const timeoutError = new Error('Request timeout');
+    soClient.create.mockRejectedValue(timeoutError);
+
+    await expect(setupFleet(soClient, esClient, { useLock: true })).rejects.toThrow(
+      'Request timeout'
+    );
+
+    expect(soClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('should throw error if checking for existing lock fails due to ES error', async () => {
+    const timeoutError = new Error('Connection timeout');
+    soClient.get.mockRejectedValue(timeoutError);
+
+    await expect(setupFleet(soClient, esClient, { useLock: true })).rejects.toThrow(
+      'Connection timeout'
+    );
+
+    expect(soClient.create).not.toHaveBeenCalled();
     expect(soClient.delete).not.toHaveBeenCalled();
   });
 
