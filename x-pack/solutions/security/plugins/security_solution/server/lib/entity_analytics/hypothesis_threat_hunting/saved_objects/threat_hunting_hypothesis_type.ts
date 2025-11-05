@@ -56,7 +56,7 @@ export const threatHuntingHypothesisTypeNameMappings: SavedObjectsType['mappings
   },
 };
 
-export const threatHuntingHypothesesType: SavedObjectsType = {
+export const threatHuntingHypothesisType: SavedObjectsType = {
   name: threatHuntingHypothesisTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,

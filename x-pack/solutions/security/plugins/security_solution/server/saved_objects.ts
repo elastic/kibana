@@ -27,7 +27,7 @@ import {
   PrivilegeMonitoringApiKeyEncryptionParams,
   PrivilegeMonitoringApiKeyType,
 } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
-import { threatHuntingHypothesesType } from './lib/entity_analytics/hypothesis_threat_hunting/saved_objects/threat_hunting_hypothesis_type';
+import { threatHuntingHypothesisType } from './lib/entity_analytics/hypothesis_threat_hunting/saved_objects/threat_hunting_hypothesis_type';
 
 const types = [
   noteType,
@@ -43,7 +43,7 @@ const types = [
   privilegeMonitoringType,
   PrivilegeMonitoringApiKeyType,
   monitoringEntitySourceType,
-  threatHuntingHypothesesType,
+  threatHuntingHypothesisType,
   protectionUpdatesNoteType,
   promptType,
   referenceDataSavedObjectType,
