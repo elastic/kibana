@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @elastic/eui/href-or-on-click */
-
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
@@ -117,6 +115,7 @@ export const QueryBar = ({
         <FilePicker />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
         <EuiButton
           size="s"
           color="text"
