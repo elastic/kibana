@@ -103,9 +103,8 @@ export function getSuggestions(
   //   type: |<-
   if (
     lineParseResult?.matchType === 'type' &&
-    autocompleteContext.dynamicConnectorTypes &&
-    autocompleteContext.focusedStepInfo &&
-    !autocompleteContext.isInTriggersContext
+    autocompleteContext.isInStepsContext &&
+    autocompleteContext.dynamicConnectorTypes
   ) {
     const adjustedRange = {
       ...autocompleteContext.range,

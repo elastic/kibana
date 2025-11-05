@@ -39,6 +39,7 @@ export interface AutocompleteContext {
   isInLiquidBlock: boolean;
   isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;
+  isInStepsContext: boolean;
   shouldUseCurlyBraces: boolean;
   shouldBeQuoted: boolean;
 }

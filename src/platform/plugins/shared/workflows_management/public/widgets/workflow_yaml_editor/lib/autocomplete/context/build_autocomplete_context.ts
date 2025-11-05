@@ -149,6 +149,7 @@ export function buildAutocompleteContext({
     isInLiquidBlock,
     isInScheduledTriggerWithBlock: _isInScheduledTriggerWithBlock,
     isInTriggersContext: isInTriggersContext(path),
+    isInStepsContext: isInStepsContext(path),
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
