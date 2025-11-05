@@ -63,7 +63,7 @@ export const QueryBar = ({
       : null;
 
   const openInDiscover = useCallback(
-    async (e: React.MouseEvent) => {
+    (e: React.MouseEvent) => {
       indexEditorTelemetryService.trackQueryThisIndexClicked(searchQuery);
 
       // If onOpenIndexInDiscover is provided, we let that handler to manage the navigation to Discover
