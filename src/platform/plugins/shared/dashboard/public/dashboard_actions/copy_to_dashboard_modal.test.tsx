@@ -14,7 +14,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
-import type { DashboardPickerProps } from '@kbn/presentation-util-plugin/public/components/dashboard_picker/dashboard_picker';
+import type { DashboardPickerProps } from '../dashboard_picker/dashboard_picker';
 
 jest.mock('../utils/get_dashboard_capabilities', () => ({
   getDashboardCapabilities: () => ({

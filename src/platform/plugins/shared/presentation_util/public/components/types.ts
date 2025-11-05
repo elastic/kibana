@@ -13,27 +13,6 @@ import type { CSSProperties, HTMLAttributes } from 'react';
 
 import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import type { OnSaveProps, SaveModalState } from '@kbn/saved-objects-plugin/public';
-
-interface SaveModalDocumentInfo {
-  id?: string;
-  title: string;
-  description?: string;
-}
-
-export interface SaveModalDashboardProps<T = void> {
-  documentInfo: SaveModalDocumentInfo;
-  canSaveByReference: boolean;
-  objectType: string;
-  onClose: () => void;
-  onSave: (
-    props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }
-  ) => Promise<T>;
-  tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
-  // include a message if the user has to copy on save
-  mustCopyOnSaveMessage?: string;
-}
-
 /**
  * A type for any React Ref that can be used to store a reference to the Monaco editor within the
  * ExpressionInput.

@@ -22,10 +22,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import type { SearchIn, SearchResult } from '@kbn/content-management-plugin/common';
-
-import { contentManagementService } from '../../services/kibana_services';
+import { dashboardClient } from '../dashboard_client';
+import { DashboardSearchAPIResult } from '@kbn/dashboard-plugin/server/content_management';
 
 export interface DashboardPickerProps {
   onChange: (dashboard: { name: string; id: string } | null) => void;
@@ -38,15 +36,13 @@ interface DashboardOption {
   value: string;
 }
 
-type DashboardHit = SavedObjectCommon<{ title: string }>;
-
 export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPickerProps) {
   const { euiTheme } = useEuiTheme();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const [dashboardHits, setDashboardHits] = useState<DashboardHit[]>([]);
+  const [dashboards, setDashboards] = useState<DashboardSearchAPIResult['hits']>([]);
   const [dashboardOptions, setDashboardOptions] = useState<DashboardOption[]>([]);
 
   const [query, setQuery] = useState('');
@@ -74,19 +70,13 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
     (async () => {
       setIsLoading(true);
 
-      const response = await contentManagementService.client.search<
-        SearchIn<'dashboard'>,
-        SearchResult<DashboardHit>
-      >({
-        contentTypeId: 'dashboard',
-        query: {
-          text: debouncedQuery ? `${debouncedQuery}*` : undefined,
-          limit: 30,
-        },
+      const response = await dashboardClient.search({
+        search: debouncedQuery,
+        size: 30,
       });
       if (canceled) return;
       if (response && response.hits) {
-        setDashboardHits(response.hits);
+        setDashboards(response.hits);
       }
 
       setIsLoading(false);
@@ -102,7 +92,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
    */
   useEffect(() => {
     setDashboardOptions(
-      dashboardHits
+      dashboards
         .filter((d) => !d.managed && !(idsToOmit ?? []).includes(d.id))
         .map((d) => ({
           value: d.id,
@@ -111,7 +101,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
           'data-test-subj': `dashboard-picker-option-${d.attributes.title.replaceAll(' ', '-')}`,
         }))
     );
-  }, [dashboardHits, idsToOmit, selectedDashboard]);
+  }, [dashboards, idsToOmit, selectedDashboard]);
 
   return (
     <EuiInputPopover

@@ -14,17 +14,42 @@ import { i18n } from '@kbn/i18n';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModal, type SaveModalState } from '@kbn/saved-objects-plugin/public';
 
-import type { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
-import { getPresentationCapabilities } from '../utils/get_presentation_capabilities';
+import { coreServices } from '../services/kibana_services';
+
+interface SaveModalDocumentInfo {
+  id?: string;
+  title: string;
+  description?: string;
+}
+
+export interface SaveModalDashboardProps<T = void> {
+  documentInfo: SaveModalDocumentInfo;
+  canSaveByReference: boolean;
+  objectType: string;
+  onClose: () => void;
+  onSave: (
+    props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }
+  ) => Promise<T>;
+  tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
+  // include a message if the user has to copy on save
+  mustCopyOnSaveMessage?: string;
+}
 
 function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<T>) {
   const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
 
+
   const { canAccessDashboards, canCreateNewDashboards } = useMemo(() => {
-    return getPresentationCapabilities();
+    const {
+      dashboard_v2: dashboard,
+    } = coreServices.application.capabilities;
+    return {
+      canAccessDashboards: Boolean(dashboard.show),
+      canCreateNewDashboards: Boolean(dashboard.createNew)
+    };
   }, []);
 
   // Disable the dashboard options if the user can't access dashboards or if they're read-only

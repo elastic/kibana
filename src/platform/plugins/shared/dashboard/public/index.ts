@@ -28,6 +28,12 @@ export { DASHBOARD_APP_ID } from '../common/constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';
 export { getDashboardLocatorParamsFromEmbeddable } from '../common/locator/get_dashboard_locator_params';
 
+export {
+  LazyDashboardPicker,
+  LazySavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboardWithSaveResult,
+} from './dashboard_picker';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
 }

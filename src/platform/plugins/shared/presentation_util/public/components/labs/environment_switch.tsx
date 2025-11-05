@@ -19,7 +19,7 @@ import {
 
 import type { EnvironmentName } from '../../../common/labs';
 import { LabsStrings } from '../../i18n';
-import { getPresentationCapabilities } from '../../utils/get_presentation_capabilities';
+import { coreServices } from '../../services/kibana_services';
 
 const { Switch: strings } = LabsStrings.Components;
 
@@ -37,8 +37,8 @@ export interface Props {
 }
 
 export const EnvironmentSwitch = ({ env, isChecked, onChange, name }: Props) => {
-  const { canSetAdvancedSettings } = useMemo(() => {
-    return getPresentationCapabilities();
+  const canSetAdvancedSettings = useMemo(() => {
+    return Boolean(coreServices.application.capabilities.advancedSettings.save)
   }, []);
 
   const canSet = env === 'kibana' ? canSetAdvancedSettings : true;

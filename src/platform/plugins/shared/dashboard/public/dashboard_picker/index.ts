@@ -8,23 +8,16 @@
  */
 
 import React from 'react';
-import { action } from '@storybook/addon-actions';
 
-import { DashboardPicker } from './dashboard_picker';
+export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker'));
 
-export default {
-  component: DashboardPicker,
-  title: 'Dashboard Picker',
-  argTypes: {
-    isDisabled: {
-      control: 'boolean',
-      defaultValue: false,
-    },
-  },
-};
+export const LazySavedObjectSaveModalDashboard = React.lazy(
+  () => import('./saved_object_save_modal_dashboard')
+);
 
-export const Example = {
-  render: ({ isDisabled }: { isDisabled: boolean }) => (
-    <DashboardPicker onChange={action('onChange')} isDisabled={isDisabled} />
-  ),
-};
+/**
+ * Used with `showSaveModal` to pass `SaveResult` back from `onSave`
+ */
+export const LazySavedObjectSaveModalDashboardWithSaveResult = React.lazy(
+  () => import('./saved_object_save_modal_dashboard_with_save_result')
+);

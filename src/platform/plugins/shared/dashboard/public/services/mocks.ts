@@ -21,7 +21,6 @@ import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/publi
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { noDataPagePublicMock } from '@kbn/no-data-page-plugin/public/mocks';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
@@ -56,7 +55,6 @@ export const setStubKibanaServices = () => {
     inspector: inspectorPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
     noDataPage: noDataPagePublicMock.createStart(),
-    observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(),
     savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
     savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),

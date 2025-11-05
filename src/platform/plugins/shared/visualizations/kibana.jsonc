@@ -30,7 +30,8 @@
       "savedObjectsFinder",
       "savedObjectsManagement",
       "savedSearch",
-      "contentManagement"
+      "contentManagement",
+      "dashboard"
     ],
     "optionalPlugins": [
       "home",

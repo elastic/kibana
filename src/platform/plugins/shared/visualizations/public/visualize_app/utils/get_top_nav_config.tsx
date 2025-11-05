@@ -24,9 +24,11 @@ import type {
 } from '@kbn/saved-objects-plugin/public';
 import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboardWithSaveResult,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import {
+  LazySavedObjectSaveModalDashboardWithSaveResult,
+} from '@kbn/dashboard-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';

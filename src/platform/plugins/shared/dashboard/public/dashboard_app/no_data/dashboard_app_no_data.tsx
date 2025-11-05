@@ -8,25 +8,21 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+/*import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import {
   getESQLAdHocDataview,
   getESQLQueryColumns,
   getIndexForESQLQuery,
   getInitialESQLQuery,
-} from '@kbn/esql-utils';
+} from '@kbn/esql-utils';*/
 import { withSuspense } from '@kbn/shared-ux-utility';
-import type { LensSerializedState } from '@kbn/lens-plugin/public';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import {
   coreServices,
   dataService,
   dataViewEditorService,
-  embeddableService,
   noDataPageService,
   shareService,
-  lensService,
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { dashboardClient } from '../../dashboard_client';
@@ -43,7 +39,7 @@ export const DashboardAppNoDataPage = ({
     noDataPage: noDataPageService,
     share: shareService,
   };
-  const [abortController, setAbortController] = useState(new AbortController());
+  const [abortController] = useState(new AbortController());
   const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
   const AnalyticsNoDataPageKibanaProvider = withSuspense(
     React.lazy(() =>
@@ -53,10 +49,6 @@ export const DashboardAppNoDataPage = ({
     )
   );
 
-  const lensHelpersAsync = useAsync(() => {
-    return lensService?.stateHelperApi() ?? Promise.resolve(null);
-  }, [lensService]);
-
   useEffect(() => {
     return () => {
       abortController?.abort();
@@ -65,7 +57,7 @@ export const DashboardAppNoDataPage = ({
 
   const onTryESQL = useCallback(async () => {
     abortController?.abort();
-    if (lensHelpersAsync.value) {
+    /*if (lensHelpersAsync.value) {
       const abc = new AbortController();
       const { dataViews } = dataService;
       const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
@@ -127,8 +119,8 @@ export const DashboardAppNoDataPage = ({
           );
         }
       }
-    }
-  }, [abortController, lensHelpersAsync.value]);
+    }*/
+  }, [abortController]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
