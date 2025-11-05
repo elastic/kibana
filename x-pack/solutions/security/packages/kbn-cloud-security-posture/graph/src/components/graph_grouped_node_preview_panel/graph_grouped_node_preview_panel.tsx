@@ -118,7 +118,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
   ({ docMode, dataViewId, documentIds, entityItems }) => {
     const [fetchPagination, setFetchPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
-    const { data, isLoading } = useFetchDocumentDetails({
+    const { data, isLoading, refresh } = useFetchDocumentDetails({
       dataViewId,
       ids: documentIds,
       options: {
@@ -136,7 +136,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
     }
 
     if (items.length === 0) {
-      return <EmptyBody />;
+      return <EmptyBody onRefresh={refresh} />;
     }
 
     return (

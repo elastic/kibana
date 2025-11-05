@@ -119,7 +119,7 @@ const LoadingTemplate: StoryFn = () => (
 
 const EmptyTemplate: StoryFn = () => (
   <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
-    <EmptyBody />
+    <EmptyBody onRefresh={() => {}} />
   </div>
 );
 

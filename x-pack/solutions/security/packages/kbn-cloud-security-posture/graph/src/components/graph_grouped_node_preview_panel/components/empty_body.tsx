@@ -5,28 +5,46 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import { PanelBody } from '../styles';
 import { i18nNamespaceKey } from '../constants';
-import { EMPTY_BODY_TEST_ID } from '../test_ids';
+import { EMPTY_BODY_TEST_ID, REFRESH_BUTTON_TEST_ID } from '../test_ids';
 
 const noItemsFound = i18n.translate(`${i18nNamespaceKey}.noItemsFound`, {
   defaultMessage: 'No items found in group',
 });
 
-const bodyContent = i18n.translate(`${i18nNamespaceKey}.bodyContent`, {
-  defaultMessage: 'Please, try again reloading the page',
+const refresh = i18n.translate(`${i18nNamespaceKey}.refresh`, {
+  defaultMessage: 'Refresh view',
 });
 
-export const EmptyBody = () => (
+const refreshContent = i18n.translate(`${i18nNamespaceKey}.refreshContent`, {
+  defaultMessage: 'Please, try again clicking on the "Refresh view" button',
+});
+
+export interface EmptyBodyProps {
+  onRefresh: () => void;
+}
+
+export const EmptyBody: FC<EmptyBodyProps> = ({ onRefresh }) => (
   <PanelBody data-test-subj={EMPTY_BODY_TEST_ID}>
     <EuiEmptyPrompt
       color="subdued"
       title={<h2>{noItemsFound}</h2>}
       layout="vertical"
-      body={<p>{bodyContent}</p>}
+      body={<p>{refreshContent}</p>}
+      actions={[
+        <EuiButtonEmpty
+          data-test-subj={REFRESH_BUTTON_TEST_ID}
+          flush="both"
+          onClick={onRefresh}
+          aria-label={refresh}
+        >
+          {refresh}
+        </EuiButtonEmpty>,
+      ]}
     />
   </PanelBody>
 );

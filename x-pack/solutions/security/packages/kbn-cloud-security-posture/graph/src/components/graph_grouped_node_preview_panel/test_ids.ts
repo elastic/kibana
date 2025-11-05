@@ -12,6 +12,7 @@ export const PAGINATION_BUTTON_NEXT_TEST_ID = 'pagination-button-next' as const;
 
 export const LOADING_BODY_TEST_ID = `${PREFIX}LoadingBody` as const;
 export const EMPTY_BODY_TEST_ID = `${PREFIX}EmptyBody` as const;
+export const REFRESH_BUTTON_TEST_ID = `${PREFIX}RefreshButton` as const;
 export const CONTENT_BODY_TEST_ID = `${PREFIX}ContentBody` as const;
 
 export const PAGE_SIZE_BTN_TEST_ID = `${PREFIX}PageSizeBtn` as const;
