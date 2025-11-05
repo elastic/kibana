@@ -56,6 +56,7 @@ interface AdditionalOptionsFieldsProps {
   taskTypeOptions: TaskTypeOption[];
   isEdit?: boolean;
   allowContextWindowLength?: boolean;
+  allowTemperature?: boolean;
 }
 
 export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
@@ -65,6 +66,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
   onTaskTypeOptionsSelect,
   isEdit,
   allowContextWindowLength,
+  allowTemperature,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { setFieldValue } = useFormContext();
@@ -177,7 +179,8 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
 
   const temperatureSettings = useMemo(
     () =>
-      selectedTaskType === CHAT_COMPLETION_TASK_TYPE || selectedTaskType === DEFAULT_TASK_TYPE ? (
+      (selectedTaskType === CHAT_COMPLETION_TASK_TYPE || selectedTaskType === DEFAULT_TASK_TYPE) &&
+      allowTemperature ? (
         <>
           <EuiTitle size="xxs" data-test-subj="temperature-details-label">
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
