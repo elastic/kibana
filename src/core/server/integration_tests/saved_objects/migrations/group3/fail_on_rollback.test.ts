@@ -14,10 +14,10 @@ import {
   defaultKibanaIndex,
   defaultKibanaTaskIndex,
   currentVersion,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import '../jest_matchers';
 import { delay } from '../test_utils';
-import { getUpToDateMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
+import { getUpToDateMigratorTestKit } from '@kbn/migrator-test-kit/fixtures';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
 
 describe('when rolling back to an older version', () => {

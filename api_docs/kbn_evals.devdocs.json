@@ -309,9 +309,9 @@
               },
               ", TTaskOutput extends ",
               "TaskOutput",
-              ">({ dataset, metadata, task, }: { dataset: TEvaluationDataset; metadata?: Record<string, unknown> | undefined; task: ",
+              ">(options: { dataset: TEvaluationDataset; metadata?: Record<string, unknown> | undefined; task: ",
               "ExperimentTask",
-              "<TEvaluationDataset[\"examples\"][number], TTaskOutput>; }, evaluators: ",
+              "<TEvaluationDataset[\"examples\"][number], TTaskOutput>; concurrency?: number | undefined; }, evaluators: ",
               "Evaluator",
               "<TEvaluationDataset[\"examples\"][number], TTaskOutput>[]) => Promise<",
               "RanExperiment",
@@ -326,7 +326,7 @@
                 "id": "def-common.KibanaPhoenixClient.runExperiment.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      dataset,\n      task,\n      metadata: experimentMetadata,\n    }",
+                "label": "{\n      dataset,\n      task,\n      metadata: experimentMetadata,\n      concurrency,\n    }",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
                 "deprecated": false,
@@ -396,6 +396,20 @@
                     "description": [],
                     "signature": [
                       "Record<string, unknown> | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.KibanaPhoenixClient.runExperiment.$1.concurrency",
+                    "type": "number",
+                    "tags": [],
+                    "label": "concurrency",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
                     "deprecated": false,
