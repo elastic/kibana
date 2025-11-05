@@ -37,6 +37,7 @@ import type {
 import { getGridLayout, getOrderedLayout } from './utils/conversions';
 import { isLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
+import { getScrollContainer } from './utils/scroll_container';
 
 export const useGridLayoutState = ({
   layout,
@@ -99,6 +100,7 @@ export const useGridLayoutState = ({
     const orderedLayout = getOrderedLayout(layout);
     const gridLayout$ = new BehaviorSubject<OrderedLayout>(orderedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
+    const scrollContainer$ = new BehaviorSubject(getScrollContainer());
     const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeSectionEvent$ = new BehaviorSubject<ActiveSectionEvent | undefined>(undefined);
 
@@ -125,6 +127,7 @@ export const useGridLayoutState = ({
       accessMode$,
       gridDimensions$,
       runtimeSettings$,
+      scrollContainer$,
       expandedPanelId$,
       isMobileView$: new BehaviorSubject<boolean>(
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)

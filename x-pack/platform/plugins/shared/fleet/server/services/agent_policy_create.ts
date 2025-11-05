@@ -88,7 +88,11 @@ async function createPackagePolicy(
 
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
-  newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
+  newPackagePolicy.name = await incrementPackageName(
+    soClient,
+    packageToInstall,
+    agentPolicy.space_ids ?? [options.spaceId]
+  );
   if (agentPolicy.supports_agentless) {
     newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
   }
@@ -202,13 +206,19 @@ export async function createAgentPolicyWithPackages({
     }
   );
 
+  // Since agentPolicyService does not handle multispace assignments, we need to keep this context with package policy creation
+  const agentPolicyWithStagedSpaces = {
+    ...agentPolicy,
+    space_ids: newPolicy.space_ids,
+  };
+
   // Create the fleet server package policy and add it to agent policy.
   if (hasFleetServer) {
     await createPackagePolicy(
       soClient,
       esClient,
       agentPolicyService,
-      agentPolicy,
+      agentPolicyWithStagedSpaces,
       FLEET_SERVER_PACKAGE,
       {
         spaceId,
@@ -225,7 +235,7 @@ export async function createAgentPolicyWithPackages({
       soClient,
       esClient,
       agentPolicyService,
-      agentPolicy,
+      agentPolicyWithStagedSpaces,
       FLEET_SYSTEM_PACKAGE,
       {
         spaceId,
