@@ -50,6 +50,7 @@ export interface ShowShareModalProps {
   canSave: boolean;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
+  isManaged: boolean;
   accessControlClient: AccessControlClient;
   saveDashboard: () => Promise<void>;
   changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
@@ -72,6 +73,7 @@ export function ShowShareModal({
   canSave,
   accessControl,
   createdBy,
+  isManaged,
   accessControlClient,
   saveDashboard,
   changeAccessMode,
@@ -251,17 +253,18 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
-      accessModeContainer: savedObjectId ? (
-        <AccessModeContainer
-          accessControl={accessControl}
-          createdBy={createdBy}
-          getActiveSpace={spacesService?.getActiveSpace}
-          getCurrentUser={coreServices.userProfile.getCurrent}
-          onChangeAccessMode={handleChangeAccessMode}
-          accessControlClient={accessControlClient}
-          contentTypeId={CONTENT_ID}
-        />
-      ) : undefined,
+      accessModeContainer:
+        savedObjectId && !isManaged ? (
+          <AccessModeContainer
+            accessControl={accessControl}
+            createdBy={createdBy}
+            getActiveSpace={spacesService?.getActiveSpace}
+            getCurrentUser={coreServices.userProfile.getCurrent}
+            onChangeAccessMode={handleChangeAccessMode}
+            accessControlClient={accessControlClient}
+            contentTypeId={CONTENT_ID}
+          />
+        ) : undefined,
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
