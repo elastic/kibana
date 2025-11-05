@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, log, timerange } from '@kbn/apm-synthtrace-client';
+import {
+  apm,
+  log,
+  syntheticsMonitor,
+  timerange,
+  generateShortId,
+} from '@kbn/apm-synthtrace-client';
 import datemath from '@kbn/datemath';
 import type { SynthSchema } from './synth_schema_template';
 import { createSchemaContext } from './schema_context';
@@ -97,8 +103,10 @@ export async function executeSchema(
 
   const range = timerange(from, to, logger);
 
-  const { apmEsClient, logsEsClient } = clients;
-  const indexedClients = new Set<typeof apmEsClient | typeof logsEsClient>();
+  const { apmEsClient, logsEsClient, syntheticsEsClient } = clients;
+  const indexedClients = new Set<
+    typeof apmEsClient | typeof logsEsClient | typeof syntheticsEsClient
+  >();
 
   // Check if any log config has failureRate > 0 - if so, set up failure store infrastructure
   let needsFailureStore = false;
@@ -538,6 +546,107 @@ export async function executeSchema(
 
           await logger.perf('index_logs', () => logsEsClient.index(logEvents));
           indexedClients.add(logsEsClient);
+        }
+      }
+
+      // Generate synthetics monitors if defined
+      if ((instanceConfig as any).synthetics && syntheticsEsClient) {
+        for (const syntheticsConfig of (instanceConfig as any).synthetics) {
+          // Validate required fields
+          const monitorId = (syntheticsConfig as any).monitorId;
+          const origin = (syntheticsConfig as any).origin;
+
+          if (!monitorId) {
+            throw new Error(
+              `monitorId is required for synthetics monitors. Service: ${
+                serviceConfig.name
+              }, Monitor: ${(syntheticsConfig as any).name || 'unnamed'}`
+            );
+          }
+
+          if (!origin) {
+            throw new Error(
+              `origin (location) is required for synthetics monitors. Service: ${
+                serviceConfig.name
+              }, Monitor: ${(syntheticsConfig as any).name || 'unnamed'}`
+            );
+          }
+
+          logger.info(
+            `Generating synthetics monitors: ${
+              (syntheticsConfig as any).name || 'unnamed'
+            }, monitorId: ${monitorId}, origin: ${origin}`
+          );
+          const monitorEvents = range
+            .interval((syntheticsConfig as any).interval || '1m')
+            .rate((syntheticsConfig as any).rate || 1)
+            .generator((timestamp) => {
+              const monitorType = ((syntheticsConfig as any).type || 'http') as 'http' | 'browser';
+              const monitorName =
+                (syntheticsConfig as any).name || `Monitor for ${serviceConfig.name}`;
+
+              // Determine status based on error rate if specified
+              let status = 'up';
+              if ((syntheticsConfig as any).errorRate !== undefined) {
+                const errorRateValue =
+                  typeof (syntheticsConfig as any).errorRate === 'number'
+                    ? (syntheticsConfig as any).errorRate
+                    : 0.1;
+                status = Math.random() < errorRateValue ? 'down' : 'up';
+              }
+
+              // Generate response time (duration) if specified
+              let durationUs: number | undefined;
+              if ((syntheticsConfig as any).durationMs !== undefined) {
+                const durationConfig = (syntheticsConfig as any).durationMs;
+                let durationValue: number;
+                if (typeof durationConfig === 'number') {
+                  durationValue = durationConfig;
+                } else if (durationConfig.type === 'uniform') {
+                  // Uniform distribution
+                  const min = durationConfig.min || 200;
+                  const max = durationConfig.max || 2000;
+                  durationValue = Math.random() * (max - min) + min;
+                } else {
+                  durationValue = evaluateDistribution(
+                    durationConfig as Distribution,
+                    timestamp,
+                    from,
+                    to
+                  );
+                }
+                durationUs = durationValue * 1000; // Convert ms to microseconds
+              } else {
+                // Default duration based on status
+                durationUs = status === 'down' ? 5000000 : 200000; // 5s for down, 200ms for up
+              }
+
+              const monitor = syntheticsMonitor
+                .create()
+                .dataset(monitorType)
+                .name(monitorName)
+                .origin(origin) // Required: location where monitor runs from
+                .status(status)
+                .timestamp(timestamp)
+                .defaults({
+                  'monitor.id': monitorId, // Required: unique monitor identifier
+                  'monitor.check_group': generateShortId(),
+                  'monitor.timespan.lt': new Date(timestamp + 60000).toISOString(),
+                  'monitor.timespan.gte': new Date(timestamp).toISOString(),
+                  ...(durationUs && { 'monitor.duration.us': durationUs }),
+                  ...((syntheticsConfig as any).ip && {
+                    'monitor.ip': (syntheticsConfig as any).ip,
+                  }),
+                  ...((syntheticsConfig as any).url && {
+                    'url.full': (syntheticsConfig as any).url,
+                  }),
+                });
+
+              return monitor;
+            });
+
+          await logger.perf('index_synthetics', () => syntheticsEsClient.index(monitorEvents));
+          indexedClients.add(syntheticsEsClient);
         }
       }
     }

@@ -42,10 +42,51 @@ function extractContextData(screenContexts: any[]) {
 }
 
 /**
+ * Extract context from URL query parameters
+ */
+function extractUrlContext(request: any): Record<string, string> {
+  const urlContext: Record<string, string> = {};
+
+  if (request?.url) {
+    try {
+      const url = new URL(request.url, 'http://localhost');
+      const params = url.searchParams;
+
+      // Extract all relevant query parameters
+      // Note: searchParams.get() automatically decodes URL-encoded values
+      if (params.get('rangeFrom')) urlContext.rangeFrom = params.get('rangeFrom')!;
+      if (params.get('rangeTo')) urlContext.rangeTo = params.get('rangeTo')!;
+      if (params.get('transactionId')) urlContext.transactionId = params.get('transactionId')!;
+      if (params.get('traceId')) urlContext.traceId = params.get('traceId')!;
+      if (params.get('transactionName'))
+        urlContext.transactionName = decodeURIComponent(params.get('transactionName')!);
+      if (params.get('transactionType'))
+        urlContext.transactionType = decodeURIComponent(params.get('transactionType')!);
+      if (params.get('serviceName')) urlContext.serviceName = params.get('serviceName')!;
+      if (params.get('monitorId')) urlContext.monitorId = params.get('monitorId')!;
+      if (params.get('monitorName'))
+        urlContext.monitorName = decodeURIComponent(params.get('monitorName')!);
+      if (params.get('monitorOrigin')) urlContext.monitorOrigin = params.get('monitorOrigin')!;
+      if (params.get('location')) urlContext.location = params.get('location')!;
+      // Handle environment - ENVIRONMENT_ALL means "all environments", so we skip it
+      const environment = params.get('environment');
+      if (environment && environment !== 'ENVIRONMENT_ALL') {
+        urlContext.environment = environment;
+      }
+    } catch (e) {
+      // Ignore URL parsing errors
+    }
+  }
+
+  return urlContext;
+}
+
+/**
  * Extract time range from screen context or URL
  */
 function extractTimeRange(screenContexts: any[], request: any): { from: string; to: string } {
   const contextData = extractContextData(screenContexts);
+  const urlContext = extractUrlContext(request);
 
   // Try screen context first
   if (contextData.rangeFrom && contextData.rangeTo) {
@@ -63,14 +104,8 @@ function extractTimeRange(screenContexts: any[], request: any): { from: string; 
   }
 
   // Try URL query parameters
-  if (request?.url) {
-    const url = new URL(request.url, 'http://localhost');
-    const rangeFrom = url.searchParams.get('rangeFrom');
-    const rangeTo = url.searchParams.get('rangeTo');
-
-    if (rangeFrom && rangeTo) {
-      return { from: rangeFrom, to: rangeTo };
-    }
+  if (urlContext.rangeFrom && urlContext.rangeTo) {
+    return { from: urlContext.rangeFrom, to: urlContext.rangeTo };
   }
 
   // Default to last hour
@@ -80,21 +115,32 @@ function extractTimeRange(screenContexts: any[], request: any): { from: string; 
 /**
  * Map context data to synthtrace schema fields
  */
-function mapContextToSynthtraceFields(contextData: Record<string, any>) {
+function mapContextToSynthtraceFields(
+  contextData: Record<string, any>,
+  urlContext: Record<string, string> = {}
+) {
   const fields: {
     serviceName?: string;
     serviceId?: string;
     agentName?: string;
+    agentId?: string;
     environment?: string;
     transactionId?: string;
     traceId?: string;
+    transactionName?: string;
+    transactionType?: string;
     hostName?: string;
     containerId?: string;
+    logFilePath?: string;
+    monitorId?: string;
+    monitorName?: string;
+    monitorOrigin?: string;
   } = {};
 
-  // Service name/id - check multiple possible keys
+  // Service name/id - check multiple possible keys, URL params take precedence
   // The screen context uses 'service_name' as the key
   fields.serviceName =
+    urlContext.serviceName ||
     contextData.service_name || // Normalized key from extractContextData
     contextData.service_name || // Original key (if preserved)
     contextData['service.name'] || // Dotted notation
@@ -111,23 +157,49 @@ function mapContextToSynthtraceFields(contextData: Record<string, any>) {
     contextData.agent?.name ||
     'nodejs'; // Default
 
-  // Environment
+  // Agent ID
+  fields.agentId =
+    contextData.agent_id || contextData['agent.id'] || contextData.agentId || contextData.agent?.id;
+
+  // Environment - URL params take precedence, skip ENVIRONMENT_ALL
   fields.environment =
+    urlContext.environment ||
     contextData.environment ||
     contextData['service.environment'] ||
     contextData.service?.environment ||
     'production'; // Default
 
-  // Transaction ID
+  // Transaction type - URL params take precedence
+  fields.transactionType =
+    urlContext.transactionType ||
+    contextData.transaction_type ||
+    contextData['transaction.type'] ||
+    contextData.transactionType ||
+    contextData.transaction?.type;
+
+  // Transaction ID - URL params take precedence
   fields.transactionId =
+    urlContext.transactionId ||
     contextData.transaction_id ||
     contextData['transaction.id'] ||
     contextData.transactionId ||
     contextData.transaction?.id;
 
-  // Trace ID
+  // Trace ID - URL params take precedence
   fields.traceId =
-    contextData.trace_id || contextData['trace.id'] || contextData.traceId || contextData.trace?.id;
+    urlContext.traceId ||
+    contextData.trace_id ||
+    contextData['trace.id'] ||
+    contextData.traceId ||
+    contextData.trace?.id;
+
+  // Transaction name - URL params take precedence
+  fields.transactionName =
+    urlContext.transactionName ||
+    contextData.transaction_name ||
+    contextData['transaction.name'] ||
+    contextData.transactionName ||
+    contextData.transaction?.name;
 
   // Host name
   fields.hostName =
@@ -142,6 +214,42 @@ function mapContextToSynthtraceFields(contextData: Record<string, any>) {
     contextData['container.id'] ||
     contextData.containerId ||
     contextData.container?.id;
+
+  // Log file path
+  fields.logFilePath =
+    contextData.log_file_path ||
+    contextData['log.file.path'] ||
+    contextData.logFilePath ||
+    contextData.log?.file?.path;
+
+  // Monitor ID - URL params take precedence
+  fields.monitorId =
+    urlContext.monitorId ||
+    contextData.monitor_id ||
+    contextData['monitor.id'] ||
+    contextData.monitorId ||
+    contextData.monitor?.id;
+
+  // Monitor Name - URL params take precedence
+  fields.monitorName =
+    urlContext.monitorName ||
+    contextData.monitor_name ||
+    contextData['monitor.name'] ||
+    contextData.monitorName ||
+    contextData.monitor?.name;
+
+  // Monitor Origin/Location - URL params take precedence
+  // Origin represents the location where the monitor runs from (e.g., "us-east-1", "eu-west-1")
+  fields.monitorOrigin =
+    urlContext.monitorOrigin ||
+    urlContext.location ||
+    contextData.monitor_origin ||
+    contextData['monitor.origin'] ||
+    contextData.location ||
+    contextData['location.id'] ||
+    contextData.monitorOrigin ||
+    contextData.monitor?.origin ||
+    contextData.monitor?.location;
 
   return fields;
 }
@@ -177,35 +285,115 @@ function buildSynthtraceConfig(
   const actuallyWantsTransactions =
     wantsTransactions || (wantsLogs && promptLower.includes('transaction'));
 
+  // Check if user wants synthetics monitors
+  const wantsSynthetics =
+    promptLower.includes('monitor') ||
+    promptLower.includes('synthetics') ||
+    promptLower.includes('synthetic') ||
+    contextFields.monitorId; // If monitor ID is in context, generate synthetics
+
   // Extract requirements from prompt
   const lowLatency = promptLower.includes('low latency') || promptLower.includes('fast');
   const highThroughput =
     promptLower.includes('high throughput') || promptLower.includes('high traffic');
   const transactionCount = actuallyWantsTransactions ? (highThroughput ? 100 : 20) : 0;
 
+  // Parse custom index name from prompt (e.g., "index name as logs-ghost.rider-default")
+  // Format: logs-{dataset}-{namespace}
+  let customDataset: string | undefined;
+  let customNamespace: string | undefined;
+  const indexNameMatch = (userPrompt || '').match(
+    /(?:index\s+name\s+(?:as|is)\s+)?logs-([^-]+)-([^\s]+)/i
+  );
+  if (indexNameMatch && indexNameMatch.length >= 3) {
+    customDataset = indexNameMatch[1];
+    customNamespace = indexNameMatch[2];
+  }
+
+  // Extract document count from prompt (e.g., "generate 10 documents")
+  const documentCountMatch = (userPrompt || '').match(
+    /(?:generate|ingest|create)\s+(\d+)\s+documents?/i
+  );
+  const requestedDocumentCount = documentCountMatch ? parseInt(documentCountMatch[1], 10) : null;
+
   // Build log configs with correlation fields
+  // Use custom dataset/namespace if specified in prompt, otherwise use defaults
+  const defaultDataset = customDataset || 'apache';
+  const defaultNamespace = customNamespace || 'success';
+  const errorNamespace = customNamespace || 'error';
+
+  // Calculate rate based on requested document count
+  // If user specified a count, generate only info logs with that exact count
+  // Otherwise, use default rates (10 info, 2 error)
   const logConfigs: any[] = wantsLogs
     ? [
         {
-          message: 'Application log entry',
+          message: contextFields.transactionName
+            ? `Transaction log: ${contextFields.transactionName}`
+            : 'Application log entry',
           level: 'info' as const,
-          rate: 10,
+          rate: requestedDocumentCount !== null ? requestedDocumentCount : 10,
           interval: '1m',
+          dataset: defaultDataset,
+          namespace: defaultNamespace,
           ...(contextFields.transactionId && { transactionId: contextFields.transactionId }),
           ...(contextFields.traceId && { traceId: contextFields.traceId }),
+          ...(contextFields.agentId && { agentId: contextFields.agentId }),
+          ...(contextFields.agentName && { agentName: contextFields.agentName }),
           ...(contextFields.hostName && { hostName: contextFields.hostName }),
           ...(contextFields.containerId && { containerId: contextFields.containerId }),
+          ...(contextFields.logFilePath && { logFilePath: contextFields.logFilePath }),
+          // Add transaction type via customFields (will be indexed as log.custom.transaction.type)
+          // Using advanced config with empty namespace to avoid log.custom prefix
+          ...(contextFields.transactionType && {
+            customFields: {
+              fields: [
+                {
+                  name: 'transaction.type',
+                  valueType: 'fixed' as const,
+                  value: contextFields.transactionType,
+                },
+              ],
+              namespace: '', // Empty namespace means no log.custom prefix
+            },
+          }),
         },
-        {
-          message: 'Error log entry',
-          level: 'error' as const,
-          rate: 2,
-          interval: '1m',
-          ...(contextFields.transactionId && { transactionId: contextFields.transactionId }),
-          ...(contextFields.traceId && { traceId: contextFields.traceId }),
-          ...(contextFields.hostName && { hostName: contextFields.hostName }),
-          ...(contextFields.containerId && { containerId: contextFields.containerId }),
-        },
+        // Only add error logs if no specific document count was requested
+        ...(requestedDocumentCount === null
+          ? [
+              {
+                message: contextFields.transactionName
+                  ? `Error log: ${contextFields.transactionName}`
+                  : 'Error log entry',
+                level: 'error' as const,
+                rate: 2,
+                interval: '1m',
+                dataset: defaultDataset,
+                namespace: errorNamespace,
+                ...(contextFields.transactionId && { transactionId: contextFields.transactionId }),
+                ...(contextFields.traceId && { traceId: contextFields.traceId }),
+                ...(contextFields.agentId && { agentId: contextFields.agentId }),
+                ...(contextFields.agentName && { agentName: contextFields.agentName }),
+                ...(contextFields.hostName && { hostName: contextFields.hostName }),
+                ...(contextFields.containerId && { containerId: contextFields.containerId }),
+                ...(contextFields.logFilePath && { logFilePath: contextFields.logFilePath }),
+                // Add transaction type via customFields (will be indexed as log.custom.transaction.type)
+                // Using advanced config with empty namespace to avoid log.custom prefix
+                ...(contextFields.transactionType && {
+                  customFields: {
+                    fields: [
+                      {
+                        name: 'transaction.type',
+                        valueType: 'fixed' as const,
+                        value: contextFields.transactionType,
+                      },
+                    ],
+                    namespace: '', // Empty namespace means no log.custom prefix
+                  },
+                }),
+              },
+            ]
+          : []),
       ]
     : [];
 
@@ -356,10 +544,6 @@ function buildSynthtraceConfig(
     /(\d+)%\s*(?:of\s*(?:them|documents)?\s*)?(?:as\s*)?(?:degraded|ignored)/
   );
 
-  // Extract document count from prompt (e.g., "ingest 100 documents")
-  const documentCountMatch = promptLower.match(/ingest\s+(\d+)\s+documents?/);
-  const totalDocuments = documentCountMatch ? parseInt(documentCountMatch[1], 10) : null;
-
   if (hasFailedDocs && failedMatch) {
     const failedRate = parseFloat(failedMatch[1]) / 100;
     // Apply to all logs if specified, or just error logs
@@ -378,25 +562,57 @@ function buildSynthtraceConfig(
     });
   }
 
-  // Adjust rates if total document count is specified
-  // Note: rate is per interval, so we need to calculate based on time range
-  // For simplicity, if totalDocuments is specified, we'll set rate = totalDocuments
-  // and the executor will generate that many per interval (which might be more than intended)
-  // A better approach would be to calculate: rate = totalDocuments / (timeRangeDuration / intervalDuration)
-  // But for now, we'll use totalDocuments as the rate to approximate the desired count
-  if (totalDocuments) {
-    // Distribute documents across log types based on error rate
-    const errorCount = Math.max(1, Math.floor(totalDocuments * 0.2)); // 20% error logs
-    const infoCount = Math.max(1, totalDocuments - errorCount); // Remaining as info logs
+  // Note: Document count handling is now done earlier when building logConfigs
+  // (lines 285-289 and 329) to properly set rates based on requested count
 
-    logConfigs.forEach((log) => {
-      if (log.level === 'error') {
-        log.rate = errorCount;
-      } else {
-        log.rate = infoCount;
-      }
-    });
-  }
+  // Parse monitor-specific requirements from prompt
+  // Extract response time range (e.g., "response times varying between 200ms and 2000ms")
+  const responseTimeMatch = promptLower.match(
+    /(?:response\s+times?|latency|duration).*?(?:between|varying).*?(\d+)\s*ms.*?(\d+)\s*ms/i
+  );
+  const minDurationMs = responseTimeMatch ? parseInt(responseTimeMatch[1], 10) : 200;
+  const maxDurationMs = responseTimeMatch ? parseInt(responseTimeMatch[2], 10) : 2000;
+
+  // Extract error rate for monitors (e.g., "errorRate: 0.1" or "10% error rate")
+  const monitorErrorRateMatch = promptLower.match(
+    /(?:error\s+rate|failure\s+rate).*?(\d+(?:\.\d+)?)%?/i
+  );
+  const monitorErrorRate = monitorErrorRateMatch ? parseFloat(monitorErrorRateMatch[1]) / 100 : 0.1; // Default 10% error rate for monitors
+
+  // Build synthetics monitor configs
+  // For synthetics monitors, monitorId and origin (location) are required
+  const syntheticsConfigs: any[] = wantsSynthetics
+    ? (() => {
+        // Validate required fields
+        if (!contextFields.monitorId) {
+          throw new Error(
+            'monitorId is required to generate synthetics monitor data. Please either:\n' +
+              '1. Open a monitor detail page in Kibana (which includes monitorId in the URL)\n' +
+              '2. Specify the monitorId in your request (e.g., "Generate data for monitor ID: 043533cc-de41-4711-afa2-26237ce70a01")'
+          );
+        }
+
+        // Origin/location is required - use default if not provided
+        const origin = contextFields.monitorOrigin || 'default-location';
+
+        return [
+          {
+            name: contextFields.monitorName || `Monitor for ${contextFields.serviceName}`,
+            type: 'http' as const, // Default to HTTP monitor
+            rate: 1, // 1 check per interval
+            interval: '1m',
+            monitorId: contextFields.monitorId, // Required
+            origin, // Required: location where monitor runs from
+            errorRate: monitorErrorRate,
+            durationMs: {
+              type: 'uniform' as const,
+              min: minDurationMs,
+              max: maxDurationMs,
+            },
+          },
+        ];
+      })()
+    : [];
 
   const config: SynthSchema = {
     timeWindow: {
@@ -422,6 +638,7 @@ function buildSynthtraceConfig(
                 },
               ],
             }),
+            ...(syntheticsConfigs.length > 0 && { synthetics: syntheticsConfigs }),
           },
         ],
       },
@@ -441,22 +658,30 @@ export function registerSynthtraceFunction({
       description: `Generate synthetic observability data (logs, metrics, traces) using the synthtrace tool. 
       
 This function automatically extracts context from the current page you're viewing, including:
-- Service name, agent name, environment
-- Transaction ID, trace ID (if viewing transaction/trace details)
+- Service name, agent name, environment (from screen context or URL query parameters)
+- Transaction ID, trace ID, transaction name (from URL query parameters if viewing transaction/trace details)
 - Host name, container ID (if viewing infrastructure pages)
-- Time range (from the page you're viewing)
+- Time range (from screen context or URL query parameters like rangeFrom/rangeTo)
+
+When the user is on a transaction detail page (URL contains transactionId/traceId), the function will automatically:
+- Generate logs correlated with that transaction/trace (using the transactionId and traceId from URL)
+- Use the appropriate log indices (e.g., logs-apache.success-default, logs-apache.error-default)
+- Use the transaction name from the URL in log messages
+- Generate logs within the current page's time range
 
 Use this function when the user asks to generate synthetic data for testing or demonstration purposes. 
 
 IMPORTANT: 
-- If the user is on a service page, the function will automatically extract the service name from screen context
+- If the user is on a service/transaction page, the function will automatically extract all context from screen context and URL
 - If the user is NOT on a service page, you MUST provide the serviceName parameter explicitly
-- Always check if serviceName is available in screen context before calling, or ask the user for the service name
+- Always check if serviceName is available in screen context or URL before calling, or ask the user for the service name
+- When user says "generate logs for the current context", use ALL available context (service, transaction, trace, time range)
 
 Examples:
-- "Generate logs for this service" (when on a service page)
+- "Generate logs for this service" (when on a service page - uses service name and time range)
+- "Generate some logs for the current context" (when on transaction page - uses transactionId, traceId, service name, time range)
 - "Generate data for service 'my-app'" (when not on a service page - use serviceName parameter)
-- "Ingest error and success logs for the current transaction"
+- "Ingest error and success logs for the current transaction" (uses transaction context from URL)
 - "Create synthetic data with CPU metrics varying between 20-60%"
 - "Generate logs with 50% failed docs"
 
@@ -503,12 +728,12 @@ Note: Requires Elasticsearch to be running locally (default: http://localhost:92
     },
     async ({ arguments: args, screenContexts }, signal) => {
       const { request } = resources;
-      const esClient = (await resources.context.core).elasticsearch.client;
 
       try {
-        // Extract context from screen contexts
+        // Extract context from screen contexts and URL
         const contextData = extractContextData(screenContexts || []);
-        const contextFields = mapContextToSynthtraceFields(contextData);
+        const urlContext = extractUrlContext(request);
+        const contextFields = mapContextToSynthtraceFields(contextData, urlContext);
         const timeRange = extractTimeRange(screenContexts || [], request);
 
         // Log available context for debugging (only in debug mode)
@@ -529,7 +754,8 @@ Note: Requires Elasticsearch to be running locally (default: http://localhost:92
         const serviceName = args.serviceName || contextFields.serviceName;
         const cpuMin = args.cpuMin ?? 0.2;
         const cpuMax = args.cpuMax ?? 0.6;
-        const logRate = args.logRate ?? 10;
+        // Only use logRate if explicitly provided, otherwise let buildSynthtraceConfig handle it from prompt
+        const logRate = args.logRate;
         const errorRate = args.errorRate ?? 0.1;
 
         if (!serviceName) {
@@ -572,9 +798,10 @@ Note: Requires Elasticsearch to be running locally (default: http://localhost:92
           : undefined;
         const config = buildSynthtraceConfig(finalContextFields, timeRange, combinedPrompt);
 
-        // Override defaults if user specified them
-        if (config.services?.[0]?.instances?.[0]?.logs) {
-          for (const logConfig of config.services[0].instances[0].logs) {
+        // Override defaults if user explicitly specified them via function arguments
+        // Note: If document count was parsed from prompt, buildSynthtraceConfig already set the rate correctly
+        if (config.services?.[0]?.instances?.[0]?.logs && logRate !== undefined) {
+          for (const logConfig of config.services[0].instances[0].logs as any[]) {
             if (logConfig.level === 'info') {
               logConfig.rate = logRate;
             } else if (logConfig.level === 'error') {

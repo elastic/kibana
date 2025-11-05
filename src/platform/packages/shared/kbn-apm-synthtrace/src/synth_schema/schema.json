@@ -675,6 +675,10 @@
                       "type": "array",
                       "items": {
                         "type": "object",
+                        "required": [
+                          "monitorId",
+                          "origin"
+                        ],
                         "properties": {
                           "interval": {
                             "$ref": "#/definitions/Synthtrace DSL/properties/services/items/properties/instances/items/properties/traces/items/properties/interval",
@@ -693,6 +697,14 @@
                           },
                           "name": {
                             "type": "string"
+                          },
+                          "monitorId": {
+                            "type": "string",
+                            "description": "Required: Unique monitor identifier"
+                          },
+                          "origin": {
+                            "type": "string",
+                            "description": "Required: Location where monitor runs from (e.g., \"us-east-1\", \"eu-west-1\")"
                           }
                         },
                         "additionalProperties": false

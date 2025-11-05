@@ -279,6 +279,8 @@ export function buildDslSchema(manifest: CapabilityManifest) {
     rate: rateSchema.optional(),
     type: z.enum(['http', 'browser']).optional(),
     name: z.string().optional(),
+    monitorId: z.string(), // Required: unique monitor identifier
+    origin: z.string(), // Required: location where monitor runs from (e.g., "us-east-1", "eu-west-1")
   });
 
   const hostsBlock = z.object({
