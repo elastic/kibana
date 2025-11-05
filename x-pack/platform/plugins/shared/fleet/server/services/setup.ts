@@ -130,6 +130,7 @@ async function createLock(
       logger.debug('Fleet setup lock does not exist, continue setup');
     } else {
       // Let other errors (timeout, connection, etc.) propagate for retry
+      logger.error(`Could not create fleet setup lock: ${error.message}`, { error });
       throw error;
     }
   }
