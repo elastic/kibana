@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -37,9 +46,22 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
               {policy?.name}
             </EuiLink>
           ) : (
-            <EuiText color="danger" size="s" className="eui-displayInline">
-              {POLICY_NOT_FOUND}
-            </EuiText>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={true}>
+                <EuiText size="xs" className="eui-displayInline">
+                  {agentPolicyId}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  aria-label={POLICY_NOT_FOUND}
+                  size="m"
+                  type="warning"
+                  color="warning"
+                  content={POLICY_NOT_FOUND}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )}
         </EuiTextColor>
       ) : (
@@ -59,7 +81,8 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
 };
 
 const POLICY_NOT_FOUND = i18n.translate('xpack.synthetics.monitorManagement.policyNotFound', {
-  defaultMessage: 'Policy not found in the current space',
+  defaultMessage:
+    'Policy not found in the current space, please update the agent policy space to include this space.',
 });
 
 const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agents', {

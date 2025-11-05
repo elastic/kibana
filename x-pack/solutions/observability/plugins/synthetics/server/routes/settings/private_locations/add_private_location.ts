@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import type { SyntheticsServerSetup } from '../../../types';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -51,7 +51,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     const agentPolicy = await server.fleet?.agentPolicyService.get(
       internalSOClient,
       location.agentPolicyId,
-      true,
+      false,
       { spaceId }
     );
 
@@ -63,13 +63,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       });
     }
 
-    const agentPolicySpaces =
-      agentPolicy.space_ids &&
-      agentPolicy.space_ids.length > 0 &&
-      !agentPolicy.space_ids.includes(ALL_SPACES_ID)
-        ? agentPolicy.space_ids
-        : // If space_ids is not set, assume agent policy space awareness is disabled and return all spaces
-          await getAllSpaceIds(server);
+    const agentPolicySpaces = getAgentPolicySpaceIds(agentPolicy);
 
     const newId = uuidV4();
     const repo = new PrivateLocationRepository(routeContext);
@@ -118,13 +112,10 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
 });
 
-const getAllSpaceIds = async (serverSetup: SyntheticsServerSetup) => {
-  const { saved_objects: spaceSO } = await serverSetup.coreStart.savedObjects
-    .createInternalRepository(['space'])
-    .find({
-      type: 'space',
-      page: 1,
-      perPage: 10_000,
-    });
-  return spaceSO.map((space) => space.id);
+const getAgentPolicySpaceIds = (agentPolicy: AgentPolicy) => {
+  const spaceIds = agentPolicy.space_ids;
+  if (!spaceIds || spaceIds?.includes(ALL_SPACES_ID)) {
+    return [ALL_SPACES_ID];
+  }
+  return spaceIds;
 };
