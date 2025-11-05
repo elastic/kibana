@@ -17,7 +17,6 @@ import type {
   UpdateCloudConnectorResponse,
   DeleteCloudConnectorResponse,
   UpdateCloudConnectorRequest,
-  CreateCloudConnectorRequest,
 } from '../../../common/types/rest_spec/cloud_connector';
 import type {
   CreateCloudConnectorRequestSchema,
@@ -43,7 +42,7 @@ export const createCloudConnectorHandler: FleetRequestHandler<
     const cloudConnector = await cloudConnectorService.create(
       internalSoClient,
       // Type assertion is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
-      request.body as unknown as CreateCloudConnectorRequest
+      request.body
     );
     logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
     const body: CreateCloudConnectorResponse = {

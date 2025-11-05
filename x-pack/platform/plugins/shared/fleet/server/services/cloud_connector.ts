@@ -68,7 +68,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
   async create(
     soClient: SavedObjectsClientContract,
-    cloudConnector: CreateCloudConnectorRequest
+    cloudConnector: TypeOf<typeof CreateCloudConnectorRequestSchema.body>['body']
   ): Promise<CloudConnector> {
     const logger = this.getLogger('create');
 
