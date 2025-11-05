@@ -22,10 +22,14 @@ interface ResponsiveMenuState {
 }
 
 /**
- * Custom hook for handling responsive menu behavior with dynamic height measurement
- * @param isCollapsed - Whether the side nav is collapsed
- * @param items - Navigation items
- * @returns Object with menu ref and partitioned menu items
+ * Custom hook that measures the primary nav container and decides which items can stay visible.
+ * Items that no longer fit are moved into the overflow "More" menu so the sidebar keeps its size
+ * limits when resizing, zooming, or collapsing.
+ *
+ * @param isCollapsed - Whether the side nav is currently collapsed (affects layout recalculation).
+ * @param items - All primary navigation items, in priority order.
+ *
+ * @returns A ref for the primary menu, the visible items and the overflow items.
  */
 export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
   const primaryMenuRef = useRef<HTMLElement | null>(null);
