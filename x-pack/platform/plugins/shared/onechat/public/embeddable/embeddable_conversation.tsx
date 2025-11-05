@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
@@ -36,18 +35,19 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     width: 100%;
     height: 100%;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+    display: flex;
+    justify-content: center;
+    align-items: center;
   `;
 
   return (
     <EmbeddableConversationsProvider {...props}>
-      <KibanaPageTemplate>
-        <div css={headerStyles}>
-          <EmbeddableConversationHeader />
-        </div>
-        <div css={contentStyles}>
-          <Conversation />
-        </div>
-      </KibanaPageTemplate>
+      <div css={headerStyles}>
+        <EmbeddableConversationHeader />
+      </div>
+      <div css={contentStyles}>
+        <Conversation />
+      </div>
     </EmbeddableConversationsProvider>
   );
 };
