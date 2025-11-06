@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { type AgentDefinition, type ToolSelection, defaultAgentToolIds } from '@kbn/onechat-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useOnechatServices } from '../use_onechat_service';

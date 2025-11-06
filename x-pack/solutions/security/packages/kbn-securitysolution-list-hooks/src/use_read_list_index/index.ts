@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { ApiParams } from '@kbn/securitysolution-list-api';
 import { readListIndex } from '@kbn/securitysolution-list-api';

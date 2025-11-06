@@ -54,6 +54,15 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
+### Version 8.19.7+, 9.1.7+, 9.2.1+, 9.3+ [ec_version_8_19_7_9_1_7_9_2_1_9_3]
+- {applies_to}`stack: ga 9.3.0`
+- {applies_to}`stack: ga 9.2.1`
+- {applies_to}`stack: ga 9.1.7`
+- {applies_to}`stack: ga 8.19.7`
+
+`xpack.actions.email.maximum_body_length`
+:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
+
 ### Version 9.2+ [ec_version_9_2]
 ```{applies_to}
 stack: ga 9.2
@@ -390,6 +399,9 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 
 `csp.img_src`
 :   Add sources for the [Content Security Policy `img-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src).
+
+`csp.object_src` {applies_to}`stack: ga 9.3`
+:   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
 
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
