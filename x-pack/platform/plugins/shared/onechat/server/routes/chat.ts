@@ -247,115 +247,115 @@ export function registerChatRoutes({
         'The endpoint emits Server-Sent Events (SSE) with the following custom event types:\n\n' +
         '`conversation_id_set`\n\n' +
         'Sets the conversation ID.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "conversation_id": "uuid"\n' +
-        '  }\n' +
-        '  ```\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "conversation_id": "uuid"\n' +
+        '}\n' +
+        '```\n\n' +
         '---\n\n' +
         '`conversation_created`\n\n' +
-        'Fires when a new conversation gets persisted and we have id.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "conversation_id": "uuid",\n' +
-        '    "title": "conversation title"\n' +
-        '  }\n' +
-        '  ```\n\n' +
+        'Fires when a new conversation is persisted and assigned an ID.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "conversation_id": "uuid",\n' +
+        '  "title": "conversation title"\n' +
+        '}\n' +
+        '```\n\n' +
         '---\n\n' +
         '`conversation_updated`\n\n' +
         'Fires when a conversation is updated.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "conversation_id": "uuid",\n' +
-        '    "title": "updated conversation title"\n' +
-        '  }\n' +
-        '  ```\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "conversation_id": "uuid",\n' +
+        '  "title": "updated conversation title"\n' +
+        '}\n' +
+        '```\n\n' +
         '---\n\n' +
         '`reasoning`\n\n' +
         'Handles reasoning-related data.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "reasoning": "plain text reasoning content",\n' +
-        '    "transient": false\n' +
-        '  }\n' +
-        '  ```\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "reasoning": "plain text reasoning content",\n' +
+        '  "transient": false\n' +
+        '}\n' +
+        '```\n\n' +
         '---\n\n' +
         '`tool_call`\n\n' +
         'Triggers when a tool is invoked.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "tool_call_id": "uuid",\n' +
-        '    "tool_id": "tool_name",\n' +
-        '    "params": {}\n' +
-        '  }\n' +
-        '  ```\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "tool_call_id": "uuid",\n' +
+        '  "tool_id": "tool_name",\n' +
+        '  "params": {}\n' +
+        '}\n' +
+        '```\n\n' +
         '---\n\n' +
         '`tool_progress`\n\n' +
         'Reports progress of a running tool.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "tool_call_id": "uuid",\n' +
-        '    "message": "progress message"\n' +
-        '  }\n' +
-        '  ```\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "tool_call_id": "uuid",\n' +
+        '  "message": "progress message"\n' +
+        '}\n' +
+        '```\n\n' +
         '---\n\n' +
         '`tool_result`\n\n' +
         'Returns results from a completed tool call.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "tool_call_id": "uuid",\n' +
-        '    "tool_id": "tool_name",\n' +
-        '    "results": []\n' +
-        '  }\n' +
-        '  ```\n' +
-        '- NOTE: `results` is an array of `ToolResult` objects.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "tool_call_id": "uuid",\n' +
+        '  "tool_id": "tool_name",\n' +
+        '  "results": []\n' +
+        '}\n' +
+        '```\n\n' +
+        '**Note:** `results` is an array of `ToolResult` objects.\n\n' +
         '---\n\n' +
         '`message_chunk`\n\n' +
         'Streams partial text chunks.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "message_id": "uuid",\n' +
-        '    "text_chunk": "partial text"\n' +
-        '  }\n' +
-        '  ```\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "message_id": "uuid",\n' +
+        '  "text_chunk": "partial text"\n' +
+        '}\n' +
+        '```\n\n' +
         '---\n\n' +
         '`message_complete`\n\n' +
         'Indicates message stream is finished.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "message_id": "uuid",\n' +
-        '    "message_content": "full text content of the message"\n' +
-        '  }\n' +
-        '  ```\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "message_id": "uuid",\n' +
+        '  "message_content": "full text content of the message"\n' +
+        '}\n' +
+        '```\n\n' +
         '---\n\n' +
         '`thinking_complete`\n\n' +
         'Marks the end of the thinking/reasoning phase.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "time_to_first_token": 0\n' +
-        '  }\n' +
-        '  ```\n' +
-        '- NOTE: `time_to_first_token` is in milliseconds.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "time_to_first_token": 0\n' +
+        '}\n' +
+        '```\n\n' +
+        '**Note:** `time_to_first_token` is in milliseconds.\n\n' +
         '---\n\n' +
         '`round_complete`\n\n' +
         'Marks end of one conversation round.\n\n' +
-        '- Schema:\n' +
-        '  ```json\n' +
-        '  {\n' +
-        '    "round": {}\n' +
-        '  }\n' +
-        '  ```\n' +
-        '- NOTE: `round` contains the full round json object.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "round": {}\n' +
+        '}\n' +
+        '```\n\n' +
+        '**Note:** `round` contains the full round json object.\n\n' +
         '---\n\n' +
         '## Event flow\n\n' +
         'A typical conversation round emits events in this sequence:\n\n' +
