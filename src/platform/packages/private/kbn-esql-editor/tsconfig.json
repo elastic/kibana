@@ -21,7 +21,6 @@
     "@kbn/language-documentation",
     "@kbn/test-jest-helpers",
     "@kbn/data-plugin",
-    "@kbn/data-views-plugin",
     "@kbn/index-management-shared-types",
     "@kbn/code-editor",
     "@kbn/fields-metadata-plugin",

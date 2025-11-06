@@ -50,6 +50,7 @@ export interface ShowShareModalProps {
   canSave: boolean;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
+  isManaged: boolean;
   accessControlClient: AccessControlClient;
   saveDashboard: () => Promise<void>;
   changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
@@ -72,6 +73,7 @@ export function ShowShareModal({
   canSave,
   accessControl,
   createdBy,
+  isManaged,
   accessControlClient,
   saveDashboard,
   changeAccessMode,
@@ -187,7 +189,9 @@ export function ShowShareModal({
     unhashUrl(baseUrl)
   );
 
-  const allowShortUrl = getDashboardCapabilities().createShortUrl;
+  const { createShortUrl, showWriteControls } = getDashboardCapabilities();
+  const allowShortUrl = createShortUrl;
+  const showAccessContainer = savedObjectId && !isManaged && showWriteControls;
 
   shareService.toggleShareContextMenu({
     isDirty,
@@ -251,7 +255,7 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
-      accessModeContainer: savedObjectId ? (
+      accessModeContainer: showAccessContainer ? (
         <AccessModeContainer
           accessControl={accessControl}
           createdBy={createdBy}

@@ -75,6 +75,7 @@ describe('ShowShareModal', () => {
     changeAccessMode: jest.fn(),
     accessControlClient: {} as AccessControlClient,
     accessControl: {} as SavedObjectAccessControl,
+    isManaged: false,
     getCurrentUser: jest.fn().mockResolvedValue({} as { uid: string }),
     getActiveSpace: jest.fn().mockResolvedValue({ name: 'default' }),
   };
