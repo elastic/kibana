@@ -118,6 +118,8 @@ export const AssistantOverlay = React.memo(() => {
   );
   useEvent('keydown', onKeyDown);
 
+  const flyoutRef = useRef<HTMLElement>(null);
+
   // Modal control functions
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
@@ -143,8 +145,6 @@ export const AssistantOverlay = React.memo(() => {
       return !prev;
     });
   }, []);
-
-  const flyoutRef = useRef<HTMLDivElement>();
 
   if (!isModalVisible) return null;
 
