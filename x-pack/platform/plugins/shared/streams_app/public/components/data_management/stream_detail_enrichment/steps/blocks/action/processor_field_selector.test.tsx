@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ProcessorFieldSelector } from './processor_field_selector';
-import { FieldSelector } from '../../../../shared/field_selector';
+import { AutocompleteSelector } from '../../../../shared/autocomplete_selector';
 
 jest.mock('../../../../../../hooks/use_field_suggestions', () => ({
   useEnrichmentFieldSuggestions: jest.fn(() => [
@@ -44,9 +44,9 @@ jest.mock('../../../state_management/stream_enrichment_state_machine', () => ({
   useSimulatorSelector: jest.fn((selector) => selector({ context: { streamName: 'test-stream' } })),
 }));
 
-// Mock the FieldSelector component to focus on ProcessorFieldSelector-specific logic
-jest.mock('../../../../shared/field_selector', () => ({
-  FieldSelector: jest.fn(
+// Mock the AutocompleteSelector component to focus on ProcessorFieldSelector-specific logic
+jest.mock('../../../../shared/autocomplete_selector', () => ({
+  AutocompleteSelector: jest.fn(
     ({
       value,
       onChange,
@@ -181,7 +181,7 @@ describe('ProcessorFieldSelector', () => {
         placeholder: 'Custom placeholder',
       });
 
-      expect(FieldSelector).toHaveBeenCalledWith(
+      expect(AutocompleteSelector).toHaveBeenCalledWith(
         expect.objectContaining({
           placeholder: 'Custom placeholder',
           fullWidth: true,
@@ -201,7 +201,7 @@ describe('ProcessorFieldSelector', () => {
       renderComponent();
 
       // Verify that suggestions are enriched with types from DataView
-      expect(FieldSelector).toHaveBeenCalledWith(
+      expect(AutocompleteSelector).toHaveBeenCalledWith(
         expect.objectContaining({
           suggestions: expect.arrayContaining([
             expect.objectContaining({ name: '@timestamp', type: 'date' }),
