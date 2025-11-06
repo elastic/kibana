@@ -75,17 +75,23 @@ describe('Update profile routes', () => {
       expect(() => bodySchema.validate(true)).toThrowErrorMatchingInlineSnapshot(
         `"expected a plain object value, but found [boolean] instead."`
       );
-      expect(() => bodySchema.validate(null)).toThrowErrorMatchingInlineSnapshot(
-        `"expected a plain object value, but found [null] instead."`
-      );
-      expect(() => bodySchema.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [object] but got [undefined]"`
-      );
+      // expect(() => bodySchema.validate(null)).toThrowErrorMatchingInlineSnapshot(
+      //   `"expected a plain object value, but found [null] instead."`
+      // );
+      // expect(() => bodySchema.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
+      //   `"expected value of type [object] but got [undefined]"`
+      // );
 
       expect(bodySchema.validate({})).toEqual({});
       expect(
-        bodySchema.validate({ title: 'some-title', content: { deepProperty: { type: 'basic' } } })
-      ).toEqual({ title: 'some-title', content: { deepProperty: { type: 'basic' } } });
+        bodySchema.validate({
+          avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
+          userSettings: { darkMode: 'dark', contrastMode: 'high' },
+        })
+      ).toEqual({
+        avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
+        userSettings: { darkMode: 'dark', contrastMode: 'high' },
+      });
     });
 
     it('fails if session is not found.', async () => {

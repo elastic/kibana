@@ -26,29 +26,21 @@ const userProfileUpdateSchema = schema.object({
     schema.object({
       initials: schema.maybe(schema.string()),
       color: schema.maybe(schema.string()),
-      imageUrl: schema.maybe(schema.string()),
+      imageUrl: schema.nullable(schema.string()),
     })
   ),
   userSettings: schema.maybe(
     schema.object({
       darkMode: schema.maybe(
-        schema.string(
-          schema.oneOf([
-            schema.literal('system'),
-            schema.literal('dark'),
-            schema.literal('light'),
-            schema.literal('space_default'),
-          ])
-        )
+        schema.oneOf([
+          schema.literal('system'),
+          schema.literal('dark'),
+          schema.literal('light'),
+          schema.literal('space_default'),
+        ])
       ),
       contrastMode: schema.maybe(
-        schema.string(
-          schema.oneOf([
-            schema.literal('system'),
-            schema.literal('standard'),
-            schema.literal('high'),
-          ])
-        )
+        schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
       ),
       solutionNavOptOut: schema.maybe(schema.boolean()),
     })
