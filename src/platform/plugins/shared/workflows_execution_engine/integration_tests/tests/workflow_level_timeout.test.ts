@@ -13,6 +13,7 @@ import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 // FLAKY: https://github.com/elastic/kibana/issues/240055
 // FLAKY: https://github.com/elastic/kibana/issues/241729
+// FLAKY: https://github.com/elastic/kibana/issues/241728
 describe.skip('workflow level timeout', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
