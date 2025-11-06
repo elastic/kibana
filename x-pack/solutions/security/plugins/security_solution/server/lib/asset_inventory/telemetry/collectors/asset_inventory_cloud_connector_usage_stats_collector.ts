@@ -83,7 +83,7 @@ export const getAssetInventoryCloudConnectorUsageStats = async (
         id: connector.id,
         created_at: connector.created_at,
         updated_at: connector.updated_at,
-        hasCredentials: hasValidCredentials(connector.cloudProvider, connector.vars || {}),
+        hasCredentials: hasValidCredentials(connector.cloudProvider, connector.vars),
         cloud_provider: connector.cloudProvider,
         packagePolicyIds,
         packagePolicyCount: connectorPackagePolicies.length,
