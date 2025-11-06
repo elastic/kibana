@@ -14,7 +14,7 @@ import { useSendMessage } from '../../../context/send_message/send_message_conte
 interface ConversationActionButtonProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
-  resetToPendingMessage: () => void;
+  resetToPendingMessageOnCancel: () => void;
 }
 
 const labels = {
@@ -29,7 +29,7 @@ const labels = {
 export const ConversationActionButton: React.FC<ConversationActionButtonProps> = ({
   onSubmit,
   isSubmitDisabled,
-  resetToPendingMessage,
+  resetToPendingMessageOnCancel,
 }) => {
   const { canCancel, cancel } = useSendMessage();
   const { euiTheme } = useEuiTheme();
@@ -49,7 +49,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
       onClick={() => {
         if (canCancel) {
           cancel();
-          resetToPendingMessage();
+          resetToPendingMessageOnCancel();
         }
       }}
     />

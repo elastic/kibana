@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useRoundContext } from '../../../../../../context/conversation_round/round_context';
 import { ThinkingItemLayout } from './thinking_item_layout';
 
 const getStackTrace = (error: unknown) => {
@@ -21,12 +22,13 @@ const getStackTrace = (error: unknown) => {
   return formatOnechatErrorMessage(error);
 };
 
-interface ErrorContentProps {
-  error: unknown;
-}
-
-export const ErrorThinkingItem: React.FC<ErrorContentProps> = ({ error }) => {
+export const ErrorThinkingItem: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
+  const { error } = useRoundContext();
+
+  if (!error) {
+    return null;
+  }
 
   const codeBlockStyles = css`
     word-break: break-all;

@@ -88,7 +88,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
         <ConversationInputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          resetToPendingMessage={() => {
+          resetToPendingMessageOnCancel={() => {
             if (pendingMessage) {
               setInput(pendingMessage);
             }

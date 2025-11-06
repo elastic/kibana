@@ -7,22 +7,15 @@
 
 import { EuiAccordion, EuiButton, EuiPanel, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
-import type { PropsWithChildren, ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useRoundContext } from '../../../../context/conversation_round/round_context';
 import { useSendMessage } from '../../../../context/send_message/send_message_context';
 import { RoundFlyout } from './round_flyout';
 import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
 import { RetryButton } from './retry_button';
-
-interface RoundThinkingProps {
-  rawRound: ConversationRound;
-  steps: ConversationRoundStep[];
-  isLoading: boolean;
-  error: unknown;
-}
 
 const buttonContentClassName = 'thinkingButtonContent';
 
@@ -60,10 +53,10 @@ const ThinkingLabel: React.FC<{ isLoading: boolean; isError: boolean }> = ({
   );
 };
 
-const ThinkingAccordion: React.FC<PropsWithChildren<{ label: ReactNode; isError: boolean }>> = ({
-  children,
-  label: buttonContent,
+const ThinkingAccordion: React.FC<PropsWithChildren<{ isLoading: boolean; isError: boolean }>> = ({
+  isLoading,
   isError,
+  children,
 }) => {
   const { euiTheme } = useEuiTheme();
   const thinkingButtonStyles = css`
@@ -94,7 +87,7 @@ const ThinkingAccordion: React.FC<PropsWithChildren<{ label: ReactNode; isError:
       buttonProps={{
         css: thinkingButtonStyles,
       }}
-      buttonContent={buttonContent}
+      buttonContent={<ThinkingLabel isLoading={isLoading} isError={isError} />}
       extraAction={isError && <RetryButton />}
       buttonContentClassName={buttonContentClassName}
     >
@@ -103,27 +96,18 @@ const ThinkingAccordion: React.FC<PropsWithChildren<{ label: ReactNode; isError:
   );
 };
 
-export const RoundThinking: React.FC<RoundThinkingProps> = ({
-  steps,
-  isLoading,
-  rawRound,
-  error,
-}) => {
+export const RoundThinking: React.FC<{}> = () => {
   const [showFlyout, setShowFlyout] = useState(false);
+  const { round, isLoading, isError } = useRoundContext();
 
   const toggleFlyout = () => {
     setShowFlyout(!showFlyout);
   };
 
-  const isError = Boolean(error);
-
   return (
-    <ThinkingAccordion
-      label={<ThinkingLabel isLoading={isLoading} isError={isError} />}
-      isError={isError}
-    >
+    <ThinkingAccordion isLoading={isLoading} isError={isError}>
       <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
-        <RoundSteps steps={steps} error={error} />
+        <RoundSteps />
         {!isLoading && (
           <EuiButton iconType={'code'} color="primary" iconSide="left" onClick={toggleFlyout}>
             <FormattedMessage
@@ -132,9 +116,9 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({
             />
           </EuiButton>
         )}
-        <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
+        <ThinkingTimeDisplay timeToFirstToken={round.time_to_first_token} />
       </EuiPanel>
-      <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
+      <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} />
     </ThinkingAccordion>
   );
 };

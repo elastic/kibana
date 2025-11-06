@@ -15,14 +15,14 @@ import { ConnectorSelector } from '../../connector_selector';
 interface ConversationInputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
-  resetToPendingMessage: () => void;
+  resetToPendingMessageOnCancel: () => void;
   agentId?: string;
 }
 
 export const ConversationInputActions: React.FC<ConversationInputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
-  resetToPendingMessage,
+  resetToPendingMessageOnCancel,
   agentId,
 }) => {
   const { connectorSelection } = useSendMessage();
@@ -51,7 +51,7 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
               <ConversationActionButton
                 onSubmit={onSubmit}
                 isSubmitDisabled={isSubmitDisabled}
-                resetToPendingMessage={resetToPendingMessage}
+                resetToPendingMessageOnCancel={resetToPendingMessageOnCancel}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

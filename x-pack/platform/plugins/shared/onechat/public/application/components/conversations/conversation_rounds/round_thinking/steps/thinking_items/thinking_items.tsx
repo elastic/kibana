@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep, ToolResult } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common';
 import { isReasoningStep, isToolCallStep } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useRoundContext } from '../../../../../../context/conversation_round/round_context';
 import { ToolCallThinkingItem } from './tool_call_thinking_item';
 import { getProgressionThinkingItems } from './progression_thinking_items';
 import {
@@ -32,10 +33,11 @@ const thinkingItemsListStyles = css`
 `;
 
 export const ThinkingItems: React.FC<{
-  steps: ConversationRoundStep[];
   openFlyout: (toolResults: ToolResult[]) => void;
-  error: unknown;
-}> = ({ steps, openFlyout, error }) => {
+}> = ({ openFlyout }) => {
+  const {
+    round: { steps },
+  } = useRoundContext();
   // Each step will map to multiple thinking items
   // In the case of tool call steps we'll have
   // an item for the tool call, items for the progression, and items for the tool call results
@@ -79,7 +81,7 @@ export const ThinkingItems: React.FC<{
   return (
     <ol css={thinkingItemsListStyles} aria-label={thinkingItemsListLabel}>
       {thinkingItems}
-      {Boolean(error) && <ErrorThinkingItem error={error} />}
+      <ErrorThinkingItem />
     </ol>
   );
 };

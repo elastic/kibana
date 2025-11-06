@@ -9,11 +9,7 @@ import React from 'react';
 import { EuiAvatar, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-
-interface RoundIconProps {
-  isLoading: boolean;
-  isError: boolean;
-}
+import { useRoundContext } from '../../../context/conversation_round/round_context';
 
 const labels = {
   error: i18n.translate('xpack.onechat.round.icon.error', {
@@ -27,7 +23,8 @@ const labels = {
   }),
 };
 
-export const RoundIcon: React.FC<RoundIconProps> = ({ isLoading, isError }) => {
+export const RoundIcon: React.FC<{}> = () => {
+  const { isLoading, isError } = useRoundContext();
   const { euiTheme } = useEuiTheme();
   const loadingStyles = css`
     inline-size: ${euiTheme.size.xl};

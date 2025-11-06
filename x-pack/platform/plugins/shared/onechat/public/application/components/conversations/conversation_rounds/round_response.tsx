@@ -7,31 +7,21 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  AssistantResponse,
-  ConversationRound,
-  ConversationRoundStep,
-} from '@kbn/onechat-common';
 import React from 'react';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundText } from './round_text/round_text';
+import { useRoundContext } from '../../../context/conversation_round/round_context';
 
-export interface RoundResponseProps {
-  rawRound: ConversationRound;
-  response: AssistantResponse;
-  steps: ConversationRoundStep[];
-  isLoading: boolean;
-  error: unknown;
-}
-
-export const RoundResponse: React.FC<RoundResponseProps> = ({
-  rawRound,
-  response: { message },
-  steps,
-  isLoading,
-  error,
-}) => {
-  const showThinking = steps.length > 0 || Boolean(error);
+export const RoundResponse: React.FC<{}> = () => {
+  const {
+    round: {
+      steps,
+      response: { message },
+    },
+    isLoading,
+    isError,
+  } = useRoundContext();
+  const showThinking = steps.length > 0 || isError;
   return (
     <EuiFlexGroup
       direction="column"
@@ -43,7 +33,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
     >
       {showThinking && (
         <EuiFlexItem grow={false}>
-          <RoundThinking steps={steps} isLoading={isLoading} rawRound={rawRound} error={error} />
+          <RoundThinking />
         </EuiFlexItem>
       )}
 

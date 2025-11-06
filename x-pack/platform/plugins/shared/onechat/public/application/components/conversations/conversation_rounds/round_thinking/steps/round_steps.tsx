@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep } from '@kbn/onechat-common/chat/conversation';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import React, { useCallback, useState } from 'react';
 import { ToolResponseFlyout } from './tool_response_flyout';
@@ -13,12 +12,7 @@ import { ThinkingItemLayout } from './thinking_items/thinking_item_layout';
 import { ToolResultDisplay } from './tool_result/tool_result_display';
 import { ThinkingItems } from './thinking_items/thinking_items';
 
-interface RoundStepsProps {
-  steps: ConversationRoundStep[];
-  error: unknown;
-}
-
-export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, error }) => {
+export const RoundSteps: React.FC<{}> = () => {
   const [toolResults, setToolResults] = useState<ToolResult[] | null>(null);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
@@ -34,7 +28,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, error }) => {
 
   return (
     <>
-      <ThinkingItems steps={steps} openFlyout={openFlyout} error={error} />
+      <ThinkingItems openFlyout={openFlyout} />
       <ToolResponseFlyout isOpen={isFlyoutOpen} onClose={closeFlyout}>
         {toolResults?.map((result: ToolResult, index) => (
           <ThinkingItemLayout key={`flyout-result-${index}`}>

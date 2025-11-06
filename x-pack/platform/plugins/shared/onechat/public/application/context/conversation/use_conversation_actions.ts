@@ -29,6 +29,7 @@ export interface ConversationActions {
   removeNewConversationQuery: () => void;
   invalidateConversation: () => void;
   addOptimisticRound: ({ userMessage }: { userMessage: string }) => void;
+  snapshotOptimisticRound: () => ConversationRound;
   removeOptimisticRound: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
@@ -125,6 +126,18 @@ const createConversationActions = ({
           draft.rounds.push(nextRound);
         })
       );
+    },
+    snapshotOptimisticRound: () => {
+      const conversation = queryClient.getQueryData<Conversation>(queryKey);
+      if (!conversation) {
+        throw new Error('Conversation not created');
+      }
+      const optimisticRound = conversation.rounds.at(-1);
+      if (!optimisticRound) {
+        throw new Error('Optimistic round not present');
+      }
+      const snapshotRound = structuredClone(optimisticRound);
+      return snapshotRound;
     },
     removeOptimisticRound: () => {
       setConversation(
