@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import type { ControlGroupRuntimeState } from './types';
+import type { ControlGroupRuntimeState, ControlPanelState } from './types';
 
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
@@ -52,7 +52,7 @@ export const controlGroupStateBuilder = {
         type,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
-      },
+      } as ControlPanelState,
     };
   },
   addOptionsListControl: (
