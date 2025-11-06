@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'console']);
+  const PageObjects = getPageObjects(['common', 'console', 'header']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
   describe('Console App CCS', function describeIndexTests() {
@@ -45,6 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
         );
         await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getOutputText();
           expect(actualResponse).to.contain('"_index": "ftr-remote:logstash-2015.09.20"');
