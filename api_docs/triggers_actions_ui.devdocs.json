@@ -5296,21 +5296,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ALERT_HISTORY_PREFIX",
-        "type": "string",
-        "tags": [],
-        "label": "ALERT_HISTORY_PREFIX",
-        "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
-        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.AlertHistoryDefaultIndexName",
         "type": "string",
         "tags": [],
@@ -6559,7 +6544,7 @@
         "label": "RULE_PREBUILD_DESCRIPTION_FIELDS",
         "description": [],
         "signature": [
-          "{ readonly INDEX_PATTERN: \"indexPattern\"; readonly CUSTOM_QUERY: \"customQuery\"; readonly ESQL_QUERY: \"esqlQuery\"; readonly DATA_VIEW_ID: \"dataViewId\"; readonly DATA_VIEW_INDEX_PATTERN: \"dataViewIndexPattern\"; }"
+          "{ readonly INDEX_PATTERN: \"indexPattern\"; readonly CUSTOM_QUERY: \"customQuery\"; readonly ESQL_QUERY: \"esqlQuery\"; readonly DATA_VIEW_ID: \"dataViewId\"; readonly DATA_VIEW_INDEX_PATTERN: \"dataViewIndexPattern\"; readonly QUERY_FILTERS: \"queryFilters\"; readonly KQL_FILTERS: \"kqlFilters\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_detail_description_type.ts",
         "deprecated": false,
