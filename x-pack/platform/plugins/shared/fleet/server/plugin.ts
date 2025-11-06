@@ -800,7 +800,9 @@ export class FleetPlugin
 
     this.policyWatcher.start(licenseService);
 
-    const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
+    logger.info(`retrySetupOnBoot is set to ${this.configInitialValue.internal?.retrySetupOnBoot}`);
+
+    const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot !== false ? 25 : 1;
 
     const fleetSetupPromise = (async () => {
       try {
