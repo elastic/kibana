@@ -148,8 +148,27 @@ export const UpdateCloudConnectorRequestSchema = {
         meta: { description: 'The name of the cloud connector.' },
       })
     ),
-    // For updates, we accept either AWS or Azure vars structure
-    vars: schema.maybe(CloudConnectorResponseVarsSchema),
+    vars: schema.maybe(
+      schema.recordOf(
+        schema.string({ minLength: 1, maxLength: 100 }),
+        schema.oneOf([
+          schema.string({ maxLength: 1000 }),
+          schema.number(),
+          schema.boolean(),
+          schema.object({
+            type: schema.string({ maxLength: 50 }),
+            value: schema.oneOf([
+              schema.string({ maxLength: 1000 }),
+              schema.object({
+                isSecretRef: schema.boolean(),
+                id: schema.string({ maxLength: 255 }),
+              }),
+            ]),
+            frozen: schema.maybe(schema.boolean()),
+          }),
+        ])
+      )
+    ),
   }),
 };
 
