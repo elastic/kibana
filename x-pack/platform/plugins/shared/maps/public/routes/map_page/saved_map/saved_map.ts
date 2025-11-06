@@ -547,7 +547,7 @@ export class SavedMap {
     const dataViewIds: string[] = [];
     getLayerList(this._store.getState())
       // exclude adhoc data views from ESQL sources
-      .filter((layer) => layer.getSource().getType() !== SOURCE_TYPES.ESQL)
+      .filter((layer) => layer.getDescriptor().sourceDescriptor?.type !== SOURCE_TYPES.ESQL)
       .forEach((layer) => {
         dataViewIds.push(...layer.getIndexPatternIds());
       });
