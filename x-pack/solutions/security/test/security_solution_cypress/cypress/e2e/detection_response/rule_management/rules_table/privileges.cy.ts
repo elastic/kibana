@@ -8,8 +8,6 @@
 import {
   CREATE_NEW_RULE_BTN,
   ENABLE_RULE_TOGGLE,
-  SUCCESS_TOASTER_HEADER,
-  TOASTER_BODY,
 } from '../../../../screens/alerts_detection_rules';
 import { loginWithUser } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -44,6 +42,7 @@ import {
   ENABLE_RULE_BULK_BTN,
 } from '../../../../screens/rules_bulk_actions';
 import { NO_PRIVILEGES_BOX } from '../../../../screens/common/page';
+import { assertSuccessToast } from '../../../../screens/common/toast';
 const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser];
 const rolesToCreate = [rulesAll, rulesRead, rulesNone];
 
@@ -64,11 +63,6 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     createAndEnableRule();
   };
 
-  const assertSuccessToaster = (heading: string, msg: string) => {
-    cy.get(SUCCESS_TOASTER_HEADER).should('be.visible').should('have.text', heading);
-    cy.get(TOASTER_BODY).should('be.visible').should('have.text', msg);
-  };
-
   before(() => {
     deleteAlertsAndRules();
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
@@ -82,17 +76,17 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       visit(RULES_URL);
     });
 
-    it(`User with role ${rulesAllUser.roles.join()} should be able to "Enable/Disable" a rule`, () => {
+    it(`should be able to "Enable/Disable" a rule`, () => {
       // Click the rule enable toggle for the only rule we have. The rule is enabled when created so we click to disable
       enableRule(0);
-      assertSuccessToaster('Rules disabled', 'Successfully disabled 1 rule');
+      assertSuccessToast('Rules disabled', 'Successfully disabled 1 rule');
 
       // Click again to enable
       enableRule(0);
-      assertSuccessToaster('Rules enabled', 'Successfully enabled 1 rule');
+      assertSuccessToast('Rules enabled', 'Successfully enabled 1 rule');
     });
 
-    it(`User with role ${rulesAllUser.roles.join()} should see enabled bulk actions from context menu`, () => {
+    it(`should see enabled bulk actions from context menu`, () => {
       selectRulesByName([ruleName]);
       cy.get(BULK_ACTIONS_BTN).click();
 
@@ -112,7 +106,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
 
       // Click to disable the rule
       enableRule(0);
-      assertSuccessToaster('Rules disabled', 'Successfully disabled 1 rule');
+      assertSuccessToast('Rules disabled', 'Successfully disabled 1 rule');
 
       cy.get(BULK_ACTIONS_BTN).click();
 
@@ -137,11 +131,11 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       visit(RULES_URL);
     });
 
-    it(`User with role ${rulesReadUser.roles.join()} should not be able to trigger "Create rule" process`, () => {
+    it(`should not be able to trigger "Create rule" process`, () => {
       cy.get(CREATE_NEW_RULE_BTN).should('not.be.enabled');
     });
 
-    it(`User with role ${rulesReadUser.roles.join()} should not be able to "Enable/Disable" a rule`, () => {
+    it(`should not be able to "Enable/Disable" a rule`, () => {
       cy.get(ENABLE_RULE_TOGGLE).should('not.be.enabled');
     });
   });
@@ -151,11 +145,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       loginWithUser(rulesNoneUser);
       visit(RULES_URL);
     });
-    it(`User ${
-      rulesNoneUser.username
-    } with role(s) ${rulesNoneUser.roles.join()} should not be able to see the rules management page`, () => {
-      loginWithUser(rulesNoneUser);
-      visit(RULES_URL);
+    it('should not be able to see the rules management page', () => {
       cy.get(NO_PRIVILEGES_BOX).should('exist');
     });
   });

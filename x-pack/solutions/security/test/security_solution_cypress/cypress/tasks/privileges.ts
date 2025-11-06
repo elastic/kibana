@@ -213,6 +213,34 @@ export const rulesAll: Role = {
         feature: {
           securitySolutionRulesV1: ['all'],
           actions: ['all'],
+          indexPatterns: ['all'],
+          savedObjectManagement: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const rulesAllWithCases: Role = {
+  name: 'rules_all_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionRulesV1: ['all'],
+          actions: ['all'],
+          indexPatterns: ['all'],
+          savedObjectManagement: ['all'],
+          securitySolutionCasesV3: ['all'],
         },
         spaces: ['*'],
       },
@@ -235,6 +263,8 @@ export const rulesRead: Role = {
       {
         feature: {
           securitySolutionRulesV1: ['read'],
+          savedObjectManagement: ['all'],
+          indexPatterns: ['all'],
         },
         spaces: ['*'],
       },
@@ -246,6 +276,12 @@ export const rulesAllUser: User = {
   username: 'rules_all_user',
   password: 'password',
   roles: [rulesAll.name],
+};
+
+export const rulesAllWithCasesUser: User = {
+  username: 'rules_all_with_cases_user',
+  password: 'password',
+  roles: [rulesAllWithCases.name],
 };
 
 export const rulesReadUser: User = {
