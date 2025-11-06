@@ -39,6 +39,9 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
       inferenceId: selectedInferenceEndpoint.inference_id,
       taskType: selectedInferenceEndpoint.task_type,
       provider: selectedInferenceEndpoint.service,
+      ...(selectedInferenceEndpoint.task_settings?.headers
+        ? { headers: selectedInferenceEndpoint.task_settings?.headers }
+        : {}),
       providerConfig: {
         ...flattenObject(selectedInferenceEndpoint.service_settings),
         // NOTE: The below is a workaround for anthropic max_tokens handling.

@@ -99,7 +99,6 @@ interface InferenceServicesProps {
     currentSolution?: SolutionView;
     isPreconfigured?: boolean;
     allowContextWindowLength?: boolean;
-    enableCustomHeaders?: boolean;
     reenterSecretsOnEdit?: boolean;
     allowTemperature?: boolean;
   };
@@ -117,7 +116,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     enforceAdaptiveAllocations,
     isPreconfigured,
     currentSolution,
-    enableCustomHeaders,
     reenterSecretsOnEdit,
   },
 }) => {
@@ -183,19 +181,10 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       if (overrides?.serverlessOnly && !enforceAdaptiveAllocations) {
         overrides = undefined;
       }
-      if (enableCustomHeaders !== true) {
-        overrides = {
-          ...(overrides ?? {}),
-          ...(overrides?.hidden
-            ? {
-                hidden: [...overrides.hidden, 'headers'],
-              }
-            : { hidden: ['headers'] }),
-        };
-      }
+
       return overrides;
     },
-    [enforceAdaptiveAllocations, enableCustomHeaders]
+    [enforceAdaptiveAllocations]
   );
 
   const providerName = useMemo(

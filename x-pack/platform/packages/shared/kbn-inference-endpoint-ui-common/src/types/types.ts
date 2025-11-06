@@ -23,14 +23,27 @@ export interface ConfigEntryView extends ConfigEntry {
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
 
+interface AdaptiveAllocations {
+  max_number_of_allocations?: number;
+  [key: string]: unknown;
+}
+
+interface ProviderConfig {
+  adaptive_allocations?: AdaptiveAllocations;
+  max_number_of_allocations?: number;
+  headers?: Record<string, string>;
+  [key: string]: unknown;
+}
+
 export interface Config {
   taskType: string;
   taskTypeConfig?: Record<string, unknown>;
   inferenceId: string;
   provider: string;
-  providerConfig?: Record<string, unknown>;
+  providerConfig?: ProviderConfig; // Record<string, unknown>;
   contextWindowLength?: number;
   temperature?: number;
+  headers?: Map;
 }
 
 export interface Secrets {
