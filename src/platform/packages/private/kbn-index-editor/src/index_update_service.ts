@@ -59,6 +59,7 @@ const MAX_COLUMN_PLACEHOLDERS = 4;
 interface DocUpdate {
   id: string;
   value: Record<string, any>;
+  atIndex?: number;
 }
 
 type BulkUpdateOperations = Array<{ type: 'add-doc'; payload: DocUpdate } | DeleteDocAction>;
@@ -126,6 +127,28 @@ export class IndexUpdateService {
   }
 
   private indexHasNewFields: boolean = false;
+
+  private newRowsVirtualIndexes: Record<string, number> = {};
+
+  private addRowVirtualIndex(id: string, atIndex: number) {
+    // Recalculate other placeholder rows indexes if new row is added before them
+    Object.entries(this.newRowsVirtualIndexes).forEach(([rowId, index]) => {
+      if (index >= atIndex) {
+        this.newRowsVirtualIndexes[rowId] += 1;
+      }
+    });
+
+    this.newRowsVirtualIndexes[id] = atIndex;
+  }
+
+  private updateVirtualIndexesAfterDeletion(index: number) {
+    // Recalculate other placeholder rows indexes if row is removed
+    Object.entries(this.newRowsVirtualIndexes).forEach(([rowId, rowIndex]) => {
+      if (rowIndex >= index) {
+        this.newRowsVirtualIndexes[rowId] -= 1;
+      }
+    });
+  }
 
   /** Indicates the service has been completed */
   private readonly _completed$ = new Subject<{
@@ -279,6 +302,9 @@ export class IndexUpdateService {
     scan((acc: BulkUpdateOperations, action: Action) => {
       switch (action.type) {
         case 'add-doc':
+          if (action.payload.atIndex !== undefined) {
+            this.addRowVirtualIndex(action.payload.id, action.payload.atIndex);
+          }
           return [...acc, action];
         case 'delete-doc':
           // if a doc is deleted we need to remove any pending updates to it
@@ -293,6 +319,13 @@ export class IndexUpdateService {
           if (isDeletingAnySavedColumn) {
             updatedAcc.push(action);
           }
+          // Remove virtual indexes for deleted rows
+          action.payload.ids.forEach((id) => {
+            const index = this._rows$.getValue().findIndex((row) => row.id === id);
+            delete this.newRowsVirtualIndexes[id];
+            this.updateVirtualIndexesAfterDeletion(index);
+          });
+
           const newTotalHits = this._totalHits$.getValue() - idsToDelete.size;
           this._totalHits$.next(newTotalHits > 1 ? newTotalHits : 1);
           return updatedAcc;
@@ -488,14 +521,20 @@ export class IndexUpdateService {
             return v;
           });
 
-        // created docs that are not saved yet should be rendered first
+        // created docs that are not saved yet should be inserted at their virtual indexes
         Array.from(savingDocs.entries())
           .filter((arg): arg is [id: string, v: PendingDocUpdate] => {
             const [id, v] = arg;
             return v.type === 'add-doc' && id.startsWith(ROW_PLACEHOLDER_PREFIX);
           })
+          .sort(([idA], [idB]) => {
+            const indexA = this.newRowsVirtualIndexes[idA];
+            const indexB = this.newRowsVirtualIndexes[idB];
+            return (indexA ?? 0) - (indexB ?? 0);
+          })
           .forEach(([id, v]) => {
-            resultRows.unshift({ id, flattened: v.update, raw: v.update });
+            const atIndex = this.newRowsVirtualIndexes[id];
+            resultRows.splice(atIndex, 0, { id, flattened: v.update, raw: v.update });
           });
 
         // If no rows left, add a placeholder row
@@ -847,9 +886,9 @@ export class IndexUpdateService {
   }
 
   /** Adds an empty document */
-  public addEmptyRow() {
+  public addEmptyRow(atIndex: number) {
     const newDocId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
-    this.addAction('add-doc', { id: newDocId, value: {} });
+    this.addAction('add-doc', { id: newDocId, value: {}, atIndex });
 
     this.telemetry.trackEditInteraction({ actionType: 'add_row' });
   }
