@@ -104,11 +104,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await testSubjects.waitForDeleted('euiOverlayMask');
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'ao');
-      await dashboard.waitForRenderComplete();
+      await comboBox.set('esqlControlValuesDropdown', 'AO');
 
-      const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
-      expect(tableContent).to.contain('AO');
+      await retry.tryForTime(5000, async () => {
+        await dashboard.waitForRenderComplete();
+        const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
+        expect(tableContent).to.contain('AO');
+      });
     });
 
     it('should handle properly a query to retrieve the values that return more than one column', async () => {
