@@ -74,29 +74,25 @@ export const AutocompleteSelector = ({
   const selectedOptions = useMemo(() => {
     if (!value) return [];
 
-    const matchingSuggestion = comboBoxOptions.find((option) => option.value === value);
-    if (matchingSuggestion) {
-      return [matchingSuggestion];
+    const matchingOption = comboBoxOptions.find((option) => option.value === value);
+    if (matchingOption) {
+      // Return the option but without the prepend (icon)
+      return [
+        {
+          label: matchingOption.label,
+          value: matchingOption.value,
+          'data-test-subj': matchingOption['data-test-subj'],
+        },
+      ];
     }
 
-    // For custom values not in suggestions, try to find the type
-    const suggestionWithType = suggestions.find((s) => s.name === value);
     return [
       {
         label: value,
         value,
-        ...(showIcon && {
-          prepend: (
-            <FieldIcon
-              type={suggestionWithType?.type || 'unknown'}
-              size="s"
-              className="eui-alignMiddle"
-            />
-          ),
-        }),
       },
     ];
-  }, [value, comboBoxOptions, suggestions, showIcon]);
+  }, [value, comboBoxOptions]);
 
   const handleSelectionChange = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {

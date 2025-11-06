@@ -223,7 +223,7 @@ describe('AutocompleteSelector', () => {
       expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
     });
 
-    it('shows icon for selected field when showIcon is true and type is available', () => {
+    it('does not show icon for selected value (icons only in dropdown)', () => {
       const suggestionsWithTypes = [
         { name: 'log.level', type: 'keyword' },
         { name: 'message', type: 'text' },
@@ -238,43 +238,9 @@ describe('AutocompleteSelector', () => {
         />
       );
 
-      // Icon should be visible in the selected value
-      expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
-    });
-
-    it('shows unknown icon for selected field when showIcon is true and type is not available', () => {
-      const suggestionsWithoutTypes = [{ name: 'log.level' }, { name: 'message' }];
-
-      render(
-        <AutocompleteSelector
-          {...defaultProps}
-          value="log.level"
-          suggestions={suggestionsWithoutTypes}
-          showIcon={true}
-        />
-      );
-
-      // Unknown icon should be visible in the selected value
-      expect(screen.getByTestId('field-icon-unknown')).toBeInTheDocument();
-    });
-
-    it('does not show icon for selected field when showIcon is false', () => {
-      const suggestionsWithTypes = [
-        { name: 'log.level', type: 'keyword' },
-        { name: 'message', type: 'text' },
-      ];
-
-      render(
-        <AutocompleteSelector
-          {...defaultProps}
-          value="log.level"
-          suggestions={suggestionsWithTypes}
-          showIcon={false}
-        />
-      );
-
-      // Icon should not be visible
+      // Selected value should not have icon (only dropdown options have icons)
       expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-unknown')).not.toBeInTheDocument();
     });
   });
 });
