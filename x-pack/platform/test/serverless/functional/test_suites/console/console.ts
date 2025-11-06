@@ -67,30 +67,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('clickable links', () => {
-      it('should have links option enabled in Monaco editor configuration', async () => {
-        // Verify that the Monaco editor has the links option enabled
-        // by accessing the editor configuration through the browser
-        const linksEnabled = await browser.execute(() => {
-          // Access Monaco editor instances
+      it('should have links enabled in the input editor but not the output editor', async () => {
+        // Verify that only the input editor has links enabled
+        const editorsConfig = await browser.execute(() => {
           const monaco = (window as any).MonacoEnvironment?.monaco;
-          if (!monaco) return false;
+          if (!monaco) return { input: false, output: false };
 
-          // Get all editor instances
           const editors = monaco.editor.getEditors();
 
-          // Find the console input editor (should be the first one)
-          for (const editor of editors) {
-            const options = editor.getOptions();
-            // Check if the links option is enabled
-            const linksOption = options.get(monaco.editor.EditorOption.links);
-            if (linksOption !== undefined) {
-              return linksOption;
-            }
-          }
-          return false;
+          // Find editors by their DOM containers using test subjects
+          const inputEditor = editors.find((e: any) => {
+            const container = e.getContainerDomNode();
+            return container?.closest('[data-test-subj="consoleMonacoEditor"]');
+          });
+
+          const outputEditor = editors.find((e: any) => {
+            const container = e.getContainerDomNode();
+            return container?.closest('[data-test-subj="consoleMonacoOutput"]');
+          });
+
+          return {
+            input: inputEditor?.getOptions().get(monaco.editor.EditorOption.links) || false,
+            output: outputEditor?.getOptions().get(monaco.editor.EditorOption.links) || false,
+          };
         });
 
-        expect(linksEnabled).to.be(true);
+        expect(editorsConfig.input).to.be(true);
+        expect(editorsConfig.output).to.be(false);
       });
     });
   });

@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
   describe('misc console behavior', function testMiscConsoleBehavior() {
@@ -262,30 +263,103 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('clickable links', () => {
-      it('should have links option enabled in Monaco editor configuration', async () => {
-        // Verify that the Monaco editor has the links option enabled
-        // by accessing the editor configuration through the browser
-        const linksEnabled = await browser.execute(() => {
-          // Access Monaco editor instances
-          const monaco = (window as any).MonacoEnvironment?.monaco;
-          if (!monaco) return false;
+      let initialWindowHandles: string[];
 
-          // Get all editor instances
+      beforeEach(async () => {
+        initialWindowHandles = await browser.getAllWindowHandles();
+      });
+
+      afterEach(async () => {
+        // Close any new tabs that were opened
+        const currentHandles = await browser.getAllWindowHandles();
+        if (currentHandles.length > initialWindowHandles.length) {
+          // Close all new tabs
+          for (let i = initialWindowHandles.length; i < currentHandles.length; i++) {
+            await browser.switchToWindow(currentHandles[i]);
+            await browser.closeCurrentWindow();
+          }
+          // Switch back to the original tab
+          await browser.switchToWindow(initialWindowHandles[0]);
+        }
+      });
+
+      it('should have links enabled in the input editor but not the output editor', async () => {
+        // Verify that only the input editor has links enabled
+        const editorsConfig = await browser.execute(() => {
+          const monaco = (window as any).MonacoEnvironment?.monaco;
+          if (!monaco) return { input: false, output: false };
+
           const editors = monaco.editor.getEditors();
 
-          // Find the console input editor (should be the first one)
-          for (const editor of editors) {
-            const options = editor.getOptions();
-            // Check if the links option is enabled
-            const linksOption = options.get(monaco.editor.EditorOption.links);
-            if (linksOption !== undefined) {
-              return linksOption;
-            }
-          }
-          return false;
+          // Find editors by their DOM containers
+          const inputEditor = editors.find((e: any) => {
+            const container = e.getContainerDomNode();
+            return container?.closest('[data-test-subj="consoleMonacoEditor"]');
+          });
+
+          const outputEditor = editors.find((e: any) => {
+            const container = e.getContainerDomNode();
+            return container?.closest('[data-test-subj="consoleMonacoOutput"]');
+          });
+
+          return {
+            input: inputEditor?.getOptions().get(monaco.editor.EditorOption.links) || false,
+            output: outputEditor?.getOptions().get(monaco.editor.EditorOption.links) || false,
+          };
         });
 
-        expect(linksEnabled).to.be(true);
+        expect(editorsConfig.input).to.be(true);
+        expect(editorsConfig.output).to.be(false);
+      });
+
+      it('should open URL in new tab when Cmd/Ctrl+Click on a link in the input editor', async () => {
+        await PageObjects.console.clearEditorText();
+
+        // Enter a URL that will be detected as a link
+        await PageObjects.console.enterText('# https://www.elastic.co\n');
+        await PageObjects.console.enterText('GET _search');
+
+        // Give Monaco time to detect and decorate the link
+        await PageObjects.common.sleep(1000);
+
+        // Verify the text was entered
+        const editorText = await PageObjects.console.getEditorText();
+        expect(editorText).to.contain('https://www.elastic.co');
+
+        // Get the input editor container
+        const inputEditor = await testSubjects.find('consoleMonacoEditor');
+
+        // Find the view-line containing the URL
+        const viewLines = await inputEditor.findAllByClassName('view-line');
+        expect(viewLines.length).to.be.greaterThan(0);
+
+        // Get the first line (which contains our URL)
+        const firstLine = viewLines[0];
+
+        // Perform Cmd/Ctrl+Click on the URL using Selenium Actions API
+        const modifierKey = browser.keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+        await browser
+          .getActions()
+          .keyDown(modifierKey)
+          .move({ origin: firstLine._webElement })
+          .click()
+          .keyUp(modifierKey)
+          .perform();
+
+        // Wait for a new tab to open
+        await retry.waitFor('new tab to open after clicking link', async () => {
+          const handles = await browser.getAllWindowHandles();
+          return handles.length > initialWindowHandles.length;
+        });
+
+        // Verify a new tab was opened
+        const windowHandles = await browser.getAllWindowHandles();
+        expect(windowHandles.length).to.be.greaterThan(initialWindowHandles.length);
+
+        // Switch to the new tab and verify the URL
+        await browser.switchToWindow(windowHandles[windowHandles.length - 1]);
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('elastic.co');
       });
     });
 
