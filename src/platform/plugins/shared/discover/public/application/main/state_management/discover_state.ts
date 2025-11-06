@@ -462,7 +462,7 @@ export function getDiscoverStateContainer({
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
 
     // subscribing to state changes of appStateContainer, triggering data fetching
-    const appStateUnsubscribe = appStateContainer.subscribe(
+    const appStateSubscription = appStateContainer.state$.subscribe(
       buildStateSubscribe({
         appState: appStateContainer,
         savedSearchState: savedSearchContainer,
@@ -513,7 +513,7 @@ export function getDiscoverStateContainer({
     internalStopSyncing = () => {
       savedSearchChangesSubscription.unsubscribe();
       unsubscribeData();
-      appStateUnsubscribe();
+      appStateSubscription.unsubscribe();
       appStateInitAndSyncUnsubscribe();
       unsubscribeSavedSearchUrlTracking();
       filterUnsubscribe.unsubscribe();
