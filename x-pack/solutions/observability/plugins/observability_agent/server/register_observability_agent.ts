@@ -20,7 +20,7 @@ import {
 import {
   OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
   createObservabilityRecallKnowledgeBaseTool,
-} from './tools/recall_knowledge_base';
+} from './tools/knowledge_base/recall_knowledge_base';
 import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createObservabilityGetDataSourcesTool,

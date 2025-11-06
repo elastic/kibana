@@ -14,6 +14,7 @@ import type {
   LogsDataAccessPluginSetup,
   LogsDataAccessPluginStart,
 } from '@kbn/logs-data-access-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 export type ObservabilityAgentPluginSetup = Record<string, never>;
 export type ObservabilityAgentPluginStart = Record<string, never>;
 
@@ -21,10 +22,12 @@ export interface ObservabilityAgentPluginSetupDependencies {
   onechat: OnechatPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
+  security: SecurityPluginSetup;
 }
 
 export interface ObservabilityAgentPluginStartDependencies {
   onechat: OnechatPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
+  security: SecurityPluginStart;
 }

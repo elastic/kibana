@@ -9,7 +9,13 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, ModelProvider } from '@kbn/onechat-server';
-import type { CoreSetup, IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  CoreSetup,
+  IScopedClusterClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import { encode } from 'gpt-tokenizer';
 import { orderBy } from 'lodash';
 import { MessageRole } from '@kbn/inference-common';
@@ -17,7 +23,8 @@ import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
-} from '../types';
+} from '../../types';
+import { getAccessQuery } from './get_access_query';
 
 export const OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID = 'observability.recall_knowledge_base';
 
@@ -68,6 +75,9 @@ export async function createObservabilityRecallKnowledgeBaseTool({
     schema: recallKnowledgeBaseSchema,
     tags: ['observability', 'knowledge', 'documentation', 'context'],
     handler: async ({ query }, { esClient, modelProvider, request }) => {
+      const [, plugins] = await core.getStartServices();
+      const user = plugins.security.authc.getCurrentUser(request);
+
       try {
         const rewrittenQuery = await rewriteQuery({ query, modelProvider, logger });
 
@@ -78,6 +88,7 @@ export async function createObservabilityRecallKnowledgeBaseTool({
         const namespace = await getNamespaceForRequest(request, core);
         logger.debug(`Using namespace: ${namespace}`);
         const entries = await recallFromKnowledgeBase({
+          user,
           esClient,
           query: rewrittenQuery,
           namespace,
@@ -191,11 +202,13 @@ EXAMPLES
  * Recall entries from the knowledge base using semantic search
  */
 async function recallFromKnowledgeBase({
+  user,
   esClient,
   query,
   namespace,
   logger,
 }: {
+  user: AuthenticatedUser | null;
   esClient: IScopedClusterClient;
   query: string;
   namespace: string;
@@ -208,8 +221,7 @@ async function recallFromKnowledgeBase({
         bool: {
           should: [{ semantic: { field: 'semantic_text', query } }],
           filter: [
-            { term: { namespace } }, // filter by space
-            { term: { public: true } }, // only public entries
+            ...getAccessQuery({ user, namespace }),
             { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } }, // exclude user instructions
           ],
         },
