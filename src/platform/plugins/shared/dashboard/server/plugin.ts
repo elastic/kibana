@@ -16,7 +16,10 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/server';
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type {
+  ContentManagementServerSetup,
+  ContentStorage,
+} from '@kbn/content-management-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type {
   PluginInitializerContext,
@@ -36,8 +39,11 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
+import type { DashboardItem } from './content_management';
+import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
 import {
   createDashboardSavedObjectType,
@@ -70,7 +76,7 @@ export class DashboardPlugin
 {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -84,6 +90,17 @@ export class DashboardPlugin
         },
       })
     );
+
+    plugins.contentManagement.register<ContentStorage<DashboardItem>>({
+      id: CONTENT_ID,
+      storage: new DashboardStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.logger.get('storage'),
+      }),
+      version: {
+        latest: LATEST_VERSION,
+      },
+    });
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
@@ -163,17 +180,18 @@ export class DashboardPlugin
 
     return {
       getDashboard: async (ctx: RequestHandlerContext, id: string) => {
-        const { core } = await ctx.resolve(['core']);
-        const soResponse = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
-          DASHBOARD_SAVED_OBJECT_TYPE,
-          id
-        );
+        const { core: coreCtx } = await ctx.resolve(['core']);
+        const soResponse =
+          await coreCtx.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+            DASHBOARD_SAVED_OBJECT_TYPE,
+            id
+          );
         return {
           id: soResponse.saved_object.id,
           description: soResponse.saved_object.attributes.description,
           tags: soResponse.saved_object.references
             .filter(({ type }) => type === tagSavedObjectTypeName)
-            .map(({ id }) => id),
+            .map((ref) => ref.id),
           title: soResponse.saved_object.attributes.title,
         };
       },
