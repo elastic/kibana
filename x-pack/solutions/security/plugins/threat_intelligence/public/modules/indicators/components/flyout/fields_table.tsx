@@ -11,12 +11,18 @@ import React, { useMemo, VFC } from 'react';
 import { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorValueActions } from './indicator_value_actions';
+import { unwrapValue } from '../../utils/unwrap_value';
 
+interface TableItem {
+  key: string;
+  value: string | string[] | null;
+}
 export interface IndicatorFieldsTableProps {
   fields: string[];
   indicator: Indicator;
   search: EuiInMemoryTableProps['search'];
   ['data-test-subj']?: string;
+  compressed?: boolean;
 }
 
 export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
@@ -64,10 +70,22 @@ export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
     [indicator, dataTestSubj]
   );
 
+  const items = useMemo(() => {
+    return fields.toSorted().reduce<TableItem[]>((acc, field) => {
+      const value = unwrapValue(indicator, field);
+      return [
+        ...acc,
+        {
+          key: field,
+          value,
+        },
+      ];
+    }, []);
+  }, [fields, indicator]);
+
   return (
     <EuiInMemoryTable
-      // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
-      items={fields.sort()}
+      items={items}
       // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
       columns={columns}
       sorting={true}
