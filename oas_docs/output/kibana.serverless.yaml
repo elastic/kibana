@@ -1670,7 +1670,65 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.<br/><br/>[Required authorization] Route required privileges: read_onechat.
+        Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.
+
+        ## Event types
+
+        The endpoint emits Server-Sent Events (SSE) with the following custom event types:
+
+        ### `conversation_id_set`
+        Emitted when the conversation ID is set or confirmed.
+        - `conversation_id` (string): The UUID of the conversation
+
+        ### `conversation_created`
+        Emitted when a new conversation is created and persisted.
+        - `conversation_id` (string): The UUID of the newly created conversation
+        - `title` (string): The title of the conversation
+
+        ### `conversation_updated`
+        Emitted when an existing conversation's metadata is updated.
+        - `conversation_id` (string): The UUID of the conversation
+        - `title` (string): The updated title of the conversation
+
+        ### `reasoning`
+        Emitted during the agent's reasoning/thinking process.
+        - `reasoning` (string): Plain text content describing the agent's reasoning
+        - `transient` (boolean, optional): If true, the reasoning will not be persisted or displayed in the thinking panel, only shown as "current thinking"
+
+        ### `tool_call`
+        Emitted when the agent invokes a tool.
+        - `tool_call_id` (string): Unique identifier for this tool invocation
+        - `tool_id` (string): The name/ID of the tool being called
+        - `params` (object): Parameters passed to the tool
+
+        ### `tool_progress`
+        Emitted to report progress updates during tool execution.
+        - `tool_call_id` (string): The UUID of the tool call this progress update relates to
+        - `message` (string): Human-readable progress message
+
+        ### `tool_result`
+        Emitted when a tool call completes and returns results.
+        - `tool_call_id` (string): The UUID of the completed tool call
+        - `tool_id` (string): The name/ID of the tool that was called
+        - `results` (array): Array of ToolResult objects containing the tool's output
+
+        ### `message_chunk`
+        Emitted for streaming text chunks of the agent's response message.
+        - `message_id` (string): UUID of the message this chunk belongs to
+        - `text_chunk` (string): Partial text content (text delta)
+
+        ### `message_complete`
+        Emitted when the agent's message stream is finished.
+        - `message_id` (string): UUID of the completed message
+        - `message_content` (string): Full text content of the complete message
+
+        ### `thinking_complete`
+        Emitted when the agent's thinking phase is complete and the first token arrives.
+        - `time_to_first_token` (number): Time elapsed from round start to first token arrival, in milliseconds
+
+        ### `round_complete`
+        Emitted when a complete conversation round finishes.
+        - `round` (object): The complete ConversationRound object containing the full round data, including input, steps, response, and metadata<br/><br/>[Required authorization] Route required privileges: read_onechat.
       operationId: post-agent-builder-converse-async
       parameters:
         - description: A required header to protect against CSRF attacks
