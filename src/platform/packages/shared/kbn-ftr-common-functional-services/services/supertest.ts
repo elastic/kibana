@@ -32,7 +32,7 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext): sup
     options.http2 = true;
   }
 
-  return supertest(kibanaServerUrl, options);
+  return supertest.agent(kibanaServerUrl, options);
 }
 
 export function ElasticsearchSupertestProvider({

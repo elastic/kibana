@@ -12,7 +12,7 @@ import supertest from 'supertest';
 import type { FtrProviderContext } from './ftr_provider_context';
 
 /**
- * Returns supertest.SuperTest<supertest.Test> instance that will not persist cookie between API requests.
+ * Returns a TestAgent<supertest.SuperTestStatic.Test> instance that will not persist cookie between API requests.
  * If you need to pass certificate, do the following:
  * await supertestWithoutAuth
  *   .get('/abc')
@@ -25,5 +25,5 @@ export function SupertestWithoutAuthProvider({ getService }: FtrProviderContext)
     auth: false,
   });
 
-  return supertest(kbnUrl);
+  return supertest.agent(kbnUrl);
 }

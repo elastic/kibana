@@ -147,7 +147,7 @@ export function TestUserSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertest(
+  return supertest.agent(
     formatUrl({
       ...kibanaServerConfig,
       auth: `${TEST_USER_NAME}:${TEST_USER_PASSWORD}`,
