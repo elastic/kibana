@@ -91,8 +91,13 @@ export type LogDocument = Fields &
     'kubernetes.namespace'?: string;
     'kubernetes.pod.name'?: string;
     'kubernetes.container.name'?: string;
+    'kubernetes.deployment.name'?: string;
+    'kubernetes.replicaset.name'?: string;
+    'kubernetes.statefulset.name'?: string;
+    'kubernetes.daemonset.name'?: string;
     'orchestrator.resource.name'?: string;
     tags?: string | string[];
+    'user.name'?: string;
     'user_agent.name'?: string;
     'orchestrator.type'?: string;
     'orchestrator.resource.type'?: string;
@@ -113,6 +118,18 @@ export type LogDocument = Fields &
     'kubernetes.labels.tier'?: string;
     'kubernetes.annotations.deployment'?: string;
     'process.pid'?: number;
+    'deployment.name'?: string;
+    'network.protocol'?: string;
+    'network.transport'?: string;
+    'network.type'?: string;
+    'tls.version'?: string;
+    'tls.cipher'?: string;
+    'tls.server.subject'?: string;
+    'tls.client.subject'?: string;
+    'session.id'?: string;
+    'span.id'?: string;
+    'error.type'?: string;
+    'error.code'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {
