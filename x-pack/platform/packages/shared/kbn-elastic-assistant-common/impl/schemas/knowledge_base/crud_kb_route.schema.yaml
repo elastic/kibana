@@ -43,7 +43,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse'
               examples:
-                $ref: '#/components/examples/KnowledgeBaseResponse200Example1'
+                KnowledgeBaseResponse200Example1:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
         400:
           description: Generic Error
           content:
@@ -51,7 +54,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
               examples:
-                $ref: '#/components/examples/KnowledgeBaseResponse400Example1'
+                KnowledgeBaseResponse400Example1:
+                  summary: A response for a request that failed due to an invalid query parameter value.
+                  value: >
+                    statusCode: 400
+                    error: Bad Request
+                    message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
@@ -76,7 +84,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
               examples:
-                $ref: '#/components/examples/KnowledgeBaseReadResponse200Example1'
+                KnowledgeBaseReadResponse200Example1:
+                  summary: A response that returns information about the knowledge base.
+                  value:
+                    elser_exists: false
+                    is_setup_in_progress: true
+                    is_setup_available: true
+                    security_labs_exists: false
+                    defend_insights_exists: true
+                    user_data_exists: true
+                    product_documentation_status: installed
         400:
           description: Generic Error
           content:
@@ -116,7 +133,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse'
               examples:
-                $ref: '#/components/examples/KnowledgeBaseResponse200Example1'
+                KnowledgeBaseResponse200Example2:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
         400:
           description: Generic Error
           content:
@@ -124,7 +144,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
               examples:
-                $ref: '#/components/examples/KnowledgeBaseResponse400Example1'
+                KnowledgeBaseResponse400Example2:
+                  summary: A response for a request that failed due to an invalid query parameter value.
+                  value: >
+                    statusCode: 400
+                    error: Bad Request
+                    message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
@@ -141,7 +166,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
               examples:
-                $ref: '#/components/examples/KnowledgeBaseReadResponse200Example1'
+                KnowledgeBaseReadResponse200Example2:
+                  summary: A response that returns information about the knowledge base.
+                  value:
+                    elser_exists: false
+                    is_setup_in_progress: true
+                    is_setup_available: true
+                    security_labs_exists: false
+                    defend_insights_exists: true
+                    user_data_exists: true
+                    product_documentation_status: installed
         400:
           description: Generic Error
           content:
@@ -149,27 +183,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
 components:
-  examples:
-    KnowledgeBaseResponse200Example1:
-      summary: A response that indicates that the request was successful.
-      value:
-        success: true
-    KnowledgeBaseResponse400Example1:
-      summary: A response for a request that failed due to an invalid query parameter value.
-      value:
-        statusCode: 400
-        error: Bad Request
-        message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
-    KnowledgeBaseReadResponse200Example1:
-      summary: A response that returns information about the knowledge base.
-      value:
-        elser_exists: false
-        is_setup_in_progress: true
-        is_setup_available: true
-        security_labs_exists: false
-        defend_insights_exists: true
-        user_data_exists: true
-        product_documentation_status: installed
   schemas:
     KnowledgeBaseResponse:
       type: object
