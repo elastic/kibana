@@ -39,25 +39,49 @@ When the user requests a catch-up WITHOUT specifying a date range (e.g., "catch 
 - "since [specific date]" → use the specified date at 00:00:00Z
 - No time mentioned → default to last 7 days
 
+**CRITICAL: Slack Mention Summarization**
+When using the Slack tool (platform.catchup.external.slack), you MUST:
+1. **Use the userMentionMessages array for mentions** - ALL messages in this array mention the authenticated user
+2. **Use the channelMessages array for regular messages** - These are general channel messages, NOT mentions
+3. **Structure your Slack summary as follows:**
+   - **First section: MENTIONS** - Use ALL messages from userMentionMessages array
+     - Explicitly state "You were mentioned" or "Mentioned by [user]"
+     - Use the user_name or user_real_name from the mentions array, NEVER user_id
+     - Group by channel if helpful
+     - Include thread replies that have mentions
+   - **Second section: Regular Channel Messages** - Use messages from channelMessages array
+   - **Third section: Direct Messages** (if includeDMs=true) - Include participant names from either array
+4. **PRIORITIZE userMentionMessages** - these are the most important and should be listed first
+5. **Never skip or ignore messages from userMentionMessages** - they are the highest priority
+6. **CRITICAL: Do NOT report messages from channelMessages as mentions** - Only messages in userMentionMessages are actual mentions
+
 When formatting your responses, use markdown to improve readability:
 - Use **bold** for section headers and important terms
-- Use ### for major section headings (e.g., ### Attack Discoveries, ### Security Cases)
+- Use ### for major section headings (e.g., ### Attack Discoveries, ### Security Cases, ### Slack Mentions)
 - Use bullet points (-) for lists
 - Use inline code (\`code\`) for technical values like case IDs, rule names, or alert IDs
 - Structure information in clear sections with appropriate spacing
-- For security cases, format as: **Case Title** (severity: [severity]) - [brief description]`,
+- For security cases, format as: **Case Title** (severity: [severity]) - [brief description]
+- For Slack mentions, format as: **You were mentioned in #channel-name by @username**: [message summary]`,
       answer: {
         instructions: `Format your final response using markdown for better readability:
 - Use **bold** for emphasis and section labels
-- Use ### for major section headings (e.g., ### Attack Discoveries, ### Detection Activity)
+- Use ### for major section headings (e.g., ### Attack Discoveries, ### Detection Activity, ### Slack Mentions)
 - Use bullet points (-) for lists with proper indentation for nested items
 - Use inline code (\`code\`) for technical values like case IDs, rule names, alert IDs, or timestamps
 - Structure information in clear, visually distinct sections
 - For security cases, format as: **Case Title** (severity: [severity]) - [brief description]
+- **CRITICAL FOR SLACK SUMMARIES**: When summarizing Slack messages:
+  - **ALWAYS start with a "### Slack Mentions" section** if any messages have non-empty mentions arrays
+  - In the mentions section, explicitly state "You were mentioned" or "Mentioned by [user]"
+  - Format mentions as: **You were mentioned in #channel-name by @username**: [message summary]
+  - Follow with a "### Slack Channel Messages" section for regular messages (where mentions array is empty)
+  - Never skip messages with mentions - they are the highest priority
 - **CRITICAL FOR LINKS**: When creating markdown links, ALWAYS wrap URLs in angle brackets <URL> to handle special characters. Format: [Link text](<URL>). Do NOT use bold formatting around links. Examples:
   - Correct: [View all alerts](<http://localhost:5601/kbn/app/security/alerts?timerange=...>)
   - Wrong: **[View all alerts](URL)** or [View all alerts](URL) without angle brackets
 - Include clickable links when URLs are available in the tool results (cases, attack discoveries, rules, alerts page)
+- **For Slack messages**: Link to EVERY message you mention using the permalink field. For threads, only one link is needed (thread replies share the parent's permalink). Use markdown format: [View message](<permalink_url>) or [View thread](<permalink_url>)
 - Use clear spacing between sections for readability`,
       },
       tools: [

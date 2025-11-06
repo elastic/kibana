@@ -28,6 +28,7 @@ import type {
   ValidChannelResponse,
   ConversationsListResponse,
   ConversationsHistoryResponse,
+  SearchMessagesResponse,
   ConversationsRepliesResponse,
   ConversationsMembersResponse,
   UsersListResponse,
@@ -507,6 +508,45 @@ export const createExternalService = (
     }
   };
 
+  const searchMessages = async (params: {
+    query: string;
+    count?: number;
+    page?: number;
+  }): Promise<ConnectorTypeExecutorResult<SearchMessagesResponse>> => {
+    try {
+      const { query, count = 20, page = 1 } = params;
+
+      if (!query || query.length === 0) {
+        return buildSlackExecutorErrorResponse({
+          slackApiError: new Error('The search query is empty'),
+          logger,
+        });
+      }
+
+      const queryParams = new URLSearchParams();
+      queryParams.append('query', query);
+      queryParams.append('count', count.toString());
+      queryParams.append('page', page.toString());
+
+      const url = `${SLACK_URL}search.messages?${queryParams.toString()}`;
+
+      const result: AxiosResponse<SearchMessagesResponse> = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url,
+        logger,
+        headers,
+        configurationUtilities,
+        connectorUsageCollector,
+      });
+
+      return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
+    } catch (error) {
+      logger.warn(`[Slack Service] searchMessages error: ${error}`);
+      return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
+    }
+  };
+
   const getChannelDigest = async (params: {
     since: number;
     types: string[];
@@ -520,6 +560,38 @@ export const createExternalService = (
           ', '
         )}, since: ${new Date(since * 1000).toISOString()}`
       );
+
+      // Get the authenticated user's ID and username using auth.test
+      let authenticatedUserId: string | undefined;
+      let authenticatedUsername: string | undefined;
+      try {
+        const authTestResult = await request<{ ok: boolean; user_id?: string; user?: string }>({
+          axios: axiosInstance,
+          configurationUtilities,
+          logger,
+          method: 'get',
+          headers,
+          url: `${SLACK_URL}auth.test`,
+          connectorUsageCollector,
+        });
+        if (authTestResult.data.ok && authTestResult.data.user_id) {
+          authenticatedUserId = authTestResult.data.user_id;
+          authenticatedUsername = authTestResult.data.user;
+          logger.info(
+            `[Slack Service] Authenticated user ID: ${authenticatedUserId}, username: ${authenticatedUsername}`
+          );
+        } else {
+          logger.warn(
+            `[Slack Service] auth.test did not return user_id. Response: ${JSON.stringify(
+              authTestResult.data
+            )}`
+          );
+        }
+      } catch (error) {
+        logger.warn(
+          `[Slack Service] Failed to get authenticated user info from auth.test: ${error}. Mentions will not be searched.`
+        );
+      }
 
       const userMap = new Map<string, { name: string; real_name?: string }>();
 
@@ -542,10 +614,418 @@ export const createExternalService = (
         await new Promise((resolve) => setTimeout(resolve, throttleDelay));
       };
 
+      // Fetch user info for authenticated user so we have their name available
+      if (authenticatedUserId) {
+        try {
+          await throttleRequest();
+          const authUserInfoResult = await getUserInfo({ user: authenticatedUserId });
+          if (
+            authUserInfoResult.status === 'ok' &&
+            authUserInfoResult.data?.ok &&
+            authUserInfoResult.data.user
+          ) {
+            const user = authUserInfoResult.data.user;
+            userMap.set(user.id, {
+              name: user.name,
+              real_name: user.profile?.display_name || user.real_name || user.name,
+            });
+            logger.debug(
+              `[Slack Service] Fetched user info for authenticated user: ${user.name} (${user.id})`
+            );
+          }
+        } catch (error) {
+          logger.debug(
+            `[Slack Service] Error fetching user info for authenticated user: ${error}. Continuing.`
+          );
+        }
+      }
+
+      // Set to track messages that mention the user (channel_id + timestamp as key)
+      const mentionedMessages = new Set<string>();
+      // Store search results directly when searchAllChannels is true (optimization)
+      const searchResultMatches: Array<{
+        channel: { id: string; name: string };
+        message: SlackMessage;
+        permalink?: string;
+      }> = [];
+      // Track unique channel IDs from search results
+      const channelsWithMentions = new Set<string>();
+
+      // Helper function to extract all user IDs mentioned in message text
+      // This is used for both verification and building the mentions array
+      const extractMentionedUserIds = (text: string | undefined): string[] => {
+        if (!text) return [];
+        const mentionedUserIds: string[] = [];
+        // Match patterns like <@USER_ID> or <@USER_ID|username>
+        const mentionPattern = /<@([A-Z0-9]+)(?:\|[^>]+)?>/g;
+        let match;
+        while ((match = mentionPattern.exec(text)) !== null) {
+          const userId = match[1];
+          if (userId && !mentionedUserIds.includes(userId)) {
+            mentionedUserIds.push(userId);
+          }
+        }
+        return mentionedUserIds;
+      };
+
+      // Helper function to check if a specific user ID is mentioned in message text
+      // This is used to filter out false positives from Slack's search API
+      const isUserMentionedInText = (text: string | undefined, userId: string): boolean => {
+        if (!text || !userId) return false;
+        const mentionedUserIds = extractMentionedUserIds(text);
+        return mentionedUserIds.includes(userId);
+      };
+
+      // Search for messages that mention the authenticated user using search.messages API
+      if (!authenticatedUserId) {
+        logger.warn(
+          `[Slack Service] ⚠️ Cannot search for mentions: authenticatedUserId is not available. Search will be skipped.`
+        );
+      }
+
+      if (authenticatedUserId) {
+        try {
+          // Convert since timestamp to date string for search query
+          const sinceDate = new Date(since * 1000);
+          const sinceDateStr = sinceDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+          const nowDate = new Date();
+          const nowDateStr = nowDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+          // Build search query: Use <@USER_ID> format (verified to work with Slack API)
+          // Note: We verify mentions in message text as a backup filter to catch false positives
+          // Alternative syntaxes that may work (untested): mentions:USER_ID or mentions:<@USER_ID>
+          const mentionQueryUserId = `<@${authenticatedUserId}>`;
+          const searchQuery = `${mentionQueryUserId} after:${sinceDateStr} before:${nowDateStr}`;
+          logger.info(`[Slack Service] ===== SEARCH CONFIGURATION =====`);
+          logger.info(`[Slack Service] Authenticated User ID: ${authenticatedUserId}`);
+          logger.info(
+            `[Slack Service] Authenticated Username: ${authenticatedUsername || 'NOT AVAILABLE'}`
+          );
+          logger.info(`[Slack Service] Since timestamp: ${since} (${sinceDate.toISOString()})`);
+          logger.info(`[Slack Service] Since date string: ${sinceDateStr}`);
+          logger.info(`[Slack Service] Now date string: ${nowDateStr}`);
+          logger.info(`[Slack Service] Mention query format: ${mentionQueryUserId}`);
+          logger.info(`[Slack Service] Full search query: ${searchQuery}`);
+          logger.info(
+            `[Slack Service] Note: Results will be verified to ensure authenticated user is actually mentioned`
+          );
+          logger.info(`[Slack Service] ===== STARTING SEARCH =====`);
+
+          // Search for messages (paginate through results)
+          let searchPage = 1;
+          let hasMoreSearchResults = true;
+          // Search for mentions from all channels (always done for catchups)
+          const maxSearchPages = 10; // Limit pages to avoid excessive API calls
+          let totalMatchesFound = 0;
+          let totalFilteredMatches = 0; // Track total filtered matches across all pages
+
+          logger.info(
+            `[Slack Service] Will search up to ${maxSearchPages} pages (${
+              maxSearchPages * 100
+            } max results)`
+          );
+
+          while (hasMoreSearchResults && searchPage <= maxSearchPages) {
+            logger.info(`[Slack Service] Fetching search page ${searchPage}/${maxSearchPages}...`);
+            await throttleRequest();
+            const searchResult = await searchMessages({
+              query: searchQuery,
+              count: 100,
+              page: searchPage,
+            });
+
+            logger.info(
+              `[Slack Service] Search page ${searchPage} response status: ${searchResult.status}`
+            );
+            if (searchResult.data) {
+              logger.info(
+                `[Slack Service] Search page ${searchPage} response ok: ${searchResult.data.ok}`
+              );
+              if (searchResult.data.error) {
+                logger.warn(
+                  `[Slack Service] Search page ${searchPage} error: ${searchResult.data.error}`
+                );
+              }
+              if (searchResult.data.messages) {
+                logger.info(
+                  `[Slack Service] Search page ${searchPage} total matches: ${
+                    searchResult.data.messages.total || 0
+                  }`
+                );
+                logger.info(
+                  `[Slack Service] Search page ${searchPage} matches in this page: ${
+                    searchResult.data.messages.matches?.length || 0
+                  }`
+                );
+                if (searchResult.data.messages.pagination) {
+                  logger.info(
+                    `[Slack Service] Search page ${searchPage} pagination: page ${searchResult.data.messages.pagination.page}/${searchResult.data.messages.pagination.page_count}, per_page: ${searchResult.data.messages.pagination.per_page}`
+                  );
+                }
+                if (searchResult.data.messages.paging) {
+                  logger.info(
+                    `[Slack Service] Search page ${searchPage} paging: page ${searchResult.data.messages.paging.page}/${searchResult.data.messages.paging.pages}, count: ${searchResult.data.messages.paging.count}`
+                  );
+                }
+              }
+            }
+
+            // Handle retry results (rate limiting)
+            if (searchResult.status === 'error' && searchResult.retry) {
+              const waitMs = waitForRetry(searchResult.retry);
+              const waitSeconds = Math.ceil(waitMs / 1000);
+              logger.warn(`Rate limited while searching messages, waiting ${waitSeconds} seconds`);
+              await new Promise((resolve) => setTimeout(resolve, waitMs));
+              continue; // Retry the same page
+            }
+
+            if (
+              searchResult.status === 'ok' &&
+              searchResult.data?.ok &&
+              searchResult.data.messages?.matches
+            ) {
+              const matches = searchResult.data.messages.matches || [];
+              totalMatchesFound += matches.length;
+              logger.info(
+                `[Slack Service] ✓ Search page ${searchPage}: Found ${matches.length} messages (total so far: ${totalMatchesFound})`
+              );
+
+              // Process matches
+              let validMatches = 0;
+              let invalidMatches = 0;
+              let filteredMatches = 0; // Track matches filtered out due to false positives (this page)
+              logger.info(
+                `[Slack Service] Processing ${matches.length} matches from search page ${searchPage}`
+              );
+              for (const match of matches) {
+                if (match.channel?.id && match.ts) {
+                  // Log the raw match for debugging
+                  logger.info(
+                    `[Slack Service] ===== RAW SEARCH MATCH =====\n` +
+                      `Channel: ${match.channel.name || match.channel.id} (${match.channel.id})\n` +
+                      `Timestamp: ${match.ts}\n` +
+                      `User: ${match.user || 'unknown'}\n` +
+                      `Full text: ${match.text || '(empty)'}\n` +
+                      `Authenticated User ID: ${authenticatedUserId}\n` +
+                      `========================================`
+                  );
+
+                  // Extract all mentioned user IDs from the message text for logging
+                  const extractedMentions = extractMentionedUserIds(match.text);
+                  logger.info(
+                    `[Slack Service] Extracted mentions from text: [${extractedMentions.join(
+                      ', '
+                    )}]`
+                  );
+
+                  // Verify that the authenticated user is actually mentioned in the message text
+                  // This filters out false positives from Slack's search API
+                  const isActuallyMentioned = isUserMentionedInText(
+                    match.text,
+                    authenticatedUserId
+                  );
+
+                  logger.info(
+                    `[Slack Service] Verification result: isActuallyMentioned=${isActuallyMentioned} (looking for user ${authenticatedUserId})`
+                  );
+
+                  if (!isActuallyMentioned) {
+                    filteredMatches++;
+                    logger.warn(
+                      `[Slack Service] ❌ FILTERED OUT FALSE POSITIVE\n` +
+                        `Channel: ${match.channel.name || match.channel.id} (${
+                          match.channel.id
+                        })\n` +
+                        `Timestamp: ${match.ts}\n` +
+                        `User: ${match.user || 'unknown'}\n` +
+                        `Message text: ${match.text || '(empty)'}\n` +
+                        `Extracted mentions: [${extractedMentions.join(', ')}]\n` +
+                        `Authenticated user ${authenticatedUserId} NOT found in mentions\n` +
+                        `This message was returned by Slack search but does not actually mention the authenticated user`
+                    );
+                    continue; // Skip this match - it's a false positive
+                  }
+
+                  validMatches++;
+                  // Use channel_id:ts as unique key
+                  const messageKey = `${match.channel.id}:${match.ts}`;
+                  mentionedMessages.add(messageKey);
+                  channelsWithMentions.add(match.channel.id);
+
+                  logger.info(
+                    `[Slack Service] ✅ VALID MENTION MATCH\n` +
+                      `Channel: ${match.channel.name || match.channel.id} (${match.channel.id})\n` +
+                      `Timestamp: ${match.ts}\n` +
+                      `User: ${match.user || 'unknown'}\n` +
+                      `Message text: ${match.text || '(empty)'}\n` +
+                      `Extracted mentions: [${extractedMentions.join(', ')}]\n` +
+                      `Authenticated user ${authenticatedUserId} confirmed in mentions`
+                  );
+
+                  // Store search results (mentions from all channels)
+                  // These will be combined with allowed channel messages
+                  searchResultMatches.push({
+                    channel: {
+                      id: match.channel.id,
+                      name: match.channel.name || match.channel.id,
+                    },
+                    message: {
+                      text: match.text,
+                      user: match.user || 'unknown',
+                      ts: match.ts,
+                    },
+                    permalink: match.permalink, // Capture permalink from search results
+                  });
+                } else {
+                  invalidMatches++;
+                  logger.warn(
+                    `[Slack Service] Invalid match on page ${searchPage}: missing channel.id or ts. channel=${JSON.stringify(
+                      match.channel
+                    )}, ts=${match.ts}`
+                  );
+                }
+              }
+              totalFilteredMatches += filteredMatches; // Accumulate filtered matches
+              logger.info(
+                `[Slack Service] Page ${searchPage} processed: ${validMatches} valid, ${invalidMatches} invalid, ${filteredMatches} filtered (false positives)`
+              );
+
+              // Check if there are more pages
+              const pagination = searchResult.data.messages.pagination;
+              const paging = searchResult.data.messages.paging;
+              if (pagination) {
+                hasMoreSearchResults = searchPage < pagination.page_count;
+                logger.info(
+                  `[Slack Service] Pagination info: page ${searchPage} of ${pagination.page_count}, hasMore=${hasMoreSearchResults}`
+                );
+              } else if (paging) {
+                hasMoreSearchResults = searchPage < paging.pages;
+                logger.info(
+                  `[Slack Service] Paging info: page ${searchPage} of ${paging.pages}, hasMore=${hasMoreSearchResults}`
+                );
+              } else {
+                hasMoreSearchResults = false;
+                logger.info(`[Slack Service] No pagination info available, assuming no more pages`);
+              }
+
+              searchPage++;
+            } else {
+              logger.warn(
+                `[Slack Service] ✗ Search page ${searchPage} failed or returned no results`
+              );
+              logger.warn(
+                `[Slack Service] Status: ${searchResult.status}, OK: ${
+                  searchResult.data?.ok
+                }, Error: ${searchResult.data?.error || 'none'}`
+              );
+              // Log full error response for debugging
+              if (searchResult.status === 'error') {
+                const serviceMessage = (searchResult as any).serviceMessage;
+                logger.warn(
+                  `[Slack Service] Full error response structure: ${JSON.stringify(
+                    {
+                      status: searchResult.status,
+                      ok: searchResult.data?.ok,
+                      error: searchResult.data?.error,
+                      serviceMessage,
+                      retry: (searchResult as any).retry,
+                      dataKeys: searchResult.data ? Object.keys(searchResult.data) : [],
+                    },
+                    null,
+                    2
+                  )}`
+                );
+                if (serviceMessage) {
+                  logger.warn(`[Slack Service] Service message: ${serviceMessage}`);
+
+                  // Check for missing_scope error - this is critical for search.messages
+                  if (
+                    serviceMessage === 'missing_scope' ||
+                    serviceMessage.includes('missing_scope')
+                  ) {
+                    logger.error(
+                      `[Slack Service] ⚠️ MISSING SCOPE ERROR: The search.messages API requires 'search:read' scope. ` +
+                        `Current UserToken connector does not have this scope. ` +
+                        `Please add 'search:read' scope to your Slack UserToken connector.`
+                    );
+
+                    // If search fails, log warning but continue with channel fetch
+                    // Mentions search is nice-to-have, but we can still fetch allowed channels
+                    logger.warn(
+                      `[Slack Service] Cannot search for mentions: missing 'search:read' scope. ` +
+                        `Will continue with allowed channels only. To enable mentions search, add 'search:read' scope to your Slack UserToken connector.`
+                    );
+                  }
+                }
+              }
+              if (searchResult.data?.messages) {
+                logger.warn(
+                  `[Slack Service] Messages object exists but no matches. Total: ${
+                    searchResult.data.messages.total || 0
+                  }, Matches array: ${searchResult.data.messages.matches ? 'exists' : 'missing'}`
+                );
+              } else {
+                logger.warn(`[Slack Service] No messages object in response`);
+              }
+              hasMoreSearchResults = false;
+            }
+          }
+
+          logger.info(`[Slack Service] ===== SEARCH COMPLETE =====`);
+          logger.info(`[Slack Service] Total pages searched: ${searchPage - 1}`);
+          logger.info(`[Slack Service] Total matches found across all pages: ${totalMatchesFound}`);
+          logger.info(
+            `[Slack Service] Total filtered matches (false positives): ${totalFilteredMatches}`
+          );
+          logger.info(`[Slack Service] Unique messages (deduplicated): ${mentionedMessages.size}`);
+          logger.info(
+            `[Slack Service] Unique channels with mentions: ${channelsWithMentions.size}`
+          );
+          logger.info(
+            `[Slack Service] Search result matches stored: ${searchResultMatches.length}`
+          );
+          if (channelsWithMentions.size > 0) {
+            logger.info(
+              `[Slack Service] Channels with mentions: ${Array.from(channelsWithMentions)
+                .slice(0, 10)
+                .join(', ')}${
+                channelsWithMentions.size > 10
+                  ? ` ... and ${channelsWithMentions.size - 10} more`
+                  : ''
+              }`
+            );
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.warn(
+            `[Slack Service] Error searching for messages mentioning user: ${errorMessage}`
+          );
+
+          // If search fails, log warning but continue with channel fetch
+          // Mentions search is nice-to-have, but we can still fetch allowed channels
+          const isMissingScope = errorMessage.includes('missing_scope');
+          if (isMissingScope) {
+            logger.warn(
+              `[Slack Service] ⚠️ Cannot search for mentions: missing 'search:read' scope. ` +
+                `Will continue with allowed channels only. To enable mentions search, add 'search:read' scope to your Slack UserToken connector.`
+            );
+          } else {
+            logger.info(
+              `[Slack Service] Search for mentions failed, continuing with regular channel fetch`
+            );
+          }
+        }
+      }
+
+      // Always fetch allowed channels AND include mentions from search (combine both)
+      // This allows catchups to show: (1) messages from allowed channels + (2) mentions from all channels
+      // We never skip channel fetch - we always combine both
+
       // Step 1: Fetch conversations for each type
       logger.debug(`[Slack Service] Step 1: Fetching conversations for types: ${types.join(', ')}`);
 
       // Check if we should use allowed channels (optimization: fetch only specific channels)
+      // Use allowed channels if they're configured
       const hasAllowedChannels = allowedChannelIds && allowedChannelIds.length > 0;
       const allChannels: SlackConversation[] = [];
 
@@ -631,6 +1111,7 @@ export const createExternalService = (
       const dmTypes = types.filter((t) => t === 'im' || t === 'mpim');
 
       // Process channel types (public_channel, private_channel)
+      // SKIP entirely if using search results only - we already have the messages from search.messages
       if (channelTypes.length > 0) {
         if (hasAllowedChannels) {
           // OPTIMIZED PATH: Try conversations.info for each allowed channel, then verify membership
@@ -720,13 +1201,21 @@ export const createExternalService = (
           }
         } else {
           // STANDARD PATH: Fetch all channels using conversations.list
-          logger.info(
-            `[Slack Service] No allowed channels configured. Will fetch from ALL channel conversations (this may be slow for large workspaces).`
-          );
+          // BUT SKIP if searchAllChannels is true (we're using search results only)
+          if (params.searchAllChannels) {
+            logger.info(
+              `[Slack Service] searchAllChannels=true: Skipping channel fetch, using search.messages results only`
+            );
+            // Don't fetch channels - we'll use search results
+          } else {
+            logger.info(
+              `[Slack Service] No allowed channels configured. Will fetch from ALL channel conversations (this may be slow for large workspaces).`
+            );
 
-          for (const type of channelTypes) {
-            const typeChannels = await fetchConversationsForType(type);
-            allChannels.push(...typeChannels);
+            for (const type of channelTypes) {
+              const typeChannels = await fetchConversationsForType(type);
+              allChannels.push(...typeChannels);
+            }
           }
         }
       }
@@ -734,6 +1223,7 @@ export const createExternalService = (
       // Process DM types (im, mpim) - always use standard path since DMs can't be in allowedChannels
       // Limit the number of DMs to avoid rate limiting (users can have hundreds/thousands of DMs)
       // Each DM requires a history fetch, so we limit to stay well under rate limits
+      // SKIP DMs if using search results only (search.messages doesn't return DMs by default)
       const maxDMsToProcess = 20; // Limit to most recent 20 DMs per type to stay within rate limits
       if (dmTypes.length > 0) {
         logger.info(
@@ -860,73 +1350,69 @@ export const createExternalService = (
         logger.info(
           `[Slack Service] Fetched participant info for ${dmParticipantsMap.size}/${dmChannels.length} DMs`
         );
+      }
 
-        // Fetch user info for DM participants using getUserInfo (targeted fetching)
-        if (allParticipantIds.size > 0) {
-          const missingParticipantIds = Array.from(allParticipantIds).filter(
-            (id) => !userMap.has(id)
+      // Fetch user info for DM participants using getUserInfo (targeted fetching)
+      if (allParticipantIds.size > 0) {
+        const missingParticipantIds = Array.from(allParticipantIds).filter(
+          (id) => !userMap.has(id)
+        );
+        if (missingParticipantIds.length > 0) {
+          logger.debug(
+            `[Slack Service] Fetching user info for ${missingParticipantIds.length} DM participants using users.info`
           );
-          if (missingParticipantIds.length > 0) {
-            logger.debug(
-              `[Slack Service] Fetching user info for ${missingParticipantIds.length} DM participants using users.info`
-            );
-            let fetchedCount = 0;
-            for (const participantId of missingParticipantIds) {
-              try {
-                await throttleRequest();
-                const userInfoResult = await getUserInfo({ user: participantId });
+          let fetchedCount = 0;
+          for (const participantId of missingParticipantIds) {
+            try {
+              await throttleRequest();
+              const userInfoResult = await getUserInfo({ user: participantId });
 
-                // Handle retry results (rate limiting)
-                if (userInfoResult.status === 'error' && userInfoResult.retry) {
-                  const waitMs = waitForRetry(userInfoResult.retry);
-                  const waitSeconds = Math.ceil(waitMs / 1000);
-                  logger.warn(
-                    `Rate limited while fetching user info for ${participantId}, waiting ${waitSeconds} seconds`
-                  );
-                  await new Promise((resolve) => setTimeout(resolve, waitMs));
-                  // Retry the same request
-                  const retryResult = await getUserInfo({ user: participantId });
-                  if (
-                    retryResult.status === 'ok' &&
-                    retryResult.data?.ok &&
-                    retryResult.data.user
-                  ) {
-                    const user = retryResult.data.user;
-                    userMap.set(user.id, {
-                      name: user.name,
-                      real_name: user.profile?.display_name || user.real_name || user.name,
-                    });
-                    fetchedCount++;
-                  }
-                } else if (
-                  userInfoResult.status === 'ok' &&
-                  userInfoResult.data?.ok &&
-                  userInfoResult.data.user
-                ) {
-                  const user = userInfoResult.data.user;
+              // Handle retry results (rate limiting)
+              if (userInfoResult.status === 'error' && userInfoResult.retry) {
+                const waitMs = waitForRetry(userInfoResult.retry);
+                const waitSeconds = Math.ceil(waitMs / 1000);
+                logger.warn(
+                  `Rate limited while fetching user info for ${participantId}, waiting ${waitSeconds} seconds`
+                );
+                await new Promise((resolve) => setTimeout(resolve, waitMs));
+                // Retry the same request
+                const retryResult = await getUserInfo({ user: participantId });
+                if (retryResult.status === 'ok' && retryResult.data?.ok && retryResult.data.user) {
+                  const user = retryResult.data.user;
                   userMap.set(user.id, {
                     name: user.name,
                     real_name: user.profile?.display_name || user.real_name || user.name,
                   });
                   fetchedCount++;
-                } else {
-                  logger.debug(
-                    `[Slack Service] Failed to fetch user info for participant ${participantId}: ${
-                      userInfoResult.data?.error || 'unknown error'
-                    }`
-                  );
                 }
-              } catch (error) {
+              } else if (
+                userInfoResult.status === 'ok' &&
+                userInfoResult.data?.ok &&
+                userInfoResult.data.user
+              ) {
+                const user = userInfoResult.data.user;
+                userMap.set(user.id, {
+                  name: user.name,
+                  real_name: user.profile?.display_name || user.real_name || user.name,
+                });
+                fetchedCount++;
+              } else {
                 logger.debug(
-                  `[Slack Service] Error fetching user info for participant ${participantId}: ${error}. Continuing without this participant's name.`
+                  `[Slack Service] Failed to fetch user info for participant ${participantId}: ${
+                    userInfoResult.data?.error || 'unknown error'
+                  }`
                 );
-                // Continue to next participant - not critical
               }
+            } catch (error) {
+              logger.debug(
+                `[Slack Service] Error fetching user info for participant ${participantId}: ${error}. Continuing without this participant's name.`
+              );
+              // Continue to next participant - not critical
             }
-            logger.info(
-              `[Slack Service] Fetched user info for ${fetchedCount}/${missingParticipantIds.length} DM participants`
-            );
           }
+          logger.info(
+            `[Slack Service] Fetched user info for ${fetchedCount}/${missingParticipantIds.length} DM participants`
+          );
         }
       }
 
@@ -934,14 +1420,24 @@ export const createExternalService = (
       const filteredChannels = allChannels;
 
       // Step 2: Fetch messages from each channel
-      logger.info(
-        `[Slack Service] Step 2: Fetching messages from ${filteredChannels.length} channels`
-      );
+      // If using search results only, use those directly instead of fetching channel history
       const allMessages: Array<{
         channel: { id: string; name: string };
         message: SlackMessage;
         thread_replies?: Array<{ user: string; text: string; ts: string }>;
+        permalink?: string;
       }> = [];
+
+      // Always fetch messages from allowed channels
+      // We'll also include mentions from search results (if any) to combine both
+      logger.info(
+        `[Slack Service] Step 2: Fetching messages from ${filteredChannels.length} channels`
+      );
+      if (searchResultMatches.length > 0) {
+        logger.info(
+          `[Slack Service] Will also include ${searchResultMatches.length} mentions from all channels (found via search.messages)`
+        );
+      }
 
       // Cache for thread replies to avoid fetching the same thread multiple times
       const threadReplyCache = new Map<string, Array<{ user: string; text: string; ts: string }>>();
@@ -1142,12 +1638,24 @@ export const createExternalService = (
           // Continue to next channel
         }
       }
+
+      // When doing regular catchup, also include mentions from all channels (found via search.messages)
+      // This allows regular catchups to show: (1) messages from allowed channels + (2) mentions from all channels
+      if (searchResultMatches.length > 0) {
+        logger.info(
+          `[Slack Service] Adding ${searchResultMatches.length} mentions from all channels (found via search.messages) to the results`
+        );
+        allMessages.push(...searchResultMatches);
+      }
       logger.info(
-        `[Slack Service] Step 2 complete: ${allMessages.length} total messages from ${filteredChannels.length} channels`
+        `[Slack Service] Step 2 complete: ${allMessages.length} total messages from ${filteredChannels.length} channels + ${searchResultMatches.length} mentions from all channels`
       );
 
-      // Fetch user info for message authors and thread reply authors that we don't already have
+      // Fetch user info for message authors, thread reply authors, and mentioned users
+      // Note: extractMentionedUserIds is already defined earlier in the function
       const allMessageUserIds = new Set<string>();
+      const allMentionedUserIds = new Set<string>();
+
       for (const item of allMessages) {
         if (item.message.user) {
           allMessageUserIds.add(item.message.user);
@@ -1159,16 +1667,32 @@ export const createExternalService = (
             }
           }
         }
+        // Extract mentioned user IDs from message text
+        const mentionedUserIds = extractMentionedUserIds(item.message.text);
+        mentionedUserIds.forEach((userId) => allMentionedUserIds.add(userId));
+
+        // Extract mentioned user IDs from thread replies
+        if (item.thread_replies) {
+          for (const reply of item.thread_replies) {
+            const replyMentionedUserIds = extractMentionedUserIds(reply.text);
+            replyMentionedUserIds.forEach((userId) => allMentionedUserIds.add(userId));
+          }
+        }
       }
 
-      const missingMessageUserIds = Array.from(allMessageUserIds).filter((id) => !userMap.has(id));
+      // Combine all user IDs we need to fetch
+      const allUserIdsToFetch = new Set<string>([
+        ...Array.from(allMessageUserIds),
+        ...Array.from(allMentionedUserIds),
+      ]);
+      const missingUserIds = Array.from(allUserIdsToFetch).filter((id) => !userMap.has(id));
 
-      if (missingMessageUserIds.length > 0) {
+      if (missingUserIds.length > 0) {
         logger.debug(
-          `[Slack Service] Fetching user info for ${missingMessageUserIds.length} message authors using users.info`
+          `[Slack Service] Fetching user info for ${missingUserIds.length} users (message authors and mentioned users) using users.info`
         );
         let fetchedCount = 0;
-        for (const userId of missingMessageUserIds) {
+        for (const userId of missingUserIds) {
           try {
             await throttleRequest();
             const userInfoResult = await getUserInfo({ user: userId });
@@ -1217,14 +1741,141 @@ export const createExternalService = (
           }
         }
         logger.info(
-          `[Slack Service] Fetched user info for ${fetchedCount}/${missingMessageUserIds.length} message authors`
+          `[Slack Service] Fetched user info for ${fetchedCount}/${missingUserIds.length} users (message authors and mentioned users)`
         );
       }
 
       // Format results
       logger.debug(`[Slack Service] Formatting ${allMessages.length} messages`);
+      // Helper function to format Slack mentions: <@USER_ID|username> -> @username
+      const formatSlackMentions = (text: string | undefined): string => {
+        if (!text) return '';
+        // Replace <@USER_ID|username> with @username
+        // Also handle <@USER_ID> (without username) -> @USER_ID
+        return text.replace(/<@([A-Z0-9]+)(?:\|([^>]+))?>/g, (match, userId, username) => {
+          return username ? `@${username}` : `@${userId}`;
+        });
+      };
+
+      // Helper function to get permalink for a message using chat.getPermalink API
+      // Cache permalinks to avoid duplicate API calls
+      const permalinkCache = new Map<string, string>();
+      const getPermalink = async (
+        channelId: string,
+        messageTs: string
+      ): Promise<string | undefined> => {
+        const cacheKey = `${channelId}:${messageTs}`;
+        if (permalinkCache.has(cacheKey)) {
+          return permalinkCache.get(cacheKey);
+        }
+
+        try {
+          await throttleRequest();
+          const queryParams = new URLSearchParams({
+            channel: channelId,
+            message_ts: messageTs,
+          });
+          const url = `${SLACK_URL}chat.getPermalink?${queryParams.toString()}`;
+          const result: AxiosResponse<{ ok: boolean; permalink?: string; error?: string }> =
+            await request({
+              axios: axiosInstance,
+              method: 'get',
+              url,
+              logger,
+              headers,
+              configurationUtilities,
+              connectorUsageCollector,
+            });
+
+          if (result.data.ok && result.data.permalink) {
+            permalinkCache.set(cacheKey, result.data.permalink);
+            return result.data.permalink;
+          }
+        } catch (error) {
+          logger.debug(
+            `[Slack Service] Failed to get permalink for ${channelId}:${messageTs}: ${error}`
+          );
+        }
+        return undefined;
+      };
+
+      // Batch fetch permalinks for messages that don't have them (from channel history)
+      // Only fetch for messages that don't already have permalinks (from search results)
+      const messagesNeedingPermalinks: Array<{
+        channelId: string;
+        messageTs: string;
+        index: number;
+      }> = [];
+      allMessages.forEach((item, index) => {
+        // Check if this is from search results (has permalink) or channel history (needs permalink)
+        const hasPermalink = 'permalink' in item && item.permalink;
+        if (!hasPermalink) {
+          messagesNeedingPermalinks.push({
+            channelId: item.channel.id,
+            messageTs: item.message.ts,
+            index,
+          });
+        }
+      });
+
+      // Fetch permalinks in batches (with throttling)
+      if (messagesNeedingPermalinks.length > 0) {
+        logger.debug(
+          `[Slack Service] Fetching permalinks for ${messagesNeedingPermalinks.length} messages from channel history`
+        );
+        for (const { channelId, messageTs, index } of messagesNeedingPermalinks) {
+          const permalink = await getPermalink(channelId, messageTs);
+          if (permalink) {
+            // Store permalink in the message item
+            const item = allMessages[index];
+            if (item) {
+              item.permalink = permalink;
+            }
+          }
+        }
+      }
+
       const formattedMessages = allMessages.map((item) => {
         const userInfo = userMap.get(item.message.user);
+
+        // Extract all mentioned user IDs from message text
+        const mentionedUserIds = extractMentionedUserIds(item.message.text);
+
+        // Check if this message was found via search.messages (which searches for mentions of authenticated user)
+        const messageKey = `${item.channel.id}:${item.message.ts}`;
+        const isMentionedViaSearch = mentionedMessages.has(messageKey);
+
+        // Build mentions array: include all users mentioned in the message text
+        // If message was found via search.messages AND verified (is in mentionedMessages),
+        // ensure the authenticated user is included in mentions (they were verified to be mentioned)
+        const messageMentionedUserIds = new Set<string>(mentionedUserIds);
+
+        // If this message was found via search and verified to mention the authenticated user,
+        // ensure they're included in the mentions array (even if extraction missed them somehow)
+        if (isMentionedViaSearch && authenticatedUserId) {
+          // This message was verified during search processing to mention the authenticated user
+          // So we should include them in the mentions array
+          messageMentionedUserIds.add(authenticatedUserId);
+
+          // Log if extraction didn't find them (shouldn't happen, but helps with debugging)
+          if (!mentionedUserIds.includes(authenticatedUserId)) {
+            logger.warn(
+              `[Slack Service] ⚠️ WARNING: Message ${messageKey} is in mentionedMessages (verified mention) but authenticated user ${authenticatedUserId} was not found in extracted mentions. Adding them anyway since verification confirmed the mention.`
+            );
+          }
+        }
+
+        // Build mentions array with user info
+        const mentions = Array.from(messageMentionedUserIds)
+          .map((userId) => {
+            const mentionedUserInfo = userMap.get(userId);
+            return {
+              user_id: userId,
+              user_name: mentionedUserInfo?.real_name || mentionedUserInfo?.name || userId,
+              user_real_name: mentionedUserInfo?.real_name,
+            };
+          })
+          .filter((mention) => mention.user_id); // Filter out any invalid mentions
 
         // Determine channel display name
         let channelDisplayName = item.channel.name || item.channel.id;
@@ -1280,38 +1931,68 @@ export const createExternalService = (
           }
         }
 
+        // Get permalink for this message (from search results or fetched via API)
+        const messagePermalink = item.permalink;
+
+        // Extract mentions from thread replies
+        const threadReplies = (item.thread_replies || []).map((reply) => {
+          const replyUserInfo = userMap.get(reply.user);
+
+          // Extract mentioned user IDs from reply text
+          const replyMentionedUserIds = extractMentionedUserIds(reply.text);
+
+          // Build mentions array with user info for reply
+          const replyMentions = replyMentionedUserIds
+            .map((userId) => {
+              const mentionedUserInfo = userMap.get(userId);
+              return {
+                user_id: userId,
+                user_name: mentionedUserInfo?.real_name || mentionedUserInfo?.name || userId,
+                user_real_name: mentionedUserInfo?.real_name,
+              };
+            })
+            .filter((mention) => mention.user_id); // Filter out any invalid mentions
+
+          return {
+            ...reply,
+            text: formatSlackMentions(reply.text),
+            user_name: replyUserInfo?.name || reply.user || 'unknown',
+            user_real_name: replyUserInfo?.real_name,
+            mentions: replyMentions,
+            // Thread replies use the same permalink as the parent message
+            permalink: messagePermalink,
+          };
+        });
+
         return {
           channel: channelDisplayName,
           channel_id: item.channel.id,
-          text: item.message.text,
+          text: formatSlackMentions(item.message.text),
           user: item.message.user || 'unknown',
           user_name: userInfo?.name || item.message.user || 'unknown',
           user_real_name: userInfo?.real_name,
           timestamp: new Date(parseFloat(item.message.ts) * 1000).toISOString(),
           thread_replies_count: item.message.reply_count || 0,
-          thread_replies: (item.thread_replies || []).map((reply) => {
-            const replyUserInfo = userMap.get(reply.user);
-            return {
-              ...reply,
-              user_name: replyUserInfo?.name || reply.user || 'unknown',
-              user_real_name: replyUserInfo?.real_name,
-            };
-          }),
+          permalink: messagePermalink,
+          mentions,
+          thread_replies: threadReplies,
         };
       });
 
       // Log summary of formatted messages to verify DM attribution
-      const dmMessages = formattedMessages.filter((msg) => msg.channel.startsWith('DM with'));
-      const uniqueDMChannels = new Set(dmMessages.map((msg) => msg.channel));
+      const dmMessagesForLogging = formattedMessages.filter((msg) =>
+        msg.channel.startsWith('DM with')
+      );
+      const uniqueDMChannels = new Set(dmMessagesForLogging.map((msg) => msg.channel));
       logger.info(
         `[Slack Service] Formatted ${
-          dmMessages.length
+          dmMessagesForLogging.length
         } messages from DMs with attributions: ${Array.from(uniqueDMChannels).join(', ')}`
       );
 
       // Log a sample of DM messages to verify they're in the response
-      if (dmMessages.length > 0) {
-        const sampleDMs = dmMessages.slice(0, 3);
+      if (dmMessagesForLogging.length > 0) {
+        const sampleDMs = dmMessagesForLogging.slice(0, 3);
         logger.info(
           `[Slack Service] Sample DM messages in response: ${JSON.stringify(
             sampleDMs.map((msg) => ({
@@ -1323,17 +2004,63 @@ export const createExternalService = (
         );
       }
 
+      // channels_searched represents the number of channels we fetched individually
+      // Mentions are searched across all channels via search.messages API (not counted here)
+      const channelsSearched = filteredChannels.length;
+
+      // Separate messages into user mentions, regular channel messages, and DMs
+      // A message is considered a "user mention" if the authenticated user is mentioned in:
+      // 1. The main message's mentions array, OR
+      // 2. Any thread reply's mentions array
+      const userMentionMessages: ChannelDigestResponse['userMentionMessages'] = [];
+      const channelMessages: ChannelDigestResponse['channelMessages'] = [];
+      const dmMessages: ChannelDigestResponse['dmMessages'] = [];
+
+      for (const message of formattedMessages) {
+        // Check if this is a DM (channel name starts with "DM with")
+        const isDM = message.channel.startsWith('DM with');
+
+        // Check if authenticated user is mentioned in the main message
+        const isMentionedInMainMessage = authenticatedUserId
+          ? message.mentions.some((mention) => mention.user_id === authenticatedUserId)
+          : false;
+
+        // Check if authenticated user is mentioned in any thread reply
+        const isMentionedInThread = authenticatedUserId
+          ? message.thread_replies.some((reply) =>
+              reply.mentions.some((mention) => mention.user_id === authenticatedUserId)
+            )
+          : false;
+
+        const isUserMentioned = isMentionedInMainMessage || isMentionedInThread;
+
+        if (isDM) {
+          dmMessages.push(message as ChannelDigestResponse['dmMessages'][0]);
+        } else if (isUserMentioned) {
+          userMentionMessages.push(message as ChannelDigestResponse['userMentionMessages'][0]);
+        } else {
+          channelMessages.push(message as ChannelDigestResponse['channelMessages'][0]);
+        }
+      }
+
+      logger.info(
+        `[Slack Service] Separated messages: ${userMentionMessages.length} user mentions, ${channelMessages.length} regular channel messages, ${dmMessages.length} DMs`
+      );
+
       const digestResponse: ChannelDigestResponse = {
         ok: true,
         total: formattedMessages.length,
         since: new Date(since * 1000).toISOString(),
         keywords: keywords || [],
-        channels_searched: filteredChannels.length,
-        messages: formattedMessages,
+        channels_searched: channelsSearched,
+        userMentionMessages,
+        channelMessages,
+        dmMessages,
       };
 
       logger.info(
-        `[Slack Service] getChannelDigest complete: ${digestResponse.total} messages from ${digestResponse.channels_searched} channels`
+        `[Slack Service] getChannelDigest complete: ${digestResponse.total} messages from ${digestResponse.channels_searched} channels ` +
+          `+ ${searchResultMatches.length} mentions from all channels (via search.messages API)`
       );
 
       return buildSlackExecutorSuccessResponse({ slackApiResponseData: digestResponse });
@@ -1353,6 +2080,7 @@ export const createExternalService = (
     getConversationsMembers,
     getUsersList,
     getUserInfo,
+    searchMessages,
     getChannelDigest,
   };
 };

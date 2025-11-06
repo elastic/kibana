@@ -24,6 +24,13 @@ const slackDigestSchema = z.object({
     .array(z.string())
     .optional()
     .describe('Optional keywords to filter messages (e.g., user mentions, project names)'),
+  includeDMs: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe(
+      'Whether to include direct messages (DMs) in the results. Defaults to false. Only set to true if the user explicitly requests DMs (e.g., "including DMs", "with DMs", "direct messages").'
+    ),
 });
 
 export const slackDigestTool = (): BuiltinToolDefinition<typeof slackDigestSchema> => {
@@ -46,6 +53,7 @@ The User Token connector must have these scopes:
 - groups:read, groups:history (for private channels the user is a member of)
 - im:read, im:history (for direct messages)
 - users:read (for user information)
+- search:read (REQUIRED for searching messages and mentions across all channels)
 
 **Connector Setup:**
 1. Create a Slack Web API connector (type: .slack_api) with a name containing "UserToken" or "user token"
@@ -58,6 +66,8 @@ The User Token connector must have these scopes:
 - Works for public channels, private channels, and DMs
 
 **Direct Messages (DMs):**
+By default, DMs are NOT included in the results. Only include DMs if the user explicitly requests them (e.g., "including DMs", "with DMs", "direct messages", "catch me up including DMs").
+
 When summarizing Direct Messages, you MUST include the name of the user(s) the DM is with in your summary. The channel field for DMs will be formatted as "DM with [User Name]" or "DM with [User1, User2, ...]" for group DMs.
 
 **CRITICAL**: The tool returns messages with the channel field already formatted to include participant names (e.g., "DM with John Doe" or "DM with Alice, Bob, Charlie"). When you see messages with channel names starting with "DM with", you MUST reference these names in your summary. For example:
@@ -67,10 +77,29 @@ When summarizing Direct Messages, you MUST include the name of the user(s) the D
 
 Do NOT omit or ignore the participant names that are provided in the channel field. Always explicitly mention who each DM conversation is with when summarizing.
 
+**Mentions:**
+The tool automatically: (1) searches for mentions of the authenticated user across ALL public channels, (2) fetches messages from allowed channels, and (3) extracts ALL mentions from message text.
+
+**Response Structure:**
+The tool returns messages in THREE separate arrays:
+- **userMentionMessages**: Messages where the authenticated user is mentioned (mentions array contains authenticated user's ID)
+- **channelMessages**: Regular channel messages (no mention of authenticated user, or empty mentions array)
+- **dmMessages**: Direct messages (DMs) - only included when includeDMs=true
+
+**CRITICAL - Summarization Rules:**
+1. **Use userMentionMessages array for mentions** - ALL messages in this array mention the authenticated user
+2. **Use channelMessages array for regular messages** - These are general channel messages, NOT mentions
+3. **Use dmMessages array for DMs** - These are direct messages, only present when includeDMs=true
+4. **Structure summary**: (1) MENTIONS from userMentionMessages (group by channel), (2) Regular messages from channelMessages, (3) DMs from dmMessages if includeDMs=true
+5. **Format mentions**: "You were mentioned in #channel by @username: [summary]" (use user_name/user_real_name from mentions array, not user_id)
+6. **PRIORITIZE userMentionMessages** - these are the most important and should be listed first
+7. **Use human-readable names** - ALWAYS use user_name or user_real_name from mentions array, NEVER user_id
+8. **Include permalinks for EVERY message** - When mentioning ANY message in your summary, you MUST include the permalink URL from the message's \`permalink\` field. Link to EVERY message you mention, not just one. For threads, only one link is needed (thread replies share the parent message's permalink). Format links using markdown: [Link text](permalink_url). Example: [View message](https://elastic.slack.com/archives/C123/p456)
+
 The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 Optionally filters by keywords for user mentions or project names.`,
     schema: slackDigestSchema,
-    handler: async ({ since, keywords }, { request, logger }) => {
+    handler: async ({ since, keywords, includeDMs = false }, { request, logger }) => {
       try {
         // Normalize date to current year if year is missing
         const normalizedSince = normalizeDateToCurrentYear(since);
@@ -127,21 +156,26 @@ Optionally filters by keywords for user mentions or project names.`,
           `[CatchUp Agent] Using user token connector: ${userConnector.name} (${userConnector.id})`
         );
 
-        // Use user connector for all channel types (user token can access public channels, private channels, and DMs)
-        const allChannelTypes = ['public_channel', 'private_channel', 'im', 'mpim'];
+        // Determine channel types based on whether DMs are requested
+        // By default, exclude DMs ('im' and 'mpim') unless explicitly requested
+        const channelTypes = ['public_channel', 'private_channel'];
+        if (includeDMs) {
+          channelTypes.push('im', 'mpim');
+        }
+
         const userParams = {
           subAction: 'getChannelDigest',
           subActionParams: {
             since: sinceTimestamp,
-            types: allChannelTypes,
+            types: channelTypes,
             keywords,
           },
         };
 
         logger.info(
-          `[CatchUp Agent] Executing user connector for all channel types, since: ${new Date(
-            sinceTimestamp * 1000
-          ).toISOString()}`
+          `[CatchUp Agent] Executing user connector for channel types: ${channelTypes.join(
+            ', '
+          )}, includeDMs: ${includeDMs}, since: ${new Date(sinceTimestamp * 1000).toISOString()}`
         );
 
         let userDigestResult;
@@ -182,7 +216,7 @@ Optionally filters by keywords for user mentions or project names.`,
           since: string;
           keywords?: string[];
           channels_searched: number;
-          messages: Array<{
+          userMentionMessages: Array<{
             channel: string;
             channel_id: string;
             text: string;
@@ -191,35 +225,111 @@ Optionally filters by keywords for user mentions or project names.`,
             user_real_name?: string;
             timestamp: string;
             thread_replies_count: number;
+            permalink?: string;
+            mentions: Array<{
+              user_id: string;
+              user_name: string;
+              user_real_name?: string;
+            }>;
             thread_replies: Array<{
               user: string;
               user_name: string;
               user_real_name?: string;
               text: string;
               ts: string;
+              permalink?: string;
+              mentions: Array<{
+                user_id: string;
+                user_name: string;
+                user_real_name?: string;
+              }>;
+            }>;
+          }>;
+          channelMessages: Array<{
+            channel: string;
+            channel_id: string;
+            text: string;
+            user: string;
+            user_name: string;
+            user_real_name?: string;
+            timestamp: string;
+            thread_replies_count: number;
+            permalink?: string;
+            mentions: Array<{
+              user_id: string;
+              user_name: string;
+              user_real_name?: string;
+            }>;
+            thread_replies: Array<{
+              user: string;
+              user_name: string;
+              user_real_name?: string;
+              text: string;
+              ts: string;
+              permalink?: string;
+              mentions: Array<{
+                user_id: string;
+                user_name: string;
+                user_real_name?: string;
+              }>;
+            }>;
+          }>;
+          dmMessages: Array<{
+            channel: string;
+            channel_id: string;
+            text: string;
+            user: string;
+            user_name: string;
+            user_real_name?: string;
+            timestamp: string;
+            thread_replies_count: number;
+            permalink?: string;
+            mentions: Array<{
+              user_id: string;
+              user_name: string;
+              user_real_name?: string;
+            }>;
+            thread_replies: Array<{
+              user: string;
+              user_name: string;
+              user_real_name?: string;
+              text: string;
+              ts: string;
+              permalink?: string;
+              mentions: Array<{
+                user_id: string;
+                user_name: string;
+                user_real_name?: string;
+              }>;
             }>;
           }>;
         };
 
+        const totalChannels = userDigest.channels_searched;
+        const totalMessages =
+          userDigest.userMentionMessages.length +
+          userDigest.channelMessages.length +
+          userDigest.dmMessages.length;
+
         logger.info(
-          `[CatchUp Agent] User connector returned ${userDigest.messages.length} messages from ${userDigest.channels_searched} channels/DMs`
+          `[CatchUp Agent] User connector returned ${totalMessages} messages from ${userDigest.channels_searched} channels/DMs: ` +
+            `${userDigest.userMentionMessages.length} mentions, ${userDigest.channelMessages.length} channel messages, ${userDigest.dmMessages.length} DMs ` +
+            `(includes mentions from all channels via search.messages API)`
         );
 
-        // Use the user connector result directly
-        const allMessages = userDigest.messages;
-        const totalChannels = userDigest.channels_searched;
-
-        // Format results
+        // Format results - return messages in the same structure as the service
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                total: allMessages.length,
+                total: totalMessages,
                 since: normalizedSince,
                 keywords: keywords || [],
                 channels_searched: totalChannels,
-                messages: allMessages,
+                userMentionMessages: userDigest.userMentionMessages,
+                channelMessages: userDigest.channelMessages,
+                dmMessages: userDigest.dmMessages,
               },
             },
           ],

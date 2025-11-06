@@ -121,10 +121,75 @@ export interface UserInfoResponse extends SlackAPiResponse {
   user?: SlackUser;
 }
 
+export interface SearchMessagesMatch {
+  type: string;
+  channel?: {
+    id: string;
+    name: string;
+    is_channel: boolean;
+    is_private: boolean;
+  };
+  user?: string;
+  username?: string;
+  ts: string;
+  text: string;
+  permalink?: string;
+}
+
+export interface SearchMessagesResponse extends SlackAPiResponse {
+  query?: string;
+  messages?: {
+    total: number;
+    pagination?: {
+      total_count: number;
+      page: number;
+      per_page: number;
+      page_count: number;
+    };
+    paging?: {
+      count: number;
+      total: number;
+      page: number;
+      pages: number;
+    };
+    matches?: SearchMessagesMatch[];
+  };
+}
+
 export interface ChannelDigestMessage {
   channel: { id: string; name: string };
   message: SlackMessage;
   thread_replies?: Array<{ user: string; text: string; ts: string }>;
+}
+
+export interface SlackMessage {
+  channel: string;
+  channel_id: string;
+  text: string;
+  user: string;
+  user_name: string;
+  user_real_name?: string;
+  timestamp: string;
+  thread_replies_count: number;
+  permalink?: string;
+  mentions: Array<{
+    user_id: string;
+    user_name: string;
+    user_real_name?: string;
+  }>;
+  thread_replies: Array<{
+    user: string;
+    user_name: string;
+    user_real_name?: string;
+    text: string;
+    ts: string;
+    permalink?: string;
+    mentions: Array<{
+      user_id: string;
+      user_name: string;
+      user_real_name?: string;
+    }>;
+  }>;
 }
 
 export interface ChannelDigestResponse extends SlackAPiResponse {
@@ -132,23 +197,12 @@ export interface ChannelDigestResponse extends SlackAPiResponse {
   since: string;
   keywords?: string[];
   channels_searched: number;
-  messages: Array<{
-    channel: string;
-    channel_id: string;
-    text: string;
-    user: string;
-    user_name: string;
-    user_real_name?: string;
-    timestamp: string;
-    thread_replies_count: number;
-    thread_replies: Array<{
-      user: string;
-      user_name: string;
-      user_real_name?: string;
-      text: string;
-      ts: string;
-    }>;
-  }>;
+  // Messages where the authenticated user is mentioned (mentions array contains authenticated user's ID)
+  userMentionMessages: SlackMessage[];
+  // Regular channel messages (no mention of authenticated user, or empty mentions array)
+  channelMessages: SlackMessage[];
+  // Direct messages (DMs) - only included when types includes 'im' or 'mpim'
+  dmMessages: SlackMessage[];
 }
 
 export interface SlackApiService {
@@ -191,9 +245,15 @@ export interface SlackApiService {
     limit?: number;
   }) => Promise<ConnectorTypeExecutorResult<UsersListResponse>>;
   getUserInfo: (params: { user: string }) => Promise<ConnectorTypeExecutorResult<UserInfoResponse>>;
+  searchMessages: (params: {
+    query: string;
+    count?: number;
+    page?: number;
+  }) => Promise<ConnectorTypeExecutorResult<SearchMessagesResponse>>;
   getChannelDigest: (params: {
     since: number;
     types: string[];
     keywords?: string[];
+    searchAllChannels?: boolean;
   }) => Promise<ConnectorTypeExecutorResult<ChannelDigestResponse>>;
 }
