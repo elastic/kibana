@@ -93,7 +93,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformInitialState(state) as LensRuntimeState;
+  const newState = transformFromApiConfig(state) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -166,7 +166,7 @@ export function getStructuredDatasourceStates(
   };
 }
 
-export function transformInitialState(state: LensSerializedAPIConfig): LensSerializedState {
+export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
   const builder = getLensBuilder();
 
   if (!builder) {
@@ -198,7 +198,7 @@ export function transformInitialState(state: LensSerializedAPIConfig): LensSeria
   };
 }
 
-export function transformOutputState(state: LensSerializedState): LensByValueSerializedAPIConfig {
+export function transformToApiConfig(state: LensSerializedState): LensByValueSerializedAPIConfig {
   if (state.savedObjectId) {
     return {
       ...state,

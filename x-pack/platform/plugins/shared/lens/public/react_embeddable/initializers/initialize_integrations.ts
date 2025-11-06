@@ -24,7 +24,7 @@ import type {
   LensByRefSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
 } from '@kbn/lens-common-2';
-import { isTextBasedLanguage, transformOutputState } from '../helper';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 function cleanupSerializedState(state: LensRuntimeState) {
   const cleanedState = omit(state, 'searchSessionId');
@@ -65,7 +65,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
           } satisfies SerializedPanelState<LensByRefSerializedAPIConfig>;
         }
 
-        const transformedState = transformOutputState(currentState);
+        const transformedState = transformToApiConfig(currentState);
 
         return {
           rawState: transformedState,

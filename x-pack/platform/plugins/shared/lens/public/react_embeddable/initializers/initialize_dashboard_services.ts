@@ -28,7 +28,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
-import { isTextBasedLanguage, transformOutputState } from '../helper';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
@@ -142,7 +142,7 @@ export function initializeDashboardServices(
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
         return {
-          rawState: transformOutputState(byValueRuntimeState),
+          rawState: transformToApiConfig(byValueRuntimeState),
         };
       },
     },

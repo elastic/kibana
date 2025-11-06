@@ -15,7 +15,7 @@ import type { LensRendererProps, LensSerializedState } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { createEmptyLensState, transformOutputState } from '../helper';
+import { createEmptyLensState, transformToApiConfig } from '../helper';
 import type { LensParentApi } from './types';
 
 // This little utility uses the same pattern of the useSearchApi hook:
@@ -159,7 +159,7 @@ export function LensRenderer({
           settings,
           // make sure to provide the initial state (useful for the comparison check)
           getSerializedStateForChild: () => {
-            const transformedState = transformOutputState(initialStateRef.current);
+            const transformedState = transformToApiConfig(initialStateRef.current);
             return {
               rawState: transformedState,
             };
