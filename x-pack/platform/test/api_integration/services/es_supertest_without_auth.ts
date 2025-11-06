@@ -18,7 +18,7 @@ export function EsSupertestWithoutAuthProvider({ getService }: FtrProviderContex
   const config = getService('config');
   const elasticsearchServerConfig = config.get('servers.elasticsearch');
 
-  return supertest.agent(
+  return supertest(
     formatUrl({
       ...elasticsearchServerConfig,
       auth: false,

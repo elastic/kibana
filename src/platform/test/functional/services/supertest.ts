@@ -30,5 +30,5 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
     options.http2 = true;
   }
 
-  return supertest.agent(kibanaServerUrl, options);
+  return supertest(kibanaServerUrl, options);
 }

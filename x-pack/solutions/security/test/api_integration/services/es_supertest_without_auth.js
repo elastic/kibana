@@ -17,7 +17,7 @@ export function EsSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const elasticsearchServerConfig = config.get('servers.elasticsearch');
 
-  return supertest.agent(
+  return supertest(
     formatUrl({
       ...elasticsearchServerConfig,
       auth: false,

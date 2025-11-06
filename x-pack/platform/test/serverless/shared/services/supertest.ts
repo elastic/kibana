@@ -8,13 +8,12 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import type { FtrProviderContext } from '../ftr_provider_context';
-
 /**
- * Returns a TestAgent<supertest.SuperTestStatic.Test> instance that will not persist cookie between API requests.
+ * Returns supertest.SuperTest<supertest.Test> instance that will not persist cookie between API requests.
  */
 export function SupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kbnUrl = formatUrl(config.get('servers.kibana'));
 
-  return supertest.agent(kbnUrl);
+  return supertest(kbnUrl);
 }

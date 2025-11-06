@@ -18,7 +18,7 @@ export function createKibanaSupertestProvider({ certificateAuthorities, kibanaUr
 
     return certificateAuthorities
       ? supertest.agent(kibanaUrl, { ca: certificateAuthorities })
-      : supertest.agent(kibanaUrl);
+      : supertest(kibanaUrl);
   };
 }
 
@@ -26,7 +26,7 @@ export function KibanaSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertest.agent(
+  return supertest(
     formatUrl({
       ...kibanaServerConfig,
       auth: false,
@@ -37,5 +37,5 @@ export function KibanaSupertestWithoutAuthProvider({ getService }) {
 export function ElasticsearchSupertestProvider({ getService }) {
   const config = getService('config');
   const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
-  return supertest.agent(elasticSearchServerUrl);
+  return supertest(elasticSearchServerUrl);
 }
