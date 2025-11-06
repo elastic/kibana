@@ -29696,14 +29696,11 @@ paths:
           required: false
           schema:
             type: string
-        - description: 'Filter by cloud provider: aws or azure.'
+        - description: KQL query to filter cloud connectors.
           in: query
-          name: cloudProvider
+          name: kuery
           required: false
           schema:
-            enum:
-              - aws
-              - azure
             type: string
       responses:
         '200':
