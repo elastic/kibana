@@ -24,7 +24,7 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
-import { OBSERVABILITY_GET_ALERTS_DATASOURCE_FIELDS_TOOL_ID } from './get_alerts_datasource_fields';
+import { getRelevantAlertFields } from './get_relevant_alert_fields';
 
 export const OBSERVABILITY_ALERTS_TOOL_ID = 'observability.alerts';
 
@@ -50,6 +50,10 @@ const alertsSchema = z.object({
     .string()
     .describe('The end of the time range, in Elasticsearch date math, like `now`.')
     .min(1),
+  query: z
+    .string()
+    .min(1)
+    .describe('Natural language request used to guide relevant field selection'),
   kqlFilter: z.string().optional().describe('Filter alerts by KQL field:value pairs'),
   includeRecovered: z
     .boolean()
@@ -67,20 +71,31 @@ export async function createObservabilityAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof alertsSchema> = {
     id: OBSERVABILITY_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve Observability alerts for services, hosts and containers. Requires start/end; supports kqlFilter. Defaults to active alerts (set includeRecovered to include recovered). Call ${OBSERVABILITY_GET_ALERTS_DATASOURCE_FIELDS_TOOL_ID} first to discover fields for filtering/display.`,
+    description: `Retrieve Observability alerts for services, hosts and containers. Requires start/end; supports kqlFilter. Defaults to active alerts (set includeRecovered to include recovered). Also returns selected alert fields (name:type) based on your request for use as table columns.`,
     schema: alertsSchema,
     tags: ['observability', 'alerts'],
     handler: async (
-      { start: startAsDatemath, end: endAsDatemath, kqlFilter, includeRecovered },
-      { request }
+      { start: startAsDatemath, end: endAsDatemath, kqlFilter, includeRecovered, query },
+      { request, modelProvider }
     ) => {
       try {
-        const [, pluginStart] = await core.getStartServices();
+        const [coreStart, pluginStart] = await core.getStartServices();
         const alertsClient = await pluginStart.ruleRegistry.getRacClientWithRequest(request);
 
         const start = datemath.parse(startAsDatemath)!.valueOf();
         const end = datemath.parse(endAsDatemath)!.valueOf();
 
+        // --- Step 1: Resolve relevant alert fields (merged from get_alerts_datasource_fields) ---
+        const selectedFields = await getRelevantAlertFields({
+          coreStart,
+          pluginStart,
+          request,
+          startAsDatemath,
+          endAsDatemath,
+          modelProvider,
+          logger,
+          query,
+        });
         const filters: QueryDslQueryContainer[] = [
           {
             range: {
@@ -138,6 +153,7 @@ export async function createObservabilityAlertsTool({
               data: {
                 total,
                 alerts,
+                selectedFields,
               },
             },
           ],
