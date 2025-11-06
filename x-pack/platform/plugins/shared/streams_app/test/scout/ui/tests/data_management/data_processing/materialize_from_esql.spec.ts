@@ -34,40 +34,40 @@ test.describe(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{IP:client_ip}');
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(1);
-      
+
       const previewRows = await pageObjects.streams.getPreviewTableRows();
       expect(previewRows.length).toBeGreaterThan(0);
     });
 
     test('should materialize GROK with WHERE condition', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-      
+
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{IP:client_ip}');
-      
+
       await page.getByText('Advanced settings').click();
-      
+
       await pageObjects.streams.fillConditionEditor({
         field: 'host.name',
         operator: 'eq',
         value: 'host-1',
       });
-      
+
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(1);
-      
+
       await pageObjects.streams.clickEditProcessor(0);
       await page.getByText('Advanced settings').click();
-      
-      await expect(
-        await pageObjects.streams.conditionEditorFieldComboBox.getSelectedValue()
-      ).toBe('host.name');
+
+      await expect(await pageObjects.streams.conditionEditorFieldComboBox.getSelectedValue()).toBe(
+        'host.name'
+      );
     });
 
     test('should materialize multiple processors from complex ES|QL', async ({
@@ -87,7 +87,7 @@ test.describe(
         value: 'host-1',
       });
       await pageObjects.streams.clickSaveProcessor();
-      
+
       // Add SET processor (from EVAL) with same WHERE
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.selectProcessorType('set');
@@ -100,84 +100,84 @@ test.describe(
         value: 'host-1',
       });
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(2);
-      
+
       await pageObjects.streams.saveStepsListChanges();
-      
+
       const previewRows = await pageObjects.streams.getPreviewTableRows();
       expect(previewRows.length).toBeGreaterThan(0);
     });
 
     test('should handle LIKE operator in WHERE condition', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-      
+
       // Simulate: WHERE message LIKE "%error%" | GROK message "%{IP:client_ip}"
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{IP:client_ip}');
       await page.getByText('Advanced settings').click();
-      
+
       // LIKE "%error%" becomes contains
       await pageObjects.streams.fillConditionEditor({
         field: 'message',
         operator: 'contains',
         value: 'error',
       });
-      
+
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(1);
     });
 
     test('should handle EVAL with DATE_PARSE', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-      
+
       // Simulate: EVAL timestamp = DATE_PARSE(date_string, "yyyy-MM-dd")
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.selectProcessorType('date');
-      
+
       await pageObjects.streams.fillProcessorFieldInput('date_string', { isCustomValue: true });
       await page.getByLabel('Target field').fill('timestamp');
 
       await page.getByText('Format').locator('..').getByTestId('input').click();
       await page.keyboard.type('yyyy-MM-dd');
       await page.keyboard.press('Enter');
-      
+
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(1);
-      
+
       await pageObjects.streams.clickEditProcessor(0);
       await expect(page.getByTestId('streamsAppProcessorTypeSelector')).toContainText('Date');
     });
 
     test('should handle RENAME command', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-      
+
       // Simulate: RENAME old_field AS new_field
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.selectProcessorType('rename');
-      
+
       await pageObjects.streams.fillProcessorFieldInput('old_field', { isCustomValue: true });
       await page.getByLabel('Target field').fill('new_field');
-      
+
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(1);
     });
 
     test('should handle DISSECT command', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-      
+
       // Simulate: DISSECT message "%{timestamp} [%{level}] %{msg}"
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.selectProcessorType('dissect');
-      
+
       await pageObjects.streams.fillProcessorFieldInput('message');
       await page
         .getByText('Pattern')
@@ -186,23 +186,39 @@ test.describe(
         .first()
         .click();
       await page.keyboard.type('%{timestamp} [%{level}] %{msg}');
-      
+
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(1);
     });
 
+    test('should render condition editor by default for a new processor', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+
+      await pageObjects.streams.clickAddProcessor();
+      await pageObjects.streams.fillProcessorFieldInput('message');
+      await pageObjects.streams.fillGrokPatternInput('%{IP:client_ip}');
+
+      await page.getByText('Advanced settings').click();
+
+      const selected = await pageObjects.streams.conditionEditorFieldComboBox.getSelectedValue();
+      expect(selected).toBeDefined();
+    });
+
     test('should handle IN operator with multiple values', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-      
+
       // Simulate: WHERE status IN ("active", "pending") | GROK message "%{IP:ip}"
       // IN with multiple values becomes OR condition
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{IP:ip}');
       await page.getByText('Advanced settings').click();
-      
+
       await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
       await pageObjects.streams.fillConditionEditorWithSyntax(
         JSON.stringify({
@@ -212,31 +228,29 @@ test.describe(
           ],
         })
       );
-      
+
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(1);
     });
 
     test('should not duplicate steps on page refresh', async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-      
+
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{IP:client_ip}');
       await pageObjects.streams.clickSaveProcessor();
       await pageObjects.streams.saveStepsListChanges();
-      
+
       let processors = await pageObjects.streams.getProcessorsListItems();
       const initialCount = processors.length;
-      
+
       await page.reload();
-      
-      await expect(
-        page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')
-      ).toBeVisible();
-      
+
+      await expect(page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible();
+
       processors = await pageObjects.streams.getProcessorsListItems();
       expect(processors).toHaveLength(initialCount);
     });
@@ -245,16 +259,14 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{IP:client_ip}');
       await pageObjects.streams.clickSaveProcessor();
-      
+
       const previewRows = await pageObjects.streams.getPreviewTableRows();
       expect(previewRows.length).toBeGreaterThan(0);
     });
   }
 );
-

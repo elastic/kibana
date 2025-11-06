@@ -6,7 +6,11 @@
  */
 
 import { enrichmentUrlSchema } from './enrichment_url_schema';
-import type { EnrichmentUrlStateV3, EnrichmentUrlStateV2, EnrichmentUrlStateV1 } from './enrichment_url_schema';
+import type {
+  EnrichmentUrlStateV3,
+  EnrichmentUrlStateV2,
+  EnrichmentUrlStateV1,
+} from './enrichment_url_schema';
 
 describe('Enrichment URL Schema', () => {
   describe('URL Schema v3 - stepsToAppend', () => {
@@ -124,6 +128,49 @@ describe('Enrichment URL Schema', () => {
                   action: 'set',
                   to: 'processed',
                   value: true,
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = enrichmentUrlSchema.safeParse(state);
+      expect(result.success).toBe(true);
+    });
+
+    it('should validate multiple WHERE blocks with nested steps', () => {
+      const state: EnrichmentUrlStateV3 = {
+        v: 3,
+        dataSources: [
+          {
+            type: 'random-samples',
+            enabled: true,
+          },
+        ],
+        stepsToAppend: [
+          {
+            where: {
+              field: 'host.name',
+              eq: 'host-1',
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'message',
+                  patterns: ['%{IP:ip}'],
+                },
+              ],
+            },
+          },
+          {
+            where: {
+              field: 'message',
+              contains: 'error',
+              steps: [
+                {
+                  action: 'rename',
+                  from: 'ip',
+                  to: 'client.ip',
                 },
               ],
             },
@@ -594,4 +641,3 @@ describe('Enrichment URL Schema', () => {
     });
   });
 });
-

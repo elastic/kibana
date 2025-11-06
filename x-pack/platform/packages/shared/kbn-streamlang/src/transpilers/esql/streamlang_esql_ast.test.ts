@@ -186,4 +186,47 @@ describe('ESQL - Wrapping OR within NOT', () => {
       `  | EVAL result_field = CASE(NOT (status == "active" AND (type == "premium" OR category == "gold")), "matched", result_field)`
     );
   });
+
+  it('should render LIKE with * anchors for contains/startsWith/endsWith', () => {
+    const dslContains: StreamlangDSL = {
+      steps: [
+        {
+          action: 'set',
+          to: 'result_field',
+          value: 'matched',
+          where: { field: 'message', contains: 'ftpd' },
+        } as SetProcessor,
+      ],
+    };
+
+    const dslStarts: StreamlangDSL = {
+      steps: [
+        {
+          action: 'set',
+          to: 'result_field',
+          value: 'matched',
+          where: { field: 'message', startsWith: 'ftpd' },
+        } as SetProcessor,
+      ],
+    };
+
+    const dslEnds: StreamlangDSL = {
+      steps: [
+        {
+          action: 'set',
+          to: 'result_field',
+          value: 'matched',
+          where: { field: 'message', endsWith: 'ftpd' },
+        } as SetProcessor,
+      ],
+    };
+
+    const containsQuery = transpile(dslContains).query.trim();
+    const startsQuery = transpile(dslStarts).query.trim();
+    const endsQuery = transpile(dslEnds).query.trim();
+
+    expect(containsQuery).toContain(`CASE(LIKE(message, "*ftpd*")`);
+    expect(startsQuery).toContain(`CASE(LIKE(message, "ftpd*")`);
+    expect(endsQuery).toContain(`CASE(LIKE(message, "*ftpd")`);
+  });
 });

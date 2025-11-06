@@ -97,19 +97,19 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
     if ('contains' in condition) {
       return Builder.expression.func.call('LIKE', [
         field,
-        Builder.expression.literal.string(`%${condition.contains}%`),
+        Builder.expression.literal.string(`*${condition.contains}*`),
       ]);
     }
     if ('startsWith' in condition) {
       return Builder.expression.func.call('LIKE', [
         field,
-        Builder.expression.literal.string(`${condition.startsWith}%`),
+        Builder.expression.literal.string(`${condition.startsWith}*`),
       ]);
     }
     if ('endsWith' in condition) {
       return Builder.expression.func.call('LIKE', [
         field,
-        Builder.expression.literal.string(`%${condition.endsWith}`),
+        Builder.expression.literal.string(`*${condition.endsWith}`),
       ]);
     }
   } else if (isAndCondition(condition)) {

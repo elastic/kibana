@@ -15,12 +15,15 @@ import type {
 } from '../../../types/processors';
 
 describe('ES|QL to Streamlang Reverse Translation', () => {
+  const hasWhere = (x: unknown): x is { where: unknown } =>
+    typeof x === 'object' && x !== null && 'where' in x;
+
   describe('esqlToStreamlangProcessors', () => {
     describe('WHERE conditions', () => {
       it('should attach WHERE condition to subsequent processors', () => {
         const query = `WHERE host.name == "host-1" | GROK message "%{IP:client_ip}"`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         expect(processors[0]).toMatchObject({
           action: 'grok',
@@ -33,7 +36,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should compound multiple WHERE conditions with AND', () => {
         const query = `WHERE host.name == "host-1" | WHERE status == "active" | GROK message "%{IP:client_ip}"`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         expect(processors[0]).toMatchObject({
           action: 'grok',
@@ -53,7 +56,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should convert GROK command to grok processor', () => {
         const query = `GROK body.text "%{IP:client_ip} %{WORD:method}"`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         const grok = processors[0] as GrokProcessor;
         expect(grok).toMatchObject({
@@ -66,7 +69,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should handle GROK with escaped quotes in pattern', () => {
         const query = `GROK message "\\"quoted\\" %{WORD:field}"`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         expect(processors[0]).toMatchObject({
           action: 'grok',
@@ -80,7 +83,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should convert DISSECT command to dissect processor', () => {
         const query = `DISSECT message "%{timestamp} %{+timestamp} %{+timestamp} [%{loglevel}] %{message}"`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         const dissect = processors[0] as DissectProcessor;
         expect(dissect).toMatchObject({
@@ -95,7 +98,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should convert EVAL literal assignment to set processor', () => {
         const query = `EVAL service.name = "ftpd"`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         const set = processors[0] as SetProcessor;
         expect(set).toMatchObject({
@@ -108,7 +111,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should convert EVAL copy assignment to set processor with copy_from', () => {
         const query = `EVAL target_field = source_field`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         const set = processors[0] as SetProcessor;
         expect(set).toMatchObject({
@@ -121,7 +124,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should convert EVAL with DATE_PARSE to date processor', () => {
         const query = `EVAL timestamp = DATE_PARSE(date_string, "yyyy-MM-dd'T'HH:mm:ss'Z'")`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         const date = processors[0] as DateProcessor;
         expect(date).toMatchObject({
@@ -135,7 +138,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should handle multiple EVAL assignments', () => {
         const query = `EVAL a = "x", b = c, timestamp = DATE_PARSE(d, "yyyy-MM-dd")`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(3);
         expect(processors[0]).toMatchObject({
           action: 'set',
@@ -158,7 +161,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should handle numeric literal assignments', () => {
         const query = `EVAL count = 42, active = true`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(2);
         expect(processors[0]).toMatchObject({
           action: 'set',
@@ -177,7 +180,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should convert RENAME command to rename processor', () => {
         const query = `RENAME old_field AS new_field`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         const rename = processors[0] as RenameProcessor;
         expect(rename).toMatchObject({
@@ -190,7 +193,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should handle multiple RENAME assignments', () => {
         const query = `RENAME a AS b, x AS y`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(2);
         expect(processors[0]).toMatchObject({
           action: 'rename',
@@ -214,12 +217,12 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
           | RENAME client_ip AS ip_address
         `;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(3);
-        
+
         // All processors should have the WHERE condition
         const expectedWhere = { field: 'host.name', eq: 'host-1' };
-        
+
         expect(processors[0]).toMatchObject({
           action: 'grok',
           where: expectedWhere,
@@ -249,7 +252,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       it('should ignore unsupported commands', () => {
         const query = `FROM logs | LIMIT 10 | GROK message "%{IP:ip}"`;
         const processors = esqlToStreamlangProcessors(query);
-        
+
         expect(processors).toHaveLength(1);
         expect(processors[0]).toMatchObject({
           action: 'grok',
@@ -263,7 +266,7 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
     it('should convert WHERE-only query to top-level where block', () => {
       const query = `WHERE host.name == "host-1"`;
       const steps = esqlToStreamlangSteps(query);
-      
+
       expect(steps).toHaveLength(1);
       expect(steps[0]).toMatchObject({
         where: {
@@ -274,18 +277,88 @@ describe('ES|QL to Streamlang Reverse Translation', () => {
       });
     });
 
-    it('should produce same processor results as esqlToStreamlangProcessors', () => {
+    it('should wrap subsequent processors under a single where block and preserve order', () => {
       const query = `WHERE status == "active" | GROK message "%{IP:ip}" | EVAL processed = true`;
-      
+
       const processors = esqlToStreamlangProcessors(query);
       const steps = esqlToStreamlangSteps(query);
-      
-      expect(steps).toHaveLength(processors.length);
-      
-      steps.forEach((step, i) => {
-        expect(step).toMatchObject(processors[i]);
+
+      expect(steps).toHaveLength(1);
+      expect(steps[0]).toMatchObject({
+        where: { field: 'status', eq: 'active' },
+      });
+
+      // Children match the processors order, minus per-processor where (now inherited)
+      const nested = (steps[0] as { where: { steps: unknown[] } }).where.steps;
+      const withoutWhere = (processors as any[]).map((p) => {
+        const { where, ...rest } = p;
+        return rest;
+      });
+      expect(nested).toEqual(withoutWhere);
+    });
+
+    it('should create separate where blocks for segmented WHERE', () => {
+      const query = `WHERE host.name == "host-1" | GROK message "%{IP:ip}" | WHERE message LIKE "*error*" | RENAME ip AS client.ip`;
+
+      const steps = esqlToStreamlangSteps(query);
+      expect(steps).toHaveLength(2);
+
+      expect(steps[0]).toMatchObject({
+        where: {
+          field: 'host.name',
+          eq: 'host-1',
+          steps: [{ action: 'grok', from: 'message', patterns: ['%{IP:ip}'] }],
+        },
+      });
+
+      // Only assert segmentation and child step presence; LIKE mapping is covered elsewhere
+      const second = steps[1];
+      expect(second).toMatchObject({
+        where: {
+          steps: [{ action: 'rename', from: 'ip', to: 'client.ip' }],
+        },
+      });
+    });
+
+    it('should handle bracketed identifiers in WHERE', () => {
+      const query = `WHERE ["service.name"] IS NOT NULL`;
+      const steps = esqlToStreamlangSteps(query);
+
+      expect(steps).toHaveLength(1);
+      expect(hasWhere(steps[0])).toBe(true);
+      const whereObj = (steps[0] as { where: unknown }).where as Record<string, unknown>;
+      expect(whereObj).toBeDefined();
+      expect(whereObj['exists']).toBe(true);
+      expect(typeof whereObj['field']).toBe('string');
+      const normalizedField = String(whereObj['field']).replace(/^\"|\"$/g, '');
+      expect(normalizedField).toBe('service.name');
+      expect(whereObj['steps']).toEqual([]);
+    });
+
+    it('should normalise LIKE "*" anchors into contains/startsWith/endsWith', () => {
+      const containsQ = `WHERE message LIKE "*ftpd*" | GROK message "%{IP:ip}"`;
+      const startsQ = `WHERE message LIKE "ftpd*" | GROK message "%{IP:ip}"`;
+      const endsQ = `WHERE message LIKE "*ftpd" | GROK message "%{IP:ip}"`;
+
+      const containsSteps = esqlToStreamlangSteps(containsQ);
+      const startsSteps = esqlToStreamlangSteps(startsQ);
+      const endsSteps = esqlToStreamlangSteps(endsQ);
+
+      expect(hasWhere(containsSteps[0])).toBe(true);
+      expect((containsSteps[0] as { where: unknown }).where as object).toMatchObject({
+        field: 'message',
+        contains: 'ftpd',
+      });
+      expect(hasWhere(startsSteps[0])).toBe(true);
+      expect((startsSteps[0] as { where: unknown }).where as object).toMatchObject({
+        field: 'message',
+        startsWith: 'ftpd',
+      });
+      expect(hasWhere(endsSteps[0])).toBe(true);
+      expect((endsSteps[0] as { where: unknown }).where as object).toMatchObject({
+        field: 'message',
+        endsWith: 'ftpd',
       });
     });
   });
 });
-
