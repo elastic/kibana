@@ -233,7 +233,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     <EuiFormRow
       label={finalConfig.label}
       labelAppend={
-        <EuiLink onClick={handleOpenWorkflowManagementApp} external>
+        <EuiLink onClick={handleOpenWorkflowManagementApp}>
           {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
         </EuiLink>
       }
