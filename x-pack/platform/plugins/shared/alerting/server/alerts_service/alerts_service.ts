@@ -525,7 +525,9 @@ export class AlertsService implements IAlertsService {
     logger: Logger;
   }) {
     if (!indices || indices.length === 0) {
-      return;
+      throw new Error(
+        `Unable to mute alert instance ${alertInstanceId} - no alert indices available`
+      );
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
@@ -552,6 +554,7 @@ export class AlertsService implements IAlertsService {
       logger.error(
         `Error updating muted field for alert instance ${alertInstanceId}: ${error.message}`
       );
+      throw error;
     }
   }
 
@@ -567,7 +570,9 @@ export class AlertsService implements IAlertsService {
     logger: Logger;
   }) {
     if (!indices || indices.length === 0) {
-      return;
+      throw new Error(
+        `Unable to unmute alert instance ${alertInstanceId} - no alert indices available`
+      );
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
@@ -594,6 +599,7 @@ export class AlertsService implements IAlertsService {
       logger.error(
         `Error updating muted field for alert instance ${alertInstanceId}: ${error.message}`
       );
+      throw error;
     }
   }
 
@@ -607,7 +613,7 @@ export class AlertsService implements IAlertsService {
     logger: Logger;
   }) {
     if (!indices || indices.length === 0) {
-      return;
+      throw new Error(`Unable to mute all alerts for rule ${ruleId} - no alert indices available`);
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
@@ -627,6 +633,7 @@ export class AlertsService implements IAlertsService {
       });
     } catch (error) {
       logger.error(`Error updating muted field for all alerts in rule ${ruleId}: ${error.message}`);
+      throw error;
     }
   }
 
@@ -640,7 +647,9 @@ export class AlertsService implements IAlertsService {
     logger: Logger;
   }) {
     if (!indices || indices.length === 0) {
-      return;
+      throw new Error(
+        `Unable to unmute all alerts for rule ${ruleId} - no alert indices available`
+      );
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
@@ -660,6 +669,7 @@ export class AlertsService implements IAlertsService {
       });
     } catch (error) {
       logger.error(`Error updating muted field for all alerts in rule ${ruleId}: ${error.message}`);
+      throw error;
     }
   }
 }
