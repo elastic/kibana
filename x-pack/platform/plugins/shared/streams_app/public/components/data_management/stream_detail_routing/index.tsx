@@ -98,7 +98,8 @@ export function StreamDetailRoutingImpl() {
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
       routingSnapshot.can({ type: 'routingRule.save' }) ||
-      routingSnapshot.can({ type: 'routingRule.fork' }),
+      routingSnapshot.can({ type: 'routingRule.fork' }) ||
+      routingSnapshot.can({ type: 'suggestion.saveSuggestion' }),
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
