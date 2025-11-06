@@ -33,10 +33,17 @@ export const processKnowledgeBaseNode = ({
   ): Promise<typeof RuleCreationAnnotation.State> => {
     logger.info('Processing knowledge base for rule creation context');
 
+    const perf1 = Date.now();
     try {
       if (!kbDataClient) {
         logger.debug('No knowledge base client available, skipping knowledge base processing');
-        return state;
+        return {
+          ...state,
+          knowledgeBase: {
+            documents: [],
+            insights: '',
+          },
+        };
       }
 
       const [requiredDocuments, contextDocuments] = await Promise.all([
@@ -54,7 +61,13 @@ export const processKnowledgeBaseNode = ({
       );
       if (!knowledgeBaseDocuments || knowledgeBaseDocuments.length === 0) {
         logger.debug('No knowledge base documents found');
-        return state;
+        return {
+          ...state,
+          knowledgeBase: {
+            documents: [],
+            insights: '',
+          },
+        };
       }
 
       const knowledgeBaseInsights = await extractKnowledgeBaseInsights({
@@ -64,6 +77,12 @@ export const processKnowledgeBaseNode = ({
         logger,
       });
 
+      const perf2 = Date.now();
+      logger.info(
+        `Knowledge base processing completed in ${(perf2 - perf1) / 1000}s with ${
+          knowledgeBaseDocuments.length
+        } documents`
+      );
       return {
         ...state,
         knowledgeBase: {
@@ -106,6 +125,8 @@ Content: ${doc.text}
 `
   )
   .join('\n\n')}
+
+If documents are not relevant to the user query, respond with "No relevant insights found."
 
 If query specifically relates to certain documents, include that document content in full in the answer.
 Extract and synthesize the most actionable insights from these documents for creating the detection rule. Focus on:

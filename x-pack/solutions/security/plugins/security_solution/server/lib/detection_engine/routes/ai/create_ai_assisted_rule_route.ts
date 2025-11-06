@@ -154,11 +154,15 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
 
           const result = await iterativeAgent.invoke({ userQuery });
 
-          //  console.log('toolAgentResult result', JSON.stringify(result, null, 2));
+          // for await (const [streamMode, chunk] of await iterativeAgent.stream({ userQuery })) {
+          //   console.log(`${streamMode}: ${JSON.stringify(chunk, null, 2)}`);
+          // }
 
-          if (result.errors.length) {
-            throw new Error(result.errors.join('; '));
-          }
+          // //  console.log('toolAgentResult result', JSON.stringify(result, null, 2));
+
+          // if (result.errors.length) {
+          //   throw new Error(result.errors.join('; '));
+          // }
 
           return response.ok({
             body: {

@@ -8,7 +8,9 @@
 import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createAIAssistedRuleRoute } from './create_ai_assisted_rule_route';
+import { streamAiAssistedRuleRoute } from './stream_ai_assisted_rule_route';
 
 export const registerAIAssistedRoutes = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   createAIAssistedRuleRoute(router, logger);
+  streamAiAssistedRuleRoute(router, logger);
 };

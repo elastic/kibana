@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiResizableContainer,
-  EuiFlexItem,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiResizableContainer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
+
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -25,13 +20,13 @@ import { MaxWidthEuiFlexItem } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
 // import { useKibana } from '../../../../common/lib/kibana';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
-import { useAiRuleCreationStream } from './hooks/use_ai_rule_creation_stream';
+import { useAiRuleCreation } from './hooks/use_ai_rule_creation';
 import { CreateRulePage } from '../rule_creation';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PromptComponent } from './prompt';
 import { LinkIcon } from '../../../../common/components/link_icon';
 import { useHeaderLinkBackStyles } from '../../../../common/components/header_page';
-import { AiAssistedRuleUpdates } from './updates';
+
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 const AiAssistedCreateRulePageComponent: React.FC = () => {
@@ -74,11 +69,10 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   }, [aiConnectors, isAiConnectorsLoading, selectedConnectorId]);
 
   const {
+    executeAiAssistedRuleCreation,
     rule,
-    streamRuleCreation,
-    updates,
-    isStreaming: isAiRuleCreationInProgress,
-  } = useAiRuleCreationStream();
+    isLoading: isAiRuleCreationInProgress,
+  } = useAiRuleCreation();
 
   const isValid = promptValue.length > 0 && selectedConnectorId != null;
   const handlePromptSubmit = useCallback(() => {
@@ -89,7 +83,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     }
     if (isValid) {
       setSubmittedPromptValue(promptValue);
-      streamRuleCreation({
+      executeAiAssistedRuleCreation({
         message: promptValue,
         connectorId: selectedConnectorId,
       })
@@ -100,11 +94,12 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
           addError(err, { title: 'Failure to suggest rule with AI assistant' });
         });
     }
-  }, [promptValue, isValid, streamRuleCreation, selectedConnectorId, addError]);
+  }, [executeAiAssistedRuleCreation, promptValue, selectedConnectorId, isValid, addError]);
 
   const onSendMessage = useCallback(() => {
     handlePromptSubmit();
-  }, [handlePromptSubmit]);
+    setPromptValue('');
+  }, [handlePromptSubmit, setPromptValue]);
 
   const backComponent = useMemo(
     () => (
@@ -133,7 +128,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     return null;
   }
 
-  return showForm && rule ? (
+  return showForm ? (
     <CreateRulePage
       rule={rule}
       backComponent={backComponent}
@@ -173,24 +168,6 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                         isValid={isValid}
                         onSendMessage={onSendMessage}
                         isAiRuleCreationInProgress={isAiRuleCreationInProgress}
-                      />
-                      <EuiSpacer size="m" />
-                    </MaxWidthEuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="m" />
-
-                  <EuiFlexGroup direction="row" justifyContent="spaceAround">
-                    <MaxWidthEuiFlexItem>
-                      {isAiRuleCreationInProgress && (
-                        <EuiFlexItem>
-                          <EuiProgress size="s" color="primary" />
-                        </EuiFlexItem>
-                      )}
-                      <EuiSpacer size="m" />
-
-                      <AiAssistedRuleUpdates
-                        updates={updates}
-                        isStreaming={isAiRuleCreationInProgress}
                       />
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>

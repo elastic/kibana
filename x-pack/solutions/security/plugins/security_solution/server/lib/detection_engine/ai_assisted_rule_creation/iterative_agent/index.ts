@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { getIterativeRuleCreationAgent } from './iterative_agent_graph';
+export {
+  getIterativeRuleCreationAgent,
+  RULE_CREATION_NODE_NAMES,
+  RULE_CREATION_NODE_ORDER,
+} from './iterative_agent_graph';

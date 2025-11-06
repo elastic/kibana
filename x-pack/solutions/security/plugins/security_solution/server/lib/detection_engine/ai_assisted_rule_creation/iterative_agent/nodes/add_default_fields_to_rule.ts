@@ -11,6 +11,7 @@ import type { RuleCreationState } from '../state';
 export const addDefaultFieldsToRulesNode = ({ model }: { model: InferenceChatModel }) => {
   return async (state: RuleCreationState) => {
     return {
+      ...state,
       rule: {
         ...state.rule,
         references: [],
@@ -25,8 +26,8 @@ export const addDefaultFieldsToRulesNode = ({ model }: { model: InferenceChatMod
         author: [],
         setup: '',
         max_signals: 100,
-        risk_score: 47,
-        severity: 'medium',
+        risk_score: 21,
+        severity: 'low',
       },
     };
   };
