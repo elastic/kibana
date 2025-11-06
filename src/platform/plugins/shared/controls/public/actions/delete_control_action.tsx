@@ -31,13 +31,10 @@ import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { ACTION_DELETE_CONTROL } from './constants';
 import { confirmDeleteControl } from '../common';
-import { BehaviorSubject } from 'rxjs';
 
 type DeleteControlActionApi = HasType &
   HasUniqueId &
-  HasParentApi<PresentationContainer & PublishesViewMode & HasType> & {
-    esqlVariable$?: BehaviorSubject<Record<string, string>>;
-  };
+  HasParentApi<PresentationContainer & PublishesViewMode & HasType>;
 
 export const compatibilityCheck = (api: unknown | null): api is DeleteControlActionApi =>
   Boolean(
@@ -87,7 +84,7 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
 
-    if (typeof embeddable.esqlVariable$ !== 'undefined') {
+    if (embeddable.type === 'esqlControl') {
       // esql_control_removed
     }
 
