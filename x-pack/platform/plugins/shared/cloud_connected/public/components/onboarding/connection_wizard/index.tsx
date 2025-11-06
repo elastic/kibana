@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiStepsProps } from '@elastic/eui';
 import {
   EuiSteps,
   EuiText,
@@ -16,6 +17,7 @@ import {
   EuiFieldText,
   EuiBadge,
 } from '@elastic/eui';
+import { useCloudConnectedAppContext } from '../../../application/app_context';
 import {
   STEP_1_TITLE,
   STEP_1_DESCRIPTION,
@@ -32,13 +34,10 @@ import {
 
 interface ConnectionWizardProps {
   onConnect: (apiKey: string) => void;
-  docLinksSecureSavedObject: string;
 }
 
-export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({
-  onConnect,
-  docLinksSecureSavedObject,
-}) => {
+export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
+  const { docLinks } = useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
 
   const handleConnect = () => {
@@ -47,7 +46,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({
     }
   };
 
-  const steps = [
+  const steps: EuiStepsProps['steps'] = [
     {
       title: STEP_1_TITLE,
       titleSize: 'xs',
@@ -70,6 +69,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({
       ),
     },
     {
+      // @ts-expect-error - title can also be a ReactNode but types don't reflect this
       title: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>{STEP_2_TITLE}</EuiFlexItem>
@@ -82,7 +82,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({
       status: 'incomplete',
       children: (
         <EuiText size="s">
-          <p>{getStep2Description(docLinksSecureSavedObject)}</p>
+          <p>{getStep2Description(docLinks.links.kibana.secureSavedObject)}</p>
         </EuiText>
       ),
     },

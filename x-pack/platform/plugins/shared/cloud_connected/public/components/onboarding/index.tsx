@@ -15,36 +15,56 @@ import {
   EuiPageSection,
   EuiImage,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useCloudConnectedAppContext } from '../../application/app_context';
 import { ConnectionWizard } from './connection_wizard';
 import { ServiceCards } from './service_cards';
-import { PAGE_TITLE, PAGE_DESCRIPTION } from './translations';
+import { COLUMN_SIZE } from './constants';
 
 interface OnboardingPageProps {
   onConnect: (apiKey: string) => void;
-  addBasePath: (path: string) => string;
-  docLinksSecureSavedObject: string;
 }
 
-const COLUMN_SIZE = 340;
+export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => {
+  const { http } = useCloudConnectedAppContext();
+  const hasPermissions = true;
 
-export const OnboardingPage: React.FC<OnboardingPageProps> = ({
-  onConnect,
-  addBasePath,
-  docLinksSecureSavedObject,
-}) => {
   return (
     <EuiPageSection>
       {/* Header Section with Title and Image */}
       <EuiFlexGroup alignItems="center" gutterSize="xl">
         <EuiFlexItem>
           <EuiTitle size="l">
-            <h1>{PAGE_TITLE}</h1>
+            <h1>
+              <FormattedMessage
+                id="xpack.cloudConnected.onboarding.pageTitle"
+                defaultMessage="Get started with Cloud Connect"
+              />
+            </h1>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiText>
-            <p>{PAGE_DESCRIPTION}</p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.cloudConnected.onboarding.pageDescription"
+                defaultMessage="Cloud Connected Services allows customers running self-managed Elastic Software to access Elastic capabilities as a Cloud service without the operational overhead of managing the infrastructure required to run."
+              />
+            </p>
           </EuiText>
+          {!hasPermissions && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiText color="subdued" size="s" style={{ fontStyle: 'italic' }}>
+                <p>
+                  <FormattedMessage
+                    id="xpack.cloudConnected.onboarding.noPermissionsDescription"
+                    defaultMessage="Only Admins can establish connection with Elastic Cloud. Reach out to your Admin to get started."
+                  />
+                </p>
+              </EuiText>
+            </>
+          )}
         </EuiFlexItem>
         <EuiFlexItem style={{ width: 90 }} grow={false} />
         <EuiFlexItem grow={false}>
@@ -52,7 +72,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
             alt={i18n.translate('xpack.cloudConnected.onboarding.illustration.alt', {
               defaultMessage: 'Illustration for cloud data migration',
             })}
-            src={addBasePath('/plugins/kibanaReact/assets/') + 'illustration_cloud_migration.png'}
+            src={http.basePath.prepend('/plugins/kibanaReact/assets/') + 'illustration_cloud_migration.png'}
             size="fullWidth"
             style={{ maxWidth: `${COLUMN_SIZE}px` }}
           />
@@ -63,18 +83,15 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
 
       {/* Main Content Section */}
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={true}>
-          <div style={{ maxWidth: '650px' }}>
-            <ConnectionWizard
-              onConnect={onConnect}
-              docLinksSecureSavedObject={docLinksSecureSavedObject}
-            />
-          </div>
-        </EuiFlexItem>
+        {hasPermissions && (
+          <EuiFlexItem grow={true}>
+            <div style={{ maxWidth: '650px' }}>
+              <ConnectionWizard onConnect={onConnect} />
+            </div>
+          </EuiFlexItem>
+        )}
 
-        <EuiFlexItem grow={false} style={{ width: `${COLUMN_SIZE}px` }}>
-          <ServiceCards />
-        </EuiFlexItem>
+        <ServiceCards hasPermissions={hasPermissions} />
       </EuiFlexGroup>
     </EuiPageSection>
   );

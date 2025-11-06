@@ -6,54 +6,87 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiSpacer, EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SERVICES_TITLE, LEARN_MORE } from './translations';
+import { COLUMN_SIZE } from '../constants';
 
-export const ServiceCards: React.FC = () => {
+interface ServiceCardsProps {
+  hasPermissions: boolean;
+}
+
+export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) => {
   return (
-    <>
-      <EuiTitle size="m">
-        <h2>{SERVICES_TITLE}</h2>
+    <EuiFlexItem grow={!hasPermissions} style={hasPermissions ? { width: `${COLUMN_SIZE}px` } : undefined}>
+      <EuiTitle size="s">
+        <h2>
+          {i18n.translate('xpack.cloudConnected.serviceCards.title', {
+            defaultMessage: 'Cloud connected services',
+          })}
+        </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      <EuiCard
-        hasBorder
-        layout="horizontal"
-        title="AutoOps"
-        description="Get instant cluster diagnostics, performance tips, and cost-saving recommendations—no extra management needed."
-        titleSize="xs"
-      />
-      <EuiSpacer size="m" />
+      <EuiFlexGroup direction={hasPermissions ? 'column' : 'row'} gutterSize="m">
+        <EuiFlexItem>
+          <EuiCard
+            hasBorder
+            layout="horizontal"
+            title={i18n.translate('xpack.cloudConnected.serviceCards.autoOps.title', {
+              defaultMessage: 'AutoOps',
+            })}
+            description={i18n.translate('xpack.cloudConnected.serviceCards.autoOps.description', {
+              defaultMessage:
+                'Get instant cluster diagnostics, performance tips, and cost-saving recommendations—no extra management needed.',
+            })}
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            hasBorder
+            layout="horizontal"
+            title={i18n.translate('xpack.cloudConnected.serviceCards.elasticInference.title', {
+              defaultMessage: 'Elastic Inference Service',
+            })}
+            description={i18n.translate('xpack.cloudConnected.serviceCards.elasticInference.description', {
+              defaultMessage:
+                'Tap into AI-powered search and chat—no ML model deployment or management needed. Fast, scalable, and hassle-free intelligent features.',
+            })}
+            titleSize="xs"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            hasBorder
+            layout="horizontal"
+            title={i18n.translate('xpack.cloudConnected.serviceCards.synthetic.title', {
+              defaultMessage: 'Synthetic',
+            })}
+            description={i18n.translate('xpack.cloudConnected.serviceCards.synthetic.description', {
+              defaultMessage:
+                'Proactive, automated monitoring for apps and APIs—catch issues early, get deep diagnostics, and integrate easily.',
+            })}
+            titleSize="xs"
+            betaBadgeProps={{
+              label: i18n.translate('xpack.cloudConnected.serviceCards.synthetic.comingSoon', {
+                defaultMessage: 'COMING SOON',
+              }),
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <EuiCard
-        hasBorder
-        layout="horizontal"
-        title="Elastic Inference Service"
-        description="Tap into AI-powered search and chat—no ML model deployment or management needed. Fast, scalable, and hassle-free intelligent features."
-        titleSize="xs"
-      />
-      <EuiSpacer size="m" />
-
-      <EuiCard
-        hasBorder
-        layout="horizontal"
-        title="Synthetic"
-        description="Proactive, automated monitoring for apps and APIs—catch issues early, get deep diagnostics, and integrate easily."
-        titleSize="xs"
-        betaBadgeProps={{
-          label: 'COMING SOON',
-        }}
-      />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="popout" iconSide="right">
-            {LEARN_MORE}
+            {i18n.translate('xpack.cloudConnected.serviceCards.learnMore', {
+              defaultMessage: 'Learn more',
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </EuiFlexItem>
   );
 };
