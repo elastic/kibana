@@ -12,7 +12,6 @@ import {
   scrollToTop,
   scrollToBottom,
   scrollTo,
-  getScrollContainer,
   getViewportBoundaries,
   getScrollPosition,
 } from '@kbn/core-chrome-layout-utils';
@@ -76,12 +75,10 @@ export function initializeTrackPanel(
 
       untilLoaded(id).then(() => {
         if (scrollPosition$.value !== undefined) {
-          const container = getScrollContainer();
-          scrollTo({ top: scrollPosition$.value, behavior: 'smooth' }, container);
+          scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
           scrollPosition$.next(undefined);
         } else {
-          const container = getScrollContainer();
-          const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries(container);
+          const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries();
           const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 
           // only scroll if panel is not fully visible within the current viewport

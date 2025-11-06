@@ -9,32 +9,18 @@
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
-export type ScrollContainer = HTMLElement | Window;
-
-/**
- * Type guard to check if a scroll container is an HTMLElement.
- * @param container - The container to check
- * @returns true if the container is an HTMLElement
- */
-export const isAppScroll = (container: ScrollContainer): container is HTMLElement => {
-  return container instanceof HTMLElement || !isWindowScroll(container);
-};
-
-/**
- * Type guard to check if a scroll container is the window object.
- * @param container - The container to check
- * @returns true if the container is the window object
- */
-export const isWindowScroll = (container: ScrollContainer): container is Window => {
-  return container === window;
-};
+export type ScrollContainer = HTMLElement;
 
 /**
  * Gets the main scroll container element for the application.
- * @returns The scroll container element if it exists, otherwise the window object
+ * @returns The scroll container element (either the app scroll container or document.documentElement for window scroll)
  */
 export const getScrollContainer = (): ScrollContainer => {
-  return document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) || window;
+  const appScroll = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+  if (appScroll instanceof HTMLElement) {
+    return appScroll;
+  }
+  return document.documentElement;
 };
 
 /**
@@ -43,11 +29,7 @@ export const getScrollContainer = (): ScrollContainer => {
  * @returns The viewport height in pixels
  */
 export const getViewportHeight = (container: ScrollContainer = getScrollContainer()): number => {
-  if (isAppScroll(container)) {
-    return container.clientHeight;
-  } else {
-    return window.innerHeight;
-  }
+  return container.clientHeight;
 };
 
 /**
@@ -59,18 +41,11 @@ export const getViewportHeight = (container: ScrollContainer = getScrollContaine
 export const getViewportBoundaries = (
   container: ScrollContainer = getScrollContainer()
 ): { top: number; bottom: number } => {
-  if (isAppScroll(container)) {
-    const rect = container.getBoundingClientRect();
-    return {
-      top: rect.top,
-      bottom: rect.top + container.clientHeight,
-    };
-  } else {
-    return {
-      top: 0,
-      bottom: window.innerHeight,
-    };
-  }
+  const rect = container.getBoundingClientRect();
+  return {
+    top: rect.top,
+    bottom: rect.top + container.clientHeight,
+  };
 };
 
 /**
@@ -79,16 +54,11 @@ export const getViewportBoundaries = (
  * @returns The current vertical scroll position in pixels
  */
 export const getScrollPosition = (container: ScrollContainer = getScrollContainer()): number => {
-  if (isAppScroll(container)) {
-    return container.scrollTop;
-  } else {
-    return window.scrollY;
-  }
+  return container.scrollTop;
 };
 
 /**
  * Scrolls a container to a specific vertical position.
- * Handles both HTMLElement and Window scroll targets transparently.
  * @param opts - Scroll options
  * @param opts.top - The vertical position to scroll to in pixels
  * @param opts.behavior - The scroll behavior ('auto' or 'smooth'). Default is 'auto'
@@ -101,11 +71,7 @@ export const scrollTo = (
   },
   container: ScrollContainer = getScrollContainer()
 ) => {
-  if (isAppScroll(container)) {
-    container.scrollTo({ top: opts.top, behavior: opts.behavior });
-  } else {
-    window.scrollTo({ top: opts.top, behavior: opts.behavior });
-  }
+  container.scrollTo({ top: opts.top, behavior: opts.behavior });
 };
 
 /**
@@ -135,8 +101,50 @@ export const scrollToBottom = (
   } = {},
   container: ScrollContainer = getScrollContainer()
 ) => {
-  const scrollHeight = isAppScroll(container)
-    ? container.scrollHeight
-    : document.documentElement.scrollHeight;
-  scrollTo({ top: scrollHeight, behavior: opts.behavior }, container);
+  scrollTo({ top: container.scrollHeight, behavior: opts.behavior }, container);
+};
+
+/**
+ * Gets all scroll dimensions of a container at once for efficiency.
+ * @param container - The container to measure. Defaults to the main application scroll container
+ * @returns An object with scrollTop, scrollHeight, and clientHeight
+ */
+export const getScrollDimensions = (
+  container: ScrollContainer = getScrollContainer()
+): { scrollTop: number; scrollHeight: number; clientHeight: number } => {
+  return {
+    scrollTop: container.scrollTop,
+    scrollHeight: container.scrollHeight,
+    clientHeight: container.clientHeight,
+  };
+};
+
+/**
+ * Scrolls a container by a relative amount.
+ * @param opts - Scroll options
+ * @param opts.top - The number of pixels to scroll (positive = down, negative = up)
+ * @param opts.behavior - The scroll behavior ('auto' or 'smooth'). Default is 'auto'
+ * @param container - The container to scroll. Defaults to the main application scroll container
+ */
+export const scrollBy = (
+  opts: {
+    top: number;
+    behavior?: ScrollBehavior;
+  },
+  container: ScrollContainer = getScrollContainer()
+) => {
+  container.scrollBy({
+    top: opts.top,
+    behavior: opts.behavior,
+  });
+};
+
+/**
+ * Detects if a scroll container has reached the bottom of its scrollable area.
+ * @param container - The container to check. Defaults to the main application scroll container
+ * @returns true if the container is scrolled to the bottom, false otherwise
+ */
+export const isAtBottomOfPage = (container: ScrollContainer = getScrollContainer()): boolean => {
+  const { scrollTop, scrollHeight, clientHeight } = getScrollDimensions(container);
+  return scrollHeight - clientHeight - scrollTop <= 1; // Allow 1px tolerance
 };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getScrollDimensions, isAtBottomOfPage } from '../../utils/scroll_container';
+import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-utils';
 import type { GridLayoutStateManager } from '../../types';
 import { updateClientY } from '../keyboard_utils';
 import type { UserKeyboardEvent } from '../sensors/keyboard/types';
@@ -33,14 +33,14 @@ export const getNextKeyboardPosition = (
 
   switch (ev.code) {
     case KeyboardCode.Down: {
-      const bottomOfPageReached = isAtBottomOfPage(scrollContainer);
+      const bottomOfPageReached = isAtBottomOfPage();
 
       // check if next key will cross the bottom edge
       // if we're at the bottom of the page, the handle can go down even more so we can reorder with the last row
       const bottomMaxPosition = bottomOfPageReached
         ? handlePosition.clientY + stepY
         : handlePosition.clientY + 2 * stepY;
-      const { clientHeight } = getScrollDimensions(scrollContainer);
+      const { clientHeight } = getScrollDimensions();
       const isCloseToBottom = bottomMaxPosition > clientHeight;
 
       return {

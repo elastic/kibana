@@ -13,9 +13,10 @@ export {
   scrollTo,
   scrollToTop,
   scrollToBottom,
-  isAppScroll,
-  isWindowScroll,
   getViewportHeight,
   getViewportBoundaries,
   getScrollPosition,
+  getScrollDimensions,
+  scrollBy,
+  isAtBottomOfPage,
 } from './src/scroll';

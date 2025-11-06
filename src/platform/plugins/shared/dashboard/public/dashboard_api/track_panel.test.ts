@@ -30,7 +30,13 @@ describe('track panel', () => {
     scrollToBottom,
   } = initializeTrackPanel(async (id: string) => undefined, dashboardContainerRef$);
 
-  const scrollToSpy = jest.spyOn(window, 'scrollTo');
+  document.documentElement.scrollTop = 100;
+  document.documentElement.scrollTo = jest.fn();
+  Object.defineProperty(document.documentElement, 'clientHeight', {
+    configurable: true,
+    value: 600,
+  });
+  const scrollToSpy = jest.spyOn(document.documentElement, 'scrollTo');
 
   afterAll(() => {
     jest.restoreAllMocks();
@@ -38,7 +44,6 @@ describe('track panel', () => {
 
   describe('expand panel', () => {
     it('should expand the panel', () => {
-      window.scrollY = 100;
       expandPanel('expanded-panel-id');
       expect(expandedPanelId$.value).toBe('expanded-panel-id');
       expect(scrollPosition$.value).toBe(100);
@@ -91,7 +96,6 @@ describe('track panel', () => {
           } as DOMRect)
       );
       mockPanelRef.scrollIntoView = jest.fn();
-      window.innerHeight = 600;
       expect(scrollPosition$.value).toBe(undefined);
 
       await scrollToPanel(mockPanelRef);
@@ -114,7 +118,6 @@ describe('track panel', () => {
           } as DOMRect)
       );
       mockPanelRef.scrollIntoView = jest.fn();
-      window.innerHeight = 600;
       expect(scrollPosition$.value).toBe(undefined);
 
       await scrollToPanel(mockPanelRef);
@@ -138,7 +141,6 @@ describe('track panel', () => {
           } as DOMRect)
       );
       mockPanelRef.scrollIntoView = jest.fn();
-      window.innerHeight = 600;
 
       await scrollToPanel(mockPanelRef);
       expect(mockPanelRef.getBoundingClientRect).toHaveBeenCalled();
