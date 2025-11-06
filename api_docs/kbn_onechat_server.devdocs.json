@@ -244,6 +244,14 @@
                     "pluginId": "@kbn/onechat-common",
                     "scope": "common",
                     "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.ThinkingCompleteEvent",
+                    "text": "ThinkingCompleteEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
                     "section": "def-common.RoundCompleteEvent",
                     "text": "RoundCompleteEvent"
                   }
@@ -2559,6 +2567,14 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ThinkingCompleteEvent",
+                "text": "ThinkingCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.RoundCompleteEvent",
                 "text": "RoundCompleteEvent"
               }
@@ -2972,6 +2988,14 @@
                 "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.MessageCompleteEvent",
                 "text": "MessageCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ThinkingCompleteEvent",
+                "text": "ThinkingCompleteEvent"
               },
               " | ",
               {
