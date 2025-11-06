@@ -316,35 +316,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clearEditorText();
 
         // Enter a URL that will be detected as a link
-        await PageObjects.console.enterText('# https://www.elastic.co\n');
-        await PageObjects.console.enterText('GET _search');
+        await PageObjects.console.enterText('# https://www.elastic.co');
 
-        // Give Monaco time to detect and decorate the link
-        await PageObjects.common.sleep(1000);
-
-        // Verify the text was entered
-        const editorText = await PageObjects.console.getEditorText();
-        expect(editorText).to.contain('https://www.elastic.co');
+        // Wait for Monaco to detect and decorate the link
+        await retry.waitFor('link to be detected by Monaco', async () => {
+          const inputEditor = await testSubjects.find('consoleMonacoEditor');
+          const detectedLinks = await inputEditor.findAllByCssSelector('.detected-link');
+          return detectedLinks.length > 0;
+        });
 
         // Get the input editor container
         const inputEditor = await testSubjects.find('consoleMonacoEditor');
 
-        // Find the view-line containing the URL
-        const viewLines = await inputEditor.findAllByClassName('view-line');
-        expect(viewLines.length).to.be.greaterThan(0);
+        // Find the detected link element that Monaco created
+        const detectedLink = await inputEditor.findByCssSelector('.detected-link');
 
-        // Get the first line (which contains our URL)
-        const firstLine = viewLines[0];
-
-        // Perform Cmd/Ctrl+Click on the URL using Selenium Actions API
+        // Perform Cmd/Ctrl+Click on the detected link
+        // Following the pattern from ES|QL tests where we use moveMouseTo then click
         const modifierKey = browser.keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-        await browser
-          .getActions()
-          .keyDown(modifierKey)
-          .move({ origin: firstLine._webElement })
-          .click()
-          .keyUp(modifierKey)
-          .perform();
+
+        await browser.getActions().keyDown(modifierKey).perform();
+
+        await detectedLink.moveMouseTo();
+        await detectedLink.clickMouseButton();
+
+        await browser.getActions().keyUp(modifierKey).perform();
 
         // Wait for a new tab to open
         await retry.waitFor('new tab to open after clicking link', async () => {
