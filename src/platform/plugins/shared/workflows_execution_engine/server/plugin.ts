@@ -26,7 +26,7 @@ import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import { resumeWorkflow, runWorkflow } from './execution_functions';
-import { LogsRepository } from './repositories/logs_repository/logs_repository';
+import { LogsRepository } from './repositories/logs_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -42,6 +42,7 @@ import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
+import { createIndexes } from '../common';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -57,6 +58,7 @@ export class WorkflowsExecutionEnginePlugin
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
   private setupDependencies?: SetupDependencies;
+  private initializePromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -87,10 +89,11 @@ export class WorkflowsExecutionEnginePlugin
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           const taskAbortController = new AbortController();
           return {
-            async run() {
+            run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await this.initialize(coreStart);
               const { actions, taskManager } = pluginsStart;
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
 
@@ -98,7 +101,7 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
               const stepExecutionRepository = new StepExecutionRepository(esClient);
-              const logsRepository = new LogsRepository(esClient, logger);
+              const logsRepository = new LogsRepository(esClient);
 
               await runWorkflow({
                 workflowRunId,
@@ -117,7 +120,7 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
               });
             },
-            async cancel() {
+            cancel: async () => {
               taskAbortController.abort();
             },
           };
@@ -136,17 +139,18 @@ export class WorkflowsExecutionEnginePlugin
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           const taskAbortController = new AbortController();
           return {
-            async run() {
+            run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await this.initialize(coreStart);
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
               const { actions, taskManager } = pluginsStart;
               // Get ES client from core services (guaranteed to be available at task execution time)
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
               const stepExecutionRepository = new StepExecutionRepository(esClient);
-              const logsRepository = new LogsRepository(esClient, logger);
+              const logsRepository = new LogsRepository(esClient);
 
               await resumeWorkflow({
                 workflowRunId,
@@ -165,7 +169,7 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
               });
             },
-            async cancel() {
+            cancel: async () => {
               taskAbortController.abort();
             },
           };
@@ -188,13 +192,14 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, any>,
       request?: any
     ) => {
+      await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
 
       // Get ES client and create repository for this execution
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const stepExecutionRepository = new StepExecutionRepository(esClient);
-      const logsRepository = new LogsRepository(esClient, this.logger);
+      const logsRepository = new LogsRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution: Partial<EsWorkflowExecution> = {
@@ -281,6 +286,7 @@ export class WorkflowsExecutionEnginePlugin
       stepId: string,
       contextOverride: Record<string, any>
     ): Promise<ExecuteWorkflowStepResponse> => {
+      await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
 
       // Get ES client and create repository for this execution
@@ -329,6 +335,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const cancelWorkflowExecution = async (workflowExecutionId: string, spaceId: string) => {
+      await this.initialize(coreStart);
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -376,4 +383,14 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {}
+
+  private async initialize(coreStart: CoreStart): Promise<void> {
+    if (!this.initializePromise) {
+      this.initializePromise = createIndexes({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
+    }
+    await this.initializePromise;
+  }
 }

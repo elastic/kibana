@@ -45,6 +45,9 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     width: 100%;
     height: 100%;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+    display: flex;
+    justify-content: center;
+    align-items: center;
   `;
 
   const labels = {

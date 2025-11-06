@@ -55,7 +55,6 @@ const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue =
       trackUiMetric: jest.fn() as any,
       http: {} as any,
       autocompleteInfo: {} as any,
-      dataViews: {} as any,
       data: {} as any,
       licensing: {} as any,
       application: {} as any,

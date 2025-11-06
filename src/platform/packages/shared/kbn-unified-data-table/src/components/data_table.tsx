@@ -982,6 +982,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           onResize,
           sortedColumns,
           disableCellActions,
+          dataGridRef,
         }),
       [
         cellActionsHandling,

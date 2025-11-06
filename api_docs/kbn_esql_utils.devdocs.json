@@ -2557,39 +2557,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.isQueryWrappedByPipes",
-        "type": "Function",
-        "tags": [],
-        "label": "isQueryWrappedByPipes",
-        "description": [],
-        "signature": [
-          "(query: string) => boolean"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.isQueryWrappedByPipes.$1",
-            "type": "string",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.mapVariableToColumn",
         "type": "Function",
         "tags": [],

@@ -10,7 +10,7 @@ import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
 import type { ObltApiServicesFixture, ObltTestFixtures, ObltWorkerFixtures } from './types';
-import { sloDataFixture } from './worker';
+import { sloDataFixture, profilingSetupFixture } from './worker';
 
 const baseFixture = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
   pageObjects: async (
@@ -43,4 +43,4 @@ const baseFixture = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
 /**
  * Should be used for the test spec files executed sequentially.
  */
-export const test = mergeTests(baseFixture, sloDataFixture);
+export const test = mergeTests(baseFixture, sloDataFixture, profilingSetupFixture);

@@ -645,10 +645,12 @@ export class SearchSource {
       case 'filter':
         return addToRoot(
           'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters || []).concat(val)
+          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
         );
+      case 'nonHighlightingFilters':
+        return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));
       case 'query':
-        return addToRoot(key, (data.query || []).concat(val));
+        return addToRoot(key, (data.query ?? []).concat(val));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -791,6 +793,7 @@ export class SearchSource {
     const bodyParams = omit(searchRequest, [
       'index',
       'filters',
+      'nonHighlightingFilters',
       'highlightAll',
       'fieldsFromSource',
       'body',
@@ -879,13 +882,38 @@ export class SearchSource {
       });
     }
 
+    // Evaluate filters if they are functions
+    const filters =
+      typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters;
+
+    const nonHighlightingFilters = searchRequest.nonHighlightingFilters ?? [];
+
+    // Merge filters and nonHighlightingFilters for the main query
+    const allFilters = [
+      ...(Array.isArray(filters) ? filters : filters ? [filters] : []),
+      ...nonHighlightingFilters,
+    ];
+
     const builtQuery = this.getBuiltEsQuery({
       index: searchRequest.index,
       query: searchRequest.query,
-      filters: searchRequest.filters,
+      filters: allFilters,
       getConfig,
       sort: body.sort,
     });
+
+    // Build highlight query using only filters (not nonHighlightingFilters)
+    const filterArray = Array.isArray(filters) ? filters : filters ? [filters] : [];
+    const highlightQuery =
+      searchRequest.highlightAll && filterArray.length > 0
+        ? this.getBuiltEsQuery({
+            index: searchRequest.index,
+            query: searchRequest.query,
+            filters: filterArray,
+            getConfig,
+            sort: body.sort,
+          })
+        : undefined;
 
     const bodyToReturn = {
       ...body,
@@ -893,7 +921,12 @@ export class SearchSource {
       query: builtQuery,
       highlight:
         searchRequest.highlightAll && builtQuery
-          ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
+          ? highlightQuery
+            ? {
+                ...getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT)),
+                highlight_query: highlightQuery,
+              }
+            : getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
           : undefined,
       // remove _source, since everything's coming from fields API, scripted, or stored fields
       _source: fieldListProvided && !sourceFieldsProvided ? false : body._source,
@@ -914,7 +947,7 @@ export class SearchSource {
     };
 
     return omitByIsNil({
-      ...omit(searchRequest, ['query', 'filters', 'fieldsFromSource']),
+      ...omit(searchRequest, ['query', 'filters', 'nonHighlightingFilters', 'fieldsFromSource']),
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(searchRequest.index),
       highlightAll:
@@ -1091,6 +1124,7 @@ export class SearchSource {
   public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
+      nonHighlightingFilters: originalNonHighlightingFilters,
       aggs: searchSourceAggs,
       parent,
       size: _size, // omit it
@@ -1113,6 +1147,12 @@ export class SearchSource {
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
         filter: filters,
+      };
+    }
+    if (originalNonHighlightingFilters) {
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        nonHighlightingFilters: originalNonHighlightingFilters,
       };
     }
     if (searchSourceAggs) {

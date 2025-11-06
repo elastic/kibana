@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -297,6 +298,8 @@ export class ChromeService {
     // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
     // we load the user profile to check if the user opted out of the new solution navigation.
     const chromeStyleSubject$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
+
+    const globalFooter$ = new BehaviorSubject<ReactNode>(null);
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -667,6 +670,12 @@ export class ChromeService {
       setBadge: (badge: ChromeBadge) => {
         badge$.next(badge);
       },
+
+      setGlobalFooter: (node) => {
+        globalFooter$.next(node);
+      },
+
+      getGlobalFooter$: () => globalFooter$.pipe(takeUntil(this.stop$)),
 
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 

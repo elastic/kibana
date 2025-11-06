@@ -11,9 +11,10 @@ import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 
 export async function analyzeTikaFile(
   data: ArrayBuffer,
-  fileUpload: FileUploadStartApi
+  fileUpload: FileUploadStartApi,
+  signal?: AbortSignal
 ): Promise<{ standardResults: AnalysisResult; tikaResults: PreviewTikaResponse }> {
-  const resp = await fileUpload.previewTikaFile(data);
+  const resp = await fileUpload.previewTikaFile(data, signal);
   const numLinesAnalyzed = (resp.content.match(/\n/g) || '').length + 1;
 
   return {

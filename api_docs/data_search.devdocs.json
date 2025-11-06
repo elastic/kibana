@@ -2352,15 +2352,7 @@
                 "section": "def-common.ISearchOptions",
                 "text": "ISearchOptions"
               },
-              ") => Promise<string>; trackId: (searchRequest: ",
-              {
-                "pluginId": "@kbn/search-types",
-                "scope": "common",
-                "docId": "kibKbnSearchTypesPluginApi",
-                "section": "def-common.IKibanaSearchRequest",
-                "text": "IKibanaSearchRequest"
-              },
-              "<any>, searchId: string, options: ",
+              ") => Promise<string>; trackId: (searchId: string, options: ",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -30036,6 +30028,29 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.SearchSourceFields.nonHighlightingFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "nonHighlightingFilters",
+            "description": [
+              "\nFilters that should not trigger highlighting.\nThese filters will be included in the search query for document retrieval,\nbut excluded from the highlight_query parameter in Elasticsearch.\n{@link Filter}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.SearchSourceFields.sort",
             "type": "CompoundType",
             "tags": [],
@@ -34307,6 +34322,14 @@
             "text": "AggregateQuery"
           },
           " | undefined; filter?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; nonHighlightingFilters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

@@ -16,6 +16,7 @@ import type {
   GridSectionData,
   MainSection,
 } from './grid_section';
+import type { ScrollContainer } from './utils/scroll_container';
 
 /**
  * The settings for how the grid should be rendered
@@ -63,6 +64,7 @@ export interface GridLayoutStateManager {
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
+  scrollContainer$: BehaviorSubject<ScrollContainer>;
 
   activePanelEvent$: BehaviorSubject<ActivePanelEvent | undefined>;
   activeSectionEvent$: BehaviorSubject<ActiveSectionEvent | undefined>;

@@ -20,7 +20,8 @@ export const createDelayFn =
   <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
     return () => {
       return state.retryDelay > 0
-        ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
+        ? // we need to use the standard setTimeout here, this way we can alter its behavior with jest.useFakeTimers()
+          new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
         : fn();
     };
   };

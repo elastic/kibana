@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTreeView,
   logicalCSS,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -32,7 +33,6 @@ import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/wor
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
-import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 
 function convertTreeToEuiTreeViewItems(
@@ -40,38 +40,41 @@ function convertTreeToEuiTreeViewItems(
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
   euiTheme: EuiThemeComputed,
   selectedId: string | null,
-  onClickHandler: (stepExecutionId: string) => void
+  onSelectStepExecution: (stepExecutionId: string) => void
 ): EuiTreeViewProps['items'] {
-  const onClickFn = onClickHandler;
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
-    const status = stepExecution?.status || null;
-    return {
-      ...item,
-      id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      icon: <StepIcon stepType={item.stepType} executionStatus={status} />,
-      css:
-        status && isDangerousStatus(status)
-          ? css`
-              &,
-              &:active,
-              &:focus {
-                background-color: ${getExecutionStatusColors(euiTheme, status).backgroundColor};
-              }
+    const status = stepExecution?.status;
+    const selected = selectedId === stepExecution?.id;
 
-              &:hover {
-                background-color: ${euiTheme.colors.backgroundLightDanger};
-              }
-            `
-          : undefined,
+    const selectStepExecution: React.MouseEventHandler = (e) => {
+      // Prevent the click event from bubbling up to the tree view item so that the tree view item is not expanded/collapsed when selected
+      e.preventDefault();
+      e.stopPropagation();
+      if (stepExecution?.id) {
+        onSelectStepExecution(stepExecution.id);
+      }
+    };
+
+    return {
+      id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
+      css: getStatusCss({ status, selected }, euiTheme),
+      icon: (
+        <StepIcon
+          stepType={item.stepType}
+          executionStatus={status ?? null}
+          onClick={selectStepExecution}
+        />
+      ),
       label: (
         <StepExecutionTreeItemLabel
           stepId={item.stepId}
+          stepType={item.stepType}
+          selected={selected}
           status={status}
           executionIndex={item.executionIndex}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
-          stepType={item.stepType}
-          selected={selectedId === stepExecution?.id}
+          onClick={selectStepExecution}
         />
       ),
       children:
@@ -81,18 +84,19 @@ function convertTreeToEuiTreeViewItems(
               stepExecutionMap,
               euiTheme,
               selectedId,
-              onClickFn
+              onSelectStepExecution
             )
           : undefined,
       callback:
-        // TODO: for nodes with children, we don't want other onClick behavior besides expanding/collapsing
+        // collapse/expand the tree view item when the button is clicked
         () => {
           let toOpen = item.stepExecutionId;
           if (!toOpen && item.children.length) {
             toOpen = item.children[0].stepExecutionId;
           }
-          onClickFn(toOpen ?? '');
-          // string is expected by EuiTreeView for some reason
+          if (toOpen) {
+            onSelectStepExecution(toOpen);
+          }
           return toOpen ?? '';
         },
     };
@@ -289,4 +293,34 @@ const componentStyles = {
       }
     }
   `,
+};
+
+const getStatusCss = (
+  { status, selected }: { status?: ExecutionStatus; selected?: boolean },
+  euiTheme: EuiThemeComputed
+) => {
+  if (!status) {
+    return;
+  }
+  let background = euiTheme.colors.backgroundLightPrimary;
+  if (isDangerousStatus(status)) {
+    background = euiTheme.colors.backgroundBaseDanger;
+  }
+
+  if (selected) {
+    return css`
+      &,
+      &:active,
+      &:focus,
+      &:hover {
+        background-color: ${background};
+      }
+    `;
+  }
+
+  return css`
+    &:hover {
+      background-color: ${transparentize(background, 0.4)};
+    }
+  `;
 };

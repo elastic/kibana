@@ -8,7 +8,7 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { WorkflowLogEvent } from '../repositories/logs_repository/logs_repository';
+import type { WorkflowLogEvent } from '../repositories/logs_repository';
 
 export interface ContextDependencies {
   cloudSetup: CloudSetup | undefined;

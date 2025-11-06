@@ -1568,6 +1568,7 @@ describe('Response actions history', () => {
         'scan. To check this option, press Enter.',
         'runscript. To check this option, press Enter.',
         'cancel. To check this option, press Enter.',
+        'memory-dump. To check this option, press Enter.',
       ]);
     });
 
@@ -1599,6 +1600,7 @@ describe('Response actions history', () => {
         'upload. To check this option, press Enter.',
         'scan. To check this option, press Enter.',
         'runscript. To check this option, press Enter.',
+        'memory-dump. To check this option, press Enter.',
       ]);
     });
 

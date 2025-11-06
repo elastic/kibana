@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { join } from 'path';
 import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
@@ -14,8 +15,7 @@ import { getNextRollingTime } from '@kbn/core-logging-server-internal';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
 
 const flushDelay = 2000;
-const delay = (waitInMs: number) => new Promise((resolve) => setTimeout(resolve, waitInMs));
-const flush = async () => delay(flushDelay);
+const flush = async () => timer(flushDelay);
 
 function createRoot(appenderConfig: any) {
   return createkbnTestServerRoot({
@@ -241,7 +241,7 @@ describe('RollingFileAppender', () => {
       logger.info(message(3));
       logger.info(message(4));
 
-      await delay(2500);
+      await timer(2500);
 
       // roll - 'kibana-1.log'
       logger.info(message(5));
@@ -288,7 +288,7 @@ describe('RollingFileAppender', () => {
       const waitForNextRollingTime = () => {
         const now = Date.now();
         const nextRolling = getNextRollingTime(now, moment.duration(1, 'second'), true);
-        return delay(nextRolling - now + 1);
+        return timer(nextRolling - now + 1);
       };
 
       // wait for a rolling time boundary to minimize the risk to have logs emitted in different intervals

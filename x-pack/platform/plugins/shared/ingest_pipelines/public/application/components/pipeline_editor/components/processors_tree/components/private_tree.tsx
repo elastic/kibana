@@ -11,6 +11,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import List from 'react-virtualized/dist/commonjs/List';
 import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import { DropSpecialLocations } from '../../../constants';
 import type { ProcessorInternal, ProcessorSelector } from '../../../types';
@@ -141,7 +142,10 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   // A list optimized to handle very many items.
   const renderVirtualList = () => {
     return (
-      <WindowScroller ref={windowScrollerRef} scrollElement={window}>
+      <WindowScroller
+        ref={windowScrollerRef}
+        scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? window}
+      >
         {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
           return (
             <AutoSizer disableHeight>

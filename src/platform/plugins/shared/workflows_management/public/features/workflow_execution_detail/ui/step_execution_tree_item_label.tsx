@@ -18,11 +18,12 @@ import { getStatusLabel } from '../../../shared/translations';
 
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;
-  status: ExecutionStatus | null;
+  status?: ExecutionStatus;
   executionIndex: number;
   executionTimeMs: number | null;
   stepType: string;
   selected: boolean;
+  onClick?: React.MouseEventHandler;
 }
 
 export function StepExecutionTreeItemLabel({
@@ -32,6 +33,7 @@ export function StepExecutionTreeItemLabel({
   executionTimeMs,
   stepType,
   selected,
+  onClick,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
   const isDangerous = status && isDangerousStatus(status);
@@ -44,6 +46,7 @@ export function StepExecutionTreeItemLabel({
       justifyContent="spaceBetween"
       responsive={false}
       css={styles.label}
+      onClick={onClick}
     >
       <EuiFlexItem
         css={[
@@ -84,9 +87,11 @@ const componentStyles = {
     whiteSpace: 'nowrap',
     textAlign: 'left',
   }),
-  selectedStepName: css({
-    fontWeight: 'bold',
-  }),
+  selectedStepName: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: 'bold',
+      color: euiTheme.colors.textPrimary,
+    }),
   dangerousStepName: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.danger,

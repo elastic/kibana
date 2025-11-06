@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpsgenieCloseAlertExample } from '../../../server/connector_types/opsgenie/test_schema';
+import { OpsgenieCloseAlertExample } from '@kbn/connector-schemas/opsgenie/schemas/test_schema';
 import { isPartialCloseAlertSchema } from './close_alert_schema';
 
 describe('close_alert_schema', () => {

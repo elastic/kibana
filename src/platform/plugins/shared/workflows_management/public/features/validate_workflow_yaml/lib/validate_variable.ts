@@ -93,7 +93,7 @@ export function validateVariable(
     };
   }
 
-  const refSchema = getSchemaAtPath(context, parsedPath.propertyPath);
+  const { schema: refSchema } = getSchemaAtPath(context, parsedPath.propertyPath);
 
   if (!refSchema) {
     return {

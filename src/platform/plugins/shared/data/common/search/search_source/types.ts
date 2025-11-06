@@ -81,6 +81,13 @@ export interface SearchSourceFields {
    */
   filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
   /**
+   * Filters that should not trigger highlighting.
+   * These filters will be included in the search query for document retrieval,
+   * but excluded from the highlight_query parameter in Elasticsearch.
+   * {@link Filter}
+   */
+  nonHighlightingFilters?: Filter[];
+  /**
    * {@link EsQuerySortValue}
    */
   sort?: EsQuerySortValue | EsQuerySortValue[];
@@ -131,6 +138,13 @@ export type SerializedSearchSourceFields = {
    * {@link Filter}
    */
   filter?: Filter[];
+  /**
+   * Filters that should not trigger highlighting.
+   * These filters will be included in the search query for document retrieval,
+   * but excluded from the highlight_query parameter in Elasticsearch.
+   * {@link Filter}
+   */
+  nonHighlightingFilters?: Filter[];
   /**
    * {@link EsQuerySortValue}
    */

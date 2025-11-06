@@ -39,7 +39,10 @@ export function validateToolCalls({
     const tool = tools?.[toolCall.function.name];
 
     if (!tool) {
-      throw createToolNotFoundError(toolCall.function.name);
+      throw createToolNotFoundError({
+        name: toolCall.function.name,
+        args: toolCall.function.arguments,
+      });
     }
 
     const toolSchema = tool.schema ?? { type: 'object', properties: {} };

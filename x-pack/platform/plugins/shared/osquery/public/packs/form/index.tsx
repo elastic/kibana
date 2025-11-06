@@ -51,12 +51,14 @@ interface PackFormProps {
   defaultValue?: PackItem;
   editMode?: boolean;
   isReadOnly?: boolean;
+  packId?: string;
 }
 
 const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
   editMode = false,
   isReadOnly = false,
+  packId,
 }) => {
   const [shardsToggleState, setShardsToggleState] =
     useState<EuiAccordionProps['forceState']>('closed');
@@ -70,7 +72,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
-  const cancelButtonProps = useRouterNavigate(`packs/${editMode ? defaultValue?.id : ''}`);
+  const cancelButtonProps = useRouterNavigate(
+    `packs/${editMode ? packId ?? defaultValue?.id : ''}`
+  );
 
   const { mutateAsync: createAsync } = useCreatePack({
     withRedirect: true,

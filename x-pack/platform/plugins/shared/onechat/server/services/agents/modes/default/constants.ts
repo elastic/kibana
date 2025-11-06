@@ -10,6 +10,7 @@ export const steps = {
   executeTool: 'executeTool',
   prepareToAnswer: 'prepareToAnswer',
   answerAgent: 'answerAgent',
+  finalize: 'finalize',
 };
 
 export const tags = {

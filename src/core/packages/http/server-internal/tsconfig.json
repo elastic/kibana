@@ -35,6 +35,8 @@
     "@kbn/logging-mocks",
     "@kbn/router-to-openapispec",
     "@kbn/core-base-server-mocks",
+    "@kbn/core-doc-links-server",
+    "@kbn/core-doc-links-server-mocks",
   ],
   "exclude": [
     "target/**/*",

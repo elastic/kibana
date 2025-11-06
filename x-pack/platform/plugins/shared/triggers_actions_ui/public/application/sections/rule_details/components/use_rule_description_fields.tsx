@@ -6,13 +6,24 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiBadge, EuiCodeBlock, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { HttpResponse, HttpSetup } from '@kbn/core/public';
+import { css } from '@emotion/react';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common/data_views/data_view';
+import { useKibana } from '../../../../common/lib/kibana';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';
 import type { PrebuildFieldsMap, RuleDefinitionProps } from '../../../../types';
+
+const RULE_DESCRIPTION_GET_DATA_VIEW_QUERY_KEY = 'ruleDescriptionGetDataView';
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { children: React.ReactNode }) {
@@ -38,10 +49,10 @@ const AsyncContent = <T,>({
   children,
 }: {
   queryKey: string[];
-  queryFn: () => Promise<HttpResponse<T>>;
+  queryFn: () => Promise<T>;
   children: (data: T) => React.ReactNode;
 }) => {
-  const { data } = useQuery<HttpResponse<T>, Error>(queryKey, queryFn, {
+  const { data } = useQuery<T, Error>(queryKey, queryFn, {
     suspense: true,
   });
   return <>{children(data as T)}</>;
@@ -53,7 +64,7 @@ export const AsyncField = <T,>({
   children,
 }: {
   queryKey: string[];
-  queryFn: () => Promise<HttpResponse<T>>;
+  queryFn: () => Promise<T>;
   children: (data: T) => React.ReactNode;
 }) => {
   return (
@@ -68,6 +79,10 @@ export const AsyncField = <T,>({
 };
 
 const IndexPattern = ({ patterns }: { patterns: string[] }) => {
+  if (patterns.length === 0) {
+    return <span>-</span>;
+  }
+
   return (
     <EuiFlexGroup
       responsive={false}
@@ -76,9 +91,16 @@ const IndexPattern = ({ patterns }: { patterns: string[] }) => {
       data-test-subj="rule-description-index-patterns"
     >
       {patterns.map((pattern) => (
-        <EuiBadge key={pattern} color="hollow">
-          {pattern}
-        </EuiBadge>
+        <EuiFlexItem grow={false} key={pattern}>
+          <EuiBadge
+            color="hollow"
+            css={css`
+              max-width: 180px;
+            `}
+          >
+            <span className="eui-textTruncate">{pattern}</span>
+          </EuiBadge>
+        </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );
@@ -96,13 +118,7 @@ const CodeBlock = ({ children, border }: { children: React.ReactNode; border: st
   );
 };
 
-export const createPrebuildFields = ({
-  border,
-  http,
-}: {
-  border: string;
-  http: HttpSetup | undefined;
-}): PrebuildFieldsMap => {
+export const createPrebuildFields = ({ border }: { border: string }): PrebuildFieldsMap => {
   return {
     [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: (patterns: string[]) => ({
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.indexPatternTitle', {
@@ -128,50 +144,73 @@ export const createPrebuildFields = ({
       }),
       description: <span>{id}</span>,
     }),
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: (indexId: string) => ({
-      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.dataViewIndexPatternTitle', {
-        defaultMessage: 'Data view index patterns',
-      }),
-      description: (
-        <AsyncField<
-          | {
-              result: {
-                result: { item: { id: string; attributes: { title: string; name: string } } };
-              };
-            }
-          | undefined
-        >
-          queryKey={['esQueryRuleDescriptionDataViewDetails']}
-          queryFn={() => {
-            return http!.post('/api/content_management/rpc/get', {
-              body: JSON.stringify({
-                contentTypeId: 'index-pattern',
-                id: indexId,
-                version: '1',
-              }),
-            });
-          }}
-        >
-          {(data) => {
-            if (!data) {
-              return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
-            }
-
-            try {
-              const dataViewIndexPatterns = data.result.result.item.attributes.title.split(',');
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: (dataViewIndexId: string) => {
+      const { dataViews } = useKibana().services;
+      return {
+        title: i18n.translate('xpack.triggersActionsUI.ruleDetails.dataViewIndexPatternTitle', {
+          defaultMessage: 'Data view index patterns',
+        }),
+        description: (
+          <AsyncField<DataView>
+            queryKey={[RULE_DESCRIPTION_GET_DATA_VIEW_QUERY_KEY]}
+            queryFn={() => {
+              return dataViews.get(dataViewIndexId);
+            }}
+          >
+            {(dataView) => {
+              if (!dataView) {
+                return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
+              }
 
               return (
                 <IndexPattern
-                  patterns={dataViewIndexPatterns}
+                  patterns={[dataView.getIndexPattern()]}
                   data-test-subj="description-detail-data-view-pattern"
                 />
               );
-            } catch (e) {
-              return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
-            }
-          }}
-        </AsyncField>
-      ),
+            }}
+          </AsyncField>
+        ),
+      };
+    },
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.QUERY_FILTERS]: ({ filters, dataViewId }) => {
+      const { dataViews } = useKibana().services;
+      return {
+        title: i18n.translate('xpack.triggersActionsUI.ruleDetails.queryFiltersTitle', {
+          defaultMessage: 'Filters',
+        }),
+        description: (
+          <AsyncField<DataView>
+            queryKey={[RULE_DESCRIPTION_GET_DATA_VIEW_QUERY_KEY]}
+            queryFn={() => {
+              return dataViews.get(dataViewId);
+            }}
+          >
+            {(dataView) => {
+              if (!dataView) {
+                return <div data-test-subj="description-detail-query-filter-error">-</div>;
+              }
+
+              return (
+                <EuiFlexGroup
+                  wrap
+                  responsive={false}
+                  gutterSize="xs"
+                  data-test-subj="description-detail-query-filter"
+                >
+                  <FilterItems filters={filters} indexPatterns={[dataView]} readOnly />
+                </EuiFlexGroup>
+              );
+            }}
+          </AsyncField>
+        ),
+      };
+    },
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.KQL_FILTERS]: (kql: string) => ({
+      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.kqlFiltersTitle', {
+        defaultMessage: 'Filter',
+      }),
+      description: <CodeBlock border={border}>{kql}</CodeBlock>,
     }),
   };
 };
@@ -183,7 +222,6 @@ export const useRuleDescriptionFields = ({
   rule: RuleDefinitionProps['rule'];
   ruleTypeRegistry: RuleDefinitionProps['ruleTypeRegistry'];
 }) => {
-  const { http } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
   const getDescriptionFields = useMemo(() => {
@@ -200,15 +238,14 @@ export const useRuleDescriptionFields = ({
 
     const prebuildFields = createPrebuildFields({
       border: euiTheme.border.thin as string,
-      http,
     });
 
     if (!prebuildFields) {
       return [];
     }
 
-    return getDescriptionFields({ rule, prebuildFields, http });
-  }, [getDescriptionFields, euiTheme.border.thin, http, rule]);
+    return getDescriptionFields({ rule, prebuildFields });
+  }, [getDescriptionFields, euiTheme.border.thin, rule]);
 
   return { descriptionFields };
 };

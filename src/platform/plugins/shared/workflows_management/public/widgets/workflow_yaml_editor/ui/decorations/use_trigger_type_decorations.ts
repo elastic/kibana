@@ -11,7 +11,7 @@ import { useEffect, useRef } from 'react';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { getTriggerNodesWithType } from '../../../../../common/lib/yaml_utils';
+import { getTriggerNodesWithType } from '../../../../../common/lib/yaml';
 
 interface UseTriggerTypeDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;

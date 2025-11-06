@@ -95,6 +95,11 @@ var IGNORE_WARNINGS = [
     code: 'DEP0128',
     messageContains: '@elastic/ebt/package.json',
   },
+  // YAML parser warning when testing invalid YAML with collection values as keys
+  {
+    messageContains:
+      'Keys with collection values will be stringified due to JS Object restrictions',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {

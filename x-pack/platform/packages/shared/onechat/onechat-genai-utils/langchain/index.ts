@@ -17,6 +17,7 @@ export {
   createReasoningEvent,
   createToolCallEvent,
   createToolResultEvent,
+  createThinkingCompleteEvent,
 } from './graph_events';
 export {
   extractTextContent,

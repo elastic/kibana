@@ -26,6 +26,12 @@ export interface SavedSearchComponentProps {
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
+  /**
+   * Filters that should not trigger highlighting.
+   * These filters will be included in the search query for document retrieval,
+   * but excluded from the highlight_query parameter in Elasticsearch.
+   */
+  nonHighlightingFilters?: Filter[];
   timestampField?: string;
   columns?: string[];
   height?: CSSProperties['height'];

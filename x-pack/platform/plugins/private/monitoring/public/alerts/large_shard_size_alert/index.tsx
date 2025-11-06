@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   RULE_DETAILS,
   RULE_LARGE_SHARD_SIZE,
@@ -18,7 +19,7 @@ import type { MonitoringConfig } from '../../types';
 import type { LazyExpressionProps } from '../components/param_details_form/lazy_expression';
 import { LazyExpression } from '../components/param_details_form/lazy_expression';
 
-interface ValidateOptions extends RuleTypeParams {
+export interface ValidateOptions extends RuleTypeParams {
   indexPattern: string;
 }
 
@@ -36,6 +37,21 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
   }
   validationResult.errors = errors;
   return validationResult;
+};
+
+export const getDescriptionFields: GetDescriptionFieldsFn<ValidateOptions> = ({
+  rule,
+  prebuildFields,
+}) => {
+  if (!rule || !prebuildFields) return [];
+
+  const fields = [prebuildFields.indexPattern([rule.params.indexPattern])];
+
+  if (rule.params.filterQueryText && typeof rule.params.filterQueryText === 'string') {
+    fields.push(prebuildFields.customQuery(rule.params.filterQueryText));
+  }
+
+  return fields;
 };
 
 export function createLargeShardSizeAlertType(
@@ -58,5 +74,6 @@ export function createLargeShardSizeAlertType(
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
+    getDescriptionFields,
   };
 }

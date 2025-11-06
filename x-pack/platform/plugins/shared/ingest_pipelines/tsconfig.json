@@ -42,7 +42,8 @@
     "@kbn/delete-managed-asset-callout",
     "@kbn/shared-ux-utility",
     "@kbn/ingest-pipelines-shared",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/core-chrome-layout-constants"
   ],
   "exclude": [
     "target/**/*",

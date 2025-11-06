@@ -207,4 +207,167 @@ describe('EnterIfNodeImpl', () => {
       `Syntax error in condition "invalid""condition" for step ${node.stepId}:`
     );
   });
+
+  describe('boolean evaluation with ${{ }} syntax', () => {
+    it('should use boolean value directly when ${{ }} evaluates to boolean true', async () => {
+      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+        {
+          id: 'thenNode',
+          type: 'enter-then-branch',
+          condition: '${{ inputs.isActive }}',
+        } as EnterConditionBranchNode,
+        {
+          id: 'elseNode',
+          type: 'enter-else-branch',
+        } as EnterConditionBranchNode,
+      ]);
+
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue(true);
+
+      await impl.run();
+
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('thenNode');
+      expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('evaluated to true')
+      );
+    });
+
+    it('should use boolean value directly when ${{ }} evaluates to boolean false', async () => {
+      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+        {
+          id: 'thenNode',
+          type: 'enter-then-branch',
+          condition: '${{ inputs.isActive }}',
+        } as EnterConditionBranchNode,
+        {
+          id: 'elseNode',
+          type: 'enter-else-branch',
+        } as EnterConditionBranchNode,
+      ]);
+
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue(false);
+
+      await impl.run();
+
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('elseNode');
+      expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('evaluated to false')
+      );
+    });
+
+    it('should handle undefined condition and default to false', async () => {
+      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+        {
+          id: 'thenNode',
+          type: 'enter-then-branch',
+          condition: '${{ inputs.undefinedValue }}',
+        } as EnterConditionBranchNode,
+        {
+          id: 'elseNode',
+          type: 'enter-else-branch',
+        } as EnterConditionBranchNode,
+      ]);
+
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue(undefined);
+
+      await impl.run();
+
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('elseNode');
+    });
+  });
+
+  describe('string evaluation with {{ }} syntax (backward compatibility)', () => {
+    it('should evaluate string condition as KQL expression', async () => {
+      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+        {
+          id: 'thenNode',
+          type: 'enter-then-branch',
+          condition: '{{ inputs.status }}:active',
+        } as EnterConditionBranchNode,
+        {
+          id: 'elseNode',
+          type: 'enter-else-branch',
+        } as EnterConditionBranchNode,
+      ]);
+
+      mockContextManager.renderValueAccordingToContext = jest
+        .fn()
+        .mockReturnValue('event.type:alert');
+
+      await impl.run();
+
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('thenNode');
+    });
+  });
+
+  describe('error handling for invalid condition types', () => {
+    it('should throw informative error for object condition', async () => {
+      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+        {
+          id: 'thenNode',
+          type: 'enter-then-branch',
+          condition: '${{ inputs.config }}',
+        } as EnterConditionBranchNode,
+      ]);
+
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue({
+        enabled: true,
+        timeout: 5000,
+      });
+
+      await expect(impl.run()).rejects.toThrow(
+        /Invalid condition type.*expected boolean or string/
+      );
+    });
+
+    it('should throw informative error for array condition', async () => {
+      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+        {
+          id: 'thenNode',
+          type: 'enter-then-branch',
+          condition: '${{ inputs.items }}',
+        } as EnterConditionBranchNode,
+      ]);
+
+      mockContextManager.renderValueAccordingToContext = jest
+        .fn()
+        .mockReturnValue(['item1', 'item2']);
+
+      await expect(impl.run()).rejects.toThrow(
+        /Invalid condition type.*expected boolean or string/
+      );
+    });
+
+    it('should throw informative error for number condition', async () => {
+      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+        {
+          id: 'thenNode',
+          type: 'enter-then-branch',
+          condition: '${{ inputs.count }}',
+        } as EnterConditionBranchNode,
+      ]);
+
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue(42);
+
+      await expect(impl.run()).rejects.toThrow(
+        /Invalid condition type.*expected boolean or string/
+      );
+    });
+
+    it('should include step ID in error message', async () => {
+      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+        {
+          id: 'thenNode',
+          type: 'enter-then-branch',
+          condition: '${{ inputs.data }}',
+        } as EnterConditionBranchNode,
+      ]);
+
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue({});
+
+      await expect(impl.run()).rejects.toThrow(
+        new RegExp(`Invalid condition type for step ${node.stepId}`)
+      );
+    });
+  });
 });

@@ -11,7 +11,12 @@ import React, { useState } from 'react';
 import type { MouseEvent } from 'react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { EuiHeaderSectionItemButton, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiHeaderSectionItemButton,
+  EuiToolTip,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isKeyboardShortcut, isMac } from '../../lib/keyboard_shortcut/keyboard_shortcut';
 import { InspectOverlay } from './overlay/inspect_overlay';
@@ -22,18 +27,19 @@ const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel',
 
 const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.tooltip', {
   values: { keyboardShortcut: isMac() ? "⌘ '" : "Ctrl '" },
-  defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
+  defaultMessage: 'Inspect component {keyboardShortcut}',
 });
 
 interface Props {
   core: CoreStart;
   branch: string;
+  buttonLocation?: 'header' | 'developerToolbar';
 }
 
 /**
  * The entry point for the plugin. Toggles inspect mode.
  */
-export const InspectButton = ({ core, branch }: Props) => {
+export const InspectButton = ({ core, branch, buttonLocation = 'header' }: Props) => {
   const [isInspecting, setIsInspecting] = useState(false);
   const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef | null>(null);
 
@@ -66,11 +72,13 @@ export const InspectButton = ({ core, branch }: Props) => {
     event.preventDefault();
   };
 
+  const ButtonComponent = buttonLocation === 'header' ? EuiHeaderSectionItemButton : EuiButtonIcon;
+
   return (
     <>
       <EuiWindowEvent event="keydown" handler={handleKeydown} />
       <EuiToolTip content={isInspecting ? '' : TOOLTIP_CONTENT} position="bottom">
-        <EuiHeaderSectionItemButton
+        <ButtonComponent
           onClick={handleTogglingInspectMode}
           onMouseDown={preventTargetFromLosingFocus}
           iconType="inspect"
@@ -79,6 +87,11 @@ export const InspectButton = ({ core, branch }: Props) => {
           css={buttonStyle}
           aria-label={ARIA_LABEL}
           data-test-subj="inspectComponentButton"
+          {...(buttonLocation === 'developerToolbar'
+            ? {
+                color: 'text',
+              }
+            : {})}
         />
       </EuiToolTip>
       {isInspecting && (

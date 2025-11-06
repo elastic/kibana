@@ -18,12 +18,13 @@ import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 
-export interface SecondaryMenuItemProps extends SecondaryMenuItem {
+export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
-  href: string;
+  hasSubmenu?: boolean;
+  href?: string;
   iconType?: IconType;
-  isHighlighted: boolean;
   isCurrent?: boolean;
+  isHighlighted: boolean;
   key: string;
   onClick?: () => void;
   testSubjPrefix?: string;
@@ -36,11 +37,13 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
 export const SecondaryMenuItemComponent = ({
   badgeType,
   children,
+  hasSubmenu,
+  href,
   iconType,
   id,
-  isHighlighted,
   isCurrent,
   isExternal,
+  isHighlighted,
   testSubjPrefix = 'secondaryMenuItem',
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -69,7 +72,7 @@ export const SecondaryMenuItemComponent = ({
     }
 
     svg:not(.euiBetaBadge__icon) {
-      color: ${euiTheme.colors.textDisabled};
+      color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
     }
 
     --high-contrast-hover-indicator-color: ${isHighlighted
@@ -96,10 +99,12 @@ export const SecondaryMenuItemComponent = ({
       {isHighlighted ? (
         <EuiButton
           aria-current={isCurrent ? 'page' : undefined}
+          id={id}
           css={buttonStyles}
           data-highlighted="true"
           data-test-subj={`${testSubjPrefix}-${id}`}
           fullWidth
+          href={hasSubmenu ? undefined : href}
           size="s"
           textProps={false}
           {...iconProps}
@@ -110,10 +115,12 @@ export const SecondaryMenuItemComponent = ({
       ) : (
         <EuiButtonEmpty
           aria-current={isCurrent ? 'page' : undefined}
-          css={buttonStyles}
+          id={id}
           color="text"
+          css={buttonStyles}
           data-highlighted="false"
           data-test-subj={`${testSubjPrefix}-${id}`}
+          href={hasSubmenu ? undefined : href}
           size="s"
           textProps={false}
           {...iconProps}

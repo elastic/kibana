@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { HoverContext, ProviderConfig } from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
-import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
+import { getPathAtOffset } from '../../../../../common/lib/yaml';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 
 /**
@@ -262,7 +262,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     try {
       // Get current path in YAML
       const absolutePosition = model.getOffsetAt(position);
-      let yamlPath = getCurrentPath(yamlDocument, absolutePosition);
+      let yamlPath = getPathAtOffset(yamlDocument, absolutePosition);
 
       // If no path found (e.g., cursor after colon), try to find it from the current line
       if (yamlPath.length === 0) {
@@ -333,7 +333,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
           });
 
           // Try to get path from the key position
-          const keyPath = getCurrentPath(yamlDocument, keyAbsolutePosition);
+          const keyPath = getPathAtOffset(yamlDocument, keyAbsolutePosition);
           if (keyPath.length > 0) {
             // Add the key name to the path
             return [...keyPath, keyName];
@@ -350,7 +350,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Try positions along the line to find any valid path
       for (let offset = 0; offset < lineContent.length; offset++) {
         const testPosition = lineStartPosition + offset;
-        const testPath = getCurrentPath(yamlDocument, testPosition);
+        const testPath = getPathAtOffset(yamlDocument, testPosition);
         if (testPath.length > 0) {
           // console.log('🔍 Found fallback path at offset', offset, ':', testPath);
           return testPath;

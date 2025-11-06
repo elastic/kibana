@@ -66,6 +66,9 @@ function serializeStepResults(rounds: ConversationRound[]): PersistentConversati
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map<ConversationRound>((round) => ({
     ...round,
+    started_at: round.started_at ?? new Date(0).toISOString(),
+    time_to_first_token: round.time_to_first_token ?? 0,
+    time_to_last_token: round.time_to_last_token ?? 0,
     steps: round.steps.map<ConversationRoundStep>((step) => {
       if (step.type === ConversationRoundStepType.toolCall) {
         return {

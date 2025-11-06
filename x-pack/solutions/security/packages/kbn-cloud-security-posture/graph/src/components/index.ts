@@ -15,6 +15,7 @@ export {
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
 } from './graph_grouped_node_preview_panel/constants';
+export { GRAPH_SCOPE_ID, NETWORK_PREVIEW_BANNER } from './constants';
 export { GraphPopover } from './graph/graph_popover';
 export { useGraphPopover } from './graph/use_graph_popover';
 export type { GraphProps } from './graph/graph';

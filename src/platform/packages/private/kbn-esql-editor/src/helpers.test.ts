@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { SOURCES_TYPES } from '@kbn/esql-types';
-import {
-  filterDataErrors,
-  getIndicesList,
-  getRemoteIndicesList,
-  parseErrors,
-  parseWarning,
-} from './helpers';
+import { coreMock } from '@kbn/core/public/mocks';
+import { SOURCES_TYPES, SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
+import { filterDataErrors, getIndicesList, parseErrors, parseWarning } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
 describe('helpers', function () {
@@ -279,49 +273,31 @@ describe('helpers', function () {
 
   describe('getIndicesList', function () {
     it('should return also system indices with hidden flag on', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: '.system1',
-            title: 'system1',
-          },
-          {
-            name: 'logs',
-            title: 'logs',
-          },
-        ]),
-      };
-      const indices = await getIndicesList(updatedDataViewsMock);
+      const coreMockStartContract = coreMock.createStart();
+      coreMockStartContract.http.get = jest.fn().mockResolvedValue([
+        { name: '.system1', hidden: true, type: SOURCES_TYPES.INDEX },
+        { name: 'logs', hidden: false, type: SOURCES_TYPES.INDEX },
+      ]);
+
+      const indices = await getIndicesList(coreMockStartContract, false);
       expect(indices).toStrictEqual([
         { name: '.system1', hidden: true, type: SOURCES_TYPES.INDEX },
         { name: 'logs', hidden: false, type: SOURCES_TYPES.INDEX },
       ]);
+
+      expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
+        `${SOURCES_AUTOCOMPLETE_ROUTE}local`
+      );
     });
 
     it('should mark the time_series indices correctly', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: 'logs',
-            title: 'logs',
-            item: {
-              mode: 'time_series',
-            },
-          },
-          {
-            name: 'metrics',
-            title: 'metrics',
-            item: {
-              mode: 'normal',
-            },
-          },
-        ]),
-      };
-      const indices = await getIndicesList(updatedDataViewsMock);
+      const coreMockStartContract = coreMock.createStart();
+      coreMockStartContract.http.get = jest.fn().mockResolvedValue([
+        { name: 'logs', hidden: false, type: SOURCES_TYPES.TIMESERIES },
+        { name: 'metrics', hidden: false, type: SOURCES_TYPES.INDEX },
+      ]);
+
+      const indices = await getIndicesList(coreMockStartContract, false);
       expect(indices).toStrictEqual([
         { name: 'logs', hidden: false, type: SOURCES_TYPES.TIMESERIES },
         { name: 'metrics', hidden: false, type: SOURCES_TYPES.INDEX },
@@ -329,27 +305,13 @@ describe('helpers', function () {
     });
 
     it('should type correctly the aliases', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: 'alias1',
-            title: 'system1',
-            tags: [
-              {
-                name: 'Alias',
-                type: 'alias',
-              },
-            ],
-          },
-          {
-            name: 'logs',
-            title: 'logs',
-          },
-        ]),
-      };
-      const indices = await getIndicesList(updatedDataViewsMock);
+      const coreMockStartContract = coreMock.createStart();
+      coreMockStartContract.http.get = jest.fn().mockResolvedValue([
+        { name: 'alias1', hidden: false, type: SOURCES_TYPES.ALIAS },
+        { name: 'logs', hidden: false, type: SOURCES_TYPES.INDEX },
+      ]);
+
+      const indices = await getIndicesList(coreMockStartContract, false);
       expect(indices).toStrictEqual([
         { name: 'alias1', hidden: false, type: SOURCES_TYPES.ALIAS },
         { name: 'logs', hidden: false, type: SOURCES_TYPES.INDEX },
@@ -357,67 +319,39 @@ describe('helpers', function () {
     });
   });
 
-  describe('getRemoteIndicesList', function () {
-    it('should filter out aliases and hidden indices', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: 'remote: alias1',
-            item: {
-              indices: ['index1'],
-            },
-          },
-          {
-            name: 'remote:.system1',
-            item: {
-              name: 'system',
-            },
-          },
-          {
-            name: 'remote:logs',
-            item: {
-              name: 'logs',
-              timestamp_field: '@timestamp',
-            },
-          },
-        ]),
-      };
-      const indices = await getRemoteIndicesList(updatedDataViewsMock, true);
+  describe('getIndicesList with remote indices', function () {
+    it('should include remote indices when areRemoteIndicesAvailable is true', async function () {
+      const coreMockStartContract = coreMock.createStart();
+      coreMockStartContract.http.get = jest.fn().mockResolvedValue([
+        { name: 'remote:logs', hidden: false, type: SOURCES_TYPES.INDEX },
+        { name: 'local-index', hidden: false, type: SOURCES_TYPES.INDEX },
+      ]);
+
+      const indices = await getIndicesList(coreMockStartContract, true);
       expect(indices).toStrictEqual([
         { name: 'remote:logs', hidden: false, type: SOURCES_TYPES.INDEX },
+        { name: 'local-index', hidden: false, type: SOURCES_TYPES.INDEX },
       ]);
+
+      expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
+        `${SOURCES_AUTOCOMPLETE_ROUTE}all`
+      );
     });
 
-    it('should not suggest ccs indices if not allowed', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: 'remote: alias1',
-            item: {
-              indices: ['index1'],
-            },
-          },
-          {
-            name: 'remote:.system1',
-            item: {
-              name: 'system',
-            },
-          },
-          {
-            name: 'remote:logs',
-            item: {
-              name: 'logs',
-              timestamp_field: '@timestamp',
-            },
-          },
-        ]),
-      };
-      const indices = await getRemoteIndicesList(updatedDataViewsMock, false);
-      expect(indices).toStrictEqual([]);
+    it('should not include remote indices when areRemoteIndicesAvailable is false', async function () {
+      const coreMockStartContract = coreMock.createStart();
+      coreMockStartContract.http.get = jest
+        .fn()
+        .mockResolvedValue([{ name: 'local-index', hidden: false, type: SOURCES_TYPES.INDEX }]);
+
+      const indices = await getIndicesList(coreMockStartContract, false);
+      expect(indices).toStrictEqual([
+        { name: 'local-index', hidden: false, type: SOURCES_TYPES.INDEX },
+      ]);
+
+      expect(coreMockStartContract.http.get).toHaveBeenCalledWith(
+        `${SOURCES_AUTOCOMPLETE_ROUTE}local`
+      );
     });
   });
 

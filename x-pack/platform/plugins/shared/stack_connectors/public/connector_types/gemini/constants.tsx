@@ -20,7 +20,7 @@ import {
   DEFAULT_GCP_REGION,
 } from '../../../common/gemini/constants';
 import * as i18n from './translations';
-import { contextWindowLengthField } from '../../common/genai_connectors';
+import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
 
 const generationConfig = {
   temperature: 0,
@@ -119,6 +119,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
     defaultValue: DEFAULT_GEMINI_MODEL,
   },
   contextWindowLengthField,
+  temperatureField,
 ];
 
 export const geminiSecrets: SecretsFieldSchema[] = [

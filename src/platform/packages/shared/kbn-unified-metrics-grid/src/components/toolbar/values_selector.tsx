@@ -29,7 +29,7 @@ import {
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
 
-interface ValuesFilterProps {
+export interface ValuesFilterProps {
   selectedDimensions: string[];
   selectedValues: string[];
   indices?: string[];
@@ -104,7 +104,7 @@ export const ValuesSelector = ({
     const count = selectedValues.length;
 
     return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           {count > 0 ? (
             <FormattedMessage

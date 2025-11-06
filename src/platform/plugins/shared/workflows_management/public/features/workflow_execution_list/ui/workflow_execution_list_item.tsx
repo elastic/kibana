@@ -66,14 +66,12 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     }, [selected, onClick, styles]);
 
     return (
-      <EuiPanel color="plain" hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
+      <EuiPanel onClick={onClick} hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
         <EuiFlexGroup
           gutterSize="m"
           alignItems="center"
           justifyContent="flexStart"
-          onClick={onClick ?? undefined}
           responsive={false}
-          color="plain"
         >
           <EuiFlexItem grow={false}>{getExecutionStatusIcon(euiTheme, status)}</EuiFlexItem>
           <EuiFlexItem>
@@ -104,18 +102,20 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="clock" color="subdued" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {formattedDuration}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {formattedDuration && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="clock" color="subdued" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {formattedDuration}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     );
@@ -130,10 +130,11 @@ const componentStyles = {
     }),
   selectableContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      cursor: 'pointer',
       '&:hover': {
         backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+        // Prevent hover animation effect from affecting the panel
+        boxShadow: 'none',
+        transform: 'none',
       },
     }),
 };

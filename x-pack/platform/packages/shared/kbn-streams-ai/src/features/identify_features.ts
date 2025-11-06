@@ -30,6 +30,7 @@ export async function identifyFeatures({
   kql,
   inferenceClient,
   logger,
+  signal,
   dropUnmapped = false,
   maxSteps: initialMaxSteps,
 }: {
@@ -41,6 +42,7 @@ export async function identifyFeatures({
   kql?: string;
   inferenceClient: BoundInferenceClient;
   logger: Logger;
+  signal: AbortSignal;
   dropUnmapped?: boolean;
   maxSteps?: number;
 }): Promise<{ features: Omit<Feature, 'description'>[] }> {
@@ -121,6 +123,7 @@ export async function identifyFeatures({
         };
       },
     },
+    abortSignal: signal,
   });
 
   return {

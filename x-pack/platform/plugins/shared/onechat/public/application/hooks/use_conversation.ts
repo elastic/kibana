@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { ConversationRound } from '@kbn/onechat-common';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
@@ -100,10 +101,16 @@ export const useConversationRounds = () => {
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
-      return [
-        ...rounds,
-        { id: '', input: { message: pendingMessage }, response: { message: '' }, steps: [] },
-      ];
+      const pendingRound: ConversationRound = {
+        id: '',
+        input: { message: pendingMessage },
+        response: { message: '' },
+        steps: [],
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+        started_at: new Date().toISOString(),
+      };
+      return [...rounds, pendingRound];
     }
     return rounds;
   }, [conversation?.rounds, error, pendingMessage]);

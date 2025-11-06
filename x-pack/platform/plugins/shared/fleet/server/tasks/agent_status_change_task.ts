@@ -27,7 +27,7 @@ import { SO_SEARCH_LIMIT } from '../constants';
 import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
 export const TYPE = 'fleet:agent-status-change-task';
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Agent Status Change Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '1m';
@@ -117,7 +117,7 @@ export class AgentStatusChangeTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[AgentStatusChangeTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[AgentStatusChangeTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public runTask = async (
@@ -143,7 +143,7 @@ export class AgentStatusChangeTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart, _startDeps] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;

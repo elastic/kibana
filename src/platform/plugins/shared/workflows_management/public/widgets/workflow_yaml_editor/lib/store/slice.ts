@@ -11,7 +11,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import type { ComputedData, WorkflowDetailState } from './types';
 import { findStepByLine } from './utils/step_finder';
-import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
+import { getWorkflowZodSchema } from '../../../../../common/schema';
 
 // Initial state
 const initialState: WorkflowDetailState = {
@@ -19,7 +19,7 @@ const initialState: WorkflowDetailState = {
   workflow: undefined,
   computed: undefined,
   connectors: undefined,
-  schemaLoose: getWorkflowZodSchemaLoose({}),
+  schema: getWorkflowZodSchema({}),
   focusedStepId: undefined,
   stepExecutions: undefined,
   highlightedStepId: undefined,
@@ -75,11 +75,8 @@ const workflowDetailSlice = createSlice({
     _clearComputedData: (state) => {
       state.computed = {};
     },
-    _setGeneratedSchemaInternal: (
-      state,
-      action: { payload: WorkflowDetailState['schemaLoose'] }
-    ) => {
-      state.schemaLoose = action.payload;
+    _setGeneratedSchemaInternal: (state, action: { payload: WorkflowDetailState['schema'] }) => {
+      state.schema = action.payload;
     },
   },
 });
@@ -107,7 +104,7 @@ export const {
 // Ignore these non-serializable fields in the state
 export const ignoredPaths: Array<string | RegExp> = [
   /detail\.computed\.*/, // All computed data is not serializable
-  'detail.schemaLoose', // Zod schema loose is not serializable
+  'detail.schema', // Zod schema is not serializable
   'detail.workflow.definition', // WorkflowYaml definition schema is not serializable
 ];
 // Ignore these specific action types that contain non-serializable data

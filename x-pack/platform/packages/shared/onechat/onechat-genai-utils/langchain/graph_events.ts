@@ -10,6 +10,7 @@ import type {
   MessageChunkEvent,
   MessageCompleteEvent,
   ReasoningEvent,
+  ThinkingCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
@@ -105,6 +106,15 @@ export const createReasoningEvent = (
     data: {
       reasoning,
       transient,
+    },
+  };
+};
+
+export const createThinkingCompleteEvent = (timeToFirstToken: number): ThinkingCompleteEvent => {
+  return {
+    type: ChatEventType.thinkingComplete,
+    data: {
+      time_to_first_token: timeToFirstToken,
     },
   };
 };

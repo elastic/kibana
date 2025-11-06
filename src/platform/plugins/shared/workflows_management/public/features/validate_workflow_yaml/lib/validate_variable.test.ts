@@ -178,7 +178,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'nonexistent.variable',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(null);
+    mockGetSchemaAtPath.mockReturnValue({ schema: null, scopedToPath: null });
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -199,7 +199,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'stringVar',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(z.string());
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: null });
     mockGetZodTypeName.mockReturnValue('string');
 
     const result = validateVariable(variableItem, mockContext);
@@ -221,7 +221,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'externalVar',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(schema);
+    mockGetSchemaAtPath.mockReturnValue({ schema, scopedToPath: 'externalVar' });
     mockGetZodTypeName.mockReturnValue('any');
 
     const result = validateVariable(variableItem, mockContext);
@@ -240,7 +240,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'unknownVar',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(z.unknown());
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.unknown(), scopedToPath: null });
     mockGetZodTypeName.mockReturnValue('unknown');
 
     const result = validateVariable(variableItem, mockContext);
@@ -259,7 +259,7 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'test.variable',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(z.string());
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'test.variable' });
     mockGetZodTypeName.mockReturnValue('string');
 
     const result = validateVariable(variableItem, mockContext);
@@ -278,7 +278,10 @@ describe('validateVariable', () => {
       errors: null,
       propertyPath: 'response.data.items[0].name',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue(z.string());
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: z.string(),
+      scopedToPath: 'response.data.items[0].name',
+    });
     mockGetZodTypeName.mockReturnValue('string');
 
     const result = validateVariable(variableItem, mockContext);
@@ -301,7 +304,10 @@ describe('validateVariable', () => {
       propertyPath: 'inputs.days_to_plan',
     } as any);
     // Mock the schema as an array with default value (ZodDefault wrapper)
-    mockGetSchemaAtPath.mockReturnValue(z.array(z.string()).default(['monday', 'tuesday']));
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: z.array(z.string()).default(['monday', 'tuesday']),
+      scopedToPath: 'inputs.days_to_plan',
+    });
     mockGetZodTypeName.mockReturnValue('array');
 
     const result = validateVariable(variableItem, mockContext);
@@ -324,7 +330,10 @@ describe('validateVariable', () => {
       propertyPath: 'inputs.items',
     } as any);
     // Mock the schema as a plain array without default
-    mockGetSchemaAtPath.mockReturnValue(z.array(z.string()));
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: z.array(z.string()),
+      scopedToPath: 'inputs.items',
+    });
     mockGetZodTypeName.mockReturnValue('array');
 
     const result = validateVariable(variableItem, mockContext);

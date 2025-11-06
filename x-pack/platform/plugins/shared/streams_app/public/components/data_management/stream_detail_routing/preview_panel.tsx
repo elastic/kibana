@@ -21,6 +21,7 @@ import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
+import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { MemoPreviewTable, PreviewFlyout } from '../shared';
@@ -120,6 +121,8 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     (snapshot) => snapshot.context.definition.stream.name
   );
 
+  const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
+
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
   const documents = useStreamSamplesSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
@@ -208,6 +211,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
             displayColumns={visibleColumns}
             setVisibleColumns={setVisibleColumns}
             cellActions={cellActions}
+            dataViewFieldTypes={fieldTypes}
           />
         </RowSelectionContext.Provider>
         <PreviewFlyout
@@ -216,6 +220,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
           streamName={streamName}
+          streamDataView={streamDataView}
         />
       </EuiFlexItem>
     );

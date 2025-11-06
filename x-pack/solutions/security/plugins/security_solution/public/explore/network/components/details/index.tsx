@@ -87,13 +87,13 @@ export const IpOverview = React.memo<IpOverviewProps>(
         description: locationRenderer(
           [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
           data,
-          contextID
+          scopeId
         ),
       },
       {
         title: i18n.AUTONOMOUS_SYSTEM,
         description: typeData
-          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, contextID)
+          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, scopeId)
           : getEmptyTagValue(),
       },
     ];
@@ -165,7 +165,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
                   scopeId,
                   host: data.host,
                   ipFilter: ip,
-                  contextID,
                   isFlyoutOpen,
                 })
               : getEmptyTagValue(),

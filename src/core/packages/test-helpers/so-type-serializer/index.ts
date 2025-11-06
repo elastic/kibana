@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SavedObjectTypeMigrationInfo } from './src/extract_migration_info';
+export type {
+  SavedObjectTypeMigrationInfo,
+  ModelVersionSummary,
+} from './src/extract_migration_info';
 export { extractMigrationInfo } from './src/extract_migration_info';
 export { getTypeHashes, getMigrationHash } from './src/get_migration_hash';

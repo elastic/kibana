@@ -33,7 +33,7 @@ export async function generateSignificantEvents({
   end,
   esClient,
   inferenceClient,
-  logger,
+  signal,
 }: {
   stream: Streams.all.Definition;
   feature?: Feature;
@@ -41,6 +41,7 @@ export async function generateSignificantEvents({
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
+  signal: AbortSignal;
   logger: Logger;
 }): Promise<{
   queries: Query[];
@@ -88,6 +89,7 @@ export async function generateSignificantEvents({
         };
       },
     },
+    abortSignal: signal,
   });
 
   const queries = response.input.flatMap((message) => {

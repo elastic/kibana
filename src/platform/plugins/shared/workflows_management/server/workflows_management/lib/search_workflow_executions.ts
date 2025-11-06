@@ -15,6 +15,7 @@ import type {
   Sort,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
 
 interface SearchWorkflowExecutionsParams {
@@ -53,6 +54,18 @@ export const searchWorkflowExecutions = async ({
 
     return transformToWorkflowExecutionListModel(response, page, perPage);
   } catch (error) {
+    // Index not found is expected when no workflows have been executed yet
+    if (isResponseError(error) && error.body?.error?.type === 'index_not_found_exception') {
+      return {
+        results: [],
+        _pagination: {
+          limit: perPage,
+          page,
+          total: 0,
+        },
+      };
+    }
+
     logger.error(`Failed to search workflow executions: ${error}`);
     throw error;
   }

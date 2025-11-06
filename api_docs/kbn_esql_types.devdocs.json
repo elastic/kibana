@@ -1659,6 +1659,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.SOURCES_AUTOCOMPLETE_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "SOURCES_AUTOCOMPLETE_ROUTE",
+        "description": [],
+        "signature": [
+          "\"/internal/esql/autocomplete/sources/\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

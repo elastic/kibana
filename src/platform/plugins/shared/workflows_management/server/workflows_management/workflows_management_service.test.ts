@@ -618,6 +618,72 @@ describe('WorkflowsService', () => {
         );
       });
 
+      it('should not log error when index_not_found_exception occurs (expected behavior)', async () => {
+        mockLogger.error.mockClear();
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument],
+            total: { value: 1 },
+          },
+        };
+
+        const indexNotFoundError = new errors.ResponseError({
+          statusCode: 404,
+          body: {
+            error: {
+              type: 'index_not_found_exception',
+              reason: 'no such index [.workflows-executions]',
+            },
+          },
+          headers: {},
+          meta: {} as any,
+          warnings: [],
+        });
+
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockRejectedValueOnce(indexNotFoundError);
+
+        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+
+        expect(result.results[0].history).toEqual([]);
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      });
+
+      it('should log error when non-index_not_found_exception errors occur', async () => {
+        mockLogger.error.mockClear();
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument],
+            total: { value: 1 },
+          },
+        };
+
+        const otherError = new errors.ResponseError({
+          statusCode: 500,
+          body: {
+            error: {
+              type: 'internal_server_error',
+              reason: 'Internal server error',
+            },
+          },
+          headers: {},
+          meta: {} as any,
+          warnings: [],
+        });
+
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockRejectedValueOnce(otherError);
+
+        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+
+        expect(result.results[0].history).toEqual([]);
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to fetch recent executions for workflows')
+        );
+      });
+
       it('should not fetch execution history for empty workflow list', async () => {
         const mockSearchResponse = {
           hits: {

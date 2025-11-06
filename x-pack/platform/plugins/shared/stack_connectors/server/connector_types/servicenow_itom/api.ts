@@ -6,12 +6,9 @@
  */
 
 import { convertTimestamp } from '@kbn/connector-schemas/common/utils';
+import type { ExecutorSubActionAddEventParams } from '@kbn/connector-schemas/servicenow_itom';
 import { api as commonApi } from '../lib/servicenow/api';
-import type {
-  ExecutorSubActionAddEventParams,
-  AddEventApiHandlerArgs,
-  ExternalServiceApiITOM,
-} from '../lib/servicenow/types';
+import type { AddEventApiHandlerArgs, ExternalServiceApiITOM } from '../lib/servicenow/types';
 
 const isValidDate = (d: Date) => !isNaN(d.valueOf());
 
