@@ -6,10 +6,10 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useRef, useState, useMemo } from 'react';
 import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
@@ -28,7 +28,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { chatService } = useOnechatServices();
   const { services } = useKibana();
   const { reportConverseError } = useReportConverseError();
-  const { conversationActions, getProcessedAttachments, browserApiTools } = useConversationContext();
+  const { conversationActions, getProcessedAttachments, browserApiTools } =
+    useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
