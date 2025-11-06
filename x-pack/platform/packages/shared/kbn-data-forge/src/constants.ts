@@ -9,6 +9,7 @@ export const FAKE_HOSTS = 'fake_hosts';
 export const FAKE_LOGS = 'fake_logs';
 export const FAKE_STACK = 'fake_stack';
 export const SERVICE_LOGS = 'service.logs';
+export const DATABASE_LOGS = 'database_logs';
 
 export const INDEX_PREFIX = 'kbn-data-forge';
 
