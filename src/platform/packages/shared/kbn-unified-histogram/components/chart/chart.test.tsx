@@ -116,7 +116,7 @@ async function mountComponent({
 
   const props: UnifiedHistogramChartProps = {
     lensVisService,
-    lensVisServiceState: lensVisService.getStateValue(),
+    lensVisServiceState: lensVisService.state$.getValue(),
     services,
     hits: noHits
       ? undefined
@@ -144,7 +144,10 @@ async function mountComponent({
     instance = mountWithIntl(<UnifiedHistogramChart {...props} />);
     // wait for initial async loading to complete
     await new Promise((r) => setTimeout(r, 0));
-    props.fetch$?.next(fetchParams);
+    props.fetch$?.next({
+      fetchParams: props.fetchParams,
+      lensVisServiceState: props.lensVisServiceState,
+    });
     instance.update();
   });
   return instance;

@@ -65,7 +65,7 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
   const lensVisMock = await getLensVisMock({
     dataView: fetchParams.dataView,
     isPlainRecord: fetchParams.isESQLQuery,
-    timeInterval: fetchParams.timeInterval!,
+    timeInterval: fetchParams.timeInterval,
     filters: fetchParams.filters,
     query: fetchParams.query,
     columns: [],

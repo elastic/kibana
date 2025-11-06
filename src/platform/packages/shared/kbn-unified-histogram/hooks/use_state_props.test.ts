@@ -34,7 +34,6 @@ describe('useStateProps', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
-    currentSuggestionContext: undefined,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -238,7 +237,6 @@ describe('useStateProps', () => {
     const stateService = getStateService({
       initialState: {
         ...initialState,
-        currentSuggestionContext: undefined,
       },
     });
     const fetchParams = getFetchParamsMock({
@@ -279,7 +277,6 @@ describe('useStateProps', () => {
     const stateService = getStateService({
       initialState: {
         ...initialState,
-        currentSuggestionContext: undefined,
       },
     });
     const fetchParams = getFetchParamsMock({
@@ -325,7 +322,6 @@ describe('useStateProps', () => {
     const stateService = getStateService({
       initialState: {
         ...initialState,
-        currentSuggestionContext: undefined,
       },
     });
     const fetchParams = getFetchParamsMock({
@@ -619,14 +615,17 @@ describe('useStateProps', () => {
     expect(stateService.setLensRequestAdapter).toHaveBeenLastCalledWith(undefined);
   });
 
-  it('should clear lensRequestAdapter when chart is undefined', () => {
+  it('should clear lensRequestAdapter when chart is undefined', async () => {
     const stateService = getStateService({ initialState });
-    const fetchParams = getFetchParamsMock({
-      dataView: dataViewWithTimefieldMock,
+    const commonFetchParams = {
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
       columns: undefined,
+    };
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewWithTimefieldMock,
+      ...commonFetchParams,
     });
     const initialProps = {
       services: unifiedHistogramServicesMock,
@@ -641,13 +640,16 @@ describe('useStateProps', () => {
     });
     (stateService.setLensRequestAdapter as jest.Mock).mockClear();
     expect(stateService.setLensRequestAdapter).not.toHaveBeenCalled();
+    const updatedFetchParams = getFetchParamsMock({
+      dataView: dataViewMock,
+      ...commonFetchParams,
+    });
     hook.rerender({
       ...initialProps,
-      fetchParams: {
-        ...fetchParams,
-        dataView: dataViewMock,
-      },
+      fetchParams: updatedFetchParams,
     });
-    expect(stateService.setLensRequestAdapter).toHaveBeenLastCalledWith(undefined);
+    await waitFor(() => {
+      expect(stateService.setLensRequestAdapter).toHaveBeenLastCalledWith(undefined);
+    });
   });
 });

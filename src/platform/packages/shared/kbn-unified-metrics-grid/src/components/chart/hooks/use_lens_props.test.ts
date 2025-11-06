@@ -177,7 +177,7 @@ describe('useLensProps', () => {
     expect(result.current).toBeUndefined();
 
     act(() => {
-      discoverFetch$.next(testFetchParams);
+      discoverFetch$.next({ fetchParams: testFetchParams, lensVisServiceState: undefined });
     });
 
     await waitFor(() => {

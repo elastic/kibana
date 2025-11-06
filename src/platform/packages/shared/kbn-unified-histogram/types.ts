@@ -264,7 +264,7 @@ export interface UnifiedHistogramFetchParamsExternal {
 
 export type UnifiedHistogramFetchParams = Omit<
   UnifiedHistogramFetchParamsExternal,
-  'breakdownField'
+  'breakdownField' | 'timeInterval'
 > & {
   query: Query | AggregateQuery;
   filters: Filter[];
@@ -282,6 +282,7 @@ export type UnifiedHistogramFetchParams = Omit<
         field: DataViewField | undefined;
       }
     | undefined;
+  timeInterval: string;
 };
 
 export interface UnifiedHistogramFetch$Arguments {

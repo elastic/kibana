@@ -18,7 +18,10 @@ import { useDiscoverHistogram, type UseUnifiedHistogramOptions } from './use_dis
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { UnifiedHistogramState } from '@kbn/unified-histogram';
+import type {
+  UnifiedHistogramFetchParamsExternal,
+  UnifiedHistogramState,
+} from '@kbn/unified-histogram';
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram/mocks';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
@@ -160,7 +163,6 @@ describe('useDiscoverHistogram', () => {
       expect(params?.initialState).toMatchInlineSnapshot(`
         Object {
           "chartHidden": false,
-          "timeInterval": "auto",
           "topPanelHeight": undefined,
           "totalHitsResult": undefined,
           "totalHitsStatus": "loading",
@@ -181,7 +183,6 @@ describe('useDiscoverHistogram', () => {
       expect(params?.initialState).toMatchInlineSnapshot(`
         Object {
           "chartHidden": false,
-          "timeInterval": "auto",
           "topPanelHeight": 100,
           "totalHitsResult": undefined,
           "totalHitsStatus": "loading",
@@ -220,19 +221,20 @@ describe('useDiscoverHistogram', () => {
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const lensRequestAdapter = new RequestAdapter();
       const state = {
-        timeInterval: '1m',
         chartHidden: true,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi();
-      api.state$ = new BehaviorSubject({ ...state, lensRequestAdapter });
+      api.state$ = new BehaviorSubject<UnifiedHistogramState>({
+        ...state,
+        lensRequestAdapter,
+      });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(inspectorAdapters.lensRequests).toBe(lensRequestAdapter);
       expect(stateContainer.appState.update).toHaveBeenCalledWith({
-        interval: state.timeInterval,
         hideChart: state.chartHidden,
       });
     });
@@ -242,7 +244,6 @@ describe('useDiscoverHistogram', () => {
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
       const state = {
-        timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
@@ -266,17 +267,13 @@ describe('useDiscoverHistogram', () => {
       api.setChartHidden = jest.fn((chartHidden) => {
         params = { ...params, chartHidden };
       });
-      api.setTimeInterval = jest.fn((timeInterval) => {
-        params = { ...params, timeInterval };
-      });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      stateContainer.appState.update({ hideChart: true, interval: '1m' });
+      stateContainer.appState.update({ hideChart: true });
       expect(api.setTotalHits).not.toHaveBeenCalled();
       expect(api.setChartHidden).toHaveBeenCalled();
-      expect(api.setTimeInterval).toHaveBeenCalled();
-      expect(Object.keys(params ?? {})).toEqual(['timeInterval', 'chartHidden']);
+      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
     });
 
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
@@ -284,7 +281,6 @@ describe('useDiscoverHistogram', () => {
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
       const state = {
-        timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
@@ -318,13 +314,12 @@ describe('useDiscoverHistogram', () => {
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
       const state = {
-        timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi();
-      api.state$ = new BehaviorSubject({
+      api.state$ = new BehaviorSubject<UnifiedHistogramState>({
         ...state,
         totalHitsStatus: UnifiedHistogramFetchStatus.complete,
         totalHitsResult: 100,
@@ -362,13 +357,12 @@ describe('useDiscoverHistogram', () => {
       const containerState = stateContainer.appState.getState();
       const error = new Error('test');
       const state = {
-        timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi();
-      api.state$ = new BehaviorSubject({
+      api.state$ = new BehaviorSubject<UnifiedHistogramState>({
         ...state,
         totalHitsStatus: UnifiedHistogramFetchStatus.error,
         totalHitsResult: error,
@@ -483,13 +477,30 @@ describe('useDiscoverHistogram', () => {
 
   describe('context awareness', () => {
     it('should modify vis attributes based on profile', async () => {
+      const stateContainer = getStateContainer();
       const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
       const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
         scopedEbtManager: scopedEbtManagerMock,
       });
       scopedProfilesManager.resolveDataSourceProfile({});
-      const { hook } = await renderUseDiscoverHistogram({ scopedProfilesManager });
-      const modifiedAttributes = hook.result.current.getModifiedVisAttributes?.(
+      const { hook } = await renderUseDiscoverHistogram({ scopedProfilesManager, stateContainer });
+
+      let getModifiedVisAttributes:
+        | UnifiedHistogramFetchParamsExternal['getModifiedVisAttributes']
+        | undefined;
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      stateContainer.dataState.fetchChart$ = fetch$;
+      const api = createMockUnifiedHistogramApi();
+      api.fetch = jest.fn((params) => {
+        getModifiedVisAttributes = params.getModifiedVisAttributes;
+      });
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      act(() => {
+        fetch$.next({});
+      });
+      const modifiedAttributes = getModifiedVisAttributes?.(
         {} as TypedLensByValueInput['attributes']
       );
       expect(modifiedAttributes).toEqual({ title: 'Modified title' });

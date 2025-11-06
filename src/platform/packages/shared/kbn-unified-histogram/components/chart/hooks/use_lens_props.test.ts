@@ -28,7 +28,7 @@ describe('useLensProps', () => {
       columns: [],
       isPlainRecord: fetchParams.isESQLQuery,
       dataView: fetchParams.dataView,
-      timeInterval: 'auto',
+      timeInterval: fetchParams.timeInterval,
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     });
     fetchParams.externalVisContext = lensVisMock.visContext;
@@ -36,13 +36,11 @@ describe('useLensProps', () => {
     const lensProps = renderHook(() => {
       return useLensProps({
         fetch$,
-        fetchParams,
-        lensVisService: lensVisMock.lensService,
         onLoad,
       });
     });
     act(() => {
-      fetch$.next(fetchParams);
+      fetch$.next({ fetchParams, lensVisServiceState: lensVisMock.lensService.state$.getValue() });
     });
     expect(lensProps.result.current?.lensProps).toMatchSnapshot();
   });
@@ -74,13 +72,11 @@ describe('useLensProps', () => {
     const lensProps = renderHook(() => {
       return useLensProps({
         fetch$,
-        fetchParams,
-        lensVisService: lensVisMock.lensService,
         onLoad,
       });
     });
     act(() => {
-      fetch$.next(fetchParams);
+      fetch$.next({ fetchParams, lensVisServiceState: lensVisMock.lensService.state$.getValue() });
     });
     expect(lensProps.result.current?.lensProps).toMatchSnapshot();
   });
@@ -102,8 +98,6 @@ describe('useLensProps', () => {
 
     const lensProps = {
       fetch$,
-      fetchParams,
-      lensVisService: lensVisMock.lensService,
       onLoad,
     };
     const hook = renderHook(
@@ -115,10 +109,11 @@ describe('useLensProps', () => {
     expect(hook.result.current).toEqual(undefined);
 
     const updatedFetchParams = { ...fetchParams, searchSessionId: '456' };
-    hook.rerender({ ...lensProps, fetchParams: updatedFetchParams });
-    expect(hook.result.current).toEqual(undefined);
     act(() => {
-      fetch$.next(updatedFetchParams);
+      fetch$.next({
+        fetchParams: updatedFetchParams,
+        lensVisServiceState: lensVisMock.lensService.state$.getValue(),
+      });
     });
     expect(hook.result.current).not.toEqual(undefined);
   });
