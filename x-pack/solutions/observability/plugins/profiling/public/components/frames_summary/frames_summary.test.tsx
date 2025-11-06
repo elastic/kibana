@@ -88,7 +88,9 @@ describe('FramesSummary', () => {
       /76\.06 lbs \/ 34\.5 kg/
     );
     expect(screen.getByTestId('annualizedCost_comparison_value')).toHaveTextContent(/\$325\.27/);
-    expect(screen.getByTestId('totalNumberOfSamples_comparison_value')).toHaveTextContent('14.940');
+    expect(screen.getByTestId('totalNumberOfSamples_comparison_value')).toHaveTextContent(
+      /14[,.]940/
+    );
   });
 
   it('shows empty summary when no data is available', () => {

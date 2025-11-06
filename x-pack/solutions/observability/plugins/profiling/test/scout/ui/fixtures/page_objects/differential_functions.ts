@@ -44,14 +44,6 @@ export class DifferentialFunctionsPage {
     return this.page.testSubj.locator(`${id}_comparison_value`);
   }
 
-  async getBaselineFrame() {
-    return this.page.testSubj.locator('frame');
-  }
-
-  async getComparisonFrame() {
-    return this.page.testSubj.locator('comparison_frame');
-  }
-
   async addKqlFilterToBaseline(key: string, value: string) {
     const searchBar = this.page.testSubj.locator('profilingUnifiedSearchBar');
     await searchBar.fill(`${key}:"${value}"`);

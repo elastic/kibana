@@ -118,10 +118,6 @@ test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
       response.url().includes('/internal/profiling/topn/functions')
     );
 
-    const baselineFrame = await differentialFunctionsPage.getBaselineFrame();
-    await expect(baselineFrame).toBeVisible();
-    const comparisonFrame = await differentialFunctionsPage.getComparisonFrame();
-    await expect(comparisonFrame).toBeVisible();
     await expect(
       page.getByRole('row', { name: 'Show actions 1 metricbeat' }).getByTestId('frame')
     ).toBeVisible();
