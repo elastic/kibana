@@ -9,7 +9,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   createConcreteWriteIndex,
-  findOrSetConcreteWriteIndex,
+  updateAliasesAndSetConcreteWriteIndex,
 } from './create_concrete_write_index';
 import { getDataStreamAdapter } from './data_stream_adapter';
 
@@ -1137,7 +1137,7 @@ describe('setConcreteWriteIndex', () => {
   });
 
   it(`should call updateAliases to set the concrete write index`, async () => {
-    await findOrSetConcreteWriteIndex({
+    await updateAliasesAndSetConcreteWriteIndex({
       logger,
       esClient: clusterClient,
       concreteIndices: [
@@ -1196,7 +1196,7 @@ describe('setConcreteWriteIndex', () => {
   });
 
   it(`should call updateAliases to set the index aliases to hidden`, async () => {
-    await findOrSetConcreteWriteIndex({
+    await updateAliasesAndSetConcreteWriteIndex({
       logger,
       esClient: clusterClient,
       concreteIndices: [
@@ -1257,7 +1257,7 @@ describe('setConcreteWriteIndex', () => {
   });
 
   it(`should call updateAliases to set the index aliases to hidden and the concrete write index`, async () => {
-    await findOrSetConcreteWriteIndex({
+    await updateAliasesAndSetConcreteWriteIndex({
       logger,
       esClient: clusterClient,
       concreteIndices: [
@@ -1340,7 +1340,7 @@ describe('setConcreteWriteIndex', () => {
     clusterClient.indices.updateAliases.mockRejectedValueOnce(error);
 
     await expect(() =>
-      findOrSetConcreteWriteIndex({
+      updateAliasesAndSetConcreteWriteIndex({
         logger,
         esClient: clusterClient,
         concreteIndices: [

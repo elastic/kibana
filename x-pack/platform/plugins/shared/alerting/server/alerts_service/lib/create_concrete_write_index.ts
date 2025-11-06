@@ -194,15 +194,15 @@ export const createConcreteWriteIndex = async (opts: CreateConcreteWriteIndexOpt
   await opts.dataStreamAdapter.createStream(opts);
 };
 
-interface SetConcreteWriteIndexOpts {
+interface UpdateAliasesAndSetConcreteWriteIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   concreteIndices: ConcreteIndexInfo[];
   alias: string;
 }
 
-export async function findOrSetConcreteWriteIndex(
-  opts: SetConcreteWriteIndexOpts
+export async function updateAliasesAndSetConcreteWriteIndex(
+  opts: UpdateAliasesAndSetConcreteWriteIndexOpts
 ): Promise<ConcreteIndexInfo> {
   const { logger, esClient, concreteIndices, alias } = opts;
   const concreteWriteIndex = concreteIndices.find((index) => index.isWriteIndex);
@@ -224,6 +224,7 @@ export async function findOrSetConcreteWriteIndex(
 
   for (let i = 0; i < sortedConcreteIndices.length; i++) {
     const index = sortedConcreteIndices[i];
+    //  If there is no write index, set last index as the write index
     if (!concreteWriteIndex && i === lastIndex) {
       logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
       actions.push(
