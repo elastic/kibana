@@ -13,7 +13,16 @@
     "@kbn/onechat-plugin",
     "@kbn/apm-data-access-plugin",
     "@kbn/apm-sources-access-plugin",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/logs-data-access-plugin",
+    "@kbn/zod",
+    "@kbn/onechat-server",
+    "@kbn/management-settings-ids",
+    "@kbn/inference-common",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/es-query",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*"
