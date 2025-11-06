@@ -126,7 +126,7 @@ export async function createSearchKnowledgeBaseTool({
                 query: rewrittenQuery,
                 entries: filteredEntries,
                 total: entries.length,
-                dropped: entries.length - filteredEntries.length,
+                noOfDroppedEntries: entries.length - filteredEntries.length,
               },
             },
           ],
