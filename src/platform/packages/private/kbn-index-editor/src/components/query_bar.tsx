@@ -28,7 +28,7 @@ export const QueryBar = ({
   onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover'];
 }) => {
   const {
-    services: { share, data, indexUpdateService, indexEditorTelemetryService, featureFlags },
+    services: { share, data, indexUpdateService, indexEditorTelemetryService },
   } = useKibana<KibanaContextExtra>();
 
   const dataView = useObservable(indexUpdateService.dataView$);
