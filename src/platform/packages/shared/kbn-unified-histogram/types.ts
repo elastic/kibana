@@ -247,6 +247,10 @@ export interface UnifiedHistogramFetchParamsExternal {
    */
   breakdownField?: string;
   /**
+   * The current time interval of the chart
+   */
+  timeInterval?: string;
+  /**
    * The external custom Lens vis
    */
   externalVisContext?: UnifiedHistogramVisContext;

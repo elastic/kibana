@@ -9,8 +9,6 @@
 
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
   UnifiedHistogramExternalVisContextStatus,
@@ -57,6 +55,10 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   onBreakdownFieldChange?: (breakdownField: string | undefined) => void;
   /**
+   * Callback to update the time interval for the histogram chart
+   */
+  onTimeIntervalChange?: (timeInterval: string | undefined) => void;
+  /**
    * Callback to notify about the change in Lens attributes
    */
   onVisContextChanged?: (
@@ -76,7 +78,7 @@ export type UnifiedHistogramApi = {
   fetch: (params: UnifiedHistogramFetchParamsExternal) => void;
 } & Pick<
   UnifiedHistogramStateService,
-  'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTimeInterval' | 'setTotalHits'
+  'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTotalHits'
 >;
 
 export type UnifiedHistogramPartialLayoutProps = Omit<
@@ -98,13 +100,17 @@ export type UseUnifiedHistogramResult =
       layoutProps: UnifiedHistogramPartialLayoutProps;
     };
 
-const EMPTY_STATE = of(undefined);
-
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
-  const { stateProps, fetch$, fetchParams, hasValidFetchParams, api, lensVisService } =
-    useServicesBootstrap(props);
+  const {
+    stateProps,
+    fetch$,
+    fetchParams,
+    hasValidFetchParams,
+    api,
+    lensVisService,
+    lensVisServiceState,
+  } = useServicesBootstrap(props);
 
-  const lensVisServiceState = useObservable(lensVisService?.state$ ?? EMPTY_STATE);
   const lensVisServiceCurrentSuggestionContextType =
     lensVisServiceState?.currentSuggestionContext?.type;
 

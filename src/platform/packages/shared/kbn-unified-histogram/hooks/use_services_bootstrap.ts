@@ -40,7 +40,7 @@ const INITIAL_STATE: State = {
 export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
   const [fetch$] = useState(() => new ReplaySubject<UnifiedHistogramFetch$Arguments>(1));
   const [state, setState] = useState<State>(INITIAL_STATE);
-  const { fetchParams, lensVisService } = state;
+  const { fetchParams, lensVisService, lensVisServiceState } = state;
   const { services, initialState, localStorageKeyPrefix, enableLensVisService } = props;
   const propsRef = useRef<UseUnifiedHistogramProps>(props);
   propsRef.current = props;
@@ -118,7 +118,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
           timeInterval:
             !nextFetchParams.isTimeBased && !nextFetchParams.isESQLQuery
               ? undefined
-              : stateService.getTimeInterval(),
+              : nextFetchParams.timeInterval,
           breakdownField: nextFetchParams.breakdown?.field,
           table: nextFetchParams.table,
           onVisContextChanged: nextFetchParams.isESQLQuery ? onVisContextChanged : undefined,
@@ -137,14 +137,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
         lensVisServiceState: updatedLensVisServiceState,
       });
     },
-    ...pick(
-      stateService,
-      'state$',
-      'setChartHidden',
-      'setTopPanelHeight',
-      'setTimeInterval',
-      'setTotalHits'
-    ),
+    ...pick(stateService, 'state$', 'setChartHidden', 'setTopPanelHeight', 'setTotalHits'),
   }));
 
   const stateProps = useStateProps({
@@ -153,6 +146,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     stateService,
     fetchParams,
     onBreakdownFieldChange: props.onBreakdownFieldChange,
+    onTimeIntervalChange: props.onTimeIntervalChange,
   });
 
   return {
@@ -164,5 +158,6 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
       fetchParams && (fetchParams.searchSessionId || fetchParams.isESQLQuery)
     ),
     lensVisService,
+    lensVisServiceState,
   };
 };

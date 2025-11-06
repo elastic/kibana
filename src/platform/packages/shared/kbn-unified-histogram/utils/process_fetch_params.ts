@@ -64,6 +64,7 @@ export const processFetchParams = ({
       isESQLQuery,
       breakdownField,
     }),
+    timeInterval: params.timeInterval ?? 'auto',
   };
 };
 

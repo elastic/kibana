@@ -31,7 +31,7 @@ export interface UnifiedHistogramState {
   /**
    * The current Lens suggestion
    */
-  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined; // TODO: remove?
   /**
    * Whether or not the chart is hidden
    */
@@ -48,10 +48,6 @@ export interface UnifiedHistogramState {
    * Lens embeddable output observable
    */
   dataLoading$?: PublishingSubject<boolean | undefined>;
-  /**
-   * The current time interval of the chart
-   */
-  timeInterval: string;
   /**
    * The current top panel height
    */
@@ -107,10 +103,6 @@ export interface UnifiedHistogramStateService {
    */
   setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
   /**
-   * Sets the current time interval
-   */
-  setTimeInterval: (timeInterval: string) => void;
-  /**
    * Sets the current Lens request adapter
    */
   setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
@@ -133,13 +125,11 @@ export const createStateService = (
 ): {
   state$: BehaviorSubject<UnifiedHistogramState>;
   getChartHidden: () => boolean;
-  getTimeInterval: () => string;
   setChartHidden: (chartHidden: boolean) => void;
   setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
   setCurrentSuggestionContext: (
     suggestionContext: UnifiedHistogramSuggestionContext | undefined
   ) => void;
-  setTimeInterval: (timeInterval: string) => void;
   setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
   setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
   setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => void;
@@ -162,7 +152,6 @@ export const createStateService = (
     chartHidden: initialChartHidden,
     currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
-    timeInterval: 'auto',
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     ...initialState,
@@ -181,10 +170,6 @@ export const createStateService = (
 
     getChartHidden: () => {
       return state$.getValue().chartHidden;
-    },
-
-    getTimeInterval: () => {
-      return state$.getValue().timeInterval;
     },
 
     setChartHidden: (chartHidden: boolean) => {
@@ -207,10 +192,6 @@ export const createStateService = (
       suggestionContext: UnifiedHistogramSuggestionContext | undefined
     ) => {
       updateState({ currentSuggestionContext: suggestionContext });
-    },
-
-    setTimeInterval: (timeInterval: string) => {
-      updateState({ timeInterval });
     },
 
     setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => {

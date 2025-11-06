@@ -19,7 +19,6 @@ import type {
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
   chartHiddenSelector,
-  timeIntervalSelector,
   totalHitsResultSelector,
   totalHitsStatusSelector,
   lensAdaptersSelector,
@@ -35,22 +34,23 @@ export const useStateProps = ({
   stateService,
   fetchParams,
   onBreakdownFieldChange: originalOnBreakdownFieldChange,
+  onTimeIntervalChange: originalOnTimeIntervalChange,
 }: {
   services: UnifiedHistogramServices;
   localStorageKeyPrefix: string | undefined;
   stateService: UnifiedHistogramStateService | undefined;
   fetchParams: UnifiedHistogramFetchParams | undefined;
   onBreakdownFieldChange: ((breakdownField: string | undefined) => void) | undefined;
+  onTimeIntervalChange: ((timeInterval: string | undefined) => void) | undefined;
 }) => {
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
-  const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
   const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
 
-  const { searchSessionId, requestAdapter, breakdown, isTimeBased, isESQLQuery } =
+  const { searchSessionId, requestAdapter, breakdown, isTimeBased, isESQLQuery, timeInterval } =
     fetchParams || {};
 
   const hits = useMemo(() => {
@@ -94,13 +94,6 @@ export const useStateProps = ({
     [stateService]
   );
 
-  const onTimeIntervalChange = useCallback(
-    (newTimeInterval: string) => {
-      stateService?.setTimeInterval(newTimeInterval);
-    },
-    [stateService]
-  );
-
   const onTotalHitsChange = useCallback(
     (newTotalHitsStatus: UnifiedHistogramFetchStatus, newTotalHitsResult?: number | Error) => {
       stateService?.setTotalHits({
@@ -133,6 +126,13 @@ export const useStateProps = ({
       originalOnBreakdownFieldChange?.(newBreakdownField?.name);
     },
     [originalOnBreakdownFieldChange]
+  );
+
+  const onTimeIntervalChange = useCallback(
+    (nextTimeInterval: string | undefined) => {
+      originalOnTimeIntervalChange?.(nextTimeInterval);
+    },
+    [originalOnTimeIntervalChange]
   );
 
   /**

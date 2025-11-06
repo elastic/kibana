@@ -89,7 +89,6 @@ export const useDiscoverHistogram = (
       const appState = stateContainer.appState.getState();
       const oldState = {
         hideChart: appState.hideChart,
-        interval: appState.interval,
       };
       const newState = { ...oldState, ...stateChanges };
 
@@ -114,10 +113,6 @@ export const useDiscoverHistogram = (
   useEffect(() => {
     const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
       (changes) => {
-        if ('timeInterval' in changes && changes.timeInterval) {
-          unifiedHistogramApi?.setTimeInterval(changes.timeInterval); // TODO: make a part of fetch params?
-        }
-
         if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
           unifiedHistogramApi?.setChartHidden(changes.chartHidden);
         }
@@ -261,6 +256,7 @@ export const useDiscoverHistogram = (
       timeRange: timeRangeMemoized,
       relativeTimeRange,
       breakdownField,
+      timeInterval,
       esqlVariables,
       controlsState: currentTabControlState,
       // visContext should be in sync with current query
@@ -272,6 +268,7 @@ export const useDiscoverHistogram = (
     };
   }, [
     breakdownField,
+    timeInterval,
     currentTabControlState,
     dataView,
     esqlVariables,
@@ -413,6 +410,17 @@ export const useDiscoverHistogram = (
     [breakdownField, stateContainer.appState]
   );
 
+  const onTimeIntervalChange = useCallback<
+    NonNullable<UseUnifiedHistogramProps['onTimeIntervalChange']>
+  >(
+    (nextTimeInterval) => {
+      if (nextTimeInterval !== timeInterval) {
+        stateContainer.appState.update({ interval: nextTimeInterval });
+      }
+    },
+    [timeInterval, stateContainer.appState]
+  );
+
   return useMemo(
     () => ({
       setUnifiedHistogramApi,
@@ -421,7 +429,6 @@ export const useDiscoverHistogram = (
       localStorageKeyPrefix: 'discover',
       initialState: {
         chartHidden,
-        timeInterval, // TODO: move to fetch params as breakdown
         topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
@@ -433,6 +440,7 @@ export const useDiscoverHistogram = (
       isChartLoading: isSuggestionLoading,
       onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
       onBreakdownFieldChange,
+      onTimeIntervalChange,
     }),
     [
       chartHidden,
@@ -443,10 +451,10 @@ export const useDiscoverHistogram = (
       isEsqlMode,
       isSuggestionLoading,
       onBreakdownFieldChange,
+      onTimeIntervalChange,
       onVisContextChanged,
       options?.initialLayoutProps?.topPanelHeight,
       services,
-      timeInterval,
     ]
   );
 };
@@ -475,10 +483,6 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
         changes.hideChart = curr.chartHidden;
       }
 
-      if (prev?.timeInterval !== curr.timeInterval) {
-        changes.interval = curr.timeInterval;
-      }
-
       return changes;
     }),
     filter((changes) => Object.keys(changes).length > 0)
@@ -494,10 +498,6 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
 
       if (!curr) {
         return changes;
-      }
-
-      if (prev?.interval !== curr.interval) {
-        changes.timeInterval = curr.interval;
       }
 
       if (prev?.hideChart !== curr.hideChart) {
