@@ -269,8 +269,6 @@ export function registerTelemetryCollector(
             },
           };
 
-          logger.error(`Collected telemetry: ${JSON.stringify({ telemetry })}`);
-
           return telemetry;
         } catch (error) {
           logger.error(`Failed to collect telemetry: ${error.message}`);
