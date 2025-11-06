@@ -13,6 +13,7 @@ export const TASK_STATUSES = {
   processing: 'processing',
   completed: 'completed',
   failed: 'failed',
+  cancelled: 'cancelled',
 };
 
 export const INPUT_TYPES = {
