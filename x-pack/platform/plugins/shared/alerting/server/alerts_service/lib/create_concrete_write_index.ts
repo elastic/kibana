@@ -20,7 +20,7 @@ export interface ConcreteIndexInfo {
   index: string;
   alias: string;
   isWriteIndex: boolean;
-  isHidden: boolean;
+  isHidden?: boolean;
 }
 
 interface UpdateIndexMappingsAndSettingsOpts {
