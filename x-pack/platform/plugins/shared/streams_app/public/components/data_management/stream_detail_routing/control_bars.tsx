@@ -119,18 +119,13 @@ export const EditSuggestedRuleControls = ({
         <CancelButton onClick={cancelChanges} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <PrivilegesTooltip hasPrivileges={hasPrivileges}>
-            <UpdateButton isLoading={false} isDisabled={isUpdateDisabled} onClick={handleUpdate} />
-          </PrivilegesTooltip>
-          <PrivilegesTooltip hasPrivileges={hasPrivileges}>
-            <UpdateAndAcceptButton
-              isLoading={false}
-              isDisabled={isUpdateDisabled}
-              onClick={handleAccept}
-            />
-          </PrivilegesTooltip>
-        </EuiFlexGroup>
+        <PrivilegesTooltip hasPrivileges={hasPrivileges}>
+          <UpdateAndAcceptButton
+            isLoading={false}
+            isDisabled={isUpdateDisabled}
+            onClick={handleAccept}
+          />
+        </PrivilegesTooltip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
