@@ -20,7 +20,7 @@ import { GoogleDriveClient, type ListFilesOptions } from './google_drive_client'
 export interface GDriveStep extends BaseStep {
   with: {
     service_credential?: Record<string, any>;
-    operation?: 'list' | 'get' | 'ping';
+    operation?: 'list' | 'get' | 'ping' | 'download';
     fileId?: string;
     fileName?: string;
     fileContent?: string;
@@ -110,6 +110,13 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
           throw new Error('fileId is required for get operation');
         }
         output = await this.handleGet(fileId);
+        break;
+
+      case 'download':
+        if (!fileId) {
+          throw new Error('fileId is required for download operation');
+        }
+        output = await this.handleDownload(fileId);
         break;
 
       default:
@@ -214,6 +221,48 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
 
     const file = await this.driveClient.getFile(fileId);
     return file;
+  }
+
+  private async handleDownload(fileId: string): Promise<any> {
+    if (!this.driveClient) {
+      throw new Error('Google Drive client not initialized');
+    }
+
+    this.workflowLogger.logInfo(`Downloading file content for fileId: ${fileId}`, {
+      workflow: { step_id: this.step.name },
+      event: { action: 'gdrive_download', outcome: 'unknown' },
+      tags: ['gdrive', 'download'],
+    });
+
+    // First get file metadata to know the file name and type
+    const fileMetadata = await this.driveClient.getFile(fileId);
+
+    // Download the file content
+    const fileContent = await this.driveClient.downloadFile(fileId);
+
+    this.workflowLogger.logInfo(
+      `Successfully downloaded file: ${fileMetadata.name} (${fileContent.size} bytes)`,
+      {
+        workflow: { step_id: this.step.name },
+        event: { action: 'gdrive_download', outcome: 'success' },
+        tags: ['gdrive', 'download'],
+      }
+    );
+
+    return {
+      fileId: fileMetadata.id,
+      fileName: fileMetadata.name,
+      mimeType: fileMetadata.mimeType,
+      size: fileContent.size,
+      content: fileContent.content,
+      contentEncoding: fileContent.encoding,
+      metadata: {
+        createdTime: fileMetadata.createdTime,
+        modifiedTime: fileMetadata.modifiedTime,
+        parents: fileMetadata.parents,
+        webViewLink: fileMetadata.webViewLink,
+      },
+    };
   }
 
   protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
