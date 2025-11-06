@@ -12,18 +12,41 @@ import { getMaxPackageName } from '../../../common/services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 import { packagePolicyService } from '../package_policy';
+import { appContextService } from '..';
 
 export async function incrementPackageName(
   soClient: SavedObjectsClientContract,
-  packageName: string
+  packageName: string,
+  spaceIds: string[]
 ): Promise<string> {
-  // Fetch all packagePolicies having the package name
-  const packagePolicyData = await packagePolicyService.list(soClient, {
+  const isMultiSpace = spaceIds.length > 1;
+  const baseSearchParams = {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
-  });
+  };
 
-  return getMaxPackageName(packageName, packagePolicyData?.items);
+  // Fetch all packagePolicies having the package name
+  let packagePoliciesResult;
+
+  if (isMultiSpace) {
+    packagePoliciesResult = await packagePolicyService.list(
+      appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+      {
+        ...baseSearchParams,
+        spaceId: '*',
+      }
+    );
+  } else {
+    packagePoliciesResult = await packagePolicyService.list(soClient, baseSearchParams);
+  }
+
+  const packagePolicies = isMultiSpace
+    ? packagePoliciesResult.items.filter((packagePolicy) => {
+        return packagePolicy.spaceIds?.some((spaceId) => spaceIds.includes(spaceId));
+      })
+    : packagePoliciesResult.items;
+
+  return getMaxPackageName(packageName, packagePolicies);
 }
 
 export async function incrementPackagePolicyCopyName(

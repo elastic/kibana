@@ -20,6 +20,7 @@ import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
+const FIELD_SIMULATION_TIMEOUT = '1s';
 
 export const unmappedFieldsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/schema/unmapped_fields',
@@ -90,7 +91,7 @@ export const unmappedFieldsRoute = createServerRoute({
   },
 });
 
-const FIELD_SIMILATION_SAMPLE_SIZE = 200;
+const FIELD_SIMILATION_SAMPLE_SIZE = 20;
 
 export const schemaFieldsSimulationRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/schema/fields_simulation',
@@ -149,14 +150,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           })),
         },
       },
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc' as const,
-          },
-        },
-      ],
       size: FIELD_SIMILATION_SAMPLE_SIZE,
+      track_total_hits: false,
+      terminate_after: FIELD_SIMILATION_SAMPLE_SIZE,
+      timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
     const sampleResults = await scopedClusterClient.asCurrentUser.search({
@@ -164,11 +161,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       ...documentSamplesSearchBody,
     });
 
-    if (
-      (typeof sampleResults.hits.total === 'object' && sampleResults.hits.total?.value === 0) ||
-      sampleResults.hits.total === 0 ||
-      !sampleResults.hits.total
-    ) {
+    if (sampleResults.hits.hits.length === 0) {
       return {
         status: 'unknown',
         simulationError: null,
@@ -232,16 +225,12 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const runtimeFieldsSearchBody = {
       runtime_mappings: propertiesCompatibleWithRuntimeMappings,
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc' as const,
-          },
-        },
-      ],
       size: FIELD_SIMILATION_SAMPLE_SIZE,
       fields: params.body.field_definitions.map((field) => field.name),
       _source: false,
+      track_total_hits: false,
+      terminate_after: FIELD_SIMILATION_SAMPLE_SIZE,
+      timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
     // This gives us a "fields" representation rather than _source from the simulation

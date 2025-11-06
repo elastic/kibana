@@ -235,9 +235,8 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "Omit<",
               "SavedSearchAttributes",
-              ", \"description\"> & { description?: string | undefined; references: ",
+              " & { references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -376,31 +375,6 @@
           ", \"id\">>"
         ],
         "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedSearch",
-        "id": "def-public.SavedSearchByValueAttributes",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedSearchByValueAttributes",
-        "description": [],
-        "signature": [
-          "Omit<",
-          "SavedSearchAttributes",
-          ", \"description\"> & { description?: string | undefined; references: ",
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.Reference",
-            "text": "Reference"
-          },
-          "[]; }"
-        ],
-        "path": "src/platform/plugins/shared/saved_search/public/service/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1658,6 +1632,14 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
+              "[] | undefined; nonHighlightingFilters?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined; sort?: ",
               {
                 "pluginId": "data",
@@ -2008,6 +1990,30 @@
           "; id?: string | undefined; tags?: string[] | undefined; managed: boolean; references?: ",
           "SavedObjectReference",
           "[] | undefined; sharingSavedObjectProps?: { outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.SavedSearchByValueAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedSearchByValueAttributes",
+        "description": [],
+        "signature": [
+          "SavedSearchAttributes",
+          " & { references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
         "deprecated": false,

@@ -212,6 +212,7 @@ export type EsWorkflowCreate = Omit<
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
+  id: z.string().optional(),
 });
 
 export const UpdateWorkflowCommandSchema = z.object({
