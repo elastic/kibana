@@ -754,15 +754,17 @@ paths:
             'generic').
           in: query
           name: entityTypes
-          required: true
+          required: false
           schema:
-            description: Array of engine types to delete. Defaults to an empty array.
+            description: >-
+              Array of engine types to delete. Empty by default, which results
+              in all the engines being deleted.
             items:
               $ref: '#/components/schemas/EntityType'
             type: array
         - description: Control flag to also delete the entity data.
           in: query
-          name: data
+          name: delete_data
           required: false
           schema:
             type: boolean
@@ -774,7 +776,13 @@ paths:
                 type: object
                 properties:
                   deleted:
-                    type: boolean
+                    items:
+                      $ref: '#/components/schemas/EntityType'
+                    type: array
+                  still_running:
+                    items:
+                      $ref: '#/components/schemas/EntityType'
+                    type: array
           description: Successful response
       summary: Delete Entity Engines
       tags:
@@ -809,6 +817,13 @@ paths:
           schema:
             $ref: '#/components/schemas/EntityType'
         - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+        - deprecated: true
+          description: Control flag to also delete the entity data.
           in: query
           name: data
           required: false
