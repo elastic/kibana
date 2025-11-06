@@ -9,8 +9,10 @@ import type { LogsSharedBackendLibs } from './lib/logs_shared_types';
 
 import { initLogViewRoutes } from './routes/log_views';
 import { initMigrateLogViewSettingsRoute } from './routes/deprecations';
+import { initLogRoutes } from './routes/logs';
 
 export const initLogsSharedServer = (libs: LogsSharedBackendLibs) => {
   initLogViewRoutes(libs);
   initMigrateLogViewSettingsRoute(libs);
+  initLogRoutes(libs);
 };

@@ -144,6 +144,19 @@ export interface ObservabilityCreateSLOFeature {
   }) => React.ReactNode;
 }
 
+export interface ObservabilityLogsFetchDocumentByIdFeature {
+  id: 'observability-logs-fetch-document-by-id';
+  fetchLogDocumentById: (
+    params: {
+      id: string;
+    },
+    signal: AbortSignal
+  ) => Promise<{
+    _index: string | null;
+    fields: Record<PropertyKey, any> | null;
+  }>;
+}
+
 export interface ObservabilityLogEventsFeature {
   id: 'observability-log-events';
   render: (props: {
@@ -191,6 +204,7 @@ export type DiscoverFeature =
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
   | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
+  | ObservabilityLogsFetchDocumentByIdFeature
   | SecuritySolutionFeature;
 
 /**
