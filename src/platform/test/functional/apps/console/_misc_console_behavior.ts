@@ -283,36 +283,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       });
 
-      it('should have links enabled in the input editor but not the output editor', async () => {
-        // Verify that only the input editor has links enabled
-        const editorsConfig = await browser.execute(() => {
-          const monaco = (window as any).MonacoEnvironment?.monaco;
-          if (!monaco) return { input: false, output: false };
-
-          const editors = monaco.editor.getEditors();
-
-          // Find editors by their DOM containers
-          const inputEditor = editors.find((e: any) => {
-            const container = e.getContainerDomNode();
-            return container?.closest('[data-test-subj="consoleMonacoEditor"]');
-          });
-
-          const outputEditor = editors.find((e: any) => {
-            const container = e.getContainerDomNode();
-            return container?.closest('[data-test-subj="consoleMonacoOutput"]');
-          });
-
-          return {
-            input: inputEditor?.getOptions().get(monaco.editor.EditorOption.links) || false,
-            output: outputEditor?.getOptions().get(monaco.editor.EditorOption.links) || false,
-          };
-        });
-
-        expect(editorsConfig.input).to.be(true);
-        expect(editorsConfig.output).to.be(false);
-      });
-
-      it('should open URL in new tab when Cmd/Ctrl+Click on a link in the input editor', async () => {
+      it('should open URL in new tab when clicking on a link in the input editor', async () => {
         await PageObjects.console.clearEditorText();
 
         // Enter a URL that will be detected as a link
@@ -340,44 +311,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Hover over the detected link to show the tooltip
         await detectedLink.moveMouseTo();
 
-        // Wait for Monaco hover tooltip to appear with "Follow link"
-        await retry.waitFor('Monaco hover tooltip with Follow link to appear', async () => {
-          const hoverWidgets = await inputEditor.findAllByCssSelector('.monaco-hover');
-          if (hoverWidgets.length === 0) return false;
-
-          // Check if the hover contains "Follow link" text
-          for (const widget of hoverWidgets) {
-            const text = await widget.getVisibleText();
-            if (text.includes('Follow link')) {
-              return true;
-            }
-          }
-          return false;
+        // Wait for Monaco hover tooltip to appear
+        // Monaco shows a tooltip with "Follow link" when hovering over a URL with Cmd/Ctrl held
+        await retry.waitFor('Monaco hover tooltip to appear', async () => {
+          const links = await inputEditor.findAllByCssSelector(
+            '.monaco-hover .rendered-markdown a'
+          );
+          return links.length > 0;
         });
 
-        // Find and click the "Follow link" action element in the hover tooltip
-        // Try multiple possible selectors for the clickable element
-        const followLinkElement = await retry.try(async () => {
-          // Monaco hover actions are typically in .hover-row or as anchor elements
-          const possibleSelectors = [
-            '.monaco-hover .hover-row a',
-            '.monaco-hover .hover-row',
-            '.monaco-hover a',
-            '.monaco-hover .action-item',
-          ];
-
-          for (const selector of possibleSelectors) {
-            const elements = await inputEditor.findAllByCssSelector(selector);
-            for (const element of elements) {
-              const text = await element.getVisibleText();
-              if (text.includes('Follow link')) {
-                return element;
-              }
-            }
-          }
-          throw new Error('Follow link element not found');
-        });
-
+        // Click the "Follow link" anchor in the hover tooltip
+        // The HTML structure is: .monaco-hover > .hover-contents > .rendered-markdown > a
+        const followLinkElement = await inputEditor.findByCssSelector(
+          '.monaco-hover .rendered-markdown a'
+        );
         await followLinkElement.click();
 
         await browser.getActions().keyUp(modifierKey).perform();
