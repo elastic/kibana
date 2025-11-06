@@ -187,7 +187,7 @@ export const ActionsLogExpandedTray = memo<{
                 ))}
               </>
             ) : (
-              <ActionResponseOutputs action={action} data-test-subj="output" />
+              <ActionResponseOutputs action={action} data-test-subj={getTestId('output')} />
             )}
           </StyledEuiCodeBlock>
         ),
