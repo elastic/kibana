@@ -159,7 +159,13 @@ export function FiltersSection({
   );
 }
 
-function AddFilterButton({ onClick, isDisabled }: { onClick: () => void; isDisabled: boolean }) {
+export function AddFilterButton({
+  onClick,
+  isDisabled,
+}: {
+  onClick: () => void;
+  isDisabled: boolean;
+}) {
   return (
     <EuiButtonEmpty
       aria-label={i18n.translate(

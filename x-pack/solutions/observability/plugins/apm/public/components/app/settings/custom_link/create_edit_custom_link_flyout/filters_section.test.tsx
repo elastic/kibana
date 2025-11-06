@@ -12,7 +12,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { Filter } from '../../../../../../common/custom_link/custom_link_types';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
-import { FiltersSection } from './filters_section';
+import { AddFilterButton, FiltersSection } from './filters_section';
+import { isEmpty } from 'lodash';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -23,6 +24,10 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('FiltersSections', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the component', () => {
     const { getByText } = render(<FiltersSection filters={[]} onChangeFilters={() => {}} />, {
       wrapper: Wrapper,
@@ -128,5 +133,65 @@ describe('FiltersSections', () => {
 
     const removeButtons2 = getAllByTestId('apmCustomLinkFiltersSectionButton');
     expect(removeButtons2).toHaveLength(1);
+  });
+});
+
+const FILTER_SELECT_OPTIONS = [
+  { value: 'DEFAULT', text: 'Select Field ...' },
+  { value: 'service.name', text: 'Service Name' },
+  { value: 'transaction.type', text: 'Transaction Type' },
+  { value: 'transaction.name', text: 'Transaction Name' },
+  { value: 'service.environment', text: 'Environment' },
+];
+
+function getIsDisabled(filters: Filter[]) {
+  return (
+    filters.length === FILTER_SELECT_OPTIONS.length - 1 ||
+    filters.some((filter) => isEmpty(filter.key) || isEmpty(filter.value))
+  );
+}
+
+describe('AddFilterButton isDisabled logic', () => {
+  it('disables AddFilterButton when all filter slots are used', () => {
+    // * test like this? ------------------------------------------------------------------------------------
+    const filters: Filter[] = [
+      { key: 'service.name', value: 'Service Name' },
+      { key: 'transaction.type', value: 'Transaction Type' },
+      { key: 'transaction.name', value: 'Transaction Name' },
+      { key: 'service.environment', value: 'Environment' },
+    ];
+    expect(getIsDisabled(filters)).toBe(true);
+
+    const clickHandler = jest.fn();
+    const { getByTestId } = render(
+      <AddFilterButton isDisabled={getIsDisabled(filters)} onClick={clickHandler} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
+    const addButton = getByTestId('apmCustomLinkAddFilterButtonAddAnotherFilterButton');
+    expect(addButton).toBeDisabled();
+  });
+
+  it('should disable if any filter has empty key', () => {
+    // * OR test like that? ------------------------------------------------------------------------------------
+    const filters: Filter[] = [
+      { key: '', value: 'Transaction Name' },
+      { key: 'service.environment', value: 'Service Environment' },
+    ];
+    expect(getIsDisabled(filters)).toBe(true);
+  });
+
+  it('should disable if any filter has empty value', () => {
+    const filters: Filter[] = [
+      { key: 'service.name', value: '' },
+      { key: 'service.environment', value: 'Service Environment' },
+    ];
+    expect(getIsDisabled(filters)).toBe(true);
+  });
+
+  it('should enable if all filters are valid and there are unused filter slots', () => {
+    const filters: Filter[] = [{ key: 'service.name', value: 'Service Name' }];
+    expect(getIsDisabled(filters)).toBe(false);
   });
 });
