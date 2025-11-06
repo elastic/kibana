@@ -8,6 +8,7 @@
  */
 
 import Path from 'path';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -202,7 +203,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             const delay = config.get('kbnTestServer.delayShutdown');
             if (typeof delay === 'number') {
               log.info('Delaying shutdown of Kibana for', delay, 'ms');
-              await setTimeout(delay);
+              await setTimeoutAsync(delay);
             }
 
             await procs.stop('kibana');
