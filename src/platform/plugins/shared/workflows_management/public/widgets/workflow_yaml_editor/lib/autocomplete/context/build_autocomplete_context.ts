@@ -26,7 +26,7 @@ import type { StepInfo, WorkflowDetailState } from '../../../../../entities/work
 import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
 
 export interface BuildAutocompleteContextParams {
-  editorState: WorkflowDetailState | undefined;
+  editorState: WorkflowDetailState;
   model: monaco.editor.ITextModel;
   position: monaco.Position;
   completionContext: monaco.languages.CompletionContext;
