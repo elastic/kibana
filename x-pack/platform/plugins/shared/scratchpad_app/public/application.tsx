@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiPageTemplate } from '@elastic/eui';
-import type { NodeChange, EdgeChange } from '@xyflow/react';
+import type { NodeChange, EdgeChange, Connection } from '@xyflow/react';
 import type { ScratchpadAppStartDependencies } from './types';
 import { ScratchpadCanvas } from './components/scratchpad_canvas';
-import { useScratchpadState } from './hooks/use_scratchpad_state';
+import { ScratchpadToolbar, getNextNodePosition } from './components/scratchpad_toolbar';
+import { NodeEditModal } from './components/node_edit_modal';
+import { useScratchpadState, type ScratchpadNode } from './hooks/use_scratchpad_state';
+import { useScratchpadScreenContext } from './hooks/use_scratchpad_screen_context';
+import { layoutNodes } from './utils/layout_nodes';
 
 export function ScratchpadApplication({
   coreStart,
@@ -23,7 +27,31 @@ export function ScratchpadApplication({
   pluginsStart: ScratchpadAppStartDependencies;
   appMountParameters: AppMountParameters;
 }) {
-  const { nodes, edges, setNodes } = useScratchpadState();
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    addNode,
+    updateNode,
+    deleteNode,
+    createEdge,
+    clearAll,
+  } = useScratchpadState();
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+  const [shouldFitView, setShouldFitView] = useState(false);
+  const [layoutKey, setLayoutKey] = useState(0);
+
+  // Integrate AI assistant screen context
+  useScratchpadScreenContext({
+    nodes,
+    edges,
+    addNode,
+    updateNode,
+    deleteNode,
+    createEdge,
+  });
 
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -39,31 +67,180 @@ export function ScratchpadApplication({
                 position: change.position,
               };
             }
+          } else if (change.type === 'select') {
+            // Handle selection changes - ensure only one node is selected
+            if (change.selected) {
+              setSelectedNodeId(change.id);
+            } else {
+              // Deselect if this node was deselected
+              if (selectedNodeId === change.id) {
+                setSelectedNodeId(null);
+              }
+            }
           }
         });
         return updatedNodes;
       });
     },
+    [setNodes, selectedNodeId]
+  );
+
+  const handleEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      // Handle edge deletion
+      changes.forEach((change) => {
+        if (change.type === 'remove') {
+          setEdges((prev) => prev.filter((e) => e.id !== change.id));
+        }
+      });
+    },
+    [setEdges]
+  );
+
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      if (connection.source && connection.target) {
+        createEdge(connection.source, connection.target);
+      }
+    },
+    [createEdge]
+  );
+
+  const handleNodeClick = useCallback(
+    (_event: React.MouseEvent, node: ScratchpadNode) => {
+      // Clear previous selection and set new one
+      const newSelectedId = node.id;
+      setSelectedNodeId(newSelectedId);
+      // Update nodes to ensure only the clicked node is selected
+      setNodes((prevNodes) =>
+        prevNodes.map((n) => ({
+          ...n,
+          selected: n.id === newSelectedId,
+          data: {
+            ...n.data,
+            // Reset any transient selection state within node data if needed
+            selected: n.id === newSelectedId,
+          },
+        }))
+      );
+    },
     [setNodes]
   );
 
-  const handleEdgesChange = useCallback((_changes: EdgeChange[]) => {
-    // Handle edge changes if needed
-    // For now, we'll keep it simple
+  const handlePaneClick = useCallback(() => {
+    setSelectedNodeId(null);
+    // Clear selection from all nodes
+    setNodes((prevNodes) =>
+      prevNodes.map((n) => ({
+        ...n,
+        selected: false,
+        data: {
+          ...n.data,
+          selected: false,
+        },
+      }))
+    );
+  }, [setNodes]);
+
+  const handleNodeDoubleClick = useCallback((_event: React.MouseEvent, node: ScratchpadNode) => {
+    setEditingNodeId(node.id);
   }, []);
 
+  const handleSaveNode = useCallback(
+    (nodeId: string, updates: Partial<ScratchpadNode>) => {
+      updateNode(nodeId, updates);
+      setEditingNodeId(null);
+    },
+    [updateNode]
+  );
+
+  const handleAddNode = useCallback(
+    (type: ScratchpadNode['type']) => {
+      const position = getNextNodePosition(nodes);
+      const nodeId = `${type}-${Date.now()}`;
+
+      const newNode: ScratchpadNode = {
+        id: nodeId,
+        type,
+        position,
+        data: {
+          type,
+          ...(type === 'text_note' && { content: 'New note', title: 'Note' }),
+          ...(type === 'esql_query' && { query: 'FROM index | LIMIT 10' }),
+          ...(type === 'kibana_link' && { url: '', title: 'Link', appId: '' }),
+        },
+      };
+
+      addNode(newNode);
+
+      // If a node is selected, create an edge from selected node to new node
+      if (selectedNodeId) {
+        createEdge(selectedNodeId, nodeId);
+      }
+    },
+    [nodes, addNode, selectedNodeId, createEdge]
+  );
+
+  const handleClearAll = useCallback(() => {
+    clearAll();
+    setSelectedNodeId(null);
+    setEditingNodeId(null);
+  }, [clearAll]);
+
+  const handleLayout = useCallback(() => {
+    const layoutedNodes = layoutNodes(nodes, edges);
+    // Force complete update by setting all nodes with new positions
+    setNodes(layoutedNodes);
+    // Increment layout key to force ReactFlow to re-render
+    setLayoutKey((prev) => prev + 1);
+    setShouldFitView(true);
+    // Reset after fitView is triggered
+    setTimeout(() => setShouldFitView(false), 200);
+  }, [nodes, edges, setNodes]);
+
   return (
-    <KibanaContextProvider services={{ ...coreStart, ...pluginsStart }}>
+    <KibanaContextProvider
+      services={{
+        ...coreStart,
+        ...pluginsStart,
+        plugins: {
+          start: pluginsStart,
+        },
+      }}
+    >
       <EuiPageTemplate>
-        <EuiPageTemplate.Header pageTitle="Scratchpad" />
+        <ScratchpadToolbar
+          key="toolbar"
+          onAddNode={handleAddNode}
+          onClearAll={handleClearAll}
+          onLayout={handleLayout}
+        />
         <EuiPageTemplate.Section paddingSize="none" style={{ height: 'calc(100vh - 200px)' }}>
           <ScratchpadCanvas
-            nodes={nodes}
+            nodes={nodes.map((node) => ({
+              ...node,
+              selected: node.id === selectedNodeId,
+              data: {
+                ...node.data,
+                selected: node.id === selectedNodeId,
+              },
+            }))}
             edges={edges}
             onNodesChange={handleNodesChange}
             onEdgesChange={handleEdgesChange}
+            onConnect={handleConnect}
+            onNodeClick={handleNodeClick}
+            onNodeDoubleClick={handleNodeDoubleClick}
+            onPaneClick={handlePaneClick}
+            shouldFitView={shouldFitView}
+            layoutKey={layoutKey}
           />
         </EuiPageTemplate.Section>
+        <NodeEditModal
+          node={editingNodeId ? nodes.find((n) => n.id === editingNodeId) || null : null}
+          onClose={() => setEditingNodeId(null)}
+          onSave={handleSaveNode}
+        />
       </EuiPageTemplate>
     </KibanaContextProvider>
   );

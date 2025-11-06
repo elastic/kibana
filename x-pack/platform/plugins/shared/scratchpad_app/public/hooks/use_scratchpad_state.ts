@@ -61,18 +61,38 @@ export function useScratchpadState() {
     setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, ...updates } : node)));
   }, []);
 
-  const deleteNode = useCallback((nodeId: string) => {
-    setNodes((prev) => prev.filter((node) => node.id !== nodeId));
-    setEdges((prev) => prev.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
-  }, []);
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      setNodes((prev) => prev.filter((node) => node.id !== nodeId));
+      setEdges((prev) => prev.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+    },
+    []
+  );
 
-  const createEdge = useCallback((sourceId: string, targetId: string) => {
-    const edge: Edge = {
-      id: `${sourceId}-${targetId}`,
-      source: sourceId,
-      target: targetId,
-    };
-    setEdges((prev) => [...prev, edge]);
+  const createEdge = useCallback(
+    (sourceId: string, targetId: string) => {
+      // Check if edge already exists
+      setEdges((prev) => {
+        const edgeExists = prev.some(
+          (e) => e.source === sourceId && e.target === targetId
+        );
+        if (edgeExists) {
+          return prev;
+        }
+        const edge: Edge = {
+          id: `${sourceId}-${targetId}-${Date.now()}`,
+          source: sourceId,
+          target: targetId,
+        };
+        return [...prev, edge];
+      });
+    },
+    []
+  );
+
+  const clearAll = useCallback(() => {
+    setNodes([]);
+    setEdges([]);
   }, []);
 
   return {
@@ -84,5 +104,6 @@ export function useScratchpadState() {
     updateNode,
     deleteNode,
     createEdge,
+    clearAll,
   };
 }
