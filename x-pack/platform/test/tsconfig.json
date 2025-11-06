@@ -173,8 +173,8 @@
     "@kbn/reporting-test-routes",
     "@kbn/alerting-types",
     "@kbn/visualizations-common",
+    "@kbn/setup-node-env",
     "@kbn/connector-schemas",
     "@kbn/es-types",
-    "@kbn/setup-node-env",
   ]
 }

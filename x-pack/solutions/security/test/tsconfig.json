@@ -63,6 +63,5 @@
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
-    "@kbn/test-suites-xpack-security/security_solution_playwright",
   ]
 }
