@@ -3,10 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "server/**/*",
-    "../../../../../typings/**/*"
-  ],
+  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/onechat-common",
@@ -24,7 +21,5 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/es-types"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -7,6 +7,10 @@
 
 import { SavedObjectsClient, type CoreSetup } from '@kbn/core/server';
 import { OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_AGENT_FEATURE_FLAG,
+  OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
+} from '../../common/constants';
 import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
@@ -24,5 +28,10 @@ export async function getIsObservabilityAgentEnabled(
     OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID
   );
 
-  return isObservabilityAgentEnabled;
+  const isFeatureFlagEnabled = await coreStart.featureFlags.getBooleanValue(
+    OBSERVABILITY_AGENT_FEATURE_FLAG,
+    OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
+  );
+
+  return isFeatureFlagEnabled && isObservabilityAgentEnabled;
 }
