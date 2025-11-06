@@ -7,13 +7,11 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
-import { ConversationHeader } from '../application/components/conversations/conversation_header';
+import { EmbeddableConversationHeader } from './embeddable_conversation_header';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -28,49 +26,28 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   const headerStyles = css`
     ${backgroundStyles}
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border: none;
+    align-items: center;
     block-size: ${headerHeight};
+    padding: 0 ${euiTheme.size.base};
   `;
   const contentStyles = css`
     ${backgroundStyles}
     width: 100%;
     height: 100%;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+    display: flex;
+    justify-content: center;
+    align-items: center;
   `;
-
-  const labels = {
-    header: i18n.translate('xpack.onechat.conversationsView.header', {
-      defaultMessage: 'Conversation header',
-    }),
-    content: i18n.translate('xpack.onechat.conversationsView.content', {
-      defaultMessage: 'Conversation content',
-    }),
-  };
 
   return (
     <EmbeddableConversationsProvider {...props}>
-      <KibanaPageTemplate>
-        <KibanaPageTemplate.Header
-          css={headerStyles}
-          bottomBorder={false}
-          aria-label={labels.header}
-          paddingSize="m"
-        >
-          <ConversationHeader />
-        </KibanaPageTemplate.Header>
-        <KibanaPageTemplate.Section
-          paddingSize="none"
-          grow
-          contentProps={{
-            css: contentStyles,
-          }}
-          aria-label={labels.content}
-        >
-          <Conversation />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      <div css={headerStyles}>
+        <EmbeddableConversationHeader />
+      </div>
+      <div css={contentStyles}>
+        <Conversation />
+      </div>
     </EmbeddableConversationsProvider>
   );
 };

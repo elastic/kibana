@@ -7,7 +7,7 @@ date: 2025-10-28
 tags: ['kibana', 'dev', 'tutorials', 'saved-objects', 'search']
 ---
 
-`SavedObjectsClientContract.search` is a powerful way to search for Saved Objects. It allows you to search Saved Objects using the [Elasticsearch query DSL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl), [ES|QL](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax-reference), [runtime fields](https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request) and more.
+`SavedObjectsClientContract.search` is a powerful way to search for Saved Objects. It allows you to search Saved Objects using the [Elasticsearch query DSL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl), [runtime fields](https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request) and more.
 
 It is an alternative to the safer but more limited `SavedObjectsClientContract.find` method.
 
@@ -95,6 +95,6 @@ See the full example in the Kibana repository at `examples/saved_objects`.
 - You are trying to search across multiple types of Saved Objects
 - You are trying to aggregate over multiple types of Saved Objects
 
-### When not to use the`search` method
+### When not to use the `search` method
 
 - You just want a simple way to filter your Saved Object type, use `SavedObjectsClientContract.find` instead

@@ -11612,7 +11612,7 @@
                 "section": "def-common.VisualizationToolbarProps",
                 "text": "VisualizationToolbarProps"
               },
-              "<T>) => React.ReactElement<",
+              "<T> & { isInlineEditing: boolean; }) => React.ReactElement<",
               {
                 "pluginId": "@kbn/lens-common",
                 "scope": "common",
@@ -11620,7 +11620,7 @@
                 "section": "def-common.VisualizationToolbarProps",
                 "text": "VisualizationToolbarProps"
               },
-              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
+              "<T> & { isInlineEditing: boolean; }, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
             "deprecated": false,
@@ -11629,7 +11629,7 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.FlyoutToolbarComponent.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "props",
                 "description": [],
@@ -11641,7 +11641,7 @@
                     "section": "def-common.VisualizationToolbarProps",
                     "text": "VisualizationToolbarProps"
                   },
-                  "<T>"
+                  "<T> & { isInlineEditing: boolean; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
                 "deprecated": false,
