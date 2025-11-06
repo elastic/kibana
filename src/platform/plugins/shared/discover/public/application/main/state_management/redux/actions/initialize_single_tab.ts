@@ -291,7 +291,6 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
 
     // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialAppState);
-    stateContainer.appState.resetInitialState();
 
     // Set runtime state
     stateContainer$.next(stateContainer);

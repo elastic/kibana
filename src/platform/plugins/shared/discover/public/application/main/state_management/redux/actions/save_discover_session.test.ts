@@ -135,7 +135,6 @@ describe('saveDiscoverSession', () => {
     const setDataViewSpy = jest.spyOn(dataViewsActions, 'setDataView');
     const setSavedSearchSpy = jest.spyOn(state.savedSearchState, 'set');
     const undoSavedSearchChangesSpy = jest.spyOn(state.actions, 'undoSavedSearchChanges');
-    const resetInitialStateSpy = jest.spyOn(state.appState, 'resetInitialState');
     const currentTabId = state.getCurrentTab().id;
 
     jest
@@ -156,7 +155,6 @@ describe('saveDiscoverSession', () => {
       expect.objectContaining({ breakdownField: 'breakdown-test' })
     );
     expect(undoSavedSearchChangesSpy).toHaveBeenCalled();
-    expect(resetInitialStateSpy).toHaveBeenCalled();
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {

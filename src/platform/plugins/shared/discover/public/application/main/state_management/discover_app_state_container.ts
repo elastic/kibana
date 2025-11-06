@@ -74,10 +74,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   resetToState: (state: DiscoverAppState) => void;
   /**
-   * Resets the current state to the initial state
-   */
-  resetInitialState: () => void;
-  /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
    * @param replace
@@ -196,13 +192,12 @@ export const getDiscoverAppStateContainer = ({
   services: DiscoverServices;
   injectCurrentTab: TabActionInjector;
 }): DiscoverAppStateContainer => {
-  let initialState = getInitialState({
+  let previousState = getInitialState({
     initialUrlState: getCurrentUrlState(stateStorage, services),
     savedSearch: savedSearchContainer.getState(),
     services,
   });
-  let previousState = initialState;
-  const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
+  const appStateContainer = createStateContainer<DiscoverAppState>(previousState);
 
   const enhancedAppContainer = {
     ...appStateContainer,
@@ -234,11 +229,6 @@ export const getDiscoverAppStateContainer = ({
     addLog('[appState] reset state to', state);
     previousState = state;
     enhancedAppContainer.set(state);
-  };
-
-  const resetInitialState = () => {
-    addLog('[appState] reset initial state to the current state');
-    initialState = enhancedAppContainer.getState();
   };
 
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
@@ -395,7 +385,6 @@ export const getDiscoverAppStateContainer = ({
     getPrevious,
     initAndSync,
     resetToState,
-    resetInitialState,
     updateUrlWithCurrentState,
     replaceUrlState,
     update,
