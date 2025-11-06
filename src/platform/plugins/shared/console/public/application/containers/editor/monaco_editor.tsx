@@ -300,6 +300,7 @@ export const MonacoEditor = ({
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        links={true}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
@@ -309,8 +310,6 @@ export const MonacoEditor = ({
           hover: {
             above: false,
           },
-          // Enable clickable links in the editor (Cmd/Ctrl+Click to open)
-          links: true,
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}

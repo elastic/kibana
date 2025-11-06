@@ -198,6 +198,12 @@ export interface CodeEditorProps {
   htmlId?: string;
 
   /**
+   * Enables clickable links in the editor. URLs will be underlined and can be opened
+   * in a new tab using Cmd/Ctrl+Click. Disabled by default.
+   */
+  links?: boolean;
+
+  /**
    * Callbacks for when editor is focused/blurred
    */
   onFocus?: () => void;
@@ -239,6 +245,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   enableCustomContextMenu = false,
   customContextMenuActions = [],
   htmlId,
+  links = false,
   onFocus,
   onBlur,
 }) => {
@@ -648,9 +655,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 fixedOverflowWidgets: true,
                 // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
                 'bracketPairColorization.enabled': false,
-                // Disable clickable links by default (can be overridden by passing links: true in options)
-                links: false,
                 ...options,
+                // Explicit links prop always takes precedence over any value passed in options
+                links,
               }}
             />
           </UseBug223981FixRepositionSuggestWidget>
