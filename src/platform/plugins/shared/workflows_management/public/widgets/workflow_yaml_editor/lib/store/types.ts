@@ -13,7 +13,7 @@ import type { LineCounter } from 'yaml';
 import type { WorkflowDetailDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
-import type { WorkflowZodSchemaLooseType } from '../../../../../common/schema';
+import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../../entities/connectors/model/types';
 
 export interface WorkflowDetailState {
@@ -33,8 +33,8 @@ export interface WorkflowDetailState {
   isTestModalOpen: boolean;
   /** The connectors data */
   connectors?: ConnectorsResponse;
-  /** The loose schema for the workflow */
-  schemaLoose: WorkflowZodSchemaLooseType;
+  /** The schema for the workflow */
+  schema: WorkflowZodSchemaType;
 }
 
 export interface ComputedData {
