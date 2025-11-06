@@ -189,7 +189,9 @@ export function ShowShareModal({
     unhashUrl(baseUrl)
   );
 
-  const allowShortUrl = getDashboardCapabilities().createShortUrl;
+  const { createShortUrl, showWriteControls } = getDashboardCapabilities();
+  const allowShortUrl = createShortUrl;
+  const showAccessContainer = savedObjectId && !isManaged && showWriteControls;
 
   shareService.toggleShareContextMenu({
     isDirty,
@@ -253,18 +255,17 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
-      accessModeContainer:
-        savedObjectId && !isManaged ? (
-          <AccessModeContainer
-            accessControl={accessControl}
-            createdBy={createdBy}
-            getActiveSpace={spacesService?.getActiveSpace}
-            getCurrentUser={coreServices.userProfile.getCurrent}
-            onChangeAccessMode={handleChangeAccessMode}
-            accessControlClient={accessControlClient}
-            contentTypeId={CONTENT_ID}
-          />
-        ) : undefined,
+      accessModeContainer: showAccessContainer ? (
+        <AccessModeContainer
+          accessControl={accessControl}
+          createdBy={createdBy}
+          getActiveSpace={spacesService?.getActiveSpace}
+          getCurrentUser={coreServices.userProfile.getCurrent}
+          onChangeAccessMode={handleChangeAccessMode}
+          accessControlClient={accessControlClient}
+          contentTypeId={CONTENT_ID}
+        />
+      ) : undefined,
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
