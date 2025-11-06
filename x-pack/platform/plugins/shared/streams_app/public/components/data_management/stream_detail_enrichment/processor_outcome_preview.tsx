@@ -52,6 +52,8 @@ import {
 import { PreviewFlyout, MemoPreviewTable } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
+import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -59,14 +61,16 @@ export const ProcessorOutcomePreview = () => {
     selectPreviewRecords(snapshot.context)
   );
 
-  const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
-    state.context.dataSourcesRefs.some((ref) =>
-      ref.getSnapshot().matches({ enabled: 'loadingData' })
-    )
+  const activeDataSourceRef = useStreamEnrichmentSelector((snapshot) =>
+    getActiveDataSourceRef(snapshot.context.dataSourcesRefs)
+  );
+
+  const isDataSourceLoading = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.matches({ enabled: 'loadingData' }) : false
   );
 
   if (isEmpty(samples)) {
-    if (areDataSourcesLoading) {
+    if (isDataSourceLoading) {
       return (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
