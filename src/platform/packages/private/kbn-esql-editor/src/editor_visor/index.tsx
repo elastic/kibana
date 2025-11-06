@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -44,6 +45,9 @@ export function QuickEditVisor({
   const [selectedSource, setSelectedSource] = useState<EuiComboBoxOptionOption[]>([]);
   const [sourcesOptions, setSourcesOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const isMounted = useMountedState();
 
   const onSearchValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -72,14 +76,16 @@ export function QuickEditVisor({
   useEffect(() => {
     async function fetchSources() {
       const sources = await getESQLSources(core, getLicense);
-      setSourcesOptions(
-        sources.filter((source) => !source.hidden).map((source) => ({ label: source.name }))
-      );
+      if (isMounted()) {
+        setSourcesOptions(
+          sources.filter((source) => !source.hidden).map((source) => ({ label: source.name }))
+        );
+      }
     }
     if (sourcesOptions.length === 0) {
       fetchSources();
     }
-  }, [core, getLicense, sourcesOptions.length]);
+  }, [core, getLicense, sourcesOptions.length, isMounted]);
 
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
@@ -88,6 +94,12 @@ export function QuickEditVisor({
     }
     setSearchValue('');
   }, [query, selectedSource]);
+
+  useEffect(() => {
+    if (isVisible && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isVisible]);
 
   const comboBoxWidth = useMemo(() => {
     return calculateWidthFromCharCount(selectedSource[0]?.label.length || 0);
@@ -136,6 +148,7 @@ export function QuickEditVisor({
           aria-label={i18n.translate('esqlEditor.visor.searchPlaceholder', {
             defaultMessage: 'Search ...',
           })}
+          inputRef={searchInputRef}
           compressed
           fullWidth
           css={styles.searchFieldStyles}
