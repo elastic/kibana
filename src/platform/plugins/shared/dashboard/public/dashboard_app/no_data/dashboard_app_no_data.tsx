@@ -7,18 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import useAsync from 'react-use/lib/useAsync';
-import {
-  getESQLAdHocDataview,
-  getESQLQueryColumns,
-  getIndexForESQLQuery,
-  getInitialESQLQuery,
-} from '@kbn/esql-utils';
+import React, { useCallback } from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import type { LensSerializedState } from '@kbn/lens-plugin/public';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import {
   coreServices,
   dataService,
@@ -26,7 +16,6 @@ import {
   embeddableService,
   noDataPageService,
   shareService,
-  lensService,
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { dashboardClient } from '../../dashboard_client';
@@ -43,7 +32,6 @@ export const DashboardAppNoDataPage = ({
     noDataPage: noDataPageService,
     share: shareService,
   };
-  const [abortController, setAbortController] = useState(new AbortController());
   const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
   const AnalyticsNoDataPageKibanaProvider = withSuspense(
     React.lazy(() =>
@@ -53,82 +41,23 @@ export const DashboardAppNoDataPage = ({
     )
   );
 
-  const lensHelpersAsync = useAsync(() => {
-    return lensService?.stateHelperApi() ?? Promise.resolve(null);
-  }, [lensService]);
-
-  useEffect(() => {
-    return () => {
-      abortController?.abort();
-    };
-  }, [abortController]);
-
   const onTryESQL = useCallback(async () => {
-    abortController?.abort();
-    if (lensHelpersAsync.value) {
-      const abc = new AbortController();
-      const { dataViews } = dataService;
-      const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-      const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
-      const esqlQuery = getInitialESQLQuery(dataView);
-
-      try {
-        const columns = await getESQLQueryColumns({
-          esqlQuery,
-          search: dataService.search.search,
-          signal: abc.signal,
-          timeRange: dataService.query.timefilter.timefilter.getAbsoluteTime(),
-        });
-
-        // lens suggestions api context
-        const context = {
-          dataViewSpec: dataView?.toSpec(false),
-          fieldName: '',
-          textBasedColumns: columns,
-          query: { esql: esqlQuery },
-        };
-
-        setAbortController(abc);
-
-        const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataView);
-        if (chartSuggestions?.length) {
-          const [suggestion] = chartSuggestions;
-
-          await embeddableService
-            .getStateTransfer()
-            .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
-              state: [
-                {
-                  type: 'lens',
-                  serializedState: {
-                    rawState: {
-                      attributes: getLensAttributesFromSuggestion({
-                        filters: [],
-                        query: {
-                          esql: esqlQuery,
-                        },
-                        suggestion,
-                        dataView,
-                      }),
-                    },
-                  },
-                },
-              ],
-              path: '#/create',
-            });
-        }
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          coreServices.notifications.toasts.addWarning(
-            i18n.translate('dashboard.noDataviews.esqlRequestWarningMessage', {
-              defaultMessage: 'Unable to load columns. {errorMessage}',
-              values: { errorMessage: error.message },
-            })
-          );
-        }
-      }
-    }
-  }, [abortController, lensHelpersAsync.value]);
+    await embeddableService.getStateTransfer().navigateToWithEmbeddablePackages('dashboards', {
+      state: [
+        {
+          type: 'lens',
+          serializedState: {
+            rawState: {
+              id: '1',
+              isNewPanel: true,
+              attributes: { references: [] },
+            },
+          },
+        },
+      ],
+      path: '#/create',
+    });
+  }, []);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>

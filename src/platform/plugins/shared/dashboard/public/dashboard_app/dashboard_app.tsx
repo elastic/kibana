@@ -32,7 +32,6 @@ import {
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
-import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -101,10 +100,6 @@ export function DashboardApp({
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
 
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
-
-  useObservabilityAIAssistantContext({
-    dashboardApi,
-  });
 
   useExecutionContext(coreServices.executionContext, {
     type: 'application',
