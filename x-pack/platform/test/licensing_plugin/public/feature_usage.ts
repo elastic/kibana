@@ -14,7 +14,7 @@ import '@kbn/core-provider-plugin/types';
 interface FeatureUsage {
   last_used?: number;
   license_level: LicenseType;
-  name: string;
+  id: string;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -24,7 +24,7 @@ export default function (ftrContext: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  const notifyFeatureUsage = async (featureName: string, lastUsed: number) => {
+  const notifyFeatureUsage = async (featureId: string, lastUsed: number) => {
     await browser.executeAsync(
       async (feature, time, cb) => {
         const { start } = window._coreProvider;
@@ -32,7 +32,7 @@ export default function (ftrContext: FtrProviderContext) {
         await licensing.featureUsage.notifyUsage(feature, time);
         cb();
       },
-      featureName,
+      featureId,
       lastUsed
     );
   };
@@ -44,7 +44,7 @@ export default function (ftrContext: FtrProviderContext) {
 
     it('allows to register features to the server', async () => {
       const response = await supertest.get('/api/licensing/feature_usage').expect(200);
-      const features = response.body.features.map(({ name }: FeatureUsage) => name);
+      const features = response.body.features.map(({ id }: FeatureUsage) => id);
 
       // These were registered by the plugin in ../plugins/test_feature_usage
       expect(features).to.contain('test-client-A');
@@ -59,8 +59,8 @@ export default function (ftrContext: FtrProviderContext) {
       const response = await supertest.get('/api/licensing/feature_usage').expect(200);
       const features = response.body.features as FeatureUsage[];
 
-      expect(features.find((f) => f.name === 'test-client-A')?.last_used).to.be(now.toISOString());
-      expect(features.find((f) => f.name === 'test-client-B')?.last_used).to.be(null);
+      expect(features.find(({ id }) => id === 'test-client-A')?.last_used).to.be(now.toISOString());
+      expect(features.find(({ id }) => id === 'test-client-B')?.last_used).to.be(null);
     });
   });
 }

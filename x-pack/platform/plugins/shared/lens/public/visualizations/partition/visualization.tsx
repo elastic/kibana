@@ -45,7 +45,7 @@ import {
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta, visualizationTypes } from './partition_charts_meta';
-import { PieToolbar, PartitionFlyoutToolbar } from './toolbar';
+import { PieToolbar } from './toolbar';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
@@ -58,6 +58,9 @@ import {
   WAFFLE_SMALL_VALUES,
 } from '../../user_messages_ids';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { PartitionLegendSettings } from './toolbar/legend_settings';
+import { PartitionStyleSettings } from './toolbar/style_settings';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -547,7 +550,17 @@ export const getPieVisualization = ({
   },
 
   FlyoutToolbarComponent(props) {
-    return <PartitionFlyoutToolbar {...props} />;
+    const { isDisabled: hasDisabledStyleSettings } =
+      PartitionChartsMeta[props.state.shape].toolbarPopover;
+    return (
+      <FlyoutToolbar
+        {...props}
+        contentMap={{
+          style: hasDisabledStyleSettings ? undefined : PartitionStyleSettings,
+          legend: PartitionLegendSettings,
+        }}
+      />
+    );
   },
 
   hasLayerSettings(props) {
