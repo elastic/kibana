@@ -14,7 +14,7 @@ import { buildEsqlFilter } from '../util/esql_query_helpers';
 interface ExecuteEsqlParams {
   query: string;
   search: ISearchGeneric;
-  signal?: AbortSignal;
+  signal: AbortSignal;
   filter?: estypes.QueryDslQueryContainer;
   kuery?: string;
   start?: number;
