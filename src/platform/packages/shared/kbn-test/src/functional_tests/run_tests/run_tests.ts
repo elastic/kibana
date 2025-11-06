@@ -127,9 +127,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             // Only some tests need this, but if they need it it's faster to start them here.
             // runDockerServers decides if the test needs docker servers
             runDockerServers({ log, config, onEarlyExit }).then((shutdown) => {
-              if (shutdown) {
-                log.info('✅ Docker servers are ready');
-              }
+              log.info('✅ Docker servers are ready');
               return shutdown;
             }),
 
