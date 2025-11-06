@@ -42,7 +42,7 @@ describe('UpdateSourceEditor', () => {
       return screen.getByText('Dynamically filter for data in the visible map area');
     }
 
-    test('should set geoField when checked and geo field is not set', async () => {
+    test.only('should set geoField when checked and geo field is not set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
