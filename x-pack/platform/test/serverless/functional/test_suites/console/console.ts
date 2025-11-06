@@ -12,8 +12,8 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const browser = getService('browser');
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'console', 'header']);
+  const browser = getService('browser');
 
   describe('console app', function describeIndexTests() {
     before(async () => {
