@@ -34,6 +34,7 @@ export const gapsResponseSchema = schema.object({
   filled_duration_ms: schema.number(),
   unfilled_duration_ms: schema.number(),
   in_progress_duration_ms: schema.number(),
+  updated_at: schema.maybe(schema.string()),
 });
 
 export const errorResponseSchema = schema.object({

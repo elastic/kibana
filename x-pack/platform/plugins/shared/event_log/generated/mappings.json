@@ -377,6 +377,9 @@
                                         },
                                         "deleted": {
                                             "type": "boolean"
+                                        },
+                                        "updated_at": {
+                                            "type": "date"
                                         }
                                     }
                                 },

@@ -144,6 +144,9 @@ exports.EcsCustomPropertyMappings = {
                   deleted: {
                     type: 'boolean',
                   },
+                  updated_at: {
+                    type: 'date',
+                  },
                 },
               },
               execution: {

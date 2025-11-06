@@ -32,6 +32,7 @@ export const gapBaseSchema = schema.object({
   unfilled_duration_ms: schema.number(),
   in_progress_duration_ms: schema.number(),
   deleted: schema.maybe(schema.boolean()),
+  updated_at: schema.maybe(schema.string()),
 });
 
 const findGapsBaseParamsSchema = schema.object(
@@ -90,4 +91,5 @@ export const findGapsSearchAfterParamsSchema = findGapsBaseParamsSchema.extends(
   searchAfter: schema.maybe(
     schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean(), schema.any()]))
   ),
+  updatedBefore: schema.maybe(schema.string()),
 });

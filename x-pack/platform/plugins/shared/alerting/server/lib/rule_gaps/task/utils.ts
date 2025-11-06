@@ -135,10 +135,9 @@ export async function filterGapsWithOverlappingBackfills(
             );
           }
         );
-        if (isGapOverlappingWithBackfills) {
-          return;
+        if (!isGapOverlappingWithBackfills) {
+          filteredGaps.push(gap);
         }
-        filteredGaps.push(gap);
       });
     }
   }

@@ -36,6 +36,7 @@ import {
   initRun,
   checkBackfillCapacity,
 } from './utils';
+import { cleanupStuckInProgressGaps } from '../update/cleanup_stuck_in_progress_gaps';
 
 function addChunkResultsToAggregation(
   aggregatedByRule: Map<string, AggregatedByRuleEntry>,
@@ -78,6 +79,7 @@ function addChunkResultsToAggregation(
  * have detection gaps and schedules backfills to fill those gaps. The scheduler:
  * - Loads its runtime configuration from a `gap_auto_fill_scheduler` saved object
  *   (referenced by `configId` in task params)
+ * - Cleans up stuck in-progress gaps that don't have corresponding backfills
  * - Honors a global backfill capacity limit before and after each batch to avoid
  *   overscheduling system-initiated backfills
  * - Processes rules in batches, prioritizing the rules with the oldest gaps first
@@ -144,6 +146,28 @@ export function registerGapAutoFillSchedulerTask({
 
             try {
               const now = new Date();
+              const startDate: Date | undefined = dateMath.parse(config.gapFillRange)?.toDate();
+              if (!startDate) {
+                throw new Error(`Invalid gapFillRange: ${config.gapFillRange}`);
+              }
+
+              // Cleanup stuck in-progress gaps
+              try {
+                const eventLogClient = await rulesClientContext.getEventLogClient();
+                await cleanupStuckInProgressGaps({
+                  rulesClientContext,
+                  eventLogClient,
+                  eventLogger,
+                  logger,
+                  startDate,
+                });
+              } catch (cleanupError) {
+                const errMsg =
+                  cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
+                logger.warn(loggerMesage(`cleanup of stuck in-progress gaps failed: ${errMsg}`));
+                // Continue with normal flow even if cleanup fails
+              }
+
               // Step 2: Capacity pre-check
               const capacityCheckInitial = await checkBackfillCapacity({
                 rulesClient,
@@ -162,10 +186,6 @@ export function registerGapAutoFillSchedulerTask({
 
               // Step 3: Fetch rule IDs with gaps
               let remainingBackfills = capacityCheckInitial.remainingCapacity;
-              const startDate: Date | undefined = dateMath.parse(config.gapFillRange)?.toDate();
-              if (!startDate) {
-                throw new Error(`Invalid gapFillRange: ${config.gapFillRange}`);
-              }
               // newest gap first
               const sortOrder = 'desc';
               const { ruleIds } = await rulesClient.getRuleIdsWithGaps({

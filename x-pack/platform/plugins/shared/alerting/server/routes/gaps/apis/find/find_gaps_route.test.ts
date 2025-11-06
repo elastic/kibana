@@ -46,6 +46,7 @@ describe('findGapsRoute', () => {
         _seq_no: 1,
         _primary_term: 1,
       },
+      updatedAt: '2025-01-01T02:03:04.000Z',
     });
     return gap;
   };
@@ -84,7 +85,7 @@ describe('findGapsRoute', () => {
         per_page: 10,
         total: 1,
         data: [
-          {
+          expect.objectContaining({
             _id: 'gap-1',
             '@timestamp': '2024-01-30T00:00:00.000Z',
             rule_id: 'abc',
@@ -105,7 +106,8 @@ describe('findGapsRoute', () => {
             ],
             filled_intervals: [],
             in_progress_intervals: [],
-          },
+            updated_at: '2025-01-01T02:03:04.000Z',
+          }),
         ],
       },
     });

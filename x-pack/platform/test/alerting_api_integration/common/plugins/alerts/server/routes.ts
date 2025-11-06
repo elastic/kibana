@@ -783,6 +783,8 @@ export function defineRoutes(
           start: schema.string(),
           end: schema.string(),
           spaceId: schema.string(),
+          markInProgress: schema.maybe(schema.boolean()),
+          updatedAt: schema.maybe(schema.string()),
         }),
       },
     },
@@ -874,6 +876,59 @@ export function defineRoutes(
           },
           { retries: 5 }
         );
+
+        // Optionally mark the just-created gap as in-progress (for testing flows)
+        if (req.body.markInProgress) {
+          const found = await eventLogClient.findEventsBySavedObjectIds(
+            'alert',
+            [req.body.ruleId],
+            {
+              filter: 'event.action: gap',
+              sort: [
+                {
+                  sort_field: '@timestamp',
+                  sort_order: 'desc',
+                },
+              ],
+              per_page: 1,
+            }
+          );
+
+          if (found.total > 0 && Array.isArray(found.data) && found.data[0]?._id) {
+            const latest = found.data[0] as any;
+            const inProgressIntervals = [
+              {
+                gte: req.body.start,
+                lte: req.body.end,
+              },
+            ];
+            const updatedAt = req.body.updatedAt ?? new Date().toISOString();
+
+            await eventLogger.updateEvents([
+              {
+                internalFields: {
+                  _id: latest._id,
+                  _index: latest._index,
+                  _seq_no: latest._seq_no,
+                  _primary_term: latest._primary_term,
+                },
+                event: {
+                  kibana: {
+                    alert: {
+                      rule: {
+                        gap: {
+                          in_progress_intervals: inProgressIntervals,
+                          updated_at: updatedAt,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ]);
+            await eventLogClient.refreshIndex();
+          }
+        }
         return res.ok({ body: { ok: true } });
       } catch (err) {
         return res.customError({
