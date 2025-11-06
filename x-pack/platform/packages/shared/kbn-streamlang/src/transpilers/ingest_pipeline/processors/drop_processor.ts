@@ -10,10 +10,8 @@ import type { IngestPipelineDropProcessor } from '../../../../types/processors/i
 
 export const processDropProcessor = (
   DropProcessor: IngestPipelineDropProcessor
-): IngestProcessorContainer[] => {
-  return [
-    {
-      drop: { ...DropProcessor },
-    },
-  ];
-};
+): IngestProcessorContainer[] => [
+  {
+    drop: { ...DropProcessor },
+  },
+];

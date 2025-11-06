@@ -7,15 +7,15 @@
 
 import { expect } from '@kbn/scout';
 import type { DropDocumentProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
-  'Streamlang to Ingest Pipeline - Drop Processor',
+  'Streamlang to ES|QL - Drop Document Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    apiTest('should drop a document matching where condition', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-drop-basic';
+    apiTest('should remove a field with drop document', async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-drop-basic';
 
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -29,17 +29,17 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { query } = transpile(streamlangDSL);
 
       const docs = [
         { environment: 'production', message: 'keep-this' },
         { environment: 'non-production', message: 'drop-this' }, // should drop docs with non-production environments
       ];
-      await testBed.ingest(indexName, docs, processors);
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
+      expect(esqlResult.documents).toHaveLength(1);
+      const source = esqlResult.documents[0];
       expect(source).toHaveProperty('environment', 'production');
       expect(source).toHaveProperty('message', 'keep-this');
     });
