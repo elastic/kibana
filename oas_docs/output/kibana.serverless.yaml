@@ -1609,6 +1609,24 @@ paths:
                       - type
                       - data
                   type: array
+                browser_api_tools:
+                  description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: Description of what the browser API tool does.
+                        type: string
+                      id:
+                        description: Unique identifier for the browser API tool.
+                        type: string
+                      schema: {}
+                    required:
+                      - id
+                      - description
+                      - schema
+                  type: array
                 capabilities:
                   additionalProperties: false
                   description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
@@ -1720,6 +1738,24 @@ paths:
                     required:
                       - type
                       - data
+                  type: array
+                browser_api_tools:
+                  description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: Description of what the browser API tool does.
+                        type: string
+                      id:
+                        description: Unique identifier for the browser API tool.
+                        type: string
+                      schema: {}
+                    required:
+                      - id
+                      - description
+                      - schema
                   type: array
                 capabilities:
                   additionalProperties: false
