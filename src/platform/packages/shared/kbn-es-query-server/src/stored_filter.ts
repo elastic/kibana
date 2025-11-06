@@ -19,7 +19,7 @@ const filterStateStoreSchema = schema.oneOf([appStateSchema, globalStateSchema],
   },
 });
 
-export const filterMetaSchema = schema.object(
+export const storedFilterMetaSchema = schema.object(
   {
     alias: schema.maybe(schema.nullable(schema.string())),
     disabled: schema.maybe(schema.boolean()),
@@ -48,9 +48,9 @@ export const filterMetaSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const filterSchema = schema.object(
+export const storedFilterSchema = schema.object(
   {
-    meta: filterMetaSchema,
+    meta: storedFilterMetaSchema,
     query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     $state: schema.maybe(
       schema.object({

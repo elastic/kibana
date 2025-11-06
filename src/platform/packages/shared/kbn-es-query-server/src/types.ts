@@ -16,19 +16,17 @@ import type {
 } from './time_range';
 import type { aggregateQuerySchema, querySchema } from './query';
 import type {
-  filterSchema,
-  filterMetaSchema,
+  storedFilterSchema,
+  storedFilterMetaSchema,
   globalStateSchema,
   appStateSchema,
-} from './filter/stored_filter';
+} from './stored_filter';
 import type {
-  simpleFilterSchema,
-  simpleFilterConditionSchema,
-  filterGroupSchema,
-  rawDSLFilterSchema,
-  filterValueSchema,
-  rangeValueSchema,
-} from './filter/simple_filter';
+  filterSchema,
+  conditionFilterSchema,
+  groupFilterSchema,
+  dslFilterSchema,
+} from './filter';
 
 export type TimeRange = Writable<TypeOf<typeof timeRangeSchema>>;
 export type AbsoluteTimeRange = TypeOf<typeof absoluteTimeRangeSchema>;
@@ -37,18 +35,16 @@ export type RelativeTimeRange = TypeOf<typeof relativeTimeRangeSchema>;
 export type Query = Writable<TypeOf<typeof querySchema>>;
 export type AggregateQuery = Writable<TypeOf<typeof aggregateQuerySchema>>;
 
-export type Filter = Writable<TypeOf<typeof filterSchema>>;
-export type FilterMeta = Writable<TypeOf<typeof filterMetaSchema>>;
+export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;
+export type StoredFilterMeta = Writable<TypeOf<typeof storedFilterMetaSchema>>;
+export type StoredFilterState = TypeOf<typeof appStateSchema> | TypeOf<typeof globalStateSchema>;
 
 /**
- * Schema-inferred types for Simple Filter API
+ * Schema-inferred types for Filter API
  *
  * These types are inferred from validation schemas and provide runtime validation compatibility.
  */
-export type SimpleFilter = Writable<TypeOf<typeof simpleFilterSchema>>;
-export type SimpleFilterCondition = Writable<TypeOf<typeof simpleFilterConditionSchema>>;
-export type SimpleFilterGroup = Writable<TypeOf<typeof filterGroupSchema>>;
-export type SimpleDSLFilter = Writable<TypeOf<typeof rawDSLFilterSchema>>;
-export type SimpleFilterValue = Writable<TypeOf<typeof filterValueSchema>>;
-export type SimpleRangeValue = Writable<TypeOf<typeof rangeValueSchema>>;
-export type StoredFilterState = TypeOf<typeof appStateSchema> | TypeOf<typeof globalStateSchema>;
+export type Filter = Writable<TypeOf<typeof filterSchema>>;
+export type ConditionFilter = Writable<TypeOf<typeof conditionFilterSchema>>;
+export type GroupFilter = Writable<TypeOf<typeof groupFilterSchema>>;
+export type DSLFilter = Writable<TypeOf<typeof dslFilterSchema>>;

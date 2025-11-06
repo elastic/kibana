@@ -23,7 +23,7 @@ import { schema } from '@kbn/config-schema';
 /**
  * Schema for range values used in numeric and date filters
  */
-export const rangeValueSchema = schema.object({
+const rangeSchema = schema.object({
   gte: schema.maybe(
     schema.oneOf([schema.number(), schema.string()], {
       meta: { description: 'Greater than or equal to' },
@@ -46,30 +46,14 @@ export const rangeValueSchema = schema.object({
   ),
 });
 
-/**
- * Schema for all possible filter values
- */
-export const filterValueSchema = schema.oneOf(
-  [
-    schema.string(),
-    schema.number(),
-    schema.boolean(),
-    schema.arrayOf(schema.string()),
-    schema.arrayOf(schema.number()),
-    schema.arrayOf(schema.boolean()),
-    rangeValueSchema,
-  ],
-  { meta: { description: 'Filter value - single value, array of homogeneous values, or range' } }
-);
-
 // ====================================================================
-// BASE FILTER PROPERTIES (SHARED BY ALL SIMPLIFIED FILTERS)
+// BASE PROPERTIES (SHARED BY ALL FILTERS)
 // ====================================================================
 
 /**
  * Base properties shared by all simplified filters
  */
-const baseFilterPropertiesSchema = {
+const baseProperties = {
   pinned: schema.maybe(
     schema.boolean({
       meta: { description: 'Whether the filter is pinned' },
@@ -105,21 +89,21 @@ const baseFilterPropertiesSchema = {
 };
 
 // ====================================================================
-// SIMPLE FILTER CONDITION SCHEMAS
+// FILTER CONDITION SCHEMAS
 // ====================================================================
 
 /**
  * Common field property for all filter conditions
  */
-const filterConditionFieldSchema = {
+const conditionField = {
   field: schema.string({ meta: { description: 'Field the filter applies to' } }),
 };
 
 /**
  * Schema for 'is' and 'is_not' operators with single value
  */
-const filterConditionIsSingleSchema = schema.object({
-  ...filterConditionFieldSchema,
+const singleConditionSchema = schema.object({
+  ...conditionField,
   operator: schema.oneOf([schema.literal('is'), schema.literal('is_not')], {
     meta: { description: 'Single value comparison operators' },
   }),
@@ -131,8 +115,8 @@ const filterConditionIsSingleSchema = schema.object({
 /**
  * Schema for 'is_one_of' and 'is_not_one_of' operators with array values
  */
-const filterConditionIsOneOfSchema = schema.object({
-  ...filterConditionFieldSchema,
+const oneOfConditionSchema = schema.object({
+  ...conditionField,
   operator: schema.oneOf([schema.literal('is_one_of'), schema.literal('is_not_one_of')], {
     meta: { description: 'Array value comparison operators' },
   }),
@@ -149,17 +133,17 @@ const filterConditionIsOneOfSchema = schema.object({
 /**
  * Schema for 'range' operator with range value
  */
-const filterConditionRangeSchema = schema.object({
-  ...filterConditionFieldSchema,
+const rangeConditionSchema = schema.object({
+  ...conditionField,
   operator: schema.literal('range'),
-  value: rangeValueSchema,
+  value: rangeSchema,
 });
 
 /**
  * Schema for 'exists' and 'not_exists' operators without value
  */
-const filterConditionExistsSchema = schema.object({
-  ...filterConditionFieldSchema,
+const existsConditionSchema = schema.object({
+  ...conditionField,
   operator: schema.oneOf([schema.literal('exists'), schema.literal('not_exists')], {
     meta: { description: 'Field existence check operators' },
   }),
@@ -169,93 +153,70 @@ const filterConditionExistsSchema = schema.object({
 /**
  * Discriminated union schema for simple filter conditions with proper operator/value type combinations
  */
-export const simpleFilterConditionSchema = schema.oneOf(
-  [
-    filterConditionIsSingleSchema,
-    filterConditionIsOneOfSchema,
-    filterConditionRangeSchema,
-    filterConditionExistsSchema,
-  ],
+const conditionSchema = schema.oneOf(
+  [singleConditionSchema, oneOfConditionSchema, rangeConditionSchema, existsConditionSchema],
   { meta: { description: 'A filter condition with strict operator/value type matching' } }
 );
 
 // ====================================================================
-// FILTER GROUP SCHEMA (RECURSIVE)
+// FILTER DISCRIMINATED UNION SCHEMA
 // ====================================================================
+
+/**
+ * Schema for condition filters
+ */
+export const conditionFilterSchema = schema.object(
+  {
+    ...baseProperties,
+    condition: conditionSchema,
+  },
+  { meta: { description: 'Condition filter' } }
+);
 
 /**
  * Schema for logical filter groups with recursive structure
  * Uses lazy schema to handle recursive references
- * Note: Groups only contain logical structure (type, conditions) - no metadata properties
  */
-export const filterGroupSchema = schema.object(
+const GROUP_FILTER_ID = '@kbn/es-query-server_groupFilter'; // package prefix for global uniqueness in OAS specs
+export const groupFilterSchema = schema.object(
   {
-    type: schema.oneOf([schema.literal('and'), schema.literal('or')]),
-    conditions: schema.arrayOf(
-      schema.oneOf([
-        simpleFilterConditionSchema,
-        schema.lazy('filterGroup'), // Recursive reference
-      ])
+    ...baseProperties,
+    group: schema.object(
+      {
+        type: schema.oneOf([schema.literal('and'), schema.literal('or')]),
+        conditions: schema.arrayOf(
+          schema.oneOf([
+            conditionSchema,
+            schema.lazy(GROUP_FILTER_ID), // Recursive reference for nested groups
+          ])
+        ),
+      },
+      { meta: { description: 'Condition or nested group filter', id: GROUP_FILTER_ID } }
     ),
-  },
-  { meta: { description: 'Grouped filters', id: 'filterGroup' } }
-);
-
-// ====================================================================
-// RAW DSL FILTER SCHEMA
-// ====================================================================
-
-/**
- * Schema for raw Elasticsearch Query DSL filters
- */
-export const rawDSLFilterSchema = schema.object({
-  query: schema.recordOf(schema.string(), schema.any(), {
-    meta: { description: 'Elasticsearch Query DSL object' },
-  }),
-});
-
-// ====================================================================
-// SIMPLE FILTER DISCRIMINATED UNION SCHEMA
-// ====================================================================
-
-/**
- * Schema for simple condition filters (Tier 1)
- */
-export const simpleConditionFilterSchema = schema.object(
-  {
-    ...baseFilterPropertiesSchema,
-    condition: simpleFilterConditionSchema,
-  },
-  { meta: { description: 'Simple condition filter' } }
-);
-
-/**
- * Schema for grouped condition filters (Tier 2-3)
- */
-export const simpleGroupFilterSchema = schema.object(
-  {
-    ...baseFilterPropertiesSchema,
-    group: filterGroupSchema,
   },
   { meta: { description: 'Grouped condition filter' } }
 );
 
 /**
- * Schema for raw DSL filters (Tier 4)
+ * Schema for DSL filters
  */
-export const simpleDSLFilterSchema = schema.object(
+export const dslFilterSchema = schema.object(
   {
-    ...baseFilterPropertiesSchema,
-    dsl: rawDSLFilterSchema,
+    ...baseProperties,
+    dsl: schema.object({
+      query: schema.recordOf(schema.string(), schema.any(), {
+        meta: { description: 'Elasticsearch Query DSL object' },
+      }),
+    }),
   },
   { meta: { description: 'Raw DSL filter' } }
 );
 
 /**
- * Main discriminated union schema for SimpleFilter
+ * Main discriminated union schema for Filter
  * Ensures exactly one of: condition, group, or dsl is present
  */
-export const simpleFilterSchema = schema.oneOf(
-  [simpleConditionFilterSchema, simpleGroupFilterSchema, simpleDSLFilterSchema],
+export const filterSchema = schema.oneOf(
+  [conditionFilterSchema, groupFilterSchema, dslFilterSchema],
   { meta: { description: 'A filter which can be a condition, group, or raw DSL' } }
 );
