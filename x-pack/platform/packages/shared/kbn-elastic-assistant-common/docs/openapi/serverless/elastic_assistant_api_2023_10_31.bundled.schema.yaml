@@ -864,6 +864,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseReadResponse200Example2:
+                  summary: >-
+                    A response that returns information about the knowledge
+                    base.
+                  value:
+                    defend_insights_exists: true
+                    elser_exists: false
+                    is_setup_available: true
+                    is_setup_in_progress: true
+                    product_documentation_status: installed
+                    security_labs_exists: false
+                    user_data_exists: true
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
           description: Indicates a successful call.
@@ -880,18 +893,50 @@ paths:
     post:
       operationId: PostKnowledgeBase
       parameters:
-        - $ref: '#/components/parameters/KnowledgeBaseModelId'
-        - $ref: '#/components/parameters/KnowledgeBaseIgnoreLabs'
+        - description: >-
+            ELSER modelId to use when setting up the Knowledge Base. If not
+            provided, a default model will be used.
+          example: elser-model-001
+          in: query
+          name: modelId
+          required: false
+          schema:
+            type: string
+        - description: >-
+            Indicates whether we should or should not install Security Labs docs
+            when setting up the Knowledge Base. Defaults to `false`.
+          example: true
+          in: query
+          name: ignoreSecurityLabs
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse200Example2:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse400Example2:
+                  summary: >-
+                    A response for a request that failed due to an invalid query
+                    parameter value.
+                  value: >
+                    statusCode: 400 error: Bad Request message: "[request
+                    query]: ignoreSecurityLabs: Invalid enum value. Expected
+                    'true' | 'false', received 'yes', ignoreSecurityLabs:
+                    Expected boolean, received string"
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
           description: Generic Error
@@ -904,11 +949,30 @@ paths:
       description: Read a knowledge base with a specific resource identifier.
       operationId: ReadKnowledgeBase
       parameters:
-        - $ref: '#/components/parameters/KnowledgeBaseResource'
+        - description: The KnowledgeBase `resource` value.
+          example: kb12345
+          in: path
+          name: resource
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseReadResponse200Example1:
+                  summary: >-
+                    A response that returns information about the knowledge
+                    base.
+                  value:
+                    defend_insights_exists: true
+                    elser_exists: false
+                    is_setup_available: true
+                    is_setup_in_progress: true
+                    product_documentation_status: installed
+                    security_labs_exists: false
+                    user_data_exists: true
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
           description: Indicates a successful call.
@@ -926,19 +990,57 @@ paths:
       description: Create a knowledge base with a specific resource identifier.
       operationId: CreateKnowledgeBase
       parameters:
-        - $ref: '#/components/parameters/KnowledgeBaseResource'
-        - $ref: '#/components/parameters/KnowledgeBaseModelId'
-        - $ref: '#/components/parameters/KnowledgeBaseIgnoreLabs'
+        - description: The KnowledgeBase `resource` value.
+          example: kb12345
+          in: path
+          name: resource
+          required: true
+          schema:
+            type: string
+        - description: >-
+            ELSER modelId to use when setting up the Knowledge Base. If not
+            provided, a default model will be used.
+          example: elser-model-001
+          in: query
+          name: modelId
+          required: false
+          schema:
+            type: string
+        - description: >-
+            Indicates whether we should or should not install Security Labs docs
+            when setting up the Knowledge Base. Defaults to `false`.
+          example: true
+          in: query
+          name: ignoreSecurityLabs
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse200Example1:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse400Example1:
+                  summary: >-
+                    A response for a request that failed due to an invalid query
+                    parameter value.
+                  value: >
+                    statusCode: 400 error: Bad Request message: "[request
+                    query]: ignoreSecurityLabs: Invalid enum value. Expected
+                    'true' | 'false', received 'yes', ignoreSecurityLabs:
+                    Expected boolean, received string"
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
           description: Generic Error
@@ -1565,36 +1667,6 @@ paths:
         - Security AI Assistant API
         - Prompts API
 components:
-  parameters:
-    KnowledgeBaseIgnoreLabs:
-      description: >-
-        Indicates whether we should or should not install Security Labs docs
-        when setting up the Knowledge Base. Defaults to `false`.
-      example: true
-      in: query
-      name: ignoreSecurityLabs
-      required: false
-      schema:
-        default: false
-        type: boolean
-    KnowledgeBaseModelId:
-      description: >-
-        ELSER modelId to use when setting up the Knowledge Base. If not
-        provided, a default model will be used.
-      example: elser-model-001
-      in: query
-      name: modelId
-      required: false
-      schema:
-        type: string
-    KnowledgeBaseResource:
-      description: The KnowledgeBase `resource` value.
-      example: kb12345
-      in: path
-      name: resource
-      required: true
-      schema:
-        type: string
   schemas:
     AnonymizationFieldCreateProps:
       type: object
