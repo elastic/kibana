@@ -218,7 +218,9 @@ export const getDiscoverAppStateContainer = ({
     state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
   };
 
-  appStateContainer.set(previousState);
+  internalState.dispatch(
+    injectCurrentTab(internalStateActions.setAppState)({ appState: previousState })
+  );
 
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
     return getInitialState({
