@@ -35,44 +35,12 @@ import { getConnectorType as getD3SecurityConnectorType } from './d3security';
 import { getConnectorType as getTheHiveConnectorType } from './thehive';
 import { getConnectorType as getXSOARConnectorType } from './xsoar';
 import { getOpsgenieConnectorType } from './opsgenie';
-import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
-import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
-export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
-export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
-export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
-export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
-export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';
-export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
-export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
-export { OpsgenieConnectorTypeId } from './opsgenie';
-
-export type {
-  OpsgenieActionConfig,
-  OpsgenieActionSecrets,
-  OpsgenieActionParams,
-  OpsgenieCloseAlertSubActionParams,
-  OpsgenieCreateAlertSubActionParams,
-  OpsgenieCloseAlertParams,
-  OpsgenieCreateAlertParams,
-} from './opsgenie';
-
-export type {
-  JiraServiceManagementActionConfig,
-  JiraServiceManagementActionSecrets,
-  JiraServiceManagementActionParams,
-  JiraServiceManagementCloseAlertSubActionParams,
-  JiraServiceManagementCreateAlertSubActionParams,
-  JiraServiceManagementCloseAlertParams,
-  JiraServiceManagementCreateAlertParams,
-} from './jira-service-management';
-
-export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 

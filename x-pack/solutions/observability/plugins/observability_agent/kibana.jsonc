@@ -9,7 +9,14 @@
     "browser": false,
     "server": true,
     "configPath": ["xpack", "observabilityAgent"],
-    "requiredPlugins": ["onechat", "apmDataAccess", "logsDataAccess", "ruleRegistry", "dataViews"],
+    "requiredPlugins": [
+      "onechat",
+      "apmDataAccess",
+      "logsDataAccess",
+      "security",
+      "ruleRegistry",
+      "dataViews"
+    ],
     "optionalPlugins": [],
     "requiredBundles": [],
     "extraPublicDirs": []

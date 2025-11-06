@@ -32,6 +32,13 @@ export async function getApmIndices({
     return plugins.apmDataAccess.getApmIndices(savedObjectsClient);
   } catch (error) {
     logger.warn(`Failed to resolve APM indices for Observability Agent: ${error.message}`);
-    throw error;
+    return {
+      error: 'apm-error-*',
+      metric: 'apm-metric-*',
+      onboarding: 'apm-onboarding-*',
+      span: 'apm-span-*',
+      transaction: 'apm-transaction-*',
+      sourcemap: 'apm-sourcemap-*',
+    };
   }
 }

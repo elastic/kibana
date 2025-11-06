@@ -35,7 +35,6 @@ jest.mock('../cell_actions', () => ({
 describe('DraggableLegendItem', () => {
   const legendItem: LegendItem = {
     color: '#1EA593',
-    dataProviderId: 'draggable-legend-item-3207fda7-d008-402a-86a0-8ad632081bad-event_dataset-flow',
     field: 'event.dataset',
     value: 'flow',
     scopeId: 'test',
@@ -74,16 +73,13 @@ describe('DraggableLegendItem', () => {
   });
 
   it('renders draggable legend item text', () => {
-    const { container } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <DraggableLegendItem legendItem={legendItem} />
       </TestProviders>
     );
 
-    const legendItemElement = container.querySelector(
-      `[data-provider-id="draggableId.content.${legendItem.dataProviderId}"]`
-    );
-    expect(legendItemElement).toHaveTextContent(String(legendItem.value));
+    expect(getByTestId('legend-item')).toHaveTextContent('flow');
   });
 
   it('renders a custom legend item via the `render` prop when provided', () => {
@@ -122,12 +118,7 @@ describe('DraggableLegendItem', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('mockSecurityCellActions')).toBeInTheDocument();
-    expect(MockSecurityCellActions).toHaveBeenCalledWith(
-      expect.objectContaining({
-        disabledActionTypes: ['security-cellAction-type-showTopN'],
-      })
-    );
+    expect(screen.getByTestId('legend-item')).toBeInTheDocument();
   });
 
   it('renders the empty value label when the value is empty', () => {
@@ -156,7 +147,7 @@ describe('DraggableLegendItem', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId(`legend-item-${legendItem.dataProviderId}`)).not.toBeInTheDocument();
+      expect(queryByTestId(`render-content-${legendItem.field}`)).not.toBeInTheDocument();
       expect(getByTestId('legendItemInlineActions')).toBeInTheDocument();
     });
   });

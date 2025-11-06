@@ -41,8 +41,6 @@ export function environmentFilter(environment?: string) {
   return [{ term: { 'service.environment': environment } }];
 }
 
-// { term: { 'metricset.name': 'service_transaction' } },
-
 export function termFilter<T extends string>(
   field: T,
   value: string | boolean | number | undefined | null

@@ -12,13 +12,16 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import { registerObservabilityAgent } from './register_observability_agent';
+import { OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID } from '@kbn/management-settings-ids';
+import { registerObservabilityAgent } from './agent/register_observability_agent';
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from './types';
+import { registerTools } from './tools/register_tools';
+import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 
 export class ObservabilityAgentPlugin
   implements
@@ -39,9 +42,27 @@ export class ObservabilityAgentPlugin
     core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>,
     plugins: ObservabilityAgentPluginSetupDependencies
   ): ObservabilityAgentPluginSetup {
-    registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
-      this.logger.error(`Error registering observability agent: ${error}`);
-    });
+    getIsObservabilityAgentEnabled(core)
+      .then((isObservabilityAgentEnabled) => {
+        if (!isObservabilityAgentEnabled) {
+          this.logger.debug(
+            `Skipping observability agent registration because ${OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID} is disabled`
+          );
+          return;
+        }
+
+        registerTools({ core, plugins, logger: this.logger }).catch((error) => {
+          this.logger.error(`Error registering observability agent tools: ${error}`);
+        });
+
+        registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
+          this.logger.error(`Error registering observability agent: ${error}`);
+        });
+      })
+      .catch((error) => {
+        this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);
+      });
+
     return {};
   }
 
