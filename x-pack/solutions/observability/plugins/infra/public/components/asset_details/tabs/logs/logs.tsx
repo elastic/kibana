@@ -42,7 +42,7 @@ export const Logs = () => {
       share: { url },
     },
   } = useKibanaContextForPlugin();
-  const { logsLocator } = getLogsLocatorsFromUrlService(url)!;
+  const { logsLocator } = getLogsLocatorsFromUrlService(url);
   const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
@@ -87,7 +87,7 @@ export const Logs = () => {
       nodeId: asset.id,
       filter: textQueryDebounced,
     });
-    return logsLocator.getRedirectUrl({
+    return logsLocator?.getRedirectUrl({
       filter: nodeQuery.query,
       timeRange: {
         startTime: state.startTimestamp,
