@@ -133,7 +133,7 @@ const getPreviewTitle = (
 
   return dataViewName
     ? i18n.translate('discover.tabsView.tabPreviewDataViewTitle', {
-        defaultMessage: 'Data View: {dataViewName}',
+        defaultMessage: 'Data view: {dataViewName}',
         values: { dataViewName },
       })
     : undefined;
