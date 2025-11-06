@@ -6,7 +6,7 @@
  */
 
 import type { PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { getDescriptionFields } from '.';
+import { getDescriptionFields } from './get_description_fields';
 
 describe('getDescriptionFields', () => {
   const mockPrebuildField = jest.fn();
