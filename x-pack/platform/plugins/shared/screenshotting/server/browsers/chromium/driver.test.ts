@@ -105,4 +105,28 @@ describe('chromium driver', () => {
     `);
     expect(result).toEqual(Buffer.from(`you won't believe this one weird screenshot`, 'base64'));
   });
+
+  it('sets the PDF image size', async () => {
+    const driver = new HeadlessChromiumDriver(
+      mockScreenshotModeSetup,
+      mockConfig,
+      mockBasePath,
+      mockPage
+    );
+
+    const layout = new PreserveLayout({} as Size);
+
+    const testSpy = jest.spyOn(layout, 'setPdfImageSize');
+
+    await driver.screenshot({
+      elementPosition: {
+        boundingClientRect: { top: 200, left: 10, height: 10, width: 100 },
+        scroll: { x: 100, y: 300 },
+      },
+      layout,
+    });
+
+    expect(testSpy).toHaveBeenCalledTimes(1);
+    expect(testSpy).toHaveBeenCalledWith({ height: 10, width: 100 });
+  });
 });
