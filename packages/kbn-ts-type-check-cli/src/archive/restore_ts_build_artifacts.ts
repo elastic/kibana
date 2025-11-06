@@ -28,6 +28,8 @@ import { MAX_COMMITS_TO_CHECK } from './constants';
 
 export async function restoreTSBuildArtifacts(log: SomeDevLog) {
   try {
+    const now = Date.now();
+
     log.info(`Restoring TypeScript build artifacts`);
     const currentSha = await resolveCurrentCommitSha();
     const history = await readRecentCommitShas(MAX_COMMITS_TO_CHECK);
@@ -64,7 +66,11 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
     await writeRestoreMetadataDocument(archiveCandidate);
 
-    log.info(`Restored TypeScript build artifacts from commit ${archiveCandidate.sha}.`);
+    const tookInMs = Math.round(Date.now() - now);
+
+    log.info(
+      `Restored TypeScript build artifacts from commit ${archiveCandidate.sha} in ${tookInMs}ms.`
+    );
   } catch (error) {
     const restoreErrorDetails = error instanceof Error ? error.message : String(error);
     log.warning(`Failed to restore TypeScript build artifacts: ${restoreErrorDetails}`);

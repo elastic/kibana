@@ -15,6 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { type TsProject, TS_PROJECTS } from '@kbn/ts-projects';
+import execa from 'execa';
 
 import {
   updateRootRefsConfig,
@@ -23,6 +24,7 @@ import {
 } from './root_refs_config';
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
 import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
+import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
@@ -85,6 +87,14 @@ async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
   );
 }
 
+async function detectLocalChanges(): Promise<boolean> {
+  const { stdout } = await execa('git', ['status', '--porcelain'], {
+    cwd: REPO_ROOT,
+  });
+
+  return stdout.trim().length > 0;
+}
+
 run(
   async ({ log, flagsReader, procRunner }) => {
     const shouldCleanCache = flagsReader.boolean('clean-cache');
@@ -96,6 +106,10 @@ run(
           force: true,
           recursive: true,
         });
+      });
+      await Fsp.rm(LOCAL_CACHE_ROOT, {
+        force: true,
+        recursive: true,
       });
       log.warning('Deleted all TypeScript caches');
       return;
@@ -151,8 +165,14 @@ run(
       didTypeCheckFail = true;
     }
 
+    const hasLocalChanges = shouldUseArchive ? await detectLocalChanges() : false;
+
     if (shouldUseArchive) {
-      await archiveTSBuildArtifacts(log);
+      if (hasLocalChanges) {
+        log.verbose('Skipping TypeScript cache archive because uncommitted changes were detected.');
+      } else {
+        await archiveTSBuildArtifacts(log);
+      }
     } else {
       log.verbose('Skipping TypeScript cache archive because --with-archive was not provided.');
     }

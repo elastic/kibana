@@ -41,6 +41,8 @@ import {
  * in a GCS bucket for cached type checks.
  */
 export async function archiveTSBuildArtifacts(log: SomeDevLog) {
+  const now = Date.now();
+
   const matches = await globby(CACHE_MATCH_GLOBS, {
     cwd: REPO_ROOT,
     dot: true,
@@ -180,7 +182,9 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
           });
         });
 
-        log.info(`Streamed TypeScript build artifacts to ${commitUris.archiveUri}.`);
+        const tookInMs = Math.round(Date.now() - now);
+
+        log.info(`Streamed TypeScript build artifacts to ${commitUris.archiveUri} in ${tookInMs}.`);
       }
     } else {
       await ensureLocalCacheRoot();
@@ -203,7 +207,11 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
       const destinationMetadataPath = resolveLocalMetadataPath(commitSha);
       await Fs.promises.writeFile(destinationMetadataPath, metadataContent);
 
-      log.info(`Archived TypeScript build artifacts locally at ${destinationPath}.`);
+      const tookInMs = Math.round(Date.now() - now);
+
+      log.info(
+        `Archived TypeScript build artifacts locally at ${destinationPath} in ${tookInMs}ms.`
+      );
     }
   } finally {
     if (embeddedMetadataAbsolutePath) {
