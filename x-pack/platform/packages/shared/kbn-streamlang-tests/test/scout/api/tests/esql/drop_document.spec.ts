@@ -14,7 +14,7 @@ apiTest.describe(
   'Streamlang to ES|QL - Drop Document Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    apiTest('should remove a field with drop document', async ({ testBed, esql }) => {
+    apiTest('should drop a document matching where condition', async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-drop-basic';
 
       const streamlangDSL: StreamlangDSL = {

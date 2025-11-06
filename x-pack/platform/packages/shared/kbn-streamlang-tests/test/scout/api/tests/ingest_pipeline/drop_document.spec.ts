@@ -11,7 +11,7 @@ import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
-  'Streamlang to Ingest Pipeline - Drop Processor',
+  'Streamlang to Ingest Pipeline - Drop Document Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     apiTest('should drop a document matching where condition', async ({ testBed }) => {
