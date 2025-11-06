@@ -106,7 +106,9 @@ export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
   text: '(FROM $0)',
   asSnippet: true,
   kind: 'Method',
-  detail: 'FROM',
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.subqueryFromDoc', {
+    defaultMessage: 'Adds a nested ES|QL query to your current query',
+  }),
   sortText: '1',
 });
 
