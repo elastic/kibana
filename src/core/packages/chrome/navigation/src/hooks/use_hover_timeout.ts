@@ -12,7 +12,7 @@ import { useRef, useCallback, useEffect } from 'react';
 /**
  * Hook for managing hover timeouts.
  *
- * @returns An object containing:
+ * @returns an object containing:
  * - `setHoverTimeout` - a function to set a hover timeout.
  * - `clearHoverTimeout` - a function to clear the hover timeout.
  */

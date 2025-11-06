@@ -12,7 +12,7 @@ import type { RefObject } from 'react';
 /**
  * Utility function to focus the adjacent trigger element.
  *
- * @param direction - The direction to focus the adjacent trigger element.
+ * @param direction - the direction to focus the adjacent trigger element.
  */
 export const focusAdjacentTrigger = (ref: RefObject<HTMLElement>, direction: -1 | 1) => {
   if (!ref.current) return;
