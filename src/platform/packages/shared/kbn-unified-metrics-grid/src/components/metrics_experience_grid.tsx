@@ -235,6 +235,7 @@ export const MetricsExperienceGrid = ({
             discoverFetch$={discoverFetch$}
             requestParams={requestParams}
             abortController={abortController}
+            searchTerm={searchTerm}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
