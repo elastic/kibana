@@ -169,15 +169,11 @@ export function generateUserJourney(): Array<Partial<LogDocument>> {
       'http.response.status_code': journey.statusCodes[i],
       'user_agent.name': session.userAgent,
       'http.request.referrer': i > 0 ? `https://example.com${journey.paths[i - 1]}` : '-',
+      'event.action': `user_journey_${journey.name}`,
+      'event.category': 'web',
+      'event.sequence': i + 1,
       tags: ['user-journey', journey.name],
     };
-
-    // Add journey metadata
-    if (!logData.labels) {
-      logData.labels = {};
-    }
-    (logData.labels as Record<string, string>).journey_type = journey.name;
-    (logData.labels as Record<string, string>).journey_step = `${i + 1}/${journey.paths.length}`;
 
     requests.push(logData);
     session.lastPath = journey.paths[i];
@@ -200,22 +196,18 @@ export function generateBruteForcePattern(): Array<Partial<LogDocument>> {
       'client.ip': ip,
       'http.request.method': 'POST',
       'url.path': '/login',
-      'http.response.status_code': i === attempts - 1 && Math.random() < 0.1 ? 200 : 401, // Last one might succeed
-      'user_agent.name': 'python-requests/2.28.0', // Automated script
+      'http.response.status_code': i === attempts - 1 && Math.random() < 0.1 ? 200 : 401,
+      'user_agent.name': 'python-requests/2.28.0',
       'http.request.referrer': '-',
       'error.type': 'AuthenticationError',
       'error.message': 'Invalid credentials',
-      'event.category': 'authentication',
-      'event.type': 'access',
+      'event.category': 'intrusion_detection',
+      'event.type': 'denied',
       'event.outcome': 'failure',
+      'event.sequence': i + 1,
+      'rule.name': 'brute_force_detected',
       tags: ['brute-force', 'attack', 'security'],
     };
-
-    if (!logData.labels) {
-      logData.labels = {};
-    }
-    (logData.labels as Record<string, string>).attack_type = 'brute_force';
-    (logData.labels as Record<string, string>).attempt_number = `${i + 1}/${attempts}`;
 
     requests.push(logData);
   }
@@ -245,22 +237,18 @@ export function generateDDoSPattern(): Array<Partial<LogDocument>> {
     for (let j = 0; j < requestsPerIP; j++) {
       const logData: Partial<LogDocument> = {
         'client.ip': ip,
+        'source.ip': ip,
         'http.request.method': 'GET',
         'url.path': targetPath,
-        'http.response.status_code': getRandomItem([200, 429, 503]), // Mix of success and rate limiting
+        'http.response.status_code': getRandomItem([200, 429, 503]),
         'user_agent.name': userAgent,
         'http.request.referrer': '-',
-        'event.category': 'network',
-        'event.type': 'access',
+        'event.category': 'intrusion_detection',
+        'event.type': 'denied',
         'event.outcome': Math.random() < 0.7 ? 'failure' : 'success',
+        'rule.name': 'ddos_detected',
         tags: ['ddos', 'attack', 'high-volume'],
       };
-
-      if (!logData.labels) {
-        logData.labels = {};
-      }
-      (logData.labels as Record<string, string>).attack_type = 'ddos';
-      (logData.labels as Record<string, string>).attack_source_ip = ip;
 
       requests.push(logData);
     }
@@ -294,22 +282,18 @@ export function generateSlowCrawlPattern(): Array<Partial<LogDocument>> {
       'client.ip': ip,
       'http.request.method': 'GET',
       'url.path': path,
-      'http.response.status_code': getRandomItem([200, 404, 403]), // Mix of found/not found
+      'http.response.status_code': getRandomItem([200, 404, 403]),
       'user_agent.name': getRandomItem([
         'Mozilla/5.0 (compatible; Scanner/1.0)',
         'Wget/1.20.3 (linux-gnu)',
         'curl/7.68.0',
       ]),
       'http.request.referrer': '-',
-      'event.category': 'network',
-      'event.type': 'access',
+      'event.category': 'intrusion_detection',
+      'event.type': 'info',
+      'rule.name': 'reconnaissance_detected',
       tags: ['reconnaissance', 'scanning', 'suspicious'],
     };
-
-    if (!logData.labels) {
-      logData.labels = {};
-    }
-    (logData.labels as Record<string, string>).pattern_type = 'reconnaissance';
 
     requests.push(logData);
   }
@@ -323,12 +307,11 @@ export function generateSlowCrawlPattern(): Array<Partial<LogDocument>> {
  */
 export function generateRateLimitPattern(): Array<Partial<LogDocument>> {
   const { ip } = generateIPWithGeo();
-  const apiKey = `api_key_${Math.floor(Math.random() * 100)}`;
   const requests: Array<Partial<LogDocument>> = [];
   const numRequests = Math.floor(Math.random() * 30) + 20; // 20-50 requests
 
   for (let i = 0; i < numRequests; i++) {
-    const isRateLimited = i > 15; // Start rate limiting after 15 requests
+    const isRateLimited = i > 15;
     const logData: Partial<LogDocument> = {
       'client.ip': ip,
       'http.request.method': 'GET',
@@ -338,15 +321,12 @@ export function generateRateLimitPattern(): Array<Partial<LogDocument>> {
       'http.request.referrer': 'https://app.example.com',
       'error.type': isRateLimited ? 'RateLimitExceeded' : undefined,
       'error.message': isRateLimited ? 'Rate limit exceeded: 100 requests per minute' : undefined,
+      'event.action': isRateLimited ? 'rate_limit_exceeded' : 'api_request',
+      'event.category': 'web',
       'event.outcome': isRateLimited ? 'failure' : 'success',
+      'event.sequence': i + 1,
       tags: isRateLimited ? ['rate-limit', 'throttled'] : ['api', 'success'],
     };
-
-    if (!logData.labels) {
-      logData.labels = {};
-    }
-    (logData.labels as Record<string, string>).api_key = apiKey;
-    (logData.labels as Record<string, string>).request_sequence = `${i + 1}/${numRequests}`;
 
     requests.push(logData);
   }

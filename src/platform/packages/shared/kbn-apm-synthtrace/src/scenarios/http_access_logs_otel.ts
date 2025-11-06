@@ -402,11 +402,29 @@ function createOTELLog(
     });
   }
 
-  // Geo location
+  // Geo location (map ECS to OTEL semantic conventions)
   if (logData['host.geo.location']) {
     const [lon, lat] = logData['host.geo.location'];
     attributes['geo.location.lon'] = lon;
     attributes['geo.location.lat'] = lat;
+  }
+  if (logData['host.geo.city_name']) {
+    attributes['geo.locality.name'] = logData['host.geo.city_name'];
+  }
+  if (logData['host.geo.country_name']) {
+    attributes['geo.country.name'] = logData['host.geo.country_name'];
+  }
+  if (logData['host.geo.country_iso_code']) {
+    attributes['geo.country.iso_code'] = logData['host.geo.country_iso_code'];
+  }
+  if (logData['host.geo.continent_name']) {
+    attributes['geo.continent.name'] = logData['host.geo.continent_name'];
+  }
+  if (logData['host.geo.region_name']) {
+    attributes['geo.region.name'] = logData['host.geo.region_name'];
+  }
+  if (logData['host.geo.timezone']) {
+    attributes['geo.timezone'] = logData['host.geo.timezone'];
   }
 
   // Map log level to OTEL severity

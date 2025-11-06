@@ -15,6 +15,7 @@
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { getRandomItem } from './http_field_generators';
 
+
 /**
  * Types of data malformations.
  */
@@ -104,11 +105,10 @@ export function applyInvalidJSON(logData: Partial<LogDocument>): Partial<LogDocu
     }
   }
 
-  // Mark as malformed
-  if (!corrupted.labels) {
-    corrupted.labels = {};
-  }
-  (corrupted.labels as Record<string, string>).malformed = 'invalid_json';
+  // Mark as malformed using ECS fields
+  corrupted['error.type'] = 'InvalidJSONError';
+  corrupted['error.message'] = 'Invalid JSON structure detected';
+  corrupted['event.outcome'] = 'failure';
 
   return corrupted;
 }
@@ -125,11 +125,10 @@ export function applyTruncation(logData: Partial<LogDocument>): Partial<LogDocum
     corrupted.message = corrupted.message.substring(0, truncateAt) + '...TRUNCATED';
   }
 
-  // Mark as malformed
-  if (!corrupted.labels) {
-    corrupted.labels = {};
-  }
-  (corrupted.labels as Record<string, string>).malformed = 'truncated';
+  // Mark as malformed using ECS fields
+  corrupted['error.type'] = 'TruncatedDataError';
+  corrupted['error.message'] = 'Message truncated unexpectedly';
+  corrupted['event.outcome'] = 'failure';
 
   return corrupted;
 }
@@ -167,11 +166,10 @@ export function applyLongValues(logData: Partial<LogDocument>): Partial<LogDocum
       break;
   }
 
-  // Mark as malformed
-  if (!corrupted.labels) {
-    corrupted.labels = {};
-  }
-  (corrupted.labels as Record<string, string>).malformed = 'long_values';
+  // Mark as malformed using ECS fields
+  corrupted['error.type'] = 'OversizedDataError';
+  corrupted['error.message'] = 'Field exceeds maximum length';
+  corrupted['event.outcome'] = 'failure';
 
   return corrupted;
 }
@@ -210,11 +208,10 @@ export function applyInvalidFields(logData: Partial<LogDocument>): Partial<LogDo
       break;
   }
 
-  // Mark as malformed
-  if (!corrupted.labels) {
-    corrupted.labels = {};
-  }
-  (corrupted.labels as Record<string, string>).malformed = 'invalid_fields';
+  // Mark as malformed using ECS fields
+  corrupted['error.type'] = 'InvalidFieldError';
+  corrupted['error.message'] = 'Field contains invalid value';
+  corrupted['event.outcome'] = 'failure';
 
   return corrupted;
 }
@@ -260,11 +257,10 @@ export function applySpecialChars(logData: Partial<LogDocument>): Partial<LogDoc
       break;
   }
 
-  // Mark as malformed
-  if (!corrupted.labels) {
-    corrupted.labels = {};
-  }
-  (corrupted.labels as Record<string, string>).malformed = 'special_chars';
+  // Mark as malformed using ECS fields
+  corrupted['error.type'] = 'EncodingError';
+  corrupted['error.message'] = 'Invalid or unsupported characters detected';
+  corrupted['event.outcome'] = 'failure';
 
   return corrupted;
 }
@@ -296,11 +292,10 @@ export function applyTimestampAnomaly(logData: Partial<LogDocument>): Partial<Lo
       break;
   }
 
-  // Mark as malformed
-  if (!corrupted.labels) {
-    corrupted.labels = {};
-  }
-  (corrupted.labels as Record<string, string>).malformed = 'timestamp_anomaly';
+  // Mark as malformed using ECS fields
+  corrupted['error.type'] = 'TimestampAnomalyError';
+  corrupted['error.message'] = 'Timestamp outside expected range';
+  corrupted['event.outcome'] = 'failure';
 
   return corrupted;
 }
@@ -312,14 +307,10 @@ export function applyTimestampAnomaly(logData: Partial<LogDocument>): Partial<Lo
 export function markAsDuplicate(logData: Partial<LogDocument>): Partial<LogDocument> {
   const corrupted = { ...logData };
 
-  // Mark as malformed
-  if (!corrupted.labels) {
-    corrupted.labels = {};
-  }
-  (corrupted.labels as Record<string, string>).malformed = 'duplicate';
-  (corrupted.labels as Record<string, string>).duplicate_id = Math.random()
-    .toString(36)
-    .substring(2, 15);
+  // Mark as malformed using ECS fields
+  corrupted['error.type'] = 'DuplicateEventError';
+  corrupted['error.message'] = 'Duplicate event detected';
+  corrupted['event.outcome'] = 'failure';
 
   return corrupted;
 }
@@ -353,11 +344,10 @@ export function applyNullRequired(logData: Partial<LogDocument>): Partial<LogDoc
       break;
   }
 
-  // Mark as malformed
-  if (!corrupted.labels) {
-    corrupted.labels = {};
-  }
-  (corrupted.labels as Record<string, string>).malformed = 'null_required';
+  // Mark as malformed using ECS fields
+  corrupted['error.type'] = 'MissingRequiredFieldError';
+  corrupted['error.message'] = 'Required field is null or empty';
+  corrupted['event.outcome'] = 'failure';
 
   return corrupted;
 }
@@ -398,12 +388,12 @@ export function applyMalformation(logData: Partial<LogDocument>): Partial<LogDoc
  * Check if log data is marked as malformed.
  */
 export function isMalformed(logData: Partial<LogDocument>): boolean {
-  return !!(logData.labels as Record<string, string>)?.malformed;
+  return !!logData['error.type'] && logData['event.outcome'] === 'failure';
 }
 
 /**
  * Get malformation type from log data.
  */
 export function getMalformationType(logData: Partial<LogDocument>): string | undefined {
-  return (logData.labels as Record<string, string>)?.malformed;
+  return logData['error.type'];
 }

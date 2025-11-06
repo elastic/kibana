@@ -70,6 +70,11 @@ export function generateBaseLogData(): Partial<LogDocument> {
   const baseData: Partial<LogDocument> = {
     'client.ip': ip,
     'host.geo.location': [geo.location.lon, geo.location.lat],
+    'host.geo.city_name': geo.city,
+    'host.geo.country_name': geo.country,
+    'host.geo.country_iso_code': geo.countryCode,
+    'host.geo.continent_name': geo.continent,
+    'host.geo.timezone': geo.timezone,
     'cloud.region': geo.countryCode.toLowerCase(),
     hostname: `${serviceName}-${Math.floor(Math.random() * 100)}`,
     'service.name': serviceName,
@@ -171,16 +176,19 @@ export function generateAttackTraffic(): Partial<LogDocument> {
     tags: ['attack', 'security', 'suspicious'],
   };
 
-  // Add attack-specific labels
-  if (!logData.labels) {
-    logData.labels = {};
-  }
-  (logData.labels as Record<string, string>).attack_type = getRandomItem([
+  // Add attack-specific metadata
+  logData['event.category'] = 'intrusion_detection';
+  logData['event.type'] = 'denied';
+  const attackType = getRandomItem([
     'sql_injection',
     'xss',
     'directory_traversal',
     'command_injection',
   ]);
+  logData['rule.name'] = `${attackType}_detected`;
+  if (!logData.tags) logData.tags = [];
+  if (typeof logData.tags === 'string') logData.tags = [logData.tags];
+  (logData.tags as string[]).push('attack', attackType);
 
   return logData;
 }
@@ -304,11 +312,6 @@ export function generateGoodBotTraffic(): Partial<LogDocument> {
     tags: ['bot', 'crawler', 'legitimate'],
   };
 
-  if (!logData.labels) {
-    logData.labels = {};
-  }
-  (logData.labels as Record<string, string>).bot_type = 'crawler';
-
   return logData;
 }
 
@@ -335,10 +338,8 @@ export function generateBadBotTraffic(): Partial<LogDocument> {
     tags: ['bot', 'scraper', 'suspicious'],
   };
 
-  if (!logData.labels) {
-    logData.labels = {};
-  }
-  (logData.labels as Record<string, string>).bot_type = 'scraper';
+  logData['event.category'] = 'web';
+  logData['event.type'] = 'access';
 
   return logData;
 }
@@ -375,14 +376,12 @@ export function generateOAuthTraffic(): Partial<LogDocument> {
   };
 
   // Add OAuth-specific fields
-  if (!logData.labels) {
-    logData.labels = {};
-  }
-  (logData.labels as Record<string, string>).oauth_flow = getRandomItem([
-    'authorization_code',
-    'implicit',
-    'client_credentials',
+  logData['event.action'] = getRandomItem([
+    'oauth_authorization_code',
+    'oauth_implicit',
+    'oauth_client_credentials',
   ]);
+  logData['event.category'] = 'authentication';
 
   return logData;
 }
@@ -409,10 +408,8 @@ export function generateRedirectTraffic(): Partial<LogDocument> {
     tags: ['redirect'],
   };
 
-  if (!logData.labels) {
-    logData.labels = {};
-  }
-  (logData.labels as Record<string, string>).redirect_location = `https://new-domain.com${path}`;
+  logData['event.action'] = 'http_redirect';
+  logData['event.category'] = 'web';
 
   return logData;
 }
@@ -438,10 +435,8 @@ export function generateCORSTraffic(): Partial<LogDocument> {
     tags: ['cors', 'preflight'],
   };
 
-  if (!logData.labels) {
-    logData.labels = {};
-  }
-  (logData.labels as Record<string, string>).cors_origin = 'https://app.example.com';
+  logData['event.action'] = 'cors_preflight';
+  logData['event.category'] = 'web';
 
   return logData;
 }
@@ -466,10 +461,9 @@ export function generateWebSocketTraffic(): Partial<LogDocument> {
     tags: ['websocket', 'upgrade'],
   };
 
-  if (!logData.labels) {
-    logData.labels = {};
-  }
-  (logData.labels as Record<string, string>).upgrade_protocol = 'websocket';
+  logData['event.action'] = 'websocket_upgrade';
+  logData['event.category'] = 'web';
+  logData['network.protocol'] = 'websocket';
 
   return logData;
 }
