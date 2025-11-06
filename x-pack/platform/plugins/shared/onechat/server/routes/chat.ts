@@ -213,7 +213,7 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { chat: chatService, attachments: attachmentsService } = getInternalServices();
-        const payload: ChatRequestBodyPayload = request.body;
+        const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -287,7 +287,7 @@ export function registerChatRoutes({
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
         const { chat: chatService, attachments: attachmentsService } = getInternalServices();
-        const payload: ChatRequestBodyPayload = request.body;
+        const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
