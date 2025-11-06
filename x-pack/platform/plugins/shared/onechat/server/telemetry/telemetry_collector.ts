@@ -20,7 +20,7 @@ export interface OnechatTelemetry {
   custom_tools: {
     total: number;
     by_type: Array<{
-      type: 'esql' | 'index_search' | 'workflow' | 'builtin' | string;
+      type: string;
       count: number;
     }>;
   };
@@ -32,7 +32,7 @@ export interface OnechatTelemetry {
     total_rounds: number;
     avg_rounds_per_conversation: number;
     rounds_distribution: Array<{
-      bucket: '1-5' | '6-10' | '11-20' | '21-50' | '51+';
+      bucket: string;
       count: number;
     }>;
   };
