@@ -56,6 +56,7 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "appState": Object {},
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -127,6 +128,7 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "appState": Object {},
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
