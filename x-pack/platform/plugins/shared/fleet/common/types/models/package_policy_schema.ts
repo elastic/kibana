@@ -410,7 +410,14 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
         },
       })
     ),
-    force: schema.maybe(schema.boolean()),
+    force: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Force package policy creation even if package is not verified, or if the agent policy is managed.',
+        },
+      })
+    ),
     package: PackagePolicyPackageSchema,
   });
 
@@ -436,9 +443,23 @@ export const UpdatePackagePolicySchema = schema.object({
 
 export const PackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
-  id: schema.string(),
-  version: schema.maybe(schema.string()),
-  revision: schema.number(),
+  id: schema.string({
+    meta: {
+      description: 'Package policy unique identifier.',
+    },
+  }),
+  version: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Package policy ES version.',
+      },
+    })
+  ),
+  revision: schema.number({
+    meta: {
+      description: 'Package policy revision.',
+    },
+  }),
   updated_at: schema.string(),
   updated_by: schema.string(),
   created_at: schema.string(),
@@ -472,16 +493,29 @@ export const PackagePolicySchema = schema.object({
 });
 
 export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
-  vars: schema.maybe(schema.oneOf([ConfigRecordSchema, schema.maybe(SimplifiedVarsSchema)])),
-  inputs: schema.oneOf([
-    schema.arrayOf(
-      schema.object({
-        ...PackagePolicyInputsSchema,
-        compiled_input: schema.maybe(schema.any()),
-      })
-    ),
-    SimplifiedPackagePolicyInputsSchema,
-  ]),
+  vars: schema.maybe(
+    schema.oneOf([ConfigRecordSchema, schema.maybe(SimplifiedVarsSchema)], {
+      meta: {
+        description: 'Package level variable.',
+      },
+    })
+  ),
+  inputs: schema.oneOf(
+    [
+      schema.arrayOf(
+        schema.object({
+          ...PackagePolicyInputsSchema,
+          compiled_input: schema.maybe(schema.any()),
+        })
+      ),
+      SimplifiedPackagePolicyInputsSchema,
+    ],
+    {
+      meta: {
+        description: 'Package policy inputs.',
+      },
+    }
+  ),
   spaceIds: schema.maybe(schema.arrayOf(schema.string())),
   agents: schema.maybe(schema.number()),
 });

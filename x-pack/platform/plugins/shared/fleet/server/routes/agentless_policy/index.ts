@@ -23,13 +23,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN,
       summary: 'Create an agentless policy',
+      description: 'Create an agentless policy',
       options: {
         tags: ['oas-tag:Fleet agentless policies'],
         availability: {
           stability: 'experimental',
         },
       },
-
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },

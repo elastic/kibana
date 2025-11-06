@@ -50,7 +50,14 @@ export const CreateAgentlessPolicyRequestSchema = {
 };
 
 export const CreateAgentlessPolicyResponseSchema = schema.object({
-  item: PackagePolicyResponseSchema.extends({}),
+  item: PackagePolicyResponseSchema.extends(
+    {},
+    {
+      meta: {
+        description: 'The created agentless package policy.',
+      },
+    }
+  ),
 });
 
 export type CreateAgentlessPolicyResponse = TypeOf<typeof CreateAgentlessPolicyResponseSchema>;
