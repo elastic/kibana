@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
 import { useExpandableFlyoutContext } from '../context';
 import {
@@ -20,7 +19,7 @@ import {
   openRightPanelAction,
   previousPreviewPanelAction,
 } from '../store/actions';
-import { useDispatch } from '../store/redux';
+import { useDispatch, selectPanelsById, useSelector } from '../store/redux';
 import type { FlyoutPanelProps, ExpandableFlyoutApi } from '../types';
 
 export type { ExpandableFlyoutApi };
@@ -30,11 +29,13 @@ export type { ExpandableFlyoutApi };
  */
 export const useExpandableFlyoutApi = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
 
   const { urlKey } = useExpandableFlyoutContext();
   // if no urlKey is provided, we are in memory storage mode and use the reserved word 'memory'
   const id = urlKey || REDUX_ID_FOR_MEMORY_STORAGE;
+
+  // Get the current flyout state to check preview panel count
+  const panels = useSelector(selectPanelsById(id));
 
   const openPanels = useCallback(
     ({
@@ -77,12 +78,21 @@ export const useExpandableFlyoutApi = () => {
   );
 
   const previousPreviewPanel = useCallback(() => {
+    // Memory mode
     if (id === REDUX_ID_FOR_MEMORY_STORAGE) {
       dispatch(previousPreviewPanelAction({ id }));
     } else {
-      closePreviewPanel();
+      // In URL mode, check if there are multiple preview panels (history to go back to)
+      const previewPanels = panels.preview || [];
+      if (previewPanels.length > 1) {
+        // There's history - go back to previous preview panel
+        dispatch(previousPreviewPanelAction({ id }));
+      } else {
+        // No history - close the preview panel
+        closePreviewPanel();
+      }
     }
-  }, [dispatch, id, closePreviewPanel]);
+  }, [dispatch, id, panels.preview, closePreviewPanel]);
 
   const closePanels = useCallback(() => dispatch(closePanelsAction({ id })), [dispatch, id]);
 
