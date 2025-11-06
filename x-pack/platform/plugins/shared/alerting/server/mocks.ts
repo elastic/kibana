@@ -172,6 +172,7 @@ const createRuleExecutorServicesMock = <
     alertsClient: publicAlertsClientMock.create(),
     getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
     getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
+    getMaintenanceWindowNames: jest.fn().mockResolvedValue([]),
     getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
     ruleMonitoringService: createRuleMonitoringServiceMock(),
     savedObjectsClient: savedObjectsClientMock.create(),
