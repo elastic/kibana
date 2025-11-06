@@ -12,6 +12,7 @@ import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 // FLAKY: https://github.com/elastic/kibana/issues/240055
+// FLAKY: https://github.com/elastic/kibana/issues/241729
 describe.skip('workflow level timeout', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
