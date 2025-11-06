@@ -154,12 +154,15 @@ function buildBaseProjectConfig(
   };
 
   projectConfig.tags = [
-    ...new Set([
-      kibanaJsonc.type,
-      kibanaJsonc.group,
-      kibanaJsonc.visibility,
-      kibanaJsonc.devOnly ? MOON_CONST.TAG_DEV : MOON_CONST.TAG_PROD,
-    ]),
+    ...new Set(
+      [
+        kibanaJsonc.type,
+        kibanaJsonc.type === 'plugin' ? MOON_CONST.TAG_PLUGIN : MOON_CONST.TAG_PACKAGE,
+        kibanaJsonc.devOnly ? MOON_CONST.TAG_DEV : MOON_CONST.TAG_PROD,
+        `${MOON_CONST.TAG_GROUP}_${kibanaJsonc.group}`,
+        kibanaJsonc.visibility,
+      ].filter(Boolean)
+    ),
   ];
 
   return projectConfig;
