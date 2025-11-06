@@ -71,6 +71,7 @@ export interface ISuggestionItem {
   command?: {
     title: string;
     id: string;
+    source?: string;
     arguments?: { [key: string]: string }[];
   };
   /**

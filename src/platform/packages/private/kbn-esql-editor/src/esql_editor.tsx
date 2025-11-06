@@ -534,8 +534,8 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
-      onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
-        telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
+      onSuggestionsWithCustomCommandShown: (commands) =>
+        telemetryService.trackSuggestionsWithCustomCommandShown(commands),
     }),
     [telemetryService]
   );

@@ -80,9 +80,9 @@ export class ESQLEditorTelemetryService {
     }
   }
 
-  public trackSuggestionsWithCustomCommandShown(commandIds: string[]) {
+  public trackSuggestionsWithCustomCommandShown(commands: { id: string; source: string }[]) {
     this._reportEvent(ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN, {
-      command_ids: commandIds,
+      commands,
     });
   }
 
