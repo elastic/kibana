@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import React from 'react';
+import { ConversationTitle } from '../application/components/conversations/conversation_title';
 
-export const useConversationGridCenterColumnWidth = () => {
-  const { euiTheme } = useEuiTheme();
-  const contentMaxWidth = `calc(${euiTheme.size.xl} * 25)`;
-  return contentMaxWidth;
+export const EmbeddableConversationHeader: React.FC<{}> = () => {
+  return (
+    <div>
+      <ConversationTitle />
+    </div>
+  );
 };
