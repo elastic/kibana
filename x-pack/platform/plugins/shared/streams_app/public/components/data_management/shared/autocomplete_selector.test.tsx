@@ -159,14 +159,20 @@ describe('AutocompleteSelector', () => {
   });
 
   describe('Field Type Icons', () => {
-    it('renders field type icons when suggestions include type information', async () => {
+    it('renders field type icons when showIcon is true and suggestions include type information', async () => {
       const suggestionsWithTypes = [
         { name: '@timestamp', type: 'date' },
         { name: 'log.level', type: 'keyword' },
         { name: 'message', type: 'text' },
       ];
 
-      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithTypes} />);
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          suggestions={suggestionsWithTypes}
+          showIcon={true}
+        />
+      );
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -177,10 +183,16 @@ describe('AutocompleteSelector', () => {
       expect(screen.getByTestId('field-icon-text')).toBeInTheDocument();
     });
 
-    it('renders unknown icons for fields without type information', async () => {
+    it('renders unknown icons when showIcon is true and fields have no type information', async () => {
       const suggestionsWithoutTypes = [{ name: '@timestamp' }, { name: 'log.level' }];
 
-      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithoutTypes} />);
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          suggestions={suggestionsWithoutTypes}
+          showIcon={true}
+        />
+      );
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
       await userEvent.click(toggleButton);
@@ -189,7 +201,29 @@ describe('AutocompleteSelector', () => {
       expect(screen.getAllByTestId('field-icon-unknown')).toHaveLength(2);
     });
 
-    it('shows icon for selected field when type is available', () => {
+    it('does not render icons when showIcon is false', async () => {
+      const suggestionsWithTypes = [
+        { name: '@timestamp', type: 'date' },
+        { name: 'log.level', type: 'keyword' },
+      ];
+
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          suggestions={suggestionsWithTypes}
+          showIcon={false}
+        />
+      );
+
+      const toggleButton = screen.getByTestId('comboBoxToggleListButton');
+      await userEvent.click(toggleButton);
+
+      // Verify that no icons are rendered
+      expect(screen.queryByTestId('field-icon-date')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
+    });
+
+    it('shows icon for selected field when showIcon is true and type is available', () => {
       const suggestionsWithTypes = [
         { name: 'log.level', type: 'keyword' },
         { name: 'message', type: 'text' },
@@ -200,6 +234,7 @@ describe('AutocompleteSelector', () => {
           {...defaultProps}
           value="log.level"
           suggestions={suggestionsWithTypes}
+          showIcon={true}
         />
       );
 
@@ -207,7 +242,7 @@ describe('AutocompleteSelector', () => {
       expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
     });
 
-    it('shows unknown icon for selected field when type is not available', () => {
+    it('shows unknown icon for selected field when showIcon is true and type is not available', () => {
       const suggestionsWithoutTypes = [{ name: 'log.level' }, { name: 'message' }];
 
       render(
@@ -215,11 +250,31 @@ describe('AutocompleteSelector', () => {
           {...defaultProps}
           value="log.level"
           suggestions={suggestionsWithoutTypes}
+          showIcon={true}
         />
       );
 
       // Unknown icon should be visible in the selected value
       expect(screen.getByTestId('field-icon-unknown')).toBeInTheDocument();
+    });
+
+    it('does not show icon for selected field when showIcon is false', () => {
+      const suggestionsWithTypes = [
+        { name: 'log.level', type: 'keyword' },
+        { name: 'message', type: 'text' },
+      ];
+
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          value="log.level"
+          suggestions={suggestionsWithTypes}
+          showIcon={false}
+        />
+      );
+
+      // Icon should not be visible
+      expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
     });
   });
 });

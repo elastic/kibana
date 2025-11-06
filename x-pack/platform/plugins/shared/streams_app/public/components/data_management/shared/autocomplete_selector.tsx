@@ -32,6 +32,7 @@ export interface AutocompleteSelectorProps {
   autoFocus?: boolean;
   hideSuggestions?: boolean;
   labelAppend?: React.ReactNode;
+  showIcon?: boolean;
 }
 
 /**
@@ -53,18 +54,21 @@ export const AutocompleteSelector = ({
   autoFocus,
   hideSuggestions = false,
   labelAppend,
+  showIcon = false,
 }: AutocompleteSelectorProps) => {
   const comboBoxOptions = useMemo(
     () =>
       suggestions.map((suggestion) => ({
         label: suggestion.name,
         value: suggestion.name,
-        prepend: (
-          <FieldIcon type={suggestion.type || 'unknown'} size="s" className="eui-alignMiddle" />
-        ),
+        ...(showIcon && {
+          prepend: (
+            <FieldIcon type={suggestion.type || 'unknown'} size="s" className="eui-alignMiddle" />
+          ),
+        }),
         'data-test-subj': `autocomplete-suggestion-${suggestion.name}`,
       })),
-    [suggestions]
+    [suggestions, showIcon]
   );
 
   const selectedOptions = useMemo(() => {
@@ -81,16 +85,18 @@ export const AutocompleteSelector = ({
       {
         label: value,
         value,
-        prepend: (
-          <FieldIcon
-            type={suggestionWithType?.type || 'unknown'}
-            size="s"
-            className="eui-alignMiddle"
-          />
-        ),
+        ...(showIcon && {
+          prepend: (
+            <FieldIcon
+              type={suggestionWithType?.type || 'unknown'}
+              size="s"
+              className="eui-alignMiddle"
+            />
+          ),
+        }),
       },
     ];
-  }, [value, comboBoxOptions, suggestions]);
+  }, [value, comboBoxOptions, suggestions, showIcon]);
 
   const handleSelectionChange = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
