@@ -123,10 +123,15 @@ export const getDecorationHoveredMessages = (
  * @param suggestions
  * @returns
  */
-export const filterSuggestionsWithCustomCommands = (suggestions: ISuggestionItem[]): string[] => {
+export const filterSuggestionsWithCustomCommands = (
+  suggestions: ISuggestionItem[]
+): { id: string; source: string }[] => {
   return suggestions
     .filter(
       (suggestion) => suggestion.command && suggestion.command.id !== 'editor.action.triggerSuggest'
     )
-    .map((suggestion) => suggestion.command!.id); // we know command is defined because of the filter
+    .map((suggestion) => ({
+      id: suggestion.command!.id, // we know command is defined because of the filter
+      source: suggestion.command!.source || 'other',
+    }));
 };
