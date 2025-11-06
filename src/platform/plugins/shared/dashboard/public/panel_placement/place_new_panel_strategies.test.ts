@@ -42,14 +42,14 @@ describe('new panel placement strategies', () => {
       });
       expect(otherPanels).toEqual(
         Object.keys(panels).reduce((prev, panelId) => {
-          const originalGridData = panels[panelId].grid;
+          const originalgrid = panels[panelId].grid;
           return {
             ...prev,
             [panelId]: {
               ...panels[panelId],
               grid: {
-                ...originalGridData,
-                y: originalGridData.y + 6, // panel was pushed down by height of new panel
+                ...originalgrid,
+                y: originalgrid.y + 6, // panel was pushed down by height of new panel
               },
             },
           };
@@ -71,16 +71,16 @@ describe('new panel placement strategies', () => {
       });
       expect(otherPanels).toEqual(
         Object.keys(panels).reduce((prev, panelId) => {
-          const originalGridData = panels[panelId].grid;
+          const originalgrid = panels[panelId].grid;
           return {
             ...prev,
             [panelId]: {
               ...panels[panelId],
               grid: {
-                ...originalGridData,
+                ...originalgrid,
                 // only panels in the targetted section should get pushed down
-                ...(originalGridData.sectionId === 'section1' && {
-                  y: originalGridData.y + 6,
+                ...(originalgrid.sectionId === 'section1' && {
+                  y: originalgrid.y + 6,
                 }),
               },
             },
@@ -93,7 +93,7 @@ describe('new panel placement strategies', () => {
       const panels: DashboardLayout['panels'] = {
         ...getMockLayout().panels,
         '3': {
-          gridData: { x: 6, y: 6, w: 6, h: 6, i: '3' }, // below panel 2
+          grid: { x: 6, y: 6, w: 6, h: 6 }, // below panel 2
           type: 'testPanelType',
         },
       };
@@ -108,12 +108,12 @@ describe('new panel placement strategies', () => {
         h: 6,
       });
       // panels 1 and 2 shouldn't move
-      expect(otherPanels['1'].gridData).toEqual(panels['1'].gridData);
-      expect(otherPanels['2'].gridData).toEqual(panels['2'].gridData);
+      expect(otherPanels['1'].grid).toEqual(panels['1'].grid);
+      expect(otherPanels['2'].grid).toEqual(panels['2'].grid);
       // panel 3 should have been pushed down by the height of the new panel
-      expect(otherPanels['3'].gridData).toEqual({
-        ...panels['3'].gridData,
-        y: panels['3'].gridData.y + newPanelPlacement.h,
+      expect(otherPanels['3'].grid).toEqual({
+        ...panels['3'].grid,
+        y: panels['3'].grid.y + newPanelPlacement.h,
       });
     });
   });
@@ -213,7 +213,7 @@ describe('new panel placement strategies', () => {
       const panels: DashboardLayout['panels'] = {
         ...getMockLayout().panels,
         '3': {
-          gridData: { x: 6, y: 6, w: 6, h: 6, i: '3' }, // below panel 2
+          grid: { x: 6, y: 6, w: 6, h: 6 }, // below panel 2
           type: 'testPanelType',
         },
       };

@@ -28,17 +28,19 @@ describe('transformControlGroupIn', () => {
     controls: [
       {
         id: 'control1',
+        // @ts-expect-error Test type
         type: 'type1',
         width: CONTROL_WIDTH_SMALL,
-        controlConfig: { bizz: 'buzz' },
+        bizz: 'buzz',
         order: 0,
         grow: false,
       },
       {
+        // @ts-expect-error Test type
         type: 'type2',
         grow: true,
         width: CONTROL_WIDTH_SMALL,
-        controlConfig: { boo: 'bear' },
+        boo: 'bear',
         order: 1,
       },
     ],

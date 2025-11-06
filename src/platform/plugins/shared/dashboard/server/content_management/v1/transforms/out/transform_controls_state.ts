@@ -36,7 +36,7 @@ export const transformControlsState: (
 
 export function transformControlObjectToArray(
   controls: StoredControlGroupInput['panels']
-): Array<SerializableRecord> {
+): Array<StoredControlState> {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }
 
