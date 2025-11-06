@@ -1102,6 +1102,8 @@
       "@kbn/find-used-node-modules/*": ["packages/kbn-find-used-node-modules/*"],
       "@kbn/fleet-plugin": ["x-pack/platform/plugins/shared/fleet"],
       "@kbn/fleet-plugin/*": ["x-pack/platform/plugins/shared/fleet/*"],
+      "@kbn/fleet-plugin-cypress": ["x-pack/platform/plugins/shared/fleet/cypress"],
+      "@kbn/fleet-plugin-cypress/*": ["x-pack/platform/plugins/shared/fleet/cypress/*"],
       "@kbn/flot-charts": ["src/platform/packages/shared/kbn-flot-charts"],
       "@kbn/flot-charts/*": ["src/platform/packages/shared/kbn-flot-charts/*"],
       "@kbn/foo-plugin": ["x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin"],

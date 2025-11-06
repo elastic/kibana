@@ -6699,6 +6699,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/fleet-plugin-cypress@link:x-pack/platform/plugins/shared/fleet/cypress":
+  version "0.0.0"
+  uid ""
+
 "@kbn/fleet-plugin@link:x-pack/platform/plugins/shared/fleet":
   version "0.0.0"
   uid ""
