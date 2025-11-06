@@ -51,6 +51,7 @@ import { IndexEditorErrors } from './types';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
 import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
+import { RowsVirtualIndexes } from './utils/rows_virtual_indexes';
 
 const DOCS_PER_FETCH = 1000;
 
@@ -128,27 +129,7 @@ export class IndexUpdateService {
 
   private indexHasNewFields: boolean = false;
 
-  private newRowsVirtualIndexes: Record<string, number> = {};
-
-  private addRowVirtualIndex(id: string, atIndex: number) {
-    // Recalculate other placeholder rows indexes if new row is added before them
-    Object.entries(this.newRowsVirtualIndexes).forEach(([rowId, index]) => {
-      if (index >= atIndex) {
-        this.newRowsVirtualIndexes[rowId] += 1;
-      }
-    });
-
-    this.newRowsVirtualIndexes[id] = atIndex;
-  }
-
-  private updateVirtualIndexesAfterDeletion(index: number) {
-    // Recalculate other placeholder rows indexes if row is removed
-    Object.entries(this.newRowsVirtualIndexes).forEach(([rowId, rowIndex]) => {
-      if (rowIndex >= index) {
-        this.newRowsVirtualIndexes[rowId] -= 1;
-      }
-    });
-  }
+  private newRowsVirtualIndexes = new RowsVirtualIndexes();
 
   /** Indicates the service has been completed */
   private readonly _completed$ = new Subject<{
@@ -303,7 +284,10 @@ export class IndexUpdateService {
       switch (action.type) {
         case 'add-doc':
           if (action.payload.atIndex !== undefined) {
-            this.addRowVirtualIndex(action.payload.id, action.payload.atIndex);
+            this.newRowsVirtualIndexes.addRowVirtualIndex(
+              action.payload.id,
+              action.payload.atIndex
+            );
           }
           return [...acc, action];
         case 'delete-doc':
@@ -322,15 +306,16 @@ export class IndexUpdateService {
           // Remove virtual indexes for deleted rows
           action.payload.ids.forEach((id) => {
             const index = this._rows$.getValue().findIndex((row) => row.id === id);
-            delete this.newRowsVirtualIndexes[id];
-            this.updateVirtualIndexesAfterDeletion(index);
+            this.newRowsVirtualIndexes.deleteVirtualIndexByRowId(id);
+            this.newRowsVirtualIndexes.updateVirtualIndexesAfterDeletion(index);
           });
 
           const newTotalHits = this._totalHits$.getValue() - idsToDelete.size;
           this._totalHits$.next(newTotalHits > 1 ? newTotalHits : 1);
           return updatedAcc;
         case 'saved':
-          // Clear the buffer after save
+          // Clear the buffer and new rows virtual indexes after save
+          this.newRowsVirtualIndexes.clear();
           return [];
         case 'discard-unsaved-changes':
           return [];
@@ -528,13 +513,15 @@ export class IndexUpdateService {
             return v.type === 'add-doc' && id.startsWith(ROW_PLACEHOLDER_PREFIX);
           })
           .sort(([idA], [idB]) => {
-            const indexA = this.newRowsVirtualIndexes[idA];
-            const indexB = this.newRowsVirtualIndexes[idB];
+            const indexA = this.newRowsVirtualIndexes.getRowVirtualIndex(idA);
+            const indexB = this.newRowsVirtualIndexes.getRowVirtualIndex(idB);
             return (indexA ?? 0) - (indexB ?? 0);
           })
           .forEach(([id, v]) => {
-            const atIndex = this.newRowsVirtualIndexes[id];
-            resultRows.splice(atIndex, 0, { id, flattened: v.update, raw: v.update });
+            const atIndex = this.newRowsVirtualIndexes.getRowVirtualIndex(id);
+            if (atIndex !== undefined) {
+              resultRows.splice(atIndex, 0, { id, flattened: v.update, raw: v.update });
+            }
           });
 
         // If no rows left, add a placeholder row
@@ -1047,6 +1034,7 @@ export class IndexUpdateService {
     this._indexName$.complete();
 
     this.data.dataViews.clearInstanceCache();
+    this.newRowsVirtualIndexes.clear();
   }
 
   public async createIndex({ exitAfterFlush = false }) {
