@@ -33,7 +33,6 @@ import {
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
   enableDiagnosticMode,
-  registerObservabilityAgent,
 } from '../common/ui_settings_keys';
 
 /**
@@ -435,21 +434,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],
     technicalPreview: true,
-  },
-  [registerObservabilityAgent]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.registerObservabilityAgent.name', {
-      defaultMessage: 'Enable Observability Agent',
-    }),
-    description: i18n.translate('xpack.observability.registerObservabilityAgent.description', {
-      defaultMessage:
-        'Enable the Observability Agent in Agent Builder. Restarting Kibana is required.',
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    solutionViews: ['classic', 'oblt'],
   },
 };
 
