@@ -89,10 +89,11 @@ export class WorkflowsExecutionEnginePlugin
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           const taskAbortController = new AbortController();
           return {
-            async run() {
+            run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await this.initialize(coreStart);
               const { actions, taskManager } = pluginsStart;
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
 
@@ -119,7 +120,7 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
               });
             },
-            async cancel() {
+            cancel: async () => {
               taskAbortController.abort();
             },
           };
@@ -138,10 +139,11 @@ export class WorkflowsExecutionEnginePlugin
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           const taskAbortController = new AbortController();
           return {
-            async run() {
+            run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await this.initialize(coreStart);
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
               const { actions, taskManager } = pluginsStart;
               // Get ES client from core services (guaranteed to be available at task execution time)
@@ -167,7 +169,7 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
               });
             },
-            async cancel() {
+            cancel: async () => {
               taskAbortController.abort();
             },
           };
