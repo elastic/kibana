@@ -433,6 +433,7 @@ export const buildColumnSuggestions = (
     const controlSuggestions = columns.length
       ? getControlSuggestion(
           variableType,
+          undefined,
           userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];
