@@ -8,7 +8,7 @@
  */
 
 import React, { useContext } from 'react';
-import type { OptionsListDisplaySettings } from '../../../../common/options_list';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import type { OptionsListComponentApi } from './types';
 
 interface Context {
