@@ -20,10 +20,103 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 
 describe('buildDefaultSettings', () => {
   it('should not generate default_field settings ', () => {
+    const ilmPolicies = new Map();
+    ilmPolicies.set('logs', {
+      deprecatedILMPolicy: {
+        version: 1,
+      },
+      newILMPolicy: { version: 1 },
+    });
+
     const settings = buildDefaultSettings({
       type: 'logs',
       ilmMigrationStatusMap: new Map(),
-      ilmPolicies: new Map(),
+      ilmPolicies,
+    });
+
+    expect(settings).toMatchInlineSnapshot(`
+      Object {
+        "index": Object {
+          "lifecycle": Object {
+            "name": "logs@lifecycle",
+          },
+        },
+      }
+    `);
+  });
+
+  it('should use new ILM policy when migration was successful', () => {
+    const ilmPolicies = new Map();
+    ilmPolicies.set('logs', {
+      deprecatedILMPolicy: {
+        version: 1,
+        in_use_by: {
+          composable_templates: [{}],
+        },
+      },
+      newILMPolicy: { version: 2 },
+    });
+    const ilmMigrationStatusMap = new Map();
+    ilmMigrationStatusMap.set('logs', 'success');
+
+    const settings = buildDefaultSettings({
+      type: 'logs',
+      ilmMigrationStatusMap,
+      ilmPolicies,
+    });
+
+    expect(settings).toMatchInlineSnapshot(`
+      Object {
+        "index": Object {
+          "lifecycle": Object {
+            "name": "logs@lifecycle",
+          },
+        },
+      }
+    `);
+  });
+
+  it('should use new ILM policy when deprecated policy does not exist', () => {
+    const ilmPolicies = new Map();
+    ilmPolicies.set('logs', {
+      deprecatedILMPolicy: undefined,
+      newILMPolicy: { version: 2 },
+    });
+    const ilmMigrationStatusMap = new Map();
+
+    const settings = buildDefaultSettings({
+      type: 'logs',
+      ilmMigrationStatusMap,
+      ilmPolicies,
+    });
+
+    expect(settings).toMatchInlineSnapshot(`
+      Object {
+        "index": Object {
+          "lifecycle": Object {
+            "name": "logs@lifecycle",
+          },
+        },
+      }
+    `);
+  });
+
+  it('should fall back to deprecated logs ILM policy when both modified and deprecated one is used', () => {
+    const ilmPolicies = new Map();
+    ilmPolicies.set('logs', {
+      deprecatedILMPolicy: {
+        version: 2,
+        in_use_by: {
+          composable_templates: [{}],
+        },
+      },
+      newILMPolicy: { version: 2 },
+    });
+
+    const settings = buildDefaultSettings({
+      type: 'logs',
+      ilmMigrationStatusMap: new Map(),
+      ilmPolicies,
     });
 
     expect(settings).toMatchInlineSnapshot(`
@@ -31,6 +124,35 @@ describe('buildDefaultSettings', () => {
         "index": Object {
           "lifecycle": Object {
             "name": "logs",
+          },
+        },
+      }
+    `);
+  });
+
+  it('should use new ILM policy when deprecated policy is not used', () => {
+    const ilmPolicies = new Map();
+    ilmPolicies.set('logs', {
+      deprecatedILMPolicy: {
+        version: 2,
+        in_use_by: {
+          composable_templates: [],
+        },
+      },
+      newILMPolicy: { version: 2 },
+    });
+
+    const settings = buildDefaultSettings({
+      type: 'logs',
+      ilmMigrationStatusMap: new Map(),
+      ilmPolicies,
+    });
+
+    expect(settings).toMatchInlineSnapshot(`
+      Object {
+        "index": Object {
+          "lifecycle": Object {
+            "name": "logs@lifecycle",
           },
         },
       }

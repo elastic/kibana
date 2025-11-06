@@ -119,12 +119,10 @@ function getILMPolicy(
 
   // deprecated and new ILM policies are not modified, mark migration as success
   if (deprecatedILMPolicy?.version === 1 && newILMPolicy?.version === 1) {
-    // await recordILMMigrationSuccess(type);
     return newILMPolicyName;
   }
   // otherwise if deprecated ILM policy does not exist, use the new ILM policy
   if (!deprecatedILMPolicy) {
-    // await recordILMMigrationSuccess(type);
     return newILMPolicyName;
   }
   // otherwise if the deprecated ILM policy is not used, use the new ILM policy
@@ -132,7 +130,6 @@ function getILMPolicy(
     deprecatedILMPolicy?.version > 1 &&
     (deprecatedILMPolicy as any).in_use_by?.composable_templates?.length === 0
   ) {
-    // await recordILMMigrationSuccess(type);
     return newILMPolicyName;
   }
 
