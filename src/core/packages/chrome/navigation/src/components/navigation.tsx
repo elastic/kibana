@@ -22,6 +22,10 @@ import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 
+const navigationWrapperStyles = css`
+  display: flex;
+`;
+
 export interface NavigationProps {
   /**
    * The active path for the navigation, used for highlighting the current item.
@@ -87,13 +91,9 @@ export const Navigation = ({
 
   const [isAnyPopoverOpen, setAnyPopoverOpen] = useState(false);
 
-  const wrapperStyles = css`
-    display: flex;
-  `;
-
   return (
     <div
-      css={wrapperStyles}
+      css={navigationWrapperStyles}
       data-test-subj={rest['data-test-subj'] ?? 'navigation-root'}
       id="navigation-root"
     >
