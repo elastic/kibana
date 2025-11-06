@@ -13,6 +13,12 @@ export const BASE_RECORD_FILTER_FIELDS = [
   'initial_record_score',
   'function',
   'field_name',
+] as const;
+
+/**
+ * Influencer fields for anomaly records when jobs have influencers configured.
+ */
+export const RECORD_INFLUENCER_FIELDS = [
   'influencers.influencer_field_name',
   'influencers.influencer_field_values',
 ] as const;

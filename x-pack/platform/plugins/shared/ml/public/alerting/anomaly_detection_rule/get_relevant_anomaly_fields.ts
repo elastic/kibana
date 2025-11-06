@@ -9,6 +9,7 @@ import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 import {
   BASE_RECORD_FILTER_FIELDS,
+  RECORD_INFLUENCER_FIELDS,
   INFLUENCER_FILTER_FIELDS,
   TOP_LEVEL_ACTUAL_TYPICAL_FIELDS,
   NESTED_ACTUAL_TYPICAL_FIELDS,
@@ -41,9 +42,18 @@ export function getRelevantAnomalyFields(
       return detectors.length === 1 && detectors[0].over_field_name;
     });
 
+  // Check if any job has influencers configured
+  const hasInfluencers =
+    jobConfigs.length > 0 &&
+    jobConfigs.some((job) => {
+      const influencers = job.analysis_config?.influencers || [];
+      return influencers.length > 0;
+    });
+
   // Add actual/typical fields based on job type
   const recordFields: string[] = [
     ...BASE_RECORD_FILTER_FIELDS,
+    ...(hasInfluencers ? RECORD_INFLUENCER_FIELDS : []),
     ...(isPurePopulationJob ? NESTED_ACTUAL_TYPICAL_FIELDS : TOP_LEVEL_ACTUAL_TYPICAL_FIELDS),
   ];
 
