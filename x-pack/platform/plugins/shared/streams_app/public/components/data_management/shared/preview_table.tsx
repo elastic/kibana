@@ -17,16 +17,17 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiToolTip,
   useEuiTheme,
   EuiButtonGroup,
-  EuiFlexItem,
   euiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
+import { FieldIcon } from '@kbn/react-field';
 import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
 import type {
   IgnoredField,
@@ -114,6 +115,7 @@ export function PreviewTable({
   mode = 'columns',
   streamName,
   viewModeToggle,
+  dataViewFieldTypes,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
@@ -140,8 +142,8 @@ export function PreviewTable({
     setViewMode: (mode: PreviewTableMode) => void;
     isDisabled: boolean;
   };
+  dataViewFieldTypes?: Array<{ name: string; type: string; esType?: string }>;
 }) {
-  const { euiTheme: theme } = useEuiTheme();
   const {
     core,
     dependencies: {
@@ -154,6 +156,24 @@ export function PreviewTable({
     if (mode !== 'summary' || !streamName) return undefined;
     return data.dataViews.create({ title: streamName });
   }, [mode, streamName, data.dataViews]);
+  const { euiTheme: theme } = useEuiTheme();
+
+  // Create a map of field names to their ES types for quick lookup from DataView
+  const fieldTypeMap = useMemo(() => {
+    const typeMap = new Map<string, string>();
+
+    if (dataViewFieldTypes && dataViewFieldTypes.length > 0) {
+      dataViewFieldTypes.forEach((field) => {
+        // Use esType if available (more specific), otherwise use type
+        const fieldType = field.esType || field.type;
+        if (fieldType) {
+          typeMap.set(field.name, fieldType);
+        }
+      });
+    }
+
+    return typeMap;
+  }, [dataViewFieldTypes]);
 
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
@@ -324,12 +344,22 @@ export function PreviewTable({
         return [...acc, '.', <wbr key={index} />, part];
       }, [] as React.ReactNode[]);
 
+      // Get the field type from the map
+      const fieldType = fieldTypeMap.get(column);
+
       return {
         id: column,
         display: (
-          <ColumnHeaderTruncateContainer wordBreak="normal">
-            {interleavedColumnParts}
-          </ColumnHeaderTruncateContainer>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FieldIcon type={fieldType || 'unknown'} size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ColumnHeaderTruncateContainer wordBreak="normal">
+                {interleavedColumnParts}
+              </ColumnHeaderTruncateContainer>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
         actions:
           Boolean(setVisibleColumns) || Boolean(setSorting)
@@ -345,7 +375,14 @@ export function PreviewTable({
         cellActions,
       };
     });
-  }, [cellActions, canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
+  }, [
+    cellActions,
+    canonicalColumnOrder,
+    fieldTypeMap,
+    setSorting,
+    setVisibleColumns,
+    columnWidths,
+  ]);
 
   const [currentRowHeights, setCurrentRowHeights] = useState<
     EuiDataGridRowHeightsOptions | undefined

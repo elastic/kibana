@@ -54,7 +54,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
+    await pageObjects.streams.selectProcessorType('Rename');
     await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
 
@@ -75,7 +75,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
+    await pageObjects.streams.selectProcessorType('Rename');
     await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
 
@@ -108,7 +108,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
+    await pageObjects.streams.selectProcessorType('Rename');
     await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
 
@@ -143,13 +143,13 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
+    await pageObjects.streams.selectProcessorType('Rename');
     await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('set');
+    await pageObjects.streams.selectProcessorType('Set');
     await pageObjects.streams.fillProcessorFieldInput('custom_threshold', { isCustomValue: true });
     await page.locator('input[name="value"]').fill('1024');
     await pageObjects.streams.clickSaveProcessor();

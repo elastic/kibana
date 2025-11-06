@@ -23,6 +23,7 @@ import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
+import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { getPercentageFormatter } from '../../../util/formatters';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
@@ -175,8 +176,13 @@ const PreviewDocumentsGroupBy = () => {
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const [userSelectedViewMode, setViewMode] = useState<PreviewTableMode>('summary');
 
+  // Original logic - used for column determination
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
+
+  // Fetch DataView field types with automatic caching via React Query
+  const { fieldTypes: dataViewFieldTypes, dataView: streamDataView } =
+    useStreamDataViewFieldTypes(streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
     (state) => state.context.previewColumnsSorting
@@ -208,9 +214,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
     const step = currentProcessorRef.getSnapshot().context.step;
 
-    if (!isActionBlock(step)) return undefined;
-
-    return getSourceField(step);
+    if (isActionBlock(step)) return getSourceField(step);
   });
 
   const docViewsRegistry = useDocViewerSetup(true);
@@ -412,6 +416,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
             setViewMode,
             isDisabled: isViewModeForced,
           }}
+          dataViewFieldTypes={dataViewFieldTypes}
         />
       </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>
@@ -421,6 +426,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
           streamName={streamName}
+          streamDataView={streamDataView}
         />
       </DocViewerContext.Provider>
     </>
