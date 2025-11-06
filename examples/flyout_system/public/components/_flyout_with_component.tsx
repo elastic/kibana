@@ -46,17 +46,24 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [isChildFlyoutVisible, setIsChildFlyoutVisible] = useState(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [isChildFlyoutAOpen, setIsChildFlyoutAOpen] = useState(false);
+  const [isChildFlyoutBOpen, setIsChildFlyoutBOpen] = useState(false);
 
   // Handlers for "Open" buttons
 
   const handleOpenMainFlyout = () => {
-    setIsFlyoutVisible(true);
+    setIsFlyoutOpen(true);
   };
 
-  const handleOpenChildFlyout = () => {
-    setIsChildFlyoutVisible(true);
+  const handleOpenChildFlyoutA = () => {
+    setIsChildFlyoutAOpen(true);
+    setIsChildFlyoutBOpen(false);
+  };
+
+  const handleOpenChildFlyoutB = () => {
+    setIsChildFlyoutBOpen(true);
+    setIsChildFlyoutAOpen(false);
   };
 
   // Callbacks for state synchronization
@@ -65,19 +72,25 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     console.log('activate main flyout', title); // eslint-disable-line no-console
   }, [title]);
 
-  const childFlyoutOnActive = useCallback(() => {
-    console.log('activate child flyout', title); // eslint-disable-line no-console
+  const childFlyoutAOnActive = useCallback(() => {
+    console.log('activate child flyout A', title); // eslint-disable-line no-console
   }, [title]);
 
-  const mainFlyoutOnClose = useCallback(() => {
+  const handleCloseFlyout = useCallback(() => {
     console.log('close main flyout', title); // eslint-disable-line no-console
-    setIsFlyoutVisible(false);
-    setIsChildFlyoutVisible(false);
+    setIsFlyoutOpen(false);
+    setIsChildFlyoutAOpen(false);
+    setIsChildFlyoutBOpen(false);
   }, [title]);
 
-  const childFlyoutOnClose = useCallback(() => {
-    console.log('close child flyout', title); // eslint-disable-line no-console
-    setIsChildFlyoutVisible(false);
+  const handleCloseChildFlyoutA = useCallback(() => {
+    console.log('close child flyout A', title); // eslint-disable-line no-console
+    setIsChildFlyoutAOpen(false);
+  }, [title]);
+
+  const handleCloseChildFlyoutB = useCallback(() => {
+    console.log('close child flyout B', title); // eslint-disable-line no-console
+    setIsChildFlyoutBOpen(false);
   }, [title]);
 
   // Render
@@ -106,13 +119,13 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <EuiButton disabled={isFlyoutVisible} onClick={handleOpenMainFlyout}>
+            <EuiButton disabled={isFlyoutOpen} onClick={handleOpenMainFlyout}>
               Open {title}
             </EuiButton>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isFlyoutVisible && (
+      {isFlyoutOpen && (
         <EuiFlyout
           id={`mainFlyout-${title}`}
           session="start"
@@ -123,7 +136,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           ownFocus={flyoutOwnFocus}
           pushAnimation={true}
           onActive={mainFlyoutOnActive}
-          onClose={mainFlyoutOnClose}
+          onClose={handleCloseFlyout}
           flyoutMenuProps={{ title }}
         >
           <EuiFlyoutHeader hasBorder>
@@ -193,12 +206,36 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                 fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
                 qui officia deserunt mollit anim id est laborum.
               </p>
+              <p>
+                Sed non neque elit. Sed ut imperdiet nisi. Proin condimentum fermentum nunc. Etiam
+                pharetra, erat sed fermentum feugiat, velit mauris egestas quam, ut aliquam massa
+                nisl quis neque. Suspendisse in orci enim augue arcu, molestie vitae vehicula et,
+                feugiat in tellus. Donec convallis lacinia dui, a porttitor lectus condimentum
+                laoreet. Nunc eu ullamcorper orci. Quisque eget odio ac lectus vestibulum faucibus
+                eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget
+                luctus tortor. Nulla facilisi. Duis aliquet egestas purus in blandit volutpat.
+                Curabitur vulputate, ligula lacinia scelerisque tempor, lacus lacus ornare ante, ac
+                egestas est urna sit amet arcu.
+              </p>
+              <p>
+                Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos
+                himenaeos. Sed molestie augue sit amet leo consequat posuere. Vestibulum ante ipsum
+                primis in faucibus orci luctus et ultrices posuere cubilia Curae; Proin vel ante a
+                orci tempus eleifend ut et magna. Lorem ipsum dolor sit amet, consectetur adipiscing
+                elit. Vivamus luctus urna sed urna ultricies ac tempor dui sagittis. In condimentum
+                facilisis porta. Sed nec diam eu diam mattis viverra. Nulla fringilla, orci ac
+                euismod semper, magna diam porttitor mauris, quis sollicitudin sapien justo in
+                libero. Fusce sed odio eu odio tincidunt congue sit amet at magna.
+              </p>
             </EuiText>
             {childSize && (
               <>
                 <EuiSpacer size="m" />
-                <EuiButton onClick={handleOpenChildFlyout} disabled={isChildFlyoutVisible}>
-                  Open child Flyout
+                <EuiButton onClick={handleOpenChildFlyoutA} disabled={isChildFlyoutAOpen}>
+                  Open child flyout A
+                </EuiButton>{' '}
+                <EuiButton onClick={handleOpenChildFlyoutB} disabled={isChildFlyoutBOpen}>
+                  Open child flyout B
                 </EuiButton>
               </>
             )}
@@ -206,52 +243,92 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={mainFlyoutOnClose} aria-label="Close">
+                <EuiButtonEmpty onClick={handleCloseFlyout} aria-label="Close">
                   Close
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
-          {childSize && isChildFlyoutVisible && (
-            <EuiFlyout
-              id={`childFlyout-${title}`}
-              aria-labelledby="childFlyoutTitle"
-              size={childSize}
-              maxWidth={childMaxWidth}
-              onActive={childFlyoutOnActive}
-              onClose={childFlyoutOnClose}
-              flyoutMenuProps={{
-                title: `${title} - Child`,
-                titleId: 'childFlyoutTitle',
-              }}
-            >
-              <EuiFlyoutBody>
-                <EuiText>
-                  <p>This is a child flyout.</p>
-                  <EuiSpacer size="m" />
-                </EuiText>
-                <EuiDescriptionList
-                  type="column"
-                  listItems={createChildFlyoutDescriptionItems(
-                    childSize,
-                    childMaxWidth,
-                    <>
-                      <EuiCode>EuiFlyout</EuiCode> component
-                    </>
-                  )}
-                />
-              </EuiFlyoutBody>
-              <EuiFlyoutFooter>
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty onClick={childFlyoutOnClose} aria-label="Close">
-                      Close
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlyoutFooter>
-            </EuiFlyout>
-          )}
+        </EuiFlyout>
+      )}
+      {isChildFlyoutAOpen && (
+        <EuiFlyout
+          id={`childFlyout-${title}-a`}
+          aria-labelledby="childFlyoutATitle"
+          size={childSize}
+          maxWidth={childMaxWidth}
+          onActive={childFlyoutAOnActive}
+          onClose={handleCloseChildFlyoutA}
+          flyoutMenuProps={{
+            title: `${title} - Child A`,
+            titleId: 'childFlyoutATitle',
+          }}
+        >
+          <EuiFlyoutBody>
+            <EuiText>
+              <p>This is child flyout A.</p>
+              <EuiSpacer size="m" />
+            </EuiText>
+            <EuiDescriptionList
+              type="column"
+              listItems={createChildFlyoutDescriptionItems(
+                childSize,
+                childMaxWidth,
+                <>
+                  <EuiCode>EuiFlyout</EuiCode> component
+                </>
+              )}
+            />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={handleCloseChildFlyoutA} aria-label="Close">
+                  Close
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      )}
+      {isChildFlyoutBOpen && (
+        <EuiFlyout
+          id={`childFlyout-${title}-a`}
+          aria-labelledby="childFlyoutBTitle"
+          size={childSize}
+          maxWidth={childMaxWidth}
+          onActive={childFlyoutAOnActive}
+          onClose={handleCloseChildFlyoutB}
+          flyoutMenuProps={{
+            title: `${title} - Child B`,
+            titleId: 'childFlyoutBTitle',
+          }}
+        >
+          <EuiFlyoutBody>
+            <EuiText>
+              <p>This is child flyout B.</p>
+              <EuiSpacer size="m" />
+            </EuiText>
+            <EuiDescriptionList
+              type="column"
+              listItems={createChildFlyoutDescriptionItems(
+                childSize,
+                childMaxWidth,
+                <>
+                  <EuiCode>EuiFlyout</EuiCode> component
+                </>
+              )}
+            />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={handleCloseChildFlyoutB} aria-label="Close">
+                  Close
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
         </EuiFlyout>
       )}
     </>
