@@ -120,6 +120,10 @@ export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
     schema: {
       query_lang: COMMON_SCHEMA.query_lang,
       session_id: COMMON_SCHEMA.session_id,
+      status: {
+        type: 'keyword',
+        _meta: { description: 'The current status of the search session.' },
+      },
     },
   });
 

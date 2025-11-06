@@ -118,6 +118,7 @@ export class SearchSessionEBTManager {
         session.restoreState?.query as Query | AggregateQuery | undefined
       ),
       session_id: session.id,
+      status: session.status,
     });
   }
 
