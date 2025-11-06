@@ -14,9 +14,9 @@ import {
 import type { RecursivePartial } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import type {
-  OpsgenieActionParams,
-  OpsgenieCloseAlertParams,
-} from '../../../server/connector_types';
+  Params as OpsgenieActionParams,
+  CloseAlertParams as OpsgenieCloseAlertParams,
+} from '@kbn/connector-schemas/opsgenie';
 import * as i18n from './translations';
 import type { EditActionCallback } from './types';
 import { DisplayMoreOptions } from './display_more_options';
