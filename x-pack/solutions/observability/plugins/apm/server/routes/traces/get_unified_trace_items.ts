@@ -176,9 +176,9 @@ export async function getUnifiedTraceItems({
     traceItems: unifiedTraceItems.hits.hits
       .map((hit) => {
         const event = accessKnownApmEventFields(hit.fields, fields);
-        const apmDuration = event(SPAN_DURATION) ?? event(TRANSACTION_DURATION);
-        const id = event(SPAN_ID) ?? event(TRANSACTION_ID);
-        const name = event(SPAN_NAME) ?? event(TRANSACTION_NAME);
+        const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
+        const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
+        const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
 
         if (!id || !name) {
           return undefined;
@@ -187,14 +187,14 @@ export async function getUnifiedTraceItems({
         return {
           id,
           name,
-          timestampUs: event(TIMESTAMP_US) ?? toMicroseconds(event(AT_TIMESTAMP)),
-          traceId: event(TRACE_ID),
-          duration: resolveDuration(apmDuration, event(DURATION)),
-          status: resolveStatus(event(EVENT_OUTCOME), event(STATUS_CODE)),
+          timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
+          traceId: event[TRACE_ID],
+          duration: resolveDuration(apmDuration, event[DURATION]),
+          status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
           errors: errorsByDocId[id] ?? [],
-          parentId: event(PARENT_ID),
-          serviceName: event(SERVICE_NAME),
-          type: event(SPAN_SUBTYPE) || event(SPAN_TYPE) || event(KIND),
+          parentId: event[PARENT_ID],
+          serviceName: event[SERVICE_NAME],
+          type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
         } satisfies TraceItem;
       })
       .filter((_) => _) as TraceItem[],

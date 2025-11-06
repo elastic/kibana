@@ -6,6 +6,7 @@
  */
 
 import { accessKnownApmEventFields } from './access_known_fields';
+import type { FlattenedApmEvent } from './utility_types';
 
 describe('accessKnownApmEventFields', () => {
   const input = {
@@ -17,6 +18,19 @@ describe('accessKnownApmEventFields', () => {
     'links.span_id': ['link1', 'link2'],
   };
 
+  it('should return either single or array values for the various known field types', () => {
+    const event = accessKnownApmEventFields(input as Partial<FlattenedApmEvent>, [
+      '@timestamp',
+      'service.name',
+    ]);
+
+    expect(event['service.name']).not.toBeUndefined();
+    expect(event['agent.name']).toBe('nodejs');
+    expect(event['agent.version']).toBeUndefined();
+    expect(event['links.span_id']).toEqual(['link1', 'link2']);
+    expect(event['links.trace_id']).toBeUndefined();
+  });
+
   it('should validate all required fields are present in the input document', () => {
     expect(() => accessKnownApmEventFields(input, ['@timestamp', 'service.name'])).not.toThrow();
 
@@ -25,13 +39,23 @@ describe('accessKnownApmEventFields', () => {
     );
   });
 
-  it('should return either single or array values for the various known field types', () => {
-    const event = accessKnownApmEventFields(input, ['@timestamp', 'service.name']);
+  it('exposes an `unflatten` method', () => {
+    const smallInput = {
+      '@timestamp': ['2024-10-10T10:10:10.000Z'],
+      'service.name': ['node-svc'],
+      'links.span_id': ['link1', 'link2'],
+    };
 
-    expect(event('service.name')).not.toBeUndefined();
-    expect(event('agent.name')).toBe('nodejs');
-    expect(event('agent.version')).toBeUndefined();
-    expect(event('links.span_id')).toEqual(['link1', 'link2']);
-    expect(event('links.trace_id')).toBeUndefined();
+    const event = accessKnownApmEventFields(smallInput, ['@timestamp', 'service.name']);
+
+    expect(typeof event.unflatten).toBe('function');
+
+    const unflattened = event.unflatten();
+
+    expect(unflattened).toEqual({
+      '@timestamp': '2024-10-10T10:10:10.000Z',
+      service: { name: 'node-svc' },
+      links: { span_id: ['link1', 'link2'] },
+    });
   });
 });
