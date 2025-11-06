@@ -11,29 +11,9 @@ import userEvent from '@testing-library/user-event';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ESQLSource } from './esql_source';
 
-jest.mock('../../../kibana_services', () => {});
-
 const mockGetDataViewFields = jest.fn().mockResolvedValue({
-  dateFields: [
-    {
-      name: 'timestamp',
-      type: 'date',
-    },
-    {
-      name: 'utc_timestamp',
-      type: 'date',
-    },
-  ],
-  geoFields: [
-    {
-      name: 'location',
-      type: 'geo_point',
-    },
-    {
-      name: 'utc_timestamp',
-      type: 'geo_point',
-    },
-  ],
+  dateFields: ['timestamp', 'utc_timestamp'],
+  geoFields: ['location', 'utc_timestamp'],
 });
 
 describe('UpdateSourceEditor', () => {
@@ -42,7 +22,7 @@ describe('UpdateSourceEditor', () => {
       return screen.getByText('Dynamically filter for data in the visible map area');
     }
 
-    test.only('should set geoField when checked and geo field is not set', async () => {
+    test('should set geoField when checked and geo field is not set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
