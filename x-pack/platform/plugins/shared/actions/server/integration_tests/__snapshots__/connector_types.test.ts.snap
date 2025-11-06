@@ -3591,6 +3591,7 @@ Object {
                 "channelNames": Object {
                   "items": Object {
                     "maxLength": 200,
+                    "minLength": 2,
                     "type": "string",
                   },
                   "maxItems": 1,
