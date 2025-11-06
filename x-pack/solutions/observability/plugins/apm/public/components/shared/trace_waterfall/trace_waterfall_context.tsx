@@ -27,6 +27,7 @@ export interface TraceWaterfallContextProps {
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
+  message?: string;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
