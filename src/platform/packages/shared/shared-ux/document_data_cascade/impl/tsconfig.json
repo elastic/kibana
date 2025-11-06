@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "@testing-library/react",
+      "@kbn/ambient-ui-types",
+      "../../../../../../../typings/emotion.d.ts"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/esql-utils",
+  ]
+}
