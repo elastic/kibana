@@ -7,45 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ForwardedRef, ReactNode } from 'react';
 import React, { forwardRef } from 'react';
-import { css } from '@emotion/react';
-import type { IconType } from '@elastic/eui';
+import type { ForwardedRef, ReactNode } from 'react';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
-
+import type { IconType } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { MenuItem } from '../../../types';
-import { MenuItem as MenuItemComponent } from '../menu_item';
-import { useTooltip } from '../../hooks/use_tooltip';
-import { BetaBadge } from '../beta_badge';
-import { TOOLTIP_OFFSET } from '../../constants';
 
-export interface SideNavPrimaryMenuItemProps extends MenuItem {
+import type { MenuItem } from '../../../types';
+import { BetaBadge } from '../beta_badge';
+import { MenuItem as MenuItemComponent } from '../menu_item';
+import { TOOLTIP_OFFSET } from '../../constants';
+import { useTooltip } from '../../hooks/use_tooltip';
+
+export interface PrimaryMenuItemProps extends Omit<MenuItem, 'href'> {
   as?: 'a' | 'button';
   children: ReactNode;
   hasContent?: boolean;
+  href?: string;
   iconType: IconType;
-  isHighlighted: boolean;
-  isCurrent?: boolean;
   isCollapsed: boolean;
+  isCurrent?: boolean;
+  isHighlighted: boolean;
+  isHorizontal?: boolean;
   onClick?: () => void;
 }
 
-export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrimaryMenuItemProps>(
+export const PrimaryMenuItem = forwardRef<
+  HTMLAnchorElement | HTMLButtonElement,
+  PrimaryMenuItemProps
+>(
   (
     {
+      badgeType,
       children,
       hasContent,
       href,
       iconType,
       id,
-      isHighlighted,
-      isCurrent,
       isCollapsed,
-      badgeType,
+      isCurrent,
+      isHighlighted,
+      isHorizontal,
       ...props
     },
-    ref: ForwardedRef<HTMLAnchorElement>
+    ref: ForwardedRef<HTMLAnchorElement | HTMLButtonElement>
   ): JSX.Element => {
     const { euiTheme } = useEuiTheme();
     const { tooltipRef, handleMouseOut } = useTooltip();

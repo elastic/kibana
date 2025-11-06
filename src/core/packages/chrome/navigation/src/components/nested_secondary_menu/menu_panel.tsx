@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, ReactNode } from 'react';
 import React, { useCallback } from 'react';
+import type { FC, ReactNode } from 'react';
 
 import { SecondaryMenu } from '../secondary_menu';
-import { useNestedMenu } from './use_nested_menu';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { useNestedMenu } from './use_nested_menu';
 
 export interface PanelProps {
   children: ReactNode;
