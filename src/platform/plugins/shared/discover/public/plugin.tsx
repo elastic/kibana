@@ -459,6 +459,7 @@ export class DiscoverPlugin
             uuid
           );
         }
+
         // unpause fetching if necessary now that ES|QL variables exist
         if (shouldPauseFetch) container.setFetchPaused(false);
       },
