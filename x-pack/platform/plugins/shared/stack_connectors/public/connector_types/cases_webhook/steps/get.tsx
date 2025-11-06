@@ -17,7 +17,7 @@ import {
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { JsonFieldWrapper, MustacheTextFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
-import { WebhookMethods } from '../../../../common/auth/constants';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 import {
   containsExternalIdForGet,
   containsExternalIdOrTitle,
