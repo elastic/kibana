@@ -48,14 +48,6 @@ export interface BrowserApiToolDefinition<TParams = unknown> {
 export function toToolMetadata<TParams>(
   tool: BrowserApiToolDefinition<TParams>
 ): BrowserApiToolMetadata {
-  // Validate tool ID doesn't contain dots
-  // OpenAI API requires tool names to match ^[a-zA-Z0-9_-]+$ (no dots allowed)
-  if (tool.id.includes('.')) {
-    throw new Error(
-      `Browser tool ID "${tool.id}" contains dots. Tool IDs must use underscores instead of dots (e.g., "set_time_range" not "set.time.range") to comply with OpenAI API requirements.`
-    );
-  }
-
   return {
     id: tool.id,
     description: tool.description,

@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { tool as toTool } from '@langchain/core/tools';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common';
+import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 
 /**
  * Create a browser tool adapter that registers browser tools as LLM tools
@@ -34,7 +35,7 @@ export function createBrowserToolAdapter({ browserTool }: { browserTool: Browser
       return [JSON.stringify(result), result];
     },
     {
-      name: `browser_${browserTool.id.replace(/\./g, '_')}`,
+      name: sanitizeToolId(`browser_${browserTool.id}`),
       description: browserTool.description,
       schema: browserTool.schema,
       responseFormat: 'content_and_artifact',
@@ -58,7 +59,7 @@ export function browserToolsToLangchain({
 
   const idMappings = new Map<string, string>();
   browserApiTools.forEach((tool) => {
-    const toolId = `browser_${tool.id.replace(/\./g, '_')}`;
+    const toolId = sanitizeToolId(`browser_${tool.id}`);
     idMappings.set(toolId, toolId);
   });
 
