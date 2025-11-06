@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-export { TrackingService, ToolCallSource, type TokenUsage } from './tracking_service';
+export { TrackingService, ToolCallSource } from './tracking_service';
 export { QueryUtils, type UsageCounterData } from './query_utils';
 export {
   createOnechatUsageCounter,
   trackToolCall,
-  trackError,
   trackLLMUsage,
-  trackTokenUsage,
   trackConversationRound,
   trackQueryToResultTime,
   ONECHAT_USAGE_DOMAIN,
