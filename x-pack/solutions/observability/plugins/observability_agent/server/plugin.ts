@@ -12,16 +12,16 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import { OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID } from '@kbn/management-settings-ids';
 import { registerObservabilityAgent } from './agent/register_observability_agent';
+import { registerTools } from './tools/register_tools';
+import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
+import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../common/constants';
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from './types';
-import { registerTools } from './tools/register_tools';
-import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 
 export class ObservabilityAgentPlugin
   implements
@@ -46,7 +46,7 @@ export class ObservabilityAgentPlugin
       .then((isObservabilityAgentEnabled) => {
         if (!isObservabilityAgentEnabled) {
           this.logger.debug(
-            `Skipping observability agent registration because ${OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID} is disabled`
+            `Skipping observability agent registration because feature flag "${OBSERVABILITY_AGENT_FEATURE_FLAG}" is set to false`
           );
           return;
         }
