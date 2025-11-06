@@ -69,8 +69,6 @@ export class WorkflowsExecutionEnginePlugin
     core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>,
     plugins: WorkflowsExecutionEnginePluginSetupDeps
   ) {
-    const initPromiseCallback = () => this.initializePromise || Promise.resolve();
-
     this.logger.debug('workflows-execution-engine: Setup');
 
     const logger = this.logger;
@@ -92,7 +90,6 @@ export class WorkflowsExecutionEnginePlugin
           const taskAbortController = new AbortController();
           return {
             async run() {
-              await initPromiseCallback();
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
@@ -142,7 +139,6 @@ export class WorkflowsExecutionEnginePlugin
           const taskAbortController = new AbortController();
           return {
             async run() {
-              await initPromiseCallback();
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
@@ -188,15 +184,13 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
     const dependencies: ContextDependencies = this.setupDependencies; // TODO: append start dependencies
-    // this.initializePromise = this.initialize(coreStart);
-    this.initializePromise = Promise.resolve();
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, any>,
       request?: any
     ) => {
-      await this.initializePromise;
+      await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
 
       // Get ES client and create repository for this execution
@@ -290,7 +284,7 @@ export class WorkflowsExecutionEnginePlugin
       stepId: string,
       contextOverride: Record<string, any>
     ): Promise<ExecuteWorkflowStepResponse> => {
-      await this.initializePromise;
+      await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
 
       // Get ES client and create repository for this execution
@@ -339,7 +333,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const cancelWorkflowExecution = async (workflowExecutionId: string, spaceId: string) => {
-      await this.initializePromise;
+      await this.initialize(coreStart);
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -388,10 +382,13 @@ export class WorkflowsExecutionEnginePlugin
 
   public stop() {}
 
-  private async initialize(coreStart: CoreStart) {
-    await createIndexes({
-      esClient: coreStart.elasticsearch.client.asInternalUser,
-      logger: this.logger,
-    });
+  private async initialize(coreStart: CoreStart): Promise<void> {
+    if (!this.initializePromise) {
+      this.initializePromise = createIndexes({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
+    }
+    await this.initializePromise;
   }
 }
