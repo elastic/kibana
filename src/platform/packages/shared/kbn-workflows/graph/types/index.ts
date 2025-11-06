@@ -20,6 +20,7 @@ export type {
   ElasticsearchGraphNodeSchema,
   KibanaGraphNode,
   KibanaGraphNodeSchema,
+  SlackSearchNode,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,

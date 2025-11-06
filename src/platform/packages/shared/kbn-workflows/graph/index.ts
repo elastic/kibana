@@ -35,6 +35,7 @@ export type {
   HttpGraphNodeSchema,
   GDriveGraphNode,
   GDriveGraphNodeSchema,
+  SlackSearchNode,
   EnterTryBlockNode,
   ExitTryBlockNode,
   EnterNormalPathNode,

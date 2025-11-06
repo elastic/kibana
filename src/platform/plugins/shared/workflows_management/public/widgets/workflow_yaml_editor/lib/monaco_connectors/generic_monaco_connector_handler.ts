@@ -165,6 +165,15 @@ ${Object.entries(category.examples.params || {})
       };
     }
 
+    // Slack connectors
+    if (connectorType.includes('slack-search')) {
+      return {
+        name: 'Slack Search',
+        description: '###',
+        documentation: '$$$',
+      };
+    }
+
     // Email connectors
     if (connectorType.includes('email') || connectorType.includes('mail')) {
       return {

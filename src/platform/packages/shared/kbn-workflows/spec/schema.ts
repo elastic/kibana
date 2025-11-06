@@ -201,10 +201,7 @@ export const GDriveStepSchema = BaseStepSchema.extend({
     // Service account credentials (JSON object)
     service_credential: z.record(z.string(), z.any()).optional(),
     // Operation to perform
-    operation: z
-      .enum(['list', 'get', 'download', 'ping'])
-      .optional()
-      .default('list'),
+    operation: z.enum(['list', 'get', 'download', 'ping']).optional().default('list'),
     // File operations
     fileId: z.string().optional(), // Required for get, download, delete
     fileName: z.string().optional(), // Required for upload
@@ -232,6 +229,17 @@ export function getGDriveStepSchema(stepSchema: z.ZodType, loose: boolean = fals
 
   return schema;
 }
+export const SlackSearchStepSchema = BaseStepSchema.extend({
+  type: z.literal('slack-search'),
+  with: z.object({
+    bearerToken: z.string().min(1),
+    query: z.string().min(1),
+    body: z.any().optional(),
+  }),
+})
+  .merge(TimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
+export type SlackSearchStep = z.infer<typeof SlackSearchStepSchema>;
 
 // Generic Elasticsearch step schema for backend validation
 export const ElasticsearchStepSchema = BaseStepSchema.extend({
@@ -479,6 +487,7 @@ const StepSchema = z.lazy(() =>
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
+    SlackSearchStepSchema,
   ])
 );
 export type Step = z.infer<typeof StepSchema>;
@@ -491,6 +500,7 @@ export const BuiltInStepTypes = [
   WaitStepSchema.shape.type._def.value,
   HttpStepSchema.shape.type._def.value,
   GDriveStepSchema.shape.type._def.value,
+  SlackSearchStepSchema.shape.type._def.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
