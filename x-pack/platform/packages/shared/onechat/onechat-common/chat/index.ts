@@ -7,6 +7,7 @@
 
 export {
   type RoundInput,
+  type RawRoundInput,
   type AssistantResponse,
   type ToolCallWithResult,
   type ConversationRound,
@@ -45,6 +46,8 @@ export {
   type MessageChunkEvent,
   type MessageCompleteEventData,
   type MessageCompleteEvent,
+  type ThinkingCompleteEventData,
+  type ThinkingCompleteEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
   isToolCallEvent,
@@ -53,6 +56,7 @@ export {
   isReasoningEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
+  isThinkingCompleteEvent,
   isRoundCompleteEvent,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
