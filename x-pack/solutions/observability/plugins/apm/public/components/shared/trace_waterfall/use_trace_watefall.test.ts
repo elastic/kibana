@@ -222,7 +222,7 @@ describe('getFlattenedTraceWaterfall', () => {
       },
     ];
 
-    const invalidMap = getTraceParentChildrenMap(invalidSpans, false);
+    const invalidMap = getTraceParentChildrenMap(invalidSpans);
 
     const { orphans, rootItem } = getRootItemOrFallback(invalidMap, invalidSpans);
 
