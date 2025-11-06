@@ -25,10 +25,6 @@ jest.mock('fs', () => ({
   },
 }));
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/path/to',
-}));
-
 jest.mock('child_process', () => ({
   spawn: jest.fn(),
 }));
@@ -298,7 +294,7 @@ describe('run_all.ts', () => {
         [
           'scripts/jest',
           '--config',
-          'config1.js',
+          '/path/to/config1.js',
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',

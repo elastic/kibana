@@ -14,7 +14,6 @@ import { spawn } from 'child_process';
 import Table from 'cli-table3';
 import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
@@ -194,7 +193,7 @@ async function runConfigs(
         const args = [
           'scripts/jest',
           '--config',
-          relative(REPO_ROOT, config),
+          config,
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
