@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
-import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../../../common';
-import { createIndexWithMappings } from '../../../common/create_index';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../../common';
 
 export interface WorkflowLogEvent {
   '@timestamp'?: string;
@@ -63,22 +61,13 @@ export interface LogSearchResult {
 
 export class LogsRepository {
   private indexName = WORKFLOWS_EXECUTION_LOGS_INDEX;
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(private esClient: ElasticsearchClient) {}
 
   async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
     await this.esClient?.bulk({
       refresh: 'wait_for',
       index: this.indexName,
       body: logEvents.flatMap((logEvent) => [{ create: {} }, { doc: logEvent }]),
-    });
-  }
-
-  public async initialize(): Promise<void> {
-    await createIndexWithMappings({
-      esClient: this.esClient,
-      indexName: this.indexName,
-      mappings: WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS,
-      logger: this.logger,
     });
   }
 
