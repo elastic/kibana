@@ -491,10 +491,17 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
         /^packages\/kbn-babel-preset/,
+        /^packages\/kbn-repo-file-maps/,
+        /^src\/platform\/packages\/private\/kbn-babel-transform/,
+        /^src\/platform\/packages\/private\/kbn-import-resolver/,
+        /^src\/platform\/packages\/private\/kbn-jest-serializers/,
         /^src\/platform\/packages\/private\/kbn-repo-packages/,
+        /^src\/platform\/packages\/shared\/kbn-babel-register/,
+        /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
+        /^src\/platform\/packages\/shared\/kbn-repo-info/,
+        /^src\/platform\/packages\/shared\/kbn-test/,
+        /^src\/setup_node_env/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:bench-jest')
     ) {
