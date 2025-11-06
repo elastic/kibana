@@ -35,6 +35,7 @@ import { getRunWorkflowTooltipContent, StatusBadge, WorkflowStatus } from '../..
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
+import { WorkflowStepsList } from '../../../widgets/worflows_triggers_list/worflow_steps_list';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
@@ -158,7 +159,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'name',
         name: 'Name',
         dataType: 'string',
-        width: '45%',
+        width: '25%',
         render: (name: string, item) => (
           <div
             css={css`
@@ -228,9 +229,17 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         ),
       },
       {
+        field: 'steps',
+        name: 'Steps',
+        width: '10%',
+        render: (value: unknown, item: WorkflowListItemDto) => {
+          return <WorkflowStepsList steps={item.definition?.steps ?? []} />;
+        },
+      },
+      {
         name: 'Last run',
         field: 'runHistory',
-        width: '10%',
+        width: '20%',
         render: (value, item) => {
           if (!item.history || item.history.length === 0) return;
           const lastRun = item.history[0];
