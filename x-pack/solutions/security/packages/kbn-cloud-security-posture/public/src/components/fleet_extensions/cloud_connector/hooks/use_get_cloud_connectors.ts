@@ -11,6 +11,7 @@ import type {
   CloudConnectorListOptions,
   CloudProvider,
 } from '@kbn/fleet-plugin/public';
+import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/public';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -46,7 +47,7 @@ export const useGetCloudConnectors = (cloudProvider?: CloudProvider) => {
 
   // Construct KQL query if cloudProvider is specified
   const kuery = cloudProvider
-    ? `fleet-cloud-connector.attributes.cloudProvider: "${cloudProvider}"`
+    ? `${CLOUD_CONNECTOR_SAVED_OBJECT_TYPE}.attributes.cloudProvider: "${cloudProvider}"`
     : undefined;
 
   return useQuery(
