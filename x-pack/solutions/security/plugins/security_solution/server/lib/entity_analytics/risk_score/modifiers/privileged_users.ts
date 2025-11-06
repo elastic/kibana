@@ -45,7 +45,7 @@ interface ApplyCriticalityModifierParams {
 
 // TODO: Tune modifier value
 // QUESTION: This should take labels/sources/roles into account?
-const PRIVILEGED_USER_MODIFIER = 1.5;
+const PRIVILEGED_USER_MODIFIER = 2;
 
 export const applyPrivmonModifier = async ({
   page: { buckets, identifierField, bounds },
