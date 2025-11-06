@@ -6,13 +6,18 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSuperDatePicker } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { ScratchpadNode } from '../hooks/use_scratchpad_state';
 
 export interface ScratchpadToolbarProps {
   onAddNode: (type: ScratchpadNode['type']) => void;
   onClearAll?: () => void;
   onLayout?: () => void;
+  timeRange?: TimeRange;
+  onTimeRangeChange?: (timeRange: TimeRange) => void;
 }
 
 /**
@@ -36,61 +41,74 @@ export function getNextNodePosition(nodes: ScratchpadNode[]): { x: number; y: nu
   };
 }
 
-export function ScratchpadToolbar({ onAddNode, onClearAll, onLayout }: ScratchpadToolbarProps) {
+export function ScratchpadToolbar({
+  onAddNode,
+  onClearAll,
+  onLayout,
+  timeRange,
+  onTimeRangeChange,
+}: ScratchpadToolbarProps) {
+  const { uiSettings } = useKibana().services;
+
   const handleAddNode = (type: ScratchpadNode['type']) => {
     onAddNode(type);
   };
 
+  const handleTimeChange = ({ start, end }: { start: string; end: string }) => {
+    if (onTimeRangeChange) {
+      onTimeRangeChange({ from: start, to: end });
+    }
+  };
+
+  const commonlyUsedRanges = uiSettings
+    ?.get('timepicker:quickRanges')
+    ?.map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+      start: from,
+      end: to,
+      label: display,
+    })) || [];
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="document"
-          onClick={() => handleAddNode('text_note')}
-        >
+        <EuiButton size="s" iconType="document" onClick={() => handleAddNode('text_note')}>
           Add Note
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="search"
-          onClick={() => handleAddNode('esql_query')}
-        >
+        <EuiButton size="s" iconType="search" onClick={() => handleAddNode('esql_query')}>
           Add ESQL Query
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="link"
-          onClick={() => handleAddNode('kibana_link')}
-        >
+        <EuiButton size="s" iconType="link" onClick={() => handleAddNode('kibana_link')}>
           Add Link
         </EuiButton>
       </EuiFlexItem>
       {onLayout && (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="grid"
-            onClick={onLayout}
-          >
+          <EuiButton size="s" iconType="grid" onClick={onLayout}>
             Arrange Layout
           </EuiButton>
         </EuiFlexItem>
       )}
       {onClearAll && (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="trash"
-            color="danger"
-            onClick={onClearAll}
-          >
+          <EuiButton size="s" iconType="trash" color="danger" onClick={onClearAll}>
             Clear All
           </EuiButton>
+        </EuiFlexItem>
+      )}
+      {timeRange && onTimeRangeChange && (
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            start={timeRange.from}
+            end={timeRange.to}
+            onTimeChange={handleTimeChange}
+            commonlyUsedRanges={commonlyUsedRanges}
+            showUpdateButton={false}
+            width="auto"
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

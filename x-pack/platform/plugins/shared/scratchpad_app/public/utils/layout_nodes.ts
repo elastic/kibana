@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { ScratchpadNode } from '../hooks/use_scratchpad_state';
 import type { Edge } from '@xyflow/react';
+import type { ScratchpadNode } from '../hooks/use_scratchpad_state';
 
-const NODE_WIDTH = 250;
-const NODE_HEIGHT = 150;
 const HORIZONTAL_SPACING = 350;
 const VERTICAL_SPACING = 200;
 
@@ -86,7 +84,6 @@ export function layoutNodes(nodes: ScratchpadNode[], edges: Edge[]): ScratchpadN
   });
 
   // Calculate positions
-  const maxLevel = Math.max(...Array.from(nodesByLevel.keys()));
   const startX = 250;
   const startY = 250;
 
@@ -99,7 +96,6 @@ export function layoutNodes(nodes: ScratchpadNode[], edges: Edge[]): ScratchpadN
     const y = startY + level * VERTICAL_SPACING;
 
     // Center nodes horizontally within their level
-    const levelWidth = nodesInLevel.length * HORIZONTAL_SPACING;
     const offsetX = (indexInLevel - (nodesInLevel.length - 1) / 2) * HORIZONTAL_SPACING;
 
     return {
@@ -111,4 +107,3 @@ export function layoutNodes(nodes: ScratchpadNode[], edges: Edge[]): ScratchpadN
     };
   });
 }
-

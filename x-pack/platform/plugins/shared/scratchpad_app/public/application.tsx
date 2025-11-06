@@ -10,6 +10,7 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiPageTemplate } from '@elastic/eui';
 import type { NodeChange, EdgeChange, Connection } from '@xyflow/react';
+import type { TimeRange } from '@kbn/es-query';
 import type { ScratchpadAppStartDependencies } from './types';
 import { ScratchpadCanvas } from './components/scratchpad_canvas';
 import { ScratchpadToolbar, getNextNodePosition } from './components/scratchpad_toolbar';
@@ -42,6 +43,10 @@ export function ScratchpadApplication({
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [shouldFitView, setShouldFitView] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    from: 'now-15m',
+    to: 'now',
+  });
 
   // Integrate AI assistant screen context
   useScratchpadScreenContext({
@@ -214,6 +219,8 @@ export function ScratchpadApplication({
           onAddNode={handleAddNode}
           onClearAll={handleClearAll}
           onLayout={handleLayout}
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
         />
         <EuiPageTemplate.Section paddingSize="none" style={{ height: 'calc(100vh - 200px)' }}>
           <ScratchpadCanvas
@@ -234,6 +241,8 @@ export function ScratchpadApplication({
             onPaneClick={handlePaneClick}
             shouldFitView={shouldFitView}
             layoutKey={layoutKey}
+            onUpdateNode={updateNode}
+            timeRange={timeRange}
           />
         </EuiPageTemplate.Section>
         <NodeEditModal

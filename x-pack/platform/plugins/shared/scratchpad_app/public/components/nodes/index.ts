@@ -6,3 +6,4 @@
  */
 
 export * from './simple_node';
+export * from './esql_query_node';

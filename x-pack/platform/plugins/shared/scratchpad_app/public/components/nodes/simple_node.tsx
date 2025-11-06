@@ -10,13 +10,19 @@ import type { Node } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import { EuiCard, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ScratchpadNodeData } from '../../hooks/use_scratchpad_state';
+import { ESQLQueryNode } from './esql_query_node';
+import { useScratchpadNodeContext } from '../scratchpad_canvas/node_context';
 
 export function SimpleNode(node: Node<ScratchpadNodeData>) {
+  const { onUpdateNode } = useScratchpadNodeContext();
   const nodeData = node.data;
   const { euiTheme } = useEuiTheme();
   const isSelected = nodeData.selected || false;
 
-  console.log('Rendering SimpleNode', node.id, 'selected:', isSelected);
+  // Use dedicated ESQL query node component for ESQL queries
+  if (nodeData.type === 'esql_query') {
+    return <ESQLQueryNode node={node as Node<any>} onUpdateNode={onUpdateNode} />;
+  }
 
   return (
     <div>
@@ -27,7 +33,7 @@ export function SimpleNode(node: Node<ScratchpadNodeData>) {
             ? String(nodeData.title || 'Note')
             : nodeData.type === 'kibana_link'
             ? String(nodeData.title || 'Link')
-            : 'ESQL Query'
+            : 'Node'
         }
         style={{
           minWidth: '200px',
@@ -44,13 +50,6 @@ export function SimpleNode(node: Node<ScratchpadNodeData>) {
         <EuiText size="s">
           {nodeData.type === 'text_note' && (
             <div>{String(nodeData.content || 'Empty note')}</div>
-          )}
-          {nodeData.type === 'esql_query' && (
-            <div>
-              <pre style={{ fontSize: '12px', overflow: 'auto', margin: 0 }}>
-                {String(nodeData.query || 'No query')}
-              </pre>
-            </div>
           )}
           {nodeData.type === 'kibana_link' && (
             <div>{String(nodeData.title || 'Link')}</div>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import {
   ReactFlow,
   Background,
@@ -22,8 +22,10 @@ import {
 import { useEuiTheme } from '@elastic/eui';
 import '@xyflow/react/dist/style.css';
 import type { NodeTypes } from '@xyflow/react';
+import type { TimeRange } from '@kbn/es-query';
 import type { ScratchpadNode } from '../../hooks/use_scratchpad_state';
 import { SimpleNode } from '../nodes/simple_node';
+import { ScratchpadNodeProvider } from './node_context';
 
 const nodeTypes: NodeTypes = {
   esql_query: SimpleNode as any,
@@ -42,6 +44,8 @@ interface ScratchpadCanvasProps {
   onPaneClick?: (event: React.MouseEvent) => void;
   shouldFitView?: boolean;
   layoutKey?: number;
+  onUpdateNode?: (nodeId: string, updates: Partial<ScratchpadNode>) => void;
+  timeRange?: TimeRange;
 }
 
 export function ScratchpadCanvas({
@@ -55,6 +59,8 @@ export function ScratchpadCanvas({
   onPaneClick,
   shouldFitView,
   layoutKey,
+  onUpdateNode,
+  timeRange,
 }: ScratchpadCanvasProps) {
   const { euiTheme } = useEuiTheme();
   const [reactFlowNodes, setReactFlowNodes, onNodesChangeInternal] = useNodesState(nodes);
@@ -214,11 +220,10 @@ export function ScratchpadCanvas({
     reactFlowInstanceRef.current = instance;
   }, []);
 
-  console.log(reactFlowNodes);
-
   return (
-    <div style={{ width: '100%', height: 'calc(100vh - 300px)' }}>
-      <ReactFlow
+    <ScratchpadNodeProvider value={{ onUpdateNode, timeRange }}>
+      <div style={{ width: '100%', height: 'calc(100vh - 300px)' }}>
+        <ReactFlow
         nodes={reactFlowNodes}
         edges={reactFlowEdges}
         nodeTypes={nodeTypes}
@@ -247,6 +252,7 @@ export function ScratchpadCanvas({
           </div>
         </Panel>
       </ReactFlow>
-    </div>
+      </div>
+    </ScratchpadNodeProvider>
   );
 }
