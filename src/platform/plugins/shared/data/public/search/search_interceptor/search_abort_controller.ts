@@ -75,9 +75,4 @@ export class SearchAbortController {
   public isTimeout() {
     return this.reason === AbortReason.Timeout;
   }
-
-  public clearTimeout() {
-    this.timeoutSub?.unsubscribe();
-    this.timeoutSub = undefined;
-  }
 }

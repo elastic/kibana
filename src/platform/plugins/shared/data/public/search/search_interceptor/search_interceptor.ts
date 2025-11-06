@@ -334,7 +334,7 @@ export class SearchInterceptor {
     let isSavedToBackground =
       this.deps.session.isCurrentSession(sessionId) &&
       (this.deps.session.isSaving() || this.deps.session.isStored());
-    if (isSavedToBackground) searchAbortController.clearTimeout();
+    if (isSavedToBackground) searchAbortController.cleanup();
 
     const savedToBackgroundSub =
       this.deps.session.isCurrentSession(sessionId) &&
@@ -349,7 +349,7 @@ export class SearchInterceptor {
           take(1)
         )
         .subscribe(() => {
-          searchAbortController.clearTimeout();
+          searchAbortController.cleanup();
           isSavedToBackground = true;
         });
 
