@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SubAgent } from '../types';
+import type { SubAgent, SubAgentParams } from '../types';
 import { LOG_ANALYZER_PROMPT } from '../prompts';
 
 /**
@@ -14,14 +14,15 @@ import { LOG_ANALYZER_PROMPT } from '../prompts';
  *
  * @returns Logs analyzer agent configured with the provided parameters
  */
-const createLogsAnalyzerAgent = (): SubAgent => {
+export const createLogsAnalyzerAgent = (
+  params: Omit<SubAgentParams, 'name' | 'description' | 'sampleCount'>
+): SubAgent => {
+  const userPrompt = params.prompt;
   return {
     name: 'logs_analyzer',
     description:
       'Analyzes the log format and provides a structured analysis for ingest pipeline generation.',
-    prompt: LOG_ANALYZER_PROMPT,
-    tools: [],
+    prompt: LOG_ANALYZER_PROMPT + (userPrompt ? `\n\n${userPrompt}` : ''),
+    tools: params.tools,
   };
 };
-
-export const logsAnalyzerSubAgent = createLogsAnalyzerAgent();
