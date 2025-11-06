@@ -11,12 +11,16 @@
  */
 export const internalNamespaces = {
   platformCore: 'platform.core',
+  mcp: 'mcp',
 } as const;
 
 /**
  * List of protected namespaces which can only be used by internal tools.
  */
-export const protectedNamespaces: string[] = [internalNamespaces.platformCore];
+export const protectedNamespaces: string[] = [
+  internalNamespaces.platformCore,
+  internalNamespaces.mcp,
+];
 
 /**
  * Checks if the provided tool name belongs to a protected namespace.

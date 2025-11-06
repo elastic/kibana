@@ -14,12 +14,14 @@ import { esqlToolFormRegistryEntry } from './tool_types/esql';
 import { indexSearchToolRegistryEntry } from './tool_types/index_search';
 import { builtinToolRegistryEntry } from './tool_types/builtin';
 import { workflowToolRegistryEntry } from './tool_types/workflow';
+import { mcpToolRegistryEntry } from './tool_types/mcp';
 
 export const TOOLS_FORM_REGISTRY = {
   [ToolType.esql]: esqlToolFormRegistryEntry,
   [ToolType.index_search]: indexSearchToolRegistryEntry,
   [ToolType.workflow]: workflowToolRegistryEntry,
   [ToolType.builtin]: builtinToolRegistryEntry,
+  [ToolType.mcp]: mcpToolRegistryEntry,
 };
 
 export function getToolTypeConfig<T extends ToolType>(
@@ -34,17 +36,17 @@ export function getToolTypeConfig<T extends ToolType>(
 
 export function getCreatePayloadFromData<T extends ToolFormData>(data: T): CreateToolPayload {
   const config = getToolTypeConfig(data.type);
-  return config.formDataToCreatePayload(data as any);
+  return config.formDataToCreatePayload(data as never);
 }
 
 export function getUpdatePayloadFromData<T extends ToolFormData>(data: T): UpdateToolPayload {
   const config = getToolTypeConfig(data.type);
-  return config.formDataToUpdatePayload(data as any);
+  return config.formDataToUpdatePayload(data as never);
 }
 
 export function getEditableToolTypes(): Array<{ value: ToolType; text: string }> {
   return Object.entries(TOOLS_FORM_REGISTRY)
-    .filter(([toolType]) => toolType !== ToolType.builtin)
+    .filter(([toolType]) => toolType !== ToolType.builtin && toolType !== ToolType.mcp)
     .map(([toolType, config]) => ({
       value: toolType as ToolType,
       text: config.label,

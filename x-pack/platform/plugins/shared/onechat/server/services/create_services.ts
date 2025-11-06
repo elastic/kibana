@@ -54,6 +54,7 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    actions,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -74,6 +75,7 @@ export class ServiceManager {
       getRunner,
       spaces,
       elasticsearch,
+      actions,
       uiSettings,
       savedObjects,
     });

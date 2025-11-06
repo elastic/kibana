@@ -47,6 +47,14 @@ export interface BuiltinToolTypeDefinition {
   builtin: true;
 }
 
+/**
+ * Specific descriptor for MCP (Model Context Protocol) tool types.
+ */
+export interface McpToolTypeDefinition {
+  toolType: ToolType.mcp;
+  mcp: true;
+}
+
 export interface ToolTypeConversionContext {
   request: KibanaRequest;
   spaceId: string;
@@ -77,7 +85,8 @@ export type AnyToolTypeDefinition<
 > =
   | ToolTypeDefinition<TType, TConfig, TSchema>
   | DisabledToolTypeDefinition<TType>
-  | BuiltinToolTypeDefinition;
+  | BuiltinToolTypeDefinition
+  | McpToolTypeDefinition;
 
 export const isEnabledDefinition = <
   TType extends ToolType,
@@ -86,7 +95,7 @@ export const isEnabledDefinition = <
 >(
   definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
 ): definition is ToolTypeDefinition<TType, TConfig, TSchema> => {
-  return !('disabled' in definition) && !('builtin' in definition);
+  return !('disabled' in definition) && !('builtin' in definition) && !('mcp' in definition);
 };
 
 export const isBuiltinDefinition = <
@@ -97,6 +106,16 @@ export const isBuiltinDefinition = <
   definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
 ): definition is BuiltinToolTypeDefinition => {
   return 'builtin' in definition && definition.builtin;
+};
+
+export const isMcpDefinition = <
+  TType extends ToolType,
+  TConfig extends object = {},
+  TSchema extends ZodObject<any> = ZodObject<any>
+>(
+  definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
+): definition is McpToolTypeDefinition => {
+  return 'mcp' in definition && definition.mcp;
 };
 
 export const isDisabledDefinition = <
