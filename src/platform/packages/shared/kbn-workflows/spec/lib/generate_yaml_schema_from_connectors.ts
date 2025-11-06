@@ -72,6 +72,9 @@ function createRecursiveStepSchema(
 
 export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContractUnion[],
+  /**
+   * @deprecated use WorkflowSchemaForAutocomplete instead
+   */
   loose: boolean = false
 ) {
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
