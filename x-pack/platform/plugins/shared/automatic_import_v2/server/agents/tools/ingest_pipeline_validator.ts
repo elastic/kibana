@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { Command } from '@langchain/langgraph';
 import { ToolMessage } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import type { AutomaticImportSamplesIndexService } from '../../services/samples_index/index_service';
 
 interface DocTemplate {
@@ -46,6 +48,17 @@ export function createIngestPipelineValidatorTool(
   esClient: ElasticsearchClient,
   samples: string[]
 ): DynamicStructuredTool {
+  const validatorSchema = z.object({
+    generated_pipeline: z
+      .object({
+        processors: z.array(z.any()).describe('The processors in the pipeline'),
+        on_failure: z
+          .array(z.any())
+          .optional()
+          .describe('Optional failure handlers for the pipeline'),
+      })
+      .describe('The generated ingest pipeline to validate'),
+  });
   return new DynamicStructuredTool({
     name: 'validate_ingest_pipeline',
     description:
@@ -63,7 +76,11 @@ export function createIngestPipelineValidatorTool(
         })
         .describe('The generated ingest pipeline to validate'),
     }),
-    func: async (input, config) => {
+    func: async (
+      input: z.infer<typeof validatorSchema>,
+      _runManager?: CallbackManagerForToolRun,
+      config?: ToolRunnableConfig
+    ) => {
       const { generated_pipeline: generatedPipeline } = input;
 
       try {
@@ -83,9 +100,7 @@ export function createIngestPipelineValidatorTool(
               messages: [
                 new ToolMessage({
                   content: message,
-                  tool_call_id: ((config as any)?.configurable?.tool_call_id ??
-                    (config as any)?.toolCall?.id ??
-                    'unknown') as string,
+                  tool_call_id: config?.toolCall?.id as string,
                 }),
               ],
             },
@@ -123,9 +138,7 @@ export function createIngestPipelineValidatorTool(
               messages: [
                 new ToolMessage({
                   content: errorMessage,
-                  tool_call_id: ((config as any)?.configurable?.tool_call_id ??
-                    (config as any)?.toolCall?.id ??
-                    'unknown') as string,
+                  tool_call_id: config?.toolCall?.id as string,
                 }),
               ],
             },
@@ -190,9 +203,7 @@ export function createIngestPipelineValidatorTool(
             messages: [
               new ToolMessage({
                 content: message,
-                tool_call_id: ((config as any)?.configurable?.tool_call_id ??
-                  (config as any)?.toolCall?.id ??
-                  'unknown') as string,
+                tool_call_id: config?.toolCall?.id as string,
               }),
             ],
           },
@@ -218,9 +229,7 @@ export function createIngestPipelineValidatorTool(
             messages: [
               new ToolMessage({
                 content: errorMessage,
-                tool_call_id: ((config as any)?.configurable?.tool_call_id ??
-                  (config as any)?.toolCall?.id ??
-                  'unknown') as string,
+                tool_call_id: config?.toolCall?.id as string,
               }),
             ],
           },
