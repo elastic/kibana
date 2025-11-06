@@ -24,7 +24,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
-import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
@@ -65,7 +65,7 @@ export function ControlledEsqlChart<T extends string>({
   xDomain: customXDomain,
 }: {
   id: string;
-  result: AbortableAsyncState<UnparsedEsqlResponse>;
+  result: AbortableAsyncState<ESQLSearchResponse>;
   metricNames: T[];
   chartType?: 'area' | 'bar' | 'line';
   height?: number;
