@@ -72,6 +72,7 @@ export function CellActionsPopover({
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
       onFilter(property, rawValue, operator);
+      closePopover();
     }
   };
 
