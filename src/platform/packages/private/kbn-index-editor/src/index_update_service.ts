@@ -530,7 +530,9 @@ export class IndexUpdateService {
 
         // If no rows left, add a placeholder row
         if (resultRows.length === 0) {
-          resultRows.push(this.buildPlaceholderRow());
+          const newRow = this.buildPlaceholderRow();
+          resultRows.push(newRow);
+          this.newRowsVirtualIndexes.addRowVirtualIndex(newRow.id, 0);
         }
         this._rows$.next(resultRows);
       })
