@@ -54,5 +54,11 @@ export interface EmbeddableConversationProps {
   initialMessage?: string;
 }
 
+export interface EmbeddableConversationFlyoutProps {
+  onClose: () => void;
+  ariaLabelledBy: string;
+}
+
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
-  EmbeddableConversationProps;
+  EmbeddableConversationProps &
+  EmbeddableConversationFlyoutProps;
