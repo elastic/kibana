@@ -6,11 +6,11 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { MaintenanceWindow } from '../../application/maintenance_window/types';
 import { filterMaintenanceWindowsIds } from './get_maintenance_windows';
-import type { MaintenanceWindowClientApi } from '../../types';
 import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { withAlertingSpan } from '../lib';
+import { MaintenanceWindowClientApi } from '@kbn/maintenance-windows-plugin/server/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 
 export const DEFAULT_CACHE_INTERVAL_MS = 60000; // 1 minute cache
 

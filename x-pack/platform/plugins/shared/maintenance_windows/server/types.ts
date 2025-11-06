@@ -51,7 +51,5 @@ export interface MaintenanceWindowsPluginsStart {
 }
 
 export interface MaintenanceWindowsServerStart {
-  getMaintenanceWindowClientWithRequest(
-    request: KibanaRequest
-  ): Promise<MaintenanceWindowClientApi>;
+  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
 }

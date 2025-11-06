@@ -105,9 +105,9 @@ export class MaintenanceWindowsPlugin
       uiSettings: core.uiSettings,
     });
 
-    const getMaintenanceWindowClientWithRequest = async (
+    const getMaintenanceWindowClientWithRequest = (
       request: KibanaRequest
-    ): Promise<MaintenanceWindowClientApi> => {
+    ): MaintenanceWindowClientApi => {
       return maintenanceWindowClientFactory!.create(request);
     };
 

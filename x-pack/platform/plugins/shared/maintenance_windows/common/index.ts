@@ -15,7 +15,7 @@ export type {
   MaintenanceWindowClientContext,
   MaintenanceWindowDeepLinkIds,
   ScopedQueryAttributes,
-} from '../../maintenance_windows/common/constants';
+} from './constants';
 
 export {
   MaintenanceWindowStatus,
@@ -29,7 +29,7 @@ export {
   MAINTENANCE_WINDOW_DATE_FORMAT,
   MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
-} from '../../maintenance_windows/common/constants';
+} from './constants';
 
 export {
   getScopedQueryErrorMessage,

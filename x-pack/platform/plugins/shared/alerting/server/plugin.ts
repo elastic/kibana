@@ -52,7 +52,7 @@ import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin';
+import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -650,10 +650,8 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
-    const getMaintenanceWindowClientWithRequest = async (request: KibanaRequest) => {
-      const temp = plugins.maintenanceWindows!.getMaintenanceWindowClientWithRequest(request);
-      console.log('alerting start', { temp, mw: plugins.maintenanceWindows, request });
-      return temp;
+    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
+      return plugins.maintenanceWindows!.getMaintenanceWindowClientWithRequest(request);
     };
 
     taskRunnerFactory.initialize({
