@@ -13,11 +13,20 @@ import type { PackageInstallContext, RegistryDataStream } from '../../../../../c
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
+import { saveSettings } from '../../../settings';
+
 import { prepareTemplate, prepareToInstallTemplates } from './install';
 
 jest.mock('../../fields/field', () => ({
   ...jest.requireActual('../../fields/field'),
   loadDatastreamsFieldsFromYaml: jest.fn(),
+}));
+
+jest.mock('../../../settings', () => ({
+  getSettings: jest.fn().mockResolvedValue({
+    ilm_migration_status: {},
+  }),
+  saveSettings: jest.fn(),
 }));
 
 const mockedLoadFieldsFromYaml = loadDatastreamsFieldsFromYaml as jest.MockedFunction<
@@ -882,6 +891,19 @@ describe('EPM index template install', () => {
   });
 
   describe('prepareToInstallTemplates', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      const esClientMock = {
+        ilm: {
+          getLifecycle: jest.fn().mockImplementation(async (name: string) => ({
+            [name]: {
+              version: 1,
+            },
+          })),
+        },
+      } as any;
+      jest.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(esClientMock);
+    });
     it('should not include stack component templates in tracked assets', async () => {
       const dataStreamDatasetIsPrefixUnset = {
         type: 'logs',
@@ -907,6 +929,11 @@ describe('EPM index template install', () => {
       );
 
       expect(assetsToAdd).not.toContainEqual({ id: 'logs@settings', type: 'component_template' });
+      expect(saveSettings as jest.Mock).toHaveBeenCalledWith(expect.anything(), {
+        ilm_migration_status: {
+          logs: 'success',
+        },
+      });
     });
 
     it('should not include shared otel component templates in tracked assets', async () => {
@@ -965,6 +992,8 @@ describe('EPM index template install', () => {
         id: 'metrics-otel@mappings',
         type: 'component_template',
       });
+      // otel templates use new ILMs, doesn't affect migrations
+      expect(saveSettings as jest.Mock).not.toHaveBeenCalled();
     });
   });
 });
