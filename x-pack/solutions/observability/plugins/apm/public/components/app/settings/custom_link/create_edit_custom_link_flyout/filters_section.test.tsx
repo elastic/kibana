@@ -104,6 +104,7 @@ describe('FiltersSections', () => {
     expect(removeButtons).toHaveLength(1);
     expect(suggestionsSelect).toHaveLength(1);
   });
+
   it('when many filters, it deletes the proper filter', async () => {
     const initialFilters: Filter[] = [
       { key: 'service.name', value: 'foo' },
