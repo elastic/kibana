@@ -12,7 +12,6 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
 import { getMetricFields } from './get_metric_fields';
-import { filterFieldsByDataAvailability } from './filter_fields';
 import { createRoute } from '../create_route';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
@@ -63,19 +62,22 @@ export const getFieldsRoute = createRoute({
   },
 });
 
-export const filterFieldsRoute = createRoute({
-  endpoint: 'POST /internal/metrics_experience/fields/filter',
+export const searchFieldsRoute = createRoute({
+  endpoint: 'POST /internal/metrics_experience/fields/_search',
   security: { authz: { requiredPrivileges: ['read'] } },
   params: z.object({
     body: z.object({
-      fields: z.array(z.object({ name: z.string(), index: z.string() })),
-      kuery: z.string(),
+      index: z.string().default('metrics-*'),
       to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
       from: z
         .string()
         .datetime()
         .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
         .transform(isoToEpoch),
+      fields: z.union([z.string(), z.array(z.string())]).default('*'),
+      page: z.coerce.number().int().positive().default(1),
+      size: z.coerce.number().int().positive().default(100),
+      kuery: z.string().optional(),
     }),
   }),
   handler: async ({ context, params, logger }) => {
@@ -83,27 +85,32 @@ export const filterFieldsRoute = createRoute({
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
     const esClient = elasticsearch.client.asCurrentUser;
-    const { from, to, kuery, fields } = params.body;
+    const { index, from, to, fields, page, size, kuery } = params.body;
 
-    const filteredFields = await filterFieldsByDataAvailability({
+    const { fields: resultFields, total } = await getMetricFields({
       esClient: createTracedEsClient({
         logger,
         client: esClient,
         plugin: 'metrics_experience',
       }),
-      fields,
+      indexPattern: index,
       timerange: { from, to },
+      fields,
+      page,
+      size,
       kuery,
       logger,
     });
 
     return {
-      fields: filteredFields,
+      fields: resultFields,
+      total,
+      page,
     };
   },
 });
 
 export const fieldsRoutes = {
   ...getFieldsRoute,
-  ...filterFieldsRoute,
+  ...searchFieldsRoute,
 };

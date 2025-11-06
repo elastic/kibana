@@ -66,11 +66,11 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
         },
         signal,
       }),
-    filterFields: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/fields/filter'>['params']['body'],
+    searchFields: (
+      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/fields/_search'>['params']['body'],
       signal?: AbortSignal | null
     ) =>
-      request('POST /internal/metrics_experience/fields/filter', {
+      request('POST /internal/metrics_experience/fields/_search', {
         params: {
           body: params,
         },

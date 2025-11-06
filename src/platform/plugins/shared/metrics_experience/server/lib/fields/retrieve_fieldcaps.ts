@@ -50,7 +50,9 @@ export async function retrieveFieldCaps({
       types: [...uniqueFieldTypes],
     });
 
-    indexFieldCapsMap.set(index.name, fieldCaps.fields);
+    if (Object.keys(fieldCaps.fields).length > 0) {
+      dataStreamFieldCapsMap.set(dataStream.name, fieldCaps.fields);
+    }
   });
 
   // Wait for all field caps requests to complete

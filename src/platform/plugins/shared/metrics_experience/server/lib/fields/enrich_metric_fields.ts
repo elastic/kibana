@@ -22,8 +22,7 @@ import { normalizeUnit } from './normalize_unit';
 export interface MetricMetadata {
   dimensions: string[];
   unitFromSample?: string;
-
-  scope?: string;
+  totalHits?: number;
 }
 export type MetricMetadataMap = Map<string, MetricMetadata>;
 
@@ -55,30 +54,17 @@ export function buildMetricMetadataMap(
 
       if (isErrorResponseBase(searchResult)) {
         logger.error(`Error sampling document for metric ${name}: ${searchResult.error}`);
-        return [mapKey, { dimensions: [] }];
+        return [mapKey, { dimensions: [], totalHits: 0 }];
       }
 
       if (!searchResult?.hits.hits?.length) {
-        return [mapKey, { dimensions: [] }];
+        return [mapKey, { dimensions: [], totalHits: 0 }];
       }
 
       const fields = searchResult.hits.hits[0].fields ?? {};
-      const { dimensions, unitFromSample, scopeName, dataSet } = Object.entries(fields).reduce(
+      const { dimensions, unitFromSample } = Object.entries(fields).reduce(
         (acc, [fieldName, fieldValue]) => {
           const value = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
-          if (fieldName === 'scope.name') {
-            if (typeof value === 'string') {
-              acc.scopeName = value;
-            }
-            return acc;
-          }
-
-          if (fieldName === 'data_stream.dataset') {
-            if (typeof value === 'string') {
-              acc.dataSet = value;
-            }
-            return acc;
-          }
 
           if (fieldName === semconvFlat.unit.name) {
             if (typeof value === 'string') {
@@ -104,7 +90,7 @@ export function buildMetricMetadataMap(
         {
           dimensions,
           unitFromSample,
-          scope: `${scopeName ?? '_none_'}|${dataSet}`,
+          totalHits: searchResult?.hits.hits?.length ?? 0,
         },
       ];
     })
@@ -152,13 +138,7 @@ export async function sampleMetricMetadata({
           },
         },
         _source: false,
-        fields: kuery
-          ? [field]
-          : dimensions
-              .map((dimension) => dimension.name)
-              .concat(semconvFlat.unit.name)
-              .concat('scope.name')
-              .concat('data_stream.dataset'),
+        fields: dimensions.map((dimension) => dimension.name).concat(semconvFlat.unit.name),
       });
     }
     const response = await esClient.msearch<{ fields: Record<string, any> }>(
@@ -208,25 +188,24 @@ export async function enrichMetricFields({
 
   return metricFields
     .map((field) => {
-      const { dimensions, unitFromSample } =
+      const { dimensions, unitFromSample, totalHits } =
         metricMetadataMap.get(generateMapKey(field.index, field.name)) || {};
       const fieldCaps = indexFieldCapsMap.get(field.index);
 
-      if (!dimensions || dimensions.length === 0) {
+      if ((!dimensions || dimensions.length === 0) && totalHits === 0) {
         return;
       }
 
-      const cacheKey = [...dimensions].sort().join(',');
-      if (!uniqueDimensionSets.has(cacheKey) && fieldCaps) {
+      const cacheKey = dimensions ? [...(dimensions || [])].sort().join(',') : undefined;
+      if (cacheKey && !uniqueDimensionSets.has(cacheKey) && fieldCaps) {
         uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensions));
       }
 
       return {
         ...field,
-        dimensions: uniqueDimensionSets.get(cacheKey)!,
+        dimensions: cacheKey ? uniqueDimensionSets.get(cacheKey) ?? [] : [],
         noData: false,
         unit: normalizeUnit({ fieldName: field.name, unit: field.unit ?? unitFromSample }),
-        scope,
       };
     })
     .filter((field): field is NonNullable<typeof field> => field !== undefined);

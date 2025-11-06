@@ -31,12 +31,13 @@ import {
 } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import { useGridData, useMetricFieldsQuery } from '../hooks';
+import { useGridData } from '../hooks';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { MetricsGridLoadingProgress, EmptyState } from './empty_state/empty_state';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from './toolbar/right_side_actions/search_button';
+import { useMetricFieldsQuery } from '../hooks/use_metric_fields_query';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -70,6 +71,14 @@ export const MetricsExperienceGrid = ({
 
   const { updateTimeRange } = requestParams;
 
+  // STEP 1: Always fetch ALL fields (used by toolbar and for dimension discovery)
+  // This query runs independently and is cached by React Query
+  const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
+  const { data: allFields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
+    index: indexPattern,
+    timeRange,
+  });
+
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
     [originalInput$]
@@ -87,19 +96,6 @@ export const MetricsExperienceGrid = ({
     [baseFetch$]
   );
 
-  const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
-    index: indexPattern,
-    timeRange,
-  });
-
-  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    fields,
-    renderToggleActions,
-    indexPattern,
-    requestParams,
-  });
-
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>) => {
       if (e.key === keys.ESCAPE && isFullscreen && !areSelectorPortalsOpen()) {
@@ -115,23 +111,32 @@ export const MetricsExperienceGrid = ({
     totalPages = 0,
     filteredFieldsCount = 0,
     filters = [],
+    isFieldsLoading = false,
   } = useGridData({
-    fields,
+    indexPattern,
     dimensions,
     pageSize: PAGE_SIZE,
     currentPage,
     searchTerm,
     valueFilters,
     timeRange,
+    allFields,
   }) ?? {};
+
+  const { leftSideActions, rightSideActions } = useToolbarActions({
+    fields: allFields,
+    indexPattern,
+    renderToggleActions,
+    requestParams,
+  });
 
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
     () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
     [filteredFieldsCount]
   );
 
-  if (fields.length === 0) {
-    return <EmptyState isLoading={isFieldsLoading} />;
+  if (allFields.length === 0 && valueFilters.length === 0) {
+    return <EmptyState isLoading={isFetchingAllFields} />;
   }
 
   return (

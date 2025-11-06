@@ -7,25 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useStableCallback } from '@kbn/unified-histogram';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { useFilterFieldsQuery } from './use_filter_fields_query';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { usePagination } from './use_pagination';
 import { useValueFilters } from './use_value_filters';
+import { useFilteredFields } from './use_filtered_fields';
+import { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 
 export const useGridData = ({
-  fields = [],
+  indexPattern,
   dimensions,
   pageSize,
   currentPage,
   searchTerm,
   timeRange,
   valueFilters,
+  allFields,
 }: {
-  fields: MetricField[];
+  allFields: MetricField[];
+  indexPattern: string;
   searchTerm: string;
   dimensions: string[];
   pageSize: number;
@@ -33,77 +36,59 @@ export const useGridData = ({
   currentPage: number;
   timeRange: TimeRange | undefined;
 }) => {
-  const dimensionsSet = useMemo(() => new Set(dimensions), [dimensions]);
-  const searchTermLower = useMemo(() => searchTerm.toLowerCase(), [searchTerm]);
-
-  // Convert valueFilters to KQL query string
+  // Build kuery from valueFilters
   const kuery = useMemo(() => {
+    if (valueFilters.length === 0) return undefined;
+
     const filtersMap = valueFilters.reduce((acc, filter) => {
       const [field, value] = filter.split(FIELD_VALUE_SEPARATOR);
       const arr = acc.get(field) || [];
-
       arr.push(`"${value}"`);
       acc.set(field, arr);
-
       return acc;
     }, new Map<string, string[]>());
 
     return Array.from(filtersMap.entries())
       .map(([field, values]) =>
-        values.length > 1 ? `"${field}":(${values.join(' or ')})` : `"${field}":${values[0]}`
+        values.length > 1 ? `${field}:(${values.join(' or ')})` : `${field}:${values[0]}`
       )
-      .join(' or ');
+      .join(' and ');
   }, [valueFilters]);
 
-  // Filter by dimensions and search term
-  const candidateFields = useMemo(() => {
-    return fields.filter((field) => {
-      if (field.noData) {
-        return false;
-      }
-
-      if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
-        return false;
-      }
-
-      if (dimensionsSet.size > 0) {
-        const hasMatchingDimension = field.dimensions.some((d) => dimensionsSet.has(d.name));
-        if (!hasMatchingDimension) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [fields, searchTermLower, dimensionsSet]);
-
-  // Prepare fields for API query
-  const fieldsForQuery = useMemo(() => {
-    return candidateFields.map((field) => ({
-      name: field.name,
-      index: field.index,
-    }));
-  }, [candidateFields]);
-
-  // API call: Check which fields have data matching the kuery
-  const { data: searchFields = [], isFetching: isSearchFieldsFetching } = useFilterFieldsQuery({
-    kuery,
-    fields: fieldsForQuery,
-    timeRange,
+  // STEP 2: Calculate candidate fields based on dimensions + search term
+  // This gives us the shortlist of fields we want to check against kuery
+  const candidateFields = useFilteredFields({
+    fields: allFields,
+    dimensions,
+    searchTerm,
   });
 
-  // Filter candidates by API results (fields that have matching data)
-  const matchingFieldNames = useMemo(() => {
-    return kuery.trim() !== '' && !isSearchFieldsFetching
-      ? new Set(searchFields.map((field) => field.name))
-      : undefined;
-  }, [searchFields, isSearchFieldsFetching, kuery]);
+  const candidateFieldNames = useMemo(
+    () => candidateFields.map((field) => field.name),
+    [candidateFields]
+  );
 
-  const filteredFields = useMemo(() => {
-    return matchingFieldNames
-      ? candidateFields.filter((field) => matchingFieldNames.has(field.name))
-      : candidateFields;
-  }, [matchingFieldNames, candidateFields]);
+  // STEP 3: When value filters exist, perform optimized search with field list
+  // PERFORMANCE: Only checks the candidate fields (e.g., 50) instead of all fields (e.g., 1000+)
+  const { data: searchedFields = [], isFetching: isFetchingSearch } = useMetricFieldsSearchQuery({
+    fields: candidateFieldNames,
+    index: indexPattern,
+    timeRange,
+    kuery: kuery || '', // Safe since we control enabled
+    enabled: !!kuery && candidateFieldNames.length > 0,
+  });
+
+  // Use searched fields when kuery is active, otherwise use all fields
+  const fields = kuery ? searchedFields : allFields;
+  const isFieldsLoading = kuery ? isFetchingSearch : false;
+
+  // Filter by dimensions and search term (client-side for display)
+  const filteredDimensions = useMemo(() => (kuery ? [] : dimensions), [kuery, dimensions]);
+  const filteredFields = useFilteredFields({
+    fields,
+    dimensions: filteredDimensions,
+    searchTerm,
+  });
 
   // Paginate the filtered results
   const { currentPageItems, totalPages, totalCount } = usePagination({
@@ -122,10 +107,12 @@ export const useGridData = ({
       filteredFieldsCount: totalCount,
       totalPages,
       filters,
+      isFieldsLoading,
+      allFields, // Always the full field list for toolbar (never changes based on value filters)
     };
-  }, [currentPageItems, totalCount, totalPages, filters]);
+  }, [currentPageItems, totalCount, totalPages, filters, isFieldsLoading, allFields]);
 
-  // State management: wait for API to finish before updating
+  // State management
   const [stableResult, setStableResult] = useState<ReturnType<typeof buildResult>>();
 
   const updateResult = useStableCallback((fn: () => ReturnType<typeof buildResult>) =>
@@ -136,12 +123,12 @@ export const useGridData = ({
     // Only update when:
     // 1. No kuery (no request needed), OR
     // 2. Kuery request has finished (!isSearchFieldsFetching)
-    const shouldUpdate = kuery.trim() === '' || !isSearchFieldsFetching;
+    const shouldUpdate = kuery?.trim() === '' || !isFetchingSearch;
 
     if (shouldUpdate) {
       updateResult(buildResult);
     }
-  }, [buildResult, updateResult, isSearchFieldsFetching, kuery]);
+  }, [buildResult, updateResult, isFetchingSearch, kuery]);
 
   return stableResult;
 };

@@ -13,36 +13,52 @@ import { useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider/use_metrics_experience_client';
 
-export const useMetricFieldsQuery = (params?: {
+/**
+ * Separate hook for searching/filtering fields with kuery.
+ * Used when value filters are applied to optimize performance by passing a specific field list.
+ */
+export const useMetricFieldsSearchQuery = (params?: {
+  fields: string[];
   index: string;
   timeRange: TimeRange | undefined;
+  kuery: string;
+  enabled?: boolean;
 }) => {
   const { client } = useMetricsExperienceClient();
 
   const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching } =
     useInfiniteQuery({
-      queryKey: ['metricFields', params?.index, params?.timeRange?.from, params?.timeRange?.to],
+      queryKey: [
+        'metricFieldsSearch',
+        params?.fields,
+        params?.index,
+        params?.timeRange?.from,
+        params?.timeRange?.to,
+        params?.kuery,
+      ],
       queryFn: async ({
         queryKey,
         pageParam = 1,
         signal,
-      }: QueryFunctionContext<[string, string?, string?, string?], number>) => {
+      }: QueryFunctionContext<[string, string[]?, string?, string?, string?, string?], number>) => {
         try {
-          const [, index, from, to] = queryKey;
+          const [, fields, index, from, to, kuery] = queryKey;
 
-          const response = await client.getFields(
+          const response = await client.searchFields(
             {
+              fields,
               index,
               from,
               to,
               page: pageParam,
               size: 200,
+              kuery,
             },
             signal
           );
 
           if (!response) {
-            throw new Error(`Failed to fetch fields for ${index}`);
+            throw new Error(`Failed to search fields for ${index}`);
           }
 
           return response;
@@ -50,13 +66,14 @@ export const useMetricFieldsQuery = (params?: {
           throw error;
         }
       },
+      enabled: params?.enabled !== false,
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
         if (!lastPage) return;
         if (lastPage?.fields.length === 0) return;
         return lastPage?.page + 1;
       },
-      staleTime: 10 * 60 * 1000, // 10 minutes - fields don't change often
+      staleTime: 5 * 60 * 1000, // 5 minutes - search results are more dynamic
     });
 
   useEffect(() => {
