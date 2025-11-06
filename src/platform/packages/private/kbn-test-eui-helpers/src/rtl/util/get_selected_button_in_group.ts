@@ -7,4 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/rtl';
+import type { Screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
+
+/**
+ * Helper function to get the selected button in a button group
+ */
+export const getSelectedButtonInGroup =
+  (testId: string, container: Screen | ReturnType<typeof within> = screen) =>
+  () => {
+    const buttonGroup = container.getByTestId(testId);
+    return within(buttonGroup).getByRole('button', { pressed: true });
+  };
