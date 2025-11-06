@@ -43,7 +43,7 @@ export class RelatedDashboardsClient {
     private getDashboard: (
       id: string
     ) => Promise<Pick<DashboardState, 'description' | 'tags' | 'title'> & { id: string }>,
-    private scanDashboard: (page: number, perPage: number) => Promise<ScanDashboardsResult>,
+    private scanDashboards: (page: number, perPage: number) => Promise<ScanDashboardsResult>,
     private alertsClient: InvestigateAlertsClient,
     private alertId: string,
     private referencedPanelManager: ReferencedPanelManager
@@ -179,7 +179,7 @@ export class RelatedDashboardsClient {
     perPage?: number;
     limit?: number;
   }) {
-    const results = await this.scanDashboard(page, perPage);
+    const results = await this.scanDashboards(page, perPage);
     for (const dashboard of results.dashboards) {
       for (const panel of dashboard.panels) {
         if (
