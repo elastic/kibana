@@ -16,6 +16,7 @@ export {
   createMessageEvent,
   createReasoningEvent,
   createToolCallEvent,
+  createBrowserToolCallEvent,
   createToolResultEvent,
 } from './graph_events';
 export {

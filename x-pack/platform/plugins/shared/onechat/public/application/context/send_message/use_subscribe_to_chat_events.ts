@@ -18,6 +18,7 @@ import {
 } from '@kbn/onechat-common';
 import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import type { Observable } from 'rxjs';
+import { isBrowserToolCallEvent } from '@kbn/onechat-common/chat/events';
 import { useConversationContext } from '../conversation/conversation_context';
 import type { BrowserToolExecutor } from '../../services/browser_tool_executor';
 
@@ -71,20 +72,18 @@ export const useSubscribeToChatEvents = ({
                 tool_id: event.data.tool_id,
               }),
             });
-
+          } else if (isBrowserToolCallEvent(event)) {
             // Check if this is a browser tool call and execute it immediately
             const toolId = event.data.tool_id;
-            if (toolId && toolId.startsWith('browser_') && browserToolExecutor && browserApiTools) {
-              const originalToolId = toolId.substring('browser_'.length);
-
-              const toolDef = browserApiTools.find((tool) => tool.id === originalToolId);
+            if (toolId && browserToolExecutor && browserApiTools) {
+              const toolDef = browserApiTools.find((tool) => tool.id === toolId);
               if (toolDef) {
-                const toolsMap = new Map([[originalToolId, toolDef]]);
+                const toolsMap = new Map([[toolId, toolDef]]);
                 browserToolExecutor
                   .executeToolCalls(
                     [
                       {
-                        tool_id: originalToolId,
+                        tool_id: toolId,
                         call_id: event.data.tool_call_id,
                         params: event.data.params,
                         timestamp: Date.now(),

@@ -11,6 +11,7 @@ import type {
   MessageCompleteEvent,
   ReasoningEvent,
   ToolCallEvent,
+  BrowserToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
 import { ChatEventType } from '@kbn/onechat-common';
@@ -47,6 +48,21 @@ export const createToolCallEvent = (data: {
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
+    data: {
+      tool_call_id: data.toolCallId,
+      tool_id: data.toolId,
+      params: data.params,
+    },
+  };
+};
+
+export const createBrowserToolCallEvent = (data: {
+  toolCallId: string;
+  toolId: string;
+  params: Record<string, unknown>;
+}): BrowserToolCallEvent => {
+  return {
+    type: ChatEventType.browserToolCall,
     data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,

@@ -15,6 +15,7 @@ import type {
   MessageChunkEvent,
   MessageCompleteEvent,
   ToolCallEvent,
+  BrowserToolCallEvent,
   ToolResultEvent,
   ReasoningEvent,
 } from '@kbn/onechat-common';
@@ -27,6 +28,7 @@ import {
   createTextChunkEvent,
   createMessageEvent,
   createToolCallEvent,
+  createBrowserToolCallEvent,
   createToolResultEvent,
   createReasoningEvent,
   extractTextContent,
@@ -42,6 +44,7 @@ export type ConvertedEvents =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ToolCallEvent
+  | BrowserToolCallEvent
   | ToolResultEvent
   | ReasoningEvent;
 
@@ -94,13 +97,26 @@ export const convertGraphEvents = ({
               }
 
               toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-              events.push(
-                createToolCallEvent({
-                  toolId,
-                  toolCallId,
-                  params: toolCallArgs,
-                })
-              );
+
+              const isBrowserTool = toolId.startsWith('browser_');
+
+              if (isBrowserTool) {
+                events.push(
+                  createBrowserToolCallEvent({
+                    toolId: toolId.replace('browser_', ''),
+                    toolCallId,
+                    params: toolCallArgs,
+                  })
+                );
+              } else {
+                events.push(
+                  createToolCallEvent({
+                    toolId,
+                    toolCallId,
+                    params: toolCallArgs,
+                  })
+                );
+              }
             }
             if (messageText && !hasReasoningEvent) {
               events.push(createReasoningEvent(messageText));
