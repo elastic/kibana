@@ -14,6 +14,7 @@ import {
   CONTROL_WIDTH_SMALL,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
+  ESQL_CONTROL,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
@@ -21,6 +22,7 @@ import {
 import { optionsListDSLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
 import { timeSliderControlSchema } from './time_slider_schema';
+import { esqlControlSchema } from './esql_control_schema';
 
 export const controlWidthSchema = schema.oneOf(
   [
@@ -70,6 +72,13 @@ export const controlsGroupSchema = schema.object({
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
+      schema
+        .allOf([
+          schema.object({ type: schema.literal(ESQL_CONTROL) }),
+          esqlControlSchema,
+          stickyControlSchema,
+        ])
+        .extendsDeep({ unknowns: 'allow' }),
     ]),
     {
       defaultValue: [],

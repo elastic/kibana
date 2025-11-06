@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ControlsGroupState, StickyControlState } from '@kbn/controls-schemas';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { controlHasVariableName } from '@kbn/esql-types';
 import { mergeControlGroupStates } from './merge_control_group_states';
 
 describe('mergeControlGroupStates', () => {
-  const createMockControl = (variableName: string, id: string = `control-${variableName}`) => ({
-    id,
-    variableName,
-    title: `Control for ${variableName}`,
-    order: 0,
-    width: 'medium' as const,
-    grow: false,
-    type: 'esqlControl',
-  });
+  const createMockControl = (variableName: string, id: string = `control-${variableName}`) =>
+    ({
+      id,
+      variableName,
+      variableType: 'values',
+      controlType: 'VALUES_FROM_QUERY',
+      esqlQuery: '',
+      selectedOptions: [],
+      title: `Control for ${variableName}`,
+      order: 0,
+      width: 'medium' as const,
+      grow: false,
+      type: 'esqlControl',
+    } as StickyControlState);
   const createMockControlGroupState = (
     controls: ControlsGroupState['controls']
   ): ControlsGroupState => ({
@@ -55,11 +60,12 @@ describe('mergeControlGroupStates', () => {
 
       expect(result).toBeDefined();
       expect(result!.controls).toHaveLength(4);
-      expect(
-        result!.controls.map(
-          (c) => controlHasVariableName(c.controlConfig) && c.controlConfig?.variableName
-        )
-      ).toEqual(['newVar1', 'newVar2', 'existingVar1', 'existingVar2']);
+      expect(result!.controls.map((c) => controlHasVariableName(c) && c.variableName)).toEqual([
+        'newVar1',
+        'newVar2',
+        'existingVar1',
+        'existingVar2',
+      ]);
     });
 
     it('should not add duplicate controls with same variable names', () => {
@@ -79,11 +85,11 @@ describe('mergeControlGroupStates', () => {
 
       expect(result).toBeDefined();
       expect(result!.controls).toHaveLength(3);
-      expect(
-        result!.controls.map(
-          (c) => controlHasVariableName(c.controlConfig) && c.controlConfig?.variableName
-        )
-      ).toEqual(['uniqueVar2', 'sharedVar', 'uniqueVar1']);
+      expect(result!.controls.map((c) => controlHasVariableName(c) && c.variableName)).toEqual([
+        'uniqueVar2',
+        'sharedVar',
+        'uniqueVar1',
+      ]);
     });
 
     it('should handle controls without variable names', () => {
@@ -100,7 +106,7 @@ describe('mergeControlGroupStates', () => {
 
       const initialState = createMockControlGroupState([
         createMockControl('withVar'),
-        controlWithoutVariableName,
+        controlWithoutVariableName as StickyControlState,
       ]);
 
       const incomingState = createMockControlGroupState([createMockControl('newVar')]);
