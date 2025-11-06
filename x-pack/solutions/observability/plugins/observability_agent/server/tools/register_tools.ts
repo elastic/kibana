@@ -8,7 +8,6 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { StaticToolRegistration } from '@kbn/onechat-server';
-import { OBSERVABILITY_GET_SERVICES_TOOL_ID, createGetServicesTool } from './get_services';
 import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createGetDataSourcesTool,
@@ -28,11 +27,9 @@ const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
-  platformCoreTools.generateEsql,
 ];
 
 const OBSERVABILITY_TOOL_IDS = [
-  OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
 ];
@@ -49,7 +46,6 @@ export async function registerTools({
   logger: Logger;
 }) {
   const observabilityTools: StaticToolRegistration<any>[] = await Promise.all([
-    createGetServicesTool({ core, plugins, logger }),
     createGetDataSourcesTool({ core, plugins, logger }),
     createRecallKnowledgeBaseTool({ core, logger }),
   ]);
