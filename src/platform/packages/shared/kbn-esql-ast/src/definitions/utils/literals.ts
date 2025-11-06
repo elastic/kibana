@@ -155,6 +155,7 @@ export function getCompatibleLiterals(
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
           ESQLVariableType.TIME_LITERAL,
+          undefined,
           userDefinedColumns.map((v) => `?${v.key}`)
         )
       );

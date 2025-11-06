@@ -290,7 +290,7 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
           ?.filter(({ type }) => type === controlType)
           .map(({ key }) => `${prefix}${key}`) ?? [];
 
-      const controlSuggestions = getControlSuggestion(controlType, variableNames);
+      const controlSuggestions = getControlSuggestion(controlType, undefined, variableNames);
       suggestions.push(...controlSuggestions);
     }
   }
