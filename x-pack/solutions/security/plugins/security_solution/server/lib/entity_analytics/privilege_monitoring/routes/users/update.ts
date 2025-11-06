@@ -9,6 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import {
   UpdatePrivMonUserRequestParams,
   UpdatePrivMonUserRequestBody,
@@ -53,9 +54,13 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             ENABLE_PRIVILEGED_USER_MONITORING_SETTING
           );
           const secSol = await context.securitySolution;
+          const { elasticsearch } = await context.core;
 
-          const dataClient = secSol.getPrivilegeMonitoringDataClient();
-          const crudService = createPrivilegedUsersCrudService(dataClient);
+          const crudService = createPrivilegedUsersCrudService({
+            esClient: elasticsearch.client.asCurrentUser,
+            index: getPrivilegedMonitorUsersIndex(secSol.getSpaceId()),
+            logger: secSol.getLogger(),
+          });
 
           const body = await crudService.update(request.params.id, request.body);
           return response.ok({ body });
