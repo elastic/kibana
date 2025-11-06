@@ -11,8 +11,9 @@ import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.st
 import type { AggParamsTerms, IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
 import { convertToTermsColumn } from './terms';
-import type { AggBasedColumn, TermsColumn } from './types';
+import type { TermsColumn } from './types';
 import type { SchemaConfig } from '../../..';
+import type { AnyMetricColumnWithSourceFieldWithMeta } from '../../types';
 
 const mockConvertMetricToColumns = jest.fn();
 
@@ -51,7 +52,7 @@ describe('convertToDateHistogramColumn', () => {
       },
     },
   ];
-  const metricColumns: AggBasedColumn[] = [
+  const metricColumns: AnyMetricColumnWithSourceFieldWithMeta[] = [
     {
       columnId: 'column-1',
       operationType: 'average',

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { FormulaIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiFormulaOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
@@ -17,7 +17,7 @@ export const fromFormulaAPItoLensState = (
 ): FormulaIndexPatternColumn => {
   const { formula, format } = options;
 
-  const { filter, timeShift, ...sharedProps } = getLensStateMetricSharedProps(options);
+  const { timeShift, ...sharedProps } = getLensStateMetricSharedProps(options);
 
   return {
     operationType: 'formula',

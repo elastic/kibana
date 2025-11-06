@@ -57,7 +57,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -95,7 +95,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Foreach Step',
@@ -134,7 +134,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -167,7 +167,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -201,7 +201,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -242,7 +242,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -284,7 +284,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Conditional Step',
@@ -325,7 +325,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',

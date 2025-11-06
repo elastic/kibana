@@ -14,8 +14,8 @@ import { css } from '@emotion/react';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { FlyoutContainer } from './flyout_container';
-import type { VisualizationToolbarProps } from '../types';
 
 type Options = 'legend' | 'style' | 'filters';
 
@@ -61,9 +61,11 @@ export interface ToolbarContentMap<S> {
 
 export function FlyoutToolbar<S>({
   contentMap,
+  isInlineEditing = false,
   ...flyoutContentProps
 }: VisualizationToolbarProps<S> & {
   contentMap: ToolbarContentMap<S>;
+  isInlineEditing: boolean;
 }) {
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
   const [idSelected, setIdSelected] = useState<Options | ''>('');
@@ -109,7 +111,7 @@ export function FlyoutToolbar<S>({
       <FlyoutContainer
         isFullscreen={false}
         label={flyoutTitle}
-        isInlineEditing={true}
+        isInlineEditing={isInlineEditing}
         isOpen={isFlyoutVisible}
         handleClose={() => {
           setIdSelected('');

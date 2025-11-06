@@ -7,15 +7,12 @@
 import { consoleTutorials } from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiImage } from '@elastic/eui';
-import React, { useRef } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
-import searchWindowIllustration from '../../assets/search_window_illustration.svg';
-import searchResultsIllustration from '../../assets/search_results_illustration.svg';
-import searchObserveIllustration from '../../assets/search_observe_illustration.svg';
-import commandLineIllustration from '../../assets/command_line.svg';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 interface TutorialMetadata {
   title: string;
   dataTestSubj: string;
@@ -27,84 +24,84 @@ interface TutorialMetadata {
 
 export const ConsoleTutorialsGroup = () => {
   const { application, console: consolePlugin, share } = useKibana().services;
-  const tutorials: TutorialMetadata[] = [
-    {
-      title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.basicsTitle', {
-        defaultMessage: 'Search basics',
-      }),
-      dataTestSubj: 'console_tutorials_search_basics',
-      description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.basicsDescription', {
-        defaultMessage: 'Learn how to create an index, add documents, and basic search techniques.',
-      }),
-      request: consoleTutorials.basics,
-      image: searchWindowIllustration,
-      buttonRef: useRef<HTMLButtonElement>(null),
-    },
-    {
-      title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.semanticTitle', {
-        defaultMessage: 'Intro to semantic search',
-      }),
-      dataTestSubj: 'console_tutorials_semantic_search',
-      description: i18n.translate(
-        'xpack.searchGettingStarted.consoleTutorials.semanticDescription',
-        {
+  const assetBasePath = useAssetBasePath();
+  const tutorials: TutorialMetadata[] = useMemo(
+    () => [
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.basicsTitle', {
+          defaultMessage: 'Search basics',
+        }),
+        dataTestSubj: 'console_tutorials_search_basics',
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.basicsDescription',
+          {
+            defaultMessage:
+              'Learn how to create an index, add documents, and basic search techniques.',
+          }
+        ),
+        request: consoleTutorials.basics,
+        image: `${assetBasePath}/search_window_illustration.svg`,
+        buttonRef: React.createRef<HTMLButtonElement>(),
+      },
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.semanticTitle', {
+          defaultMessage: 'Intro to semantic search',
+        }),
+        dataTestSubj: 'console_tutorials_semantic_search',
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.semanticDescription',
+          {
+            defaultMessage:
+              'Learn semantic search techniques to understand intent and deliver more accurate, relevant results.',
+          }
+        ),
+        request: consoleTutorials.semanticSearch,
+        image: `${assetBasePath}/search_results_illustration.svg`,
+        buttonRef: React.createRef<HTMLButtonElement>(),
+      },
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlTitle', {
+          defaultMessage: 'ES|QL fundamentals',
+        }),
+        dataTestSubj: 'console_tutorials_esql',
+        description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlDescription', {
           defaultMessage:
-            'Learn semantic search techniques to understand intent and deliver more accurate, relevant results.',
-        }
-      ),
-      request: consoleTutorials.semanticSearch,
-      image: searchResultsIllustration,
-      buttonRef: useRef<HTMLButtonElement>(null),
-    },
-    {
-      title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlTitle', {
-        defaultMessage: 'ES|QL fundamentals',
-      }),
-      dataTestSubj: 'console_tutorials_esql',
-      description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlDescription', {
-        defaultMessage:
-          "Learn how to use Elastic's piped query language to simplify data investigations.",
-      }),
-      request: consoleTutorials.esql,
-      image: searchObserveIllustration,
-      buttonRef: useRef<HTMLButtonElement>(null),
-    },
-    // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
-    // {
-    //   title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
-    //     defaultMessage: 'Time series data streams',
-    //   }),
-    //   dataTestSubj: 'console_tutorials_tsds',
-    //   description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
-    //     defaultMessage:
-    //       'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
-    //   }),
-    //   request: consoleTutorials.timeSeriesDataStreams,
-    //   image: null,
-    //   buttonRef: useRef<HTMLButtonElement>(null),
-    // },
-  ];
+            "Learn how to use Elastic's piped query language to simplify data investigations.",
+        }),
+        request: consoleTutorials.esql,
+        image: `${assetBasePath}/search_observe_illustration.svg`,
+        buttonRef: React.createRef<HTMLButtonElement>(),
+      },
+      // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+      // {
+      //   title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
+      //     defaultMessage: 'Time series data streams',
+      //   }),
+      //   dataTestSubj: 'console_tutorials_tsds',
+      //   description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
+      //     defaultMessage:
+      //       'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
+      //   }),
+      //   request: consoleTutorials.timeSeriesDataStreams,
+      //   image: null,
+      //   buttonRef: useRef<HTMLButtonElement>(null),
+      // },
+    ],
+    [assetBasePath]
+  );
 
   return (
     <EuiFlexGroup gutterSize="l" direction={'column'} justifyContent="spaceBetween">
-      <EuiFlexGroup gutterSize="xs" direction={'column'} justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <SearchGettingStartedSectionHeading
-            title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
-              defaultMessage: 'Explore the API',
-            })}
-            icon={commandLineIllustration}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
-            <FormattedMessage
-              id="xpack.searchGettingStarted.consoleTutorials.description"
-              defaultMessage="Choose a tutorial and use Console to quickly start interacting with the elasticsearch API."
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SearchGettingStartedSectionHeading
+        title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
+          defaultMessage: 'Explore the API',
+        })}
+        icon={`${assetBasePath}/command_line.svg`}
+        description={i18n.translate('xpack.searchGettingStarted.consoleTutorials.description', {
+          defaultMessage:
+            'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
+        })}
+      />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween">
           {tutorials.map((tutorial) => (
@@ -117,17 +114,18 @@ export const ConsoleTutorialsGroup = () => {
                 onClick={() => {
                   tutorial.buttonRef.current?.click();
                 }}
+                data-test-subj={tutorial.dataTestSubj}
                 footer={
                   <TryInConsoleButton
                     type="button"
-                    iconType={commandLineIllustration}
+                    iconType={`${assetBasePath}/command_line.svg`} // TODO: Replace with EUI icon when it's available
                     color="text"
                     request={tutorial.request}
                     application={application}
                     sharePlugin={share}
                     consolePlugin={consolePlugin}
                     telemetryId={tutorial.dataTestSubj}
-                    data-test-subj={tutorial.dataTestSubj}
+                    data-test-subj={`${tutorial.dataTestSubj}-btn`}
                     buttonProps={{ buttonRef: tutorial.buttonRef }}
                     content={
                       <FormattedMessage
@@ -161,13 +159,11 @@ export const ConsoleTutorialsGroup = () => {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <div style={{ alignSelf: 'flex-end', minWidth: '66px' }}>
-                      <EuiImage
-                        src={tutorial.image}
-                        alt={`${tutorial.title} tutorial icon`}
-                        size="original"
-                      />
-                    </div>
+                    <EuiImage
+                      src={tutorial.image}
+                      alt={`${tutorial.title} tutorial icon`}
+                      size="original"
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiCard>

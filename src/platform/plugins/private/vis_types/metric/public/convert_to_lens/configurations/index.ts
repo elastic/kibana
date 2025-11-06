@@ -10,9 +10,9 @@
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type {
   CollapseFunction,
-  Column,
-  MetricVisConfiguration,
-} from '@kbn/visualizations-plugin/common';
+  MetricVisualizationState as MetricVisConfiguration,
+} from '@kbn/lens-common';
+import type { Column } from '@kbn/visualizations-plugin/common';
 import type { VisParams } from '../../types';
 
 export const getConfiguration = (

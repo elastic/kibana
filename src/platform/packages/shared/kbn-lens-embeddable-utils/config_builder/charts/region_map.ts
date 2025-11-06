@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormBasedPersistedState } from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, ChoroplethChartState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ChoroplethChartState } from '@kbn/maps-plugin/public/lens/choropleth_chart/types';
 import type {
   BuildDependencies,
   LensAttributes,

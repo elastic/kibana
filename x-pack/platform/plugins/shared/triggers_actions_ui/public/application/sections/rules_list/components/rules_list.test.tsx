@@ -10,7 +10,7 @@ import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/mainten
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   cleanup,
   fireEvent,

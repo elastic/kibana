@@ -54,7 +54,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   };
 
-  describe('Stats', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/239999
+  describe.skip('Stats', function () {
     // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
     // These versions are not expected to work together.
     // The tests raise "unknown index privilege [read_failure_store]" error in ES 9.0.

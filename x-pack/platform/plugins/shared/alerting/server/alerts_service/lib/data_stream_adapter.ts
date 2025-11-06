@@ -21,7 +21,7 @@ import {
   updateIndexMappingsAndSettings,
   findOrSetConcreteWriteIndex,
 } from './create_concrete_write_index';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { IIndexPatternString } from '../resource_installer_utils';
 
 export interface DataStreamAdapter {

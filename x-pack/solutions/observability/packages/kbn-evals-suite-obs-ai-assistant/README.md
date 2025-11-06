@@ -77,7 +77,7 @@ Evaluation results are stored in the .kibana-evaluations data stream on the Elas
 **Get evaluator scores per dataset (replicating in-terminal evaluation results):**
 
 ```bash
-POST /_query?format=csv
+POST /_query?format=txt
 {
   "query": """
 FROM .kibana-evaluations
@@ -89,7 +89,7 @@ FROM .kibana-evaluations
     factuality_score = AVG(mean_dataset_score) WHERE evaluator.name == "Factuality",
     relevance_score = AVG(mean_dataset_score) WHERE evaluator.name == "Relevance",
     sequence_accuracy_score = AVG(mean_dataset_score) WHERE evaluator.name == "Sequence Accuracy"
-    BY run_id, dataset.name
+    BY dataset.name
 | SORT dataset.name
 | LIMIT 100
     """
@@ -99,7 +99,7 @@ FROM .kibana-evaluations
 **Get evaluator scores per scenario (replicating in-terminal results when `SCENARIO_REPORTING=true`):**
 
 ```bash
-POST /_query?format=csv
+POST /_query?format=txt
 {
   "query": """
 FROM .kibana-evaluations
@@ -112,7 +112,33 @@ FROM .kibana-evaluations
     factuality_score = AVG(mean_dataset_score) WHERE evaluator.name == "Factuality",
     relevance_score = AVG(mean_dataset_score) WHERE evaluator.name == "Relevance",
     sequence_accuracy_score = AVG(mean_dataset_score) WHERE evaluator.name == "Sequence Accuracy"
-    BY run_id, scenario
+    BY scenario
+| SORT scenario
+| LIMIT 100
+    """
+}
+```
+
+**View performance ratings for each scenario in the evaluation run based on performance matrix heuristics:**
+
+```bash
+POST /_query?format=txt
+{
+  "query": """
+FROM .kibana-evaluations
+| WHERE run_id == "${run_id}"
+| DISSECT dataset.name "%{scenario}: %{rest}"
+| EVAL mean_dataset_score = MV_AVG(evaluator.scores)
+| STATS
+    criteria_score = AVG(mean_dataset_score) WHERE evaluator.name == "Criteria"
+    BY scenario
+| EVAL rating = CASE(
+    criteria_score >= 0 and criteria_score < 0.45, "Poor",
+    criteria_score < 0.75, "Good",
+    criteria_score < 0.84, "Great",
+    criteria_score <= 1, "Excellent",
+    "Invalid"
+)
 | SORT scenario
 | LIMIT 100
     """

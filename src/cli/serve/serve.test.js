@@ -146,7 +146,7 @@ describe('applyConfigOverrides', () => {
           },
           uiam: {
             enabled: true,
-            sharedSecret: 'XmLutyDzrWDcz9i+xXRXzSMJEfulI+Q9yIaibncLRyA=',
+            sharedSecret: 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=',
             url: 'http://localhost:8080',
           },
         },

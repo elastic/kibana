@@ -13,12 +13,10 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type {
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
@@ -33,7 +31,7 @@ import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
-import type { LensApiFilterType } from '../schema/filter';
+import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -443,10 +441,12 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
   };
 };
 
-export const filtersToApiFormat = (filters: Filter[]): LensApiFilterType[] => {
+export const filtersToApiFormat = (
+  filters: Filter[]
+): (LensApiFilterType | UnifiedSearchFilterType)[] => {
   return filters.map((filter) => ({
     language: filter.query?.language,
-    query: filter.query?.query,
+    query: filter.query?.query ?? filter.query,
     meta: {},
   }));
 };
@@ -461,9 +461,11 @@ export const queryToApiFormat = (query: Query): LensApiFilterType | undefined =>
   };
 };
 
-export const filtersToLensState = (filters: LensApiFilterType[]): Filter[] => {
+export const filtersToLensState = (
+  filters: (LensApiFilterType | UnifiedSearchFilterType)[]
+): Filter[] => {
   return filters.map((filter) => ({
-    query: { query: filter.query, language: filter.language },
+    query: { query: filter.query, language: filter?.language },
     meta: {},
   }));
 };
@@ -472,7 +474,12 @@ export const queryToLensState = (query: LensApiFilterType): Query => {
   return query;
 };
 
-export const filtersAndQueryToApiFormat = (state: LensAttributes) => {
+export const filtersAndQueryToApiFormat = (
+  state: LensAttributes
+): {
+  filters?: (LensApiFilterType | UnifiedSearchFilterType)[];
+  query?: LensApiFilterType;
+} => {
   return {
     ...(state.state.filters?.length ? { filters: filtersToApiFormat(state.state.filters) } : {}),
     ...(state.state.query && !isOfAggregateQueryType(state.state.query)

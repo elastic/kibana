@@ -73,7 +73,6 @@ export type {
 } from './src/saved_objects_type';
 export type {
   ISavedObjectsSerializer,
-  SavedObjectsRawDocSource,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
@@ -147,6 +146,8 @@ export type {
   SavedObjectModelVersionForwardCompatibilityFn,
   SavedObjectModelVersionForwardCompatibilityObjectSchema,
   SavedObjectModelVersionForwardCompatibilitySchema,
+  SavedObjectsFullModelVersion,
+  SavedObjectsFullModelVersionSchemaDefinitions,
 } from './src/model_version';
 
 // We re-export the SavedObject types here for convenience.
@@ -156,4 +157,5 @@ export type {
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-api-server';

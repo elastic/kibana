@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { ResponseActionRequestTag } from '../../constants';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
@@ -88,6 +89,8 @@ import type {
   UploadedFileInfo,
   WithAllKeys,
   ResponseActionScriptsApiResponse,
+  ResponseActionMemoryDumpParameters,
+  ResponseActionMemoryDumpOutputContent,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -583,12 +586,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     // if space awareness is enabled, then validate that agents are valid for active space.
     // We do this validation by just calling `fetchAgentPolicyInfo()` which will throw if agents
     // are not found in active space
-    if (this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      try {
-        await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
-      } catch (err) {
-        return { isValid: false, error: err };
-      }
+    try {
+      await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
+    } catch (err) {
+      return { isValid: false, error: err };
     }
 
     return { isValid: true, error: undefined };
@@ -609,8 +610,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       TMeta
     >
   ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
-    const isSpacesEnabled =
-      this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
     let errorMsg = String(actionRequest.error ?? '').trim();
 
     if (!errorMsg) {
@@ -633,7 +632,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     // the `integration deleted` tag to the action request, which means these are only
     // visible in the space configured (via ref. data) show orphaned actions
     const agentPolicyInfo: LogsEndpointAction['agent']['policy'] =
-      isSpacesEnabled && actionRequest.endpoint_ids.length > 0
+      actionRequest.endpoint_ids.length > 0
         ? await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids)
         : [];
     const tags: LogsEndpointAction['tags'] = actionRequest.tags ?? [];
@@ -645,20 +644,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
-
-      // Add the `originSpaceId` property to the document if spaces is enabled
-      ...(isSpacesEnabled ? { originSpaceId: this.options.spaceId } : {}),
-
-      // Add `tags` property to the document if spaces is enabled
-      ...(isSpacesEnabled ? { tags } : {}),
-
-      // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
-      // It will be removed once we enable the feature and delete the feature flag checks.
-      // @ts-expect-error
+      originSpaceId: this.options.spaceId,
+      tags,
       agent: {
         id: actionRequest.endpoint_ids,
-        // add the `policy` info if space awareness is enabled
-        ...(isSpacesEnabled ? { policy: agentPolicyInfo } : {}),
+        policy: agentPolicyInfo,
       },
       EndpointActions: {
         action_id: actionId,
@@ -683,9 +673,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         : {}),
     };
 
-    if (isSpacesEnabled) {
-      await this.ensureActionRequestsIndexIsConfigured();
-    }
+    await this.ensureActionRequestsIndexIsConfigured();
 
     this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
 
@@ -1044,6 +1032,15 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
     throw new ResponseActionsNotSupportedError('cancel');
+  }
+
+  public async memoryDump(
+    actionRequest: OmitUnsupportedAttributes<MemoryDumpActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+  > {
+    throw new ResponseActionsNotSupportedError('memory-dump');
   }
 
   public async getCustomScripts(
