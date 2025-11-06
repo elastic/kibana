@@ -10,6 +10,7 @@
 import type {
   AtomicGraphNode,
   ElasticsearchGraphNode,
+  GDriveGraphNode,
   HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
@@ -44,6 +45,8 @@ export const isKibana = (node: GraphNodeUnion): node is KibanaGraphNode =>
   node.type.startsWith('kibana.');
 
 export const isHttp = (node: GraphNodeUnion): node is HttpGraphNode => node.type === 'http';
+
+export const isGDrive = (node: GraphNodeUnion): node is GDriveGraphNode => node.type === 'gdrive';
 
 export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type === 'wait';
 

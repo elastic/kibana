@@ -85,7 +85,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       return this.handleFailure(input, error);
     }
   }
-
+// -------------------------------------------------------------
   private async executeHttpRequest(input?: any): Promise<RunStepResult> {
     const { url, method, headers, body, fetcher: fetcherOptions } = input;
 
@@ -172,6 +172,8 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       error: undefined,
     };
   }
+
+  // -------------------------------------------------------------
 
   protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
     let errorMessage: string;
