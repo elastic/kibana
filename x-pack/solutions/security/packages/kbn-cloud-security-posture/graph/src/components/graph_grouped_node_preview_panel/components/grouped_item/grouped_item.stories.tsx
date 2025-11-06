@@ -24,8 +24,8 @@ interface BaseStoryProps {
   isLoading?: boolean;
   id: string;
   timestamp?: string | number | Date;
-  ip?: string;
-  countryCode?: string;
+  ips?: string[];
+  countryCodes?: string[];
 }
 
 // Entity-specific props (excluding type which is hardcoded)
@@ -66,8 +66,8 @@ EntityItem.args = {
   id: 'host-02',
   label: 'host-02.acme',
   risk: 55,
-  ip: '10.200.0.202',
-  countryCode: 'US',
+  ips: ['10.200.0.202'],
+  countryCodes: ['US'],
   icon: 'storage',
   timestamp: Date.now(),
 };

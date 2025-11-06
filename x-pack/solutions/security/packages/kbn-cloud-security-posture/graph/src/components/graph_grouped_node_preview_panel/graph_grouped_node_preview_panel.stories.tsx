@@ -53,8 +53,8 @@ const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
   icon: 'storage',
   risk: 75,
   timestamp: new Date('2023-12-01T10:30:00Z'),
-  ip: '10.200.0.101',
-  countryCode: 'US',
+  ips: ['10.200.0.101'],
+  countryCodes: ['US'],
   ...overrides,
 });
 
@@ -63,8 +63,8 @@ const createEventItem = (overrides: Partial<EventItem> = {}): EventItem => ({
   id: 'event-1',
   action: 'process_start',
   timestamp: new Date('2023-12-01T11:15:00Z'),
-  ip: '192.168.1.100',
-  countryCode: 'CA',
+  ips: ['192.168.1.100'],
+  countryCodes: ['CA'],
   actor: { id: 'user-123', label: 'admin_user', icon: 'user' },
   target: { id: 'process-456', label: 'notepad.exe', icon: 'document' },
   ...overrides,
@@ -75,8 +75,8 @@ const createAlertItem = (overrides: Partial<AlertItem> = {}): AlertItem => ({
   id: 'alert-1',
   action: 'malware_detected',
   timestamp: new Date('2023-12-01T12:45:00Z'),
-  ip: '172.16.0.50',
-  countryCode: 'GB',
+  ips: ['172.16.0.50'],
+  countryCodes: ['GB'],
   actor: { id: 'system-789', label: 'antivirus_scanner', icon: 'shield' },
   target: { id: 'file-101', label: 'suspicious.exe', icon: 'warning' },
   ...overrides,
@@ -139,8 +139,8 @@ EntitiesGroup.args = {
       type: 'host',
       icon: 'storage',
       risk: 85,
-      ip: '10.0.1.10',
-      countryCode: 'US',
+      ips: ['10.0.1.10'],
+      countryCodes: ['US'],
     }),
     createEntityItem({
       id: 'host-2',
@@ -148,8 +148,8 @@ EntitiesGroup.args = {
       type: 'host',
       icon: 'storage',
       risk: 45,
-      ip: '10.0.1.11',
-      countryCode: 'US',
+      ips: ['10.0.1.11'],
+      countryCodes: ['US'],
     }),
     createEntityItem({
       id: 'host-3',
@@ -157,8 +157,8 @@ EntitiesGroup.args = {
       type: 'host',
       icon: 'storage',
       risk: 65,
-      ip: '10.0.2.15',
-      countryCode: 'CA',
+      ips: ['10.0.2.15'],
+      countryCodes: ['CA'],
     }),
   ],
 };
@@ -284,8 +284,8 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
             id: `entity-${index}`,
             label: `host-${String(index).padStart(2, '0')}.domain.com`,
             risk: Math.floor(Math.random() * 100),
-            ip: `10.0.1.${100 + index}`,
-            countryCode: ['US', 'CA', 'GB', 'DE', 'FR'][index % 5],
+            ips: [`10.0.1.${100 + index}`],
+            countryCodes: [['US', 'CA', 'GB', 'DE', 'FR'][index % 5]],
           });
         } else if (itemType === DOCUMENT_TYPE_EVENT) {
           const actions = [

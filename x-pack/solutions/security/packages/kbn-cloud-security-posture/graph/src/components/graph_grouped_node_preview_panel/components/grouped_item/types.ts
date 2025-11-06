@@ -17,10 +17,10 @@ export interface BaseGroupedItemCommonFields {
   index?: string;
   /** raw timestamp */
   timestamp?: string | number | Date;
-  /** optional ip address */
-  ip?: string;
-  /** optional country code (e.g. US) */
-  countryCode?: string; // we will render flag + country name if provided
+  /** optional ip addresses (normalized to array, UI renders first element) */
+  ips?: string[];
+  /** optional country codes (e.g. US) - normalized to array, UI renders first element */
+  countryCodes?: string[];
 }
 
 export interface EventOrAlertSpecificFields extends BaseGroupedItemCommonFields {

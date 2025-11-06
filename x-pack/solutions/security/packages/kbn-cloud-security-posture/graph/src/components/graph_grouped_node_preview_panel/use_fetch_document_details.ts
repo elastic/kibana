@@ -89,6 +89,17 @@ export const buildDocumentsRequest = (
   },
 });
 
+/**
+ * Normalizes a value to an array of strings.
+ * - undefined/null → undefined
+ * - string → [string] (single element array)
+ * - string[] → string[] (pass through)
+ */
+const normalizeToArray = (value?: string | string[]): string[] | undefined => {
+  if (value === undefined || value === null) return undefined;
+  return Array.isArray(value) ? value : [value];
+};
+
 const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
   // TODO Fix typing issue and replace `any`
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,8 +115,8 @@ const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
     action: hitSource.event?.action,
     actor: { id: hitSource.actor?.entity?.id },
     target: { id: hitSource.target?.entity?.id },
-    ip: hitSource.source?.ip,
-    countryCode: hitSource.source?.geo?.country_iso_code,
+    ips: normalizeToArray(hitSource.source?.ip),
+    countryCodes: normalizeToArray(hitSource.source?.geo?.country_iso_code),
   };
 };
 
