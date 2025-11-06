@@ -228,12 +228,14 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        {canManage && (
+        {canManage ? (
           <DocumentMatchFilterControls
             onFilterChange={setDocumentMatchFilter}
             matchedDocumentPercentage={approximateMatchingPercentage}
             isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
           />
+        ) : (
+          <EuiFlexItem grow={false} />
         )}
         {content}
       </EuiFlexGroup>
