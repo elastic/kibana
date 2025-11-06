@@ -61,7 +61,7 @@ describe('FiltersSections', () => {
     );
 
     const select = getByLabelText('Choose a field to filter by');
-    const suggestionsSelect = getByTestId(`comboBoxSearchInput`) as HTMLSelectElement;
+    const suggestionsSelect = getByTestId('comboBoxSearchInput') as HTMLSelectElement;
     expect(suggestionsSelect.value).toBe('foo');
 
     await act(async () => {
@@ -79,7 +79,7 @@ describe('FiltersSections', () => {
       );
     });
 
-    const suggestionsSelect2 = getByTestId(`comboBoxSearchInput`) as HTMLSelectElement;
+    const suggestionsSelect2 = getByTestId('comboBoxSearchInput') as HTMLSelectElement;
     expect(suggestionsSelect2.value).toBe('');
   });
 
@@ -94,7 +94,7 @@ describe('FiltersSections', () => {
     const removeButtons = getAllByTestId('apmCustomLinkFiltersSectionButton');
     expect(removeButtons).toHaveLength(1);
 
-    const suggestionsSelect = getAllByTestId(`comboBoxSearchInput`);
+    const suggestionsSelect = getAllByTestId('comboBoxSearchInput');
     expect(suggestionsSelect).toHaveLength(1);
 
     await act(async () => {
