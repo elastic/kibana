@@ -12,11 +12,11 @@ import React from 'react';
 import * as i18n from './translations';
 
 interface WorkflowSelectorEmptyStateProps {
-  onCreateWorkflow: () => void;
+  createWorkflowHref: string;
 }
 
 export const WorkflowSelectorEmptyState: React.FC<WorkflowSelectorEmptyStateProps> = ({
-  onCreateWorkflow,
+  createWorkflowHref,
 }) => {
   return (
     <EuiSelectableMessage>
@@ -32,11 +32,10 @@ export const WorkflowSelectorEmptyState: React.FC<WorkflowSelectorEmptyStateProp
           <EuiButton
             color="primary"
             fill={false}
-            onClick={onCreateWorkflow}
+            href={createWorkflowHref}
+            target="_blank"
             iconType="plusInCircle"
             size="s"
-            disabled={false}
-            isLoading={false}
           >
             {i18n.EMPTY_STATE_BUTTON_TEXT}
           </EuiButton>

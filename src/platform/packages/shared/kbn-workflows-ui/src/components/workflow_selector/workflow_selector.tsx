@@ -37,7 +37,6 @@ interface WorkflowSelectorProps {
   onWorkflowChange: (workflowId: string) => void;
   config?: WorkflowSelectorConfig;
   error?: string;
-  onCreateWorkflow?: () => void;
 }
 
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
@@ -45,7 +44,6 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   onWorkflowChange,
   config = {},
   error,
-  onCreateWorkflow,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -200,16 +198,13 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     }
   }, [selectedWorkflowId, workflowOptions, isSearching]);
 
-  const handleOpenWorkflowManagementApp = useCallback(() => {
-    if (onCreateWorkflow) {
-      onCreateWorkflow();
-    } else {
-      const url = application?.getUrlForApp
-        ? application.getUrlForApp('workflows')
-        : '/app/workflows';
-      window.open(url, '_blank');
-    }
-  }, [application, onCreateWorkflow]);
+  // Use href+target for regular links
+  const workflowManagementLinkProps = useMemo(() => {
+    return {
+      href: application?.getUrlForApp('workflows') || '/app/workflows',
+      target: '_blank' as const,
+    };
+  }, [application]);
 
   // Update input value when workflowId changes
   useEffect(() => {
@@ -237,7 +232,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     <EuiFormRow
       label={finalConfig.label}
       labelAppend={
-        <EuiLink onClick={handleOpenWorkflowManagementApp}>
+        <EuiLink {...workflowManagementLinkProps} external={false}>
           {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
         </EuiLink>
       }
@@ -273,7 +268,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
           isPreFiltered={isSearching ? false : { highlightSearch: false }}
           data-test-subj="workflowIdSelect"
           emptyMessage={
-            <WorkflowSelectorEmptyState onCreateWorkflow={handleOpenWorkflowManagementApp} />
+            <WorkflowSelectorEmptyState createWorkflowHref={workflowManagementLinkProps.href} />
           }
           listProps={{
             rowHeight: 60, // Increased height to accommodate secondary content and tags
@@ -305,7 +300,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
                   css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
                 >
                   <EuiText size="s" textAlign="right">
-                    <EuiLink onClick={handleOpenWorkflowManagementApp} external>
+                    <EuiLink {...workflowManagementLinkProps} external={false}>
                       <FormattedMessage
                         id="workflows.params.viewAllWorkflowsLinkText"
                         defaultMessage="View all workflows"

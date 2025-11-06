@@ -29,13 +29,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     [editAction, index]
   );
 
-  const handleOpenWorkflowManagementApp = useCallback(() => {
-    const url = application?.getUrlForApp
-      ? application.getUrlForApp('workflows')
-      : '/app/workflows';
-    window.open(url, '_blank');
-  }, [application]);
-
   // Ensure proper initialization of action parameters
   useEffect(() => {
     if (!actionParams?.subAction) {
@@ -65,7 +58,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           }),
       }}
       error={validationError}
-      onCreateWorkflow={handleOpenWorkflowManagementApp}
     />
   );
 };
