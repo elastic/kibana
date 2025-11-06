@@ -23,6 +23,7 @@ export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlertType> = {
   context: STACK_AAD_INDEX_NAME,
   mappings: {
     fieldMap: {
+      'alert.flapping': { type: 'boolean', array: false, required: false },
       [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
       [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
       [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
