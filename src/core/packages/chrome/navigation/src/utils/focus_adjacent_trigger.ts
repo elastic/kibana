@@ -15,7 +15,7 @@ import type { RefObject } from 'react';
  * @param direction - the direction to focus the adjacent trigger element.
  */
 export const focusAdjacentTrigger = (ref: RefObject<HTMLElement>, direction: -1 | 1) => {
-  if (!ref.current) return;
+  if (typeof window === 'undefined' || !ref.current) return;
 
   const container = document.querySelector<HTMLElement>('#navigation-root');
   const triggers = container

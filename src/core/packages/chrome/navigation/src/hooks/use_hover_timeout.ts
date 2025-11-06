@@ -20,7 +20,7 @@ export const useHoverTimeout = () => {
   const timeoutRef = useRef<number | null>(null);
 
   const clearHoverTimeout = useCallback(() => {
-    if (timeoutRef.current !== null) {
+    if (typeof window !== 'undefined' && timeoutRef.current !== null) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
@@ -29,7 +29,9 @@ export const useHoverTimeout = () => {
   const setHoverTimeout = useCallback(
     (callback: () => void, delay: number) => {
       clearHoverTimeout();
-      timeoutRef.current = window.setTimeout(callback, delay);
+      if (typeof window !== 'undefined') {
+        timeoutRef.current = window.setTimeout(callback, delay);
+      }
     },
     [clearHoverTimeout]
   );
