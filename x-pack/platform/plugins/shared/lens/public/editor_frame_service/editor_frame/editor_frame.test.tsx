@@ -94,7 +94,7 @@ describe('editor_frame', () => {
   beforeEach(() => {
     mockVisualization = {
       ...createMockVisualization(),
-      ToolbarComponent: jest.fn(() => <div />),
+      FlyoutToolbarComponent: jest.fn(() => <div />),
     };
 
     mockVisualization2 = createMockVisualization('testVis2', ['second']);
