@@ -26,6 +26,8 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { apiHasUniqueId, apiPublishesPauseFetch } from '@kbn/presentation-publishing';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -418,9 +420,18 @@ export class DiscoverPlugin
       onAdd: async (container, savedObject) => {
         const { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME } =
           await getEmbeddableServices();
+        const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
 
-        await addControlsFromSavedSession(container, savedObject);
-        container.addNewPanel(
+        const hasVariables =
+          apiPublishesESQLVariables(container) &&
+          savedSessionAttributes.controlGroupJson &&
+          Object.keys(savedSessionAttributes.controlGroupJson).length > 0;
+
+        // pause fetching so that we don't try to build an ES|QL query without necessary variables
+        const shouldPauseFetch = hasVariables && apiPublishesPauseFetch(container);
+        if (shouldPauseFetch) container.setFetchPaused(true);
+
+        const api = await container.addNewPanel(
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
@@ -439,6 +450,17 @@ export class DiscoverPlugin
             displaySuccessMessage: true,
           }
         );
+
+        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
+        if (hasVariables) {
+          await addControlsFromSavedSession(
+            container,
+            savedSessionAttributes.controlGroupJson!, // this is verified in hasVariables
+            uuid
+          );
+        }
+        // unpause fetching if necessary now that ES|QL variables exist
+        if (shouldPauseFetch) container.setFetchPaused(false);
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {

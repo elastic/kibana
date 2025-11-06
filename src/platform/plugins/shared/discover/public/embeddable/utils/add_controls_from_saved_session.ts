@@ -7,28 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
-import type { SavedObjectCommon, FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { type ESQLControlState, apiPublishesESQLVariables } from '@kbn/esql-types';
+import type { ESQLControlState, PublishesESQLVariables } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { StickyControlState } from '@kbn/controls-schemas';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { omit } from 'lodash';
 
 export const addControlsFromSavedSession = async (
-  container: CanAddNewPanel & { esqlVariables$?: unknown },
-  savedObject: SavedObjectCommon<FinderAttributes>
+  container: CanAddNewPanel & PublishesESQLVariables,
+  controlGroupJson: string,
+  uuid: string | undefined
 ): Promise<void> => {
-  const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
-  if (
-    !savedSessionAttributes.controlGroupJson ||
-    Object.keys(savedSessionAttributes.controlGroupJson).length === 0 ||
-    !apiPublishesESQLVariables(container)
-  ) {
-    return;
-  }
-
-  const controlsState = JSON.parse(savedSessionAttributes.controlGroupJson) as ControlPanelsState<
+  const controlsState = JSON.parse(controlGroupJson) as ControlPanelsState<
     StickyControlState & ESQLControlState
   >;
   const esqlVariables$ = container.esqlVariables$;
@@ -39,14 +29,17 @@ export const addControlsFromSavedSession = async (
     const variableName = panel.variableName;
     const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
     if (!variableExists) {
-      await container.addNewPanel({
-        panelType: ESQL_CONTROL,
-        serializedState: {
-          rawState: {
-            ...omit(panel, ['width', 'grow', 'order']),
+      await container.addNewPanel(
+        {
+          panelType: ESQL_CONTROL,
+          serializedState: {
+            rawState: {
+              ...omit(panel, ['width', 'grow', 'order']),
+            },
           },
         },
-      });
+        { beside: uuid, scrollToPanel: false }
+      );
     }
   }
 };

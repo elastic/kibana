@@ -11,10 +11,13 @@ import type { Observable } from 'rxjs';
 
 export interface PublishesPauseFetch {
   isFetchPaused$: Observable<boolean>;
+  setFetchPaused: (paused: boolean) => void;
 }
 
 export const apiPublishesPauseFetch = (
   unknownApi: null | unknown
 ): unknownApi is PublishesPauseFetch => {
-  return Boolean(unknownApi && (unknownApi as PublishesPauseFetch)?.isFetchPaused$ !== undefined);
+  return (
+    Boolean(unknownApi && (unknownApi as PublishesPauseFetch)?.isFetchPaused$ !== undefined) &&
+    typeof (unknownApi as PublishesPauseFetch)?.setFetchPaused === 'function'
 };

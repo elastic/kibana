@@ -272,6 +272,7 @@ export function initializeLayoutManager(
     panelPackage: PanelPackage,
     options?: {
       displaySuccessMessage?: boolean;
+      scrollToPanel?: boolean;
       beside?: string;
     },
     grid?: DashboardPanel['grid']
@@ -282,14 +283,21 @@ export function initializeLayoutManager(
 
     layout$.next(await placeNewPanel(uuid, panelPackage, grid, options?.beside));
 
-    if (options?.displaySuccessMessage) {
+    const { scrollToPanel, displaySuccessMessage } = {
+      scrollToPanel: true,
+      displaySuccessMessage: false,
+      ...options,
+    };
+    if (displaySuccessMessage) {
       const title = (serializedState?.rawState as SerializedTitles)?.title;
       coreServices.notifications.toasts.addSuccess({
         title: getPanelAddedSuccessString(title),
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
       });
     }
-    trackPanel.setScrollToPanelId(uuid);
+    if (scrollToPanel) {
+      trackPanel.setScrollToPanelId(uuid);
+    }
     trackPanel.setHighlightPanelId(uuid);
     return (await getChildApi(uuid)) as ApiType;
   };
