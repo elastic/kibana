@@ -1758,6 +1758,30 @@
                     },
                     "type": "array"
                   },
+                  "browser_api_tools": {
+                    "description": "Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "description": {
+                          "description": "Description of what the browser API tool does.",
+                          "type": "string"
+                        },
+                        "id": {
+                          "description": "Unique identifier for the browser API tool.",
+                          "type": "string"
+                        },
+                        "schema": {}
+                      },
+                      "required": [
+                        "id",
+                        "description",
+                        "schema"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
                   "capabilities": {
                     "additionalProperties": false,
                     "description": "Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.",
@@ -1907,6 +1931,30 @@
                       "required": [
                         "type",
                         "data"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "browser_api_tools": {
+                    "description": "Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "description": {
+                          "description": "Description of what the browser API tool does.",
+                          "type": "string"
+                        },
+                        "id": {
+                          "description": "Unique identifier for the browser API tool.",
+                          "type": "string"
+                        },
+                        "schema": {}
+                      },
+                      "required": [
+                        "id",
+                        "description",
+                        "schema"
                       ],
                       "type": "object"
                     },
@@ -52834,7 +52882,15 @@
                                                                 "ignore_failure": {
                                                                   "type": "boolean"
                                                                 },
+                                                                "locale": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
                                                                 "output_format": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "timezone": {
                                                                   "minLength": 1,
                                                                   "type": "string"
                                                                 },
@@ -57126,7 +57182,15 @@
                                                             "ignore_failure": {
                                                               "type": "boolean"
                                                             },
+                                                            "locale": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
                                                             "output_format": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "timezone": {
                                                               "minLength": 1,
                                                               "type": "string"
                                                             },
@@ -61011,7 +61075,15 @@
                                                                 "ignore_failure": {
                                                                   "type": "boolean"
                                                                 },
+                                                                "locale": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
                                                                 "output_format": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "timezone": {
                                                                   "minLength": 1,
                                                                   "type": "string"
                                                                 },
@@ -64999,7 +65071,15 @@
                                                             "ignore_failure": {
                                                               "type": "boolean"
                                                             },
+                                                            "locale": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
                                                             "output_format": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "timezone": {
                                                               "minLength": 1,
                                                               "type": "string"
                                                             },
@@ -69468,7 +69548,15 @@
                                                 "ignore_failure": {
                                                   "type": "boolean"
                                                 },
+                                                "locale": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
                                                 "output_format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "timezone": {
                                                   "minLength": 1,
                                                   "type": "string"
                                                 },
@@ -73325,7 +73413,15 @@
                                                 "ignore_failure": {
                                                   "type": "boolean"
                                                 },
+                                                "locale": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
                                                 "output_format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "timezone": {
                                                   "minLength": 1,
                                                   "type": "string"
                                                 },
