@@ -80,9 +80,9 @@ export const useExpandableFlyoutApi = () => {
     if (id === REDUX_ID_FOR_MEMORY_STORAGE) {
       dispatch(previousPreviewPanelAction({ id }));
     } else {
-      history.goBack();
+      closePreviewPanel();
     }
-  }, [dispatch, id, history]);
+  }, [dispatch, id, closePreviewPanel]);
 
   const closePanels = useCallback(() => dispatch(closePanelsAction({ id })), [dispatch, id]);
 
