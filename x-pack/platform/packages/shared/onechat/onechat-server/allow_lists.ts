@@ -11,8 +11,7 @@
  */
 export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Observability
-  'observability.get_services',
-  'observability.recall_knowledge_base',
+  'observability.search_knowledge_base',
   'observability.get_data_sources',
 ];
 
