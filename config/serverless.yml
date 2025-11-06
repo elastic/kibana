@@ -36,7 +36,6 @@ xpack.features.overrides:
     subFeatures.privileges:
       download_csv_report.disabled: true
       generate_report.disabled: true
-      store_search_session.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -60,7 +59,6 @@ xpack.features.overrides:
     subFeatures.privileges:
       download_csv_report.disabled: true
       generate_report.disabled: true
-      store_search_session.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -69,7 +67,6 @@ xpack.features.overrides:
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
     subFeatures.privileges:
       generate_report.disabled: true
-      store_search_session.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -78,7 +75,6 @@ xpack.features.overrides:
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
     subFeatures.privileges:
       generate_report.disabled: true
-      store_search_session.disabled: true
       url_create:
         disabled: true
         includeIn: "read"
@@ -167,7 +163,7 @@ xpack.cloud_integrations.data_migration.enabled: false
 # Other disabled plugins
 xpack.canvas.enabled: false
 xpack.reindex_service.enabled: false
-data.search.sessions.enabled: false
+data.search.sessions.enabled: true
 advanced_settings.globalSettingsEnabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
