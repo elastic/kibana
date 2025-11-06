@@ -11,11 +11,6 @@ export interface ConnectorMetadata {
     docsUrl?: string;
     minimumLicense: "basic" | "gold" | "platinum" | "enterprise";
     supportedFeatureIds: Array<"alerting" | "cases" | "uptime" | "security" | "siem" | "generativeAIForSecurity" | "generativeAIForObservability" | "generativeAIForSearchPlayground" | "endpointSecurity">;
-    subFeature?: "endpointSecurity";
-    getKibanaPrivileges?: (args?: {
-        source?: string;
-        params?: Record<string, unknown>;
-    }) => string[];
 }
 
 export const AuthSchema = z.discriminatedUnion("method", [
@@ -241,12 +236,65 @@ export interface Transformations {
 export interface ValidationConfig {
     configSchema: z.ZodSchema;
     secretsSchema: z.ZodSchema;
-    validateConfig?: (config: unknown, services: unknown) => void | string | null;
-    validateSecrets?: (secrets: unknown, services: unknown) => void | string | null;
-    validateConnector?: (config: unknown, secrets: unknown) => string | null;
     validateUrls?: {
         configFields?: string[];
         secretFields?: string[];
+    };
+}
+
+export function createUrlAllowlistRefine(configurationUtilities: {
+    ensureUriAllowed: (url: string) => void;
+}) {
+    return (url: string) => {
+        try {
+            configurationUtilities.ensureUriAllowed(url);
+            return true;
+        }
+        catch {
+            return false;
+        }
+    };
+}
+
+export function createConnectivityTestRefine<T>(testFn: (value: T) => Promise<boolean>) {
+    return async (value: T) => {
+        try {
+            return await testFn(value);
+        }
+        catch {
+            return false;
+        }
+    };
+}
+
+export function requireAtLeastOne(fieldGroups: Array<string | string[]>) {
+    return (data: any, ctx: z.RefinementCtx) => {
+        const hasAny = fieldGroups.some(group => {
+            if (Array.isArray(group)) {
+                return group.every(field => !!data[field]);
+            }
+            return !!data[group];
+        });
+        if (!hasAny) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `At least one of the following is required: ${fieldGroups.map(g => Array.isArray(g) ? `(${g.join(' + ')})` : g).join(', ')}`
+            });
+        }
+    };
+}
+
+export function requireBothOrNeither(field1: string, field2: string, message?: string) {
+    return (data: any, ctx: z.RefinementCtx) => {
+        const has1 = !!data[field1];
+        const has2 = !!data[field2];
+        if (has1 !== has2) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: [has1 ? field2 : field1],
+                message: message || `Both ${field1} and ${field2} must be provided together`
+            });
+        }
     };
 }
 

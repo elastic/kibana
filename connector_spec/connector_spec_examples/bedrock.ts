@@ -92,7 +92,14 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
           helpText: "Bedrock runtime endpoint (e.g., https://bedrock-runtime.us-east-1.amazonaws.com)",
           placeholder: "https://bedrock-runtime.us-east-1.amazonaws.com",
         }
-      ).describe("API URL"),
+      )
+        .describe("API URL")
+        .refine(
+          (url) => url.includes("bedrock-runtime"),
+          {
+            message: "API URL must be a valid Bedrock endpoint (must contain 'bedrock-runtime')",
+          }
+        ),
       
       defaultModel: withUIMeta(
         z.string(),
@@ -119,14 +126,10 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
     
     secretsSchema: z.object({}),
     
-    // Custom validators
+    // URL allowlist validation (framework-enforced)
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/index.ts:43-59
-    validateConfig: (config: any, services) => {
-      // Validate URL is a Bedrock endpoint
-      if (!config.apiUrl.includes("bedrock-runtime")) {
-        return "API URL must be a valid Bedrock endpoint";
-      }
-      return null;
+    validateUrls: {
+      configFields: ["apiUrl"],
     },
   },
   

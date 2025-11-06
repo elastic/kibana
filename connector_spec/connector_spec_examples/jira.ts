@@ -68,7 +68,14 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
           placeholder: "https://your-domain.atlassian.net",
           helpText: "Your Jira instance URL",
         }
-      ).describe("Jira URL"),
+      )
+        .describe("Jira URL")
+        .refine(
+          (url) => url.includes("atlassian.net") || url.includes("jira"),
+          {
+            message: "Jira URL must be a valid Jira instance (e.g., *.atlassian.net or contain 'jira')",
+          }
+        ),
       
       // Optional project key for default project
       projectKey: z.string()
@@ -78,13 +85,9 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
     
     secretsSchema: z.object({}),
     
-    // Custom validators
-    validateConfig: (config: any) => {
-      // Validate URL format
-      if (!config.apiUrl.includes("atlassian.net") && !config.apiUrl.includes("jira")) {
-        return "Jira URL must be a valid Jira instance (e.g., *.atlassian.net or contain 'jira')";
-      }
-      return null; // null = valid
+    // URL allowlist validation (framework-enforced)
+    validateUrls: {
+      configFields: ["apiUrl"],
     },
   },
   

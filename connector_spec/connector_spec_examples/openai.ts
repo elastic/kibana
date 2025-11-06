@@ -159,12 +159,11 @@ export const OpenAIConnectorExample: SingleFileConnectorDefinition = {
     
     secretsSchema: z.object({}),
     
-    // Custom validators
+    // URL allowlist validation (framework-enforced)
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/index.ts:62-92
-    validateConfig: (config, services) => {
-      // Check if URL is in allowed list
-      // URL allowlist validation happens here
-      return null; // null = valid, string = error message
+    // Note: The auth schema's apiUrl field is validated by the framework's allowlist
+    validateUrls: {
+      configFields: [], // No config URLs, auth URLs validated separately
     },
   },
   

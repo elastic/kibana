@@ -66,67 +66,6 @@ export interface ConnectorMetadata {
     | "generativeAIForSearchPlayground"
     | "endpointSecurity"
   >;
-  
-  /** 
-   * Sub-feature type for specialized connectors
-   * 
-   * WHY: Some connectors require special categorization beyond basic feature IDs
-   * for security and access control purposes. This allows grouping connectors
-   * that share specialized capabilities or security requirements.
-   * 
-   * USED BY: Endpoint security connectors (Crowdstrike, SentinelOne, Microsoft Defender Endpoint)
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/index.ts:42
-   *   Code: `subFeature: 'endpointSecurity'`
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone/index.ts:42
-   *   Code: `subFeature: 'endpointSecurity'`
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/microsoft_defender_endpoint/index.ts:49
-   *   Code: `subFeature: 'endpointSecurity'`
-   * 
-   * WHY NEEDED: Endpoint security connectors require special privilege checks and 
-   * access controls beyond standard connectors. This flag allows the framework to
-   * apply additional security measures.
-   */
-  subFeature?: "endpointSecurity";
-  
-  /** 
-   * Dynamic privilege requirements based on execution context
-   * 
-   * WHY: Some connectors require different Kibana privileges depending on:
-   * - How they're executed (HTTP request vs rule execution)
-   * - Which action is being performed
-   * - User context and permissions needed
-   * 
-   * This allows connectors to enforce fine-grained access control dynamically
-   * rather than static privilege requirements.
-   * 
-   * USED BY: Endpoint security connectors (Crowdstrike, SentinelOne, Microsoft Defender Endpoint)
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike/index.ts:43-52
-   *   Code:
-   *   ```typescript
-   *   getKibanaPrivileges: (args) => {
-   *     const privileges = [ENDPOINT_SECURITY_EXECUTE_PRIVILEGE];
-   *     if (
-   *       args?.source === ActionExecutionSourceType.HTTP_REQUEST &&
-   *       args?.params?.subAction !== SUB_ACTION.GET_AGENT_DETAILS
-   *     ) {
-   *       privileges.push(ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE);
-   *     }
-   *     return privileges;
-   *   }
-   *   ```
-   * 
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone/index.ts:43-52
-   *   Code: Similar pattern - requires `actionsSubActionsExecute:endpointSecurity` for
-   *   most actions when executed via HTTP, except for read-only actions like `GET_AGENTS`
-   * 
-   * WHY NEEDED: Endpoint security actions can be highly privileged (isolate host,
-   * execute commands). Different actions need different privilege levels, and
-   * HTTP-initiated actions need stricter checks than rule-based executions.
-   */
-  getKibanaPrivileges?: (args?: {
-    source?: string;
-    params?: Record<string, unknown>;
-  }) => string[];
 }
 
 // ============================================================================
@@ -1009,117 +948,302 @@ export interface Transformations {
 // ============================================================================
 
 /**
- * Validation configuration
+ * Validation configuration using pure Zod schemas
  * 
  * WHY: Connector configuration and secrets must be validated before they're saved
  * and used. Validation prevents runtime errors, security issues, and user confusion.
+ * 
+ * DESIGN PRINCIPLE: Use Zod's built-in refinements instead of custom validators.
+ * This provides:
+ * - Standard validation patterns
+ * - Better TypeScript inference
+ * - Simpler mental model (one validation approach)
+ * - Reusable validation utilities
+ * 
+ * MIGRATION: Custom validators should be converted to Zod refinements:
+ * - Simple validation → .refine()
+ * - Cross-field validation → .superRefine()
+ * - Async validation → async .refine()
  */
 export interface ValidationConfig {
   /** 
-   * Config schema (Zod)
+   * Config schema with Zod refinements for validation
    * 
    * USED BY: ALL connectors - required by framework
    * REFERENCE: All connectors define config schemas
-   * WHY: Provides type-safe validation of configuration values at runtime
+   * 
+   * WHY: Provides type-safe validation of configuration values at runtime.
+   * Use Zod's refinement methods for complex validation:
+   * 
+   * @example URL allowlist validation
+   * ```typescript
+   * configSchema: z.object({
+   *   apiUrl: z.string().url().refine(
+   *     createUrlAllowlistRefine(configurationUtilities),
+   *     { message: "URL not in allowlist" }
+   *   )
+   * })
+   * ```
+   * 
+   * @example Provider-specific validation
+   * ```typescript
+   * configSchema: z.object({
+   *   provider: z.enum(['openai', 'azure', 'other']),
+   *   apiKey: z.string().optional(),
+   *   azureEndpoint: z.string().optional()
+   * }).superRefine((config, ctx) => {
+   *   if (config.provider === 'azure' && !config.azureEndpoint) {
+   *     ctx.addIssue({
+   *       code: z.ZodIssueCode.custom,
+   *       path: ['azureEndpoint'],
+   *       message: "Azure endpoint required"
+   *     });
+   *   }
+   * })
+   * ```
+   * 
+   * @example Async connectivity test
+   * ```typescript
+   * configSchema: z.object({
+   *   apiUrl: z.string().url(),
+   *   apiKey: z.string()
+   * }).refine(
+   *   async (config) => {
+   *     try {
+   *       await testConnection(config.apiUrl, config.apiKey);
+   *       return true;
+   *     } catch {
+   *       return false;
+   *     }
+   *   },
+   *   { message: "Cannot connect to API endpoint" }
+   * )
+   * ```
    */
   configSchema: z.ZodSchema;
   
   /** 
-   * Secrets schema (Zod)
+   * Secrets schema with Zod refinements for validation
    * 
    * USED BY: ALL connectors - required by framework
    * REFERENCE: All connectors define secrets schemas
-   * WHY: Validates sensitive data (API keys, passwords) before encryption
+   * 
+   * WHY: Validates sensitive data (API keys, passwords) before encryption.
+   * Use superRefine for interdependent secrets validation:
+   * 
+   * @example Certificate + Key validation
+   * ```typescript
+   * secretsSchema: z.object({
+   *   certificateData: z.string().optional(),
+   *   privateKeyData: z.string().optional()
+   * }).superRefine((secrets, ctx) => {
+   *   const hasCert = !!secrets.certificateData;
+   *   const hasKey = !!secrets.privateKeyData;
+   *   
+   *   // Both or neither
+   *   if (hasCert !== hasKey) {
+   *     ctx.addIssue({
+   *       code: z.ZodIssueCode.custom,
+   *       path: hasCert ? ['privateKeyData'] : ['certificateData'],
+   *       message: "Certificate and private key must both be provided"
+   *     });
+   *   }
+   * })
+   * ```
+   * 
+   * @example Auth method validation
+   * ```typescript
+   * secretsSchema: z.object({
+   *   user: z.string().nullable(),
+   *   password: z.string().nullable(),
+   *   apiToken: z.string().nullable()
+   * }).superRefine((secrets, ctx) => {
+   *   const hasBasicAuth = secrets.user && secrets.password;
+   *   const hasTokenAuth = secrets.apiToken;
+   *   
+   *   if (!hasBasicAuth && !hasTokenAuth) {
+   *     ctx.addIssue({
+   *       code: z.ZodIssueCode.custom,
+   *       message: "Either username/password or API token required"
+   *     });
+   *   }
+   * })
+   * ```
    */
   secretsSchema: z.ZodSchema;
   
   /** 
-   * Custom config validator
-   * 
-   * USED BY: Webhook, OpenAI, Bedrock, and many connectors
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.ts:66
-   *   Code: `customValidator: validateConnectorTypeConfig`
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/index.ts:62-92
-   *   Code:
-   *   ```typescript
-   *   export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
-   *     try {
-   *       assertURL(configObject.apiUrl);
-   *       urlAllowListValidator('apiUrl')(configObject, validatorServices);
-   *       
-   *       if (!['OpenAi', 'AzureAi', 'Other'].includes(apiProvider)) {
-   *         throw new Error(`API Provider is not supported: ${apiProvider}`);
-   *       }
-   *       
-   *       return configObject;
-   *     } catch (err) {
-   *       throw new Error(`Error configuring OpenAI action: ${err}`);
-   *     }
-   *   };
-   *   ```
-   * 
-   * WHY: Zod schemas provide structure validation, but custom validators handle:
-   * - URL allowlist checks (security)
-   * - Complex business logic (provider-specific requirements)
-   * - External validation (API connectivity tests)
-   */
-  validateConfig?: (config: unknown, services: unknown) => void | string | null;
-  
-  /** 
-   * Custom secrets validator
-   * 
-   * USED BY: OpenAI (PKI validation), Webhook (auth validation)
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/index.ts:51-60
-   *   Code:
-   *   ```typescript
-   *   const secretsValidator = (secretsObject: Secrets) => {
-   *     const validatorFn = 
-   *       ('certificateData' in secretsObject && secretsObject.certificateData) ||
-   *       ('privateKeyData' in secretsObject && secretsObject.privateKeyData)
-   *         ? pkiSecretsValidator
-   *         : nonPkiSecretsValidator;
-   *     validatorFn(secretsObject);
-   *     return secretsObject;
-   *   };
-   *   ```
-   * 
-   * WHY: Secrets often have interdependencies:
-   * - Certificate + private key must both be present
-   * - Username requires password (and vice versa)
-   * - Different auth methods need different secrets
-   */
-  validateSecrets?: (secrets: unknown, services: unknown) => void | string | null;
-  
-  /** 
-   * Cross-field validation (config + secrets)
-   * 
-   * USED BY: Connectors with complex validation across config and secrets
-   * WHY: Some validations require both config and secrets together:
-   * - Test API connectivity with credentials
-   * - Validate auth method matches config
-   * - Check that URLs and credentials align
-   */
-  validateConnector?: (
-    config: unknown,
-    secrets: unknown
-  ) => string | null;
-  
-  /** 
-   * URL allowlist validation
+   * URL allowlist validation (framework-enforced)
    * 
    * USED BY: All connectors making external HTTP requests
    * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.ts:103-111
-   *   Code: URL validation ensures connectors only call allowed domains
    * REFERENCE: Most SubActionConnectorType connectors use urlAllowListValidator
    * 
    * WHY: Security - prevents SSRF attacks by restricting which URLs connectors can call.
-   * Admins configure allowed URL patterns in kibana.yml.
+   * The framework enforces this separately as a security layer.
    * 
-   * EXAMPLE: Only allow calls to *.company.com or specific partner APIs
+   * NOTE: While URL validation can also be done in Zod (see configSchema examples above),
+   * this field allows the framework to perform additional security checks and logging.
+   * 
+   * @example
+   * ```typescript
+   * validateUrls: {
+   *   configFields: ["apiUrl", "webhookUrl"],
+   *   secretFields: ["oauthTokenUrl"]
+   * }
+   * ```
    */
   validateUrls?: {
+    /** Config field names containing URLs to validate */
     configFields?: string[];
+    /** Secret field names containing URLs to validate */
     secretFields?: string[];
+  };
+}
+
+// ============================================================================
+// VALIDATION UTILITIES
+// ============================================================================
+
+/**
+ * Reusable Zod refinement utilities for common validation patterns
+ * 
+ * WHY: Share validation logic across connectors instead of duplicating it.
+ * These utilities wrap common validation patterns into reusable Zod refinements.
+ * 
+ * USAGE: Import and use in your connector's config/secrets schemas
+ */
+
+/**
+ * Creates a Zod refinement for URL allowlist validation
+ * 
+ * USED BY: Webhook, OpenAI, Bedrock, and all connectors making external HTTP calls
+ * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/lib/validators.ts
+ * 
+ * @example
+ * ```typescript
+ * import { createUrlAllowlistRefine } from './connector_spec';
+ * 
+ * const configSchema = z.object({
+ *   apiUrl: z.string().url().refine(
+ *     createUrlAllowlistRefine(configurationUtilities),
+ *     { message: "URL not in allowlist" }
+ *   )
+ * });
+ * ```
+ */
+export function createUrlAllowlistRefine(
+  configurationUtilities: { ensureUriAllowed: (url: string) => void }
+) {
+  return (url: string) => {
+    try {
+      configurationUtilities.ensureUriAllowed(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+}
+
+/**
+ * Creates a Zod refinement for testing API connectivity
+ * 
+ * USED BY: Connectors that want to validate connectivity at config save time
+ * 
+ * @example
+ * ```typescript
+ * const configSchema = z.object({
+ *   apiUrl: z.string().url(),
+ *   apiKey: z.string()
+ * }).refine(
+ *   createConnectivityTestRefine(async (config) => {
+ *     const response = await fetch(`${config.apiUrl}/health`, {
+ *       headers: { 'Authorization': `Bearer ${config.apiKey}` }
+ *     });
+ *     return response.ok;
+ *   }),
+ *   { message: "Cannot connect to API endpoint - check URL and credentials" }
+ * );
+ * ```
+ */
+export function createConnectivityTestRefine<T>(
+  testFn: (value: T) => Promise<boolean>
+) {
+  return async (value: T) => {
+    try {
+      return await testFn(value);
+    } catch {
+      return false;
+    }
+  };
+}
+
+/**
+ * Validates that at least one of the specified fields is present
+ * 
+ * USED BY: Connectors with multiple auth methods
+ * 
+ * @example
+ * ```typescript
+ * const secretsSchema = z.object({
+ *   apiToken: z.string().optional(),
+ *   user: z.string().optional(),
+ *   password: z.string().optional()
+ * }).superRefine(requireAtLeastOne(['apiToken', ['user', 'password']]));
+ * ```
+ */
+export function requireAtLeastOne(fieldGroups: Array<string | string[]>) {
+  return (data: any, ctx: z.RefinementCtx) => {
+    const hasAny = fieldGroups.some(group => {
+      if (Array.isArray(group)) {
+        return group.every(field => !!data[field]);
+      }
+      return !!data[group];
+    });
+    
+    if (!hasAny) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `At least one of the following is required: ${fieldGroups.map(g => 
+          Array.isArray(g) ? `(${g.join(' + ')})` : g
+        ).join(', ')}`
+      });
+    }
+  };
+}
+
+/**
+ * Validates that certificate and private key are both present or both absent
+ * 
+ * USED BY: OpenAI, Webhook, and connectors supporting mTLS
+ * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/validators.ts
+ * 
+ * @example
+ * ```typescript
+ * const secretsSchema = z.object({
+ *   certificateData: z.string().optional(),
+ *   privateKeyData: z.string().optional()
+ * }).superRefine(requireBothOrNeither('certificateData', 'privateKeyData', 
+ *   'Certificate and private key must both be provided for mTLS'
+ * ));
+ * ```
+ */
+export function requireBothOrNeither(
+  field1: string, 
+  field2: string, 
+  message?: string
+) {
+  return (data: any, ctx: z.RefinementCtx) => {
+    const has1 = !!data[field1];
+    const has2 = !!data[field2];
+    
+    if (has1 !== has2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [has1 ? field2 : field1],
+        message: message || `Both ${field1} and ${field2} must be provided together`
+      });
+    }
   };
 }
 
