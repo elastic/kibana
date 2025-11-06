@@ -60,7 +60,8 @@ export async function saveILMMigrationChanges(
   updatedILMMigrationStatusMap: Map<string, 'success' | undefined>
 ) {
   const soClient = appContextService.getInternalUserSOClient();
-  const { ilm_migration_status: ilmMigrationStatus } = await getSettingsOrUndefined(soClient);
+  const settings = await getSettingsOrUndefined(soClient);
+  const ilmMigrationStatus = settings?.ilm_migration_status ?? {};
 
   if (
     (updatedILMMigrationStatusMap.get('logs') === 'success' &&
@@ -88,7 +89,9 @@ export async function saveILMMigrationChanges(
 export async function getILMMigrationStatus(): Promise<Map<string, 'success' | undefined>> {
   const soClient = appContextService.getInternalUserSOClient();
 
-  const { ilm_migration_status: ilmMigrationStatus } = await getSettingsOrUndefined(soClient);
+  const settings = await getSettingsOrUndefined(soClient);
+  const ilmMigrationStatus = settings?.ilm_migration_status ?? {};
+
   const ilmMigrationStatusMap = new Map<string, 'success' | undefined>([
     ['logs', ilmMigrationStatus?.logs],
     ['metrics', ilmMigrationStatus?.metrics],
