@@ -53,6 +53,9 @@ export const buildConstantsDefinitions = (
         }),
       ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
       sortText: sortText ?? 'A',
+      // command: {
+      //   id: 'esql.control.inserted',
+      // }
     };
 
     return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
