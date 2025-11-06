@@ -51,7 +51,7 @@ export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
             rootItem,
             parentChildMap: traceParentChildrenMap,
             orphans,
-            serviceColorsMap
+            serviceColorsMap,
           })
         : [];
 
