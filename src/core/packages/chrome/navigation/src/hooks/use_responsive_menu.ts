@@ -8,12 +8,14 @@
  */
 
 import type { MutableRefObject } from 'react';
-import { useCallback, useRef, useState, useLayoutEffect, useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import type { MenuItem } from '../../types';
-import { MAX_MENU_ITEMS } from '../constants';
+import { cacheMenuItemHeights } from '../utils/cache_menu_item_heights';
+import { countVisibleMenuItems } from '../utils/count_visible_menu_items';
 import { getStyleProperty } from '../utils/get_style_property';
 import { useRafDebouncedCallback } from './use_raf_debounced';
+import { useStableMenuItemsReference } from './use_stable_menu_items_reference';
 
 interface ResponsiveMenuState {
   primaryMenuRef: MutableRefObject<HTMLElement | null>;
@@ -41,7 +43,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
 
   const visibleMenuItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
   const overflowMenuItems = useMemo(() => items.slice(visibleCount), [items, visibleCount]);
-  const stableItemsReference = useStableItemsReference(items);
+  const stableItemsReference = useStableMenuItemsReference(items);
 
   const recalculateMenuLayout = useCallback(() => {
     if (!primaryMenuRef.current) return;
@@ -51,7 +53,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     const menuHeight = menu.clientHeight;
 
     // 1. Cache the heights of all children
-    cacheHeights(heightsCacheRef, menu, stableItemsReference);
+    cacheMenuItemHeights(heightsCacheRef, menu, stableItemsReference);
 
     if (heightsCacheRef.current.length === 0) return;
 
@@ -60,13 +62,14 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     const childrenGap = getStyleProperty(menu, 'gap');
 
     // 2. Calculate the number of visible menu items
-    const nextVisibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
+    const nextVisibleCount = countVisibleMenuItems(childrenHeights, childrenGap, menuHeight);
 
     // 3. Update the visible count if needed
     setVisibleCount(nextVisibleCount);
   }, [stableItemsReference]);
 
-  const [scheduleRecalc, cancelRecalc] = useRafDebouncedCallback(recalculateMenuLayout);
+  const [scheduleRecalculation, cancelRecalculation] =
+    useRafDebouncedCallback(recalculateMenuLayout);
 
   useLayoutEffect(() => {
     // Invalidate the cache when items change
@@ -74,7 +77,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     heightsCacheRef.current = [];
 
     const observer = new ResizeObserver(() => {
-      scheduleRecalc();
+      scheduleRecalculation();
     });
 
     if (primaryMenuRef.current) {
@@ -82,13 +85,13 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     }
 
     // Initial calculation
-    scheduleRecalc();
+    scheduleRecalculation();
 
     return () => {
       observer.disconnect();
-      cancelRecalc();
+      cancelRecalculation();
     };
-  }, [isCollapsed, stableItemsReference, scheduleRecalc, cancelRecalc]);
+  }, [isCollapsed, stableItemsReference, scheduleRecalculation, cancelRecalculation]);
 
   return {
     primaryMenuRef,
@@ -96,106 +99,3 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     overflowMenuItems,
   };
 }
-
-/**
- * Utility function to cache the heights of the menu items in a ref.
- * It assumes one initial render where all items are in the DOM.
- *
- * @param ref - The ref to the heights cache.
- * @param menu - The menu element.
- * @param items - The menu items.
- */
-const cacheHeights = (
-  ref: MutableRefObject<number[]>,
-  menu: HTMLElement,
-  items: MenuItem[]
-): void => {
-  if (ref.current?.length !== items.length) {
-    const children: Element[] = Array.from(menu.children);
-
-    // Only cache if the DOM has rendered all the items we expect
-    if (children.length === items.length) {
-      ref.current = children.map((child) => child.clientHeight);
-    }
-  }
-};
-
-/**
- * Utility function to get the number of visible menu items until we reach the menu height or the limit of menu items.
- *
- * @param heights - The heights of the menu items.
- * @param gap - The gap between the menu items.
- * @param menuHeight - The height of the menu.
- *
- * @returns The number of visible menu items.
- */
-const countVisibleItems = (heights: number[], gap: number, menuHeight: number): number => {
-  const countItemsToFit = (availableHeight: number, limit: number) => {
-    let itemCount = 0;
-    let totalHeight = 0;
-
-    for (let i = 0; i < heights.length && itemCount < limit; i++) {
-      const itemHeight = heights[i];
-      const nextTotalHeight = totalHeight + itemHeight + (itemCount > 0 ? gap : 0);
-
-      if (nextTotalHeight <= availableHeight) {
-        totalHeight = nextTotalHeight;
-        itemCount++;
-      } else {
-        break;
-      }
-    }
-
-    return itemCount;
-  };
-
-  // 1. Calculate how many items can fit without considering the "More" button
-  const initialVisibleCount = countItemsToFit(menuHeight, MAX_MENU_ITEMS);
-
-  // 2. If not all items are visible, we need the "More" button
-  if (heights.length > initialVisibleCount) {
-    const moreItemHeight = heights[0]; // Approximately the same height as any other item
-    const availableHeight = menuHeight - moreItemHeight - gap;
-
-    return countItemsToFit(availableHeight, MAX_MENU_ITEMS - 1);
-  }
-
-  return initialVisibleCount;
-};
-
-/**
- * Get a stable reference to the items array that changes only when we need to recalculate the height.
- *
- * @param items - menu items.
- * @returns the stable items reference.
- */
-const useStableItemsReference = (items: MenuItem[]): MenuItem[] => {
-  const ref = useRef<MenuItem[]>(items);
-  const out = haveSameHeightSignature(ref.current, items) ? ref.current : items;
-
-  // Don’t write to a ref during render
-  useLayoutEffect(() => {
-    if (!haveSameHeightSignature(ref.current, items)) {
-      ref.current = items;
-    }
-  }, [items]);
-
-  return out;
-};
-
-/**
- * Pre-check to see if the item's height might have changed and if we need to do a full recalculation.
- *
- * @param prev - previous menu items.
- * @param next - next menu items.
- * @returns (boolean) whether the menu items have the same height signature.
- */
-const haveSameHeightSignature = (prev: MenuItem[], next: MenuItem[]): boolean => {
-  if (prev === next) return true;
-  if (prev.length !== next.length) return false;
-  for (let i = 0; i < prev.length; i++) {
-    // Only compare properties that might affect height
-    if (prev[i].label !== next[i].label) return false;
-  }
-  return true;
-};
