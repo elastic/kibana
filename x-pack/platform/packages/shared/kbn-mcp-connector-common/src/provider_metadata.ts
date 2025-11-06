@@ -6,7 +6,6 @@
  */
 
 import type { ToolProviderMetadata } from './client';
-import { MCP_NAMESPACE_PREFIX } from './namespaces';
 
 /**
  * Create provider metadata for an MCP connector tool.
@@ -22,7 +21,7 @@ export function createProviderMetadata(
   description?: string
 ): ToolProviderMetadata {
   return {
-    id: `${MCP_NAMESPACE_PREFIX}.${uniqueId}`,
+    id: `${uniqueId}`,
     name: connectorName,
     type: 'mcp' as const,
     uniqueId,
