@@ -20,6 +20,7 @@ interface ConversationContextValue {
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
   getProcessedAttachments?: (conversation?: Conversation) => Promise<AttachmentInput[]>;
+  setAttachmentMap?: (attachmentMap: Map<string, Record<string, unknown>>) => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);

@@ -26,6 +26,8 @@ export const useConversation = () => {
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
+  const { setAttachmentMap } = useConversationContext();
+
   const {
     data: conversation,
     isLoading,
@@ -43,7 +45,9 @@ export const useConversation = () => {
       return conversationsService.get({ conversationId });
     },
     onSuccess: (data) => {
-      rebuildAttachmentMapFromConversation(data);
+      if (setAttachmentMap) {
+        setAttachmentMap(rebuildAttachmentMapFromConversation(data));
+      }
     },
   });
 

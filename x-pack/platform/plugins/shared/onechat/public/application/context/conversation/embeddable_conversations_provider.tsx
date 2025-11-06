@@ -108,6 +108,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
 
+  const setAttachmentMap = useCallback((attachments: Map<string, Record<string, unknown>>) => {
+    attachmentMapRef.current = attachments;
+  }, []);
+
   const handleGetProcessedAttachments = useCallback(
     (_conversation?: Conversation) => {
       return getProcessedAttachments({
@@ -131,6 +135,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       attachments: contextProps.attachments,
       conversationActions,
       getProcessedAttachments: handleGetProcessedAttachments,
+      setAttachmentMap,
     }),
     [
       persistedConversationId,
@@ -141,6 +146,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       conversationActions,
       handleGetProcessedAttachments,
       setConversationId,
+      setAttachmentMap,
     ]
   );
 
