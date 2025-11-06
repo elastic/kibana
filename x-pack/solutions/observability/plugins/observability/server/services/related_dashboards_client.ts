@@ -226,10 +226,8 @@ export class RelatedDashboardsClient {
           () => `Found ${matchingPanels.length} panel(s) in dashboard ${d.id} using index ${index}`
         );
         relevantDashboards.push({
+          ...d,
           id,
-          title: d.title,
-          description: d.description,
-          tags: d.tags,
           matchedBy: { index: [index] },
           score: 0, // scores are computed when dashboards are deduplicated
         });
@@ -256,10 +254,8 @@ export class RelatedDashboardsClient {
             ).toString()}`
         );
         relevantDashboards.push({
+          ...d,
           id,
-          title: d.title,
-          description: d.description,
-          tags: d.tags,
           matchedBy: { fields: Array.from(allMatchingFields) },
           score: 0, // scores are computed when dashboards are deduplicated
         });
