@@ -268,6 +268,8 @@ export class RenderingService {
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
+
+    this.coreContext.logger.get('apm').info(JSON.stringify(apmConfig));
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
