@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseStateContainer, ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/common';
+import type { BaseStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
 import {
   COMPARE_ALL_OPTIONS,
@@ -28,6 +27,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { distinctUntilChanged, from, map } from 'rxjs';
+import defaultComparator from 'fast-deep-equal';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
@@ -43,7 +43,7 @@ import {
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import type { DiscoverInternalState, InternalStateStore, TabActionInjector } from './redux';
-import { internalStateActions, selectTab } from './redux';
+import { internalStateActions, selectTab, useCurrentTabSelector } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
@@ -165,8 +165,8 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   index?: string;
 }
 
-export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =
-  createStateContainerReactHelpers<ReduxLikeStateContainer<DiscoverAppState>>();
+export const useAppStateSelector = <T>(selector: (state: DiscoverAppState) => T): T =>
+  useCurrentTabSelector((tab) => selector(tab.appState), defaultComparator);
 
 /**
  * This is the app state container for Discover main, it's responsible for syncing state with the URL
