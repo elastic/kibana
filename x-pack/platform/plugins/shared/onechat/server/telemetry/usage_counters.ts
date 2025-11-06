@@ -39,7 +39,7 @@ export function trackToolCall(
   if (!usageCounter) return;
 
   usageCounter.incrementCounter({
-    counterName: `tool_call_${source}`,
+    counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_${source}`,
     counterType: 'count',
     incrementBy: 1,
   });
@@ -59,13 +59,13 @@ export function trackLLMUsage(
   if (!usageCounter) return;
 
   usageCounter.incrementCounter({
-    counterName: `llm_provider_${provider}`,
+    counterName: `${ONECHAT_USAGE_DOMAIN}_llm_provider_${provider}`,
     counterType: 'count',
     incrementBy: 1,
   });
 
   usageCounter.incrementCounter({
-    counterName: `llm_model_${model}`,
+    counterName: `${ONECHAT_USAGE_DOMAIN}_llm_model_${model}`,
     counterType: 'count',
     incrementBy: 1,
   });
@@ -96,7 +96,7 @@ export function trackConversationRound(
   }
 
   usageCounter.incrementCounter({
-    counterName: bucket,
+    counterName: `${ONECHAT_USAGE_DOMAIN}_${bucket}`,
     counterType: 'count',
     incrementBy: 1,
   });
@@ -127,7 +127,7 @@ export function trackQueryToResultTime(
   }
 
   usageCounter.incrementCounter({
-    counterName: bucket,
+    counterName: `${ONECHAT_USAGE_DOMAIN}_${bucket}`,
     counterType: 'count',
     incrementBy: 1,
   });

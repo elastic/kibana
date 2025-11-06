@@ -149,12 +149,16 @@ class ChatServiceImpl implements ChatService {
             convertErrors({ logger: this.dependencies.logger }),
             tap((event) => {
               // Track round completion and query-to-result time
-              if (isRoundCompleteEvent(event) && trackingService) {
-                if (requestId) trackingService.trackQueryEnd(requestId);
-                const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
-                if (conversationId) {
-                  trackingService.trackConversationRound(conversationId, currentRoundCount);
+              try {
+                if (isRoundCompleteEvent(event) && trackingService) {
+                  if (requestId) trackingService.trackQueryEnd(requestId);
+                  const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
+                  if (conversationId) {
+                    trackingService.trackConversationRound(conversationId, currentRoundCount);
+                  }
                 }
+              } catch (error) {
+                this.dependencies.logger.error(error);
               }
             }),
             shareReplay()

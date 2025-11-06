@@ -38,8 +38,11 @@ export const runTool = async <TParams = Record<string, unknown>>({
   const { toolsService, request, resultStore, trackingService } = manager.deps;
 
   if (trackingService) {
-    // todo: Determine tool call source
-    trackingService.trackToolCall(toolId, ToolCallSource.API);
+    try {
+      trackingService.trackToolCall(toolId, ToolCallSource.API);
+    } catch (error) {
+      /* empty */
+    }
   }
 
   const toolRegistry = await toolsService.getRegistry({ request });

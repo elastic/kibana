@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
+import { ONECHAT_USAGE_DOMAIN } from './usage_counters';
 /**
  * Tool call source - identifies where the tool was called from
  */
@@ -44,7 +45,7 @@ export class TrackingService {
   trackToolCall(toolId: string, source: ToolCallSource): void {
     try {
       this.usageCounter.incrementCounter({
-        counterName: `tool_call_${source}`,
+        counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_${source}`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -77,7 +78,7 @@ export class TrackingService {
       }
 
       this.usageCounter.incrementCounter({
-        counterName: bucket,
+        counterName: `${ONECHAT_USAGE_DOMAIN}_${bucket}`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -135,7 +136,7 @@ export class TrackingService {
       }
 
       this.usageCounter.incrementCounter({
-        counterName: bucket,
+        counterName: `${ONECHAT_USAGE_DOMAIN}_${bucket}`,
         counterType: 'count',
         incrementBy: 1,
       });
