@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fireEvent, render } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -29,13 +28,7 @@ describe('FiltersSections', () => {
       wrapper: Wrapper,
     });
 
-    expect(
-      getByText(
-        i18n.translate('xpack.apm.settings.customLink.flyout.filters.title', {
-          defaultMessage: 'Filters',
-        })
-      )
-    ).toBeInTheDocument();
+    expect(getByText('Filters')).toBeInTheDocument();
   });
 
   it('clears SuggestionsSelect value when EuiSelect value changes', async () => {
