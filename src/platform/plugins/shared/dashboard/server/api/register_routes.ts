@@ -213,11 +213,9 @@ export function registerAPIRoutes({
       },
     },
     async (ctx, req, res) => {
-      console.log('hello');
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
-      console.log('got client');
       let result;
       try {
         ({ result } = await client.get(req.params.id));
