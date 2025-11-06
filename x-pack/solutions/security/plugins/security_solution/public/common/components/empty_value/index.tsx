@@ -6,6 +6,7 @@
  */
 
 import { get, isString } from 'lodash/fp';
+import type { ReactNode } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -29,8 +30,7 @@ export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
   } else if (isString(item) && item === '') {
     return getEmptyStringTag();
   } else {
-    // @ts-expect-error upgrade typescript v5.9.3
-    return <>{item}</>;
+    return <>{item as ReactNode}</>;
   }
 };
 
