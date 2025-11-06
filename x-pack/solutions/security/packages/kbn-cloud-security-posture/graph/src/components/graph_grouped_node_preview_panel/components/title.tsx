@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ICON_TEST_ID, TOTAL_HITS_TEST_ID, GROUPED_ITEMS_TYPE_TEST_ID } from '../test_ids';
+import { i18nNamespaceKey } from '../constants';
 
 export interface TitleProps {
   icon: string;
@@ -34,13 +35,10 @@ export const Title = ({ icon, text, count }: TitleProps) => {
             {count ? (
               <>
                 <span data-test-subj={TOTAL_HITS_TEST_ID}>
-                  {i18n.translate(
-                    'xpack.cloudSecurityPosture.graph.groupedNodePreviewPanel.title.withCount',
-                    {
-                      defaultMessage: '{count} {text}',
-                      values: { count, text },
-                    }
-                  )}
+                  {i18n.translate(`${i18nNamespaceKey}.title`, {
+                    defaultMessage: '{count} {text}',
+                    values: { count, text },
+                  })}
                 </span>
               </>
             ) : (
