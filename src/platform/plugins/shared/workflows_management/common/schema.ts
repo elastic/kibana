@@ -626,6 +626,21 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
 // Static connectors used for schema generation
 const staticConnectors: ConnectorContractUnion[] = [
   {
+    type: 'slack-search',
+    summary: 'Slack Search',
+    paramsSchema: z
+      .object({
+        bearerToken: z.string().min(1),
+        query: z.string().min(1),
+        fields: z.string().optional(),
+      })
+      .required(),
+    outputSchema: z.string(),
+    description: i18n.translate('workflows.connectors.slack-search.description', {
+      defaultMessage: 'Slack Search',
+    }),
+  },
+  {
     type: 'console',
     summary: 'Console',
     paramsSchema: z

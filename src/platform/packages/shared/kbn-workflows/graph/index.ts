@@ -33,6 +33,7 @@ export type {
   WaitGraphNode,
   HttpGraphNode,
   HttpGraphNodeSchema,
+  SlackSearchNode,
   EnterTryBlockNode,
   ExitTryBlockNode,
   EnterNormalPathNode,

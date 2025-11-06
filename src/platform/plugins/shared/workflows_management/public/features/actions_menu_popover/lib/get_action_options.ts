@@ -84,6 +84,17 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
       defaultMessage: 'Make an generic HTTP request',
     }),
   };
+  const slackSearch: ActionOptionData = {
+    iconType: 'globe',
+    iconColor: euiTheme.colors.vis.euiColorVis0,
+    id: 'slack-search',
+    label: i18n.translate('workflows.actionsMenu.slackSearch', {
+      defaultMessage: 'Custom Slack Search',
+    }),
+    description: i18n.translate('workflows.actionsMenu.slackSearchDescription', {
+      defaultMessage: 'Search Slack',
+    }),
+  };
   const externalGroup: ActionOptionData = {
     iconType: 'apps',
     iconColor: euiTheme.colors.vis.euiColorVis0,
@@ -218,6 +229,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     kibanaGroup,
     externalGroup,
     httpRequest,
+    slackSearch,
     flowControlGroup,
   ];
 }

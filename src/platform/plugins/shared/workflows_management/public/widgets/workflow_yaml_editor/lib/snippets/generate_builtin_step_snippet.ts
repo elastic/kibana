@@ -68,6 +68,11 @@ export function generateBuiltInStepSnippet(
         with: { url: 'https://api.example.com', method: 'GET' },
       };
       break;
+    case 'slack-search':
+      parameters = {
+        with: { bearerToken: '', query: '', fields: '' },
+      };
+      break;
     case 'wait':
       parameters = {
         with: { duration: '5s' },

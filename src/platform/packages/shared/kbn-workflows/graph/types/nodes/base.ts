@@ -12,6 +12,7 @@ import {
   ElasticsearchStepSchema,
   HttpStepSchema,
   KibanaStepSchema,
+  SlackSearchStepSchema,
   WaitStepSchema,
 } from '../../../spec/schema';
 
@@ -42,6 +43,13 @@ export const HttpGraphNodeSchema = GraphNodeSchema.extend({
   configuration: HttpStepSchema,
 });
 export type HttpGraphNode = z.infer<typeof HttpGraphNodeSchema>;
+
+export const SlackSearchNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('slack-search'),
+  configuration: SlackSearchStepSchema,
+});
+export type SlackSearchNode = z.infer<typeof SlackSearchNodeSchema>;
 
 export const ElasticsearchGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

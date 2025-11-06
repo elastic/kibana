@@ -195,6 +195,18 @@ export const HttpStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 
+export const SlackSearchStepSchema = BaseStepSchema.extend({
+  type: z.literal('slack-search'),
+  with: z.object({
+    bearerToken: z.string().min(1),
+    query: z.string().min(1),
+    body: z.any().optional(),
+  }),
+})
+  .merge(TimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
+export type SlackSearchStep = z.infer<typeof SlackSearchStepSchema>;
+
 // Generic Elasticsearch step schema for backend validation
 export const ElasticsearchStepSchema = BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
@@ -440,6 +452,7 @@ const StepSchema = z.lazy(() =>
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
+    SlackSearchStepSchema,
   ])
 );
 export type Step = z.infer<typeof StepSchema>;
@@ -451,6 +464,7 @@ export const BuiltInStepTypes = [
   MergeStepSchema.shape.type._def.value,
   WaitStepSchema.shape.type._def.value,
   HttpStepSchema.shape.type._def.value,
+  SlackSearchStepSchema.shape.type._def.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
