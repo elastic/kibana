@@ -139,7 +139,7 @@ describe('GraphVisualization', () => {
       });
     });
 
-    it('calls open event preview callback for alert', async () => {
+    it('calls open grouped events preview for alert with event - normal alert case', async () => {
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
@@ -153,7 +153,7 @@ describe('GraphVisualization', () => {
       const onOpenEventPreview =
         jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
 
-      // Act
+      // Act - Alert nodes contain both the event and alert documents
       onOpenEventPreview?.({
         id: 'node-1',
         shape: 'label',
@@ -163,25 +163,29 @@ describe('GraphVisualization', () => {
             index: 'event-index',
             id: 'event-id',
             type: 'event',
+            event: { id: 'event-id' },
           },
           {
             index: 'alert-index',
             id: 'alert-id',
             type: 'alert',
+            event: { id: 'alert-id' },
           },
         ],
       } satisfies NodeViewModel);
 
-      // Assert
+      // Assert - should open grouped events preview panel (not single alert preview)
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: 'document-details-preview',
+          id: 'graphGroupedNodePreviewPanel',
           params: {
-            id: 'alert-id',
-            indexName: 'alert-index',
-            banner: expect.objectContaining({ title: 'Preview alert details' }),
+            id: 'node-1',
             scopeId: 'test-scope',
             isPreviewMode: true,
+            banner: expect.objectContaining({ backgroundColor: 'warning', textColor: 'warning' }),
+            docMode: 'grouped-events',
+            dataViewId: 'experimental-data-view-pattern',
+            documentIds: ['event-id', 'alert-id'],
           },
         })
       );
