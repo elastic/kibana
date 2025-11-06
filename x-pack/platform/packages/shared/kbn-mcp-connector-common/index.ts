@@ -38,13 +38,6 @@ export type {
 
 export { MCP_CONNECTOR_TYPE_ID, MCP_CONNECTOR_TITLE } from './src/constants';
 
-export {
-  MCP_NAMESPACE_PREFIX,
-  isMcpToolId,
-  createMcpToolId,
-  parseMcpToolId,
-} from './src/namespaces';
-
 export { createProviderMetadata } from './src/provider_metadata';
 
 export {
