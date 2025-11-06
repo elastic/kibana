@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
 import { parseDuration } from '../../../../common';
 import { clipDateInterval } from '../gap/interval_utils';
 import type { Gap } from '../gap';
 import type { GapBase } from '../types';
-import type { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
 
 export interface ScheduledItem {
   from: Date;
