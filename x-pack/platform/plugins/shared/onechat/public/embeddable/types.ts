@@ -13,6 +13,16 @@ export interface EmbeddableConversationDependencies {
   coreStart: CoreStart;
 }
 
+export type AttachmentsGetContent = () =>
+  | Promise<Record<string, unknown>>
+  | Record<string, unknown>;
+
+export type AttachmentList = Array<{
+  id: string;
+  type: string;
+  getContent: AttachmentsGetContent;
+}>;
+
 export interface EmbeddableConversationProps {
   /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
@@ -57,11 +67,7 @@ export interface EmbeddableConversationProps {
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.
    */
-  attachments?: Array<{
-    id: string;
-    type: string;
-    getContent: () => Promise<Record<string, unknown>> | Record<string, unknown>;
-  }>;
+  attachments?: AttachmentList;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &

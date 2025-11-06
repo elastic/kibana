@@ -41,7 +41,7 @@ export class ChatService {
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
-    } as ChatRequestBodyPayload;
+    };
 
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
