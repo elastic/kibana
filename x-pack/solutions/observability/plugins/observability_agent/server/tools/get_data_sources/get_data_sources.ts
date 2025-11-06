@@ -14,8 +14,8 @@ import type {
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
-} from '../types';
-import { getObservabilityDataSources } from '../utils/get_observability_data_sources';
+} from '../../types';
+import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 
 export const OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID = 'observability.get_data_sources';
 

@@ -30,7 +30,7 @@ import type {
 } from '../../types';
 import { getAccessQuery } from './get_access_query';
 
-export const OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID = 'observability.recall_knowledge_base';
+export const OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID = 'observability.search_knowledge_base';
 
 // Knowledge base constants based on observability AI assistant
 const OBSERVABILITY_KB_INDEX_ALIAS = '.kibana-observability-ai-assistant-kb';
@@ -54,29 +54,29 @@ interface KnowledgeBaseEntry {
   is_correction?: boolean; // deprecated
 }
 
-interface RecalledEntry {
+interface KnowledgeBaseResult {
   id: string;
   title: string;
   text: string;
   esScore: number;
 }
 
-const recallKnowledgeBaseSchema = z.object({
+const searchKnowledgeBaseSchema = z.object({
   query: z.string().min(1).describe('The search query to find relevant knowledge base entries.'),
 });
 
-export async function createRecallKnowledgeBaseTool({
+export async function createSearchKnowledgeBaseTool({
   core,
   logger,
 }: {
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   logger: Logger;
-}): Promise<StaticToolRegistration<typeof recallKnowledgeBaseSchema>> {
-  const toolDefinition: BuiltinToolDefinition<typeof recallKnowledgeBaseSchema> = {
-    id: OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
+}): Promise<StaticToolRegistration<typeof searchKnowledgeBaseSchema>> {
+  const toolDefinition: BuiltinToolDefinition<typeof searchKnowledgeBaseSchema> = {
+    id: OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
     type: ToolType.builtin,
     description: `Search the observability knowledge base for documentation, guides, custom organizational knowledge, and user-specific information. This contains specialized content not accessible through other search tools, including personal user details, preferences, and context from previous interactions. Use when built-in tools don't have the needed information or when queries involve custom organizational policies, procedures, domain-specific knowledge, or personal user information not available in standard indices.`,
-    schema: recallKnowledgeBaseSchema,
+    schema: searchKnowledgeBaseSchema,
     tags: ['observability', 'knowledge', 'documentation', 'context'],
     handler: async ({ query }, { esClient, modelProvider, request }) => {
       const [, plugins] = await core.getStartServices();
@@ -86,12 +86,12 @@ export async function createRecallKnowledgeBaseTool({
         const rewrittenQuery = await rewriteQuery({ query, modelProvider, logger });
 
         logger.debug(
-          `Recalling from knowledge base: original="${query}", rewritten="${rewrittenQuery}"`
+          `Searching from knowledge base: original="${query}", rewritten="${rewrittenQuery}"`
         );
 
         const namespace = await getNamespaceForRequest(request, core);
         logger.debug(`Using namespace: ${namespace}`);
-        const entries = await recallFromKnowledgeBase({
+        const entries = await searchKnowledgeBase({
           user,
           esClient,
           query: rewrittenQuery,
@@ -132,14 +132,14 @@ export async function createRecallKnowledgeBaseTool({
           ],
         };
       } catch (error) {
-        logger.error(`Error recalling from knowledge base: ${error.message}`);
+        logger.error(`Error searching from knowledge base: ${error.message}`);
         logger.debug(error);
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to recall from knowledge base: ${error.message}`,
+                message: `Failed to searching from knowledge base: ${error.message}`,
                 stack: error.stack,
               },
             },
@@ -203,9 +203,9 @@ EXAMPLES
 }
 
 /**
- * Recall entries from the knowledge base using semantic search
+ * Query the knowledge base using semantic search
  */
-async function recallFromKnowledgeBase({
+async function searchKnowledgeBase({
   user,
   esClient,
   query,
@@ -217,7 +217,7 @@ async function recallFromKnowledgeBase({
   query: string;
   namespace: string;
   logger: Logger;
-}): Promise<RecalledEntry[]> {
+}): Promise<KnowledgeBaseResult[]> {
   try {
     const response = await esClient.asInternalUser.search<KnowledgeBaseEntry>({
       index: [OBSERVABILITY_KB_INDEX_ALIAS],
@@ -256,11 +256,14 @@ async function recallFromKnowledgeBase({
  * Filter entries by token limit to avoid exceeding context window
  */
 const MAX_TOKENS = 4000;
-function filterEntriesByTokenLimit(entries: RecalledEntry[], logger: Logger): RecalledEntry[] {
+function filterEntriesByTokenLimit(
+  entries: KnowledgeBaseResult[],
+  logger: Logger
+): KnowledgeBaseResult[] {
   const sortedEntries = orderBy(entries, 'esScore', 'desc');
 
   let tokenCount = 0;
-  const returnedEntries: RecalledEntry[] = [];
+  const returnedEntries: KnowledgeBaseResult[] = [];
 
   for (const entry of sortedEntries) {
     const entryTokens = encode(entry.text).length;

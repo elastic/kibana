@@ -11,11 +11,11 @@ import type { StaticToolRegistration } from '@kbn/onechat-server';
 import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createGetDataSourcesTool,
-} from './get_data_sources';
+} from './get_data_sources/get_data_sources';
 import {
-  OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
-  createRecallKnowledgeBaseTool,
-} from './recall_knowledge_base/recall_knowledge_base';
+  OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
+  createSearchKnowledgeBaseTool,
+} from './search_knowledge_base/search_knowledge_base';
 import type {
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
@@ -31,7 +31,7 @@ const PLATFORM_TOOL_IDS = [
 
 const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
-  OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
+  OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -47,7 +47,7 @@ export async function registerTools({
 }) {
   const observabilityTools: StaticToolRegistration<any>[] = await Promise.all([
     createGetDataSourcesTool({ core, plugins, logger }),
-    createRecallKnowledgeBaseTool({ core, logger }),
+    createSearchKnowledgeBaseTool({ core, logger }),
   ]);
 
   for (const tool of observabilityTools) {
