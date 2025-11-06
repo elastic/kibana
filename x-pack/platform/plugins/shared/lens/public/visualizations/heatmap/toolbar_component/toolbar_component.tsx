@@ -23,27 +23,16 @@ import {
   HeatmapTitlesAndTextSettings,
   HeatmapVerticalAxisSettings,
 } from './style_settings';
+import { legendOptions } from './legend_settings';
+
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 
 const PANEL_STYLE = {
   width: '500px',
 };
-
-const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
-  {
-    id: `heatmap_legend_show`,
-    value: 'show',
-    label: i18n.translate('xpack.lens.heatmapChart.legendVisibility.show', {
-      defaultMessage: 'Show',
-    }),
-  },
-  {
-    id: `heatmap_legend_hide`,
-    value: 'hide',
-    label: i18n.translate('xpack.lens.heatmapChart.legendVisibility.hide', {
-      defaultMessage: 'Hide',
-    }),
-  },
-];
 
 export const HeatmapToolbar = memo(
   (props: VisualizationToolbarProps<HeatmapVisualizationState>) => {

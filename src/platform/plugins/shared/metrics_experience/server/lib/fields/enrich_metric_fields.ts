@@ -29,8 +29,8 @@ function isErrorResponseBase(subject: unknown): subject is ErrorResponseBase {
   return typeof subject === 'object' && subject !== null && 'error' in subject;
 }
 
-function generateMapKey(indexName: string, fieldName: string) {
-  return `${indexName}>${fieldName}`;
+export function generateMapKey(indexName: string, fieldName: string) {
+  return `${fieldName}>${indexName}`;
 }
 
 function buildMetricMetadataMap(

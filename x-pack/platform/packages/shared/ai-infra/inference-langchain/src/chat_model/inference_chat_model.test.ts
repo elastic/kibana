@@ -581,48 +581,19 @@ describe('InferenceChatModel', () => {
       const response = createStreamResponse([
         {
           tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: '' },
-            },
+            { toolCallId: 'my-tool-call-id', index: 0, function: { name: '', arguments: '' } },
           ],
         },
         {
           tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: '' },
-            },
+            { toolCallId: '', index: 0, function: { name: 'myfunction', arguments: ' { "' } },
           ],
         },
         {
-          tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: ' { "' },
-            },
-          ],
+          tool_calls: [{ toolCallId: '', index: 0, function: { name: '', arguments: 'arg1": ' } }],
         },
         {
-          tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: 'arg1": ' },
-            },
-          ],
-        },
-        {
-          tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: '42 }' },
-            },
-          ],
+          tool_calls: [{ toolCallId: '', index: 0, function: { name: '', arguments: '42 }' } }],
         },
       ]);
       chatComplete.mockReturnValue(response);
@@ -636,7 +607,8 @@ describe('InferenceChatModel', () => {
         concatChunk = concatChunk ? concatChunk.concat(chunk) : chunk;
       }
 
-      expect(allChunks.length).toBe(5);
+      expect(allChunks.length).toBe(4);
+
       expect(concatChunk!.tool_calls).toEqual([
         {
           id: 'my-tool-call-id',
@@ -717,16 +689,15 @@ describe('InferenceChatModel', () => {
       });
       chatComplete.mockReturnValue(response);
 
-      const output = await chatModel.stream('Some question');
-
       const allChunks: AIMessageChunk[] = [];
       await expect(async () => {
+        const output = await chatModel.stream('Some question');
         for await (const chunk of output) {
           allChunks.push(chunk);
         }
       }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
 
-      expect(allChunks.length).toBe(2);
+      expect(allChunks.length).toBe(0);
     });
   });
 

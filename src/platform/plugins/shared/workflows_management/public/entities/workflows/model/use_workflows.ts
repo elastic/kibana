@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { WorkflowListDto } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { WorkflowsSearchParams } from '../../../types';

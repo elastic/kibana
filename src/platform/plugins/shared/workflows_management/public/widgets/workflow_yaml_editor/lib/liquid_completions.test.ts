@@ -38,6 +38,8 @@ describe('liquid_completions', () => {
       expect(filterNames).toContain('join');
       expect(filterNames).toContain('plus');
       expect(filterNames).toContain('minus');
+      expect(filterNames).toContain('base64_encode');
+      expect(filterNames).toContain('base64_decode');
     });
 
     it('should have proper structure for each filter', () => {

@@ -9,7 +9,7 @@ import { EuiFlexItem, EuiTextArea, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-import { useConversationId } from '../../../hooks/use_conversation_id';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
 
 const inputContainerStyles = css`
   display: flex;

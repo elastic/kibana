@@ -11,12 +11,13 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
 import type { TeamsConnectorType } from '.';
-import { getConnectorType, ConnectorTypeId } from '.';
+import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/teams';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -49,7 +50,7 @@ beforeEach(() => {
 
 describe('connector registration', () => {
   test('returns connector type', () => {
-    expect(connectorType.id).toEqual(ConnectorTypeId);
+    expect(connectorType.id).toEqual(CONNECTOR_ID);
     expect(connectorType.name).toEqual('Microsoft Teams');
   });
 });
@@ -66,15 +67,35 @@ describe('validateParams()', () => {
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"message\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [number]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"number\\",
+          \\"path\\": [
+            \\"message\\"
+          ],
+          \\"message\\": \\"Expected string, received number\\"
+        }
+      ]"
+    `);
   });
 });
 
@@ -92,15 +113,35 @@ describe('validateActionTypeSecrets()', () => {
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"webhookUrl\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
 
     expect(() => {
       validateSecrets(connectorType, { webhookUrl: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"number\\",
+          \\"path\\": [
+            \\"webhookUrl\\"
+          ],
+          \\"message\\": \\"Expected string, received number\\"
+        }
+      ]"
+    `);
 
     expect(() => {
       validateSecrets(connectorType, { webhookUrl: 'fee-fi-fo-fum' }, { configurationUtilities });

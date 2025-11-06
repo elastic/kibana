@@ -183,6 +183,11 @@ export interface FunctionParameter {
   suggestedValues?: string[];
 
   mapParams?: string;
+
+  /** If true, this parameter supports multiple values (arrays). Default is false.
+   * This indicates that the parameter can accept multiple values, which will be passed as an array.
+   */
+  supportsMultiValues?: boolean;
 }
 
 export interface ElasticsearchCommandDefinition {
@@ -391,6 +396,18 @@ export interface ValidationErrors {
     type: {};
   };
   forkTooFewBranches: {
+    message: string;
+    type: {};
+  };
+  forkNotAllowedWithSubqueries: {
+    message: string;
+    type: {};
+  };
+  inlineStatsNotAllowedAfterLimit: {
+    message: string;
+    type: {};
+  };
+  joinOnSingleExpression: {
     message: string;
     type: {};
   };

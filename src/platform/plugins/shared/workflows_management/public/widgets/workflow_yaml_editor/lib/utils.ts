@@ -45,9 +45,6 @@ export function navigateToErrorPosition(
   editor.revealLineInCenter(lineNumber);
 }
 
-// REMOVED: getHighlightStepDecorations - no longer needed
-// All step highlighting is now handled by UnifiedActionsProvider
-
 export function getMonacoRangeFromYamlNode(
   model: monaco.editor.ITextModel,
   node: Node

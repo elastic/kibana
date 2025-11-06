@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RRule } from '@kbn/rrule';
@@ -14,26 +18,26 @@ import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
 import { isOk } from '@kbn/task-manager-plugin/server/lib/result_type';
 import type { BulkOperationError } from './types';
-import type { ListScheduledReportApiJSON, ScheduledReportType } from '../../types';
+import type { ScheduledReportApiJson, ScheduledReportType } from '../../types';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
 
-interface ApiResponse {
+interface ListApiResponse {
   page: number;
   per_page: number;
   total: number;
-  data: ListScheduledReportApiJSON[];
+  data: ScheduledReportApiJson[];
 }
 
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
 export function transformSingleResponse(
   logger: Logger,
-  so: SavedObjectsFindResult<ScheduledReportType>,
+  so: SavedObjectsFindResult<ScheduledReportType> | SavedObject<ScheduledReportType>,
   lastResponse?: CreatedAtSearchResponse,
   nextRunResponse?: BulkGetResult
-) {
+): ScheduledReportApiJson {
   const id = so.id;
   const lastRunForId = (lastResponse?.hits.hits ?? []).find(
     (hit) => hit.fields?.[SCHEDULED_REPORT_ID_FIELD]?.[0] === id
@@ -98,7 +102,7 @@ export function transformListResponse(
   result: SavedObjectsFindResponse<ScheduledReportType>,
   lastResponse?: CreatedAtSearchResponse,
   nextRunResponse?: BulkGetResult
-): ApiResponse {
+): ListApiResponse {
   return {
     page: result.page,
     per_page: result.per_page,

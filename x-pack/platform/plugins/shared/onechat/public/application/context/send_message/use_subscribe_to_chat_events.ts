@@ -15,10 +15,11 @@ import {
   isToolCallEvent,
   isToolProgressEvent,
   isToolResultEvent,
+  isThinkingCompleteEvent,
 } from '@kbn/onechat-common';
 import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import type { Observable } from 'rxjs';
-import { useConversationActions } from '../../hooks/use_conversation_actions';
+import { useConversationContext } from '../conversation/conversation_context';
 
 export const useSubscribeToChatEvents = ({
   setAgentReasoning,
@@ -29,7 +30,7 @@ export const useSubscribeToChatEvents = ({
   setIsResponseLoading: (isResponseLoading: boolean) => void;
   isAborted: () => boolean;
 }) => {
-  const conversationActions = useConversationActions();
+  const { conversationActions } = useConversationContext();
 
   return (events$: Observable<ChatEvent>) => {
     return new Promise<void>((resolve, reject) => {
@@ -77,6 +78,10 @@ export const useSubscribeToChatEvents = ({
           } else if (isConversationCreatedEvent(event)) {
             const { conversation_id: id, title } = event.data;
             conversationActions.onConversationCreated({ conversationId: id, title });
+          } else if (isThinkingCompleteEvent(event)) {
+            conversationActions.setTimeToFirstToken({
+              timeToFirstToken: event.data.time_to_first_token,
+            });
           }
         },
         complete: () => {
