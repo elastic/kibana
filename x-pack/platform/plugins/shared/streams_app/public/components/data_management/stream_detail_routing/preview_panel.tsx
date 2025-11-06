@@ -119,7 +119,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const streamName = useStreamSamplesSelector(
     (snapshot) => snapshot.context.definition.stream.name
   );
-  const canManage = useStreamSamplesSelector(
+  const hasPrivileges = useStreamSamplesSelector(
     (snapshot) => snapshot.context.definition.privileges.manage
   );
 
@@ -228,7 +228,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        {canManage ? (
+        {hasPrivileges ? (
           <DocumentMatchFilterControls
             onFilterChange={setDocumentMatchFilter}
             matchedDocumentPercentage={approximateMatchingPercentage}
