@@ -7,28 +7,37 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import type { TimingTestBed } from './timing.helpers';
-import { setupTimingTestBed } from './timing.helpers';
+import { setup } from './timing.helpers';
 import type { PhaseWithTiming } from '../../../common/types';
 
 describe('<EditPolicy /> timing', () => {
-  let testBed: TimingTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+
+  let actions: ReturnType<typeof setup>['actions'];
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     httpRequestsMockHelpers.setDefaultResponses();
 
-    await act(async () => {
-      testBed = await setupTimingTestBed(httpSetup);
-    });
+    ({ actions } = setup(httpSetup));
 
-    const { component } = testBed;
-    component.update();
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
+    });
   });
 
   ['warm', 'cold', 'frozen', 'delete'].forEach((phase: string) => {
     test(`timing is only shown when ${phase} phase is enabled`, async () => {
-      const { actions } = testBed;
       const phaseWithTiming = phase as PhaseWithTiming;
       expect(actions[phaseWithTiming].hasMinAgeInput()).toBeFalsy();
       await actions.togglePhase(phaseWithTiming);

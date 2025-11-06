@@ -5,87 +5,93 @@
  * 2.0.
  */
 
+import { screen, fireEvent, within } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
 import { createFormToggleAction } from './form_toggle_action';
 import { createFormSetValueAction } from './form_set_value_action';
 
-const createSetPrimaryShardSizeAction =
-  (testBed: TestBed) => async (value: string, units?: string) => {
-    const { find, component } = testBed;
+// All action functions must be async (main-2co Pattern 2)
+const setMaxPrimaryShardSize = async (value: string, units?: string) => {
+  // Use getAllByTestId()[0] to handle duplicate test IDs (main-2co Pattern 6)
+  const input = screen.getAllByTestId<HTMLInputElement>('hot-selectedMaxPrimaryShardSize')[0];
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
 
+  if (units) {
+    // Use within() to scope queries instead of dot notation (main-2co Pattern 6)
+    const popover = screen.getAllByTestId('hot-selectedMaxPrimaryShardSizeUnits')[0];
+    const filterButton = within(popover).getByTestId('show-filters-button');
+    fireEvent.click(filterButton);
+
+    // Component state stabilization (main-2co Pattern 4)
     await act(async () => {
-      find('hot-selectedMaxPrimaryShardSize').simulate('change', { target: { value } });
+      await jest.runOnlyPendingTimersAsync();
     });
-    component.update();
 
-    if (units) {
-      act(() => {
-        find('hot-selectedMaxPrimaryShardSize.show-filters-button').simulate('click');
-      });
-      component.update();
-
-      act(() => {
-        find(`hot-selectedMaxPrimaryShardSize.filter-option-${units}`).simulate('click');
-      });
-      component.update();
-    }
-  };
-
-const createSetMaxAgeAction = (testBed: TestBed) => async (value: string, units?: string) => {
-  const { find, component } = testBed;
-
-  await act(async () => {
-    find('hot-selectedMaxAge').simulate('change', { target: { value } });
-  });
-  component.update();
-
-  if (units) {
-    act(() => {
-      find('hot-selectedMaxAgeUnits.show-filters-button').simulate('click');
-    });
-    component.update();
-
-    act(() => {
-      find(`hot-selectedMaxAgeUnits.filter-option-${units}`).simulate('click');
-    });
-    component.update();
+    // Options are in a portal, query on screen
+    const filterOption = screen.getAllByTestId(`filter-option-${units}`)[0];
+    fireEvent.click(filterOption);
   }
 };
 
-const createSetMaxSizeAction = (testBed: TestBed) => async (value: string, units?: string) => {
-  const { find, component } = testBed;
-
-  await act(async () => {
-    find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
-  });
-  component.update();
+const setMaxAge = async (value: string, units?: string) => {
+  // Use getAllByTestId()[0] to handle duplicate test IDs (main-2co Pattern 6)
+  const input = screen.getAllByTestId<HTMLInputElement>('hot-selectedMaxAge')[0];
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
 
   if (units) {
-    act(() => {
-      find('hot-selectedMaxSizeStoredUnits.show-filters-button').simulate('click');
-    });
-    component.update();
+    // Use within() to scope queries instead of dot notation (main-2co Pattern 6)
+    const popover = screen.getAllByTestId('hot-selectedMaxAgeUnits')[0];
+    const filterButton = within(popover).getByTestId('show-filters-button');
+    fireEvent.click(filterButton);
 
-    act(() => {
-      find(`hot-selectedMaxSizeStoredUnits.filter-option-${units}`).simulate('click');
+    // Component state stabilization (main-2co Pattern 4)
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
     });
-    component.update();
+
+    // Options are in a portal, query on screen
+    const filterOption = screen.getAllByTestId(`filter-option-${units}`)[0];
+    fireEvent.click(filterOption);
   }
 };
 
-export const createRolloverActions = (testBed: TestBed) => {
-  const { exists } = testBed;
+const setMaxSize = async (value: string, units?: string) => {
+  // Use getAllByTestId()[0] to handle duplicate test IDs (main-2co Pattern 6)
+  const input = screen.getAllByTestId<HTMLInputElement>('hot-selectedMaxSizeStored')[0];
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
+
+  if (units) {
+    // Use within() to scope queries instead of dot notation (main-2co Pattern 6)
+    const popover = screen.getAllByTestId('hot-selectedMaxSizeStoredUnits')[0];
+    const filterButton = within(popover).getByTestId('show-filters-button');
+    fireEvent.click(filterButton);
+
+    // Component state stabilization (main-2co Pattern 4)
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
+    });
+
+    // Options are in a portal, query on screen
+    const filterOption = screen.getAllByTestId(`filter-option-${units}`)[0];
+    fireEvent.click(filterOption);
+  }
+};
+
+export const createRolloverActions = () => {
   return {
     rollover: {
-      toggle: createFormToggleAction(testBed, 'rolloverSwitch'),
-      toggleDefault: createFormToggleAction(testBed, 'useDefaultRolloverSwitch'),
-      setMaxPrimaryShardSize: createSetPrimaryShardSizeAction(testBed),
-      setMaxPrimaryShardDocs: createFormSetValueAction(testBed, 'hot-selectedMaxPrimaryShardDocs'),
-      setMaxDocs: createFormSetValueAction(testBed, 'hot-selectedMaxDocuments'),
-      setMaxAge: createSetMaxAgeAction(testBed),
-      setMaxSize: createSetMaxSizeAction(testBed),
-      hasSettingRequiredCallout: (): boolean => exists('rolloverSettingsRequired'),
+      toggle: createFormToggleAction('rolloverSwitch'),
+      toggleDefault: createFormToggleAction('useDefaultRolloverSwitch'),
+      setMaxPrimaryShardSize,
+      setMaxPrimaryShardDocs: createFormSetValueAction('hot-selectedMaxPrimaryShardDocs'),
+      setMaxDocs: createFormSetValueAction('hot-selectedMaxDocuments'),
+      setMaxAge,
+      setMaxSize,
+      hasSettingRequiredCallout: (): boolean =>
+        Boolean(screen.queryByTestId('rolloverSettingsRequired')),
     },
   };
 };

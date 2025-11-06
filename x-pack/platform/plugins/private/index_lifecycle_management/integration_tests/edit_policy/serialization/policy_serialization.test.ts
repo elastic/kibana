@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { cleanup } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
@@ -20,30 +21,31 @@ import { setupSerializationTestBed } from './policy_serialization.helpers';
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: SerializationTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setDefaultResponses();
+  // Timer handling (main-2co Pattern 1)
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
 
-    await act(async () => {
-      testBed = await setupSerializationTestBed(httpSetup);
-    });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
-    const { component } = testBed;
-    component.update();
+  beforeEach(() => {
+    // Test Structure & Isolation (main-2co Pattern 5)
+    jest.clearAllMocks();
+    ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterEach(() => {
+    // Cleanup to prevent test pollution (main-2co Pattern 6a)
+    cleanup(); // RTL cleanup unmounts all components
+    jest.clearAllTimers();
   });
 
   describe('top level form', () => {
-    afterAll(async () => {
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup, {
-          appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
-          },
-        });
-      });
-    });
-
     /**
      * We assume that policies that populate this form are loaded directly from ES and so
      * are valid according to ES. There may be settings in the policy created through the ILM
@@ -52,12 +54,20 @@ describe('<EditPolicy /> serialization', () => {
      */
     it('preserves policy settings it did not configure', async () => {
       httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS]);
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
 
-      const { component, actions } = testBed;
-      component.update();
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
+      const { actions } = testBed;
 
       // Set max docs to test whether we keep the unknown fields in that object after serializing
       await actions.rollover.setMaxDocs('1000');
@@ -100,13 +110,21 @@ describe('<EditPolicy /> serialization', () => {
 
     it('default policy (only policy name input) on enterprise license', async () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
-
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
 
-      const { component, actions } = testBed;
-      component.update();
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup, { isNewPolicy: true });
+        // Advance timers to complete HTTP request and component initialization
+        await jest.runOnlyPendingTimersAsync();
+      });
+
+      const { actions } = testBed;
       await actions.setPolicyName('test_policy');
       await actions.savePolicy();
 
@@ -136,17 +154,26 @@ describe('<EditPolicy /> serialization', () => {
 
     it('default policy (only policy name input) on basic license', async () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
 
       await act(async () => {
         testBed = await setupSerializationTestBed(httpSetup, {
+          isNewPolicy: true,
           appServicesContext: {
             license: licensingMock.createLicense({ license: { type: 'basic' } }),
           },
         });
+        // Advance timers to complete HTTP request and component initialization
+        await jest.runOnlyPendingTimersAsync();
       });
 
-      const { component, actions } = testBed;
-      component.update();
+      const { actions } = testBed;
       await actions.setPolicyName('test_policy');
       await actions.savePolicy();
 
@@ -183,9 +210,10 @@ describe('<EditPolicy /> serialization', () => {
         testBed = await setupSerializationTestBed(httpSetup);
       });
 
-      const { component } = testBed;
-
-      component.update();
+      // Advance timers after setup to allow component initialization
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
     test('setting all values', async () => {
@@ -243,6 +271,18 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('setting searchable snapshot', async () => {
+      // Ensure clean DOM before creating new testBed (main-2co Pattern 6a)
+      cleanup();
+
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      testBed = setupSerializationTestBed(httpSetup);
+
+      // Wait for component initialization (main-2co Pattern 1c)
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
 
       await actions.hot.setSearchableSnapshot('abc');
@@ -259,6 +299,13 @@ describe('<EditPolicy /> serialization', () => {
 
     // Setting downsample disables setting readonly so we test this separately
     test('setting downsample', async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
 
       await actions.rollover.toggleDefault();
@@ -276,6 +323,13 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('disabling rollover', async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
 
       await actions.rollover.toggleDefault();
@@ -297,18 +351,14 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('warm phase', () => {
-    beforeEach(async () => {
+    test('default values', async () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
         testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
       });
 
-      const { component } = testBed;
-      component.update();
-    });
-
-    test('default values', async () => {
       const { actions } = testBed;
       await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
@@ -332,6 +382,19 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('setting all values', async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      // Override with correct node attributes format (server returns 'key:value' as keys)
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
       await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
@@ -393,6 +456,13 @@ describe('<EditPolicy /> serialization', () => {
 
     // Setting downsample disables setting readonly so we test this separately
     test('setting downsample', async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
 
       await actions.togglePhase('warm');
@@ -411,24 +481,21 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     describe('policy with include and exclude', () => {
-      beforeEach(async () => {
+      test('preserves include, exclude allocation settings', async () => {
         httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_INCLUDE_EXCLUDE]);
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
         httpRequestsMockHelpers.setListNodes({
           nodesByRoles: {},
-          nodesByAttributes: { test: ['123'] },
+          nodesByAttributes: { 'test:123': ['node-1'] },
           isUsingDeprecatedDataRoleConfig: false,
         });
-        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {
           testBed = await setupSerializationTestBed(httpSetup);
+          await jest.runOnlyPendingTimersAsync();
         });
 
-        const { component } = testBed;
-        component.update();
-      });
-
-      test('preserves include, exclude allocation settings', async () => {
         const { actions } = testBed;
         await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
@@ -459,18 +526,14 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('cold phase', () => {
-    beforeEach(async () => {
+    test('default values', async () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
         testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
       });
 
-      const { component } = testBed;
-      component.update();
-    });
-
-    test('default values', async () => {
       const { actions } = testBed;
 
       await actions.togglePhase('cold');
@@ -495,11 +558,24 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('setting all values, excluding searchable snapshot', async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      // Override with correct node attributes format (server returns 'key:value' as keys)
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { 'test:123': ['node-1'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
 
       await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('123');
-      await actions.cold.setMinAgeUnits('s');
+      await actions.cold.setMinAgeUnits('h');
       await actions.cold.setDataAllocation('node_attrs');
       await actions.cold.setSelectedNodeAttribute('test:123');
       await actions.cold.setReplicas('123');
@@ -524,7 +600,7 @@ describe('<EditPolicy /> serialization', () => {
                 },
               },
               cold: {
-                min_age: '123s',
+                min_age: '123h',
                 actions: {
                   set_priority: {
                     priority: 123,
@@ -546,6 +622,13 @@ describe('<EditPolicy /> serialization', () => {
 
     // Setting downsample disables setting readonly so we test this separately
     test('setting downsample', async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
 
       await actions.togglePhase('cold');
@@ -565,7 +648,20 @@ describe('<EditPolicy /> serialization', () => {
 
     // Setting searchable snapshot field disables setting replicas so we test this separately
     test('setting searchable snapshot', async () => {
+      // Ensure clean DOM before creating new testBed (main-2co Pattern 6a)
+      cleanup();
+
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      testBed = setupSerializationTestBed(httpSetup);
+
+      // Wait for component initialization (main-2co Pattern 1c)
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
+
       await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('10');
       await actions.cold.setSearchableSnapshot('my-repo');
@@ -583,20 +679,31 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('frozen phase', () => {
-    beforeEach(async () => {
+    test('default value', async () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup);
+        testBed = await setupSerializationTestBed(httpSetup, {
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+          },
+        });
       });
 
-      const { component } = testBed;
-      component.update();
-    });
+      // Advance timers after setup to allow component initialization
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
 
-    test('default value', async () => {
       const { actions } = testBed;
+
       await actions.togglePhase('frozen');
+
+      // Allow phase toggle to complete (main-2co Pattern 4)
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       await actions.frozen.setMinAgeValue('13');
       await actions.frozen.setSearchableSnapshot('myRepo');
 
@@ -616,7 +723,7 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     describe('deserialization', () => {
-      beforeEach(async () => {
+      test('default value', async () => {
         const policyToEdit = getDefaultHotPhasePolicy();
         policyToEdit.policy.phases.frozen = {
           min_age: '1234m',
@@ -625,21 +732,18 @@ describe('<EditPolicy /> serialization', () => {
 
         httpRequestsMockHelpers.setLoadPolicies([policyToEdit]);
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
         httpRequestsMockHelpers.setListNodes({
           nodesByRoles: {},
-          nodesByAttributes: { test: ['123'] },
+          nodesByAttributes: { 'test:123': ['node-1'] },
           isUsingDeprecatedDataRoleConfig: false,
         });
 
         await act(async () => {
           testBed = await setupSerializationTestBed(httpSetup);
+          await jest.runOnlyPendingTimersAsync();
         });
 
-        const { component } = testBed;
-        component.update();
-      });
-
-      test('default value', async () => {
         const { actions } = testBed;
 
         await actions.savePolicy();
@@ -663,6 +767,13 @@ describe('<EditPolicy /> serialization', () => {
 
   describe('delete phase', () => {
     test('default value', async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
       await actions.togglePhase('delete');
       await actions.delete.setSnapshotPolicy('test');
@@ -689,6 +800,13 @@ describe('<EditPolicy /> serialization', () => {
 
   describe('shrink', () => {
     test('shrink shard size', async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+        await jest.runOnlyPendingTimersAsync();
+      });
+
       const { actions } = testBed;
       await actions.hot.setShrinkSize('50');
 

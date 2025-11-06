@@ -5,49 +5,76 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import type { Phase } from '../../../common/types';
 import { createFormSetValueAction } from './form_set_value_action';
 
-export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
-  const { exists, form, component, find } = testBed;
+export const createShrinkActions = (phase: Phase) => {
   const toggleShrinkSelector = `${phase}-shrinkSwitch`;
   const shrinkSizeSelector = `${phase}-primaryShardSize`;
   const shrinkCountSelector = `${phase}-primaryShardCount`;
   const allowWritesToggleSelector = `${phase}-allowWriteAfterShrink`;
 
   const changeShrinkRadioButton = async (selector: string) => {
-    await act(async () => {
-      await find(selector).find('input').simulate('change');
-    });
-    component.update();
+    // Use getAllByTestId()[0] to handle duplicate test IDs (main-2co Pattern 6)
+    const radioButton = screen.getAllByTestId(selector)[0].querySelector('input');
+    if (radioButton) {
+      await act(async () => {
+        fireEvent.click(radioButton);
+        await jest.runOnlyPendingTimersAsync();
+      });
+    }
   };
+
+  const enableShrink = async () => {
+    // Use getAllByTestId()[0] to handle duplicate test IDs (main-2co Pattern 6)
+    const shrinkSwitch = screen.getAllByTestId(toggleShrinkSelector)[0];
+    await act(async () => {
+      fireEvent.click(shrinkSwitch);
+      await jest.runOnlyPendingTimersAsync();
+    });
+
+    // Initialize isUsingShardSize to false (shard count mode) by default
+    // This is required for the shrink fields to render (see shrink_field.tsx line 61)
+    await act(async () => {
+      await changeShrinkRadioButton(`${phase}-configureShardCount`);
+    });
+  };
+
   return {
-    shrinkExists: () => exists(toggleShrinkSelector),
+    shrinkExists: () => Boolean(screen.queryByTestId(toggleShrinkSelector)),
     setShrinkCount: async (value: string) => {
-      if (!exists(shrinkCountSelector) && !exists(shrinkSizeSelector)) {
-        await form.toggleEuiSwitch(toggleShrinkSelector);
+      const shrinkCountExists = Boolean(screen.queryByTestId(shrinkCountSelector));
+      const shrinkSizeExists = Boolean(screen.queryByTestId(shrinkSizeSelector));
+
+      if (!shrinkCountExists && !shrinkSizeExists) {
+        await enableShrink();
       }
-      if (!exists(shrinkCountSelector)) {
+      if (!shrinkCountExists) {
         await changeShrinkRadioButton(`${phase}-configureShardCount`);
       }
-      await createFormSetValueAction(testBed, shrinkCountSelector)(value);
+      await createFormSetValueAction(shrinkCountSelector)(value);
     },
     setShrinkSize: async (value: string) => {
-      if (!exists(shrinkCountSelector) && !exists(shrinkSizeSelector)) {
-        await form.toggleEuiSwitch(toggleShrinkSelector);
+      const shrinkCountExists = Boolean(screen.queryByTestId(shrinkCountSelector));
+      const shrinkSizeExists = Boolean(screen.queryByTestId(shrinkSizeSelector));
+
+      if (!shrinkCountExists && !shrinkSizeExists) {
+        await enableShrink();
       }
-      if (!exists(shrinkSizeSelector)) {
+      if (!shrinkSizeExists) {
         await changeShrinkRadioButton(`${phase}-configureShardSize`);
       }
-      await createFormSetValueAction(testBed, shrinkSizeSelector)(value);
+      await createFormSetValueAction(shrinkSizeSelector)(value);
     },
     toggleAllowWriteAfterShrink: async () => {
-      if (!exists(allowWritesToggleSelector)) {
-        await form.toggleEuiSwitch(toggleShrinkSelector);
+      if (!screen.queryByTestId(allowWritesToggleSelector)) {
+        await enableShrink();
       }
-      await form.toggleEuiSwitch(allowWritesToggleSelector);
+      // Use getAllByTestId()[0] to handle duplicate test IDs (main-2co Pattern 6)
+      const allowWritesSwitch = screen.getAllByTestId(allowWritesToggleSelector)[0];
+      fireEvent.click(allowWritesSwitch);
     },
   };
 };

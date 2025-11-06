@@ -15,7 +15,7 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
   const { httpSetup, setDelayResponse, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -40,9 +40,6 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
     ]);
 
     await setup();
-
-    const { component } = testBed;
-    component.update();
   });
 
   test(`doesn't offer allocation guidance when node with deprecated "data" role exists`, async () => {
@@ -52,10 +49,14 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
       isUsingDeprecatedDataRoleConfig: false,
     });
     await setup();
-    const { actions, component } = testBed;
+    const { actions } = testBed;
 
-    component.update();
     await actions.togglePhase();
+
+    // Wait for async operations to complete
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
+    });
 
     expect(actions.isAllocationLoading()).toBeFalsy();
     expect(actions.hasDefaultAllocationBehaviorNotice()).toBeFalsy();
@@ -68,6 +69,12 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
 
       const { actions } = testBed;
       await actions.togglePhase();
+
+      // The loading spinner should appear after toggling, even with delayed response
+      // Wait for React to update but don't advance timers (keep request pending)
+      await act(async () => {
+        await Promise.resolve();
+      });
 
       expect(actions.isAllocationLoading()).toBeTruthy();
       expect(actions.hasDataTierAllocationControls()).toBeTruthy();
@@ -88,6 +95,11 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
         const { actions } = testBed;
         await actions.togglePhase();
 
+        // Wait for async operations to complete
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
+
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
         expect(actions.hasDefaultAllocationBehaviorNotice()).toBeFalsy();
@@ -98,6 +110,11 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
       test('shows view node attributes link when an attribute is selected and shows flyout when clicked', async () => {
         const { actions } = testBed;
         await actions.togglePhase();
+
+        // Wait for async operations to complete
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
@@ -116,9 +133,13 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
     describe('and none are defined', () => {
       const commonSetupAndBaselineAssertions = async () => {
         await setup();
-        const { actions, component } = testBed;
-        component.update();
+        const { actions } = testBed;
         await actions.togglePhase();
+
+        // Wait for async operations to complete
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
@@ -185,10 +206,14 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
       });
 
       await setup();
-      const { actions, component } = testBed;
+      const { actions } = testBed;
 
-      component.update();
       await actions.togglePhase();
+
+      // Wait for async operations to complete
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
 
       expect(actions.isAllocationLoading()).toBeFalsy();
       expect(actions.hasNoTiersAvailableNotice()).toBeTruthy();
@@ -202,10 +227,14 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
       });
 
       await setup();
-      const { actions, component } = testBed;
+      const { actions } = testBed;
 
-      component.update();
       await actions.togglePhase();
+
+      // Wait for async operations to complete
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
 
       expect(actions.isAllocationLoading()).toBeFalsy();
       expect(actions.hasWillUseFallbackTierNotice()).toBeTruthy();

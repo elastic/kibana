@@ -15,4 +15,9 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/private/index_lifecycle_management/{common,public,server}/**/*.{ts,tsx}',
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/packages/kbn-ui-framework/dist/',
+    '<rootDir>/packages/kbn-pm/dist/',
+    // Allow integration_tests for this plugin (they're actually unit tests)
+  ],
 };

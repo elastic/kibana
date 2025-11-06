@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
 import {
   createForceMergeActions,
   createShrinkActions,
@@ -19,60 +18,60 @@ import {
   createDownsampleActions,
 } from '.';
 
-export const createHotPhaseActions = (testBed: TestBed) => {
+export const createHotPhaseActions = () => {
   return {
     hot: {
-      ...createForceMergeActions(testBed, 'hot'),
-      ...createShrinkActions(testBed, 'hot'),
-      ...createReadonlyActions(testBed, 'hot'),
-      ...createIndexPriorityActions(testBed, 'hot'),
-      ...createSearchableSnapshotActions(testBed, 'hot'),
-      ...createDownsampleActions(testBed, 'hot'),
+      ...createForceMergeActions('hot'),
+      ...createShrinkActions('hot'),
+      ...createReadonlyActions('hot'),
+      ...createIndexPriorityActions('hot'),
+      ...createSearchableSnapshotActions('hot'),
+      ...createDownsampleActions('hot'),
     },
   };
 };
-export const createWarmPhaseActions = (testBed: TestBed) => {
+export const createWarmPhaseActions = () => {
   return {
     warm: {
-      ...createMinAgeActions(testBed, 'warm'),
-      ...createForceMergeActions(testBed, 'warm'),
-      ...createShrinkActions(testBed, 'warm'),
-      ...createReadonlyActions(testBed, 'warm'),
-      ...createIndexPriorityActions(testBed, 'warm'),
-      ...createNodeAllocationActions(testBed, 'warm'),
-      ...createReplicasAction(testBed, 'warm'),
-      ...createDownsampleActions(testBed, 'warm'),
+      ...createMinAgeActions('warm'),
+      ...createForceMergeActions('warm'),
+      ...createShrinkActions('warm'),
+      ...createReadonlyActions('warm'),
+      ...createIndexPriorityActions('warm'),
+      ...createNodeAllocationActions('warm'),
+      ...createReplicasAction('warm'),
+      ...createDownsampleActions('warm'),
     },
   };
 };
-export const createColdPhaseActions = (testBed: TestBed) => {
+export const createColdPhaseActions = () => {
   return {
     cold: {
-      ...createMinAgeActions(testBed, 'cold'),
-      ...createReplicasAction(testBed, 'cold'),
-      ...createReadonlyActions(testBed, 'cold'),
-      ...createIndexPriorityActions(testBed, 'cold'),
-      ...createNodeAllocationActions(testBed, 'cold'),
-      ...createSearchableSnapshotActions(testBed, 'cold'),
-      ...createDownsampleActions(testBed, 'cold'),
+      ...createMinAgeActions('cold'),
+      ...createReplicasAction('cold'),
+      ...createReadonlyActions('cold'),
+      ...createIndexPriorityActions('cold'),
+      ...createNodeAllocationActions('cold'),
+      ...createSearchableSnapshotActions('cold'),
+      ...createDownsampleActions('cold'),
     },
   };
 };
 
-export const createFrozenPhaseActions = (testBed: TestBed) => {
+export const createFrozenPhaseActions = () => {
   return {
     frozen: {
-      ...createMinAgeActions(testBed, 'frozen'),
-      ...createSearchableSnapshotActions(testBed, 'frozen'),
+      ...createMinAgeActions('frozen'),
+      ...createSearchableSnapshotActions('frozen'),
     },
   };
 };
 
-export const createDeletePhaseActions = (testBed: TestBed) => {
+export const createDeletePhaseActions = () => {
   return {
     delete: {
-      ...createMinAgeActions(testBed, 'delete'),
-      ...createSnapshotPolicyActions(testBed),
+      ...createMinAgeActions('delete'),
+      ...createSnapshotPolicyActions(),
     },
   };
 };

@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { screen, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
@@ -17,17 +18,25 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 describe('<EditPolicy /> searchable snapshots', () => {
   let testBed: SearchableSnapshotsTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(async () => {
+    ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
     httpRequestsMockHelpers.setDefaultResponses();
 
+    testBed = setupSearchableSnapshotsTestBed(httpSetup);
     await act(async () => {
-      testBed = await setupSearchableSnapshotsTestBed(httpSetup);
+      await jest.runOnlyPendingTimersAsync();
     });
-
-    const { component } = testBed;
-    component.update();
   });
 
   test('enabling searchable snapshot should hide force merge, readonly and shrink in subsequent phases', async () => {
@@ -139,22 +148,21 @@ describe('<EditPolicy /> searchable snapshots', () => {
         });
         httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-        await act(async () => {
-          testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
-            appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
-          });
+        testBed.unmount();
+        testBed = setupSearchableSnapshotsTestBed(httpSetup, {
+          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
         });
-
-        const { component } = testBed;
-        component.update();
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
       });
 
       test('defaults searchable snapshot to true on cloud', async () => {
-        const { find, actions } = testBed;
+        const { actions } = testBed;
         await actions.togglePhase('cold');
-        expect(
-          find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
-        ).toBe(true);
+        const container = screen.getAllByTestId('searchableSnapshotField-cold')[0];
+        const toggle = within(container).getByTestId('searchableSnapshotToggle');
+        expect(toggle).toHaveAttribute('aria-checked', 'true');
       });
     });
 
@@ -168,14 +176,13 @@ describe('<EditPolicy /> searchable snapshots', () => {
         });
         httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-        await act(async () => {
-          testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
-            appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
-          });
+        testBed.unmount();
+        testBed = setupSearchableSnapshotsTestBed(httpSetup, {
+          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
         });
-
-        const { component } = testBed;
-        component.update();
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
       });
 
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
@@ -208,16 +215,15 @@ describe('<EditPolicy /> searchable snapshots', () => {
       });
       httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['my-repo'] });
 
-      await act(async () => {
-        testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
-          appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'basic' } }),
-          },
-        });
+      testBed.unmount();
+      testBed = setupSearchableSnapshotsTestBed(httpSetup, {
+        appServicesContext: {
+          license: licensingMock.createLicense({ license: { type: 'basic' } }),
+        },
       });
-
-      const { component } = testBed;
-      component.update();
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
     test('disable setting searchable snapshots', async () => {

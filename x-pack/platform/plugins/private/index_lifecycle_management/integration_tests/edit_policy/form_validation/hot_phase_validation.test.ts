@@ -17,7 +17,7 @@ describe('<EditPolicy /> hot phase validation', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -25,13 +25,12 @@ describe('<EditPolicy /> hot phase validation', () => {
   });
 
   beforeEach(async () => {
+    httpRequestsMockHelpers.setDefaultResponses();
     httpRequestsMockHelpers.setLoadPolicies([]);
     await act(async () => {
       testBed = await setupValidationTestBed(httpSetup);
     });
 
-    const { component } = testBed;
-    component.update();
     ({ actions } = testBed);
     await actions.setPolicyName('mypolicy');
   });
@@ -47,7 +46,7 @@ describe('<EditPolicy /> hot phase validation', () => {
       await actions.rollover.setMaxDocs('');
       await actions.rollover.setMaxSize('');
 
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
 
       expect(actions.rollover.hasSettingRequiredCallout()).toBeTruthy();
     });
@@ -57,7 +56,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxPrimaryShardSize('-1');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -66,7 +65,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxPrimaryShardSize('0');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -77,7 +76,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxPrimaryShardDocs('-1');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -86,7 +85,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxPrimaryShardDocs('0');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -95,7 +94,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxPrimaryShardDocs('5.5');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
       });
@@ -106,7 +105,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxSize('-1');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -115,7 +114,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxSize('0');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -126,7 +125,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxAge('-1');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -135,7 +134,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxAge('0');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -144,7 +143,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxAge('5.5');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
       });
@@ -155,7 +154,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxDocs('-1');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -164,7 +163,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxDocs('0');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
       });
@@ -173,7 +172,7 @@ describe('<EditPolicy /> hot phase validation', () => {
         await actions.rollover.toggleDefault();
         await actions.rollover.setMaxDocs('5.5');
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages([i18nTexts.editPolicy.errors.integerRequired]);
       });
@@ -184,13 +183,13 @@ describe('<EditPolicy /> hot phase validation', () => {
     test(`doesn't allow 0 for forcemerge`, async () => {
       await actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('0');
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
     test(`doesn't allow -1 for forcemerge`, async () => {
       await actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('-1');
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
   });
@@ -198,22 +197,22 @@ describe('<EditPolicy /> hot phase validation', () => {
   describe('shrink', () => {
     test(`doesn't allow 0 for shrink size`, async () => {
       await actions.hot.setShrinkSize('0');
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
     test(`doesn't allow -1 for shrink size`, async () => {
       await actions.hot.setShrinkSize('-1');
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
     test(`doesn't allow 0 for shrink count`, async () => {
       await actions.hot.setShrinkCount('0');
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
     test(`doesn't allow -1 for shrink count`, async () => {
       await actions.hot.setShrinkCount('-1');
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
   });
@@ -221,13 +220,13 @@ describe('<EditPolicy /> hot phase validation', () => {
   describe('index priority', () => {
     test(`doesn't allow -1 for index priority`, async () => {
       await actions.hot.setIndexPriority('-1');
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
 
     test(`allows 0 for index priority`, async () => {
       await actions.hot.setIndexPriority('0');
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
       actions.errors.expectMessages([]);
     });
   });

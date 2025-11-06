@@ -16,7 +16,7 @@ describe('<EditPolicy /> cold phase validation', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -38,8 +38,7 @@ describe('<EditPolicy /> cold phase validation', () => {
       testBed = await setupValidationTestBed(httpSetup);
     });
 
-    const { component, actions } = testBed;
-    component.update();
+    const { actions } = testBed;
     await actions.setPolicyName('mypolicy');
     await actions.togglePhase('cold');
   });
@@ -50,7 +49,7 @@ describe('<EditPolicy /> cold phase validation', () => {
 
       await actions.cold.setReplicas('-1');
 
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
 
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
@@ -60,7 +59,7 @@ describe('<EditPolicy /> cold phase validation', () => {
 
       await actions.cold.setReplicas('0');
 
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
 
       actions.errors.expectMessages([]);
     });
@@ -72,7 +71,7 @@ describe('<EditPolicy /> cold phase validation', () => {
 
       await actions.cold.setIndexPriority('-1');
 
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
 
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
@@ -82,7 +81,7 @@ describe('<EditPolicy /> cold phase validation', () => {
 
       await actions.cold.setIndexPriority('0');
 
-      actions.errors.waitForValidation();
+      await actions.errors.waitForValidation();
 
       actions.errors.expectMessages([]);
     });

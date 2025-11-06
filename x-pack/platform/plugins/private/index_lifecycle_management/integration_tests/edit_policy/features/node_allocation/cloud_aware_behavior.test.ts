@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
 import { setupEnvironment } from '../../../helpers';
 import type { CloudNodeAllocationTestBed } from './cloud_aware_behavior.helpers';
 import { setupCloudNodeAllocation } from './cloud_aware_behavior.helpers';
@@ -16,7 +17,7 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -35,21 +36,12 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
     });
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
     httpRequestsMockHelpers.setLoadPolicies([]);
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: { data: ['node1'] },
-      nodesByAttributes: { 'attribute:true': ['node1'] },
-      isUsingDeprecatedDataRoleConfig: true,
-    });
     httpRequestsMockHelpers.setNodesDetails('attribute:true', [
       { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
     ]);
-
-    await setup();
-
-    const { component } = testBed;
-    component.update();
   });
 
   describe('when not on cloud', () => {
@@ -61,17 +53,25 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
       });
 
       await setup();
-      const { actions, component, exists } = testBed;
+      const { actions } = testBed;
 
-      component.update();
       await actions.togglePhase('warm');
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+      // Wait for async operations to complete
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+
+      // Verify loading is complete (matching original Enzyme test)
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
 
       // Assert that default, custom and 'none' options exist
+      // openNodeAttributesSection already waits for dropdown to open
       await actions.warm.openNodeAttributesSection();
-      expect(exists('defaultDataAllocationOption')).toBeTruthy();
-      expect(exists('customDataAllocationOption')).toBeTruthy();
-      expect(exists('noneDataAllocationOption')).toBeTruthy();
+
+      expect(screen.getByTestId('defaultDataAllocationOption')).toBeInTheDocument();
+      expect(screen.getByTestId('customDataAllocationOption')).toBeInTheDocument();
+      expect(screen.getByTestId('noneDataAllocationOption')).toBeInTheDocument();
     });
   });
 
@@ -85,19 +85,26 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
           isUsingDeprecatedDataRoleConfig: true,
         });
         await setup(true);
-        const { actions, component, exists, find } = testBed;
+        const { actions } = testBed;
 
-        component.update();
         await actions.togglePhase('warm');
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-        // Assert that custom and 'none' options exist
+        // Wait for async operations to complete
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
+
+        // Verify loading is complete (matching original Enzyme test)
+        expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+
+        // openNodeAttributesSection already waits for dropdown to open
         await actions.warm.openNodeAttributesSection();
-        expect(exists('defaultDataAllocationOption')).toBeFalsy();
-        expect(exists('customDataAllocationOption')).toBeTruthy();
-        expect(exists('noneDataAllocationOption')).toBeTruthy();
+
+        expect(screen.queryByTestId('defaultDataAllocationOption')).not.toBeInTheDocument();
+        expect(screen.getByTestId('customDataAllocationOption')).toBeInTheDocument();
+        expect(screen.getByTestId('noneDataAllocationOption')).toBeInTheDocument();
         // Show the call-to-action for users to migrate their cluster to use node roles
-        expect(find('cloudDataTierCallout').exists()).toBeTruthy();
+        expect(screen.getByTestId('cloudDataTierCallout')).toBeInTheDocument();
       });
     });
 
@@ -109,18 +116,26 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
           isUsingDeprecatedDataRoleConfig: false,
         });
         await setup(true);
-        testBed.component.update();
 
-        const { actions, component, exists, find } = testBed;
+        const { actions } = testBed;
         await actions.togglePhase('warm');
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
+        // Wait for async operations to complete
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
+
+        // Verify loading is complete (matching original Enzyme test)
+        expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+
+        // openNodeAttributesSection already waits for dropdown to open
         await actions.warm.openNodeAttributesSection();
-        expect(exists('defaultDataAllocationOption')).toBeTruthy();
-        expect(exists('customDataAllocationOption')).toBeTruthy();
-        expect(exists('noneDataAllocationOption')).toBeTruthy();
+
+        expect(screen.getByTestId('defaultDataAllocationOption')).toBeInTheDocument();
+        expect(screen.getByTestId('customDataAllocationOption')).toBeInTheDocument();
+        expect(screen.getByTestId('noneDataAllocationOption')).toBeInTheDocument();
         // Do not show the call-to-action for users to migrate their cluster to use node roles
-        expect(find('cloudDataTierCallout').exists()).toBeFalsy();
+        expect(screen.queryByTestId('cloudDataTierCallout')).not.toBeInTheDocument();
       });
 
       test('do not show node allocation specific warnings on cloud', async () => {
@@ -131,14 +146,23 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
           isUsingDeprecatedDataRoleConfig: false,
         });
         await setup(true);
-        testBed.component.update();
 
-        const { actions, component, exists } = testBed;
+        const { actions } = testBed;
         await actions.togglePhase('warm');
-        await actions.togglePhase('cold');
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-        expect(exists('cloudDataTierCallout')).toBeFalsy();
+        // Wait for async operations to complete
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
+
+        await actions.togglePhase('cold');
+
+        // Wait for async operations to complete
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
+
+        expect(screen.queryByTestId('cloudDataTierCallout')).not.toBeInTheDocument();
         expect(
           actions.warm.hasWillUseFallbackTierNotice() || actions.cold.hasWillUseFallbackTierNotice()
         ).toBeFalsy();

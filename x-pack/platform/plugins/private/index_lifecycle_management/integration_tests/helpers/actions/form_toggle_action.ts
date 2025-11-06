@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, fireEvent } from '@testing-library/react';
 
-export const createFormToggleAction = (testBed: TestBed, dataTestSubject: string) => async () => {
-  const { form, component } = testBed;
-
-  await act(async () => {
-    form.toggleEuiSwitch(dataTestSubject);
-  });
-
-  component.update();
+export const createFormToggleAction = (dataTestSubject: string) => () => {
+  // Handle potential duplicates by getting all matches and clicking the first one
+  const switchElements = screen.getAllByTestId(dataTestSubject);
+  fireEvent.click(switchElements[0]);
 };

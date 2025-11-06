@@ -7,63 +7,65 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import type { RolloverTestBed } from './rollover.helpers';
-import { setupRolloverTestBed } from './rollover.helpers';
+import { setup } from './rollover.helpers';
 
 describe('<EditPolicy /> rollover', () => {
-  let testBed: RolloverTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setDefaultResponses();
+  let actions: ReturnType<typeof setup>['actions'];
 
-    await act(async () => {
-      testBed = await setupRolloverTestBed(httpSetup);
-    });
-
-    const { component } = testBed;
-    component.update();
+  beforeAll(() => {
+    jest.useFakeTimers();
   });
 
-  test('shows forcemerge when rollover enabled', async () => {
-    const { actions } = testBed;
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
+    httpRequestsMockHelpers.setDefaultResponses();
+
+    ({ actions } = setup(httpSetup));
+
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
+    });
+  });
+
+  test('shows forcemerge when rollover enabled', () => {
     expect(actions.hot.forceMergeExists()).toBeTruthy();
   });
 
   test('hides forcemerge when rollover is disabled', async () => {
-    const { actions } = testBed;
     await actions.rollover.toggleDefault();
     await actions.rollover.toggle();
     expect(actions.hot.forceMergeExists()).toBeFalsy();
   });
 
-  test('shows shrink input when rollover enabled', async () => {
-    const { actions } = testBed;
+  test('shows shrink input when rollover enabled', () => {
     expect(actions.hot.shrinkExists()).toBeTruthy();
   });
 
   test('hides shrink input when rollover is disabled', async () => {
-    const { actions } = testBed;
     await actions.rollover.toggleDefault();
     await actions.rollover.toggle();
     expect(actions.hot.shrinkExists()).toBeFalsy();
   });
 
-  test('shows readonly input when rollover enabled', async () => {
-    const { actions } = testBed;
+  test('shows readonly input when rollover enabled', () => {
     expect(actions.hot.readonlyExists()).toBeTruthy();
   });
 
   test('hides readonly input when rollover is disabled', async () => {
-    const { actions } = testBed;
     await actions.rollover.toggleDefault();
     await actions.rollover.toggle();
     expect(actions.hot.readonlyExists()).toBeFalsy();
   });
 
   test('hides and disables searchable snapshot field', async () => {
-    const { actions } = testBed;
-
     expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
     await actions.rollover.toggleDefault();
     await actions.rollover.toggle();
@@ -73,8 +75,6 @@ describe('<EditPolicy /> rollover', () => {
   });
 
   test('shows rollover tip on minimum age', async () => {
-    const { actions } = testBed;
-
     await actions.togglePhase('warm');
     await actions.togglePhase('cold');
     await actions.togglePhase('frozen');
@@ -87,7 +87,6 @@ describe('<EditPolicy /> rollover', () => {
   });
 
   test('hiding rollover tip on minimum age', async () => {
-    const { actions } = testBed;
     await actions.rollover.toggleDefault();
     await actions.rollover.toggle();
 

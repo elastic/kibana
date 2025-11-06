@@ -7,32 +7,38 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import type { DownsampleTestBed } from './downsample.helpers';
 import { setupDownsampleTestBed } from './downsample.helpers';
 
 describe('<EditPolicy /> downsample', () => {
-  let testBed: DownsampleTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let actions: ReturnType<typeof setupDownsampleTestBed>['actions'];
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     httpRequestsMockHelpers.setDefaultResponses();
 
+    ({ actions } = setupDownsampleTestBed(httpSetup));
+
     await act(async () => {
-      testBed = await setupDownsampleTestBed(httpSetup);
+      await jest.runOnlyPendingTimersAsync();
     });
 
-    const { component } = testBed;
-    component.update();
-
-    const { actions } = testBed;
     await actions.rollover.toggleDefault();
     await actions.togglePhase('warm');
     await actions.togglePhase('cold');
   });
 
   test('enabling downsample in hot should hide readonly in hot, warm and cold', async () => {
-    const { actions } = testBed;
-
     expect(actions.hot.readonlyExists()).toBeTruthy();
     expect(actions.warm.readonlyExists()).toBeTruthy();
     expect(actions.cold.readonlyExists()).toBeTruthy();
@@ -45,8 +51,6 @@ describe('<EditPolicy /> downsample', () => {
   });
 
   test('enabling downsample in warm should hide readonly in warm and cold', async () => {
-    const { actions } = testBed;
-
     expect(actions.hot.readonlyExists()).toBeTruthy();
     expect(actions.warm.readonlyExists()).toBeTruthy();
     expect(actions.cold.readonlyExists()).toBeTruthy();
@@ -59,8 +63,6 @@ describe('<EditPolicy /> downsample', () => {
   });
 
   test('enabling downsample in cold should hide readonly in cold', async () => {
-    const { actions } = testBed;
-
     expect(actions.hot.readonlyExists()).toBeTruthy();
     expect(actions.warm.readonlyExists()).toBeTruthy();
     expect(actions.cold.readonlyExists()).toBeTruthy();

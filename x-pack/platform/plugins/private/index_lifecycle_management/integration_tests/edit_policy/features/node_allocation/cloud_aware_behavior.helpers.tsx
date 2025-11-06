@@ -11,29 +11,34 @@ import type { TestBedConfig } from '@kbn/test-jest-helpers';
 import type { AppServicesContext } from '../../../../public/types';
 import { createTogglePhaseAction, createNodeAllocationActions } from '../../../helpers';
 import { initTestBed } from '../../init_test_bed';
+import type { InitTestBed } from '../../init_test_bed';
 
-type SetupReturn = ReturnType<typeof setupCloudNodeAllocation>;
+export interface CloudNodeAllocationTestBed extends InitTestBed {
+  actions: {
+    togglePhase: ReturnType<typeof createTogglePhaseAction>;
+    warm: ReturnType<typeof createNodeAllocationActions>;
+    cold: ReturnType<typeof createNodeAllocationActions>;
+  };
+}
 
-export type CloudNodeAllocationTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
-
-export const setupCloudNodeAllocation = async (
+export const setupCloudNodeAllocation = (
   httpSetup: HttpSetup,
   arg?: {
     appServicesContext?: Partial<AppServicesContext>;
     testBedConfig?: Partial<TestBedConfig>;
   }
-) => {
-  const testBed = await initTestBed(httpSetup, arg);
+): CloudNodeAllocationTestBed => {
+  const renderResult = initTestBed(httpSetup, arg);
 
   return {
-    ...testBed,
+    ...renderResult,
     actions: {
-      togglePhase: createTogglePhaseAction(testBed),
+      togglePhase: createTogglePhaseAction(),
       warm: {
-        ...createNodeAllocationActions(testBed, 'warm'),
+        ...createNodeAllocationActions('warm'),
       },
       cold: {
-        ...createNodeAllocationActions(testBed, 'cold'),
+        ...createNodeAllocationActions('cold'),
       },
     },
   };

@@ -7,26 +7,34 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import type { TimelineTestBed } from './timeline.helpers';
 import { setupTimelineTestBed } from './timeline.helpers';
 
 describe('<EditPolicy /> timeline', () => {
-  let testBed: TimelineTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let actions: ReturnType<typeof setupTimelineTestBed>['actions'];
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     httpRequestsMockHelpers.setDefaultResponses();
 
-    await act(async () => {
-      testBed = await setupTimelineTestBed(httpSetup);
-    });
+    ({ actions } = setupTimelineTestBed(httpSetup));
 
-    const { component } = testBed;
-    component.update();
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
+    });
   });
 
   test('showing all phases on the timeline', async () => {
-    const { actions } = testBed;
     // This is how the default policy should look
     expect(actions.timeline.hasPhase('hot')).toBe(true);
     expect(actions.timeline.hasPhase('warm')).toBe(false);

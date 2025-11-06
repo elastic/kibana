@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import type { Phase } from '../../../common/types';
 import { createFormToggleAction } from './form_toggle_action';
 import { createFormToggleAndSetValueAction } from './form_toggle_and_set_value_action';
 
-export const createIndexPriorityActions = (testBed: TestBed, phase: Phase) => {
-  const { exists } = testBed;
+export const createIndexPriorityActions = (phase: Phase) => {
   const toggleSelector = `${phase}-indexPrioritySwitch`;
   return {
-    indexPriorityExists: () => exists(toggleSelector),
-    toggleIndexPriority: createFormToggleAction(testBed, toggleSelector),
-    setIndexPriority: createFormToggleAndSetValueAction(
-      testBed,
-      toggleSelector,
-      `${phase}-indexPriority`
-    ),
+    indexPriorityExists: () => Boolean(screen.queryByTestId(toggleSelector)),
+    toggleIndexPriority: createFormToggleAction(toggleSelector),
+    setIndexPriority: createFormToggleAndSetValueAction(toggleSelector, `${phase}-indexPriority`),
   };
 };
