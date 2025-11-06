@@ -52,7 +52,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Omits system properties when syncing ingest pipelines [#241096]({{kib-pull}}241096).
 * Fixes Fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
 
-**E{{esql}} editor**:
+**{{esql}} editor**:
 * Fixes the autocomplete suggestion of time series sources in `TS` commands after a comma [#241402]({{kib-pull}}241402).
 
 **{{product.observability}} solution**:
