@@ -8,7 +8,7 @@
 import type { IlmGetLifecycleLifecycle } from '@elastic/elasticsearch/lib/api/types';
 
 import { appContextService } from '../../../app_context';
-import { getSettings, saveSettings } from '../../../settings';
+import { getSettingsOrUndefined, saveSettings } from '../../../settings';
 
 export async function getILMPolicies(
   dataStreamTypes: string[]
@@ -60,7 +60,7 @@ export async function saveILMMigrationChanges(
   updatedILMMigrationStatusMap: Map<string, 'success' | undefined>
 ) {
   const soClient = appContextService.getInternalUserSOClient();
-  const { ilm_migration_status: ilmMigrationStatus } = await getSettings(soClient);
+  const { ilm_migration_status: ilmMigrationStatus } = await getSettingsOrUndefined(soClient);
 
   if (
     (updatedILMMigrationStatusMap.get('logs') === 'success' &&
@@ -88,7 +88,7 @@ export async function saveILMMigrationChanges(
 export async function getILMMigrationStatus(): Promise<Map<string, 'success' | undefined>> {
   const soClient = appContextService.getInternalUserSOClient();
 
-  const { ilm_migration_status: ilmMigrationStatus } = await getSettings(soClient);
+  const { ilm_migration_status: ilmMigrationStatus } = await getSettingsOrUndefined(soClient);
   const ilmMigrationStatusMap = new Map<string, 'success' | undefined>([
     ['logs', ilmMigrationStatus?.logs],
     ['metrics', ilmMigrationStatus?.metrics],

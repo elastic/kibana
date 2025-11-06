@@ -23,7 +23,7 @@ jest.mock('../../fields/field', () => ({
 }));
 
 jest.mock('../../../settings', () => ({
-  getSettings: jest.fn().mockResolvedValue({
+  getSettingsOrUndefined: jest.fn().mockResolvedValue({
     ilm_migration_status: {},
   }),
   saveSettings: jest.fn(),

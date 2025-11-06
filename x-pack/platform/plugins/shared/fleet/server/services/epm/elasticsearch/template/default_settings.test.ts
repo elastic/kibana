@@ -15,7 +15,7 @@ import { buildDefaultSettings, saveILMMigrationChanges } from './default_setting
 
 jest.mock('../../../app_context');
 jest.mock('../../../settings', () => ({
-  getSettings: jest.fn().mockResolvedValue({
+  getSettingsOrUndefined: jest.fn().mockResolvedValue({
     ilm_migration_status: {
       metrics: 'success',
     },
