@@ -67,10 +67,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     await log.indent(0, async () => {
       if (options.configs.length > 1) {
         const progress = `${i + 1}/${options.configs.length}`;
+
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
       let config: Config;
+
       if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
         config = await readConfigFile(log, options.esVersion, path, settingOverrides);
       } else {
@@ -83,17 +85,20 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         );
       }
 
-      const hasTests = await checkForEnabledTestsInFtrConfig({
+      // Check if there are any enabled tests before starting servers
+      // If not, reuse the runner instance to report skipped test group to ci-stats
+      const { hasTests, runner } = await checkForEnabledTestsInFtrConfig({
         config,
         esVersion: options.esVersion,
         log,
       });
+
       if (!hasTests) {
-        // just run the FTR, no Kibana or ES, which will quickly report a skipped test group to ci-stats and continue
         await runFtr({
           log,
           config,
           esVersion: options.esVersion,
+          runner,
         });
         return;
       }
