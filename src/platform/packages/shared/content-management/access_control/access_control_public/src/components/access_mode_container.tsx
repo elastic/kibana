@@ -49,6 +49,21 @@ const selectOptions = [
   },
 ];
 
+const getSpaceIcon = (space: Space['solution']) => {
+  switch (space) {
+    case 'es':
+    case 'workplaceai':
+      return 'logoElasticsearch';
+    case 'security':
+      return 'logoSecurity';
+    case 'oblt':
+      return 'logoObservability';
+    case 'classic':
+    default:
+      return 'logoElasticStack';
+  }
+};
+
 interface Props {
   onChangeAccessMode: (
     value: SavedObjectAccessControl['accessMode']
@@ -70,7 +85,7 @@ export const AccessModeContainer = ({
   accessControl,
   createdBy,
 }: Props) => {
-  const [spaceName, setSpaceName] = useState('');
+  const [space, setSpace] = useState<Space>({} as Space);
   const [isUpdatingPermissions, setIsUpdatingPermissions] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
   const [isAccessControlEnabled, setIsAccessControlEnabled] = useState(false);
@@ -88,7 +103,7 @@ export const AccessModeContainer = ({
 
   useEffect(() => {
     getActiveSpace?.().then((activeSpace) => {
-      setSpaceName(activeSpace.name);
+      setSpace(activeSpace);
     });
   }, [getActiveSpace]);
 
@@ -164,8 +179,8 @@ export const AccessModeContainer = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge iconType="logoSecurity" color="hollow">
-                  {spaceName}
+                <EuiBadge iconType={getSpaceIcon(space.solution)} color="hollow">
+                  {space.name}
                 </EuiBadge>
               </EuiFlexItem>
               {!canManageAccessControl && (
