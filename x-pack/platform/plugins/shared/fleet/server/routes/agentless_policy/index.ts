@@ -28,6 +28,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       options: {
         tags: ['oas-tag:Fleet agentless policies'],
         availability: {
+          since: '9.3.0',
           stability: 'experimental',
         },
       },

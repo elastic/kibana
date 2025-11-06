@@ -106,7 +106,7 @@ export const PackagePolicyPackageSchema = schema.object({
 export const PackagePolicyBaseSchema = {
   name: schema.string({
     meta: {
-      description: 'Package policy name (should be unique)',
+      description: 'Unique name for the package policy.',
     },
   }),
   description: schema.maybe(
@@ -122,7 +122,7 @@ export const PackagePolicyBaseSchema = {
       schema.literal(null),
       schema.string({
         meta: {
-          description: 'Agent policy ID where that package policy will be added',
+          description: 'ID of the agent policy which the package policy will be added to.',
           deprecated: true,
         },
       }),
@@ -132,7 +132,7 @@ export const PackagePolicyBaseSchema = {
     schema.arrayOf(
       schema.string({
         meta: {
-          description: 'Agent policy IDs where that package policy will be added',
+          description: 'IDs of the agent policies which that package policy will be added to.',
         },
       })
     )
@@ -247,7 +247,7 @@ export const CreatePackagePolicyRequestBodySchema = schema.object({
     schema.boolean({
       meta: {
         description:
-          'Force package policy creation even if package is not verified, or if the agent policy is managed.',
+          'Force package policy creation even if the package is not verified, or if the agent policy is managed.',
       },
     })
   ),
@@ -272,7 +272,7 @@ export const SimplifiedVarsSchema = schema.recordOf(
   {
     meta: {
       description:
-        'Input/stream level variable (see integration documentation for more information)',
+        'Input/stream level variable. Refer to the integration documentation for more information.',
     },
   }
 );
@@ -284,7 +284,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
       enabled: schema.maybe(
         schema.boolean({
           meta: {
-            description: 'enable or disable that input, (default to true)',
+            description: 'Enable or disable that input. Defaults to `true` (enabled).',
           },
         })
       ),
@@ -296,7 +296,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
             enabled: schema.maybe(
               schema.boolean({
                 meta: {
-                  description: 'enable or disable that stream, (default to true)',
+                  description: 'Enable or disable that stream. Defaults to `true` (enabled).',
                 },
               })
             ),
@@ -305,7 +305,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
           {
             meta: {
               description:
-                'Input streams (see integration documentation to know what streams are available)',
+                'Input streams. Refer to the integration documentation to know which streams are available.',
             },
           }
         )
@@ -314,7 +314,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
     {
       meta: {
         description:
-          'Package policy inputs (see integration documentation to know what inputs are available)',
+          'Package policy inputs. Refer to the integration documentation to know which inputs are available.',
       },
     }
   )
@@ -335,26 +335,26 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   id: schema.maybe(
     schema.string({
       meta: {
-        description: 'Policy unique identifier',
+        description: 'Policy unique identifier.',
       },
     })
   ),
   name: schema.string({
     meta: {
-      description: 'Policy name (should be unique)',
+      description: 'Unique name for the policy.',
     },
   }),
   description: schema.maybe(
     schema.string({
       meta: {
-        description: 'Policy description',
+        description: 'Policy description.',
       },
     })
   ),
   namespace: schema.maybe(
     schema.string({
       meta: {
-        description: 'Policy namespace, leave blank to inherit the agent policy namespace',
+        description: 'Policy namespace. When not specified, it inherits the agent policy namespace.',
       },
     })
   ),
@@ -398,7 +398,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
     policy_id: schema.maybe(
       schema.oneOf([schema.literal(null), schema.string()], {
         meta: {
-          description: 'Deprecated use policy_ids instead.',
+          description: 'Deprecated. Use policy_ids instead.',
           deprecated: true,
         },
       })
@@ -406,7 +406,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
     policy_ids: schema.maybe(
       schema.arrayOf(schema.string(), {
         meta: {
-          description: 'Agent policy IDs where that package policy will be added',
+          description: 'IDs of the agent policies which that package policy will be added to.',
         },
       })
     ),
@@ -414,7 +414,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
       schema.boolean({
         meta: {
           description:
-            'Force package policy creation even if package is not verified, or if the agent policy is managed.',
+            'Force package policy creation even if the package is not verified, or if the agent policy is managed.',
         },
       })
     ),
