@@ -56,10 +56,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   getPrevious: () => DiscoverAppState;
   /**
-   * Determines if the current state is different from the initial state
-   */
-  hasChanged: () => boolean;
-  /**
    * Initializes the app state and starts syncing it with the URL
    */
   initAndSync: () => () => void;
@@ -224,10 +220,6 @@ export const getDiscoverAppStateContainer = ({
 
       appStateContainer.set(value);
     },
-  };
-
-  const hasChanged = () => {
-    return !isEqualState(initialState, enhancedAppContainer.getState());
   };
 
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
@@ -401,7 +393,6 @@ export const getDiscoverAppStateContainer = ({
   return {
     ...enhancedAppContainer,
     getPrevious,
-    hasChanged,
     initAndSync,
     resetToState,
     resetInitialState,

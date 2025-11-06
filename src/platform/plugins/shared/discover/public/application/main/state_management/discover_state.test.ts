@@ -143,15 +143,6 @@ describe('Discover state', () => {
       });
     });
 
-    test('isAppStateDirty returns  whether the current state has changed', async () => {
-      state.appState.update({
-        dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
-      });
-      expect(state.appState.hasChanged()).toBeTruthy();
-      state.appState.resetInitialState();
-      expect(state.appState.hasChanged()).toBeFalsy();
-    });
-
     test('getPreviousAppState returns the state before the current', async () => {
       state.appState.update({
         dataSource: createDataViewDataSource({ dataViewId: 'first' }),
