@@ -93,12 +93,6 @@ export interface UnifiedHistogramStateService {
    */
   setChartHidden: (chartHidden: boolean) => void;
   /**
-   * Sets current Lens suggestion
-   */
-  setCurrentSuggestionContext: (
-    suggestionContext: UnifiedHistogramSuggestionContext | undefined
-  ) => void;
-  /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
@@ -127,9 +121,6 @@ export const createStateService = (
   getChartHidden: () => boolean;
   setChartHidden: (chartHidden: boolean) => void;
   setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
-  setCurrentSuggestionContext: (
-    suggestionContext: UnifiedHistogramSuggestionContext | undefined
-  ) => void;
   setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
   setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
   setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => void;
@@ -186,12 +177,6 @@ export const createStateService = (
       }
 
       updateState({ topPanelHeight });
-    },
-
-    setCurrentSuggestionContext: (
-      suggestionContext: UnifiedHistogramSuggestionContext | undefined
-    ) => {
-      updateState({ currentSuggestionContext: suggestionContext });
     },
 
     setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => {

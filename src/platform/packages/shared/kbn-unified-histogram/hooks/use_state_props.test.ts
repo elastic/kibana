@@ -13,7 +13,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import type { UnifiedHistogramSuggestionContext } from '../types';
 import { UnifiedHistogramFetchStatus } from '../types';
 import { dataViewMock } from '../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
@@ -32,7 +31,6 @@ describe('useStateProps', () => {
     chartHidden: false,
     lensRequestAdapter: new RequestAdapter(),
     lensAdapters: lensAdaptersMock,
-    timeInterval: 'auto',
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
@@ -46,10 +44,8 @@ describe('useStateProps', () => {
     });
     jest.spyOn(stateService, 'setChartHidden');
     jest.spyOn(stateService, 'setTopPanelHeight');
-    jest.spyOn(stateService, 'setTimeInterval');
     jest.spyOn(stateService, 'setLensRequestAdapter');
     jest.spyOn(stateService, 'setTotalHits');
-    jest.spyOn(stateService, 'setCurrentSuggestionContext');
     return stateService;
   };
 
@@ -68,9 +64,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -125,11 +120,9 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
-        "onVisContextChanged": undefined,
         "request": Object {
           "adapter": RequestAdapter {
             "_events": Object {},
@@ -162,9 +155,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -219,11 +211,9 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
-        "onVisContextChanged": undefined,
         "request": Object {
           "adapter": RequestAdapter {
             "_events": Object {},
@@ -264,9 +254,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
     expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
@@ -307,9 +296,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
 
@@ -353,9 +341,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
     const { onBreakdownFieldChange } = result.current;
@@ -382,9 +369,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -434,11 +420,9 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
-        "onVisContextChanged": undefined,
         "request": Object {
           "adapter": RequestAdapter {
             "_events": Object {},
@@ -471,9 +455,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -523,11 +506,9 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
-        "onVisContextChanged": undefined,
         "request": Object {
           "adapter": RequestAdapter {
             "_events": Object {},
@@ -560,9 +541,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
 
@@ -575,28 +555,21 @@ describe('useStateProps', () => {
           onChartHiddenChange: expect.any(Function),
           onChartLoad: expect.any(Function),
           onBreakdownFieldChange: expect.any(Function),
-          onSuggestionContextChange: expect.any(Function),
         })
       )
     );
 
     const {
       onTopPanelHeightChange,
-      onTimeIntervalChange,
       onTotalHitsChange,
       onChartHiddenChange,
       onChartLoad,
       onBreakdownFieldChange,
-      onSuggestionContextChange,
     } = result.current;
     act(() => {
       onTopPanelHeightChange(200);
     });
     expect(stateService.setTopPanelHeight).toHaveBeenLastCalledWith(200);
-    act(() => {
-      onTimeIntervalChange('1d');
-    });
-    expect(stateService.setTimeInterval).toHaveBeenLastCalledWith('1d');
     act(() => {
       onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 100);
     });
@@ -616,14 +589,6 @@ describe('useStateProps', () => {
     act(() => {
       onBreakdownFieldChange({ name: 'field' } as DataViewField);
     });
-    act(() => {
-      onSuggestionContextChange({
-        suggestion: { title: 'Stacked Bar' },
-      } as UnifiedHistogramSuggestionContext);
-    });
-    expect(stateService.setCurrentSuggestionContext).toHaveBeenLastCalledWith({
-      suggestion: { title: 'Stacked Bar' },
-    });
   });
 
   it('should clear lensRequestAdapter when chart is hidden', () => {
@@ -641,9 +606,8 @@ describe('useStateProps', () => {
         localStorageKeyPrefix: undefined,
         stateService,
         fetchParams,
-        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
-        onVisContextChanged: undefined,
+        onTimeIntervalChange: undefined,
       })
     );
     (stateService.setLensRequestAdapter as jest.Mock).mockClear();
@@ -669,9 +633,8 @@ describe('useStateProps', () => {
       localStorageKeyPrefix: undefined,
       stateService,
       fetchParams,
-      initialBreakdownField: undefined,
       onBreakdownFieldChange: undefined,
-      onVisContextChanged: undefined,
+      onTimeIntervalChange: undefined,
     };
     const hook = renderHook((props: Parameters<typeof useStateProps>[0]) => useStateProps(props), {
       initialProps,
