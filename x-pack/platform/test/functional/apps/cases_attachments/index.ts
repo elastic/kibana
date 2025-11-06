@@ -8,11 +8,11 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
-  const ml = getService('ml');
+  describe('cases attachments', function () {
+    // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
+    const ml = getService('ml');
 
-  describe('aiops', function () {
-    this.tags(['skipFirefox', 'aiops']);
+    this.tags(['skipFirefox', 'cases']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();
@@ -22,20 +22,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     after(async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await ml.securityUI.logout();
-
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
-
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./log_rate_analysis'));
-    loadTestFile(require.resolve('./log_rate_analysis_anomaly_table'));
-    loadTestFile(require.resolve('./log_rate_analysis_dashboard_embeddable'));
-    loadTestFile(require.resolve('./change_point_detection'));
-    loadTestFile(require.resolve('./change_point_detection_dashboard'));
-    loadTestFile(require.resolve('./log_pattern_analysis'));
-    loadTestFile(require.resolve('./log_pattern_analysis_in_discover'));
-    loadTestFile(require.resolve('./log_pattern_analysis_esql_in_discover'));
+    loadTestFile(require.resolve('./ml/anomaly_detection_charts_cases'));
+    loadTestFile(require.resolve('./aiops/log_rate_analysis_cases'));
+    loadTestFile(require.resolve('./aiops/change_point_detection_cases'));
+    loadTestFile(require.resolve('./aiops/log_pattern_analysis_cases'));
   });
 }
