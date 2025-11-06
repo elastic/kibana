@@ -332,13 +332,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const detectedLink = await inputEditor.findByCssSelector('.detected-link');
 
         // Perform Cmd/Ctrl+Click on the detected link
-        // Following the pattern from ES|QL tests where we use moveMouseTo then click
+        // Following the pattern from ES|QL tests where we hover to show tooltip, then click the option
         const modifierKey = browser.keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
 
         await browser.getActions().keyDown(modifierKey).perform();
 
+        // Hover over the detected link to show the tooltip
         await detectedLink.moveMouseTo();
-        await detectedLink.clickMouseButton();
+
+        // Wait for Monaco hover tooltip to appear with "Follow link"
+        await retry.waitFor('Monaco hover tooltip with Follow link to appear', async () => {
+          const hoverWidgets = await inputEditor.findAllByCssSelector('.monaco-hover');
+          if (hoverWidgets.length === 0) return false;
+
+          // Check if the hover contains "Follow link" text
+          for (const widget of hoverWidgets) {
+            const text = await widget.getVisibleText();
+            if (text.includes('Follow link')) {
+              return true;
+            }
+          }
+          return false;
+        });
+
+        // Find and click the "Follow link" action element in the hover tooltip
+        // Try multiple possible selectors for the clickable element
+        const followLinkElement = await retry.try(async () => {
+          // Monaco hover actions are typically in .hover-row or as anchor elements
+          const possibleSelectors = [
+            '.monaco-hover .hover-row a',
+            '.monaco-hover .hover-row',
+            '.monaco-hover a',
+            '.monaco-hover .action-item',
+          ];
+
+          for (const selector of possibleSelectors) {
+            const elements = await inputEditor.findAllByCssSelector(selector);
+            for (const element of elements) {
+              const text = await element.getVisibleText();
+              if (text.includes('Follow link')) {
+                return element;
+              }
+            }
+          }
+          throw new Error('Follow link element not found');
+        });
+
+        await followLinkElement.click();
 
         await browser.getActions().keyUp(modifierKey).perform();
 
