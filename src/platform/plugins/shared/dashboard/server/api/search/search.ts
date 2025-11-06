@@ -54,11 +54,11 @@ export async function search(
         },
         meta: {
           createdAt: so.created_at,
-          createdBy: so.created_at,
+          createdBy: so.created_by,
           error: so.error,
           managed: so.managed,
           updatedAt: so.updated_at,
-          updatedBy: so.updated_at,
+          updatedBy: so.updated_by,
           version: so.version,
         },
       };
