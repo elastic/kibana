@@ -70,7 +70,7 @@ export function getDashboardApi({
   //   (embeddable) => embeddable.type === CONTROLS_GROUP_TYPE
   // );
   const restEmbeddables = incomingEmbeddables;
-
+  // console.log({ incomingEmbeddables });
   const layoutManager = initializeLayoutManager(
     restEmbeddables,
     initialState.panels,

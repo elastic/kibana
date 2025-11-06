@@ -419,7 +419,7 @@ export class DiscoverPlugin
         const { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME } =
           await getEmbeddableServices();
 
-        addControlsFromSavedSession(container, savedObject);
+        await addControlsFromSavedSession(container, savedObject);
         container.addNewPanel(
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
