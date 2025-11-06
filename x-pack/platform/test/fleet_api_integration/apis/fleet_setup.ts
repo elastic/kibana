@@ -55,17 +55,23 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should install default packages', async () => {
-      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      // With early Docker startup, Fleet may attempt to install packages during Kibana
+      // startup before saved objects are fully ready, causing a race condition.
+      // The first setup call may have non-fatal errors, so we retry to ensure packages install.
+      await retry.tryForTime(90000, async () => {
+        // Call setup again to trigger retry of any failed installations
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
-      const { body: apiResponse } = await supertest
-        .get(`/api/fleet/epm/packages?prerelease=true`)
-        .expect(200);
-      const installedPackages = apiResponse.items
-        .filter((p: any) => p.status === 'installed')
-        .map((p: any) => p.name)
-        .sort();
+        const { body: apiResponse } = await supertest
+          .get(`/api/fleet/epm/packages?prerelease=true`)
+          .expect(200);
+        const installedPackages = apiResponse.items
+          .filter((p: any) => p.status === 'installed')
+          .map((p: any) => p.name)
+          .sort();
 
-      expect(installedPackages).to.eql(['endpoint']);
+        expect(installedPackages).to.eql(['endpoint']);
+      });
     });
 
     describe('upgrade managed package policies', () => {
