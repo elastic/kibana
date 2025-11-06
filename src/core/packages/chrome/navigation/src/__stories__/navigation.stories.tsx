@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps } from 'react';
 import React, { useState } from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { css, Global } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import type { ComponentProps } from 'react';
 import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
-import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
+import { css, Global } from '@emotion/react';
 
-import { Navigation } from '../components/navigation';
 import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
-import { usePreventLinkNavigation } from '../hooks/prevent_link_navigation';
+import { Navigation } from '../components/navigation';
+import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
   body {
