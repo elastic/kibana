@@ -226,8 +226,7 @@ export const useDashboardListingTable = ({
                   createdAt: meta.createdAt,
                   createdBy: meta.createdBy,
                   updatedBy: meta.updatedBy,
-                  // TODO create references from tags
-                  references: [],
+                  references: (data.tags ?? []).map((tag) => ({ id: tag, name: tag, type: 'tag' })),
                   managed: meta.managed,
                   attributes: {
                     title: data.title,
