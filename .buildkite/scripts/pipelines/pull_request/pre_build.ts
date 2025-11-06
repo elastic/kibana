@@ -14,12 +14,8 @@ const PRE_BUILD_SCRIPT = Path.resolve(__dirname, '../../lifecycle/pre_build.sh')
 export async function runPreBuild() {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(PRE_BUILD_SCRIPT, {
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ['ignore', 'ignore', 'pipe'],
       env: process.env,
-    });
-
-    child.stdout.on('data', (chunk) => {
-      process.stderr.write(chunk);
     });
 
     child.stderr.on('data', (chunk) => {
