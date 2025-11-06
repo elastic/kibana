@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
-import type { OptionsListControlApi } from '@kbn/controls-plugin/public/controls/data_controls/options_list_control/types';
+import type { OptionsListControlApi } from '@kbn/controls-plugin/public';
 import type { CanClearSelections } from '@kbn/controls-plugin/public/types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
