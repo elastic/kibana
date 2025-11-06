@@ -13,8 +13,6 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
 
-export const DEFAULT_LOG_INDEX_PATTERNS = ['logs-*'];
-
 export async function getLogsIndices({
   core,
   logger,

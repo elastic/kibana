@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import datemath from '@elastic/datemath';
 import { kqlFilter, timeRangeFilter } from '../utils/dsl_filters';
@@ -23,6 +23,8 @@ import { getObservabilityDataSources } from '../utils/get_observability_data_sou
 import { toISOString } from '../utils/time';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
+
+type ServiceInventorySchema = ReturnType<typeof createServiceInventorySchema>;
 
 const createServiceInventorySchema = (indexPatterns: string[]) =>
   z.object({
@@ -54,7 +56,7 @@ const createServiceInventorySchema = (indexPatterns: string[]) =>
       .describe('Optional KQL query to further scope the search before aggregating services.'),
   });
 
-export async function createObservabilityGetServicesTool({
+export async function createGetServicesTool({
   core,
   plugins,
   logger,
@@ -62,8 +64,12 @@ export async function createObservabilityGetServicesTool({
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
-}) {
-  const { apmIndices, logIndexPatterns, metricIndexPatterns } = await getObservabilityDataSources({
+}): Promise<StaticToolRegistration<ServiceInventorySchema>> {
+  const {
+    apmIndexPatterns: apmIndices,
+    logIndexPatterns,
+    metricIndexPatterns,
+  } = await getObservabilityDataSources({
     core,
     plugins,
     logger,

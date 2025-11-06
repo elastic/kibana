@@ -8,7 +8,11 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition, ModelProvider } from '@kbn/onechat-server';
+import type {
+  BuiltinToolDefinition,
+  ModelProvider,
+  StaticToolRegistration,
+} from '@kbn/onechat-server';
 import type {
   AuthenticatedUser,
   CoreSetup,
@@ -61,13 +65,13 @@ const recallKnowledgeBaseSchema = z.object({
   query: z.string().min(1).describe('The search query to find relevant knowledge base entries.'),
 });
 
-export async function createObservabilityRecallKnowledgeBaseTool({
+export async function createRecallKnowledgeBaseTool({
   core,
   logger,
 }: {
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   logger: Logger;
-}) {
+}): Promise<StaticToolRegistration<typeof recallKnowledgeBaseSchema>> {
   const toolDefinition: BuiltinToolDefinition<typeof recallKnowledgeBaseSchema> = {
     id: OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
     type: ToolType.builtin,

@@ -24,15 +24,20 @@ export async function getObservabilityDataSources({
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }): Promise<{
-  apmIndices: APMIndices;
+  apmIndexPatterns: APMIndices;
   logIndexPatterns: string[];
   metricIndexPatterns: string[];
   alertsIndexPattern: string[];
 }> {
-  const apmIndices = await getApmIndices({ core, plugins, logger });
+  const apmIndexPatterns = await getApmIndices({ core, plugins, logger });
   const logIndexPatterns = await getLogsIndices({ core, logger });
   const metricIndexPatterns = ['metrics-*'];
   const alertsIndexPattern = ['alerts-observability-*'];
 
-  return { apmIndices, logIndexPatterns, metricIndexPatterns, alertsIndexPattern };
+  return {
+    apmIndexPatterns,
+    logIndexPatterns,
+    metricIndexPatterns,
+    alertsIndexPattern,
+  };
 }
