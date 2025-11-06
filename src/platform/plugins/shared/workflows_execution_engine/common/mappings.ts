@@ -37,6 +37,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     createdAt: {
       type: 'date',
     },
+    isTestRun: {
+      type: 'boolean',
+    },
     createdBy: {
       type: 'keyword',
     },
