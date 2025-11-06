@@ -15,7 +15,8 @@
       "cloud_connected"
     ],
     "requiredPlugins": [
-      "management"
+      "management",
+      "features"
     ]
   }
 }

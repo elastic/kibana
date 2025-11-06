@@ -27,8 +27,10 @@ interface OnboardingPageProps {
 }
 
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => {
-  const { http } = useCloudConnectedAppContext();
-  const hasPermissions = true;
+  const { http, application } = useCloudConnectedAppContext();
+  const hasPermissions =
+    application.capabilities.cloudConnected?.configure === true &&
+    application.capabilities.cloudConnected?.connect === true;
 
   return (
     <EuiPageSection>

@@ -12,10 +12,16 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { cloudConnectedFeature } from './features';
 
 export interface CloudConnectedPluginSetup {}
 
 export interface CloudConnectedPluginStart {}
+
+interface CloudConnectedSetupDeps {
+  features: FeaturesPluginSetup;
+}
 
 export class CloudConnectedPlugin
   implements Plugin<CloudConnectedPluginSetup, CloudConnectedPluginStart>
@@ -26,8 +32,15 @@ export class CloudConnectedPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup): CloudConnectedPluginSetup {
+  public setup(
+    core: CoreSetup,
+    plugins: CloudConnectedSetupDeps
+  ): CloudConnectedPluginSetup {
     this.logger.debug('cloudConnected: Setup');
+
+    // Register the feature with privileges
+    plugins.features.registerKibanaFeature(cloudConnectedFeature);
+
     return {};
   }
 
