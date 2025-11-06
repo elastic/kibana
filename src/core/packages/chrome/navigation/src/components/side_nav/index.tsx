@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { FC, ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '../../hooks/use_layout_width';
 import { Footer } from '../footer';
@@ -20,6 +20,18 @@ import { Popover } from './popover';
 import { PrimaryMenu } from '../primary_menu';
 import { SecondaryMenu } from '../secondary_menu';
 import { SidePanel } from './side_panel';
+
+const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
+  box-sizing: border-box;
+  background-color: ${theme.colors.backgroundBasePlain};
+  border-right: ${theme.border.width.thin} solid ${theme.colors.borderBaseSubdued};
+  display: flex;
+  flex-direction: column;
+  gap: ${isCollapsed ? theme.size.s : theme.size.m};
+  height: 100%;
+  padding-bottom: ${theme.size.base};
+  width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
+`;
 
 export interface SideNavProps {
   children: ReactNode;
@@ -48,17 +60,10 @@ interface SideNavComponent extends FC<SideNavProps> {
 export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   const { euiTheme } = useEuiTheme();
 
-  const wrapperStyles = css`
-    box-sizing: border-box;
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-    display: flex;
-    flex-direction: column;
-    gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-    height: 100%;
-    padding-bottom: ${euiTheme.size.base};
-    width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
-  `;
+  const wrapperStyles = useMemo(
+    () => getWrapperStyles(euiTheme, isCollapsed),
+    [euiTheme, isCollapsed]
+  );
 
   return (
     <div className="side-nav" css={wrapperStyles}>

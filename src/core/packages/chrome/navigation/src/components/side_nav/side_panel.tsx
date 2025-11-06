@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
-import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
+import React, { type ReactNode, useMemo } from 'react';
+import { EuiSplitPanel, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -18,6 +18,20 @@ import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
+
+/**
+ * **Border and shadow**
+ *
+ * For instance, only plain or transparent panels can have a border and/or shadow.
+ * Source: {@link https://eui.elastic.co/docs/components/containers/panel/}
+ */
+const getWrapperStyles = (theme: UseEuiTheme['euiTheme']) => css`
+  box-sizing: border-box;
+  border-right: ${theme.border.width.thin} ${theme.colors.borderBaseSubdued} solid;
+  display: flex;
+  flex-direction: column;
+  width: ${SIDE_PANEL_WIDTH}px;
+`;
 
 export interface SidePanelProps {
   children: ReactNode;
@@ -32,6 +46,7 @@ export interface SidePanelProps {
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useScroll();
+  const wrapperStyles = useMemo(() => getWrapperStyles(euiTheme), [euiTheme]);
 
   const panelRef = (ref: HTMLDivElement) => {
     if (ref) {
@@ -40,23 +55,12 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
     }
   };
 
-  /**
-   * **Border and shadow**
-   *
-   * For instance, only plain or transparent panels can have a border and/or shadow.
-   * Source: {@link https://eui.elastic.co/docs/components/containers/panel/}
-   */
-  const wrapperStyles = css`
-    box-sizing: border-box;
-    border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
-    display: flex;
-    flex-direction: column;
-    width: ${SIDE_PANEL_WIDTH}px;
-  `;
-
-  const navigationPanelStyles = css`
-    ${scrollStyles}
-  `;
+  const navigationPanelStyles = useMemo(
+    () => css`
+      ${scrollStyles}
+    `,
+    [scrollStyles]
+  );
 
   return (
     <EuiSplitPanel.Outer
