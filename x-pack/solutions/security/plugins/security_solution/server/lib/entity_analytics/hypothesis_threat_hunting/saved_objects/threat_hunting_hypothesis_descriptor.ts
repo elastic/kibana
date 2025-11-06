@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { asyncForEach } from '@kbn/std';
 import type { ThreatHuntingHypothesis } from '../types';
 import { threatHuntingHypothesisTypeName } from './threat_hunting_hypothesis_type';
 
@@ -27,6 +28,18 @@ export class ThreatHuntingHypothesisDescriptorClient {
     return attributes;
   }
 
+  async getAll(): Promise<Record<string, ThreatHuntingHypothesis>> {
+    const savedObjectsResponse = await this.deps.soClient.find<ThreatHuntingHypothesis>({
+      type: threatHuntingHypothesisTypeName,
+      perPage: 10000,
+    });
+    const results: Record<string, ThreatHuntingHypothesis> = {};
+    for (const savedObject of savedObjectsResponse.saved_objects) {
+      results[savedObject.id] = savedObject.attributes;
+    }
+    return results;
+  }
+
   async delete(id: string) {
     await this.deps.soClient.delete(threatHuntingHypothesisTypeName, id);
   }
@@ -42,10 +55,50 @@ export class ThreatHuntingHypothesisDescriptorClient {
     return createdSources;
   }
 
+  async update(id: string, updates: Partial<ThreatHuntingHypothesis>) {
+    const { attributes } = await this.deps.soClient.update<ThreatHuntingHypothesis>(
+      threatHuntingHypothesisTypeName,
+      id,
+      updates,
+      { refresh: 'wait_for' }
+    );
+    return attributes;
+  }
+
   bulkUpsert = async (hypotheses: ThreatHuntingHypothesis[]) => {
     if (hypotheses.length === 0) {
       return { created: 0, updated: 0, results: [] };
     }
-    // TODO: fill this in. Step one is just create them all
+    const existing = await this.getAll();
+    const createdCount = 0;
+    const updatedCount = 0;
+    const results: Array<{ action: 'created' | 'updated'; hypothesis: ThreatHuntingHypothesis }> =
+      [];
+    await asyncForEach(hypotheses, async (hypothesis) => {
+      const existingHypothesis = Object.values(existing).find(
+        (eh) => eh.hypothesisId === hypothesis.hypothesisId
+      );
+      if (!existingHypothesis) {
+        // eslint-disable-next-line no-console
+        console.log('Creating hypothesis:', hypothesis.hypothesisId);
+        await this.deps.soClient.create<ThreatHuntingHypothesis>(
+          threatHuntingHypothesisTypeName,
+          hypothesis,
+          { id: this.getSavedObjectId(), refresh: 'wait_for' }
+        );
+        results.push({ action: 'created', hypothesis });
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('Updating hypothesis:', hypothesis.hypothesisId);
+        await this.deps.soClient.update<ThreatHuntingHypothesis>(
+          threatHuntingHypothesisTypeName,
+          this.getSavedObjectId(),
+          hypothesis,
+          { refresh: 'wait_for' }
+        );
+        results.push({ action: 'updated', hypothesis });
+      }
+    });
+    return { created: createdCount, updated: updatedCount, results };
   };
 }

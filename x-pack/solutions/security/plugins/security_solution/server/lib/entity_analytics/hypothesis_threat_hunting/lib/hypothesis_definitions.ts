@@ -7,12 +7,13 @@
 
 import type { ThreatHuntingHypothesis } from '../types';
 
-export const HYPOTHESES_VERSION = 1;
+export const HYPOTHESES_VERSION = 2;
 
 // Co-Pilot generated this example so far. More definitions can be added following this structure.
 export const hypothesisDefinitions: ThreatHuntingHypothesis[] = [
   {
-    title: 'Suspicious PowerShell Activity',
+    title: 'UPDATED SUSPICIOUS POWERSHELL ACTIVITY', // test upsert
+    hypothesisId: 'suspicious_powershell_activity_2',
     summary:
       'Detects potentially malicious PowerShell activity that may indicate an attacker is using PowerShell for reconnaissance or lateral movement within the network.',
     managed: true,
@@ -38,9 +39,6 @@ export const hypothesisDefinitions: ThreatHuntingHypothesis[] = [
       },
     ],
     tags: ['powershell', 'lateral_movement', 'reconnaissance'],
-    _meta: {
-      mappingsVersion: 1,
-    },
   },
   // Additional hypothesis definitions can be added here
 ];
@@ -48,7 +46,7 @@ export const hypothesisDefinitions: ThreatHuntingHypothesis[] = [
 const randomTag = (allTags: string[]) => allTags[Math.floor(Math.random() * allTags.length)];
 
 export const hypothesisDefinitionsScaled: ThreatHuntingHypothesis[] = Array.from(
-  { length: 1000 },
+  { length: 25000 },
   (_, i) => ({
     ...hypothesisDefinitions[0],
     title: `${hypothesisDefinitions[0].title} #${i + 1}`,

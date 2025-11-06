@@ -6,9 +6,13 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { hypothesisDefinitionsScaled } from '../lib/hypothesis_definitions';
+import { hypothesisDefinitions } from '../lib/hypothesis_definitions';
 import { ThreatHuntingHypothesisDescriptorClient } from '../saved_objects/threat_hunting_hypothesis_descriptor';
 import { createLoggerService } from '../utils/logger_service';
+import {
+  isThreatHuntingHypothesesDefinitionsUpdateRequired,
+  updateThreatHuntingHypothesesDefinitions,
+} from '../migrations/update_threat_hunting_hypotheses';
 
 export type ThreatHuntingHypothesesService = ReturnType<
   typeof createThreatHuntingHypothesesInitService
@@ -28,6 +32,7 @@ export const createThreatHuntingHypothesesInitService = (
 ) => {
   const loggingService = createLoggerService(logger, 'threat_hunting_initialisation');
   const init = async (): Promise<void> => {
+    // will need to change the name of this as its not ALWAYS on init
     const started = performance.now();
     /**
      * On startup - pull from the hardcoded list of Hypothesis Definitions
@@ -38,7 +43,7 @@ export const createThreatHuntingHypothesesInitService = (
       soClient,
       namespace: 'default', // TODO pull in multiple from deps object. Keep it slim.
     });
-    const hypothesisDefinitions = hypothesisDefinitionsScaled;
+    // const hypothesisDefinitions = hypothesisDefinitionsScaled;
     loggingService.info('Starting Threat Hunting Hypotheses definitions initialisation');
     // TODO: audit logging
     try {
@@ -47,14 +52,20 @@ export const createThreatHuntingHypothesesInitService = (
       loggingService.info(
         `Creating ${hypothesisDefinitions.length} Threat Hunting Hypotheses definitions`
       );
-      const created = await descriptor.bulkCreate(hypothesisDefinitions); // POC v1 prove you can save down the hardcoded list.
+      // do we need to update mappings?
+      const isUpdateRequired = await isThreatHuntingHypothesesDefinitionsUpdateRequired({
+        threatHuntingHypothesisDescriptorClient: descriptor,
+      });
+      // first run when we have no saved objects - need to make a conditional here.
+      await updateThreatHuntingHypothesesDefinitions({
+        threatHuntingHypothesisDescriptorClient: descriptor,
+      });
+      if (isUpdateRequired) {
+        loggingService.info('Updating existing Threat Hunting Hypotheses definitions mappings');
+      }
+      // find a way to say - if this first run, create all. If not first run, do recon.
+      // const created = await descriptor.bulkCreate(hypothesisDefinitions); // POC v1 prove you can save down the hardcoded list.
       const elapsed = (performance.now() - started) / 1000;
-      loggingService.info(
-        `Successfully created ${
-          created.saved_objects.length
-        } Threat Hunting Hypotheses definitions in time: ${elapsed.toFixed(2)}s`
-      );
-      loggingService.info(`Saved Objects: ${JSON.stringify(created.saved_objects)}`);
     } catch (error) {
       loggingService.error(
         `Failed to create Threat Hunting Hypotheses definitions: ${error.message}`

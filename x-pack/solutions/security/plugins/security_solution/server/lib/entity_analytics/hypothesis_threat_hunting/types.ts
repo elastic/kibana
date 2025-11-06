@@ -7,6 +7,7 @@
 
 export interface ThreatHuntingHypothesis {
   title: string;
+  hypothesisId: string;
   summary: string;
   managed: boolean;
   sourceType: 'pre_built' | 'ai_generated';
@@ -32,8 +33,5 @@ export interface ThreatHuntingHypothesis {
   tags?: string[];
   model?: {
     name: string;
-  };
-  _meta: {
-    mappingsVersion: number;
   };
 }
