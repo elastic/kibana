@@ -35,7 +35,6 @@ import { initializeViewModeManager } from './view_mode_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeTimesliceManager } from './timeslice_manager';
 import { initializeFiltersManager } from './filters_manager';
-// import { mergeControlGroupStates } from './merge_control_group_states';
 
 export function getDashboardApi({
   creationOptions,
@@ -65,12 +64,8 @@ export function getDashboardApi({
     return getReferencesForPanelId(id, references$.value ?? []);
   };
 
-  // TODO: Handle incoming sticky embeddables
-  // const incomingControlGroup = incomingEmbeddables?.find(
-  //   (embeddable) => embeddable.type === CONTROLS_GROUP_TYPE
-  // );
   const restEmbeddables = incomingEmbeddables;
-
+  console.log({ incomingEmbeddables });
   const layoutManager = initializeLayoutManager(
     restEmbeddables,
     initialState.panels,
@@ -78,10 +73,6 @@ export function getDashboardApi({
     trackPanel,
     getReferences
   );
-  // const mergedControlGroupState = mergeControlGroupStates(
-  //   initialState.controlGroupInput,
-  //   incomingControlGroup
-  // );
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
