@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/scratchpad-app-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "scratchpadApp",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "scratchpadApp"],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "charts",
+      "share",
+      "navigation"
+    ],
+    "optionalPlugins": [
+      "observabilityAIAssistant"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": ["common"]
+  }
+}
+

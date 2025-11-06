@@ -1794,6 +1794,8 @@
       "@kbn/scout-reporting/*": ["src/platform/packages/private/kbn-scout-reporting/*"],
       "@kbn/scout-security": ["x-pack/solutions/security/packages/kbn-scout-security"],
       "@kbn/scout-security/*": ["x-pack/solutions/security/packages/kbn-scout-security/*"],
+      "@kbn/scratchpad-app-plugin": ["x-pack/platform/plugins/shared/scratchpad_app"],
+      "@kbn/scratchpad-app-plugin/*": ["x-pack/platform/plugins/shared/scratchpad_app/*"],
       "@kbn/screenshot-mode-example-plugin": ["examples/screenshot_mode_example"],
       "@kbn/screenshot-mode-example-plugin/*": ["examples/screenshot_mode_example/*"],
       "@kbn/screenshot-mode-plugin": ["src/platform/plugins/shared/screenshot_mode"],
