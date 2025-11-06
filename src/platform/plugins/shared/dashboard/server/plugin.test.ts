@@ -57,7 +57,8 @@ describe('DashboardPlugin', () => {
       expect(scheduleDashboardTelemetry).toHaveBeenCalledTimes(1);
       expect(await mockTaskManager.runSoon).toHaveBeenCalledTimes(1);
       expect(response).toEqual({
-        getContentClient: expect.any(Function),
+        getDashboard: expect.any(Function),
+        scanDashboards: expect.any(Function),
       });
     });
   });
