@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IKbnUrlStateStorage, StateContainer } from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -669,7 +669,7 @@ export function getDiscoverStateContainer({
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {
-  appStateContainer: StateContainer<DiscoverAppState>;
+  appStateContainer: DiscoverAppStateContainer;
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
@@ -708,7 +708,7 @@ function createUrlGeneratorState({
   getSavedSearch,
   shouldRestoreSearchSession,
 }: {
-  appStateContainer: StateContainer<DiscoverAppState>;
+  appStateContainer: DiscoverAppStateContainer;
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
   shouldRestoreSearchSession: boolean;
