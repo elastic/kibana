@@ -68,10 +68,12 @@ export async function autocomplete(
   // TS something/
   // TS something, /
   else if (indexes.length) {
-    const sources = context?.sources ?? [];
+    const timeSeriesSources =
+      context?.timeSeriesSources?.map(({ name }) => ({ name, hidden: false })) ?? [];
+
     const additionalSuggestions = await additionalSourcesSuggestions(
       innerText,
-      sources,
+      timeSeriesSources,
       indexes.map(({ name }) => name),
       []
     );
