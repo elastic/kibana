@@ -10,8 +10,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsServices } from '../../../../../types';
+import type { RootState } from '../../types';
 import { selectYamlString } from '../selectors';
-import type { RootState } from '../types';
 
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;

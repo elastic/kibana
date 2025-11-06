@@ -11,8 +11,8 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServices } from '../../../../../types';
+import type { RootState } from '../../types';
 import { setWorkflow, setYamlString } from '../slice';
-import type { RootState } from '../types';
 
 export interface LoadWorkflowParams {
   id: string;

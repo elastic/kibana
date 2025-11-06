@@ -10,8 +10,8 @@
 import type { WorkflowDetailDto } from '@kbn/workflows';
 
 import { loadWorkflowThunk } from './load_workflow_thunk';
-import { createMockStore, getMockServices } from '../__mocks__/store.mock';
-import type { MockServices, MockStore } from '../__mocks__/store.mock';
+import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
+import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 
 const mockWorkflow: WorkflowDetailDto = {
   id: 'test-workflow-1',

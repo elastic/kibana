@@ -10,8 +10,8 @@
 import type { EsWorkflow, WorkflowDetailDto } from '@kbn/workflows';
 
 import { updateWorkflowThunk } from './update_workflow_thunk';
-import { createMockStore, getMockServices } from '../__mocks__/store.mock';
-import type { MockServices, MockStore } from '../__mocks__/store.mock';
+import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
+import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setWorkflow } from '../slice';
 
 // Mock the query client
