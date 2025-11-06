@@ -206,6 +206,8 @@ class SavedObjectFinderUiClass extends React.Component<
   }
 
   private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData> {
+    import('./new_stuff_async');
+
     return this.props.savedObjectMetaData.reduce(
       (map, metaData) => ({ ...map, [metaData.type]: metaData }),
       {}
