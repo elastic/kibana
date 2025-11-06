@@ -10,10 +10,10 @@ import WebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AuthType, SSLCertType } from '../../../common/auth/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
