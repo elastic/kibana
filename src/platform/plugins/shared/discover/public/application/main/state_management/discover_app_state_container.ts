@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import {
-  createStateContainer,
-  createStateContainerReactHelpers,
-} from '@kbn/kibana-utils-plugin/common';
+import type { BaseStateContainer, ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
+import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/common';
 import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
 import {
   COMPARE_ALL_OPTIONS,
@@ -50,7 +47,7 @@ import { internalStateActions, selectTab } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
-export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
+export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAppState> {
   /**
    * Returns the previous state, used for diffing e.g. if fetching new data is necessary
    */
@@ -197,24 +194,28 @@ export const getDiscoverAppStateContainer = ({
     savedSearch: savedSearchContainer.getState(),
     services,
   });
-  const appStateContainer = createStateContainer<DiscoverAppState>(previousState);
 
-  const enhancedAppContainer = {
-    ...appStateContainer,
-    set: (value: DiscoverAppState | null) => {
-      if (!value) {
+  const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
+    return selectTab(state, tabId).appState;
+  };
+
+  const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
+    get: () => getAppState(internalState.getState()),
+    set: (appState) => {
+      if (!appState) {
         return;
       }
 
-      previousState = appStateContainer.getState();
+      previousState = appStateContainer.get();
 
       // When updating to an ES|QL query, sync the data source
-      if (isOfAggregateQueryType(value.query)) {
-        value = { ...value, dataSource: createEsqlDataSource() };
+      if (isOfAggregateQueryType(appState.query)) {
+        appState = { ...appState, dataSource: createEsqlDataSource() };
       }
 
-      appStateContainer.set(value);
+      internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
     },
+    state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
   };
 
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
@@ -228,16 +229,16 @@ export const getDiscoverAppStateContainer = ({
   const resetToState = (state: DiscoverAppState) => {
     addLog('[appState] reset state to', state);
     previousState = state;
-    enhancedAppContainer.set(state);
+    appStateContainer.set(state);
   };
 
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
-    const state = merge ? { ...enhancedAppContainer.getState(), ...newPartial } : newPartial;
+    const state = merge ? { ...appStateContainer.get(), ...newPartial } : newPartial;
     if (internalState.getState().tabs.unsafeCurrentId === tabId) {
       await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
     } else {
-      enhancedAppContainer.set(state);
+      appStateContainer.set(state);
     }
   };
 
@@ -305,7 +306,7 @@ export const getDiscoverAppStateContainer = ({
 
     const { data } = services;
     const savedSearchDataView = currentSavedSearch.searchSource.getField('index');
-    const appState = enhancedAppContainer.getState();
+    const appState = appStateContainer.get();
     const setDataViewFromSavedSearch =
       !appState.dataSource ||
       (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
@@ -313,7 +314,7 @@ export const getDiscoverAppStateContainer = ({
 
     if (setDataViewFromSavedSearch) {
       // used data view is different from the given by url/state which is invalid
-      setState(enhancedAppContainer, {
+      setState(appStateContainer, {
         dataSource: savedSearchDataView?.id
           ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
           : undefined,
@@ -323,7 +324,7 @@ export const getDiscoverAppStateContainer = ({
     // syncs `_a` portion of url with query services
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       data.query,
-      enhancedAppContainer,
+      appStateContainer,
       {
         filters: FilterStateStore.APP_STATE,
         query: true,
@@ -332,7 +333,7 @@ export const getDiscoverAppStateContainer = ({
 
     const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
       storageKey: APP_STATE_URL_KEY,
-      stateContainer: enhancedAppContainer,
+      stateContainer: appStateContainer,
       stateStorage,
     });
 
@@ -373,15 +374,15 @@ export const getDiscoverAppStateContainer = ({
     if (replace) {
       return replaceUrlState(newPartial);
     } else {
-      previousState = { ...enhancedAppContainer.getState() };
-      setState(enhancedAppContainer, newPartial);
+      previousState = { ...appStateContainer.get() };
+      setState(appStateContainer, newPartial);
     }
   };
 
   const getPrevious = () => previousState;
 
   return {
-    ...enhancedAppContainer,
+    ...appStateContainer,
     getPrevious,
     initAndSync,
     resetToState,
@@ -435,11 +436,11 @@ export function getInitialState({
  * container
  */
 export function setState(
-  stateContainer: ReduxLikeStateContainer<DiscoverAppState>,
+  stateContainer: BaseStateContainer<DiscoverAppState>,
   newState: DiscoverAppState
 ) {
   addLog('[appstate] setState', { newState });
-  const oldState = stateContainer.getState();
+  const oldState = stateContainer.get();
   const mergedState = { ...oldState, ...newState };
   if (!isEqualState(oldState, mergedState)) {
     stateContainer.set(mergedState);
