@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { WorkflowSelectorWithProvider } from '@kbn/workflows-ui';
 import type { WorkflowsActionParams } from './types';
@@ -20,7 +19,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   errors,
 }) => {
   const { workflowId } = actionParams.subActionParams ?? {};
-  const { application } = useKibana().services;
 
   const handleWorkflowChange = useCallback(
     (newWorkflowId: string) => {
