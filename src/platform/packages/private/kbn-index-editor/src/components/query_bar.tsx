@@ -46,12 +46,7 @@ export const QueryBar = ({
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
-  const isOpeningInNewTabEnabled = useMemo(
-    () => featureFlags?.getBooleanValue('discover.tabsEnabled', true) ?? true,
-    [featureFlags]
-  );
-
-  // Only used as fallback if onOpenIndexInDiscover is not provided or tabs are disabled
+  // Only used as fallback if onOpenIndexInDiscover is not provided
   const discoverLink =
     isIndexCreated && esqlDiscoverQuery
       ? discoverLocator?.getRedirectUrl({
@@ -68,7 +63,7 @@ export const QueryBar = ({
 
       // If onOpenIndexInDiscover is provided, we let that handler to manage the navigation to Discover
       // If not, the button href will be executed
-      if (isOpeningInNewTabEnabled && onOpenIndexInDiscover && indexName && esqlDiscoverQuery) {
+      if (onOpenIndexInDiscover && indexName && esqlDiscoverQuery) {
         e.preventDefault();
         const onExitCallback = () => onOpenIndexInDiscover(indexName, esqlDiscoverQuery);
         indexUpdateService.exit(onExitCallback);
@@ -77,7 +72,6 @@ export const QueryBar = ({
     [
       indexEditorTelemetryService,
       searchQuery,
-      isOpeningInNewTabEnabled,
       onOpenIndexInDiscover,
       indexName,
       esqlDiscoverQuery,

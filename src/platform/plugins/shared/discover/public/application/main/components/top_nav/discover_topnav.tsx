@@ -328,7 +328,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
-        onOpenQueryInNewTab={onOpenQueryInNewTab}
+        onOpenQueryInNewTab={tabsEnabled ? onOpenQueryInNewTab : undefined}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
