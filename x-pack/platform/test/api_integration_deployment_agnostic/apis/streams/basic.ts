@@ -58,9 +58,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     ]).then(([indicesResponse, componentTemplateResponse, indexTemplateResponse]) => {
       // Filter out Fleet-related templates that may be created during Kibana initialization
       // These are not managed by Streams and should be ignored in resource tracking
-      const isFleetResource = (name: string) => 
+      const isFleetResource = (name: string) =>
         name.includes('fleet_server') || name.includes('.fleet');
-      
+
       return {
         indices: Object.keys(indicesResponse.indices ?? {}),
         componentTemplates: componentTemplateResponse.component_templates
