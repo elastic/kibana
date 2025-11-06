@@ -9,15 +9,18 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow } from '../..';
+import { WORKFLOW_INDEX_NAME } from '../constants';
 
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
-  indexName: string;
+  indexName?: string;
 }
 
 export class WorkflowRepository {
-  constructor(private options: WorkflowRepositoryOptions) {}
+  constructor(private options: WorkflowRepositoryOptions) {
+    this.options.indexName = this.options.indexName || WORKFLOW_INDEX_NAME;
+  }
 
   /**
    * Get a workflow by ID and space ID
@@ -48,7 +51,7 @@ export class WorkflowRepository {
       }
 
       // Transform the stored document to EsWorkflow format
-      const source = document._source as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const source = document._source as EsWorkflow;
       return {
         id: workflowId,
         name: source.name,
@@ -56,9 +59,9 @@ export class WorkflowRepository {
         enabled: source.enabled,
         tags: source.tags || [],
         valid: source.valid,
-        createdAt: new Date(source.created_at),
+        createdAt: new Date(source.createdAt),
         createdBy: source.createdBy,
-        lastUpdatedAt: new Date(source.updated_at),
+        lastUpdatedAt: new Date(source.lastUpdatedAt),
         lastUpdatedBy: source.lastUpdatedBy,
         definition: source.definition,
         deleted_at: source.deleted_at ? new Date(source.deleted_at) : null,

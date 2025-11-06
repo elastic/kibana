@@ -20,7 +20,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import type { WorkflowsExecutionEngineConfig } from './config';
@@ -267,15 +267,24 @@ export class WorkflowsExecutionEnginePlugin
           const taskAbortController = new AbortController();
           return {
             async run() {
-              const { workflow, spaceId } = taskInstance.params as {
-                workflow: WorkflowExecutionEngineModel;
+              const { workflowId, spaceId } = taskInstance.params as {
+                workflowId: string;
                 spaceId: string;
                 triggerType: string;
               };
               const [coreStart, pluginsStart] = await core.getStartServices();
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
               const { actions, taskManager } = pluginsStart;
+              const workflowRepository = new WorkflowRepository({
+                esClient: coreStart.elasticsearch.client.asInternalUser as Client,
+                logger,
+              });
 
+              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
+              if (!workflow) {
+                logger.error(`Workflow ${workflowId} not found`);
+                return;
+              }
               logger.info(`Running scheduled workflow task for workflow ${workflow.id}`);
 
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
@@ -328,7 +337,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
-                isTestRun: workflow.isTestRun,
+                isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
                 context: executionContext,
