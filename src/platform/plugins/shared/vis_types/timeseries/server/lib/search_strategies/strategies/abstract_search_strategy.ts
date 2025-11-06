@@ -12,6 +12,7 @@ import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { createRequestHash } from '../../../create_request_hash';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
@@ -56,17 +57,19 @@ export abstract class AbstractSearchStrategy {
         ...rest,
         ...(typeof body === 'string' ? { body } : body),
       };
+      const params = {
+        ...searchBody,
+        index,
+      };
+      const requestHash = createRequestHash(params);
       requests.push(
         searchContext
           .search(
             {
               indexType,
-              params: {
-                ...searchBody,
-                index,
-              },
+              params,
             },
-            { ...req.body.searchSession, abortSignal }
+            { ...req.body.searchSession, abortSignal, requestHash }
           )
           .pipe(
             tap((data) => {
