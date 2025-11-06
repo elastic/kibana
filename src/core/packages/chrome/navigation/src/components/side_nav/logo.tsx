@@ -7,35 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HTMLAttributes } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
+import type { HTMLAttributes } from 'react';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-import { MenuItem } from '../menu_item';
 import type { SideNavLogo } from '../../../types';
+import { MenuItem } from '../menu_item';
 import { useTooltip } from '../../hooks/use_tooltip';
 
-export interface SideNavLogoProps
-  extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>,
-    SideNavLogo {
+export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
   id: string;
-  isHighlighted: boolean;
-  isCurrent?: boolean;
   isCollapsed: boolean;
+  isCurrent?: boolean;
+  isHighlighted: boolean;
   onClick?: () => void;
 }
 
-/**
- * It's used to communicate what solution the user is currently in.
- */
-export const SideNavLogoComponent = ({
-  isHighlighted,
-  isCurrent,
+export const Logo = ({
   isCollapsed,
+  isCurrent,
+  isHighlighted,
   label,
   ...props
-}: SideNavLogoProps): JSX.Element => {
+}: LogoProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { tooltipRef, handleMouseOut } = useTooltip();
 

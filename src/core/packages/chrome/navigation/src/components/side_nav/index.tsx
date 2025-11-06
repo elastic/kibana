@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { FC, ReactNode } from 'react';
 import React from 'react';
+import type { FC, ReactNode } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
-import { SideNavFooter } from './footer';
-import { SideNavFooterItem } from './footer_item';
-import { SideNavLogoComponent } from './logo';
-import { SideNavPanel } from './panel';
-import { SideNavPopover } from '../popover';
-import { SideNavPrimaryMenu } from './primary_menu';
-import { SideNavPrimaryMenuItem } from './primary_menu_item';
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '../../hooks/use_layout_width';
+import { Footer } from '../footer';
+import { Logo } from './logo';
+import { NestedSecondaryMenu } from '../nested_secondary_menu';
+import { Popover } from './popover';
+import { PrimaryMenu } from '../primary_menu';
+import { SecondaryMenu } from '../secondary_menu';
+import { SidePanel } from './side_panel';
 
 export interface SideNavProps {
   children: ReactNode;
@@ -27,42 +27,50 @@ export interface SideNavProps {
 }
 
 interface SideNavComponent extends FC<SideNavProps> {
-  Logo: typeof SideNavLogoComponent;
-  PrimaryMenu: typeof SideNavPrimaryMenu;
-  PrimaryMenuItem: typeof SideNavPrimaryMenuItem;
-  Popover: typeof SideNavPopover;
-  Footer: typeof SideNavFooter;
-  FooterItem: typeof SideNavFooterItem;
-  Panel: typeof SideNavPanel;
+  Logo: typeof Logo;
+  PrimaryMenu: typeof PrimaryMenu;
+  Popover: typeof Popover;
+  SecondaryMenu: typeof SecondaryMenu;
+  NestedSecondaryMenu: typeof NestedSecondaryMenu;
+  Footer: typeof Footer;
+  SidePanel: typeof SidePanel;
 }
 
+/**
+ * A wrapper component for the side navigation that encapsulates:
+ * - the logo,
+ * - the primary menu,
+ * - the secondary menu used in the popover and in the side panel,
+ * - the nested secondary menu used in the "More" menu,
+ * - the footer,
+ * - the side panel.
+ */
 export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   const { euiTheme } = useEuiTheme();
 
+  const wrapperStyles = css`
+    box-sizing: border-box;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    display: flex;
+    flex-direction: column;
+    gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+    height: 100%;
+    padding-bottom: ${euiTheme.size.base};
+    width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
+  `;
+
   return (
-    <div
-      className="side-nav"
-      css={css`
-        box-sizing: border-box;
-        background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-        display: flex;
-        flex-direction: column;
-        gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-        height: 100%;
-        padding-bottom: ${euiTheme.size.base};
-        width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
-      `}
-    >
+    <div className="side-nav" css={wrapperStyles}>
       {children}
     </div>
   );
 };
 
-SideNav.Logo = SideNavLogoComponent;
-SideNav.PrimaryMenu = SideNavPrimaryMenu;
-SideNav.PrimaryMenuItem = SideNavPrimaryMenuItem;
-SideNav.Popover = SideNavPopover;
-SideNav.Footer = SideNavFooter;
-SideNav.FooterItem = SideNavFooterItem;
-SideNav.Panel = SideNavPanel;
+SideNav.Logo = Logo;
+SideNav.PrimaryMenu = PrimaryMenu;
+SideNav.Popover = Popover;
+SideNav.SecondaryMenu = SecondaryMenu;
+SideNav.NestedSecondaryMenu = NestedSecondaryMenu;
+SideNav.Footer = Footer;
+SideNav.SidePanel = SidePanel;

@@ -10,8 +10,8 @@
 import React from 'react';
 import { EuiBetaBadge, EuiThemeProvider } from '@elastic/eui';
 import { css } from '@emotion/react';
-
 import { i18n } from '@kbn/i18n';
+
 import type { BadgeType } from '../../../types';
 
 interface BetaBadgeProps {

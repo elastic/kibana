@@ -7,23 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
-import { useIsWithinBreakpoints } from '@elastic/eui';
-import { css } from '@emotion/react';
-
-import { i18n } from '@kbn/i18n';
+import React, { type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { useIsWithinBreakpoints } from '@elastic/eui';
+
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
-import { NestedSecondaryMenu } from './nested_secondary_menu';
-import { SecondaryMenu } from './secondary_menu';
+import { MAX_FOOTER_ITEMS } from '../constants';
 import { SideNav } from './side_nav';
+import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
-import { focusMainContent } from '../utils/focus_main_content';
-import { MAX_FOOTER_ITEMS } from '../constants';
 
 export interface NavigationProps {
   /**
@@ -94,15 +91,15 @@ export const Navigation = ({
 
   return (
     <div
-      id="navigation-root"
       css={wrapperStyles}
       data-test-subj={rest['data-test-subj'] ?? 'navigation-root'}
+      id="navigation-root"
     >
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
-          isHighlighted={visuallyActivePageId === logo.id}
-          isCurrent={actualActiveItemId === logo.id}
           isCollapsed={isCollapsed}
+          isCurrent={actualActiveItemId === logo.id}
+          isHighlighted={visuallyActivePageId === logo.id}
           onClick={() => onItemClick?.(logo)}
           {...logo}
         />
@@ -117,24 +114,24 @@ export const Navigation = ({
                 isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
                 label={item.label}
                 trigger={
-                  <SideNav.PrimaryMenuItem
-                    isCollapsed={isCollapsed}
-                    isHighlighted={item.id === visuallyActivePageId}
-                    isCurrent={actualActiveItemId === item.id}
+                  <SideNav.PrimaryMenu.Item
                     hasContent={getHasSubmenu(item)}
+                    isCollapsed={isCollapsed}
+                    isCurrent={actualActiveItemId === item.id}
+                    isHighlighted={item.id === visuallyActivePageId}
                     onClick={() => onItemClick?.(item)}
                     {...itemProps}
                   >
                     {item.label}
-                  </SideNav.PrimaryMenuItem>
+                  </SideNav.PrimaryMenu.Item>
                 }
               >
                 {(closePopover) => (
-                  <SecondaryMenu title={item.label} badgeType={item.badgeType}>
+                  <SideNav.SecondaryMenu title={item.label} badgeType={item.badgeType}>
                     {sections?.map((section) => (
-                      <SecondaryMenu.Section key={section.id} label={section.label}>
+                      <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
                         {section.items.map((subItem) => (
-                          <SecondaryMenu.Item
+                          <SideNav.SecondaryMenu.Item
                             key={subItem.id}
                             isHighlighted={subItem.id === visuallyActiveSubpageId}
                             isCurrent={actualActiveItemId === subItem.id}
@@ -148,11 +145,11 @@ export const Navigation = ({
                             {...subItem}
                           >
                             {subItem.label}
-                          </SecondaryMenu.Item>
+                          </SideNav.SecondaryMenu.Item>
                         ))}
-                      </SecondaryMenu.Section>
+                      </SideNav.SecondaryMenu.Section>
                     ))}
-                  </SecondaryMenu>
+                  </SideNav.SecondaryMenu>
                 )}
               </SideNav.Popover>
             );
@@ -167,15 +164,14 @@ export const Navigation = ({
               })}
               persistent
               trigger={
-                <SideNav.PrimaryMenuItem
+                <SideNav.PrimaryMenu.Item
                   as="button"
                   data-test-subj="sideNavMoreMenuItem"
-                  isHighlighted={overflowMenuItems.some((item) => item.id === visuallyActivePageId)}
-                  isCollapsed={isCollapsed}
-                  iconType="boxesVertical"
                   hasContent
-                  href=""
+                  iconType="boxesVertical"
                   id="more-menu"
+                  isCollapsed={isCollapsed}
+                  isHighlighted={overflowMenuItems.some((item) => item.id === visuallyActivePageId)}
                   label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
                     defaultMessage: 'More',
                   })}
@@ -184,24 +180,24 @@ export const Navigation = ({
                     id="core.ui.chrome.sideNavigation.moreMenuItemText"
                     defaultMessage="More"
                   />
-                </SideNav.PrimaryMenuItem>
+                </SideNav.PrimaryMenu.Item>
               }
             >
               {(closePopover) => (
-                <NestedSecondaryMenu>
-                  <NestedSecondaryMenu.Panel
+                <SideNav.NestedSecondaryMenu>
+                  <SideNav.NestedSecondaryMenu.Panel
                     id="main"
                     title={i18n.translate(
                       'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
                       { defaultMessage: 'More' }
                     )}
                   >
-                    <NestedSecondaryMenu.Section>
+                    <SideNav.NestedSecondaryMenu.Section>
                       {overflowMenuItems.map((item) => {
                         const hasSubmenu = getHasSubmenu(item);
                         const { sections, ...itemProps } = item;
                         return (
-                          <NestedSecondaryMenu.PrimaryMenuItem
+                          <SideNav.NestedSecondaryMenu.PrimaryMenuItem
                             key={item.id}
                             isHighlighted={item.id === visuallyActivePageId}
                             hasSubmenu={hasSubmenu}
@@ -215,18 +211,18 @@ export const Navigation = ({
                             {...itemProps}
                           >
                             {item.label}
-                          </NestedSecondaryMenu.PrimaryMenuItem>
+                          </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
                         );
                       })}
-                    </NestedSecondaryMenu.Section>
-                  </NestedSecondaryMenu.Panel>
+                    </SideNav.NestedSecondaryMenu.Section>
+                  </SideNav.NestedSecondaryMenu.Panel>
                   {overflowMenuItems.filter(getHasSubmenu).map((item) => (
-                    <NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
-                      <NestedSecondaryMenu.Header title={item.label} />
+                    <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
+                      <SideNav.NestedSecondaryMenu.Header title={item.label} />
                       {item.sections?.map((section) => (
-                        <NestedSecondaryMenu.Section key={section.id} label={section.label}>
+                        <SideNav.NestedSecondaryMenu.Section key={section.id} label={section.label}>
                           {section.items.map((subItem) => (
-                            <NestedSecondaryMenu.Item
+                            <SideNav.NestedSecondaryMenu.Item
                               key={subItem.id}
                               isHighlighted={subItem.id === visuallyActiveSubpageId}
                               isCurrent={actualActiveItemId === subItem.id}
@@ -238,13 +234,13 @@ export const Navigation = ({
                               {...subItem}
                             >
                               {subItem.label}
-                            </NestedSecondaryMenu.Item>
+                            </SideNav.NestedSecondaryMenu.Item>
                           ))}
-                        </NestedSecondaryMenu.Section>
+                        </SideNav.NestedSecondaryMenu.Section>
                       ))}
-                    </NestedSecondaryMenu.Panel>
+                    </SideNav.NestedSecondaryMenu.Panel>
                   ))}
-                </NestedSecondaryMenu>
+                </SideNav.NestedSecondaryMenu>
               )}
             </SideNav.Popover>
           )}
@@ -261,7 +257,7 @@ export const Navigation = ({
                 label={item.label}
                 persistent={false}
                 trigger={
-                  <SideNav.FooterItem
+                  <SideNav.Footer.Item
                     isHighlighted={item.id === visuallyActivePageId}
                     isCurrent={actualActiveItemId === item.id}
                     hasContent={getHasSubmenu(item)}
@@ -271,11 +267,11 @@ export const Navigation = ({
                 }
               >
                 {(closePopover) => (
-                  <SecondaryMenu title={item.label} badgeType={item.badgeType}>
+                  <SideNav.SecondaryMenu title={item.label} badgeType={item.badgeType}>
                     {sections?.map((section) => (
-                      <SecondaryMenu.Section key={section.id} label={section.label}>
+                      <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
                         {section.items.map((subItem) => (
-                          <SecondaryMenu.Item
+                          <SideNav.SecondaryMenu.Item
                             key={subItem.id}
                             isHighlighted={subItem.id === visuallyActiveSubpageId}
                             isCurrent={actualActiveItemId === subItem.id}
@@ -289,11 +285,11 @@ export const Navigation = ({
                             testSubjPrefix="popoverFooterItem"
                           >
                             {subItem.label}
-                          </SecondaryMenu.Item>
+                          </SideNav.SecondaryMenu.Item>
                         ))}
-                      </SecondaryMenu.Section>
+                      </SideNav.SecondaryMenu.Section>
                     ))}
-                  </SecondaryMenu>
+                  </SideNav.SecondaryMenu>
                 )}
               </SideNav.Popover>
             );
@@ -302,26 +298,26 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && openerNode && (
-        <SideNav.Panel footer={sidePanelFooter} openerNode={openerNode}>
-          <SecondaryMenu badgeType={openerNode.badgeType} isPanel title={openerNode.label}>
+        <SideNav.SidePanel footer={sidePanelFooter} openerNode={openerNode}>
+          <SideNav.SecondaryMenu badgeType={openerNode.badgeType} isPanel title={openerNode.label}>
             {openerNode.sections?.map((section) => (
-              <SecondaryMenu.Section key={section.id} label={section.label}>
+              <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
                 {section.items.map((subItem) => (
-                  <SecondaryMenu.Item
+                  <SideNav.SecondaryMenu.Item
                     key={subItem.id}
-                    isHighlighted={subItem.id === visuallyActiveSubpageId}
                     isCurrent={actualActiveItemId === subItem.id}
+                    isHighlighted={subItem.id === visuallyActiveSubpageId}
                     onClick={() => onItemClick?.(subItem)}
                     testSubjPrefix="sidePanelItem"
                     {...subItem}
                   >
                     {subItem.label}
-                  </SecondaryMenu.Item>
+                  </SideNav.SecondaryMenu.Item>
                 ))}
-              </SecondaryMenu.Section>
+              </SideNav.SecondaryMenu.Section>
             ))}
-          </SecondaryMenu>
-        </SideNav.Panel>
+          </SideNav.SecondaryMenu>
+        </SideNav.SidePanel>
       )}
     </div>
   );

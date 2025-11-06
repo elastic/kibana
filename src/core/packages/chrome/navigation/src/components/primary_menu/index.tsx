@@ -8,22 +8,28 @@
  */
 
 import React, { forwardRef } from 'react';
-import type { ForwardedRef, ReactNode } from 'react';
+import type { ForwardedRef, ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 
 import { PRIMARY_NAVIGATION_ID } from '../../constants';
-import { handleRovingIndex } from '../../utils/handle_roving_index';
+import { PrimaryMenuItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 
-export interface SideNavPrimaryMenuProps {
+export interface PrimaryMenuProps {
   children: ReactNode;
   isCollapsed: boolean;
 }
 
-export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProps>(
+interface PrimaryMenuComponent
+  extends ForwardRefExoticComponent<PrimaryMenuProps & RefAttributes<HTMLElement>> {
+  Item: typeof PrimaryMenuItem;
+}
+
+export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
   ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
     const { euiTheme } = useEuiTheme();
 
@@ -61,3 +67,7 @@ export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProp
     );
   }
 );
+
+export const PrimaryMenu = Object.assign(PrimaryMenuBase, {
+  Item: PrimaryMenuItem,
+}) satisfies PrimaryMenuComponent;

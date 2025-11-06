@@ -7,33 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KeyboardEvent, ForwardedRef, ComponentProps } from 'react';
 import React, { Suspense, forwardRef } from 'react';
-import { css } from '@emotion/react';
-import type { EuiButtonIconProps, IconType } from '@elastic/eui';
+import type { KeyboardEvent, ForwardedRef, ComponentProps } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { EuiButtonIconProps, IconType } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { MenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { TOOLTIP_OFFSET } from '../../constants';
 import { focusMainContent } from '../../utils/focus_main_content';
-import { useTooltip } from '../../hooks/use_tooltip';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
+import { useTooltip } from '../../hooks/use_tooltip';
 
-export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
+export interface FooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
   iconType: IconType;
-  isHighlighted: boolean;
   isCurrent?: boolean;
+  isHighlighted: boolean;
   label: string;
   onClick?: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
 }
 
 /**
- * Toggle button pattern: https://eui.elastic.co/docs/components/navigation/buttons/button/#toggle-button
+ * A footer item that leverages the "Toggle button" pattern from EUI.
+ *
+ * @see {@link https://eui.elastic.co/docs/components/navigation/buttons/button/#toggle-button}
  */
-export const SideNavFooterItem = forwardRef<HTMLAnchorElement, SideNavFooterItemProps>(
+export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
   (
     { badgeType, hasContent, iconType, id, isCurrent, isHighlighted, label, ...props },
     ref: ForwardedRef<HTMLAnchorElement>

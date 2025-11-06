@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode, HTMLAttributes, ForwardedRef } from 'react';
 import React, { Suspense, forwardRef } from 'react';
-import { css } from '@emotion/react';
-import type { IconType } from '@elastic/eui';
+import type { ReactNode, HTMLAttributes, ForwardedRef } from 'react';
 import { EuiIcon, EuiScreenReaderOnly, EuiText, euiFontSize, useEuiTheme } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLButtonElement> {
   as?: 'a' | 'button';
   children: ReactNode;
-  href: string;
+  href?: string;
   iconSize?: 's' | 'm';
   iconType: IconType;
   isHighlighted: boolean;
@@ -63,11 +63,11 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       justify-content: center;
       display: flex;
       flex-direction: column;
-      // 3px is from Figma; there is no token
+      /* 3px is from Figma; there is no token */
       gap: 3px;
-      // eslint-disable-next-line @elastic/eui/no-css-color
+      /* eslint-disable-next-line @elastic/eui/no-css-color */
       color: var(--menu-item-text-color);
-      // Focus affordance with border on the iconWrapper instead
+      /* Focus affordance with border on the iconWrapper instead */
       outline: none !important;
 
       .iconWrapper {
@@ -93,8 +93,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         z-index: 0;
       }
 
-      // TODO: consider using euiFocusRing
-      // source: https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible
+      /* TODO: consider using euiFocusRing (source: https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) */
       &:focus-visible .iconWrapper {
         border: ${euiTheme.border.width.thick} solid
           ${isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
