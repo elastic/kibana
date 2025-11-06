@@ -95,6 +95,12 @@ export const deleteEntityEnginesRoute = (
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
         },
       },
+      options: {
+        availability: {
+          since: '9.3.0',
+          stability: 'stable',
+        },
+      },
     })
     .addVersion(
       {
