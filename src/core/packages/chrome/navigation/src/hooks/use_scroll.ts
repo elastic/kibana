@@ -13,8 +13,8 @@ import { css } from '@emotion/react';
 /**
  * Hook for handling scroll styles.
  *
- * @param withMask - Whether to apply a mask to the scrollable content.
- * @returns The scroll styles.
+ * @param withMask - whether to apply a mask to the scrollable content.
+ * @returns the scroll styles.
  */
 export const useScroll = (withMask: boolean = false) => {
   const scrollStyles = css`

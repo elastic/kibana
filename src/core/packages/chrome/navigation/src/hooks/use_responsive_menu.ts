@@ -26,9 +26,12 @@ interface ResponsiveMenuState {
  * Items that no longer fit are moved into the overflow "More" menu so the sidebar keeps its size
  * limits when resizing, zooming, or collapsing.
  *
- * @param isCollapsed - Whether the side nav is currently collapsed (affects layout recalculation).
- * @param items - All primary navigation items, in priority order.
- * @returns A ref for the primary menu, the visible items and the overflow items.
+ * @param isCollapsed - whether the side nav is currently collapsed (affects layout recalculation).
+ * @param items - all primary navigation items, in priority order.
+ * @returns an object containing:
+ * - `primaryMenuRef` - a ref to the primary menu.
+ * - `visibleMenuItems` - the visible menu items.
+ * - `overflowMenuItems` - the overflow menu items.
  */
 export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
   const primaryMenuRef = useRef<HTMLElement | null>(null);

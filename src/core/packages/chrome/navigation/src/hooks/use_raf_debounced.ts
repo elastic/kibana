@@ -12,7 +12,7 @@ import { useCallback, useLayoutEffect, useRef } from 'react';
 /**
  * Hook that returns a debounced callback using `requestAnimationFrame`.
  *
- * @param fn - The callback function to debounce.
+ * @param fn - the callback function to debounce.
  */
 export function useRafDebouncedCallback(fn: () => void) {
   const rafIdRef = useRef<number | null>(null);

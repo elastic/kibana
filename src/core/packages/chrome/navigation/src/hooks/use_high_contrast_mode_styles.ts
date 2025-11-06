@@ -20,8 +20,8 @@ export const highContrastHoverStyle = ({ euiTheme }: UseEuiTheme) => `
 /**
  * Hook to get the high contrast mode hover styles for buttons.
  *
- * @param selector - The selector to apply the high contrast mode hover styles to.
- * @returns The high contrast mode hover styles.
+ * @param selector - the selector to apply the high contrast mode hover styles to.
+ * @returns the high contrast mode hover styles.
  */
 export const useHighContrastModeStyles = (selector: string = '') => {
   const euiThemeContext = useEuiTheme();

@@ -24,11 +24,11 @@ interface NavigationState {
 /**
  * Hook for managing the main navigation state.
  *
- * @param isCollapsed - Whether the side nav is collapsed.
- * @param items - The navigation structure including primary, secondary, and footer items.
- * @param logoId - The logo ID, used for highlighting the logo.
- * @param activeItemId - The active item ID, used for highlighting the active item.
- * @returns The navigation state including:
+ * @param isCollapsed - whether the side nav is collapsed.
+ * @param items - the navigation structure including primary, secondary, and footer items.
+ * @param logoId - the logo ID, used for highlighting the logo.
+ * @param activeItemId - the active item ID, used for highlighting the active item.
+ * @returns the navigation state including:
  * - `actualActiveItemId` - the actual active item ID. There can only be one `aria-current=page` link on the page.
  * - `visuallyActivePageId` - the visually active page ID. The link does not have to be `aria-current=page`, it can be a parent of an active page.
  * - `visuallyActiveSubpageId` - the visually active subpage ID.
