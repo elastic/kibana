@@ -10,7 +10,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cloneDeep, pick } from 'lodash';
 import { ReplaySubject } from 'rxjs';
-import type { TypedLensByValueInput } from '@kbn/lens-common';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
@@ -18,7 +17,6 @@ import type {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetch$Arguments,
-  UnifiedHistogramSuggestionContext,
   UnifiedHistogramVisContext,
   LensVisServiceState,
 } from '../types';
@@ -88,12 +86,6 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     },
     []
   );
-  const getModifiedVisAttributes = useCallback(
-    (attributes: TypedLensByValueInput['attributes']) => {
-      return propsRef.current.getModifiedVisAttributes?.(cloneDeep(attributes)) ?? attributes;
-    },
-    []
-  );
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: async (params) => {
@@ -130,7 +122,13 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
           breakdownField: nextFetchParams.breakdown?.field,
           table: nextFetchParams.table,
           onVisContextChanged: nextFetchParams.isESQLQuery ? onVisContextChanged : undefined,
-          getModifiedVisAttributes,
+          getModifiedVisAttributes: nextFetchParams.getModifiedVisAttributes
+            ? (attributes) => {
+                return (
+                  nextFetchParams.getModifiedVisAttributes!(cloneDeep(attributes)) ?? attributes
+                );
+              }
+            : undefined,
         });
       }
       setState({

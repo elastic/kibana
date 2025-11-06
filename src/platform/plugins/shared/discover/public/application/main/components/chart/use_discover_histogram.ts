@@ -243,6 +243,14 @@ export const useDiscoverHistogram = (
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
+  const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
+  const getModifiedVisAttributes = useCallback<
+    NonNullable<UnifiedHistogramFetchParamsExternal['getModifiedVisAttributes']>
+  >(
+    (attributes) => getModifiedVisAttributesAccessor((params) => params.attributes)({ attributes }),
+    [getModifiedVisAttributesAccessor]
+  );
+
   const collectedFetchParams: UnifiedHistogramFetchParamsExternal | undefined = useMemo(() => {
     return {
       searchSessionId,
@@ -260,6 +268,7 @@ export const useDiscoverHistogram = (
         isEsqlMode && canImportVisContext(savedSearchState?.visContext)
           ? savedSearchState?.visContext
           : undefined,
+      getModifiedVisAttributes,
     };
   }, [
     breakdownField,
@@ -274,6 +283,7 @@ export const useDiscoverHistogram = (
     timeRangeMemoized,
     query,
     savedSearchState?.visContext,
+    getModifiedVisAttributes,
   ]);
 
   const usedFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
@@ -403,14 +413,6 @@ export const useDiscoverHistogram = (
     [breakdownField, stateContainer.appState]
   );
 
-  const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
-  const getModifiedVisAttributes = useCallback<
-    NonNullable<UseUnifiedHistogramProps['getModifiedVisAttributes']>
-  >(
-    (attributes) => getModifiedVisAttributesAccessor((params) => params.attributes)({ attributes }),
-    [getModifiedVisAttributesAccessor]
-  );
-
   return useMemo(
     () => ({
       setUnifiedHistogramApi,
@@ -419,7 +421,7 @@ export const useDiscoverHistogram = (
       localStorageKeyPrefix: 'discover',
       initialState: {
         chartHidden,
-        timeInterval,
+        timeInterval, // TODO: move to fetch params as breakdown
         topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
@@ -431,11 +433,9 @@ export const useDiscoverHistogram = (
       isChartLoading: isSuggestionLoading,
       onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
       onBreakdownFieldChange,
-      getModifiedVisAttributes, // TODO: make a part of fetch params instead
     }),
     [
       chartHidden,
-      getModifiedVisAttributes,
       histogramCustomization?.disabledActions,
       histogramCustomization?.onBrushEnd,
       histogramCustomization?.onFilter,

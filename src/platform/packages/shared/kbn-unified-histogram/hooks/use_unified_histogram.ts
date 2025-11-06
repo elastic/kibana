@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EmbeddableComponentProps,
-  LensEmbeddableInput,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
@@ -68,12 +64,6 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
   ) => void;
   /**
-   * Callback to modify the default Lens vis attributes used in the chart
-   */
-  getModifiedVisAttributes?: (
-    attributes: TypedLensByValueInput['attributes']
-  ) => TypedLensByValueInput['attributes'];
-  /**
    * Whether to calculate lens vis context automatically
    */
   enableLensVisService?: boolean;
@@ -108,11 +98,13 @@ export type UseUnifiedHistogramResult =
       layoutProps: UnifiedHistogramPartialLayoutProps;
     };
 
+const EMPTY_STATE = of(undefined);
+
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const { stateProps, fetch$, fetchParams, hasValidFetchParams, api, lensVisService } =
     useServicesBootstrap(props);
 
-  const lensVisServiceState = useObservable(lensVisService?.state$ ?? of(undefined));
+  const lensVisServiceState = useObservable(lensVisService?.state$ ?? EMPTY_STATE);
   const lensVisServiceCurrentSuggestionContextType =
     lensVisServiceState?.currentSuggestionContext?.type;
 

@@ -250,6 +250,12 @@ export interface UnifiedHistogramFetchParamsExternal {
    * The external custom Lens vis
    */
   externalVisContext?: UnifiedHistogramVisContext;
+  /**
+   * Callback to modify the default Lens vis attributes used in the chart
+   */
+  getModifiedVisAttributes?: (
+    attributes: TypedLensByValueInput['attributes']
+  ) => TypedLensByValueInput['attributes'];
 }
 
 export type UnifiedHistogramFetchParams = Omit<
