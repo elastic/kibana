@@ -39595,6 +39595,16 @@ paths:
                           type: string
                         type:
                           type: string
+                        warning:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - title
                       required:
                         - type
                         - name
@@ -39723,6 +39733,16 @@ paths:
                           type: string
                         type:
                           type: string
+                        warning:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - title
                       required:
                         - type
                         - name

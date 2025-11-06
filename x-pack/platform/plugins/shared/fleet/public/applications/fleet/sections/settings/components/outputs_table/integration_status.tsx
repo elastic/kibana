@@ -257,7 +257,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                 id={`${customAsset.type}:${customAsset.name}`}
                 key={`${customAsset.type}:${customAsset.name}`}
                 arrowDisplay={customAsset.error ? 'left' : 'none'}
-                isDisabled={!customAsset.error}
+                isDisabled={!customAsset.error && !customAsset.warning}
                 buttonContent={
                   <EuiFlexGroup alignItems="baseline" gutterSize="xs">
                     <EuiFlexItem grow={false}>
@@ -282,10 +282,18 @@ export const IntegrationStatus: React.FunctionComponent<{
                   ) : (
                     <EuiIcon
                       size="m"
-                      color={customAsset.sync_status === SyncStatus.FAILED ? 'danger' : 'success'}
+                      color={
+                        customAsset.sync_status === SyncStatus.FAILED
+                          ? 'danger'
+                          : customAsset.sync_status === SyncStatus.WARNING
+                          ? 'warning'
+                          : 'success'
+                      }
                       type={
                         customAsset.sync_status === SyncStatus.FAILED
                           ? 'errorFilled'
+                          : customAsset.sync_status === SyncStatus.WARNING
+                          ? 'warning'
                           : 'checkInCircleFilled'
                       }
                     />
@@ -293,26 +301,61 @@ export const IntegrationStatus: React.FunctionComponent<{
                 }
                 paddingSize="none"
               >
-                {customAsset.error && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiCallOut
-                      title={
-                        <FormattedMessage
-                          id="xpack.fleet.integrationSyncStatus.errorTitle"
-                          defaultMessage="Error"
-                        />
-                      }
-                      color="danger"
-                      iconType="error"
-                      size="s"
-                      data-test-subj="integrationSyncAssetErrorCallout"
-                    >
-                      <EuiText size="s">{customAsset.error}</EuiText>
-                    </EuiCallOut>
-                    <EuiSpacer size="s" />
-                  </>
-                )}
+                <>
+                  {customAsset.error && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiCallOut
+                        title={
+                          <FormattedMessage
+                            id="xpack.fleet.integrationSyncStatus.errorTitle"
+                            defaultMessage="Error"
+                          />
+                        }
+                        color="danger"
+                        iconType="error"
+                        size="s"
+                        data-test-subj="integrationSyncAssetErrorCallout"
+                      >
+                        <EuiText size="s">{customAsset.error}</EuiText>
+                      </EuiCallOut>
+                      <EuiSpacer size="s" />
+                    </>
+                  )}
+                  {customAsset.sync_status === SyncStatus.WARNING && customAsset.warning && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiCallOut
+                        title={
+                          <FormattedMessage
+                            id="xpack.fleet.integrationSyncStatus.customAssetWarningTitle"
+                            defaultMessage="{Warning}"
+                            values={{
+                              Warning: customAsset.warning.title,
+                            }}
+                          />
+                        }
+                        color="warning"
+                        iconType="warning"
+                        size="s"
+                        data-test-subj="customAssetWarningCallout"
+                      >
+                        {customAsset.warning.message && (
+                          <EuiText size="s">
+                            <FormattedMessage
+                              id="xpack.fleet.integrationSyncStatus.customAssetWarningContent"
+                              defaultMessage="{customAssetWarning}"
+                              values={{
+                                customAssetWarning: customAsset.warning.message,
+                              }}
+                            />
+                          </EuiText>
+                        )}
+                      </EuiCallOut>
+                      <EuiSpacer size="s" />
+                    </>
+                  )}
+                </>
               </EuiAccordion>
             );
           })}
