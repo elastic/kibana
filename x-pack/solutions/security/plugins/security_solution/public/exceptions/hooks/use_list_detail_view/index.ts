@@ -16,7 +16,6 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import {
@@ -57,7 +56,6 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
   const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges;
 
-  const [{ loading: userInfoLoading }] = useUserData();
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canUserWriteCurrentList =
     exceptionListId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
@@ -411,7 +409,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   // #endregion
 
   return {
-    isLoading: isLoading || userInfoLoading,
+    isLoading,
     invalidListId,
     isReadOnly: !!(!canUserWriteCurrentList && canReadRules),
     list,

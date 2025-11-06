@@ -143,12 +143,11 @@ describe('useMissingPrivileges', () => {
     });
   });
 
-  // TODO this behavior now seems inadequate. What should be reported if user does not have rules:read? Do we ever report `siemv5` feature as missing?
-  it.skip('reports missing "all" privilege for security if user does not have CRUD', () => {
+  it('reports missing "all" privilege for security if user does not have CRUD', () => {
     const hookResult = renderHook(() => useMissingPrivileges());
 
     expect(hookResult.result.current.featurePrivileges).toEqual(
-      expect.arrayContaining([RULES_FEATURE_ID, ['all']])
+      expect.arrayContaining([[RULES_FEATURE_ID, ['all']]])
     );
   });
 

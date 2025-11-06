@@ -48,8 +48,7 @@ export interface MissingPrivileges {
  * Hook that returns index and feature privileges that are missing for the user.
  */
 export const useMissingPrivileges = (): MissingPrivileges => {
-  const { detectionEnginePrivileges, listPrivileges } = useUserPrivileges();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const { detectionEnginePrivileges, listPrivileges, rulesPrivileges } = useUserPrivileges();
 
   return useMemo<MissingPrivileges>(() => {
     const featurePrivileges: MissingFeaturePrivileges[] = [];
@@ -66,7 +65,7 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       };
     }
 
-    if (canEditRules === false) {
+    if (rulesPrivileges.edit === false) {
       featurePrivileges.push([RULES_FEATURE_ID, ['all']]);
     }
 
@@ -91,5 +90,5 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       featurePrivileges,
       indexPrivileges,
     };
-  }, [listPrivileges.result, detectionEnginePrivileges.result, canEditRules]);
+  }, [listPrivileges.result, detectionEnginePrivileges.result, rulesPrivileges.edit]);
 };
