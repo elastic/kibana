@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { CloudConnectedAppContextProvider } from './application/app_context';
@@ -58,9 +58,7 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
   history,
 }) => {
   return (
-    <CloudConnectedAppContextProvider
-      value={{ chrome, application, http, docLinks, history }}
-    >
+    <CloudConnectedAppContextProvider value={{ chrome, application, http, docLinks, history }}>
       <Router history={history}>
         <CloudConnectedAppRoutes />
       </Router>

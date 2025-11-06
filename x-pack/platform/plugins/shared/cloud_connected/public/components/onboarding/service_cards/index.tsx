@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiSpacer, EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiCard,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { COLUMN_SIZE } from '../constants';
 
 interface ServiceCardsProps {
@@ -16,7 +23,10 @@ interface ServiceCardsProps {
 
 export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) => {
   return (
-    <EuiFlexItem grow={!hasPermissions} style={hasPermissions ? { width: `${COLUMN_SIZE}px` } : undefined}>
+    <EuiFlexItem
+      grow={!hasPermissions}
+      style={hasPermissions ? { width: `${COLUMN_SIZE}px` } : undefined}
+    >
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.cloudConnected.serviceCards.title', {
@@ -48,10 +58,13 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
             title={i18n.translate('xpack.cloudConnected.serviceCards.elasticInference.title', {
               defaultMessage: 'Elastic Inference Service',
             })}
-            description={i18n.translate('xpack.cloudConnected.serviceCards.elasticInference.description', {
-              defaultMessage:
-                'Tap into AI-powered search and chat—no ML model deployment or management needed. Fast, scalable, and hassle-free intelligent features.',
-            })}
+            description={i18n.translate(
+              'xpack.cloudConnected.serviceCards.elasticInference.description',
+              {
+                defaultMessage:
+                  'Tap into AI-powered search and chat—no ML model deployment or management needed. Fast, scalable, and hassle-free intelligent features.',
+              }
+            )}
             titleSize="xs"
           />
         </EuiFlexItem>

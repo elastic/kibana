@@ -22,13 +22,17 @@ export const CloudConnectedAppContextProvider: React.FC<{
   value: CloudConnectedAppContextValue;
   children: React.ReactNode;
 }> = ({ value, children }) => {
-  return <CloudConnectedAppContext.Provider value={value}>{children}</CloudConnectedAppContext.Provider>;
+  return (
+    <CloudConnectedAppContext.Provider value={value}>{children}</CloudConnectedAppContext.Provider>
+  );
 };
 
 export const useCloudConnectedAppContext = () => {
   const context = useContext(CloudConnectedAppContext);
   if (!context) {
-    throw new Error('useCloudConnectedAppContext must be used within CloudConnectedAppContextProvider');
+    throw new Error(
+      'useCloudConnectedAppContext must be used within CloudConnectedAppContextProvider'
+    );
   }
   return context;
 };

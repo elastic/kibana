@@ -72,7 +72,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
             alt={i18n.translate('xpack.cloudConnected.onboarding.illustration.alt', {
               defaultMessage: 'Illustration for cloud data migration',
             })}
-            src={http.basePath.prepend('/plugins/kibanaReact/assets/') + 'illustration_cloud_migration.png'}
+            src={
+              http.basePath.prepend('/plugins/kibanaReact/assets/') +
+              'illustration_cloud_migration.png'
+            }
             size="fullWidth"
             style={{ maxWidth: `${COLUMN_SIZE}px` }}
           />

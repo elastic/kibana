@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import type {
   AppMountParameters,
   CoreSetup,
-  CoreStart,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -29,7 +28,7 @@ export class CloudConnectedPlugin
 {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: CloudConnectedSetupDeps): CloudConnectedPluginSetup {
+  public setup(core: CoreSetup): CloudConnectedPluginSetup {
     // Register the app in the management section
     core.application.register({
       id: 'cloud_connected',
@@ -49,7 +48,7 @@ export class CloudConnectedPlugin
     return {};
   }
 
-  public start(core: CoreStart): CloudConnectedPluginStart {
+  public start() {
     return {};
   }
 
