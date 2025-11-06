@@ -10,6 +10,7 @@ import type {
   SavedObjectReference,
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { ALL_VALUE, sloDefinitionSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
@@ -24,6 +25,7 @@ export interface SLORepository {
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
+  getAll(searchAfter: FieldValue): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string, options?: { ignoreNotFound?: boolean }): Promise<void>;
   search(
@@ -113,6 +115,17 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       page: 1,
       perPage: ids.length,
       filter: `slo.attributes.id:(${ids.join(' or ')})`,
+    });
+
+    return response.saved_objects.map((so) => this.toSLO(so)).filter(this.isSLO);
+  }
+
+  async getAll(searchAfter: FieldValue): Promise<SLODefinition[]> {
+    const response = await this.soClient.find<StoredSLODefinition>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1000,
+      searchAfter: searchAfter ? [searchAfter] : undefined,
     });
 
     return response.saved_objects.map((so) => this.toSLO(so)).filter(this.isSLO);

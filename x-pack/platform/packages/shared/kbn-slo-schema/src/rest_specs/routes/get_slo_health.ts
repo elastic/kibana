@@ -10,9 +10,9 @@ import { allOrAnyString } from '../../schema/common';
 
 const fetchSLOHealthDataSchema = t.array(
   t.type({
-    sloId: sloIdSchema,
-    sloRevision: t.number,
-    sloName: t.string,
+    id: sloIdSchema,
+    revision: t.number,
+    name: t.string,
     state: stateSchema,
     health: t.type({
       overall: transformHealthSchema,
@@ -32,7 +32,7 @@ const fetchSLOHealthResponseSchema = t.type({
 const fetchSLOHealthParamsSchema = t.type({
   body: t.intersection([
     t.type({
-      list: t.array(t.type({ sloId: sloIdSchema, sloInstanceId: allOrAnyString })),
+      list: t.array(t.type({ id: sloIdSchema, instanceId: allOrAnyString, enabled: t.boolean })),
     }),
     t.partial({
       page: t.number,

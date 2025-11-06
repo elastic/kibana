@@ -23,6 +23,8 @@ import {
 } from '../../common/constants';
 import type { HealthStatus, State } from '../domain/models/health';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import type { SLORepository } from './slo_repository';
+import type { SLODefinition } from '../domain/models/slo';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
@@ -38,16 +40,29 @@ function getAfterKey(
 }
 
 export class GetSLOHealth {
-  constructor(private scopedClusterClient: IScopedClusterClient) {}
+  constructor(
+    private scopedClusterClient: IScopedClusterClient,
+    private repository: SLORepository
+  ) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     let afterKey: AggregationsAggregate | undefined;
     let sloKeysFromES: Array<{
-      sloId: string;
-      sloInstanceId: string;
-      sloRevision: number;
-      sloName: string;
+      id: string;
+      instanceId: string;
+      revision: number;
+      name: string;
     }> = [];
+
+    const sloList = params.list ?? (await this.getAllSLODefinitions());
+
+    const enableMap = new Map<
+      string,
+      {
+        instanceId: string;
+        enabled: boolean;
+      }
+    >(this.getDataFromParams(sloList));
 
     const page = typeof params.page === 'number' && params.page >= 0 ? params.page : 0;
     const perPage =
@@ -66,16 +81,16 @@ export class GetSLOHealth {
               size: ES_PAGESIZE_LIMIT,
               sources: [
                 {
-                  sloId: { terms: { field: 'slo.id' } },
+                  id: { terms: { field: 'slo.id' } },
                 },
                 {
-                  sloInstanceId: { terms: { field: 'slo.instanceId' } },
+                  instanceId: { terms: { field: 'slo.instanceId' } },
                 },
                 {
-                  sloRevision: { terms: { field: 'slo.revision' } },
+                  revision: { terms: { field: 'slo.revision' } },
                 },
                 {
-                  sloName: { terms: { field: 'slo.name.keyword' } },
+                  name: { terms: { field: 'slo.name.keyword' } },
                 },
               ],
             },
@@ -84,7 +99,7 @@ export class GetSLOHealth {
         ...(params.list?.length && {
           query: {
             bool: {
-              filter: [{ terms: { 'slo.id': params.list.map((slo) => slo.sloId) } }],
+              filter: [{ terms: { 'slo.id': params.list.map((slo) => slo.id) } }],
             },
           },
         }),
@@ -95,7 +110,7 @@ export class GetSLOHealth {
       const buckets = (
         sloIdCompositeQueryResponse.aggregations?.sloIds as {
           buckets?: Array<{
-            key: { sloId: string; sloInstanceId: string; sloRevision: number; sloName: string };
+            key: { id: string; instanceId: string; revision: number; name: string };
           }>;
         }
       )?.buckets;
@@ -104,10 +119,10 @@ export class GetSLOHealth {
         sloKeysFromES = sloKeysFromES.concat([
           ...buckets.map((bucket) => {
             return {
-              sloId: bucket.key.sloId,
-              sloInstanceId: bucket.key.sloInstanceId,
-              sloRevision: bucket.key.sloRevision,
-              sloName: bucket.key.sloName,
+              id: bucket.key.id,
+              instanceId: bucket.key.instanceId,
+              revision: bucket.key.revision,
+              name: bucket.key.name,
             };
           }),
         ]);
@@ -115,10 +130,11 @@ export class GetSLOHealth {
     } while (afterKey);
 
     const filteredList = sloKeysFromES.map((item) => ({
-      sloId: item.sloId,
-      sloInstanceId: item.sloInstanceId,
-      sloRevision: item.sloRevision,
-      sloName: item.sloName,
+      id: item.id,
+      instanceId: item.instanceId,
+      revision: item.revision,
+      name: item.name,
+      enabled: enableMap.get(item.id)?.enabled,
     }));
 
     const summaryDocsById = await this.getSummaryDocsById(filteredList);
@@ -130,10 +146,7 @@ export class GetSLOHealth {
         const state = computeState(summaryDocsById, item);
 
         return {
-          sloId: item.sloId,
-          sloName: item.sloName,
-          sloInstanceId: item.sloInstanceId,
-          sloRevision: item.sloRevision,
+          ...item,
           state,
           health,
         };
@@ -141,7 +154,7 @@ export class GetSLOHealth {
     );
 
     const mappedResults = Array.from(
-      new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
+      new Map(results.map((item) => [`${item.id}-${item.revision}`, item])).values()
     );
 
     const uniqueResults = params.statusFilter
@@ -156,8 +169,37 @@ export class GetSLOHealth {
     });
   }
 
+  private getAllSLODefinitions = async () => {
+    let searchAfter: FieldValue = '';
+    let results: SLODefinition[] = [];
+
+    do {
+      if (!this.repository) {
+        break;
+      }
+
+      const newResults: SLODefinition[] = await this.repository.getAll(searchAfter);
+      searchAfter = newResults[newResults.length - 1]?.id;
+      results = results.concat(newResults);
+    } while (searchAfter);
+
+    return results;
+  };
+
+  private getDataFromParams = (
+    list: Array<{ id: string; instanceId?: string; enabled: boolean }>
+  ): Array<[string, { instanceId: string; enabled: boolean }]> => {
+    return list?.map((item): [string, { instanceId: string; enabled: boolean }] => [
+      item.id,
+      {
+        instanceId: item.instanceId ?? '*',
+        enabled: item.enabled,
+      },
+    ]);
+  };
+
   private async getSummaryDocsById(
-    filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
+    filteredList: Array<{ id: string; instanceId: string; revision: number }>
   ) {
     const summaryDocs = await this.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -166,8 +208,8 @@ export class GetSLOHealth {
           should: filteredList.map((item) => ({
             bool: {
               must: [
-                { term: { 'slo.id': item.sloId } },
-                { term: { 'slo.instanceId': item.sloInstanceId } },
+                { term: { 'slo.id': item.id } },
+                { term: { 'slo.instanceId': item.instanceId } },
               ],
             },
           })),
@@ -183,13 +225,13 @@ export class GetSLOHealth {
   }
 
   private async getTransformStatsForSLO(item: {
-    sloId: string;
-    sloRevision: number;
+    id: string;
+    revision: number;
   }): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
     const rollupTransformStats =
       await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
         {
-          transform_id: getSLOTransformId(item.sloId, item.sloRevision),
+          transform_id: getSLOTransformId(item.id, item.revision),
           allow_no_match: true,
           size: 1,
         },
@@ -199,7 +241,7 @@ export class GetSLOHealth {
     const summaryTransformStats =
       await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
         {
-          transform_id: getSLOSummaryTransformId(item.sloId, item.sloRevision),
+          transform_id: getSLOSummaryTransformId(item.id, item.revision),
           allow_no_match: true,
           size: 1,
         },
@@ -221,9 +263,9 @@ function buildSummaryKey(id: string, instanceId: string) {
 
 function computeState(
   summaryDocsById: Dictionary<EsSummaryDocument[]>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
+  item: { id: string; instanceId: string; revision: number }
 ): State {
-  const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.sloId, item.sloInstanceId)];
+  const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.id, item.instanceId)];
 
   let state: State = 'no_data';
   if (!sloSummaryDocs) {
@@ -264,7 +306,7 @@ function getTransformHealth(
   const transformState = transformStat.state?.toLowerCase();
   return transformStat.health?.status?.toLowerCase() === 'green'
     ? {
-        status: 'healthy',
+        status: 'unhealthy',
         transformState: transformState as HealthStatus['transformState'],
       }
     : {
@@ -275,13 +317,11 @@ function getTransformHealth(
 
 function computeHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
+  item: { id: string; instanceId: string; revision: number }
 ): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
-  const rollup = getTransformHealth(
-    transformStatsById[getSLOTransformId(item.sloId, item.sloRevision)]
-  );
+  const rollup = getTransformHealth(transformStatsById[getSLOTransformId(item.id, item.revision)]);
   const summary = getTransformHealth(
-    transformStatsById[getSLOSummaryTransformId(item.sloId, item.sloRevision)]
+    transformStatsById[getSLOSummaryTransformId(item.id, item.revision)]
   );
 
   const overall: 'healthy' | 'unhealthy' =
