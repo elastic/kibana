@@ -344,6 +344,14 @@ export class Alert<
     return this.meta.maintenanceWindowIds ?? [];
   }
 
+  setMaintenanceWindowNames(maintenanceWindowNames: string[] = []) {
+    this.meta.maintenanceWindowNames = maintenanceWindowNames;
+  }
+
+  getMaintenanceWindowNames() {
+    return this.meta.maintenanceWindowNames ?? [];
+  }
+
   incrementActiveCount() {
     if (!this.meta.activeCount) {
       this.meta.activeCount = 0;

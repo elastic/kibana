@@ -479,6 +479,7 @@ function getRelevantAlertFields(alertDetail: AlertData) {
     'event.kind',
     'kibana.alert.rule.tags',
     'kibana.alert.maintenance_window_ids',
+    'kibana.alert.maintenance_window_names',
     'kibana.alert.consecutive_matches',
   ]);
 }

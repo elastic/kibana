@@ -13,6 +13,7 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_EXECUTION_UUID,
@@ -801,16 +802,18 @@ export class AlertsClient<
     return alertsByMaintenanceWindowIds;
   }
 
-  private async updateAlertMaintenanceWindowIds(idsToUpdate: string[]) {
+  private async updateAlertMaintenanceWindowIdsAndNames(idsToUpdate: string[]) {
     const esClient = await this.options.elasticsearchClientPromise;
     const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
 
-    const params: Record<string, string[]> = {};
+    const paramIds: Record<string, string[]> = {};
+    const paramNames: Record<string, string[]> = {};
 
     idsToUpdate.forEach((id) => {
       const newAlert = newAlerts.find((alert) => alert.matchesUuid(id));
       if (newAlert) {
-        params[id] = newAlert.getMaintenanceWindowIds();
+        paramIds[id] = newAlert.getMaintenanceWindowIds();
+        paramNames[id] = newAlert.getMaintenanceWindowNames();
       }
     });
 
@@ -826,18 +829,24 @@ export class AlertsClient<
         index: this.indexTemplateAndPattern.alias,
         script: {
           source: `
-            if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
-              ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params[ctx._source['${ALERT_UUID}']];
+            if (params.paramIds.containsKey(ctx._source['${ALERT_UUID}'])) {
+              ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params.paramIds[ctx._source['${ALERT_UUID}']];
+            }
+            if (params.paramNames.containsKey(ctx._source['${ALERT_UUID}'])) {
+              ctx._source['${ALERT_MAINTENANCE_WINDOW_NAMES}'] = params.paramNames[ctx._source['${ALERT_UUID}']];
             }
           `,
           lang: 'painless',
-          params,
+          params: {
+            paramIds,
+            paramNames,
+          },
         },
       });
       return response;
     } catch (err) {
       this.options.logger.warn(
-        `Error updating alert maintenance window IDs ${this.ruleInfoMessage}: ${err}`,
+        `Error updating alert maintenance window IDs and names ${this.ruleInfoMessage}: ${err}`,
         this.logTags
       );
       throw err;
@@ -930,7 +939,7 @@ export class AlertsClient<
       const uniqueMaintenanceWindowIds = [...new Set(appliedMaintenanceWindowIds)];
 
       if (uniqueAlertsId.length) {
-        await this.updateAlertMaintenanceWindowIds(uniqueAlertsId);
+        await this.updateAlertMaintenanceWindowIdsAndNames(uniqueAlertsId);
       }
 
       return {
