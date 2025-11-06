@@ -16,6 +16,7 @@ import {
   EuiImage,
   EuiCodeBlock,
 } from '@elastic/eui';
+import { ApiKeyForm } from '@kbn/workplaceai-api-keys-components';
 import { useCurrentUser } from '../hooks/use_current_user';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import headerHeroSvg from '../../assets/header_hero.svg';
@@ -48,16 +49,7 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
             </EuiCodeBlock>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill={false}
-              color="text"
-              size="s"
-              iconType="key"
-              iconSide="left"
-              onClick={() => {}}
-            >
-              API key
-            </EuiButton>
+            <ApiKeyForm hasTitle={false} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

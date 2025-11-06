@@ -28,6 +28,8 @@
     "@kbn/logging",
     "@kbn/data-sources-registry-plugin",
     "@kbn/react-query",
+    "@kbn/workplaceai-api-keys-components",
+    "@kbn/workplaceai-api-keys-server",
   ],
   "exclude": [
     "target/**/*",
