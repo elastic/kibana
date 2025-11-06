@@ -39,9 +39,10 @@ export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
   const waterfall = useMemo(() => {
     try {
       const legends = getLegends(traceItems);
-      const colorBy = legends.filter(({ type }) => type === WaterfallLegendType.ServiceName).length > 1
-        ? WaterfallLegendType.ServiceName
-        : WaterfallLegendType.Type;
+      const colorBy =
+        legends.filter(({ type }) => type === WaterfallLegendType.ServiceName).length > 1
+          ? WaterfallLegendType.ServiceName
+          : WaterfallLegendType.Type;
       const colorMap = createColorLookupMap(legends);
       const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
       const { rootItem, traceState, orphans } = getRootItemOrFallback(
