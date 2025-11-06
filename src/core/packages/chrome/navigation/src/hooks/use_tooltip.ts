@@ -8,7 +8,7 @@
  */
 
 import type { EuiToolTip } from '@elastic/eui';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 /**
  * Custom hook to manage tooltip visibility
@@ -20,9 +20,9 @@ import { useRef } from 'react';
 export const useTooltip = () => {
   const tooltipRef = useRef<EuiToolTip | null>(null);
 
-  const handleMouseOut = () => {
+  const handleMouseOut = useCallback(() => {
     tooltipRef.current?.hideToolTip();
-  };
+  }, []);
 
   return { tooltipRef, handleMouseOut };
 };
