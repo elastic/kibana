@@ -12,6 +12,7 @@ inversify
 canvas-confetti
 @types/canvas-confetti
 undici
+colors
 liquidjs
 @tanstack/react-table
 @tanstack/react-virtual

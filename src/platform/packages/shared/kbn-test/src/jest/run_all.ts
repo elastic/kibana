@@ -315,6 +315,9 @@ async function writeSummary(results: JestConfigResult[], log: ToolingLog, totalM
       head: ['cyan', 'bold'],
       border: ['gray'],
     },
+    colWidths: [150, 10, 12, 10],
+    wordWrap: true,
+    wrapOnWordBoundary: false,
   });
 
   // Read slow tests for each config
