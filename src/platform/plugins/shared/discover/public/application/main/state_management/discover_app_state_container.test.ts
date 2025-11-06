@@ -91,7 +91,7 @@ describe('Test discover app state container', () => {
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'first' }),
     });
-    const stateA = state.getState();
+    const stateA = state.get();
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'second' }),
     });

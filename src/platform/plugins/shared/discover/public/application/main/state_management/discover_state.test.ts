@@ -125,7 +125,7 @@ describe('Discover state', () => {
 
     test('changing URL to be propagated to appState', async () => {
       history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
-      expect(state.appState.getState()).toMatchInlineSnapshot(`
+      expect(state.appState.get()).toMatchInlineSnapshot(`
               Object {
                 "dataSource": Object {
                   "dataViewId": "modified",
@@ -138,7 +138,7 @@ describe('Discover state', () => {
     test('URL navigation to url without _a, state should not change', async () => {
       history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
       history.push('/');
-      expect(state.appState.getState()).toEqual({
+      expect(state.appState.get()).toEqual({
         dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
       });
     });
@@ -147,7 +147,7 @@ describe('Discover state', () => {
       state.appState.update({
         dataSource: createDataViewDataSource({ dataViewId: 'first' }),
       });
-      const stateA = state.appState.getState();
+      const stateA = state.appState.get();
       state.appState.update({
         dataSource: createDataViewDataSource({ dataViewId: 'second' }),
       });
@@ -215,7 +215,7 @@ describe('Discover state', () => {
 
       await jest.runAllTimersAsync();
 
-      expect(state.appState.getState()).toMatchInlineSnapshot(`
+      expect(state.appState.get()).toMatchInlineSnapshot(`
               Object {
                 "dataSource": Object {
                   "dataViewId": "modified",
@@ -235,7 +235,7 @@ describe('Discover state', () => {
 
       const { state } = await getState('/#?_a=(sort:!(!(timestamp,desc)))', { savedSearch });
       state.actions.initializeAndSync();
-      expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
+      expect(state.appState.get().sort).toEqual([['timestamp', 'desc']]);
       state.actions.stopSyncing();
     });
 
@@ -255,7 +255,7 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
+      expect(state.appState.get().sort).toEqual([['bytes', 'desc']]);
       state.actions.stopSyncing();
     });
   });
@@ -266,7 +266,7 @@ describe('Discover state', () => {
         "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))",
         { savedSearch: savedSearchMockWithTimeFieldNew }
       );
-      expect(state.appState.getState().query).toMatchInlineSnapshot(`
+      expect(state.appState.get().query).toMatchInlineSnapshot(`
               Object {
                 "language": "lucene",
                 "query": Object {
@@ -746,7 +746,7 @@ describe('Discover state', () => {
         })
       );
       expect(state.savedSearchState.getState().hideChart).toBe(undefined);
-      expect(state.appState.getState().hideChart).toBe(undefined);
+      expect(state.appState.get().hideChart).toBe(undefined);
     });
 
     test('loadSavedSearch without id ignoring invalid index in URL, adding a warning toast', async () => {
@@ -791,7 +791,7 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.appState.getState().dataSource).toEqual(createEsqlDataSource());
+      expect(state.appState.get().dataSource).toEqual(createEsqlDataSource());
       expect(mockServices.toastNotifications.addWarning).not.toHaveBeenCalled();
     });
 
@@ -1062,7 +1062,7 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.appState.getState().dataSource).toEqual(
+      expect(state.appState.get().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: adHocDataViewId! })
       );
       expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe(adHocDataViewId);
@@ -1109,12 +1109,12 @@ describe('Discover state', () => {
         ],
       });
       await state.actions.transitionFromDataViewToESQL(dataViewMockWithTimeField);
-      expect(state.appState.getState().query).toStrictEqual({
+      expect(state.appState.get().query).toStrictEqual({
         esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
       });
-      expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
+      expect(state.appState.get().sort).toEqual([['bytes', 'desc']]);
       expect(state.getCurrentTab().globalState.filters).toStrictEqual([]);
-      expect(state.appState.getState().filters).toStrictEqual([]);
+      expect(state.appState.get().filters).toStrictEqual([]);
     });
 
     test('transitionFromESQLToDataView', async () => {
@@ -1125,7 +1125,7 @@ describe('Discover state', () => {
       savedSearchWithQuery.searchSource.setField('query', query);
       const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
       await state.actions.transitionFromESQLToDataView('the-data-view-id');
-      expect(state.appState.getState().query).toStrictEqual({ query: '', language: 'kuery' });
+      expect(state.appState.get().query).toStrictEqual({ query: '', language: 'kuery' });
     });
 
     test('onChangeDataView', async () => {
@@ -1156,7 +1156,7 @@ describe('Discover state', () => {
 
       // test changed state, fetch should be called once and URL should be updated
       expect(dataState.fetch).toHaveBeenCalledTimes(2);
-      expect(state.appState.getState().dataSource).toEqual(
+      expect(state.appState.get().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
       );
       expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(
@@ -1190,7 +1190,7 @@ describe('Discover state', () => {
           ).currentDataView$.getValue()
         ).toBe(dataViewComplexMock);
       });
-      expect(state.appState.getState().dataSource).toEqual(
+      expect(state.appState.get().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
       );
       expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
@@ -1227,7 +1227,7 @@ describe('Discover state', () => {
           ).currentDataView$.getValue()
         ).toBe(dataViewAdHoc);
       });
-      expect(state.appState.getState().dataSource).toEqual(
+      expect(state.appState.get().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
       );
       expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
@@ -1307,7 +1307,7 @@ describe('Discover state', () => {
         { savedSearch: savedSearchMock }
       );
       jest.spyOn(mockServices.filterManager, 'getAppFilters').mockImplementation(() => {
-        return state.appState.getState().filters!;
+        return state.appState.get().filters!;
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -1347,7 +1347,7 @@ describe('Discover state', () => {
         })
       );
       await state.actions.createAndAppendAdHocDataView({ title: 'ad-hoc-test' });
-      expect(state.appState.getState().dataSource).toEqual(
+      expect(state.appState.get().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
       );
       expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe('ad-hoc-id');
@@ -1486,7 +1486,7 @@ describe('Discover state', () => {
 
     test('changing URL to be propagated to appState', async () => {
       history.push('/?_a=(dataSource:(dataViewId:modified,type:dataView))');
-      expect(state.appState.getState()).toMatchObject(
+      expect(state.appState.get()).toMatchObject(
         expect.objectContaining({
           dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
         })

@@ -486,7 +486,7 @@ export function getDiscoverStateContainer({
       const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       savedSearchContainer.update({
         nextDataView: currentDataView$.getValue(),
-        nextState: appStateContainer.getState(),
+        nextState: appStateContainer.get(),
         useFilterAndQueryServices: true,
       });
       addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
@@ -622,7 +622,7 @@ export function getDiscoverStateContainer({
 
   const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
     addLog('updateESQLQuery');
-    const { query: currentQuery } = appStateContainer.getState();
+    const { query: currentQuery } = appStateContainer.get();
 
     if (!isOfAggregateQueryType(currentQuery)) {
       throw new Error(

@@ -230,7 +230,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
       if (nextTab && nextTabStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
-        const appState = nextTabStateContainer.appState.getState();
+        const appState = nextTabStateContainer.appState.get();
         const { filters: appFilters, query } = appState;
 
         await urlStateStorage.set<QueryState>(

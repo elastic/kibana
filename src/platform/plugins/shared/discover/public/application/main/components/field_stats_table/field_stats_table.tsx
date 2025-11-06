@@ -67,7 +67,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
 
   // State from Discover we want the embeddable to reflect
   const showPreviewByDefault = useMemo(
-    () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
+    () => (stateContainer ? !stateContainer.appState.get().hideAggregatedPreview : true),
     [stateContainer]
   );
 

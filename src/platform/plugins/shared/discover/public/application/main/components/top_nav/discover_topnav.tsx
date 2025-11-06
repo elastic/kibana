@@ -161,7 +161,7 @@ export const DiscoverTopNav = ({
     } else {
       // remove savedQueryId from state
       const newState = {
-        ...appState.getState(),
+        ...appState.get(),
       };
       delete newState.savedQuery;
       appState.set(newState);

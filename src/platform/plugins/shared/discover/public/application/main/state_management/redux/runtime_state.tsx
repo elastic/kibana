@@ -116,7 +116,7 @@ export const selectTabRuntimeAppState = (
   tabId: string
 ) => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  return tabRuntimeState?.stateContainer$.getValue()?.appState?.getState();
+  return tabRuntimeState?.stateContainer$.getValue()?.appState?.get();
 };
 
 export const selectTabRuntimeInternalState = (
