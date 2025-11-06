@@ -73,42 +73,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
-        "id": "def-public.getSideNavVersion",
-        "type": "Function",
-        "tags": [],
-        "label": "getSideNavVersion",
-        "description": [],
-        "signature": [
-          "(featureFlags: ",
-          "FeatureFlagsStart",
-          ") => ",
-          "LayoutProjectSideNavVersion"
-        ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
-            "id": "def-public.getSideNavVersion.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "featureFlags",
-            "description": [],
-            "signature": [
-              "FeatureFlagsStart"
-            ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -146,21 +110,6 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
-        "id": "def-public.LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY",
-        "type": "string",
-        "tags": [],
-        "label": "LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY",
-        "description": [],
-        "signature": [
-          "\"core.chrome.projectSideNav\""
-        ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
         "id": "def-public.LayoutFeatureFlag",
         "type": "Type",
         "tags": [],
@@ -168,21 +117,6 @@
         "description": [],
         "signature": [
           "\"grid\" | \"legacy-fixed\""
-        ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
-        "id": "def-public.LayoutProjectSideNavVersion",
-        "type": "Type",
-        "tags": [],
-        "label": "LayoutProjectSideNavVersion",
-        "description": [],
-        "signature": [
-          "\"v2\" | \"v1\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
         "deprecated": false,
