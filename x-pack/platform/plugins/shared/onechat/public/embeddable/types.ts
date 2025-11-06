@@ -75,5 +75,11 @@ export interface EmbeddableConversationProps {
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
 }
 
+export interface EmbeddableConversationFlyoutProps {
+  onClose: () => void;
+  ariaLabelledBy: string;
+}
+
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
-  EmbeddableConversationProps;
+  EmbeddableConversationProps &
+  EmbeddableConversationFlyoutProps;
