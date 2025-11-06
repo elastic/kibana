@@ -15,6 +15,7 @@ import type { Server as HapiServer } from '@hapi/hapi';
 import type { IRouter } from '@kbn/core-http-server';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ServerMetricsCollector } from '@kbn/core-metrics-collectors-server-internal';
 import { createInternalHttpService } from '../utilities';
@@ -29,7 +30,10 @@ describe('ServerMetricsCollector', () => {
 
   beforeEach(async () => {
     server = createInternalHttpService();
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const contextSetup = contextServiceMock.createSetupContract();
     const httpSetup = await server.setup({
       context: contextSetup,
