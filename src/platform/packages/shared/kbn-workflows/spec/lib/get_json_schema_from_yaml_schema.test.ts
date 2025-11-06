@@ -135,3 +135,255 @@ describe('fixAdditionalPropertiesInSchema', () => {
     });
   });
 });
+
+describe('addFetcherToKibanaConnectors', () => {
+  it('should add fetcher parameter to Kibana connector steps in JSON schema', () => {
+    // Import the actual connector generation to test with real connectors
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
+
+    const mockConnectors = [
+      {
+        type: 'kibana.getCaseDefaultSpace',
+        connectorIdRequired: false,
+        description: 'GET /api/cases/:id',
+        methods: ['GET'],
+        patterns: ['/api/cases/{caseId}'],
+        isInternal: true,
+        parameterTypes: {
+          pathParams: ['caseId'],
+          urlParams: [],
+          bodyParams: [],
+        },
+        paramsSchema: z.object({
+          caseId: z.string(),
+        }),
+        outputSchema: z.any(),
+      },
+    ];
+
+    const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors);
+    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+
+    // Navigate to the step schema in the JSON schema
+    const fallbackItems = (jsonSchema as any).definitions.WorkflowSchema.properties.settings
+      .properties['on-failure'].properties.fallback.items;
+
+    expect(fallbackItems).toBeDefined();
+    expect(fallbackItems.anyOf).toBeDefined();
+
+    // Find the Kibana connector step
+    const kibanaStep = fallbackItems.anyOf.find(
+      (step: any) => step.properties?.type?.const === 'kibana.getCaseDefaultSpace'
+    );
+
+    expect(kibanaStep).toBeDefined();
+    expect(kibanaStep.properties.with.properties.fetcher).toBeDefined();
+
+    // FetcherConfigSchema is optional, so it creates an anyOf structure
+    const fetcherSchema = kibanaStep.properties.with.properties.fetcher;
+
+    // Check if it's an anyOf with object as one option (due to .optional())
+    if (fetcherSchema.anyOf) {
+      const objectSchema = fetcherSchema.anyOf.find((s: any) => s.type === 'object');
+      expect(objectSchema).toBeDefined();
+      expect(objectSchema.properties).toHaveProperty('skip_ssl_verification');
+      expect(objectSchema.properties).toHaveProperty('follow_redirects');
+      expect(objectSchema.properties).toHaveProperty('max_redirects');
+      expect(objectSchema.properties).toHaveProperty('keep_alive');
+    } else {
+      // Direct object schema
+      expect(fetcherSchema.type).toBe('object');
+      expect(fetcherSchema.properties).toHaveProperty('skip_ssl_verification');
+      expect(fetcherSchema.properties).toHaveProperty('follow_redirects');
+      expect(fetcherSchema.properties).toHaveProperty('max_redirects');
+      expect(fetcherSchema.properties).toHaveProperty('keep_alive');
+    }
+  });
+
+  it('should not add fetcher to non-Kibana connector steps', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
+
+    const mockConnectors = [
+      {
+        type: 'elasticsearch.search',
+        connectorIdRequired: false,
+        description: 'Elasticsearch search',
+        methods: ['POST'],
+        patterns: ['/{index}/_search'],
+        isInternal: true,
+        parameterTypes: {
+          pathParams: ['index'],
+          urlParams: [],
+          bodyParams: [],
+        },
+        paramsSchema: z.object({
+          index: z.string(),
+        }),
+        outputSchema: z.any(),
+      },
+    ];
+
+    const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors);
+    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+
+    // Navigate to the step schema in the JSON schema
+    const fallbackItems = (jsonSchema as any).definitions.WorkflowSchema.properties.settings
+      .properties['on-failure'].properties.fallback.items;
+
+    expect(fallbackItems).toBeDefined();
+    expect(fallbackItems.anyOf).toBeDefined();
+
+    // Find the ES connector step
+    const esStep = fallbackItems.anyOf.find(
+      (step: any) => step.properties?.type?.const === 'elasticsearch.search'
+    );
+
+    expect(esStep).toBeDefined();
+    // Fetcher should NOT be added to ES connectors
+    expect(esStep.properties.with.properties.fetcher).toBeUndefined();
+  });
+
+  it('should handle Kibana connectors with complex schemas', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
+
+    const mockConnectors = [
+      {
+        type: 'kibana.postActionsConnectorId',
+        connectorIdRequired: false,
+        description: 'POST /api/actions/connector/:id',
+        methods: ['POST'],
+        patterns: ['/api/actions/connector/{id}'],
+        isInternal: true,
+        parameterTypes: {
+          pathParams: ['id'],
+          urlParams: [],
+          bodyParams: ['config'],
+        },
+        paramsSchema: z.object({
+          id: z.string(),
+          config: z.record(z.any()),
+        }),
+        outputSchema: z.any(),
+      },
+      {
+        type: 'elasticsearch.index',
+        connectorIdRequired: false,
+        description: 'Elasticsearch index',
+        methods: ['POST'],
+        patterns: ['/{index}/_doc'],
+        isInternal: true,
+        parameterTypes: {
+          pathParams: ['index'],
+          urlParams: [],
+          bodyParams: [],
+        },
+        paramsSchema: z.object({
+          index: z.string(),
+        }),
+        outputSchema: z.any(),
+      },
+    ];
+
+    const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors);
+    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+
+    // Navigate to the step schemas
+    const fallbackItems = (jsonSchema as any).definitions.WorkflowSchema.properties.settings
+      .properties['on-failure'].properties.fallback.items;
+
+    expect(fallbackItems).toBeDefined();
+    expect(fallbackItems.anyOf).toBeDefined();
+
+    // Find both connectors
+    const kibanaStep = fallbackItems.anyOf.find(
+      (step: any) => step.properties?.type?.const === 'kibana.postActionsConnectorId'
+    );
+    const esStep = fallbackItems.anyOf.find(
+      (step: any) => step.properties?.type?.const === 'elasticsearch.index'
+    );
+
+    // Kibana connector should have fetcher
+    expect(kibanaStep).toBeDefined();
+    expect(kibanaStep.properties.with.properties.fetcher).toBeDefined();
+
+    // ES connector should NOT have fetcher
+    expect(esStep).toBeDefined();
+    expect(esStep.properties.with.properties.fetcher).toBeUndefined();
+  });
+
+  it('should handle workflow schema without steps', () => {
+    // This shouldn't throw an error - generate schema with empty connectors
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
+
+    const workflowSchema = generateYamlSchemaFromConnectors([]);
+    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+
+    expect(jsonSchema).toBeDefined();
+    // Should complete without errors even with no connectors
+  });
+
+  it('should add fetcher with correct schema structure', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
+
+    const mockConnectors = [
+      {
+        type: 'kibana.testEndpoint',
+        connectorIdRequired: false,
+        description: 'Test endpoint',
+        methods: ['GET'],
+        patterns: ['/api/test'],
+        isInternal: true,
+        parameterTypes: {
+          pathParams: [],
+          urlParams: [],
+          bodyParams: [],
+        },
+        paramsSchema: z.object({
+          param: z.string(),
+        }),
+        outputSchema: z.any(),
+      },
+    ];
+
+    const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors);
+    const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
+
+    const fallbackItems = (jsonSchema as any).definitions.WorkflowSchema.properties.settings
+      .properties['on-failure'].properties.fallback.items;
+
+    expect(fallbackItems).toBeDefined();
+    expect(fallbackItems.anyOf).toBeDefined();
+
+    const kibanaStep = fallbackItems.anyOf.find(
+      (step: any) => step.properties?.type?.const === 'kibana.testEndpoint'
+    );
+
+    expect(kibanaStep).toBeDefined();
+    const fetcherSchema = kibanaStep.properties.with.properties.fetcher;
+
+    // Verify fetcher schema structure (FetcherConfigSchema is optional, creates anyOf)
+    expect(fetcherSchema).toBeDefined();
+
+    if (fetcherSchema.anyOf) {
+      const objectSchema = fetcherSchema.anyOf.find((s: any) => s.type === 'object');
+      expect(objectSchema).toBeDefined();
+      expect(objectSchema.properties.skip_ssl_verification).toEqual({ type: 'boolean' });
+      expect(objectSchema.properties.follow_redirects).toEqual({ type: 'boolean' });
+      expect(objectSchema.properties.max_redirects).toEqual({ type: 'number' });
+      expect(objectSchema.properties.keep_alive).toEqual({ type: 'boolean' });
+      expect(objectSchema.additionalProperties).toBe(false);
+    } else {
+      expect(fetcherSchema.type).toBe('object');
+      expect(fetcherSchema.properties.skip_ssl_verification).toEqual({ type: 'boolean' });
+      expect(fetcherSchema.properties.follow_redirects).toEqual({ type: 'boolean' });
+      expect(fetcherSchema.properties.max_redirects).toEqual({ type: 'number' });
+      expect(fetcherSchema.properties.keep_alive).toEqual({ type: 'boolean' });
+      expect(fetcherSchema.additionalProperties).toBe(false);
+    }
+  });
+});
