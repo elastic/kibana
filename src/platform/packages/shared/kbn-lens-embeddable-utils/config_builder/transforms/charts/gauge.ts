@@ -166,10 +166,7 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.colorMode === 'palette' && visualization.palette) {
-      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      if (colorByValue) {
-        props.metric.color = colorByValue;
-      }
+      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette);
     }
   }
 
