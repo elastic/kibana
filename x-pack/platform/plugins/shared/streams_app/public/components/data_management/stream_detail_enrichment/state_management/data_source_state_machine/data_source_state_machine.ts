@@ -169,6 +169,12 @@ export const dataSourceMachine = setup({
             { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
           ],
         },
+        'dataSource.change': {
+          actions: [
+            { type: 'storeDataSource', params: ({ event }) => event },
+            { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+          ],
+        },
         'dataSource.delete': 'deleted',
       },
     },

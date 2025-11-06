@@ -32,8 +32,9 @@ export const CustomSamplesDataSourceCard = ({
     (snapshot) => snapshot.context.dataSource as CustomSamplesDataSourceWithUIAttributes
   );
 
-  const isDisabled = useDataSourceSelector(dataSourceRef, (snapshot) =>
-    snapshot.matches('disabled')
+  const isDisabled = useDataSourceSelector(
+    dataSourceRef,
+    (snapshot) => !snapshot.can({ type: 'dataSource.change', dataSource })
   );
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +78,12 @@ export const CustomSamplesDataSourceCard = ({
       subtitle={DATA_SOURCES_I18N.customSamples.subtitle}
       isForCompleteSimulation
     >
-      <NameField onChange={handleNameChange} value={dataSource.name} disabled={isDisabled} />
+      <NameField
+        onChange={handleNameChange}
+        value={dataSource.name}
+        disabled={isDisabled}
+        data-test-subj="streamsAppCustomSamplesDataSourceNameField"
+      />
       <EuiFormRow
         label={DATA_SOURCES_I18N.customSamples.label}
         helpText={DATA_SOURCES_I18N.customSamples.helpText}

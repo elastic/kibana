@@ -95,6 +95,7 @@ const DataSourceSelector = () => {
       aria-label={i18n.translate('xpack.streams.dataSource.dataSourceSelector.ariaLabel', {
         defaultMessage: 'Select a data source...',
       })}
+      data-test-subj="streamsAppProcessingDataSourceSelector"
       options={options}
       valueOfSelected={selectedDataSourceRef?.id}
       onChange={(id) => selectDataSource(id)}

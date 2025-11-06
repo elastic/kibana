@@ -74,7 +74,7 @@ export const DataSourceCard = ({
 
   return (
     <EuiCheckableCard
-      id={`dataSourceCard-${dataSourceRef.id}`}
+      id={`dataSourceCard-${dataSource.type}-${dataSourceRef.id}`}
       css={css`
         [class*='euiSplitPanel__inner']:has(> label.euiCheckableCard__label) {
           overflow-block: auto;
