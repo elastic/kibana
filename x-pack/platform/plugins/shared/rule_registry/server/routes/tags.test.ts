@@ -17,7 +17,7 @@ const getPatchTagsByAlertIdsRequest = () =>
     body: {
       alertIds: ['alert-1'],
       index: '.alerts-security.alerts',
-      tags: ['new-tag'],
+      addTags: ['new-tag'],
     },
   });
 
@@ -50,24 +50,6 @@ describe('bulkPatchAlertTagsRoute', () => {
   });
 
   describe('success scenarios', () => {
-    test('returns 200 when updating tags by alertIds', async () => {
-      const response = await server.inject(getPatchTagsByAlertIdsRequest(), context);
-      expect(response.status).toEqual(200);
-      expect(response.body).toEqual({
-        success: true,
-        failures: [],
-        updated: 1,
-      });
-      expect(clients.rac.patchTags).toHaveBeenCalledWith({
-        alertIds: ['alert-1'],
-        index: '.alerts-security.alerts',
-        tags: ['new-tag'],
-        addTags: undefined,
-        removeTags: undefined,
-        query: undefined,
-      });
-    });
-
     test('returns 200 when updating tags by query', async () => {
       clients.rac.patchTags.mockResolvedValue({
         failures: [],
@@ -85,7 +67,6 @@ describe('bulkPatchAlertTagsRoute', () => {
         index: '.alerts-security.alerts',
         addTags: ['tag-to-add'],
         removeTags: ['tag-to-remove'],
-        tags: undefined,
         alertIds: undefined,
       });
     });
@@ -100,7 +81,7 @@ describe('bulkPatchAlertTagsRoute', () => {
         body: {
           alertIds: largeAlertIds,
           index: '.alerts-security.alerts',
-          tags: ['some-tag'],
+          addTags: ['some-tag'],
         },
       });
       const response = await server.inject(request, context);
@@ -127,7 +108,7 @@ describe('bulkPatchAlertTagsRoute', () => {
         ...getPatchTagsByAlertIdsRequest(),
         body: {
           alertIds: ['alert-1'],
-          tags: ['new-tag'],
+          addTags: ['new-tag'],
         },
       };
       await expect(server.inject(request, context)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -142,7 +123,7 @@ describe('bulkPatchAlertTagsRoute', () => {
           alertIds: ['alert-1'],
           query: { term: { 'some.field': 'some-value' } },
           index: '.alerts-security.alerts',
-          tags: ['new-tag'],
+          addTags: ['new-tag'],
         },
       };
       await expect(server.inject(request, context)).rejects.toThrowError();
@@ -153,20 +134,7 @@ describe('bulkPatchAlertTagsRoute', () => {
         ...getPatchTagsByAlertIdsRequest(),
         body: {
           index: '.alerts-security.alerts',
-          tags: ['new-tag'],
-        },
-      };
-      await expect(server.inject(request, context)).rejects.toThrowError();
-    });
-
-    test('rejects if tags and addTags/removeTags are provided', async () => {
-      const request = {
-        ...getPatchTagsByAlertIdsRequest(),
-        body: {
-          alertIds: ['alert-1'],
-          index: '.alerts-security.alerts',
-          tags: ['new-tag'],
-          addTags: ['another-tag'],
+          addTags: ['new-tag'],
         },
       };
       await expect(server.inject(request, context)).rejects.toThrowError();

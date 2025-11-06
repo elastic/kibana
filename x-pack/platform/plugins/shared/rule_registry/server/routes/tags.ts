@@ -33,18 +33,10 @@ export const bulkPatchAlertTagsRoute = (router: IRouter<RacRequestHandlerContext
                 query: t.union([t.object, t.string]),
               }),
             ]),
-            t.union([
-              t.strict({
-                tags: t.array(t.string),
-                addTags: t.undefined,
-                removeTags: t.undefined,
-              }),
-              t.partial({
-                tags: t.undefined,
-                addTags: t.array(t.string),
-                removeTags: t.array(t.string),
-              }),
-            ]),
+            t.partial({
+              addTags: t.array(t.string),
+              removeTags: t.array(t.string),
+            }),
           ])
         ),
       },
@@ -61,7 +53,7 @@ export const bulkPatchAlertTagsRoute = (router: IRouter<RacRequestHandlerContext
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { query, alertIds, index, addTags, removeTags, tags } = req.body;
+        const { query, alertIds, index, addTags, removeTags } = req.body;
 
         if (alertIds != null && alertIds.length > 1000) {
           return response.badRequest({
@@ -75,7 +67,6 @@ export const bulkPatchAlertTagsRoute = (router: IRouter<RacRequestHandlerContext
           alertIds,
           addTags,
           removeTags,
-          tags,
           query,
           index,
         });

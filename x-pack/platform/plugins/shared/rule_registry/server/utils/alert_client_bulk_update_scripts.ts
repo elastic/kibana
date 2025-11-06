@@ -28,7 +28,3 @@ export const REMOVE_TAGS_UPDATE_SCRIPT = `
     }
   }
 `;
-
-export const REPLACE_TAGS_UPDATE_SCRIPT = `
-  ctx._source['${ALERT_WORKFLOW_TAGS}'] = params.tags;
-`;

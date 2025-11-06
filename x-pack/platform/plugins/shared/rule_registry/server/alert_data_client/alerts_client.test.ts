@@ -16,7 +16,6 @@ import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-da
 import {
   ADD_TAGS_UPDATE_SCRIPT,
   REMOVE_TAGS_UPDATE_SCRIPT,
-  REPLACE_TAGS_UPDATE_SCRIPT,
 } from '../utils/alert_client_bulk_update_scripts';
 
 describe('AlertsClient', () => {
@@ -714,57 +713,6 @@ describe('AlertsClient', () => {
               params: {
                 addTags: ['urgent'],
                 removeTags: ['outdated'],
-              },
-            },
-          },
-        ],
-      });
-    });
-
-    it('should bulk update alerts with tags', async () => {
-      await alertsClient.patchTags({
-        alertIds: ['alert-1', 'alert-2'],
-        index: '.alerts-security.alerts-default',
-        tags: ['urgent'],
-      });
-
-      expect(esClientMock.mget).toHaveBeenCalledWith({
-        docs: [
-          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
-          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
-        ],
-      });
-
-      expect(esClientMock.bulk).toHaveBeenCalledWith({
-        refresh: 'wait_for',
-        body: [
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-1',
-            },
-          },
-          {
-            script: {
-              source: [REPLACE_TAGS_UPDATE_SCRIPT].join('\n'),
-              lang: 'painless',
-              params: {
-                tags: ['urgent'],
-              },
-            },
-          },
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-2',
-            },
-          },
-          {
-            script: {
-              source: [REPLACE_TAGS_UPDATE_SCRIPT].join('\n'),
-              lang: 'painless',
-              params: {
-                tags: ['urgent'],
               },
             },
           },

@@ -74,7 +74,6 @@ import type { GetAlertFieldsResponseV1 } from '../routes/get_alert_fields';
 import {
   ADD_TAGS_UPDATE_SCRIPT,
   REMOVE_TAGS_UPDATE_SCRIPT,
-  REPLACE_TAGS_UPDATE_SCRIPT,
 } from '../utils/alert_client_bulk_update_scripts';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
@@ -120,7 +119,6 @@ export interface PatchTagOptions<Params extends RuleTypeParams> {
   alertIds?: string[] | null;
   addTags?: string[] | null;
   removeTags?: string[] | null;
-  tags?: string[] | null;
   index: string;
   query?: object | string | null;
 }
@@ -880,8 +878,7 @@ export class AlertsClient {
     index,
     addTags,
     removeTags,
-    tags,
-  }: PatchTagOptions<Params> & { addTags?: string[]; removeTags?: string[]; tags?: string[] }) {
+  }: PatchTagOptions<Params> & { addTags?: string[]; removeTags?: string[] }) {
     // rejects at the route level if more than 1000 id's are passed in
     const scriptOps: string[] = [];
     const params: Record<string, string[] | STATUS_VALUES> = {};
@@ -894,11 +891,6 @@ export class AlertsClient {
     if (removeTags != null && removeTags.length > 0) {
       params.removeTags = removeTags;
       scriptOps.push(REMOVE_TAGS_UPDATE_SCRIPT);
-    }
-
-    if (tags != null && tags.length > 0) {
-      params.tags = tags;
-      scriptOps.push(REPLACE_TAGS_UPDATE_SCRIPT);
     }
 
     if (scriptOps.length === 0) {
