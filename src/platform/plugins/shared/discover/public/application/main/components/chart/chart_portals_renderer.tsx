@@ -230,9 +230,9 @@ const CustomChartSectionWrapper = ({
   const onInitialStateChange = useCallback(
     (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
       // Defer dispatch to next tick - ensures React render cycle is complete
-      setTimeout(() => {
-        dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));
-      }, 0);
+      // setTimeout(() => {
+      dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));
+      // }, 0);
     },
     [setMetricsGridState, dispatch]
   );

@@ -110,7 +110,7 @@ export const ChartSectionTemplate = ({
 
           {leftSide && (
             <EuiFlexItem grow data-toolbar-section="left">
-              <EuiFlexGroup direction="row" gutterSize="s">
+              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                 {React.Children.toArray(leftSide).map((child, i) => (
                   <EuiFlexItem grow={false} key={i}>
                     {child}
