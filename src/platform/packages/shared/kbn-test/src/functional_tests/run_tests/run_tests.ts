@@ -20,6 +20,7 @@ import { Config, readConfigFile } from '../../functional_test_runner';
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
+import { runDockerServers } from '../lib/run_docker_servers';
 import type { RunTestsOptions } from './flags';
 
 /**
@@ -106,12 +107,13 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         let shutdownEs;
+        let shutdownDockerServers;
         try {
-          log.info('🚀 Starting Elasticsearch and Kibana in parallel...');
+          log.info('🚀 Starting Elasticsearch, Docker servers, and Kibana in parallel...');
 
-          // Start both ES and Kibana in parallel
+          // Start ES, Docker servers, and Kibana in parallel
           // Kibana has built-in retry logic for ES connections, so it will wait for ES to be ready
-          // Use Promise.allSettled to ensure both complete (or fail) before proceeding
+          // Use Promise.allSettled to ensure all complete (or fail) before proceeding
           const results = await Promise.allSettled([
             // Start Elasticsearch - this completes when ES cluster health is yellow/green
             process.env.TEST_ES_DISABLE_STARTUP !== 'true'
@@ -120,6 +122,16 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                   return shutdown;
                 })
               : Promise.resolve(undefined),
+
+            // Start docker servers (e.g., package registry) early alongside ES
+            // Only some tests need this, but if they need it it's faster to start them here.
+            // runDockerServers decides if the test needs docker servers
+            runDockerServers({ log, config, onEarlyExit }).then((shutdown) => {
+              if (shutdown) {
+                log.info('✅ Docker servers are ready');
+              }
+              return shutdown;
+            }),
 
             // Start Kibana - will retry ES connections until successful
             runKibanaServer({
@@ -138,11 +150,15 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             }),
           ]);
 
-          // Check if either service failed to start
-          const [esResult, kibanaResult] = results;
+          // Check if any service failed to start
+          const [esResult, dockerResult, kibanaResult] = results;
 
           if (esResult.status === 'rejected') {
             throw esResult.reason;
+          }
+
+          if (dockerResult.status === 'rejected') {
+            throw dockerResult.reason;
           }
 
           if (kibanaResult.status === 'rejected') {
@@ -150,6 +166,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           }
 
           shutdownEs = esResult.value;
+          shutdownDockerServers = dockerResult.value;
 
           if (abortCtrl.signal.aborted) {
             return;
@@ -208,6 +225,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
             await procs.stop('kibana');
           } finally {
+            // Clean up docker servers before ES
+            if (shutdownDockerServers) {
+              await shutdownDockerServers();
+            }
             if (shutdownEs) {
               await shutdownEs();
             }
