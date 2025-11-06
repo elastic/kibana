@@ -17,6 +17,7 @@ import type {
   ConvertProcessor,
   RemoveByPrefixProcessor,
   RemoveProcessor,
+  DropProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -78,6 +79,12 @@ export type IngestPipelineRemoveProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; where: 'if' }
 >;
 
+// Drop
+export type IngestPipelineDropProcessor = RenameFieldsAndRemoveAction<
+  DropProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -88,6 +95,7 @@ export type IngestPipelineProcessor =
   | IngestPipelineGrokProcessor
   | IngestPipelineDissectProcessor
   | IngestPipelineDateProcessor
+  | IngestPipelineDropProcessor
   | IngestPipelineRenameProcessor
   | IngestPipelineSetProcessor
   | IngestPipelineAppendProcessor

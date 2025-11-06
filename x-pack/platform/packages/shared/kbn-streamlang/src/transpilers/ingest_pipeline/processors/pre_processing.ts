@@ -16,6 +16,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   grok: { from: 'field', where: 'if' },
   dissect: { from: 'field', where: 'if' },
   date: { from: 'field', to: 'target_field', where: 'if' },
+  drop_document: { where: 'if' },
   rename: { from: 'field', to: 'target_field', where: 'if' },
   set: { to: 'field', where: 'if' },
   append: { to: 'field', where: 'if' },

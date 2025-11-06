@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { StreamlangDSL } from '../../../../types/streamlang';
 import type {
-  RenameProcessor,
-  SetProcessor,
-  GrokProcessor,
-  DateProcessor,
-  DissectProcessor,
-  ManualIngestPipelineProcessor,
   AppendProcessor,
   ConvertProcessor,
+  DateProcessor,
+  DissectProcessor,
+  GrokProcessor,
+  ManualIngestPipelineProcessor,
+  RenameProcessor,
+  SetProcessor,
 } from '../../../../types/processors';
+import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
