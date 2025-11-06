@@ -13,7 +13,6 @@ import { type ESQLControlState, apiPublishesESQLVariables } from '@kbn/esql-type
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { StickyControlState } from '@kbn/controls-schemas';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
 
 export const addControlsFromSavedSession = async (
@@ -36,7 +35,7 @@ export const addControlsFromSavedSession = async (
   const esqlVariables = esqlVariables$?.getValue();
 
   // Only add controls whose variableName does not exist in current esqlVariables
-  await asyncForEach(Object.values(controlsState), async (panel): Promise<void> => {
+  for (const panel of Object.values(controlsState)) {
     const variableName = panel.variableName;
     const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
     if (!variableExists) {
@@ -49,5 +48,5 @@ export const addControlsFromSavedSession = async (
         },
       });
     }
-  });
+  }
 };
