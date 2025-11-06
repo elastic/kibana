@@ -472,6 +472,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
   SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
+  DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
