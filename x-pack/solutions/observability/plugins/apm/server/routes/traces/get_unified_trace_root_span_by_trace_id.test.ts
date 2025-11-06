@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRootItemByTraceId } from './get_root_item_by_trace_id';
+import { getUnifiedTraceRootSpanByTraceId } from './get_unified_trace_root_span_by_trace_id';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
@@ -18,7 +18,7 @@ import {
   SPAN_ID,
 } from '../../../common/es_fields/apm';
 
-describe('getRootItemByTraceId', () => {
+describe('getUnifiedTraceRootSpanByTraceId', () => {
   const traceId = 'test-trace-id';
   const start = 1000000;
   const end = 2000000;
@@ -53,7 +53,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -119,7 +119,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -149,7 +149,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -178,7 +178,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -207,7 +207,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -231,7 +231,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -250,7 +250,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -278,7 +278,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -304,7 +304,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -329,7 +329,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      const result = await getRootItemByTraceId({
+      const result = await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -350,7 +350,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      await getRootItemByTraceId({
+      await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -374,7 +374,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      await getRootItemByTraceId({
+      await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,
@@ -398,7 +398,7 @@ describe('getRootItemByTraceId', () => {
         },
       });
 
-      await getRootItemByTraceId({
+      await getUnifiedTraceRootSpanByTraceId({
         traceId,
         apmEventClient,
         start,

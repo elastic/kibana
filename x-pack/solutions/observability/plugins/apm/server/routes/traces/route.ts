@@ -7,7 +7,7 @@
 
 import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { type ErrorsByTraceId, type SpanDocument } from '@kbn/apm-types';
+import { type ErrorsByTraceId, type SpanDocument, type TraceRootSpan } from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
@@ -37,8 +37,8 @@ import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { normalizeErrors } from './normalize_errors';
-import { getRootItemByTraceId, type TraceRootSpan } from './get_root_item_by_trace_id';
 import { getUnifiedTraceSpan } from './get_unified_trace_span';
+import { getUnifiedTraceRootSpanByTraceId } from './get_unified_trace_root_span_by_trace_id';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -287,7 +287,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
 });
 
 const rootItemByTraceIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}/root_item',
+  endpoint: 'GET /internal/apm/unified_traces/{traceId}/root_span',
   params: t.type({
     path: t.type({
       traceId: t.string,
@@ -305,7 +305,7 @@ const rootItemByTraceIdRoute = createApmServerRoute({
 
     const apmEventClient = await getApmEventClient(resources);
 
-    return getRootItemByTraceId({ traceId, apmEventClient, start, end });
+    return getUnifiedTraceRootSpanByTraceId({ traceId, apmEventClient, start, end });
   },
 });
 

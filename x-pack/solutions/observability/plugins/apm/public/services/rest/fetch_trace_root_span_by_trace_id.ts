@@ -8,7 +8,7 @@
 import type { APIReturnType } from './create_call_apm_api';
 import { callApmApi } from './create_call_apm_api';
 
-type TraceRootSpan = APIReturnType<'GET /internal/apm/traces/{traceId}/root_item'>;
+type TraceRootSpan = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/root_span'>;
 
 export const fetchRootSpanByTraceId = (
   {
@@ -22,7 +22,7 @@ export const fetchRootSpanByTraceId = (
   },
   signal: AbortSignal
 ): Promise<TraceRootSpan | undefined> =>
-  callApmApi('GET /internal/apm/traces/{traceId}/root_item', {
+  callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
     params: {
       path: { traceId },
       query: {

@@ -23,7 +23,7 @@ import {
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 
-export async function getRootItemByTraceId({
+export async function getUnifiedTraceRootSpanByTraceId({
   traceId,
   apmEventClient,
   start,
