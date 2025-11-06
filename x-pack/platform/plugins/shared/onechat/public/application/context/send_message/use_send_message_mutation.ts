@@ -7,7 +7,7 @@
 
 import { useMutation } from '@kbn/react-query';
 import { useRef, useState } from 'react';
-import { useAgentId } from '../../hooks/use_conversation';
+import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
@@ -30,6 +30,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
+  const { conversation } = useConversation();
   const {
     pendingMessageState: { error, pendingMessage },
     setPendingMessage,
@@ -49,7 +50,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       return Promise.reject(new Error('Abort signal not present'));
     }
 
-    const processedAttachments = await getProcessedAttachments();
+    const processedAttachments = getProcessedAttachments
+      ? await getProcessedAttachments(conversation)
+      : [];
 
     const events$ = chatService.chat({
       signal,
@@ -57,7 +60,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
-      attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
+      attachments: processedAttachments,
     });
 
     return subscribeToChatEvents(events$);

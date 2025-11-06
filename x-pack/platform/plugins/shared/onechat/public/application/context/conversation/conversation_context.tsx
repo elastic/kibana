@@ -7,8 +7,8 @@
 
 import { createContext, useContext } from 'react';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { Conversation } from '@kbn/onechat-common/chat';
 import type { ConversationActions } from './use_conversation_actions';
-import type { AttachmentList } from '../../../embeddable/types';
 
 interface ConversationContextValue {
   conversationId?: string;
@@ -17,10 +17,10 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
-  attachments?: AttachmentList;
+  // attachments?: UiAttachment[];
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
-  getProcessedAttachments: () => Promise<AttachmentInput[]>;
+  getProcessedAttachments?: (conversation?: Conversation) => Promise<AttachmentInput[]>;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { OnechatInternalService } from '../services';
 
@@ -13,15 +14,13 @@ export interface EmbeddableConversationDependencies {
   coreStart: CoreStart;
 }
 
-export type AttachmentsGetContent = () =>
-  | Promise<Record<string, unknown>>
-  | Record<string, unknown>;
+export type AttachmentsGetContent = () => MaybePromise<Record<string, unknown>>;
 
-export type AttachmentList = Array<{
+export interface UiAttachment {
   id: string;
   type: string;
   getContent: AttachmentsGetContent;
-}>;
+}
 
 export interface EmbeddableConversationProps {
   /**
@@ -67,7 +66,7 @@ export interface EmbeddableConversationProps {
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.
    */
-  attachments?: AttachmentList;
+  attachments?: UiAttachment[];
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &

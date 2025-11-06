@@ -7,21 +7,28 @@
 
 import { isEqual } from 'lodash';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { EmbeddableConversationProps } from '../../../embeddable/types';
+import type { UiAttachment } from '../../../embeddable/types';
 
 /**
  * Processes attachments and returns only those that have changed or are new.
  * This function compares the current attachment content with previously sent content
  * to avoid re-sending unchanged attachments.
  *
- * @param attachments - The attachments to process
- * @param attachmentContentMapRef - Reference to the map tracking previously sent attachment content
+ * @param params - Object containing:
+ *   - attachments: The attachments to process
+ *   - getAttachment: Function to retrieve previously sent attachment content by ID
+ *   - setAttachment: Function to store attachment content by ID
  * @returns Promise resolving to an array of attachments that need to be sent
  */
-export async function getProcessedAttachments(
-  attachments: EmbeddableConversationProps['attachments'],
-  attachmentContentMapRef: React.MutableRefObject<Map<string, Record<string, unknown>>>
-): Promise<AttachmentInput[]> {
+export async function getProcessedAttachments({
+  attachments,
+  getAttachment,
+  setAttachment,
+}: {
+  attachments: UiAttachment[];
+  getAttachment: (id: string) => Record<string, unknown> | undefined;
+  setAttachment: (id: string, content: Record<string, unknown>) => void;
+}): Promise<AttachmentInput[]> {
   if (!attachments || attachments.length === 0) {
     return [];
   }
@@ -31,7 +38,7 @@ export async function getProcessedAttachments(
   for (const attachment of attachments) {
     try {
       const currentContent = await Promise.resolve(attachment.getContent());
-      const previousContent = attachmentContentMapRef.current.get(attachment.id);
+      const previousContent = getAttachment(attachment.id);
 
       const contentChanged = !isEqual(currentContent, previousContent);
 
@@ -43,7 +50,7 @@ export async function getProcessedAttachments(
           hidden: true,
         });
 
-        attachmentContentMapRef.current.set(attachment.id, currentContent);
+        setAttachment(attachment.id, currentContent);
       }
     } catch (attachmentError) {
       // eslint-disable-next-line no-console

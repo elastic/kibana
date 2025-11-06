@@ -9,13 +9,15 @@ import React, { useMemo, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { Conversation } from '@kbn/onechat-common';
 import type { EmbeddableConversationInternalProps } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
-import { AttachmentMapRebuilder } from './attachment_map_rebuilder';
+import { useConversation } from '../../hooks/use_conversation';
+import { rebuildAttachmentMapFromConversation } from './rebuild_attachment_map_from_conversation';
 import { getProcessedAttachments } from './get_processed_attachments';
 
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
@@ -30,8 +32,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 }) => {
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
-
-  const attachmentContentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
 
   const kibanaServices = useMemo(
     () => ({
@@ -108,8 +108,22 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onConversationCreated,
   });
 
+  const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+
+  const { conversation } = useConversation();
+
+  useEffect(() => {
+    attachmentMapRef.current = rebuildAttachmentMapFromConversation(conversation);
+  }, [conversation]);
+
   const handleGetProcessedAttachments = useCallback(
-    () => getProcessedAttachments(contextProps.attachments, attachmentContentMapRef),
+    (_conversation?: Conversation) => {
+      return getProcessedAttachments({
+        attachments: contextProps.attachments ?? [],
+        getAttachment: (id) => attachmentMapRef.current.get(id),
+        setAttachment: (id, content) => attachmentMapRef.current.set(id, content),
+      });
+    },
     [contextProps.attachments]
   );
 
@@ -144,11 +158,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         <QueryClientProvider client={queryClient}>
           <OnechatServicesContext.Provider value={services}>
             <ConversationContext.Provider value={conversationContextValue}>
-              <SendMessageProvider>
-                <AttachmentMapRebuilder attachmentContentMapRef={attachmentContentMapRef}>
-                  {children}
-                </AttachmentMapRebuilder>
-              </SendMessageProvider>
+              <SendMessageProvider>{children}</SendMessageProvider>
             </ConversationContext.Provider>
           </OnechatServicesContext.Provider>
         </QueryClientProvider>
