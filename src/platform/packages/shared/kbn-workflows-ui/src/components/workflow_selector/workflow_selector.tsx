@@ -144,7 +144,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
         {option.secondaryContent && (
           <EuiText size="xs" color="subdued" className="eui-displayBlock">
             <small>
-              <EuiHighlight search={searchValue}>{option.secondaryContent}</EuiHighlight>
+              <EuiHighlight search={searchValue}>{option.secondaryContent as string}</EuiHighlight>
             </small>
           </EuiText>
         )}
