@@ -39,6 +39,17 @@ interface WorkflowSelectorProps {
   error?: string;
 }
 
+// Default configuration
+const defaultConfig: WorkflowSelectorConfig = {
+  label: i18n.WORKFLOW_ID_LABEL,
+  placeholder: i18n.SELECT_WORKFLOW_PLACEHOLDER,
+  createWorkflowLinkText: i18n.CREATE_NEW_WORKFLOW,
+  errorMessages: {
+    selectedWorkflowDisabled: i18n.SELECTED_WORKFLOW_DISABLED_ERROR,
+    loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
+  },
+};
+
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   selectedWorkflowId,
   onWorkflowChange,
@@ -51,21 +62,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const { application } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
-  // Default configuration
-  const defaultConfig: WorkflowSelectorConfig = useMemo(
-    () => ({
-      label: i18n.WORKFLOW_ID_LABEL,
-      placeholder: i18n.SELECT_WORKFLOW_PLACEHOLDER,
-      createWorkflowLinkText: i18n.CREATE_NEW_WORKFLOW,
-      errorMessages: {
-        selectedWorkflowDisabled: i18n.SELECTED_WORKFLOW_DISABLED_ERROR,
-        loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
-      },
-    }),
-    []
-  );
-
-  const finalConfig = useMemo(() => ({ ...defaultConfig, ...config }), [defaultConfig, config]);
+  const finalConfig = useMemo(() => ({ ...defaultConfig, ...config }), [config]);
 
   // Fetch workflows using the hook
   const {
