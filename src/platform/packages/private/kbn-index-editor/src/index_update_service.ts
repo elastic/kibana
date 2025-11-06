@@ -129,6 +129,10 @@ export class IndexUpdateService {
 
   private indexHasNewFields: boolean = false;
 
+  /**
+   * Keeps track of the placement position of newly added rows inside the table
+   * This is updated when rows are added/deleted
+   */
   private newRowsVirtualIndexes = new RowsVirtualIndexes();
 
   /** Indicates the service has been completed */
