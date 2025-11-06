@@ -25,6 +25,35 @@ interface RequestDetailsStatRow extends RequestStatistic {
   id: string;
 }
 
+const StatRow = ({ stat }: { stat: RequestDetailsStatRow }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiTableRow>
+      <EuiTableRowCell>
+        {stat.label}
+
+        <span css={css({ marginLeft: euiTheme.size.xs })}>
+          {stat.description ? (
+            <EuiIconTip
+              aria-label={i18n.translate('inspector.requests.descriptionRowIconAriaLabel', {
+                defaultMessage: 'Description',
+              })}
+              type="question"
+              color="subdued"
+              content={stat.description}
+            />
+          ) : (
+            <EuiIcon type="empty" />
+          )}
+        </span>
+      </EuiTableRowCell>
+      <EuiTableRowCell data-test-subj={`inspector.statistics.${stat.id}`}>
+        {stat.value}
+      </EuiTableRowCell>
+    </EuiTableRow>
+  );
+};
+
 export class RequestDetailsStats extends Component<DetailViewProps> {
   static shouldShow = (request: Request) =>
     Boolean(request.stats && Object.keys(request.stats).length);
