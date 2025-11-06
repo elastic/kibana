@@ -105,21 +105,21 @@ export const AuthConfig: FunctionComponent<Props> = ({
     if (loadingHeaders) return;
 
     const formData = getFormData();
-    const currentHeaders: Array<InternalFormData> = formData.__internal__?.headers ?? [];
-    const fetchedSecretHeadersSet = new Set(secretHeaderKeys);
-
-    let mergedHeaders: Array<InternalFormData> = currentHeaders.map((header) => {
-      if (fetchedSecretHeadersSet.has(header.key)) {
-        return { ...header, value: '', type: 'secret' };
+    const secretHeaderKeysSet = new Set(secretHeaderKeys);
+    const currentHeaders: Array<InternalFormData> = (formData.__internal__?.headers ?? []).map(
+      (header: InternalFormData) => {
+        if (secretHeaderKeysSet.has(header.key)) {
+          return { ...header, value: '', type: 'secret' };
+        }
+        return header;
       }
-      return header;
-    });
-
-    const existingKeys = new Set(mergedHeaders.map((header) => header.key));
+    );
+    const currentHeadersKeysSet = new Set(currentHeaders.map((header) => header.key));
     const newSecretHeaders = secretHeaderKeys
-      .filter((key) => !existingKeys.has(key))
+      .filter((key) => !currentHeadersKeysSet.has(key))
       .map((key) => ({ key, value: '', type: 'secret' }));
-    mergedHeaders = [...mergedHeaders, ...newSecretHeaders];
+
+    let mergedHeaders: Array<InternalFormData> = [...currentHeaders, ...newSecretHeaders];
 
     if (mergedHeaders.length === 0 && hasHeaders) {
       mergedHeaders = [{ key: '', value: '', type: 'config' }];
