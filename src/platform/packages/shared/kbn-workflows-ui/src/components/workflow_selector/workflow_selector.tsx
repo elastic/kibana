@@ -25,12 +25,12 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useWorkflows } from '../../hooks';
 import * as i18n from './translations';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
 import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
 import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
 import { IconDisabledWorkflow } from '../../assets/icons';
+import { useWorkflows } from '../../hooks';
 
 interface WorkflowSelectorProps {
   selectedWorkflowId?: string;
@@ -286,7 +286,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               disableFocusTrap
               closeOnScroll
               isOpen={isPopoverOpen}
-              input={search!}
+              input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
               panelPaddingSize="none"
               fullWidth
             >

@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { testQueryClientConfig } from '../test_utils';
-import { useWorkflows } from './use_workflows';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { useWorkflows } from './use_workflows';
+import { testQueryClientConfig } from '../test_utils';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
-
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 const queryClient = new QueryClient(testQueryClientConfig);
 const mockCore = coreMock.createStart();

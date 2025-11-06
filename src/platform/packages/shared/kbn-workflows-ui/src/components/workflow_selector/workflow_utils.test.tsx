@@ -9,8 +9,8 @@
 
 import type { WorkflowListDto } from '@kbn/workflows';
 import {
-  processWorkflowsToOptions,
   getSelectedWorkflowDisabledError,
+  processWorkflowsToOptions,
   type WorkflowSelectorConfig,
 } from './workflow_utils';
 

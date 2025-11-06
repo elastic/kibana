@@ -11,8 +11,8 @@ import { renderHook } from '@testing-library/react';
 import type { UseQueryResult } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { useWorkflowExecutionPolling, PollingIntervalMs } from './use_workflow_execution_polling';
 import { useWorkflowExecution } from './use_workflow_execution';
+import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
 
 // Mock the useWorkflowExecution hook
 jest.mock('./use_workflow_execution');

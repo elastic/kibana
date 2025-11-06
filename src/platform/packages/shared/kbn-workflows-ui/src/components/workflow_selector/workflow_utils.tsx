@@ -9,8 +9,8 @@
 
 import React from 'react';
 import type { WorkflowListDto } from '@kbn/workflows';
-import * as i18n from './translations';
 import { TagsBadge } from './tags_badge';
+import * as i18n from './translations';
 
 export interface WorkflowValidationResult {
   severity: 'error' | 'warning';
@@ -30,7 +30,7 @@ export interface WorkflowOption {
   data?: {
     secondaryContent?: string;
   };
-  [key: string]: any; // Allow additional properties for EuiSelectable
+  [key: string]: unknown; // Allow additional properties for EuiSelectable
 }
 
 export interface WorkflowSelectorConfig {
