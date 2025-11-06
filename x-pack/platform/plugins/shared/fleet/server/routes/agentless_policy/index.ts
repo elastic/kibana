@@ -15,6 +15,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { genericErrorResponse } from '../schema/errors';
 
 import { createAgentlessPolicyHandler } from './handler';
+import path from 'node:path';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // Create
@@ -37,6 +38,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/create_agentless_policies.yaml'),
+        },
         validate: {
           request: CreateAgentlessPolicyRequestSchema,
           response: {
