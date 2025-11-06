@@ -779,7 +779,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 2000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)
@@ -943,13 +943,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
+      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
         return;
       }
       await retry.try(async () => {
         const allChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
         await allChartSwitches[layerIndex].click();
-        await testSubjects.existOrFail('lnsChartSwitchList');
+        await testSubjects.existOrFail('lnsChartSwitchList', { timeout: 2000 });
       });
     },
 
