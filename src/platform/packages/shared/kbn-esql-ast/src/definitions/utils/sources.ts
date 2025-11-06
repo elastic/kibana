@@ -17,6 +17,7 @@ import { withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../commands_registry/options/metadata';
 import { fuzzySearch } from './shared';
+import { isSource, isSubQuery } from '../../ast/is';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -126,11 +127,22 @@ export function getSourcesFromCommands(
   sourceType: 'index' | 'policy'
 ) {
   const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
-  const args = (sourceCommand?.args ?? []) as ESQLSource[];
+  const sources: ESQLSource[] = [];
+
+  for (const arg of sourceCommand?.args ?? []) {
+    if (Array.isArray(arg)) {
+      continue;
+    }
+
+    if (isSource(arg) && arg.sourceType === sourceType) {
+      sources.push(arg);
+    } else if (isSubQuery(arg)) {
+      sources.push(...getSourcesFromCommands(arg.child.commands, sourceType));
+    }
+  }
+
   // the marker gets added in queries like "FROM "
-  return args.filter(
-    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
-  );
+  return sources.filter((source) => source.name !== '' && source.name !== EDITOR_MARKER);
 }
 
 export function getSourceSuggestions(
