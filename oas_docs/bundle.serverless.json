@@ -23653,7 +23653,62 @@
                     "type": "string"
                   },
                   "vars": {
-                    "additionalProperties": {},
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "maxLength": 1000,
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "frozen": {
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "maxLength": 50,
+                              "type": "string"
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 1000,
+                                  "type": "string"
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "id": {
+                                      "maxLength": 255,
+                                      "type": "string"
+                                    },
+                                    "isSecretRef": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "isSecretRef",
+                                    "id"
+                                  ],
+                                  "type": "object"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
                     "type": "object"
                   }
                 },
