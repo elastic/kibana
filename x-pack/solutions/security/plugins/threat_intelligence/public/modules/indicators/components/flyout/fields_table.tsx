@@ -7,11 +7,17 @@
 
 import { EuiBasicTableColumn, EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, VFC } from 'react';
+import React, { useMemo } from 'react';
+import type { FC } from 'react';
 import { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorValueActions } from './indicator_value_actions';
+import { unwrapValue } from '../../utils/unwrap_value';
 
+interface TableItem {
+  key: string;
+  value: string | string[] | null;
+}
 export interface IndicatorFieldsTableProps {
   fields: string[];
   indicator: Indicator;
@@ -19,7 +25,7 @@ export interface IndicatorFieldsTableProps {
   ['data-test-subj']?: string;
 }
 
-export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
+export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
   fields,
   indicator,
   'data-test-subj': dataTestSubj,
@@ -64,10 +70,20 @@ export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
     [indicator, dataTestSubj]
   );
 
+  const items = useMemo<TableItem[]>(() => {
+    return [...fields].sort().map((field) => {
+      const value = unwrapValue(indicator, field);
+
+      return {
+        key: field,
+        value,
+      };
+    });
+  }, [fields, indicator]);
+
   return (
     <EuiInMemoryTable
-      // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
-      items={fields.sort()}
+      items={items}
       // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
       columns={columns}
       sorting={true}
