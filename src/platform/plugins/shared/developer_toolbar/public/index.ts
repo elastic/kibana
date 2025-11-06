@@ -7,18 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
+import { DeveloperToolbarPlugin } from './plugin';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/guide.mdx',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
-};
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DeveloperToolbarPlugin(initializerContext);
+}
+
+export type { DeveloperToolbarStart, DeveloperToolbarSetup } from './plugin';
