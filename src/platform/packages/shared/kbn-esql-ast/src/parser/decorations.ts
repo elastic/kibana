@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @module
+ * @description Decorations are comments and extra whitespace lines that can
+ * be optionally collected and attached to the AST nodes.
+ */
+
 import type { Token } from 'antlr4';
 import { type CommonTokenStream } from 'antlr4';
 import { Builder } from '../builder';
