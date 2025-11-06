@@ -1680,26 +1680,26 @@ paths:
 
         Sets the conversation ID.
 
-        - Schema:
-          ```json
-          {
-            "conversation_id": "uuid"
-          }
-          ```
+        Schema:
+        ```json
+        {
+          "conversation_id": "uuid"
+        }
+        ```
 
         ---
 
         `conversation_created`
 
-        Fires when a new conversation gets persisted and we have id.
+        Fires when a new conversation is persisted and assigned an ID.
 
-        - Schema:
-          ```json
-          {
-            "conversation_id": "uuid",
-            "title": "conversation title"
-          }
-          ```
+        Schema:
+        ```json
+        {
+          "conversation_id": "uuid",
+          "title": "conversation title"
+        }
+        ```
 
         ---
 
@@ -1707,13 +1707,13 @@ paths:
 
         Fires when a conversation is updated.
 
-        - Schema:
-          ```json
-          {
-            "conversation_id": "uuid",
-            "title": "updated conversation title"
-          }
-          ```
+        Schema:
+        ```json
+        {
+          "conversation_id": "uuid",
+          "title": "updated conversation title"
+        }
+        ```
 
         ---
 
@@ -1721,13 +1721,13 @@ paths:
 
         Handles reasoning-related data.
 
-        - Schema:
-          ```json
-          {
-            "reasoning": "plain text reasoning content",
-            "transient": false
-          }
-          ```
+        Schema:
+        ```json
+        {
+          "reasoning": "plain text reasoning content",
+          "transient": false
+        }
+        ```
 
         ---
 
@@ -1735,14 +1735,14 @@ paths:
 
         Triggers when a tool is invoked.
 
-        - Schema:
-          ```json
-          {
-            "tool_call_id": "uuid",
-            "tool_id": "tool_name",
-            "params": {}
-          }
-          ```
+        Schema:
+        ```json
+        {
+          "tool_call_id": "uuid",
+          "tool_id": "tool_name",
+          "params": {}
+        }
+        ```
 
         ---
 
@@ -1750,13 +1750,13 @@ paths:
 
         Reports progress of a running tool.
 
-        - Schema:
-          ```json
-          {
-            "tool_call_id": "uuid",
-            "message": "progress message"
-          }
-          ```
+        Schema:
+        ```json
+        {
+          "tool_call_id": "uuid",
+          "message": "progress message"
+        }
+        ```
 
         ---
 
@@ -1764,15 +1764,16 @@ paths:
 
         Returns results from a completed tool call.
 
-        - Schema:
-          ```json
-          {
-            "tool_call_id": "uuid",
-            "tool_id": "tool_name",
-            "results": []
-          }
-          ```
-        - NOTE: `results` is an array of `ToolResult` objects.
+        Schema:
+        ```json
+        {
+          "tool_call_id": "uuid",
+          "tool_id": "tool_name",
+          "results": []
+        }
+        ```
+
+        **Note:** `results` is an array of `ToolResult` objects.
 
         ---
 
@@ -1780,13 +1781,13 @@ paths:
 
         Streams partial text chunks.
 
-        - Schema:
-          ```json
-          {
-            "message_id": "uuid",
-            "text_chunk": "partial text"
-          }
-          ```
+        Schema:
+        ```json
+        {
+          "message_id": "uuid",
+          "text_chunk": "partial text"
+        }
+        ```
 
         ---
 
@@ -1794,13 +1795,13 @@ paths:
 
         Indicates message stream is finished.
 
-        - Schema:
-          ```json
-          {
-            "message_id": "uuid",
-            "message_content": "full text content of the message"
-          }
-          ```
+        Schema:
+        ```json
+        {
+          "message_id": "uuid",
+          "message_content": "full text content of the message"
+        }
+        ```
 
         ---
 
@@ -1808,13 +1809,14 @@ paths:
 
         Marks the end of the thinking/reasoning phase.
 
-        - Schema:
-          ```json
-          {
-            "time_to_first_token": 0
-          }
-          ```
-        - NOTE: `time_to_first_token` is in milliseconds.
+        Schema:
+        ```json
+        {
+          "time_to_first_token": 0
+        }
+        ```
+
+        **Note:** `time_to_first_token` is in milliseconds.
 
         ---
 
@@ -1822,13 +1824,14 @@ paths:
 
         Marks end of one conversation round.
 
-        - Schema:
-          ```json
-          {
-            "round": {}
-          }
-          ```
-        - NOTE: `round` contains the full round json object.
+        Schema:
+        ```json
+        {
+          "round": {}
+        }
+        ```
+
+        **Note:** `round` contains the full round json object.
 
         ---
 
