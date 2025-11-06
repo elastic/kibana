@@ -101,7 +101,7 @@ async function fetchIndicesCall(
     );
   }
 
-  // uses the _metering/stats API to get the number of documents and size of the index
+  // uses the _metering/stats API to get the size of the index
   // this API is only available in ES3
   if (config.isSizeAndDocCountEnabled) {
     const { indices: indicesStats } =
@@ -110,30 +110,40 @@ async function fetchIndicesCall(
         path: `/_metering/stats/` + indexNamesString,
       });
 
-    return indicesNames.map((indexName: string) => {
-      const indexData = indices[indexName];
-      const aliases = Object.keys(indexData.aliases!);
-      const baseResponse = {
-        name: indexName,
-        isFrozen: false,
-        aliases: aliases.length ? aliases : 'none',
-        hidden: indexData.settings?.index?.hidden === 'true',
-        data_stream: indexData.data_stream,
-        mode: indexData.settings?.index?.mode,
-      };
+    return await Promise.all(
+      indicesNames.map(async (indexName: string) => {
+        // Use _count API for document counts
+        const countResult = await client.asCurrentUser
+          .count({
+            index: indexName,
+          })
+          .catch(() => ({ count: 0 }));
 
-      if (indicesStats) {
-        const indexStats = indicesStats.find((index) => index.name === indexName);
-
-        return {
-          ...baseResponse,
-          documents: indexStats?.num_docs ?? 0,
-          size: new ByteSizeValue(indexStats?.size_in_bytes ?? 0).toString(),
+        const indexData = indices[indexName];
+        const aliases = Object.keys(indexData.aliases!);
+        const baseResponse = {
+          name: indexName,
+          isFrozen: false,
+          aliases: aliases.length ? aliases : 'none',
+          hidden: indexData.settings?.index?.hidden === 'true',
+          data_stream: indexData.data_stream,
+          mode: indexData.settings?.index?.mode,
         };
-      }
 
-      return baseResponse;
-    });
+        if (indicesStats) {
+          const indexStats = indicesStats.find((index) => index.name === indexName);
+          const documentCount = countResult.count;
+
+          return {
+            ...baseResponse,
+            documents: documentCount,
+            size: new ByteSizeValue(indexStats?.size_in_bytes ?? 0).toString(),
+          };
+        }
+
+        return baseResponse;
+      })
+    );
   }
 
   // if neither index stats (Stateful only API)

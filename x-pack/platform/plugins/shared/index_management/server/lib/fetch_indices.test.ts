@@ -192,6 +192,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
       getIndices.mockResolvedValue({
         regular_index: createTestIndexState(),
       });
+      getCount.mockResolvedValue({ count: 100 });
       getMeteringStats.mockResolvedValue({
         indices: [{ name: 'regular_index', num_docs: 100, size_in_bytes: 1000 }],
       });
