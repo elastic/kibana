@@ -562,13 +562,23 @@ export class OneChatPageObject extends FtrService {
   getAgentIdInput() {
     const idInputSelector = 'agentSettingsIdInput';
     return {
-      getValue: () => this.testSubjects.getAttribute(idInputSelector, 'value'),
-      isEnabled: () => this.testSubjects.isEnabled(idInputSelector),
+      getValue: async () => {
+        const idInputValue = await this.testSubjects.getAttribute(idInputSelector, 'value');
+        return idInputValue;
+      },
+      isEnabled: async () => {
+        const isIdInputEnabled = await this.testSubjects.isEnabled(idInputSelector);
+        return isIdInputEnabled;
+      },
     };
   }
 
-  getAgentFormDisplayName() {
-    return this.testSubjects.getAttribute('agentSettingsDisplayNameInput', 'value');
+  async getAgentFormDisplayName() {
+    const displayNameInputValue = await this.testSubjects.getAttribute(
+      'agentSettingsDisplayNameInput',
+      'value'
+    );
+    return displayNameInputValue;
   }
 
   async setAgentFormDisplayName(name: string) {
@@ -578,7 +588,10 @@ export class OneChatPageObject extends FtrService {
   agentFormSaveButton() {
     const saveButtonSelector = 'agentFormSaveButton';
     return {
-      isEnabled: () => this.testSubjects.isEnabled(saveButtonSelector),
+      isEnabled: async () => {
+        const isSaveButtonEnabled = await this.testSubjects.isEnabled(saveButtonSelector);
+        return isSaveButtonEnabled;
+      },
       click: async () => {
         await this.testSubjects.click(saveButtonSelector);
       },
