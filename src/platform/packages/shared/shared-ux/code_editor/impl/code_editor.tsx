@@ -648,6 +648,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 fixedOverflowWidgets: true,
                 // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
                 'bracketPairColorization.enabled': false,
+                // Disable clickable links by default (can be overridden by passing links: true in options)
+                links: false,
                 ...options,
               }}
             />
