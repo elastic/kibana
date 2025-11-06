@@ -9323,6 +9323,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workplaceai-api-keys-components@link:x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workplaceai-api-keys-server@link:x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workspaces@link:src/platform/packages/shared/kbn-workspaces":
   version "0.0.0"
   uid ""

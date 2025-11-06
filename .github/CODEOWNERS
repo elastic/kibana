@@ -1211,6 +1211,8 @@ x-pack/solutions/security/plugins/security_solution_serverless @elastic/security
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/plugins/workplace_ai_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/test @elastic/workchat-eng

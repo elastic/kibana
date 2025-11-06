@@ -1155,6 +1155,8 @@
     "@kbn/workflows-management-plugin": "link:src/platform/plugins/shared/workflows_management",
     "@kbn/workflows-ui": "link:src/platform/packages/shared/kbn-workflows-ui",
     "@kbn/workplace-ai-app": "link:x-pack/solutions/workplaceai/plugins/workplace_ai_app",
+    "@kbn/workplaceai-api-keys-components": "link:x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components",
+    "@kbn/workplaceai-api-keys-server": "link:x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",
     "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",
