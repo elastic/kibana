@@ -25,11 +25,11 @@ import {
 
 describe('Gauge', () => {
   describe('validateConverter', () => {
-    it('should convert a gauge chart with full config', () => {
+    it('should convert a gauge chart with full config and absolute color mode', () => {
       validateConverter(gaugeAttributes, gaugeStateSchema);
     });
     //  rangeMax: null for percentage color mode -> throws validation error in the color schema
-    it.skip('should convert a gauge chart with full config with percentage color mode', () => {
+    it.skip('should convert a gauge chart with full config and percentage color mode', () => {
       validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
     });
     it('should convert a gauge chart with ESQL dataset', () => {
@@ -37,27 +37,27 @@ describe('Gauge', () => {
     });
   });
   describe('validateAPIConverter', () => {
-    it('should convert a basic legacy metric chart with ad hoc dataView', () => {
+    it('should convert a basic gauge chart with ad hoc dataView', () => {
       validateAPIConverter(basicGaugeWithAdHocDataView, gaugeStateSchema);
     });
 
-    it('should convert a basic legacy metric chart with dataView', () => {
+    it('should convert a basic gauge chart with dataView', () => {
       validateAPIConverter(basicGaugeWithDataView, gaugeStateSchema);
     });
 
-    it('should convert a ESQL-based legacy metric chart', () => {
+    it('should convert a ESQL-based gauge chart', () => {
       validateAPIConverter(esqlGauge, gaugeStateSchema);
     });
 
-    it('should convert a comprehensive legacy metric chart with ad hoc data view', () => {
+    it('should convert a comprehensive gauge chart with ad hoc data view', () => {
       validateAPIConverter(comprehensiveGaugeWithAdHocDataView, gaugeStateSchema);
     });
 
-    it('should convert a comprehensive legacy metric chart with data view', () => {
+    it('should convert a comprehensive gauge chart with data view', () => {
       validateAPIConverter(comprehensiveGaugeWithDataView, gaugeStateSchema);
     });
 
-    it('should convert a comprehensive ESQL-based legacy metric chart', () => {
+    it('should convert a comprehensive ESQL-based gauge chart', () => {
       validateAPIConverter(comprehensiveEsqlGauge, gaugeStateSchema);
     });
   });
