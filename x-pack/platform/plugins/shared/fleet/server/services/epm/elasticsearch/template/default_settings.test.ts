@@ -9,14 +9,32 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../../../app_context';
 
-import { buildDefaultSettings } from './default_settings';
+import { saveSettings } from '../../../settings';
+
+import { buildDefaultSettings, saveILMMigrationChanges } from './default_settings';
 
 jest.mock('../../../app_context');
+jest.mock('../../../settings', () => ({
+  getSettings: jest.fn().mockResolvedValue({
+    ilm_migration_status: {
+      metrics: 'success',
+    },
+  }),
+  saveSettings: jest.fn(),
+}));
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+mockedAppContextService.getLogger.mockReturnValue({
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+} as any);
+
+const saveSettingsMock = saveSettings as jest.Mock;
 
 describe('buildDefaultSettings', () => {
   it('should not generate default_field settings ', () => {
@@ -176,5 +194,34 @@ describe('buildDefaultSettings', () => {
         },
       }
     `);
+  });
+});
+
+describe('ILM migration', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should save settings if migration status changed', async () => {
+    const updatedILMMigrationStatusMap = new Map();
+    updatedILMMigrationStatusMap.set('logs', 'success');
+
+    await saveILMMigrationChanges(updatedILMMigrationStatusMap);
+
+    expect(saveSettingsMock).toHaveBeenCalledWith(undefined, {
+      ilm_migration_status: {
+        logs: 'success',
+        metrics: 'success',
+      },
+    });
+  });
+
+  it('should not save settings if migration status did not change', async () => {
+    const updatedILMMigrationStatusMap = new Map();
+    updatedILMMigrationStatusMap.set('metrics', 'success');
+
+    await saveILMMigrationChanges(updatedILMMigrationStatusMap);
+
+    expect(saveSettingsMock).not.toHaveBeenCalled();
   });
 });

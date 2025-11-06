@@ -62,26 +62,24 @@ export async function saveILMMigrationChanges(
   const soClient = appContextService.getInternalUserSOClient();
   const { ilm_migration_status: ilmMigrationStatus } = await getSettings(soClient);
 
-  const updateILMMigrationStatus = {
-    logs: updatedILMMigrationStatusMap.get('logs'),
-    metrics: updatedILMMigrationStatusMap.get('metrics'),
-    synthetics: updatedILMMigrationStatusMap.get('synthetics'),
-  };
-
   if (
-    (updateILMMigrationStatus.logs === 'success' && ilmMigrationStatus?.logs !== 'success') ||
-    (updateILMMigrationStatus.metrics === 'success' && ilmMigrationStatus?.metrics !== 'success') ||
-    (updateILMMigrationStatus.synthetics === 'success' &&
+    (updatedILMMigrationStatusMap.get('logs') === 'success' &&
+      ilmMigrationStatus?.logs !== 'success') ||
+    (updatedILMMigrationStatusMap.get('metrics') === 'success' &&
+      ilmMigrationStatus?.metrics !== 'success') ||
+    (updatedILMMigrationStatusMap.get('synthetics') === 'success' &&
       ilmMigrationStatus?.synthetics !== 'success')
   ) {
     appContextService
       .getLogger()
-      .info(`Saving ILM migration status changes: ${JSON.stringify(updateILMMigrationStatus)}`);
+      .info(`Saving ILM migration status changes: ${JSON.stringify(updatedILMMigrationStatusMap)}`);
 
     await saveSettings(soClient, {
       ilm_migration_status: {
-        ...ilmMigrationStatus,
-        ...updateILMMigrationStatus,
+        logs: updatedILMMigrationStatusMap.get('logs') ?? ilmMigrationStatus?.logs,
+        metrics: updatedILMMigrationStatusMap.get('metrics') ?? ilmMigrationStatus?.metrics,
+        synthetics:
+          updatedILMMigrationStatusMap.get('synthetics') ?? ilmMigrationStatus?.synthetics,
       },
     });
   }
