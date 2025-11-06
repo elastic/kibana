@@ -31,6 +31,7 @@ export const getFetchParamsMock = (
         ...partialParams,
       },
       services: unifiedHistogramServicesMock,
+      initialBreakdownField: undefined,
     }),
   };
 };

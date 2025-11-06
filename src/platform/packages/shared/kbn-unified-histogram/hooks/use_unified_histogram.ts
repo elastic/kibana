@@ -65,10 +65,6 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
     nextVisContext: UnifiedHistogramVisContext | undefined,
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
   ) => void;
-  /**
-   * Whether to calculate lens vis context automatically
-   */
-  enableLensVisService?: boolean;
 };
 
 export type UnifiedHistogramApi = {
@@ -109,7 +105,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     api,
     lensVisService,
     lensVisServiceState,
-  } = useServicesBootstrap(props);
+  } = useServicesBootstrap(props, { enableLensVisService: true });
 
   const lensVisServiceCurrentSuggestionContextType =
     lensVisServiceState?.currentSuggestionContext?.type;

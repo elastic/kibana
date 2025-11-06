@@ -9,7 +9,7 @@
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { useServicesBootstrap } from './use_services_bootstrap';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { getBreakdownField } from '../utils/local_storage_utils';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
@@ -40,10 +40,13 @@ describe('useServicesBootstrap', () => {
 
   it('should initialize', async () => {
     const hook = renderHook(() =>
-      useServicesBootstrap({
-        services: unifiedHistogramServicesMock,
-        localStorageKeyPrefix,
-      })
+      useServicesBootstrap(
+        {
+          services: unifiedHistogramServicesMock,
+          localStorageKeyPrefix,
+        },
+        { enableLensVisService: true }
+      )
     );
 
     expect(createStateServiceMock).toBeCalledTimes(1);
@@ -74,6 +77,9 @@ describe('useServicesBootstrap', () => {
       hook.result.current.api.fetch(fetchParamsExternal);
     });
 
+    await waitFor(() => {
+      expect(hook.result.current.hasValidFetchParams).toBe(true);
+    });
     expect(hook.result.current.fetchParams).toEqual(
       expect.objectContaining({
         searchSessionId: 'test-session',
@@ -81,8 +87,12 @@ describe('useServicesBootstrap', () => {
         query,
       })
     );
-    expect(hook.result.current.hasValidFetchParams).toBe(true);
+    expect(hook.result.current.lensVisService).toBeDefined();
+    expect(hook.result.current.lensVisServiceState).toBeDefined();
     expect(subscriber).toBeCalledTimes(1);
-    expect(subscriber).toBeCalledWith(hook.result.current.fetchParams);
+    expect(subscriber).toBeCalledWith({
+      fetchParams: hook.result.current.fetchParams,
+      lensVisServiceState: hook.result.current.lensVisServiceState,
+    });
   });
 });

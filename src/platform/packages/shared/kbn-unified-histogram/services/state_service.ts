@@ -22,16 +22,11 @@ import {
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
-import type { UnifiedHistogramSuggestionContext } from '../types';
 
 /**
  * The current state of the container
  */
 export interface UnifiedHistogramState {
-  /**
-   * The current Lens suggestion
-   */
-  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined; // TODO: remove?
   /**
    * Whether or not the chart is hidden
    */
@@ -141,7 +136,6 @@ export const createStateService = (
 
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     chartHidden: initialChartHidden,
-    currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,

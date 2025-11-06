@@ -47,11 +47,12 @@ describe('useUnifiedHistogram', () => {
         },
       ] as ESQLControlVariable[],
       controlsState: esqlControlState,
+      timeInterval: '42s',
     };
     const hook = renderHook(() =>
       useUnifiedHistogram({
         services: unifiedHistogramServicesMock,
-        initialState: { timeInterval: '42s' },
+        initialState: {},
       })
     );
     expect(hook.result.current.isInitialized).toBe(false);
@@ -87,11 +88,12 @@ describe('useUnifiedHistogram', () => {
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
       relativeTimeRange: { from: 'now-15m', to: 'now' },
+      timeInterval: '42s',
     };
     const { result } = renderHook(() =>
       useUnifiedHistogram({
         services: unifiedHistogramServicesMock,
-        initialState: { timeInterval: '42s' },
+        initialState: {},
       })
     );
     expect(result.current.isInitialized).toBe(false);
@@ -105,6 +107,9 @@ describe('useUnifiedHistogram', () => {
     const fetchSpy = jest.fn();
     fetch$?.subscribe(fetchSpy);
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(fetchSpy).toHaveBeenCalledWith(result.current.chartProps?.fetchParams);
+    expect(fetchSpy).toHaveBeenCalledWith({
+      fetchParams: result.current.chartProps?.fetchParams,
+      lensVisServiceState: result.current.chartProps?.lensVisServiceState,
+    });
   });
 });

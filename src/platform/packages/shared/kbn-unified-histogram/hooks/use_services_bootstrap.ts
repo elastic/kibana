@@ -37,11 +37,17 @@ const INITIAL_STATE: State = {
   lensVisServiceState: undefined,
 };
 
-export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
+export const useServicesBootstrap = (
+  props: UseUnifiedHistogramProps,
+  options?: {
+    enableLensVisService?: boolean;
+  }
+) => {
   const [fetch$] = useState(() => new ReplaySubject<UnifiedHistogramFetch$Arguments>(1));
   const [state, setState] = useState<State>(INITIAL_STATE);
   const { fetchParams, lensVisService, lensVisServiceState } = state;
-  const { services, initialState, localStorageKeyPrefix, enableLensVisService } = props;
+  const { services, initialState, localStorageKeyPrefix } = props;
+  const enableLensVisService = options?.enableLensVisService;
   const propsRef = useRef<UseUnifiedHistogramProps>(props);
   propsRef.current = props;
 
