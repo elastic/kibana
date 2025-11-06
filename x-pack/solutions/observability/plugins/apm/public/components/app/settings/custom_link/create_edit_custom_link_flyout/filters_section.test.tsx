@@ -83,7 +83,27 @@ describe('FiltersSections', () => {
     expect(suggestionsSelect2.value).toBe('');
   });
 
-  it('empties the key and the value, when I have only 1 filter and I delete the filter', () => {});
+  it('empties the key and the value AND keeps the selects visible, when I have only 1 filter and I delete the filter.', async () => {
+    const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo' }];
+    const onChangeFilters = jest.fn();
+    const { getAllByTestId } = render(
+      <FiltersSection filters={initialFilters} onChangeFilters={onChangeFilters} />,
+      { wrapper: Wrapper }
+    );
+
+    const removeButtons = getAllByTestId('apmCustomLinkFiltersSectionButton');
+    expect(removeButtons).toHaveLength(1);
+
+    const suggestionsSelect = getAllByTestId(`comboBoxSearchInput`);
+    expect(suggestionsSelect).toHaveLength(1);
+
+    await act(async () => {
+      fireEvent.click(removeButtons[0]);
+    });
+
+    expect(removeButtons).toHaveLength(1);
+    expect(suggestionsSelect).toHaveLength(1);
+  });
   it('when many filters, it deletes the proper filter', async () => {
     const initialFilters: Filter[] = [
       { key: 'service.name', value: 'foo' },
