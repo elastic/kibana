@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MaintenanceWindowAttributes } from '../../data/types/maintenance_window_attributes';
-import { MaintenanceWindowWithoutComputedProperties } from '../types';
+import type { MaintenanceWindowAttributes } from '../../data/types/maintenance_window_attributes';
+import type { MaintenanceWindowWithoutComputedProperties } from '../types';
 
 export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
   maintenanceWindow: MaintenanceWindowWithoutComputedProperties

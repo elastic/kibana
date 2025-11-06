@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type {
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
-} from '@kbn/encrypted-saved-objects-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { MaintenanceWindowClient } from './client';
-import { KibanaRequest } from '@kbn/core/server';
 
 export interface MaintenanceWindowApiRequestHandlerContext {
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
@@ -34,20 +29,12 @@ export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient
 
 export interface MaintenanceWindowsPluginsSetup {
   taskManager: TaskManagerSetupContract;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-  // eventLog: IEventLogService;
   features: FeaturesPluginSetup;
 }
 
 export interface MaintenanceWindowsPluginsStart {
   taskManager: TaskManagerStartContract;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  features: FeaturesPluginStart;
-  //  eventLog: IEventLogClientService;
-  licensing: LicensingPluginStart;
-  //  spaces?: SpacesPluginStart;
 }
 
 export interface MaintenanceWindowsServerStart {

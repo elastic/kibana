@@ -14,7 +14,9 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { MaintenanceWindowsConfig } from './config';
+import type { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
+import type { MaintenanceWindowsConfig } from './config';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { registerSavedObject } from './saved_objects';
 import {
@@ -23,7 +25,6 @@ import {
 } from './tasks/events_generation_task';
 import type { MaintenanceWindowRequestHandlerContext, MaintenanceWindowClientApi } from './types';
 import { LicenseState, type ILicenseState } from './lib';
-import { ReplaySubject, Subject } from 'rxjs';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import type {
   MaintenanceWindowsPluginsSetup,
@@ -33,7 +34,13 @@ import type {
 import { defineRoutes } from './routes';
 
 export class MaintenanceWindowsPlugin
-  implements Plugin<MaintenanceWindowsPluginsSetup, MaintenanceWindowsPluginsStart>
+  implements
+    Plugin<
+      void,
+      MaintenanceWindowsServerStart,
+      MaintenanceWindowsPluginsSetup,
+      MaintenanceWindowsPluginsStart
+    >
 {
   private readonly logger: Logger;
   private readonly config: MaintenanceWindowsConfig;
@@ -95,7 +102,7 @@ export class MaintenanceWindowsPlugin
     core: CoreStart,
     plugins: MaintenanceWindowsPluginsStart
   ): MaintenanceWindowsServerStart {
-    const { maintenanceWindowClientFactory, licenseState } = this;
+    const { maintenanceWindowClientFactory } = this;
 
     this.logger.debug('maintenanceWindows: Started');
     maintenanceWindowClientFactory.initialize({

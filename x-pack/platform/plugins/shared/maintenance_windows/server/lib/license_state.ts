@@ -9,10 +9,8 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { assertNever } from '@kbn/std';
-import { capitalize } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { ILicense, LicenseType } from '@kbn/licensing-types';
+import type { ILicense } from '@kbn/licensing-types';
 import { PLUGIN } from '../../common/constants/plugin';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
@@ -27,7 +25,6 @@ export class LicenseState {
   private licenseInformation: AlertingLicenseInformation = this.checkLicense(undefined);
   private subscription: Subscription;
   private license?: ILicense;
-  private _notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage'] | null = null;
 
   constructor(license$: Observable<ILicense>) {
     this.subscription = license$.subscribe(this.updateInformation.bind(this));

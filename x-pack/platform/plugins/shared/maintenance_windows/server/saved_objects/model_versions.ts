@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawMaintenanceWindowSchemaV1 } from './schema/index';
+import { rawMaintenanceWindowSchemaV1 } from './schema';
 
 export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
   '1': {

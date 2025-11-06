@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { GetSummarizedAlertsParams } from './types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type {
+  GetMaintenanceWindowScopedQueryAlertsParams,
+  GetSummarizedAlertsParams,
+  UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
+} from './types';
 import type { AlertRuleData } from '.';
 import type { AlertsFilter } from '../types';
 
@@ -76,6 +80,36 @@ export const getParamsByTimeQuery: GetSummarizedAlertsParams = {
   end: new Date('2023-09-06T00:01:00.000'),
   start: new Date('2023-09-06T00:00:00.000'),
 };
+
+export const getParamsByMaintenanceWindowScopedQuery: GetMaintenanceWindowScopedQueryAlertsParams =
+  {
+    ruleId: 'ruleId',
+    spaceId: 'default',
+    executionUuid: '111',
+    maintenanceWindows: [
+      {
+        id: 'mw1',
+        categoryIds: ['management'],
+        scopedQuery: {
+          kql: "kibana.alert.rule.name: 'test123'",
+          filters: [],
+          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test123"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+        },
+      } as unknown as MaintenanceWindow,
+      {
+        id: 'mw2',
+        categoryIds: ['management'],
+        scopedQuery: {
+          kql: "kibana.alert.rule.name: 'test456'",
+          filters: [],
+          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test456"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+        },
+      } as unknown as MaintenanceWindow,
+    ],
+  };
+
+export const getParamsByUpdateMaintenanceWindowIds: UpdateAlertsMaintenanceWindowIdByScopedQueryParams =
+  getParamsByMaintenanceWindowScopedQuery;
 
 export const getExpectedQueryByExecutionUuid = ({
   indexName,

@@ -6,11 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { maintenanceWindowCategoryIdTypes } from '../../application/maintenance_window/constants';
-import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
-import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
-import { MaintenanceWindowStatus } from '../../types';
-import type { MaintenanceWindow } from '../../application/maintenance_window/types';
+import { maintenanceWindowCategoryIdTypes } from '@kbn/maintenance-windows-plugin/server/application/constants';
+import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/data/test_helpers';
+import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server/maintenance_window_client.mock';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
 import { mockedRawRuleSO, mockedRule } from '../fixtures';
 import {
   filterMaintenanceWindows,

@@ -6,6 +6,8 @@
  */
 
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/data/test_helpers';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -16,11 +18,7 @@ import type {
   RuleAlertData,
   RawRule,
 } from '../types';
-import {
-  MaintenanceWindowStatus,
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
-} from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../types';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
@@ -110,7 +108,6 @@ import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapte
 import { createTaskRunnerLogger } from './lib';
 import type { SavedObject } from '@kbn/core/server';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 

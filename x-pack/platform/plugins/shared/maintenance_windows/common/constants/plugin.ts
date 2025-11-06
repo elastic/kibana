@@ -12,7 +12,6 @@ export const PLUGIN = {
   MINIMUM_LICENSE_REQUIRED: 'platinum' as LicenseType, // TODO: supposed to be changed up on requirements
   // all plugins seem to use getI18nName with any
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getI18nName: (i18n: any): string =>
     i18n.translate('xpack.maintenanceWindows.appName', {
       defaultMessage: 'Maintenance Windows',

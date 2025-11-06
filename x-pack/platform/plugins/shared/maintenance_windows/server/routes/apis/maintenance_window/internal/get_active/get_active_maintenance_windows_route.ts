@@ -12,7 +12,7 @@ import type { MaintenanceWindowRequestHandlerContext } from '../../../../../type
 import { INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH } from '../../../../../../common';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 
-import { MaintenanceWindow } from '../../../../../application/types';
+import type { MaintenanceWindow } from '../../../../../application/types';
 import type { GetActiveMaintenanceWindowsResponseV1 } from '../../../../schemas/maintenance_window/internal/request/get_active';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../transforms';
 

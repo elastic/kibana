@@ -36,6 +36,8 @@ export {
   isScopedQueryError,
 } from './maintenance_window_scoped_query_error_message';
 
+export type { MaintenanceWindowAttributes } from '../server/data/types/maintenance_window_attributes';
+
 // Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
 export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =

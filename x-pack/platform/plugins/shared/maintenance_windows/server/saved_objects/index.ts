@@ -6,8 +6,8 @@
  */
 
 import type { Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 import { maintenanceWindowMappings } from './mapping';
 import { maintenanceWindowModelVersions } from './model_versions';
 

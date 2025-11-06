@@ -7,7 +7,7 @@
 
 import type { MaintenanceWindow } from '../../../../../../../application/types';
 import { transformRRuleToCustomScheduleV1 } from '../../../../../../schemas/schedule';
-import { MaintenanceWindowResponseV1 } from '../../../../../../schemas/maintenance_window/external/response';
+import type { MaintenanceWindowResponseV1 } from '../../../../../../schemas/maintenance_window/external/response';
 
 /**
  *  This function converts from the internal Maintenance Window type used by the application client,

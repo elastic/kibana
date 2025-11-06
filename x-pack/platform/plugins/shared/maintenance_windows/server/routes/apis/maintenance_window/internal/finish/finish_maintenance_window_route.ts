@@ -17,7 +17,7 @@ import type {
 } from '../../../../schemas/maintenance_window/internal/request/finish';
 import { finishParamsSchemaV1 } from '../../../../schemas/maintenance_window/internal/request/finish';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../transforms';
-import { MaintenanceWindow } from '../../../../../application/types';
+import type { MaintenanceWindow } from '../../../../../application/types';
 
 export const finishMaintenanceWindowRoute = (
   router: IRouter<MaintenanceWindowRequestHandlerContext>,

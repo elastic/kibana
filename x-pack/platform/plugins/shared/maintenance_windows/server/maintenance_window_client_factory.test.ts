@@ -18,7 +18,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
 
-jest.mock('./maintenance_window_client');
+jest.mock('./client');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
@@ -49,7 +49,7 @@ test('creates a maintenance window client with proper constructor arguments when
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
 
-  const { MaintenanceWindowClient } = jest.requireMock('./maintenance_window_client');
+  const { MaintenanceWindowClient } = jest.requireMock('./client');
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -71,7 +71,7 @@ test('creates a maintenance window client with proper constructor arguments', as
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
 
-  const { MaintenanceWindowClient } = jest.requireMock('./maintenance_window_client');
+  const { MaintenanceWindowClient } = jest.requireMock('./client');
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -94,7 +94,7 @@ test('creates an unauthorized maintenance window client', async () => {
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
 
-  const { MaintenanceWindowClient } = jest.requireMock('./maintenance_window_client');
+  const { MaintenanceWindowClient } = jest.requireMock('./client');
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -109,8 +109,7 @@ test('getUserName() returns null when security is disabled', async () => {
   const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
-  const constructorCall = jest.requireMock('./maintenance_window_client').MaintenanceWindowClient
-    .mock.calls[0][0];
+  const constructorCall = jest.requireMock('./client').MaintenanceWindowClient.mock.calls[0][0];
 
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual(null);
@@ -123,8 +122,7 @@ test('getUserName() returns a name when security is enabled', async () => {
 
   factory.createWithAuthorization(request);
 
-  const constructorCall = jest.requireMock('./maintenance_window_client').MaintenanceWindowClient
-    .mock.calls[0][0];
+  const constructorCall = jest.requireMock('./client').MaintenanceWindowClient.mock.calls[0][0];
 
   securityService.authc.getCurrentUser.mockReturnValueOnce({
     username: 'testname',

@@ -11,7 +11,7 @@ import { verifyAccessAndContext } from '../../../../lib/verify_access_and_contex
 import type { MaintenanceWindowRequestHandlerContext } from '../../../../../types';
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../../../../../common';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
-import { MaintenanceWindow } from '../../../../../application/types';
+import type { MaintenanceWindow } from '../../../../../application/types';
 import type {
   UpdateMaintenanceWindowRequestBodyV1,
   UpdateMaintenanceWindowRequestParamsV1,

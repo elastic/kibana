@@ -9,7 +9,7 @@ import type { WeekdayStr } from '@kbn/rrule';
 
 type RRuleFreq = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-export type RRuleAttributes = {
+export interface RRuleAttributes {
   dtstart: string;
   tzid: string;
   freq?: RRuleFreq;
@@ -26,4 +26,4 @@ export type RRuleAttributes = {
   byhour?: number[] | null;
   byminute?: number[] | null;
   bysecond?: number[] | null;
-};
+}
