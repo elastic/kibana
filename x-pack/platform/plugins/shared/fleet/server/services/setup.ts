@@ -125,8 +125,13 @@ async function createLock(
       return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
     }
   } catch (error) {
+    // Only catch 404 - lock doesn't exist yet, continue
     if (error.isBoom && error.output.statusCode === 404) {
       logger.debug('Fleet setup lock does not exist, continue setup');
+    } else {
+      // Let other errors (timeout, connection, etc.) propagate for retry
+      logger.error(`Could not create fleet setup lock: ${error.message}`, { error });
+      throw error;
     }
   }
 
@@ -144,8 +149,9 @@ async function createLock(
       logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
     }
   } catch (error) {
-    logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
-    return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
+    // Let all errors (timeout, connection, conflict, etc.) propagate for retry
+    logger.warn(`Error creating fleet setup lock: ${error}`);
+    throw error;
   }
   return { created: !!created };
 }
