@@ -1996,6 +1996,8 @@
       "@kbn/shared-ux-card-no-data-mocks/*": ["src/platform/packages/shared/shared-ux/card/no_data/mocks/*"],
       "@kbn/shared-ux-card-no-data-types": ["src/platform/packages/shared/shared-ux/card/no_data/types"],
       "@kbn/shared-ux-card-no-data-types/*": ["src/platform/packages/shared/shared-ux/card/no_data/types/*"],
+      "@kbn/shared-ux-document-data-cascade": ["src/platform/packages/shared/shared-ux/document_data_cascade/impl"],
+      "@kbn/shared-ux-document-data-cascade/*": ["src/platform/packages/shared/shared-ux/document_data_cascade/impl/*"],
       "@kbn/shared-ux-error-boundary": ["src/platform/packages/shared/shared-ux/error_boundary"],
       "@kbn/shared-ux-error-boundary/*": ["src/platform/packages/shared/shared-ux/error_boundary/*"],
       "@kbn/shared-ux-feedback-snippet": ["src/platform/packages/shared/shared-ux/feedback_snippet"],
