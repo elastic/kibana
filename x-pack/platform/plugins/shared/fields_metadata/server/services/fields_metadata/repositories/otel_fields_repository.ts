@@ -8,10 +8,10 @@
 import { PathReporter } from 'io-ts/PathReporter';
 import { mapValues } from 'lodash';
 import { isLeft } from 'fp-ts/Either';
+import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
 import { fieldsMetadataDictionaryRT } from '../../../../common/fields_metadata';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
 import type { AnyFieldName, OtelFieldName, FieldMetadataPlain } from '../../../../common';
-import { FieldMetadata } from '../../../../common';
 import type { TOtelFields } from '../../../../common/fields_metadata/types';
 
 // Helper function to convert structured semconv fields to FieldMetadataPlain format

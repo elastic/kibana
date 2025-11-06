@@ -6,10 +6,10 @@
  */
 
 import { mapValues } from 'lodash';
+import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
 import type { MetadataFieldName } from '../../../../common/fields_metadata';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
 import type { AnyFieldName, TMetadataFields } from '../../../../common';
-import { FieldMetadata } from '../../../../common';
 
 interface MetadataFieldsRepositoryDeps {
   metadataFields: TMetadataFields;

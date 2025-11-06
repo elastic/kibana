@@ -20,7 +20,4 @@ export type {
   TOtelFields,
 } from './fields_metadata/types';
 
-export { FieldMetadata } from './fields_metadata/models/field_metadata';
-export { FieldsMetadataDictionary } from './fields_metadata/models/fields_metadata_dictionary';
-
 export { isMetadataField } from './guards';

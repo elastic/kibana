@@ -122,4 +122,18 @@ export const MetadataFields = {
   },
 };
 
-export const MetadataFieldNames = Object.keys(MetadataFields);
+/**
+ * Statically type the metadata field names instead of using Object.keys(MetadataFields) because it reduces the exported bundle size.
+ */
+export const MetadataFieldNames = [
+  '_index',
+  '_id',
+  '_source',
+  '_size',
+  '_doc_count',
+  '_field_names',
+  '_ignored',
+  '_routing',
+  '_meta',
+  '_tier',
+];
