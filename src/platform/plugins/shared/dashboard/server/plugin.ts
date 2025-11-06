@@ -29,6 +29,7 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -37,14 +38,17 @@ import {
 import { getUISettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { createDashboardSavedObjectType, DASHBOARD_SAVED_OBJECT_TYPE, DashboardSavedObjectAttributes } from './dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
+import {
+  createDashboardSavedObjectType,
+  DASHBOARD_SAVED_OBJECT_TYPE,
+} from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -160,13 +164,18 @@ export class DashboardPlugin
     return {
       getDashboard: async (ctx: RequestHandlerContext, id: string) => {
         const { core } = await ctx.resolve(['core']);
-        const soResponse = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
+        const soResponse = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+          DASHBOARD_SAVED_OBJECT_TYPE,
+          id
+        );
         return {
           id: soResponse.saved_object.id,
           description: soResponse.saved_object.attributes.description,
-          tags: soResponse.saved_object.references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id),
+          tags: soResponse.saved_object.references
+            .filter(({ type }) => type === tagSavedObjectTypeName)
+            .map(({ id }) => id),
           title: soResponse.saved_object.attributes.title,
-        }
+        };
       },
       scanDashboards,
     };

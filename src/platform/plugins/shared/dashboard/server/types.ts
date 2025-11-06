@@ -9,14 +9,19 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import { DashboardState } from './content_management';
+import type { DashboardState } from './content_management';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
 export interface DashboardPluginStart {
-  getDashboard: (ctx: RequestHandlerContext, id: string) => Promise<Pick<DashboardState, 'description' | 'tags' | 'title'> & {
-    id: string;
-  }>;
+  getDashboard: (
+    ctx: RequestHandlerContext,
+    id: string
+  ) => Promise<
+    Pick<DashboardState, 'description' | 'tags' | 'title'> & {
+      id: string;
+    }
+  >;
   /**
    * @deprecated Contact #kibana-presentation about requirements for a proper panel search interface
    */
