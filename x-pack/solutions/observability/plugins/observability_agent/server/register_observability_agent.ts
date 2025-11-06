@@ -93,7 +93,7 @@ export async function registerObservabilityAgent({
     description: OBSERVABILITY_AGENT_DESCRIPTION,
     avatar_icon: 'logoObservability',
     configuration: {
-      instructions: 'You are a observability specialist agent',
+      instructions: 'You are an observability specialist agent',
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
