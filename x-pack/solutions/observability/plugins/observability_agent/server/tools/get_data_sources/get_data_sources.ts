@@ -75,7 +75,7 @@ export async function createGetDataSourcesTool({
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to retrieve data sources: ${error.message}`,
+                message: `Failed to retrieve observability data sources: ${error.message}`,
                 stack: error.stack,
               },
             },
