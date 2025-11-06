@@ -6,11 +6,12 @@
  */
 
 import { useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ScratchpadNode, ScratchpadNodeData } from './use_scratchpad_state';
 import type { Edge } from '@xyflow/react';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ScratchpadNode } from './use_scratchpad_state';
 
 export interface UseScratchpadScreenContextOptions {
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   nodes: ScratchpadNode[];
   edges: Edge[];
   addNode: (node: ScratchpadNode) => string;
@@ -20,6 +21,7 @@ export interface UseScratchpadScreenContextOptions {
 }
 
 export function useScratchpadScreenContext({
+  observabilityAIAssistant,
   nodes,
   edges,
   addNode,
@@ -27,10 +29,6 @@ export function useScratchpadScreenContext({
   deleteNode,
   createEdge,
 }: UseScratchpadScreenContextOptions) {
-  const {
-    services: { observabilityAIAssistant },
-  } = useKibana();
-
   useEffect(() => {
     if (!observabilityAIAssistant) return;
 
@@ -139,7 +137,8 @@ export function useScratchpadScreenContext({
                     x: { type: 'number' },
                     y: { type: 'number' },
                   },
-                  description: 'Optional position for the node. If not provided, will be auto-positioned.',
+                  description:
+                    'Optional position for the node. If not provided, will be auto-positioned.',
                 },
               },
               required: ['query'],
@@ -174,7 +173,8 @@ export function useScratchpadScreenContext({
         createScreenContextAction(
           {
             name: 'add_text_note_node',
-            description: 'Add a new text note node to the scratchpad for storing notes or documentation.',
+            description:
+              'Add a new text note node to the scratchpad for storing notes or documentation.',
             parameters: {
               type: 'object',
               properties: {
@@ -329,7 +329,8 @@ export function useScratchpadScreenContext({
         createScreenContextAction(
           {
             name: 'delete_node',
-            description: 'Delete a node from the scratchpad. This will also remove any edges connected to it.',
+            description:
+              'Delete a node from the scratchpad. This will also remove any edges connected to it.',
             parameters: {
               type: 'object',
               properties: {
@@ -394,14 +395,5 @@ export function useScratchpadScreenContext({
         ),
       ],
     });
-  }, [
-    observabilityAIAssistant,
-    nodes,
-    edges,
-    addNode,
-    updateNode,
-    deleteNode,
-    createEdge,
-  ]);
+  }, [observabilityAIAssistant, nodes, edges, addNode, updateNode, deleteNode, createEdge]);
 }
-

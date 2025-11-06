@@ -50,6 +50,7 @@ export function ScratchpadApplication({
 
   // Integrate AI assistant screen context
   useScratchpadScreenContext({
+    observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
     nodes,
     edges,
     addNode,
@@ -304,6 +305,7 @@ export function ScratchpadApplication({
           node={editingNodeId ? nodes.find((n) => n.id === editingNodeId) || null : null}
           onClose={() => setEditingNodeId(null)}
           onSave={handleSaveNode}
+          timeRange={timeRange}
         />
       </EuiPageTemplate>
     </KibanaContextProvider>

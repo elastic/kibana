@@ -26,25 +26,24 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import type { ScratchpadNode } from '../../hooks/use_scratchpad_state';
 import { useESQLQuery } from '../../hooks/use_esql_query';
 import { esqlResultsToChartData } from '../../utils/esql_results_to_chart';
 import { ESQLChart } from '../nodes/esql_chart';
-import { useScratchpadNodeContext } from '../scratchpad_canvas/node_context';
-import type { EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
 
 interface NodeEditModalProps {
   node: ScratchpadNode | null;
   onClose: () => void;
   onSave: (nodeId: string, updates: Partial<ScratchpadNode>) => void;
+  timeRange?: TimeRange;
 }
 
 type TableRow = Record<string, unknown>;
 
-export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
-  const { timeRange } = useScratchpadNodeContext();
+export function NodeEditModal({ node, onClose, onSave, timeRange }: NodeEditModalProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [query, setQuery] = useState('');
@@ -68,6 +67,7 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
   const handleRunQuery = useCallback(async () => {
     if (!query || !timeRange) return;
     await executeQuery(query, timeRange);
+    // Results are stored in the hook state and will be displayed via the `results` variable
   }, [query, timeRange, executeQuery]);
 
   // Auto-execute query when time range changes (but not on initial load or query change)
@@ -75,8 +75,8 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
     if (node?.data.type === 'esql_query' && query && timeRange && node.data.query === query) {
       let cancelled = false;
       const runQuery = async () => {
-        const queryResults = await executeQuery(query, timeRange);
-        if (!cancelled && queryResults && node) {
+        await executeQuery(query, timeRange);
+        if (!cancelled && node) {
           // Results are stored in the hook state, will be displayed
         }
       };
@@ -85,9 +85,20 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
         cancelled = true;
       };
     }
-  }, [timeRange?.from, timeRange?.to, executeQuery, node?.data.type, node?.data.query, query]);
+  }, [
+    timeRange?.from,
+    timeRange?.to,
+    executeQuery,
+    node?.data.type,
+    node?.data.query,
+    query,
+    node,
+    timeRange,
+  ]);
 
-  const displayResults = node?.data.type === 'esql_query' ? (node.data as any).results || results : null;
+  // Prioritize hook results (from manual execution) over saved node results
+  const displayResults =
+    node?.data.type === 'esql_query' ? results || (node.data as any).results : null;
 
   // Convert results to chart data
   const chartData = useMemo(() => {
@@ -135,7 +146,7 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
           query,
           viewMode,
           chartType,
-          results: displayResults,
+          results: displayResults, // Use the latest results (from hook or saved)
         }),
         ...(node.data.type === 'kibana_link' && { url, title }),
       },
@@ -156,7 +167,9 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
       <EuiModalHeader>
         <EuiModalHeaderTitle>Edit {node.data.type.replace('_', ' ')}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody style={isESQLNode ? { height: 'calc(90vh - 120px)', overflow: 'auto' } : undefined}>
+      <EuiModalBody
+        style={isESQLNode ? { height: 'calc(90vh - 120px)', overflow: 'auto' } : undefined}
+      >
         <EuiForm>
           {node.data.type === 'text_note' && (
             <>
@@ -209,7 +222,7 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
                     initialState={{
                       editorHeight: 200,
                     }}
-                    errors={error ? [{ message: error }] : []}
+                    errors={error ? [{ message: error, name: 'QueryError' }] : []}
                   />
                 </div>
               </EuiFormRow>
@@ -245,7 +258,6 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
                         ]}
                         idSelected={viewMode}
                         onChange={(id) => setViewMode(id as 'table' | 'chart')}
-                        size="compressed"
                       />
                     </EuiFlexItem>
                     {viewMode === 'chart' && chartData.canChart && (
@@ -259,7 +271,6 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
                           ]}
                           idSelected={chartType}
                           onChange={(id) => setChartType(id as 'line' | 'bar' | 'area')}
-                          size="compressed"
                         />
                       </EuiFlexItem>
                     )}
@@ -291,8 +302,8 @@ export function NodeEditModal({ node, onClose, onSave }: NodeEditModalProps) {
                     </div>
                   ) : (
                     <div style={{ padding: '16px', background: '#f5f5f5', borderRadius: '4px' }}>
-                      Chart requires at least one time column (timestamp, time) and one numeric column,
-                      or at least two numeric columns.
+                      Chart requires at least one time column (timestamp, time) and one numeric
+                      column, or at least two numeric columns.
                     </div>
                   )}
                 </>
