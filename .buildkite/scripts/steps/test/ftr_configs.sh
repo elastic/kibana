@@ -53,16 +53,7 @@ while read -r config; do
   fi
 
   FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
-
-  CONFIG_EXECUTION_KEY="${config}_executed"
-  IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false" --log-level error)
-
-  if [[ "${IS_CONFIG_EXECUTION}" == "true" ]]; then
-    echo "--- [ already-tested ] $FULL_COMMAND"
-    continue
-  else
-    echo "--- $ $FULL_COMMAND"
-  fi
+  echo "--- $ $FULL_COMMAND"
 
   start=$(date +%s)
 
@@ -89,17 +80,6 @@ while read -r config; do
   lastCode=$?
   set -e;
 
-  # Scout reporter
-  if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
-    # Upload events after running each config
-    echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
-    node scripts/scout upload-events --dontFailOnError
-    echo "Upload successful, removing local events at .scout/reports"
-    rm -rf .scout/reports
-  else
-    echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
-  fi
-
   timeSec=$(($(date +%s)-start))
   if [[ $timeSec -gt 60 ]]; then
     min=$((timeSec/60))
@@ -113,10 +93,7 @@ while read -r config; do
     duration: ${duration}
     result: ${lastCode}")
 
-  if [ $lastCode -eq 0 ]; then
-    # Test was successful, so mark it as executed
-    buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
-  else
+  if [ $lastCode -ne 0 ]; then
     exitCode=10
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
@@ -136,5 +113,8 @@ fi
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
+
+# Scout reporter
+source .buildkite/scripts/steps/test/scout_upload_report_events.sh
 
 exit $exitCode

@@ -18,5 +18,5 @@ if ! ts-node --version; then
 fi
 
 cd '.buildkite'
-retry 5 15 npm ci --no-audit
+retry 5 15 npm ci
 cd -
