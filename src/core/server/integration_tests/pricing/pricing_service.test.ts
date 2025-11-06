@@ -14,6 +14,7 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
 import type {
   HttpService,
@@ -41,7 +42,10 @@ describe('PricingService', () => {
   describe('preboot', () => {
     beforeAll(async () => {
       server = createInternalHttpService();
-      httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
+      httpPreboot = await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
+      });
       httpSetup = await server.setup({
         context: contextServiceMock.createSetupContract(),
         executionContext: executionContextServiceMock.createInternalSetupContract(),
@@ -76,7 +80,10 @@ describe('PricingService', () => {
   describe('after preboot', () => {
     beforeAll(async () => {
       server = createInternalHttpService();
-      httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
+      httpPreboot = await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
+      });
       httpSetup = await server.setup({
         context: contextServiceMock.createSetupContract(),
         executionContext: executionContextServiceMock.createInternalSetupContract(),
