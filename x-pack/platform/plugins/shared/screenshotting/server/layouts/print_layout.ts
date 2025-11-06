@@ -52,8 +52,7 @@ export class PrintLayout extends BaseLayout implements Layout {
   public getPdfImageSize() {
     return {
       width: 500,
-      height: 700,
-    };
+    } as PdfImageSize;
   }
 
   // Image size is not used in print layout
