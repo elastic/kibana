@@ -30,7 +30,11 @@ import {
   getAdhocDataviews,
   operationFromColumn,
 } from '../utils';
-import { getSharedChartAPIToLensState, getSharedChartLensStateToAPI } from './utils';
+import {
+  getMetricAccessor,
+  getSharedChartAPIToLensState,
+  getSharedChartLensStateToAPI,
+} from './utils';
 import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
@@ -82,7 +86,8 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): GaugeState {
-  if (visualization.metricAccessor == null) {
+  const metricAccessor = getMetricAccessor(visualization);
+  if (metricAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
@@ -102,7 +107,7 @@ function reverseBuildVisualizationState(
         : { type: visualization.shape },
     metric: isEsqlTableTypeDataset(dataset)
       ? {
-          ...getValueApiColumn(visualization.metricAccessor, layer as TextBasedLayer),
+          ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
           ...(visualization.minAccessor
             ? { min: getValueApiColumn(visualization.minAccessor, layer as TextBasedLayer) }
             : {}),
@@ -115,7 +120,7 @@ function reverseBuildVisualizationState(
         }
       : {
           ...(operationFromColumn(
-            visualization.metricAccessor,
+            metricAccessor,
             layer as FormBasedLayer
           ) as LensApiAllMetricOperations),
           ...(visualization.minAccessor
@@ -255,9 +260,16 @@ export function fromLensStateToAPI(
   const { state } = config;
   const visualization = state.visualization as GaugeVisualizationState;
   const layers =
-    state.datasourceStates.formBased?.layers ?? state.datasourceStates.textBased?.layers ?? [];
+    state.datasourceStates.formBased?.layers ??
+    state.datasourceStates.textBased?.layers ??
+    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
+    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
+    [];
 
-  const [layerId, layer] = Object.entries(layers)[0];
+  // Layers can be in any order, so make sure to get the main one
+  const [layerId, layer] = Object.entries(layers).find(
+    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
+  )!;
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
