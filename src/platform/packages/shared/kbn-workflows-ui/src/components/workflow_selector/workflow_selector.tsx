@@ -115,12 +115,16 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
             type="alert"
             color="warning"
             style={{ marginRight: '8px' }}
-            aria-label="Workflow disabled warning"
+            aria-label={i18n.WORKFLOW_DISABLED_WARNING}
           />
         );
       } else if (isDisabled) {
         return (
-          <IconDisabledWorkflow size="m" style={{ marginRight: '8px' }} aria-label="Disabled" />
+          <IconDisabledWorkflow
+            size="m"
+            style={{ marginRight: '8px' }}
+            aria-label={i18n.DISABLED_BADGE_LABEL}
+          />
         );
       } else if (workflowOption.validationResult) {
         return (
@@ -246,7 +250,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
         <EuiLoadingSpinner size="m" />
       ) : (
         <EuiSelectable
-          aria-label="Select workflow"
+          aria-label={i18n.WORKFLOW_ID_LABEL}
           options={workflowOptions as EuiSelectableOption<WorkflowOption>[]}
           onChange={handleWorkflowChange}
           singleSelection
