@@ -23,21 +23,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show the correct content', async () => {
       const checkTab0 = async () => {
         const tabPreviewContent = await unifiedTabs.getTabPreviewContent(0);
-        expect(tabPreviewContent.title).to.be('Data View: logstash-*');
+        expect(tabPreviewContent.title).to.be('Data view: logstash-*');
         expect(tabPreviewContent.query).to.be('');
         expect(tabPreviewContent.label).to.be('no query');
       };
 
       const checkTab1 = async () => {
         const tabPreviewContent = await unifiedTabs.getTabPreviewContent(1);
-        expect(tabPreviewContent.title).to.be('Data View: logstash-*');
+        expect(tabPreviewContent.title).to.be('Data view: logstash-*');
         expect(tabPreviewContent.query).to.be('bytes > 100');
         expect(tabPreviewContent.label).to.be('with query');
       };
 
       const checkTab2 = async () => {
         const tabPreviewContent = await unifiedTabs.getTabPreviewContent(2);
-        expect(tabPreviewContent.title).to.be('Data View: logs*');
+        expect(tabPreviewContent.title).to.be('Data view: logs*');
         expect(tabPreviewContent.query).to.be('');
         expect(tabPreviewContent.label).to.be('with different data view');
       };
