@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHttp } from '../../../common/lib/kibana';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
@@ -182,7 +183,15 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
         </EuiText>
       );
     } else if (error) {
-      return <FormattedError error={error} data-test-subj={getTestId('apiError')} />;
+      return (
+        <EuiText size={textSize} color="warning">
+          <FormattedMessage
+            id="xpack.securitySolution.responseActionFileDownloadLink.apiError"
+            defaultMessage="Attempt to retrive file download information failed."
+          />
+          <FormattedError error={error} data-test-subj={getTestId('apiError')} />
+        </EuiText>
+      );
     }
 
     return (
