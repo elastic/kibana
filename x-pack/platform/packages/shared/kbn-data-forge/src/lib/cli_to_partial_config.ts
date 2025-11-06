@@ -50,6 +50,7 @@ export function cliOptionsToPartialConfig(options: CliOptions) {
       ephemeralProjectIds: options.ephemeralProjectIds,
       alignEventsToInterval: options.alignEventsToInterval === true,
       slashLogs: options.slashLogs,
+      loopSchedule: options.loopSchedule === true,
     },
     schedule: [schedule],
   };
