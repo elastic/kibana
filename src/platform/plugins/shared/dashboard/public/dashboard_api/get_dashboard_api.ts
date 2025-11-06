@@ -110,7 +110,6 @@ export function getDashboardApi({
     savedObjectId$,
     settingsManager,
     unifiedSearchManager,
-    getReferences,
     filtersManager,
   });
 
