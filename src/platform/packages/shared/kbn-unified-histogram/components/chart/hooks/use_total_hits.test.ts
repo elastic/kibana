@@ -8,7 +8,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { UnifiedHistogramFetch$, UnifiedHistogramFetchParams } from '../../../types';
+import type { UnifiedHistogramFetch$ } from '../../../types';
 import { UnifiedHistogramFetchStatus } from '../../../types';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { useTotalHits } from './use_total_hits';
@@ -31,7 +31,7 @@ jest.mock('react-use/lib/useDebounce', () => {
 
 describe('useTotalHits', () => {
   let fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
-  const getDeps = (fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock()) => ({
+  const getDeps = () => ({
     services: {
       data: dataPluginMock.createStartContract(),
       expressions: {
@@ -46,15 +46,14 @@ describe('useTotalHits', () => {
         ),
       },
     } as any,
-    dataView: dataViewWithTimefieldMock,
     request: undefined,
     hits: {
       status: UnifiedHistogramFetchStatus.uninitialized,
       total: undefined,
     },
     chartVisible: false,
-    fetchParams,
     fetch$,
+    abortController: new AbortController(),
     onTotalHitsChange: jest.fn(),
   });
 
@@ -93,7 +92,7 @@ describe('useTotalHits', () => {
     const adapter = new RequestAdapter();
     const { rerender } = renderHook(() =>
       useTotalHits({
-        ...getDeps(fetchParams),
+        ...getDeps(),
         services: { data } as any,
         request: {
           searchSessionId: '123',
@@ -102,7 +101,7 @@ describe('useTotalHits', () => {
         onTotalHitsChange,
       })
     );
-    fetch$.next(fetchParams);
+    fetch$.next({ fetchParams, lensVisServiceState: undefined });
     rerender();
     expect(onTotalHitsChange).toBeCalledTimes(1);
     expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
@@ -131,11 +130,11 @@ describe('useTotalHits', () => {
       query: { esql: 'from test' },
     });
     const deps = {
-      ...getDeps(fetchParams),
+      ...getDeps(),
       onTotalHitsChange,
     };
     const { rerender } = renderHook(() => useTotalHits(deps));
-    fetch$.next(fetchParams);
+    fetch$.next({ fetchParams, lensVisServiceState: undefined });
     rerender();
     expect(onTotalHitsChange).not.toHaveBeenCalled();
   });
@@ -179,7 +178,7 @@ describe('useTotalHits', () => {
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
-    fetch$.next(options.fetchParams);
+    fetch$.next({ fetchParams: getFetchParamsMock(), lensVisServiceState: undefined });
     rerender();
     expect(onTotalHitsChange).toBeCalledTimes(1);
     expect(setFieldSpy).toHaveBeenCalled();
@@ -187,7 +186,7 @@ describe('useTotalHits', () => {
     await waitFor(() => {
       expect(onTotalHitsChange).toBeCalledTimes(2);
     });
-    fetch$.next(options.fetchParams);
+    fetch$.next({ fetchParams: getFetchParamsMock(), lensVisServiceState: undefined });
     rerender();
     expect(abortSpy).toHaveBeenCalled();
     expect(onTotalHitsChange).toBeCalledTimes(3);
@@ -207,7 +206,7 @@ describe('useTotalHits', () => {
       .mockReturnValue(throwError(() => error));
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
-    fetch$.next(options.fetchParams);
+    fetch$.next({ fetchParams: getFetchParamsMock(), lensVisServiceState: undefined });
     rerender();
     await waitFor(() => {
       expect(onTotalHitsChange).toBeCalledTimes(2);
@@ -233,8 +232,8 @@ describe('useTotalHits', () => {
       .mockClear()
       .mockReturnValue(fetchParams.timeRange as any);
     const filters: Filter[] = [{ meta: { index: 'test' }, query: { match_all: {} } }];
-    const { rerender } = renderHook(() => useTotalHits(getDeps(fetchParams)));
-    fetch$.next(fetchParams);
+    const { rerender } = renderHook(() => useTotalHits(getDeps()));
+    fetch$.next({ fetchParams, lensVisServiceState: undefined });
     rerender();
     expect(setOverwriteDataViewTypeSpy).toHaveBeenCalledWith(undefined);
     expect(setFieldSpy).toHaveBeenCalledWith('filter', filters);

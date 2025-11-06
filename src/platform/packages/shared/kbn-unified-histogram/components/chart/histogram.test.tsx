@@ -65,7 +65,7 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
   const lensVisMock = await getLensVisMock({
     dataView: fetchParams.dataView,
     isPlainRecord: fetchParams.isESQLQuery,
-    timeInterval: 'auto',
+    timeInterval: fetchParams.timeInterval!,
     filters: fetchParams.filters,
     query: fetchParams.query,
     columns: [],
@@ -76,11 +76,9 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
     services: unifiedHistogramServicesMock,
     chart: {
       hidden: false,
-      timeInterval: 'auto',
+      timeInterval: fetchParams.timeInterval,
     },
     fetch$,
-    fetchParams,
-    lensVisService: lensVisMock.lensService,
     onLoad: jest.fn(),
     withDefaultActions: undefined,
     dataView: fetchParams.dataView,
@@ -97,10 +95,10 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
   const component = mountWithIntl(<Wrapper {...props} />);
 
   act(() => {
-    fetch$?.next(fetchParams);
+    fetch$?.next({ fetchParams, lensVisServiceState: lensVisMock.lensService.state$.getValue() });
   });
 
-  return { props, fetch$, component: component.update() };
+  return { props, fetch$, fetchParams, component: component.update(), lensVisMock };
 }
 
 describe('Histogram', () => {
@@ -110,24 +108,24 @@ describe('Histogram', () => {
   });
 
   it('should only update lens.EmbeddableComponent props when fetch$ is triggered', async () => {
-    const { component, props, fetch$ } = await mountComponent();
+    const { component, fetch$, fetchParams, lensVisMock } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     expect(component.find(embeddable).exists()).toBe(true);
     let lensProps = component.find(embeddable).props();
     const originalProps = getLensProps({
-      searchSessionId: props.fetchParams.searchSessionId,
-      timeRange: props.fetchParams.timeRange,
-      esqlVariables: props.fetchParams.esqlVariables,
+      searchSessionId: fetchParams.searchSessionId,
+      timeRange: fetchParams.timeRange,
+      esqlVariables: fetchParams.esqlVariables,
       attributes: (await getMockLensAttributes())!.attributes,
       onLoad: lensProps.onLoad!,
     });
     expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
-    const updatedFetchParams = { ...props.fetchParams, searchSessionId: '321' };
-    component.setProps({ fetchParams: updatedFetchParams }).update();
-    lensProps = component.find(embeddable).props();
-    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
+    const updatedFetchParams = { ...fetchParams, searchSessionId: '321' };
     await act(async () => {
-      fetch$.next(updatedFetchParams);
+      fetch$.next({
+        fetchParams: updatedFetchParams,
+        lensVisServiceState: lensVisMock.lensService.state$.getValue(),
+      });
     });
     component.update();
     lensProps = component.find(embeddable).props();

@@ -78,7 +78,6 @@ describe('Layout', () => {
           totalHitsStatus: hits?.status ?? UnifiedHistogramFetchStatus.complete,
           totalHitsResult: hits?.total ?? 10,
           chartHidden: chart?.hidden ?? false,
-          timeInterval: chart?.timeInterval ?? 'auto',
         },
         isChartLoading: false,
         ...rest,
