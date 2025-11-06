@@ -32,10 +32,6 @@ export interface NavigationProps {
    */
   activeItemId?: string;
   /**
-   * Content to display inside the side panel footer.
-   */
-  sidePanelFooter?: ReactNode;
-  /**
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
   isCollapsed: boolean;
@@ -48,15 +44,19 @@ export interface NavigationProps {
    */
   logo: SideNavLogo;
   /**
-   * Callback fired when a navigation item is clicked.
-   */
-  onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
-  /**
    * Required by the grid layout to set the width of the navigation slot.
    */
   setWidth: (width: number) => void;
   /**
-   * Optional data-test-subj attribute for testing purposes.
+   * (optional) Callback fired when a navigation item is clicked.
+   */
+  onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
+  /**
+   * (optional) Content to display inside the side panel footer.
+   */
+  sidePanelFooter?: ReactNode;
+  /**
+   * (optional) data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
 }
