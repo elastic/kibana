@@ -17,12 +17,20 @@ import {
   comprehensiveGaugeWithDataView,
   esqlGauge,
 } from './lens_api_config.mock';
-import { gaugeAttributes, gaugeESQLAttributes } from './lens_state_config.mock';
+import {
+  gaugeAttributes,
+  gaugeAttributesWithPercentageColorMode,
+  gaugeESQLAttributes,
+} from './lens_state_config.mock';
 
 describe('Gauge', () => {
   describe('validateConverter', () => {
     it('should convert a gauge chart with full config', () => {
       validateConverter(gaugeAttributes, gaugeStateSchema);
+    });
+    //  rangeMax: null for percentage color mode -> throws validation error in the color schema
+    it.skip('should convert a gauge chart with full config with percentage color mode', () => {
+      validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
     });
     it('should convert a gauge chart with ESQL dataset', () => {
       validateConverter(gaugeESQLAttributes, gaugeStateSchema);

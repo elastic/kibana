@@ -214,6 +214,107 @@ export const gaugeAttributes: LensAttributes = {
   ],
 };
 
+/**
+ *  Gauge generated from kibana with percentage color mode
+ */
+export const gaugeAttributesWithPercentageColorMode: LensAttributes = {
+  title: 'Gauge full config with percentage color mode',
+  visualizationType: 'lnsGauge',
+  description: 'Gauge full config with percentage color mode',
+  state: {
+    visualization: {
+      shape: 'arc',
+      layerId: '0c83ba66-2a5b-47d6-9a5b-5b91786ee6f4',
+      layerType: 'data',
+      ticksPosition: 'auto',
+      labelMajorMode: 'auto',
+      metricAccessor: '7328e798-7f14-4a3e-9cba-525910be67d4',
+      palette: {
+        type: 'palette',
+        name: 'status',
+        params: {
+          name: 'status',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          rangeMax: null,
+          progression: 'fixed',
+          stops: [
+            {
+              color: '#24c292',
+              stop: 0,
+            },
+            {
+              color: '#aee8d2',
+              stop: 25,
+            },
+            {
+              color: '#ffc9c2',
+              stop: 50,
+            },
+            {
+              color: '#f6726a',
+              stop: 75,
+            },
+          ],
+          steps: 4,
+          continuity: 'above',
+          maxSteps: 5,
+        },
+      },
+      colorMode: 'palette',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '0c83ba66-2a5b-47d6-9a5b-5b91786ee6f4': {
+            columns: {
+              '7328e798-7f14-4a3e-9cba-525910be67d4': {
+                label: 'Median of bytes',
+                dataType: 'number',
+                operationType: 'median',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['7328e798-7f14-4a3e-9cba-525910be67d4'],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  version: 1,
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-0c83ba66-2a5b-47d6-9a5b-5b91786ee6f4',
+    },
+  ],
+};
+
+/**
+ *  ESQL Gauge generated from kibana
+ */
 export const gaugeESQLAttributes: LensAttributes = {
   title: 'ESQL Gauge full config',
   visualizationType: 'lnsGauge',
