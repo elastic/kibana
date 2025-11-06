@@ -9,7 +9,6 @@
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { ESQLControlState, PublishesESQLVariables } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
-import type { StickyControlState } from '@kbn/controls-schemas';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { omit } from 'lodash';
 
@@ -18,15 +17,13 @@ export const addControlsFromSavedSession = async (
   controlGroupJson: string,
   uuid: string | undefined
 ): Promise<void> => {
-  const controlsState = JSON.parse(controlGroupJson) as ControlPanelsState<
-    StickyControlState & ESQLControlState
-  >;
+  const controlsState = JSON.parse(controlGroupJson) as ControlPanelsState;
   const esqlVariables$ = container.esqlVariables$;
   const esqlVariables = esqlVariables$?.getValue();
 
   // Only add controls whose variableName does not exist in current esqlVariables
   for (const panel of Object.values(controlsState)) {
-    const variableName = panel.variableName;
+    const variableName = (panel as ESQLControlState).variableName;
     const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
     if (!variableExists) {
       await container.addNewPanel(
