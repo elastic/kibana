@@ -30112,7 +30112,38 @@ paths:
                   minLength: 1
                   type: string
                 vars:
-                  additionalProperties: {}
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 1000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          frozen:
+                            type: boolean
+                          type:
+                            maxLength: 50
+                            type: string
+                          value:
+                            anyOf:
+                              - maxLength: 1000
+                                type: string
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - isSecretRef
+                                  - id
+                        required:
+                          - type
+                          - value
                   type: object
       responses:
         '200':
