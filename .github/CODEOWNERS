@@ -858,6 +858,7 @@ x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
 x-pack/platform/packages/private/kbn-data-quality @elastic/obs-ux-logs-team
 x-pack/platform/packages/private/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
+x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
 x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-presentation
 x-pack/platform/packages/private/ml/agg_utils @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_change_point_detection @elastic/ml-ui
@@ -896,7 +897,6 @@ x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/public @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/server @elastic/kibana-management
-x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
