@@ -12,6 +12,7 @@ import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent, AgentCapabilities } from '@kbn/onechat-common';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/onechat-common/agents';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapOnechatErrors } from '../utils/errors';
@@ -24,6 +25,7 @@ export interface ChatParams {
   capabilities?: AgentCapabilities;
   input: string;
   attachments?: AttachmentInput[];
+  browserApiTools?: BrowserApiToolMetadata[];
 }
 
 export class ChatService {
@@ -41,6 +43,7 @@ export class ChatService {
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
+      browser_api_tools: params.browserApiTools ?? [],
     };
 
     return defer(() => {

@@ -7,6 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { CoreStart } from '@kbn/core/public';
+import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
 import type { OnechatInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
@@ -67,7 +68,33 @@ export interface EmbeddableConversationProps {
    * It will be appended only if it has changed since previous conversation round.
    */
   attachments?: UiAttachment[];
+
+  /**
+   * Browser API tools that the agent can use to interact with the page.
+   * Tools are executed browser-side when the LLM requests them.
+   *
+   * Example:
+   * ```typescript
+   * browserApiTools: [{
+   *   id: 'dashboard.config.update_title',
+   *   description: 'Update the dashboard title',
+   *   schema: z.object({
+   *     title: z.string().describe('The new title')
+   *   }),
+   *   handler: async ({ title }) => {
+   *     dashboardApi.updateTitle(title);
+   *   }
+   * }]
+   * ```
+   */
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+}
+
+export interface EmbeddableConversationFlyoutProps {
+  onClose: () => void;
+  ariaLabelledBy: string;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
-  EmbeddableConversationProps;
+  EmbeddableConversationProps &
+  EmbeddableConversationFlyoutProps;
