@@ -10,10 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { IWorkflowEventLogger, WorkflowEventLoggerContext } from './workflow_event_logger';
 import { WorkflowEventLogger } from './workflow_event_logger';
-import type {
-  LogSearchResult,
-  LogsRepository,
-} from '../repositories/logs_repository/logs_repository';
+import type { LogSearchResult, LogsRepository } from '../repositories/logs_repository';
 
 export interface WorkflowEventLoggerServiceOptions {
   logsRepository: LogsRepository;
@@ -25,32 +22,13 @@ export interface WorkflowEventLoggerServiceOptions {
 export class WorkflowEventLoggerService {
   private logsRepository: LogsRepository;
   private logger: Logger;
-  private indexName: string;
   private enableConsoleLogging: boolean;
   private initialized: boolean = false;
 
   constructor(options: WorkflowEventLoggerServiceOptions) {
     this.logsRepository = options.logsRepository;
     this.logger = options.logger;
-    this.indexName = options.indexName;
     this.enableConsoleLogging = options.enableConsoleLogging || false;
-  }
-
-  public async initialize(): Promise<void> {
-    if (this.initialized) {
-      return;
-    }
-
-    try {
-      // Create the logs index with proper mappings
-      await this.logsRepository.initialize();
-
-      this.initialized = true;
-      this.logger.debug(`WorkflowEventLoggerService initialized with index: ${this.indexName}`);
-    } catch (error) {
-      this.logger.error('Failed to initialize WorkflowEventLoggerService', error);
-      throw error;
-    }
   }
 
   public createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger {
