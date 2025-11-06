@@ -8,6 +8,8 @@
  */
 
 import { useAbortableAsync } from '@kbn/react-hooks';
+import { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 interface UseSpanParams {
@@ -16,7 +18,7 @@ interface UseSpanParams {
 }
 
 export const useSpan = ({ spanId, traceId }: UseSpanParams) => {
-  const { discoverShared } = getUnifiedDocViewerServices();
+  const { discoverShared, core } = getUnifiedDocViewerServices();
 
   const fetchSpanFeature = discoverShared.features.registry.getById(
     'observability-traces-fetch-span'
@@ -38,6 +40,18 @@ export const useSpan = ({ spanId, traceId }: UseSpanParams) => {
     },
     [fetchSpanFeature, traceId, spanId]
   );
+
+  useEffect(() => {
+    if (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      core.notifications.toasts.addDanger({
+        title: i18n.translate('unifiedDocViewer.fullScreenWaterfall.spanDocument.error', {
+          defaultMessage: 'An error occurred while fetching the span document',
+        }),
+        text: errorMessage,
+      });
+    }
+  }, [error, core.notifications.toasts]);
 
   return {
     loading,

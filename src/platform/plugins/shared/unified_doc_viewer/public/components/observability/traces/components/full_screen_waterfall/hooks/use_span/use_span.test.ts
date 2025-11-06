@@ -17,6 +17,7 @@ jest.mock('../../../../../../../plugin', () => ({
 }));
 
 const mockFetchSpan = jest.fn<Promise<SpanDocument | undefined>, any>();
+const mockAddDanger = jest.fn();
 
 const mockGetById: jest.Mock<
   | {
@@ -36,6 +37,13 @@ const mockGetById: jest.Mock<
       },
     },
   },
+  core: {
+    notifications: {
+      toasts: {
+        addDanger: mockAddDanger,
+      },
+    },
+  },
 });
 
 describe('useSpan', () => {
@@ -47,6 +55,7 @@ describe('useSpan', () => {
     mockGetById.mockReturnValue({
       fetchSpan: mockFetchSpan,
     });
+    mockAddDanger.mockClear();
   });
 
   it('should return undefined when feature is not registered', async () => {
@@ -154,6 +163,22 @@ describe('useSpan', () => {
     expect(result.current.error?.message).toBe(errorMessage);
     expect(result.current.span).toBeUndefined();
     expect(mockFetchSpan).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show toast notification when an error occurs', async () => {
+    const errorMessage = 'Fetch error';
+    mockFetchSpan.mockRejectedValue(new Error(errorMessage));
+
+    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+
+    await waitFor(() => !result.current.loading);
+
+    await waitFor(() => {
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title: 'An error occurred while fetching the span document',
+        text: errorMessage,
+      });
+    });
   });
 
   it('should refetch when spanId changes', async () => {
