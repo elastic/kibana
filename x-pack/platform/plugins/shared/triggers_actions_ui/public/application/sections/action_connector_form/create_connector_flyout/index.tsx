@@ -47,7 +47,7 @@ export interface CreateConnectorFlyoutProps {
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
-  initialConnector?: Partial<ActionConnector> & { actionTypeId: string };
+  initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
