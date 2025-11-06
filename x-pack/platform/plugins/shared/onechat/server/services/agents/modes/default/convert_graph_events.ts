@@ -40,7 +40,7 @@ import type { Logger } from '@kbn/logging';
 import type { RunToolReturn } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import type { StateType } from './state';
-import { steps, tags } from './constants';
+import { steps, tags, BROWSER_TOOL_PREFIX } from './constants';
 import { isToolCallAction, isAnswerAction, isExecuteToolAction } from './actions';
 import type { ToolCallResult } from './actions';
 
@@ -114,42 +114,30 @@ export const convertGraphEvents = ({
                 }
 
                 toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-                events.push(
-                  createToolCallEvent({
-                    toolId,
-                    toolCallId,
-                    params: toolCallArgs,
-                  })
-                );
+
+                const isBrowserTool = toolId.startsWith(BROWSER_TOOL_PREFIX);
+
+                if (isBrowserTool) {
+                  events.push(
+                    createBrowserToolCallEvent({
+                      toolId: toolId.replace(BROWSER_TOOL_PREFIX, ''),
+                      toolCallId,
+                      params: toolCallArgs,
+                    })
+                  );
+                } else {
+                  events.push(
+                    createToolCallEvent({
+                      toolId,
+                      toolCallId,
+                      params: toolCallArgs,
+                    })
+                  );
+                }
               }
               if (messageText && !hasReasoningEvent) {
                 events.push(createReasoningEvent(messageText));
               }
-
-              toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-
-              const isBrowserTool = toolId.startsWith('browser_');
-
-              if (isBrowserTool) {
-                events.push(
-                  createBrowserToolCallEvent({
-                    toolId: toolId.replace('browser_', ''),
-                    toolCallId,
-                    params: toolCallArgs,
-                  })
-                );
-              } else {
-                events.push(
-                  createToolCallEvent({
-                    toolId,
-                    toolCallId,
-                    params: toolCallArgs,
-                  })
-                );
-              }
-            }
-            if (messageText && !hasReasoningEvent) {
-              events.push(createReasoningEvent(messageText));
             }
           }
 

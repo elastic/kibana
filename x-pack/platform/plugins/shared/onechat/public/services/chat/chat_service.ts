@@ -40,7 +40,7 @@ export class ChatService {
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
-      browser_api_tools: params.browserApiTools,
+      browser_api_tools: params.browserApiTools ?? [],
     };
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
