@@ -29,6 +29,7 @@ const chatAgentGraphName = 'default-onechat-agent';
 
 export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
   browserApiTools?: BrowserApiToolMetadata[];
+  startTime?: Date;
 };
 
 export type RunChatAgentFn = (
@@ -49,6 +50,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentId,
     abortSignal,
     browserApiTools,
+    startTime = new Date(),
   },
   { logger, request, modelProvider, toolProvider, attachments, events }
 ) => {
@@ -123,7 +125,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
-        runId,
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
@@ -136,6 +137,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       graphName: chatAgentGraphName,
       toolIdMapping: allToolIdMappings,
       logger,
+      startTime,
     }),
     finalize(() => manualEvents$.complete())
   );
@@ -146,7 +148,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: processedInput }),
+    addRoundCompleteEvent({ userInput: processedInput, startTime }),
     shareReplay()
   );
 

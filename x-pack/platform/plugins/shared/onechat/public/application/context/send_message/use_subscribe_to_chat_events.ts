@@ -15,6 +15,7 @@ import {
   isToolCallEvent,
   isToolProgressEvent,
   isToolResultEvent,
+  isThinkingCompleteEvent,
 } from '@kbn/onechat-common';
 import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import type { Observable } from 'rxjs';
@@ -106,6 +107,10 @@ export const useSubscribeToChatEvents = ({
           } else if (isConversationCreatedEvent(event)) {
             const { conversation_id: id, title } = event.data;
             conversationActions.onConversationCreated({ conversationId: id, title });
+          } else if (isThinkingCompleteEvent(event)) {
+            conversationActions.setTimeToFirstToken({
+              timeToFirstToken: event.data.time_to_first_token,
+            });
           }
         },
         complete: () => {

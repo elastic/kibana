@@ -17,6 +17,7 @@ export enum ChatEventType {
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
   messageComplete = 'message_complete',
+  thinkingComplete = 'thinking_complete',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
@@ -140,6 +141,24 @@ export const isMessageCompleteEvent = (
   return event.type === ChatEventType.messageComplete;
 };
 
+// Thinking complete
+
+export interface ThinkingCompleteEventData {
+  /** time elapsed from round start to first token arrival, in ms */
+  time_to_first_token: number;
+}
+
+export type ThinkingCompleteEvent = ChatEventBase<
+  ChatEventType.thinkingComplete,
+  ThinkingCompleteEventData
+>;
+
+export const isThinkingCompleteEvent = (
+  event: OnechatEvent<string, any>
+): event is ThinkingCompleteEvent => {
+  return event.type === ChatEventType.thinkingComplete;
+};
+
 // Round complete
 
 export interface RoundCompleteEventData {
@@ -219,6 +238,7 @@ export type ChatAgentEvent =
   | ReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
+  | ThinkingCompleteEvent
   | RoundCompleteEvent;
 
 /**
