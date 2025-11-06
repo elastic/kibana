@@ -73,16 +73,14 @@ interface OwnProps {
   to: string;
 
   /**
-   * By default, multi-value fields will be transformed into a string
+   * If you're not using this property, multi-value fields will be transformed into a string
    * and grouped by that value. For instance, if an object has a property
    * called "mac" with value ['mac1', 'mac2'], the query will stringify that value
    * to "mac1, mac2" and then group by it.
    *
-   * This property allows you to specify exceptions for this rule. For insance, if
-   * you pass ['mac'], then the query will not stringify the value for that field.
-   * Instead, every single value will be bucketed correctly.
-   *
-   * In the end, you will have two groups: "mac1" and "mac2"
+   * Using this property will create a bucket for each value of the multi-value fields in question.
+   * Following the example above, a field with the ['mac1', 'mac2'] value will be grouped
+   * in 2 groups: one for mac1 and a second formac2.
    */
   multiValueFieldsToFlatten?: string[];
 }
