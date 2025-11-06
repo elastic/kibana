@@ -71,9 +71,9 @@ export const GetCloudConnectorsRequestSchema = {
         meta: { description: 'The number of items per page.' },
       })
     ),
-    cloudProvider: schema.maybe(
-      schema.oneOf([schema.literal('aws'), schema.literal('azure')], {
-        meta: { description: 'Filter by cloud provider: aws or azure.' },
+    kuery: schema.maybe(
+      schema.string({
+        meta: { description: 'KQL query to filter cloud connectors.' },
       })
     ),
   }),

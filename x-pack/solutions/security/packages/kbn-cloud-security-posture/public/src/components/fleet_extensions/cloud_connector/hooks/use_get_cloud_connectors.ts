@@ -29,8 +29,8 @@ const fetchCloudConnectors = async (
     query.perPage = options.perPage.toString();
   }
 
-  if (options?.cloudProvider) {
-    query.cloudProvider = options.cloudProvider;
+  if (options?.kuery) {
+    query.kuery = options.kuery;
   }
 
   return http
@@ -43,9 +43,15 @@ const fetchCloudConnectors = async (
 export const useGetCloudConnectors = (cloudProvider?: CloudProvider) => {
   const CLOUD_CONNECTOR_QUERY_KEY = 'get-cloud-connectors';
   const { http } = useKibana<CoreStart>().services;
+
+  // Construct KQL query if cloudProvider is specified
+  const kuery = cloudProvider
+    ? `fleet-cloud-connector.attributes.cloudProvider: "${cloudProvider}"`
+    : undefined;
+
   return useQuery(
     [CLOUD_CONNECTOR_QUERY_KEY, cloudProvider],
-    () => fetchCloudConnectors(http, { cloudProvider }),
+    () => fetchCloudConnectors(http, { kuery }),
     {
       enabled: true,
     }

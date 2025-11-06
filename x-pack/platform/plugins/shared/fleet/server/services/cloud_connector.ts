@@ -142,9 +142,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         sortOrder: 'desc',
       };
 
-      // Add cloudProvider filter if specified
-      if (options?.cloudProvider) {
-        findOptions.filter = `${CLOUD_CONNECTOR_SAVED_OBJECT_TYPE}.attributes.cloudProvider: "${options.cloudProvider}"`;
+      // Add KQL filter if specified
+      if (options?.kuery) {
+        findOptions.filter = options.kuery;
       }
 
       const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>(findOptions);

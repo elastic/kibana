@@ -51,5 +51,5 @@ export interface CloudConnector {
 export interface CloudConnectorListOptions {
   page?: number;
   perPage?: number;
-  cloudProvider?: CloudProvider;
+  kuery?: string;
 }
