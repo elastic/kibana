@@ -347,6 +347,10 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
   });
 
+  monaco.editor.registerCommand('esql.control.inserted', (...args) => {
+    //esql_control_inserted
+  });
+
   const controlCommands = [
     { command: 'esql.control.multi_values.create', variableType: ESQLVariableType.MULTI_VALUES },
     { command: 'esql.control.time_literal.create', variableType: ESQLVariableType.TIME_LITERAL },
