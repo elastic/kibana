@@ -101,10 +101,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // save the changes
       await testSubjects.click('applyFlyoutButton');
-      await dashboard.waitForRenderComplete();
+      // await dashboard.waitForRenderComplete();
+      await testSubjects.waitForDeleted('euiOverlayMask');
       // change the control value
       await comboBox.set('esqlControlValuesDropdown', 'AO');
       await dashboard.waitForRenderComplete();
+      // console.log('__________________________&&&&&&&&&&&  22222  &&&&&&&&&&&&&&&&____________________________');
 
       const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
       expect(tableContent).to.contain('AO');
@@ -119,6 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');
       expect(await testSubjects.exists('esqlMoreThanOneColumnCallout')).to.be(true);
+      // console.log('__________________________&&&&&&&&&   33333333  &&&&&&&&&&&&&&&&&&____________________________');
       await testSubjects.click('chooseColumnBtn');
       const searchInput = await testSubjects.find('selectableColumnSearch');
       await searchInput.type('geo.dest');
