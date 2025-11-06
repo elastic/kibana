@@ -188,72 +188,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('clickable links', () => {
-      it('should NOT have clickable links in the Search Profiler editor', async () => {
-        // First, verify that the links option is disabled in the editor
-        const editorConfig = await browser.execute(() => {
+    describe('links', () => {
+      it('does not enable clickable links', async () => {
+        const linksEnabled = await browser.execute(() => {
           const monaco = (window as any).MonacoEnvironment?.monaco;
-          if (!monaco) return { links: null };
+          if (!monaco) return null;
 
           const editors = monaco.editor.getEditors();
-          const searchProfilerEditor = editors.find((e: any) => {
+          const editor = editors.find((e: any) => {
             const container = e.getContainerDomNode();
             return container?.closest('[data-test-subj="searchProfilerEditor"]');
           });
 
-          if (searchProfilerEditor) {
-            return {
-              links: searchProfilerEditor.getOptions().get(monaco.editor.EditorOption.links),
-            };
+          if (editor) {
+            editor.setValue('# https://www.elastic.co');
+            return editor.getOptions().get(monaco.editor.EditorOption.links);
           }
-          return { links: null };
+          return null;
         });
 
-        expect(editorConfig.links).to.be(false);
+        expect(linksEnabled).to.be(false);
 
-        // Programmatically set content with a URL in the editor
-        await browser.execute(() => {
-          const monaco = (window as any).MonacoEnvironment?.monaco;
-          if (!monaco) return;
-
-          const editors = monaco.editor.getEditors();
-          const searchProfilerEditor = editors.find((e: any) => {
-            const container = e.getContainerDomNode();
-            return container?.closest('[data-test-subj="searchProfilerEditor"]');
-          });
-
-          if (searchProfilerEditor) {
-            // Set editor content with a URL
-            searchProfilerEditor.setValue('# https://www.elastic.co');
-          }
-        });
-
-        // Wait for the content to be rendered
         await PageObjects.common.sleep(500);
 
-        // Get the editor container
         const editor = await testSubjects.find('searchProfilerEditor');
-
-        // Try to find any detected links in the editor
-        // There should be NO .detected-link elements because links are disabled by default
         const detectedLinks = await editor.findAllByCssSelector('.detected-link');
         expect(detectedLinks.length).to.be(0);
 
-        // Additional verification: Try to trigger link detection by holding Cmd/Ctrl
-        // and hovering over the URL, no hover tooltip should appear
         const modifierKey = browser.keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-
         await browser.getActions().keyDown(modifierKey).perform();
 
-        // Hover over the first line containing the URL
         const editorLines = await editor.findAllByClassName('view-line');
-        expect(editorLines.length).to.be.greaterThan(0);
-
         await editorLines[0].moveMouseTo();
         await PageObjects.common.sleep(500);
 
-        // Verify NO Monaco hover tooltip with "Follow link" appears
-        // Check specifically for the rendered markdown link which indicates a clickable link
         const followLinks = await editor.findAllByCssSelector('.monaco-hover .rendered-markdown a');
         expect(followLinks.length).to.be(0);
 
