@@ -720,6 +720,7 @@ x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
+<<<<<<< HEAD
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
@@ -730,6 +731,7 @@ packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
+src/platform/packages/shared/kbn-scout-release-testing @elastic/appex-qa
 src/platform/packages/shared/presentation/presentation_containers @elastic/kibana-presentation
 src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
