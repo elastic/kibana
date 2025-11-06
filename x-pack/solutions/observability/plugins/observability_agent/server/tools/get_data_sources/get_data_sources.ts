@@ -68,7 +68,7 @@ export async function createGetDataSourcesTool({
           ],
         };
       } catch (error) {
-        logger.error(`Error getting data sources: ${error.message}`);
+        logger.error(`Error getting observability data sources: ${error.message}`);
         logger.debug(error);
         return {
           results: [
