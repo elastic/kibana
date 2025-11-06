@@ -20,4 +20,5 @@ export const apiPublishesPauseFetch = (
   return (
     Boolean(unknownApi && (unknownApi as PublishesPauseFetch)?.isFetchPaused$ !== undefined) &&
     typeof (unknownApi as PublishesPauseFetch)?.setFetchPaused === 'function'
+  );
 };
