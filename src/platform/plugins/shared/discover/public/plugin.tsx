@@ -422,13 +422,13 @@ export class DiscoverPlugin
           await getEmbeddableServices();
         const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
 
-        const hasVariables =
+        const mightHaveVariables =
           apiPublishesESQLVariables(container) &&
           savedSessionAttributes.controlGroupJson &&
           Object.keys(savedSessionAttributes.controlGroupJson).length > 0;
 
         // pause fetching so that we don't try to build an ES|QL query without necessary variables
-        const shouldPauseFetch = hasVariables && apiPublishesPauseFetch(container);
+        const shouldPauseFetch = mightHaveVariables && apiPublishesPauseFetch(container);
         if (shouldPauseFetch) container.setFetchPaused(true);
 
         const api = await container.addNewPanel(
@@ -452,10 +452,10 @@ export class DiscoverPlugin
         );
 
         const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        if (hasVariables) {
+        if (mightHaveVariables) {
           await addControlsFromSavedSession(
             container,
-            savedSessionAttributes.controlGroupJson!, // this is verified in hasVariables
+            savedSessionAttributes.controlGroupJson!, // this is verified via mightHaveVariables
             uuid
           );
         }
