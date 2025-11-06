@@ -10,7 +10,7 @@ import type {
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
   ExecutorSubActionPushParams,
-} from '../../../server/connector_types/cases_webhook/types';
+} from '@kbn/connector-schemas/cases_webhook';
 
 export interface CasesWebhookActionParams {
   subAction: string;
