@@ -70,6 +70,7 @@ describe('AgentlessPoliciesService', () => {
           updated_by: 'system',
         };
       });
+      jest.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({} as any));
 
       jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
         if (pkgName === 'agentless_integration') {
@@ -143,7 +144,7 @@ describe('AgentlessPoliciesService', () => {
       );
     });
 
-    it('should support cloud connectors in new agentless policy', async () => {
+    it('should delete agent policy if an error occurs during package policy creation', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const logger = loggingSystemMock.createLogger();
@@ -154,40 +155,76 @@ describe('AgentlessPoliciesService', () => {
         esClient,
         logger
       );
-
-      const result = await agentlessPoliciesService.createAgentlessPolicy({
-        name: 'Test Agentless Policy',
-        namespace: 'default',
-        package: {
-          name: 'agentless_integration',
-          version: '1.0.0',
-        },
-        inputs: {},
-        cloud_connector_id: 'test-cloud-connector-id',
-        supports_cloud_connector: true,
+      jest.mocked(packagePolicyService.create).mockImplementationOnce(async () => {
+        throw new Error('Error creating package policy');
       });
 
-      expect(result).toBeDefined();
+      await expect(() =>
+        agentlessPoliciesService.createAgentlessPolicy({
+          id: 'test-agentless-policy-id',
+          name: 'Test Agentless Policy',
+          namespace: 'default',
+          package: {
+            name: 'agentless_integration',
+            version: '1.0.0',
+          },
+          inputs: {},
+        })
+      ).rejects.toThrow('Error creating package policy');
 
       expect(jest.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledWith(
+
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
+        'test-agentless-policy-id',
         expect.objectContaining({
-          supports_agentless: true,
-          supports_cloud_connector: true,
-          cloud_connector_id: 'test-cloud-connector-id',
-        }),
-        expect.anything(),
-        undefined,
-        undefined
+          force: true,
+        })
       );
-      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledTimes(1);
     });
 
     it('should delete agent policy if an error occurs during deployment', async () => {
-      // TODO
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+      jest.mocked(agentPolicyService.deployPolicy).mockImplementationOnce(async () => {
+        throw new Error('Error calling agentless API');
+      });
+
+      await expect(() =>
+        agentlessPoliciesService.createAgentlessPolicy({
+          id: 'test-agentless-policy-id',
+          name: 'Test Agentless Policy',
+          namespace: 'default',
+          package: {
+            name: 'agentless_integration',
+            version: '1.0.0',
+          },
+          inputs: {},
+        })
+      ).rejects.toThrow('Error calling agentless API');
+
+      expect(jest.mocked(agentPolicyService.create)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledTimes(1);
+
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test-agentless-policy-id',
+        expect.objectContaining({
+          force: true,
+        })
+      );
     });
   });
 });

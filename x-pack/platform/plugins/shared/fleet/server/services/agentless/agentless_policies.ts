@@ -129,7 +129,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           is_protected: false,
         },
         { id: agentPolicyId, skipDeploy: true, authorizationHeader, user }
-      ); // TODO user, authorization ?
+      );
 
       createdAgentPolicyId = agentPolicy.id;
 
