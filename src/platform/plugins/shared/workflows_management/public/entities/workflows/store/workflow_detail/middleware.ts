@@ -10,8 +10,8 @@
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
 import { debounce } from 'lodash';
 import { _clearComputedData, _setComputedDataInternal, setYamlString } from './slice';
-import type { RootState } from './types';
-import { performComputation } from './utils/computation';
+import type { RootState } from '../types';
+import { performComputation } from '../utils/computation';
 
 const COMPUTATION_DEBOUNCE_MS = 500; // 500ms debounce
 
@@ -30,7 +30,7 @@ const compute = (
 const debouncedCompute = debounce(compute, COMPUTATION_DEBOUNCE_MS);
 
 // Side effects middleware - computes derived data when yamlString changes (debounced)
-export const workflowComputationMiddleware: Middleware =
+const workflowComputationMiddleware: Middleware =
   (store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => (next) => (action) => {
     const result = next(action);
 
@@ -57,3 +57,5 @@ export const workflowComputationMiddleware: Middleware =
 
     return result;
   };
+
+export const workflowDetailMiddleware: Middleware[] = [workflowComputationMiddleware];

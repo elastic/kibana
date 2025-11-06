@@ -13,8 +13,8 @@ import type { LineCounter } from 'yaml';
 import type { WorkflowDetailDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
-import type { WorkflowZodSchemaType } from '../../../../../common/schema';
-import type { ConnectorsResponse } from '../../../../entities/connectors/model/types';
+import type { WorkflowZodSchemaType } from '../../../../common/schema';
+import type { ConnectorsResponse } from '../../connectors/model/types';
 
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */

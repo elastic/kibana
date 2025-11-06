@@ -8,12 +8,12 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { workflowComputationMiddleware } from './middleware';
-import { ignoredActions, ignoredPaths, workflowDetailReducer } from './slice';
-import type { WorkflowsServices } from '../../../../types';
+import { workflowDetailMiddleware } from './workflow_detail/middleware';
+import { ignoredActions, ignoredPaths, workflowDetailReducer } from './workflow_detail/slice';
+import type { WorkflowsServices } from '../../../types';
 
 // Store factory
-export const createWorkflowDetailStore = (services: WorkflowsServices) => {
+export const createWorkflowsStore = (services: WorkflowsServices) => {
   return configureStore({
     reducer: {
       detail: workflowDetailReducer,
@@ -27,8 +27,8 @@ export const createWorkflowDetailStore = (services: WorkflowsServices) => {
           // Ignore these specific action types that contain non-serializable data
           ignoredActions,
         },
-      }).concat(workflowComputationMiddleware),
+      }).concat(workflowDetailMiddleware),
   });
 };
 
-export type AppDispatch = ReturnType<typeof createWorkflowDetailStore>['dispatch'];
+export type AppDispatch = ReturnType<typeof createWorkflowsStore>['dispatch'];

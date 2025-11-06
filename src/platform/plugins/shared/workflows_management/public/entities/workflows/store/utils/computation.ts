@@ -14,7 +14,7 @@ import { buildWorkflowLookup } from './build_workflow_lookup';
 import {
   correctYamlSyntax,
   parseWorkflowYamlForAutocomplete,
-} from '../../../../../../common/lib/yaml';
+} from '../../../../../common/lib/yaml';
 import type { ComputedData } from '../types';
 
 export const performComputation = (yamlString: string | undefined): ComputedData | undefined => {

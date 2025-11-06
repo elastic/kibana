@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import type { EsWorkflow } from '@kbn/workflows';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
+import type { RootState } from '../../types';
 import { selectWorkflowId } from '../selectors';
 import { updateWorkflow } from '../slice';
-import type { RootState } from '../types';
 
 export interface UpdateWorkflowParams {
   workflow: Partial<EsWorkflow>;

@@ -9,9 +9,9 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import type { ComputedData, WorkflowDetailState } from './types';
-import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
+import type { ComputedData, WorkflowDetailState } from '../types';
+import { findStepByLine } from '../utils/step_finder';
 
 // Initial state
 const initialState: WorkflowDetailState = {
