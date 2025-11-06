@@ -242,10 +242,10 @@ describe('AutocompleteSelector', () => {
       await userEvent.click(toggleButton);
 
       // Verify that field icons are not rendered for fields with types
-      expect(screen.getByTestId('field-icon-date')).not.toBeInTheDocument();
-      expect(screen.getByTestId('field-icon-keyword')).not.toBeInTheDocument();
-      expect(screen.getByTestId('field-icon-text')).not.toBeInTheDocument();
-      expect(screen.getByTestId('field-icon-unknown')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-date')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-text')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-unknown')).not.toBeInTheDocument();
     });
 
     it('hides icon for selected suggestion when icon is not available', () => {
@@ -265,7 +265,7 @@ describe('AutocompleteSelector', () => {
       );
 
       // Icon should not be visible in the selected value
-      expect(screen.getByTestId('field-icon-keyword')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
     });
   });
 });
