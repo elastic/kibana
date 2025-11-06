@@ -71,19 +71,13 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
-      let config: Config;
-
-      if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
-      } else {
-        config = await readConfigFile(
-          log,
-          options.esVersion,
-          path,
-          settingOverrides,
-          applyFipsOverrides
-        );
-      }
+      const config = await readConfigFile(
+        log,
+        options.esVersion,
+        path,
+        settingOverrides,
+        process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true' ? undefined : applyFipsOverrides
+      );
 
       // Check if there are any enabled tests before starting servers
       // If not, reuse the runner instance to report skipped test group to ci-stats
@@ -113,20 +107,28 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
         let shutdownEs;
         let shutdownDockerServers;
+
         try {
           log.info('🚀 Starting Elasticsearch, Docker servers, and Kibana in parallel...');
 
-          // Start ES, Docker servers, and Kibana in parallel
-          // Kibana has built-in retry logic for ES connections, so it will wait for ES to be ready
+          // Helper to start Elasticsearch if not disabled
+          async function runElasticsearchIfEnabled() {
+            if (process.env.TEST_ES_DISABLE_STARTUP === 'true') {
+              return undefined;
+            }
+            return runElasticsearch({ ...options, log, config, onEarlyExit });
+          }
+
+          // Start ES, Kibana and Docker servers in parallel
           // Use Promise.allSettled to ensure all complete (or fail) before proceeding
           const results = await Promise.allSettled([
             // Start Elasticsearch - this completes when ES cluster health is yellow/green
-            process.env.TEST_ES_DISABLE_STARTUP !== 'true'
-              ? runElasticsearch({ ...options, log, config, onEarlyExit }).then((shutdown) => {
-                  log.info('✅ Elasticsearch is ready');
-                  return shutdown;
-                })
-              : Promise.resolve(undefined),
+            runElasticsearchIfEnabled().then((shutdown) => {
+              if (shutdown) {
+                log.info('✅ Elasticsearch is ready');
+              }
+              return shutdown;
+            }),
 
             // Start docker servers (e.g., package registry) early alongside ES
             // Only some tests need this, but if they need it it's faster to start them here.
