@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { EuiButtonEmpty, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+export function QuickEditAction({ toggleVisor }: { toggleVisor: () => void }) {
+  const quickEditLabel = i18n.translate('esqlEditor.visor.quickEditLabel', {
+    defaultMessage: 'Quick edit',
+  });
+
+  const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+  const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
+  const shortCut = COMMAND_KEY + ' K';
+
+  const { euiTheme } = useEuiTheme();
+  return (
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="top" content={quickEditLabel} disableScreenReaderOutput>
+          <EuiButtonEmpty
+            size="xs"
+            color="primary"
+            flush="both"
+            onClick={toggleVisor}
+            data-test-subj="ESQLEditor-toggle-quick-edit-visor"
+            aria-label={quickEditLabel}
+            css={css`
+              margin-right: ${euiTheme.size.m};
+            `}
+          >
+            {`${quickEditLabel} (${shortCut})`}
+          </EuiButtonEmpty>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </>
+  );
+}

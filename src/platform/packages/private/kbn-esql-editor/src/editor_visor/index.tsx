@@ -9,15 +9,12 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -25,6 +22,7 @@ import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-coun
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getESQLSources } from '../helpers';
 import type { ESQLEditorDeps } from '../types';
+import { visorStyles } from './visor.styles';
 
 export function QuickEditVisor({
   query,
@@ -95,38 +93,17 @@ export function QuickEditVisor({
     return calculateWidthFromCharCount(selectedSource[0]?.label.length || 0);
   }, [selectedSource]);
 
+  const styles = visorStyles(euiTheme, comboBoxWidth, Boolean(isSpaceReduced), isVisible);
+
   return (
     <EuiFlexGroup
       gutterSize="none"
       alignItems="center"
       justifyContent="flexStart"
       responsive={false}
-      css={css`
-        background: linear-gradient(107.9deg, rgb(11, 100, 221) 21.85%, rgb(255, 39, 165) 98.82%);
-        padding: 1px;
-        width: ${isSpaceReduced ? '90%' : '50%'};
-        height: ${isVisible ? euiTheme.size.xxl : '0'};
-        box-shadow: rgba(11, 14, 22, 0.03) 0px 6px 14px 0px;
-        margin: ${isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0'};
-        border-radius: ${euiTheme.size.s};
-        opacity: ${isVisible ? 1 : 0};
-        pointer-events: ${isVisible ? 'auto' : 'none'};
-        overflow: hidden;
-        transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-      `}
+      css={styles.visorWrapper}
     >
-      <EuiFlexItem
-        css={css`
-          background: ${euiTheme.colors.emptyShade};
-          height: 100%;
-          justify-content: center;
-          border-bottom-left-radius: ${euiTheme.size.s};
-          border-top-left-radius: ${euiTheme.size.s};
-          padding-left: 2px;
-          flex-grow: 1;
-          max-width: ${comboBoxWidth}px;
-        `}
-      >
+      <EuiFlexItem css={styles.comboBoxWrapper}>
         <EuiComboBox
           placeholder={i18n.translate('esqlEditor.visor.placeholder', {
             defaultMessage: 'Select a source to quick edit',
@@ -140,19 +117,7 @@ export function QuickEditVisor({
           aria-label={i18n.translate('esqlEditor.visor.ariaLabel', {
             defaultMessage: 'Quick edit source selection',
           })}
-          css={css`
-            .euiComboBox__inputWrap {
-              box-shadow: none;
-              border-radius: 0;
-              border-right: 1px solid rgb(227, 232, 242);
-            }
-            .euiComboBox__inputWrap:focus,
-            .euiComboBox__inputWrap:focus-within,
-            .euiComboBox__inputWrap:hover {
-              box-shadow: none !important;
-              outline: none !important;
-            }
-          `}
+          css={styles.comboBoxStyles}
           truncationProps={{
             truncation: 'middle',
           }}
@@ -160,27 +125,7 @@ export function QuickEditVisor({
           compressed
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        css={css`
-          background: ${euiTheme.colors.emptyShade};
-          height: 100%;
-          justify-content: center;
-          border-bottom-right-radius: ${euiTheme.size.s};
-          border-top-right-radius: ${euiTheme.size.s};
-          padding-right: 2px;
-
-          .euiFormControlLayout--group::after {
-            border: none;
-          }
-
-          .euiFormControlLayout__append {
-            background-color: ${euiTheme.colors.backgroundBasePlain};
-            &::before {
-              border: none;
-            }
-          }
-        `}
-      >
+      <EuiFlexItem css={styles.searchWrapper}>
         <EuiFieldText
           placeholder={i18n.translate('esqlEditor.visor.searchPlaceholder', {
             defaultMessage: 'Search ...',
@@ -193,15 +138,7 @@ export function QuickEditVisor({
           })}
           compressed
           fullWidth
-          css={css`
-            box-shadow: none;
-            border-radius: 0;
-            &:focus,
-            &:hover {
-              box-shadow: none !important;
-              outline: none !important;
-            }
-          `}
+          css={styles.searchFieldStyles}
           append={
             <EuiButtonIcon
               color="text"
@@ -216,38 +153,5 @@ export function QuickEditVisor({
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-}
-
-export function QuickEditAction({ toggleVisor }: { toggleVisor: () => void }) {
-  const quickEditLabel = i18n.translate('esqlEditor.visor.quickEditLabel', {
-    defaultMessage: 'Quick edit',
-  });
-
-  const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-  const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
-  const shortCut = COMMAND_KEY + ' K';
-
-  const { euiTheme } = useEuiTheme();
-  return (
-    <>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={quickEditLabel} disableScreenReaderOutput>
-          <EuiButtonEmpty
-            size="xs"
-            color="primary"
-            flush="both"
-            onClick={toggleVisor}
-            data-test-subj="ESQLEditor-toggle-quick-edit-visor"
-            aria-label={quickEditLabel}
-            css={css`
-              margin-right: ${euiTheme.size.m};
-            `}
-          >
-            {`${quickEditLabel} (${shortCut})`}
-          </EuiButtonEmpty>
-        </EuiToolTip>
-      </EuiFlexItem>
-    </>
   );
 }

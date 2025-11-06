@@ -36,7 +36,7 @@ import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_star
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
-import { QuickEditAction } from './quick_edit_visor';
+import { QuickEditAction } from '../editor_visor/quick_edit_action';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';

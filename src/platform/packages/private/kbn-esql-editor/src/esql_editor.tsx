@@ -51,7 +51,7 @@ import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_tele
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
-import { QuickEditVisor } from './editor_footer/quick_edit_visor';
+import { QuickEditVisor } from './editor_visor';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
