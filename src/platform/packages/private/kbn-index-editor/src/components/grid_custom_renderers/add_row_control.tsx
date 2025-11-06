@@ -8,19 +8,30 @@
  */
 
 import type { RowControlComponent, RowControlRowProps } from '@kbn/discover-utils';
+import type { RefObject } from 'react';
 import React from 'react';
+import type { EuiDataGridRefProps } from '@elastic/eui';
 import type { IndexUpdateService } from '../../index_update_service';
 
 export const getAddRowControl =
-  (indexUpdateService: IndexUpdateService) =>
+  (indexUpdateService: IndexUpdateService, dataTableRef: RefObject<EuiDataGridRefProps>) =>
   (Control: RowControlComponent, props: RowControlRowProps) => {
     const onAddRow = (atIndex: number) => {
       indexUpdateService.addEmptyRow(atIndex);
+
+      // Set focus to the new added row's first cell
+      setTimeout(() => {
+        dataTableRef.current?.setFocusedCell({
+          rowIndex: atIndex,
+          colIndex: 2, // first data column (skip row control columns)
+        });
+      }, 100);
     };
 
     return (
       <div className="dataGrid__addRowAction" css={{ position: 'relative', top: -2 }}>
         <Control
+          color="text"
           iconType="plus"
           label="Add row"
           tooltipContent="Add row"

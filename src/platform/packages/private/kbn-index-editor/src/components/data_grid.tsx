@@ -230,7 +230,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return [
       {
         id: 'add-row',
-        render: getAddRowControl(indexUpdateService),
+        render: getAddRowControl(indexUpdateService, dataTableRef),
       },
     ];
   }, [indexUpdateService]);
@@ -298,7 +298,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
               opacity: 0;
             }
 
-            .euiDataGridRow:hover .dataGrid__addRowAction {
+            .euiDataGridRow:hover .dataGrid__addRowAction,
+            .euiDataGridRow:focus-within .dataGrid__addRowAction {
               opacity: 1;
             }
           `}
