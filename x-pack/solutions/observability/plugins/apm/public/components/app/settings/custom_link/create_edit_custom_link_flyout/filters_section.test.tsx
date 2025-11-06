@@ -111,7 +111,7 @@ describe('FiltersSections', () => {
       { key: 'transaction.type', value: 'bar' },
     ];
     const onChangeFilters = jest.fn();
-    const { getAllByTestId } = render(
+    const { getAllByTestId, rerender } = render(
       <FiltersSection filters={initialFilters} onChangeFilters={onChangeFilters} />
     );
 
@@ -123,5 +123,17 @@ describe('FiltersSections', () => {
     });
 
     expect(onChangeFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: 'bar' }]);
+
+    await act(async () => {
+      rerender(
+        <FiltersSection
+          filters={[{ key: 'transaction.type', value: 'bar' }]}
+          onChangeFilters={onChangeFilters}
+        />
+      );
+    });
+
+    const removeButtons2 = getAllByTestId('apmCustomLinkFiltersSectionButton');
+    expect(removeButtons2).toHaveLength(1);
   });
 });
