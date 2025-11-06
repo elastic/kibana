@@ -14,7 +14,11 @@
  *   version: Bundle (no version)
  */
 
+import supertest_ from 'supertest';
 import type SuperTest from 'supertest';
+// TODO: Fix the linter rule for this test file, I'm not sure why this file in particular is complaining
+// eslint-disable-next-line import/no-nodejs-modules
+import { format as formatUrl } from 'url';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -532,13 +536,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 });
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const supertestService = getService('supertest');
+  const config = getService('config');
 
   return {
-    ...securitySolutionApiServiceFactory(supertest),
-    withUser: (user: { username: string; password: string }) =>
-      securitySolutionApiServiceFactory(supertestWithoutAuth.auth(user.username, user.password)),
+    ...securitySolutionApiServiceFactory(supertestService),
+    withUser: (user: { username: string; password: string }) => {
+      const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+      return securitySolutionApiServiceFactory(
+        supertest_.agent(kbnUrl).auth(user.username, user.password)
+      );
+    },
   };
 }
 
