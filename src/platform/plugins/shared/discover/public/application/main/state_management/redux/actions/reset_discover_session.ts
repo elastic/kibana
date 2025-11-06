@@ -65,12 +65,12 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           }
 
           tabStateContainer.savedSearchState.set(savedSearch);
-          tabStateContainer.actions.undoSavedSearchChanges();
+          await tabStateContainer.actions.undoSavedSearchChanges();
         }
 
         const tabState = fromSavedObjectTabToTabState({
           tab,
-          existingTab: selectTab(state, tab.id),
+          existingTab: selectTab(getState(), tab.id),
         });
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.
