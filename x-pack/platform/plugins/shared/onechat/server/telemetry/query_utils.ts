@@ -165,7 +165,10 @@ export class QueryUtils {
             terms: {
               script: {
                 source: `
-                def rounds = doc['conversation_rounds'].size();
+                def source = params._source;
+                def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                def rounds = roundsArray != null ? roundsArray.size() : 0;
+
                 if (rounds <= 5) return '1-5';
                 if (rounds <= 10) return '6-10';
                 if (rounds <= 20) return '11-20';

@@ -229,16 +229,12 @@ export function registerTelemetryCollector(
         const queryUtils = new QueryUtils(esClient, soClient, logger);
 
         try {
-          // 1. Get custom tools metrics
           const customTools = await queryUtils.getCustomToolsMetrics();
 
-          // 2. Get custom agents metrics
           const customAgents = await queryUtils.getCustomAgentsMetrics();
 
-          // 3. Get conversation metrics
           const conversations = await queryUtils.getConversationMetrics();
 
-          // 4. Get query-to-result time from usage counters
           const queryTimeCounters = await queryUtils.getCountersByPrefix(
             ONECHAT_USAGE_DOMAIN,
             'query_to_result_time_'
@@ -262,7 +258,7 @@ export function registerTelemetryCollector(
             0
           );
 
-          return {
+          const telemetry = {
             custom_tools: customTools,
             custom_agents: { total: customAgents },
             conversations,
@@ -272,6 +268,10 @@ export function registerTelemetryCollector(
               by_source: toolCallsBySource,
             },
           };
+
+          logger.error(`Collected telemetry: ${JSON.stringify({ telemetry })}`);
+
+          return telemetry;
         } catch (error) {
           logger.error(`Failed to collect telemetry: ${error.message}`);
           // Return empty/default values on error
