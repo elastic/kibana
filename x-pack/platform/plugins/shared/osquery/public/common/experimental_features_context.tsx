@@ -14,25 +14,22 @@ const ExperimentalFeaturesContext = createContext<ExperimentalFeatures | null>(n
 export const ExperimentalFeaturesProvider: React.FC<{
   value: ExperimentalFeatures;
   children: React.ReactNode;
-}> = ({ value, children }) => {
-  return (
-    <ExperimentalFeaturesContext.Provider value={value}>
-      {children}
-    </ExperimentalFeaturesContext.Provider>
-  );
-};
+}> = ({ value, children }) => (
+  <ExperimentalFeaturesContext.Provider value={value}>
+    {children}
+  </ExperimentalFeaturesContext.Provider>
+);
 
 export const useExperimentalFeatures = (): ExperimentalFeatures => {
   const context = useContext(ExperimentalFeaturesContext);
   if (context === null) {
     throw new Error('useExperimentalFeatures must be used within ExperimentalFeaturesProvider');
   }
+
   return context;
 };
 
-export const useIsExperimentalFeatureEnabled = (
-  feature: keyof ExperimentalFeatures
-): boolean => {
+export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
   const experimentalFeatures = useExperimentalFeatures();
 
   if (!experimentalFeatures || !(feature in experimentalFeatures)) {
