@@ -13,6 +13,7 @@ import type {
   BaseStep,
   ElasticsearchStep,
   ForEachStep,
+  GDriveStep,
   HttpStep,
   IfStep,
   KibanaStep,
@@ -47,6 +48,7 @@ import type {
   ExitRetryNode,
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
+  GDriveGraphNode,
   GraphNodeUnion,
   HttpGraphNode,
   KibanaGraphNode,
@@ -140,6 +142,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitHttpStep(currentStep as HttpStep, context);
   }
 
+  if ((currentStep as GDriveStep).type === 'gdrive') {
+    return visitGDriveStep(currentStep as GDriveStep, context);
+  }
+
   if ((currentStep as ElasticsearchStep).type?.startsWith('elasticsearch.')) {
     return visitElasticsearchStep(currentStep as ElasticsearchStep, context);
   }
@@ -187,6 +193,26 @@ export function visitHttpStep(
     },
   };
   graph.setNode(httpNode.id, httpNode);
+
+  return graph;
+}
+
+export function visitGDriveStep(
+  currentStep: GDriveStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const gdriveNode: GDriveGraphNode = {
+    id: getStepId(currentStep, context),
+    type: 'gdrive',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(gdriveNode.id, gdriveNode);
 
   return graph;
 }

@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import {
   AtomicGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
+  GDriveGraphNodeSchema,
   HttpGraphNodeSchema,
   KibanaGraphNodeSchema,
   WaitGraphNodeSchema,
@@ -45,6 +46,7 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
   HttpGraphNodeSchema,
+  GDriveGraphNodeSchema,
   WaitGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,

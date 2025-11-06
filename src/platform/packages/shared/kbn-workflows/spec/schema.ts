@@ -195,6 +195,44 @@ export const HttpStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 
+export const GDriveStepSchema = BaseStepSchema.extend({
+  type: z.literal('gdrive'),
+  with: z.object({
+    // Service account credentials (JSON object)
+    service_credential: z.record(z.string(), z.any()).optional(),
+    // Operation to perform
+    operation: z
+      .enum(['list', 'get', 'ping'])
+      .optional()
+      .default('list'),
+    // File operations
+    fileId: z.string().optional(), // Required for get, download, delete
+    fileName: z.string().optional(), // Required for upload
+    fileContent: z.string().optional(), // Required for upload (can be base64 or plain text)
+    folderId: z.string().optional(), // Optional folder filter for list, target folder for upload
+    mimeType: z.string().optional(), // MIME type for upload
+    subject: z.string().optional(), // For domain-wide delegation
+  }),
+})
+  .merge(StepWithIfConditionSchema)
+  .merge(StepWithForEachSchema)
+  .merge(TimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
+export type GDriveStep = z.infer<typeof GDriveStepSchema>;
+
+export function getGDriveStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = GDriveStepSchema.extend({
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+}
+
 // Generic Elasticsearch step schema for backend validation
 export const ElasticsearchStepSchema = BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
@@ -435,6 +473,7 @@ const StepSchema = z.lazy(() =>
     IfStepSchema,
     WaitStepSchema,
     HttpStepSchema,
+    GDriveStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
     ParallelStepSchema,
@@ -451,6 +490,7 @@ export const BuiltInStepTypes = [
   MergeStepSchema.shape.type._def.value,
   WaitStepSchema.shape.type._def.value,
   HttpStepSchema.shape.type._def.value,
+  GDriveStepSchema.shape.type._def.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 

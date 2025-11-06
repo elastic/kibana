@@ -20,6 +20,7 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
+  GDriveGraphNode,
   GraphNodeUnion,
   HttpGraphNode,
   WorkflowGraph,
@@ -32,6 +33,7 @@ import {
 } from '@kbn/workflows/graph';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
+import { GDriveStepImpl } from './gdrive_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
 import {
@@ -234,6 +236,13 @@ export class NodesFactory {
           stepExecutionRuntime,
           stepLogger,
           this.urlValidator,
+          this.workflowRuntime
+        );
+      case 'gdrive':
+        return new GDriveStepImpl(
+          node as GDriveGraphNode,
+          stepExecutionRuntime,
+          stepLogger,
           this.workflowRuntime
         );
       default:
