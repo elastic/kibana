@@ -1,6 +1,6 @@
 {
   "type": "functional-tests",
-  "id": "@kbn/fleet-plugin-cypress",
+  "id": "@kbn/osquery-plugin-cypress",
   "owner": [],
   "group": "platform",
   "visibility": "private",

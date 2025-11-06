@@ -1562,6 +1562,8 @@
       "@kbn/osquery-io-ts-types/*": ["src/platform/packages/shared/kbn-osquery-io-ts-types/*"],
       "@kbn/osquery-plugin": ["x-pack/platform/plugins/shared/osquery"],
       "@kbn/osquery-plugin/*": ["x-pack/platform/plugins/shared/osquery/*"],
+      "@kbn/osquery-plugin-cypress": ["x-pack/platform/plugins/shared/osquery/cypress"],
+      "@kbn/osquery-plugin-cypress/*": ["x-pack/platform/plugins/shared/osquery/cypress/*"],
       "@kbn/otel-semantic-conventions": ["src/platform/packages/shared/kbn-otel-semantic-conventions"],
       "@kbn/otel-semantic-conventions/*": ["src/platform/packages/shared/kbn-otel-semantic-conventions/*"],
       "@kbn/paertial-results-example-plugin": ["examples/partial_results_example"],
