@@ -244,6 +244,14 @@
                     "pluginId": "@kbn/onechat-common",
                     "scope": "common",
                     "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.ThinkingCompleteEvent",
+                    "text": "ThinkingCompleteEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
                     "section": "def-common.RoundCompleteEvent",
                     "text": "RoundCompleteEvent"
                   }
@@ -352,7 +360,7 @@
             "tags": [],
             "label": "runner",
             "description": [
-              "\nOnechat runner scoped to the current execution.\nCan be used to run other workchat primitive as part of the tool execution."
+              "\nOnechat runner scoped to the current execution."
             ],
             "signature": [
               {
@@ -362,6 +370,22 @@
                 "section": "def-common.ScopedRunner",
                 "text": "ScopedRunner"
               }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerContext.attachments",
+            "type": "Object",
+            "tags": [],
+            "label": "attachments",
+            "description": [
+              "\nAttachment service to interact with attachments."
+            ],
+            "signature": [
+              "AttachmentsService"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
             "deprecated": false,
@@ -1810,7 +1834,7 @@
             "tags": [],
             "label": "runner",
             "description": [
-              "\nOnechat runner scoped to the current execution.\nCan be used to run other workchat primitive as part of the tool execution."
+              "\nOnechat runner scoped to the current execution."
             ],
             "signature": [
               {
@@ -2543,6 +2567,14 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ThinkingCompleteEvent",
+                "text": "ThinkingCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.RoundCompleteEvent",
                 "text": "RoundCompleteEvent"
               }
@@ -2956,6 +2988,14 @@
                 "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.MessageCompleteEvent",
                 "text": "MessageCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ThinkingCompleteEvent",
+                "text": "ThinkingCompleteEvent"
               },
               " | ",
               {

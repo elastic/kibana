@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { ConversationRound } from '@kbn/onechat-common';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
@@ -17,6 +18,7 @@ import { useOnechatServices } from './use_onechat_service';
 import { storageKeys } from '../storage_keys';
 import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
+import { useConversationContext } from '../context/conversation/conversation_context';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -65,6 +67,7 @@ const useGetNewConversationAgentId = () => {
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
+  const context = useConversationContext();
   const agentId = conversation?.agent_id;
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
@@ -72,6 +75,10 @@ export const useAgentId = () => {
 
   if (agentId) {
     return agentId;
+  }
+
+  if (context.agentId) {
+    return context.agentId;
   }
 
   // For new conversations, agent id must be defined
@@ -94,10 +101,16 @@ export const useConversationRounds = () => {
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
-      return [
-        ...rounds,
-        { id: '', input: { message: pendingMessage }, response: { message: '' }, steps: [] },
-      ];
+      const pendingRound: ConversationRound = {
+        id: '',
+        input: { message: pendingMessage },
+        response: { message: '' },
+        steps: [],
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+        started_at: new Date().toISOString(),
+      };
+      return [...rounds, pendingRound];
     }
     return rounds;
   }, [conversation?.rounds, error, pendingMessage]);

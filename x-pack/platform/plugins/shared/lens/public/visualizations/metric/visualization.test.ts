@@ -287,7 +287,7 @@ describe('metric visualization', () => {
         ).toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#ffffff",
+              "color": "#FFFFFF",
               "columnId": "metric-col-id",
               "triggerIconType": "color",
             },
@@ -311,7 +311,7 @@ describe('metric visualization', () => {
           .toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#ffffff",
+              "color": "#FFFFFF",
               "columnId": "metric-col-id",
               "triggerIconType": "color",
             },

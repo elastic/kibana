@@ -53,7 +53,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
+    await pageObjects.streams.selectProcessorType('Rename');
     await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
 
@@ -74,7 +74,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
+    await pageObjects.streams.selectProcessorType('Rename');
     await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
 
@@ -107,7 +107,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
+    await pageObjects.streams.selectProcessorType('Rename');
     await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
 
@@ -142,13 +142,13 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
+    await pageObjects.streams.selectProcessorType('Rename');
     await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('set');
+    await pageObjects.streams.selectProcessorType('Set');
     await pageObjects.streams.fillProcessorFieldInput('custom_threshold', { isCustomValue: true });
     await page.locator('input[name="value"]').fill('1024');
     await pageObjects.streams.clickSaveProcessor();
@@ -185,6 +185,49 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
         columnName: 'custom_threshold',
         rowIndex,
         value: '1024',
+      });
+    }
+  });
+
+  test('should update the simulation preview with processed dates from another locale/timezone', async ({
+    page,
+    pageObjects,
+  }) => {
+    const sourceField = 'french_date';
+    const targetField = 'processed_french_date';
+
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Set');
+    await pageObjects.streams.fillProcessorFieldInput(sourceField, { isCustomValue: true });
+    await page.locator('input[name="value"]').fill('08 avril 1999');
+    await pageObjects.streams.clickSaveProcessor();
+
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Set');
+    await pageObjects.streams.fillProcessorFieldInput(targetField, {
+      isCustomValue: true,
+    });
+    await page.locator('input[name="value"]').fill('null');
+    await pageObjects.streams.clickSaveProcessor();
+
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Date');
+    await pageObjects.streams.fillDateProcessorSourceFieldInput(sourceField);
+    await pageObjects.streams.fillDateProcessorFormatInput('dd MMMM yyyy');
+    await pageObjects.streams.clickDateProcessorAdvancedSettings();
+    await pageObjects.streams.fillDateProcessorTargetFieldInput(targetField);
+    await pageObjects.streams.fillDateProcessorTimezoneInput('Europe/Paris');
+    await pageObjects.streams.fillDateProcessorLocaleInput('fr');
+    await pageObjects.streams.fillDateProcessorOutputFormatInput('yyyy-MM-dd');
+    await pageObjects.streams.clickSaveProcessor();
+
+    const updatedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(updatedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: targetField,
+        rowIndex,
+        value: '1999-04-08',
       });
     }
   });
