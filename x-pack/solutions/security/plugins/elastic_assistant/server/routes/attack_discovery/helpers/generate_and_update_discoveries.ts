@@ -162,6 +162,27 @@ export const generateAndUpdateAttackDiscoveries = async ({
           },
         },
       });
+      await esClient.updateByQuery({
+        index: '.alerts-security.attack.discovery.alerts-default',
+        query: {
+          ids: {
+            values: attack.id,
+          },
+        },
+        script: {
+          source: `
+            if (ctx._source['${ALERT_ATTACK_IDS}'] == null) {
+              ctx._source['${ALERT_ATTACK_IDS}'] = [params.attack_id];
+            } else if (!ctx._source['${ALERT_ATTACK_IDS}'].contains(params.attack_id)) {
+              ctx._source['${ALERT_ATTACK_IDS}'].add(params.attack_id);
+            }
+          `,
+          lang: 'painless',
+          params: {
+            attack_id: attack.id,
+          },
+        },
+      });
     }
 
     return {
