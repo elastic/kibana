@@ -12,7 +12,7 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { migrationRules } from '../__mocks__';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 
 jest.mock('../api');
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
