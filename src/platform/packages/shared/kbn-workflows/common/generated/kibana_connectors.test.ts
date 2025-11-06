@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod';
 import { GENERATED_KIBANA_CONNECTORS, KIBANA_CONNECTOR_COUNT } from './kibana_connectors';
 import type { InternalConnectorContract } from '../../types/v1';
-import { generateYamlSchemaFromConnectors } from '../../spec/lib/generate_yaml_schema';
+import { generateYamlSchemaFromConnectors } from '../../spec/lib/generate_yaml_schema_from_connectors';
 import { getJsonSchemaFromYamlSchema } from '../../spec/lib/get_json_schema_from_yaml_schema';
 
 describe('Generated Kibana Connectors', () => {
