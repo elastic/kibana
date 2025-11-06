@@ -16,8 +16,6 @@ import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
-import { useConversation } from '../../hooks/use_conversation';
-import { rebuildAttachmentMapFromConversation } from './rebuild_attachment_map_from_conversation';
 import { getProcessedAttachments } from './get_processed_attachments';
 
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
@@ -109,12 +107,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   });
 
   const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
-
-  const { conversation } = useConversation();
-
-  useEffect(() => {
-    attachmentMapRef.current = rebuildAttachmentMapFromConversation(conversation);
-  }, [conversation]);
 
   const handleGetProcessedAttachments = useCallback(
     (_conversation?: Conversation) => {

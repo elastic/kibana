@@ -17,7 +17,6 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
-  // attachments?: UiAttachment[];
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
   getProcessedAttachments?: (conversation?: Conversation) => Promise<AttachmentInput[]>;
