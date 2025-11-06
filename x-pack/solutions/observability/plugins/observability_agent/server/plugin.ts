@@ -42,22 +42,26 @@ export class ObservabilityAgentPlugin
     core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>,
     plugins: ObservabilityAgentPluginSetupDependencies
   ): ObservabilityAgentPluginSetup {
-    getIsObservabilityAgentEnabled(core).then((isObservabilityAgentEnabled) => {
-      if (!isObservabilityAgentEnabled) {
-        this.logger.debug(
-          `Skipping observability agent registration because ${OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID} is disabled`
-        );
-        return;
-      }
+    getIsObservabilityAgentEnabled(core)
+      .then((isObservabilityAgentEnabled) => {
+        if (!isObservabilityAgentEnabled) {
+          this.logger.debug(
+            `Skipping observability agent registration because ${OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID} is disabled`
+          );
+          return;
+        }
 
-      registerTools({ core, plugins, logger: this.logger }).catch((error) => {
-        this.logger.error(`Error registering observability agent tools: ${error}`);
-      });
+        registerTools({ core, plugins, logger: this.logger }).catch((error) => {
+          this.logger.error(`Error registering observability agent tools: ${error}`);
+        });
 
-      registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
-        this.logger.error(`Error registering observability agent: ${error}`);
+        registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
+          this.logger.error(`Error registering observability agent: ${error}`);
+        });
+      })
+      .catch((error) => {
+        this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);
       });
-    });
 
     return {};
   }
