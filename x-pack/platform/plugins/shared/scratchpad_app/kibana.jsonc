@@ -14,7 +14,8 @@
       "dataViews",
       "charts",
       "share",
-      "navigation"
+      "navigation",
+      "esql"
     ],
     "optionalPlugins": [
       "observabilityAIAssistant"

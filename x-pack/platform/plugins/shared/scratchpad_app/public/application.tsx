@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiPageTemplate } from '@elastic/eui';
@@ -202,6 +202,61 @@ export function ScratchpadApplication({
     // Reset after fitView is triggered
     setTimeout(() => setShouldFitView(false), 200);
   }, [nodes, edges, setNodes]);
+
+  const handleDeleteSelectedNode = useCallback(() => {
+    if (selectedNodeId) {
+      deleteNode(selectedNodeId);
+      setSelectedNodeId(null);
+    }
+  }, [selectedNodeId, deleteNode]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in inputs/editors
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        target.closest('[contenteditable="true"]') ||
+        target.closest('.monaco-editor')
+      ) {
+        return;
+      }
+
+      // Delete/Backspace: Delete selected node
+      if ((event.key === 'Delete' || event.key === 'Backspace') && selectedNodeId) {
+        event.preventDefault();
+        handleDeleteSelectedNode();
+      }
+
+      // N: Add new note node
+      if (event.key === 'n' && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        handleAddNode('text_note');
+      }
+
+      // L: Arrange layout
+      if (event.key === 'l' && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        handleLayout();
+      }
+
+      // Ctrl+K or Cmd+K: Clear all
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        if (window.confirm('Are you sure you want to clear all nodes?')) {
+          handleClearAll();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedNodeId, handleDeleteSelectedNode, handleAddNode, handleLayout, handleClearAll]);
 
   return (
     <KibanaContextProvider

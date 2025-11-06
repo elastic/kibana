@@ -90,9 +90,30 @@ export function useESQLQuery() {
           return null;
         }
       } catch (error) {
+        let errorMessage = 'Unknown error occurred';
+        
+        if (error instanceof Error) {
+          errorMessage = error.message;
+          // Try to extract more meaningful error from Elasticsearch responses
+          if ('body' in error && typeof error.body === 'object' && error.body !== null) {
+            const body = error.body as any;
+            if (body.error?.reason) {
+              errorMessage = body.error.reason;
+            } else if (body.message) {
+              errorMessage = body.message;
+            } else if (body.error?.caused_by?.reason) {
+              errorMessage = body.error.caused_by.reason;
+            }
+          }
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object' && 'message' in error) {
+          errorMessage = String(error.message);
+        }
+        
         setState({
           loading: false,
-          error: error instanceof Error ? error.message : 'Unknown error occurred',
+          error: errorMessage,
           results: null,
         });
         return null;

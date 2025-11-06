@@ -11,6 +11,7 @@ import { Handle, Position } from '@xyflow/react';
 import { EuiCard, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ScratchpadNodeData } from '../../hooks/use_scratchpad_state';
 import { ESQLQueryNode } from './esql_query_node';
+import { KibanaLinkNode } from './kibana_link_node';
 import { useScratchpadNodeContext } from '../scratchpad_canvas/node_context';
 
 export function SimpleNode(node: Node<ScratchpadNodeData>) {
@@ -24,17 +25,16 @@ export function SimpleNode(node: Node<ScratchpadNodeData>) {
     return <ESQLQueryNode node={node as Node<any>} onUpdateNode={onUpdateNode} />;
   }
 
+  // Use dedicated Kibana link node component
+  if (nodeData.type === 'kibana_link') {
+    return <KibanaLinkNode node={node as Node<any>} />;
+  }
+
   return (
     <div>
       <Handle type="target" position={Position.Top} />
       <EuiCard
-        title={
-          nodeData.type === 'text_note'
-            ? String(nodeData.title || 'Note')
-            : nodeData.type === 'kibana_link'
-            ? String(nodeData.title || 'Link')
-            : 'Node'
-        }
+        title={nodeData.type === 'text_note' ? String(nodeData.title || 'Note') : 'Node'}
         style={{
           minWidth: '200px',
           maxWidth: '300px',
@@ -50,9 +50,6 @@ export function SimpleNode(node: Node<ScratchpadNodeData>) {
         <EuiText size="s">
           {nodeData.type === 'text_note' && (
             <div>{String(nodeData.content || 'Empty note')}</div>
-          )}
-          {nodeData.type === 'kibana_link' && (
-            <div>{String(nodeData.title || 'Link')}</div>
           )}
         </EuiText>
       </EuiCard>
