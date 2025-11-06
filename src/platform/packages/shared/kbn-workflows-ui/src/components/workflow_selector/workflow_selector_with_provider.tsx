@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, memo } from 'react';
-import { QueryClient, QueryClientProvider, type QueryClientConfig } from '@kbn/react-query';
+import React, { memo } from 'react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { WorkflowSelector } from './workflow_selector';
 import type { WorkflowSelectorConfig } from './workflow_utils';
 
@@ -17,31 +17,18 @@ interface WorkflowSelectorWithProviderProps {
   onWorkflowChange: (workflowId: string) => void;
   config?: WorkflowSelectorConfig;
   error?: string;
-  onCreateWorkflow?: () => void;
-  // Optional: provide your own QueryClient for shared cache/configuration
-  queryClient?: QueryClient;
-  // Optional: configure the QueryClient if you don't provide one
-  queryClientConfig?: QueryClientConfig;
 }
 
 const WorkflowSelectorWithProvider = memo<WorkflowSelectorWithProviderProps>(
-  ({ queryClient: providedQueryClient, queryClientConfig, ...selectorProps }) => {
-    // Use provided client, or create one per instance (for isolation)
-    const queryClient = useMemo(() => {
-      if (providedQueryClient) {
-        return providedQueryClient;
-      }
-      return new QueryClient(
-        queryClientConfig || {
-          defaultOptions: {
-            queries: {
-              retry: false,
-              refetchOnWindowFocus: false,
-            },
-          },
-        }
-      );
-    }, [providedQueryClient, queryClientConfig]);
+  ({ ...selectorProps }) => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          refetchOnWindowFocus: false,
+        },
+      },
+    });
 
     return (
       <QueryClientProvider client={queryClient}>
