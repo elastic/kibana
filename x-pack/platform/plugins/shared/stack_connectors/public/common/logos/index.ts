@@ -6,7 +6,6 @@
  */
 
 import { lazy } from 'react';
-import { OPENAI_CONNECTOR_ID } from '../../../common/openai/constants';
 
 export const OpenAILogoLazy = lazy(() => import('../../connector_types/openai/logo'));
 export const BedrockLogoLazy = lazy(() => import('../../connector_types/bedrock/logo'));
@@ -45,7 +44,7 @@ export function getStackConnectorLogoLazy(dottedType: string) {
   switch (dottedType) {
     case '.bedrock':
       return BedrockLogoLazy;
-    case OPENAI_CONNECTOR_ID:
+    case '.openai':
       return OpenAILogoLazy;
     case '.gemini':
       return GeminiLogoLazy;
@@ -98,7 +97,7 @@ export async function getStackConnectorLogo(
   switch (dottedType) {
     case '.bedrock':
       return await import('../../connector_types/bedrock/logo').then((module) => module.default);
-    case OPENAI_CONNECTOR_ID:
+    case '.openai':
       return await import('../../connector_types/openai/logo').then((module) => module.default);
     case '.gemini':
       return await import('../../connector_types/gemini/logo').then((module) => module.default);

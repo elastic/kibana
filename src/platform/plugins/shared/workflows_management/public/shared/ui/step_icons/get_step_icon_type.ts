@@ -9,6 +9,7 @@
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
+// eslint-disable-next-line complexity
 export const getStepIconType = (nodeType: string): EuiIconType => {
   let iconType: EuiIconType = 'info';
   switch (nodeType) {
@@ -22,6 +23,7 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'scheduled':
       iconType = 'clock';
       break;
+
     // built-in node types
     case 'http':
       iconType = 'globe';
@@ -29,6 +31,7 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'console':
       iconType = 'console';
       break;
+
     // flow control nodes
     case 'wait':
       iconType = 'clock';
@@ -51,21 +54,26 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
       iconType = 'tokenNumber';
       break;
 
-    // connectors
-    // should be handled by the connector icon component
+    // connectors which use EUI icons
+    case 'email':
+      iconType = 'email';
+      break;
+    case 'slack':
+    case 'slack_api':
+      iconType = 'logoSlack';
+      break;
+    case 'inference':
+      iconType = 'sparkles';
+      break;
+    case 'elasticsearch':
+      iconType = 'logoElasticsearch';
+      break;
+    case 'kibana':
+      iconType = 'logoKibana';
+      break;
 
-    // case 'email':
-    //   iconType = 'email';
-    //   break;
-    // case 'slack':
-    // case 'slack_api':
-    //   iconType = 'logoSlack';
-    //   break;
-    // case 'inference':
-    // case 'inference.completion':
-    // case 'inference.unified_completion':
-    //   iconType = 'sparkles';
-    //   break;
+    // other connectors
+    // will be handled by in getStackConnectorIcon
 
     default:
       iconType = 'plugs';
