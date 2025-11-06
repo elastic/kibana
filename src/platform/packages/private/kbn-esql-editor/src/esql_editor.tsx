@@ -51,6 +51,7 @@ import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_tele
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
+import { QuickEditVisor } from './editor_footer/quick_edit_visor';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
@@ -178,6 +179,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+  const [isVisorOpen, setIsVisorOpen] = useState(false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -190,6 +192,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
+      setIsVisorOpen(false);
     },
     [onTextLangQueryChange]
   );
@@ -227,6 +230,17 @@ const ESQLEditorInternal = function ESQLEditor({
       onTextLangQuerySubmit,
       telemetryService,
     ]
+  );
+
+  // combine with the starred queries one
+  const onUpdateAndSubmitQuery = useCallback(
+    (newQuery: string) => {
+      onQueryUpdate(newQuery);
+      setTimeout(() => {
+        onQuerySubmit(QuerySource.VISOR);
+      }, 0);
+    },
+    [onQuerySubmit, onQueryUpdate]
   );
 
   const onCommentLine = useCallback(() => {
@@ -359,6 +373,12 @@ const ESQLEditorInternal = function ESQLEditor({
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
     () => onQuerySubmit(QuerySource.MANUAL)
+  );
+
+  editor1.current?.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+    () => setIsVisorOpen(!isVisorOpen)
   );
 
   const styles = esqlEditorStyles(
@@ -1083,6 +1103,13 @@ const ESQLEditorInternal = function ESQLEditor({
           }
         />
       )}
+      <QuickEditVisor
+        query={code}
+        isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
+        isVisible={isVisorOpen}
+        onClose={() => setIsVisorOpen(false)}
+        onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
+      />
       <EditorFooter
         lines={editorModel.current?.getLineCount() || 1}
         styles={{
@@ -1110,6 +1137,7 @@ const ESQLEditorInternal = function ESQLEditor({
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
         telemetryService={telemetryService}
+        toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

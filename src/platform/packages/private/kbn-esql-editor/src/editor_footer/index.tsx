@@ -36,6 +36,7 @@ import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_star
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import { QuickEditAction } from './quick_edit_visor';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -68,6 +69,7 @@ interface EditorFooterProps {
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
   telemetryService: ESQLEditorTelemetryService;
+  toggleVisor: () => void;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -95,6 +97,7 @@ export const EditorFooter = memo(function EditorFooter({
   code,
   dataErrorsControl,
   telemetryService,
+  toggleVisor,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -244,6 +247,7 @@ export const EditorFooter = memo(function EditorFooter({
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               {!Boolean(editorIsInline) && (
                 <>
+                  <QuickEditAction toggleVisor={toggleVisor} />
                   <SubmitFeedbackComponent />
                   {!hideQueryHistory && (
                     <QueryHistoryAction
