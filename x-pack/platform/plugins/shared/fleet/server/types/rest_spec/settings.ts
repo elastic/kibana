@@ -71,7 +71,7 @@ export const SpaceSettingsResponseSchema = schema.object({
   }),
 });
 
-export const SettingsResponseSchema = schema.object({
+export const SettingsResponseSchemaV5 = schema.object({
   item: schema.object({
     has_seen_add_data_notice: schema.maybe(schema.boolean()),
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
@@ -102,6 +102,8 @@ export const SettingsResponseSchema = schema.object({
     ),
   }),
 });
+
+export const SettingsResponseSchema = SettingsResponseSchemaV5.extends({});
 
 export const PutSpaceSettingsRequestSchema = {
   body: schema.object({
