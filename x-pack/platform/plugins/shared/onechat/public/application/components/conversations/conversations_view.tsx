@@ -45,6 +45,9 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     width: 100%;
     height: 100%;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+    display: flex;
+    justify-content: center;
+    align-items: center;
   `;
 
   const labels = {
@@ -83,9 +86,11 @@ export const OnechatConversationsView: React.FC<{}> = () => {
             paddingSize="m"
           >
             <ConversationHeader
-              isSidebarOpen={isSidebarOpen}
-              onToggleSidebar={() => {
-                setIsSidebarOpen((open) => !open);
+              sidebar={{
+                isOpen: isSidebarOpen,
+                onToggle: () => {
+                  setIsSidebarOpen((open) => !open);
+                },
               }}
             />
           </KibanaPageTemplate.Header>
