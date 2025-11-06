@@ -37,7 +37,7 @@ export class WorkflowTemplatingEngine {
 
   public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
     let resolvedExpression = template.trim();
-    const openExpressionIndex = resolvedExpression.indexOf('${{');
+    const openExpressionIndex = resolvedExpression.indexOf('{{');
     const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
 
     if (openExpressionIndex === -1 || closeExpressionIndex === -1) {
