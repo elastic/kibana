@@ -8,42 +8,56 @@
  */
 
 import React, { Suspense, forwardRef } from 'react';
-import type { ReactNode, HTMLAttributes, ForwardedRef } from 'react';
+import type { ReactNode, ForwardedRef, AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { EuiIcon, EuiScreenReaderOnly, EuiText, euiFontSize, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 
-export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLButtonElement> {
-  as?: 'a' | 'button';
+interface MenuItemBaseProps {
   children: ReactNode;
-  href?: string;
-  iconSize?: 's' | 'm';
   iconType: IconType;
-  isHighlighted: boolean;
+  id?: string;
   isCurrent?: boolean;
+  isHighlighted: boolean;
+  isHorizontal?: boolean;
   isLabelVisible?: boolean;
   isTruncated?: boolean;
 }
 
+type MenuItemAnchorRestProps = Omit<
+  AnchorHTMLAttributes<HTMLAnchorElement>,
+  keyof MenuItemBaseProps | 'href'
+>;
+
+type MenuItemButtonRestProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  keyof MenuItemBaseProps
+>;
+
+interface MenuItemWithHref extends MenuItemBaseProps, MenuItemAnchorRestProps {
+  href: string;
+}
+
+interface MenuItemWithoutHref extends MenuItemBaseProps, MenuItemButtonRestProps {
+  href?: undefined;
+}
+
+export type MenuItemProps = MenuItemWithHref | MenuItemWithoutHref;
+
 export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuItemProps>(
-  (
-    {
-      as = 'a',
+  (props, ref): JSX.Element => {
+    const {
       children,
-      href,
-      iconSize = 's',
       iconType,
       id,
       isCurrent = false,
       isHighlighted,
       isLabelVisible = true,
       isTruncated = true,
-      ...props
-    },
-    ref
-  ): JSX.Element => {
+    } = props;
+
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
 
@@ -164,27 +178,36 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       css: buttonStyles,
       'data-menu-item': true,
       'data-highlighted': isHighlighted ? 'true' : 'false',
-      ...props,
     };
 
-    if (as === 'button') {
+    if (props.href === undefined) {
+      const buttonProps: MenuItemButtonRestProps = props;
+
       return (
-        <button id={id} ref={ref as ForwardedRef<HTMLButtonElement>} {...commonProps}>
+        <button
+          id={id}
+          ref={ref as ForwardedRef<HTMLButtonElement>}
+          {...commonProps}
+          {...buttonProps}
+        >
           {content}
         </button>
       );
-    }
+    } else {
+      const anchorProps: MenuItemAnchorRestProps = props;
 
-    return (
-      <a
-        aria-current={isCurrent ? 'page' : undefined}
-        href={href}
-        id={id}
-        ref={ref as ForwardedRef<HTMLAnchorElement>}
-        {...commonProps}
-      >
-        {content}
-      </a>
-    );
+      return (
+        <a
+          aria-current={isCurrent ? 'page' : undefined}
+          href={props.href}
+          id={id}
+          ref={ref as ForwardedRef<HTMLAnchorElement>}
+          {...commonProps}
+          {...anchorProps}
+        >
+          {content}
+        </a>
+      );
+    }
   }
 );
