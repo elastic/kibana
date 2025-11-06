@@ -53,7 +53,7 @@ export async function createObservabilityGetApmDownstreamDependenciesTool({
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }) {
-  const { apmIndices } = await getObservabilityDataSources({ core, plugins, logger });
+  const { apmIndexPatterns } = await getObservabilityDataSources({ core, plugins, logger });
 
   const toolDefinition: BuiltinToolDefinition<typeof downstreamDependenciesSchema> = {
     id: OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
@@ -89,8 +89,8 @@ export async function createObservabilityGetApmDownstreamDependenciesTool({
           { range: { '@timestamp': { gte: start, lte: end } } },
         ];
 
-        const spanIndices = apmIndices.span ?? [];
-        const transactionIndices = apmIndices.transaction ?? [];
+        const spanIndices = apmIndexPatterns.span ?? [];
+        const transactionIndices = apmIndexPatterns.transaction ?? [];
 
         // If no APM span/transaction indices are configured, avoid a cluster-wide search
         if (spanIndices.length === 0 || transactionIndices.length === 0) {
