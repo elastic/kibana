@@ -6,7 +6,7 @@
  */
 
 import type { CreateSLOInput } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { usePluginContext } from './use_plugin_context';
 
 export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) {

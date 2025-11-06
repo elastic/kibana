@@ -48,5 +48,6 @@
     "@kbn/utility-types-jest",
     "@kbn/utility-types",
     "@kbn/zod",
+    "@kbn/react-query",
   ]
 }
