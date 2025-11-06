@@ -193,7 +193,7 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Fixes Fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
 
 **{{product.kibana}} platform**:
-* Ensures that the `max_tokens` parameter is correctly passed as expected when connecting to Anthropic  [#241212]({{kib-pull}}241212) & [#241188]({{kib-pull}}241188).
+* Ensures that the `max_tokens` parameter is correctly passed as expected when connecting to Anthropic [#241212]({{kib-pull}}241212) & [#241188]({{kib-pull}}241188).
 * Removes the default fallback region for the Amazon Bedrock connector [#241157]({{kib-pull}}241157).
 
 **{{product.observability}} solution**:
