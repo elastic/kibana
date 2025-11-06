@@ -41,6 +41,7 @@ import {
 
 import type { FinderAttributes, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
+import { foo } from './new_stuff';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];
 
@@ -221,6 +222,8 @@ class SavedObjectFinderUiClass extends React.Component<
   };
 
   public render() {
+    console.log(foo);
+
     const {
       onChoose,
       savedObjectMetaData,
