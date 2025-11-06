@@ -7,21 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createRequestHash } from './utils';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-describe('data/search/session utils', () => {
-  describe('createRequestHash', () => {
-    it('ignores `preference`', () => {
-      const request = {
-        foo: 'bar',
-      };
-
-      const withPreference = {
-        ...request,
-        preference: 1234,
-      };
-
-      expect(createRequestHash(request)).toEqual(createRequestHash(withPreference));
-    });
-  });
+export default createPlaywrightConfig({
+  testDir: './discovery_tests',
 });
