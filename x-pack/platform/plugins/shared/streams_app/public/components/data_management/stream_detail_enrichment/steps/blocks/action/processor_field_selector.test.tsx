@@ -186,6 +186,7 @@ describe('ProcessorFieldSelector', () => {
           placeholder: 'Custom placeholder',
           fullWidth: true,
           dataTestSubj: 'streamsAppProcessorFieldSelectorComboFieldText',
+          showIcon: true,
           suggestions: [
             { name: '@timestamp', type: 'date' },
             { name: 'log.level', type: 'keyword' },
@@ -207,6 +208,7 @@ describe('ProcessorFieldSelector', () => {
             expect.objectContaining({ name: '@timestamp', type: 'date' }),
             expect.objectContaining({ name: 'log.level', type: 'keyword' }),
           ]),
+          showIcon: true,
         }),
         expect.anything()
       );
