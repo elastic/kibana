@@ -36,24 +36,15 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useHoverTimeout } from '../../hooks/use_hover_timeout';
 import { useScroll } from '../../hooks/use_scroll';
 
-/**
- * Flag for tracking if any popover is open.
- */
-let anyPopoverOpen: boolean = false;
-
-/**
- * Utility function to check if any popover is open.
- *
- * @returns true if any popover is open
- */
-export const getIsAnyPopoverOpenNow = () => anyPopoverOpen;
-
 export interface PopoverProps {
-  container?: HTMLElement;
   children?: ReactNode | ((closePopover: () => void) => ReactNode);
+  container?: HTMLElement;
   hasContent: boolean;
+  isAnyPopoverOpen: boolean;
   isSidePanelOpen: boolean;
   label: string;
+  persistent?: boolean;
+  setAnyPopoverOpen: (isOpen: boolean) => void;
   trigger: ReactElement<{
     ref?: Ref<HTMLElement>;
     onClick?: (e: MouseEvent) => void;
@@ -62,7 +53,6 @@ export interface PopoverProps {
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     'aria-expanded'?: boolean;
   }>;
-  persistent?: boolean;
 }
 
 /**
@@ -77,9 +67,11 @@ export const Popover = ({
   children,
   container,
   hasContent,
+  isAnyPopoverOpen,
   isSidePanelOpen,
   label,
   persistent = false,
+  setAnyPopoverOpen,
   trigger,
 }: PopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -98,16 +90,16 @@ export const Popover = ({
 
   const open = useCallback(() => {
     setIsOpen(true);
-    anyPopoverOpen = true;
-  }, []);
+    setAnyPopoverOpen(true);
+  }, [setAnyPopoverOpen]);
 
   const close = useCallback(() => {
     setIsOpen(false);
     clearOpenedByClick();
     clearHoverTimeout();
     setShouldFocusOnOpen(false);
-    anyPopoverOpen = false;
-  }, [clearOpenedByClick, clearHoverTimeout]);
+    setAnyPopoverOpen(false);
+  }, [clearOpenedByClick, clearHoverTimeout, setAnyPopoverOpen]);
 
   const handleClose = useCallback(() => {
     clearHoverTimeout();
@@ -115,15 +107,15 @@ export const Popover = ({
   }, [clearHoverTimeout, close]);
 
   const tryOpen = useCallback(() => {
-    if (!isSidePanelOpen && !getIsAnyPopoverOpenNow()) {
+    if (!isSidePanelOpen && !isAnyPopoverOpen) {
       open();
     }
-  }, [isSidePanelOpen, open]);
+  }, [isAnyPopoverOpen, isSidePanelOpen, open]);
 
   const handleMouseEnter = useCallback(() => {
     if (!persistent || !isOpenedByClick) {
       clearHoverTimeout();
-      if (getIsAnyPopoverOpenNow()) {
+      if (isAnyPopoverOpen) {
         setHoverTimeout(tryOpen, POPOVER_HOVER_DELAY);
       } else if (!isSidePanelOpen) {
         setHoverTimeout(open, POPOVER_HOVER_DELAY);
@@ -132,6 +124,7 @@ export const Popover = ({
   }, [
     persistent,
     isOpenedByClick,
+    isAnyPopoverOpen,
     isSidePanelOpen,
     clearHoverTimeout,
     open,

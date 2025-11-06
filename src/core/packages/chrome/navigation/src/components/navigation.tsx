@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -85,6 +85,8 @@ export const Navigation = ({
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
 
+  const [isAnyPopoverOpen, setAnyPopoverOpen] = useState(false);
+
   const wrapperStyles = css`
     display: flex;
   `;
@@ -111,8 +113,10 @@ export const Navigation = ({
               <SideNav.Popover
                 key={item.id}
                 hasContent={getHasSubmenu(item)}
+                isAnyPopoverOpen={isAnyPopoverOpen}
                 isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
                 label={item.label}
+                setAnyPopoverOpen={setAnyPopoverOpen}
                 trigger={
                   <SideNav.PrimaryMenu.Item
                     hasContent={getHasSubmenu(item)}
@@ -158,11 +162,13 @@ export const Navigation = ({
           {overflowMenuItems.length > 0 && (
             <SideNav.Popover
               hasContent
+              isAnyPopoverOpen={isAnyPopoverOpen}
               isSidePanelOpen={false}
               label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuLabel', {
                 defaultMessage: 'More',
               })}
               persistent
+              setAnyPopoverOpen={setAnyPopoverOpen}
               trigger={
                 <SideNav.PrimaryMenu.Item
                   as="button"
@@ -253,9 +259,11 @@ export const Navigation = ({
               <SideNav.Popover
                 key={item.id}
                 hasContent={getHasSubmenu(item)}
+                isAnyPopoverOpen={isAnyPopoverOpen}
                 isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
                 label={item.label}
                 persistent={false}
+                setAnyPopoverOpen={setAnyPopoverOpen}
                 trigger={
                   <SideNav.Footer.Item
                     isHighlighted={item.id === visuallyActivePageId}
