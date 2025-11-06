@@ -202,7 +202,7 @@ export const GDriveStepSchema = BaseStepSchema.extend({
     service_credential: z.record(z.string(), z.any()).optional(),
     // Operation to perform
     operation: z
-      .enum(['list', 'get', 'ping'])
+      .enum(['list', 'get', 'download', 'ping'])
       .optional()
       .default('list'),
     // File operations
