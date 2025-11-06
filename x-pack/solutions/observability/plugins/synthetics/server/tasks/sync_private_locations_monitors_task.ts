@@ -135,6 +135,8 @@ export class SyncPrivateLocationMonitorsTask {
             soClient,
             encryptedSavedObjects,
           });
+        } else {
+          this.debugLog(`No private locations found, skipping sync`);
         }
         this.debugLog(`Sync of private location monitors succeeded`);
       } else {
