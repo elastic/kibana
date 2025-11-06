@@ -15,11 +15,24 @@ import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 import { normalizeUrl } from '../utils/normalize_url';
 
-type KibanaClientFetchOptions = RequestInit;
+export type KibanaClientFetchOptions = RequestInit & { ignore?: number[] };
+type KibanaClientFetchOptionsWithIgnore = RequestInit & { ignore: number[] };
 
 export class KibanaClientHttpError extends Error {
   constructor(message: string, public readonly statusCode: number, public readonly data?: unknown) {
-    super(message);
+    super(`${statusCode}: ${message}`);
+
+    if (typeof data !== 'undefined' && this.stack) {
+      let serializedData: string;
+
+      try {
+        serializedData = JSON.stringify(data, null, 2);
+      } catch (error) {
+        serializedData = String(data);
+      }
+
+      this.stack = `${this.stack}\nData: ${serializedData}`;
+    }
   }
 }
 
@@ -32,7 +45,9 @@ export class KibanaClient {
     this.headers = { ...kibanaHeaders(), ...(options.headers ?? {}) };
   }
 
-  fetch<T>(pathname: string, options: KibanaClientFetchOptions): Promise<T> {
+  fetch<T>(pathname: string, options: KibanaClientFetchOptions): Promise<T>;
+  fetch<T>(pathname: string, options: KibanaClientFetchOptionsWithIgnore): Promise<undefined>;
+  fetch(pathname: string, options: KibanaClientFetchOptionsWithIgnore) {
     const pathnameWithLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
     const url = new URL(`${this.target}${pathnameWithLeadingSlash}`);
     const normalizedUrl = normalizeUrl(url.toString());
@@ -44,6 +59,10 @@ export class KibanaClient {
       },
       agent: getFetchAgent(normalizedUrl),
     }).then(async (response) => {
+      if (options.ignore && options.ignore.includes(response.status)) {
+        return undefined;
+      }
+
       if (response.status >= 400) {
         throw new KibanaClientHttpError(
           `Response error for ${options.method?.toUpperCase() ?? 'GET'} ${normalizedUrl}`,

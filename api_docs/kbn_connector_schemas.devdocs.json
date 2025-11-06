@@ -1,0 +1,148 @@
+{
+  "id": "@kbn/connector-schemas",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".email\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/email/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".index\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/es_index/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".jira\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/jira/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".pagerduty\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/pagerduty/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".server-log\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/server_log/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".slack\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/slack/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".slack_api\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/slack_api/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".webhook\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/webhook/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
