@@ -11,6 +11,8 @@ import type {
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import { MAX_ATTEMPTS_AI_WORKFLOWS, MAX_CONCURRENT_AI_WORKFLOWS } from './constants';
+import { TASK_STATUSES } from './saved_objects/constants';
 
 const TASK_TYPE = 'automaticImport-aiWorkflow';
 
@@ -27,8 +29,8 @@ export class TaskManagerService {
         title: 'Automatic Import AI Workflow',
         description: 'Executes long-running AI agent workflows for automatic import',
         timeout: '30m',
-        maxAttempts: 3,
-        maxConcurrency: 1,
+        maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
+        maxConcurrency: MAX_CONCURRENT_AI_WORKFLOWS,
         createTaskRunner: ({ taskInstance }) => ({
           run: async () => this.runTask(taskInstance),
           cancel: async () => this.cancelTask(taskInstance),
@@ -54,13 +56,13 @@ export class TaskManagerService {
       throw new Error('TaskManager not initialized');
     }
 
-    // for each task, we want idempotent behavior so that we are not running more than one AI process per datastream.
+    // for each task, we don't want an error if task with same id already exists.
     // therefore we use ensureScheduled with some id that ensures a pattern based on datastream and integration id
     const taskInstance = await this.taskManager.ensureScheduled({
       id: `automaticImport-aiWorkflow-${params.integrationId}-${params.dataStreamId}`,
       taskType: TASK_TYPE,
       params,
-      state: { status: 'pending' },
+      state: { task_status: TASK_STATUSES.pending },
       scope: ['automaticImport'],
     });
 
@@ -69,10 +71,8 @@ export class TaskManagerService {
     return { taskId: taskInstance.id };
   }
 
-  // also return more info like state, params, runAt, startedAt, retryAt?
-  // Rely mainly on task manager for polling the status.
   public async getTaskStatus(taskId: string): Promise<{
-    status: string;
+    task_status: keyof typeof TASK_STATUSES;
   }> {
     if (!this.taskManager) {
       throw new Error('TaskManager not initialized');
@@ -82,7 +82,7 @@ export class TaskManagerService {
       const task = await this.taskManager.get(taskId);
 
       return {
-        status: task.status,
+        task_status: task.state?.task_status,
       };
     } catch (error: any) {
       this.logger.error(`Failed to get task status for ${taskId}:`, error);
@@ -102,16 +102,16 @@ export class TaskManagerService {
 
       this.logger.info(`Task ${taskId} completed successfully`);
 
-      return { state: { status: 'completed' } };
+      return { state: { task_status: TASK_STATUSES.completed } };
     } catch (error: any) {
       this.logger.error(`Task ${taskId} failed:`, error);
-      return { state: { status: 'failed' }, error };
+      return { state: { task_status: TASK_STATUSES.failed }, error };
     }
   }
 
   private async cancelTask(taskInstance: ConcreteTaskInstance) {
     // Cancel the AI task here
     this.logger.info(`Cancelling task ${taskInstance.id}`);
-    return { state: { status: 'cancelled' } };
+    return { state: { task_status: TASK_STATUSES.cancelled } };
   }
 }
