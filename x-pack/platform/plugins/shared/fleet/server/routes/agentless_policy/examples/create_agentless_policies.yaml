@@ -87,13 +87,17 @@ responses:
           genericErrorResponseExample:
             description: 'Example of a generic error response'
             value:
+              statusCode: 400
+              error: 'Bad Request'
               message: 'An error message describing what went wrong'
-    409:
-      description: 'Conflict'
-      content:
-        application/json:
-          examples:
-            conflictErrorResponseExample:
-              description: 'Example of a conflict error response'
-              value:
-                message: 'An error message describing what went wrong'
+  409:
+    description: 'Conflict'
+    content:
+      application/json:
+        examples:
+          conflictErrorResponseExample:
+            description: 'Example of a conflict error response'
+            value:
+              statusCode: 409
+              error: 'Conflict'
+              message: 'An error message describing what went wrong'

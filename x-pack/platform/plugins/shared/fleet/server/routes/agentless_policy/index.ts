@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'node:path';
 
 import {
   CreateAgentlessPolicyRequestSchema,
@@ -15,7 +16,6 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { genericErrorResponse } from '../schema/errors';
 
 import { createAgentlessPolicyHandler } from './handler';
-import path from 'node:path';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // Create
