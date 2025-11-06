@@ -213,3 +213,146 @@ export const gaugeAttributes: LensAttributes = {
     },
   ],
 };
+
+export const gaugeESQLAttributes: LensAttributes = {
+  title: 'ESQL Gauge full config',
+  visualizationType: 'lnsGauge',
+  state: {
+    visualization: {
+      shape: 'circle',
+      layerId: '13bab0dc-1cf2-4342-8599-097f94455119',
+      layerType: 'data',
+      ticksPosition: 'auto',
+      labelMajorMode: 'auto',
+      metricAccessor: 'average',
+      minAccessor: '7300f2d7-a68c-4baa-8aa6-82486f73c08c',
+      maxAccessor: '62dd9334-ca5f-4edd-952f-ef6c01f3f728',
+      goalAccessor: 'fc9aa5bf-df9b-40e6-8919-903605702130',
+      palette: {
+        type: 'palette',
+        name: 'complementary',
+        params: {
+          name: 'complementary',
+          reverse: false,
+          rangeType: 'number',
+          rangeMin: 5353,
+          rangeMax: null,
+          progression: 'fixed',
+          stops: [
+            { color: '#61a2ff', stop: 5353 },
+            { color: '#accefe', stop: 7927.95 },
+            { color: '#f0d47f', stop: 10502.9 },
+            { color: '#eaae01', stop: 13077.84 },
+          ],
+          steps: 4,
+          continuity: 'above',
+          maxSteps: 5,
+        },
+      },
+      colorMode: 'palette',
+    },
+    query: {
+      esql: 'FROM kibana_sample_data_logs n| EVAL max = 50n| STATS average=avg(bytes), min=min(bytes), max=avg(bytes)*2, goal=max(bytes)',
+    },
+    filters: [],
+    datasourceStates: {
+      textBased: {
+        layers: {
+          '13bab0dc-1cf2-4342-8599-097f94455119': {
+            index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+            query: {
+              esql: 'FROM kibana_sample_data_logs n| EVAL max = 50n| STATS average=avg(bytes), min=min(bytes), max=avg(bytes)*2, goal=max(bytes)',
+            },
+            columns: [
+              {
+                columnId: 'average',
+                fieldName: 'average',
+                label: 'average',
+                customLabel: false,
+                meta: { type: 'number', esType: 'double' },
+                inMetricDimension: true,
+              },
+              {
+                columnId: 'min',
+                fieldName: 'min',
+                label: 'min',
+                customLabel: false,
+                meta: { type: 'number', esType: 'long' },
+                inMetricDimension: true,
+              },
+              {
+                columnId: 'max',
+                fieldName: 'max',
+                label: 'max',
+                customLabel: false,
+                meta: { type: 'number', esType: 'long' },
+                inMetricDimension: true,
+              },
+              {
+                columnId: '7300f2d7-a68c-4baa-8aa6-82486f73c08c',
+                fieldName: 'min',
+                meta: {
+                  type: 'number',
+                  esType: 'long',
+                  sourceParams: { indexPattern: 'kibana_sample_data_logs', sourceField: 'min' },
+                  params: { id: 'number' },
+                },
+                label: 'min',
+              },
+              {
+                columnId: '62dd9334-ca5f-4edd-952f-ef6c01f3f728',
+                fieldName: 'max',
+                meta: {
+                  type: 'number',
+                  esType: 'long',
+                  sourceParams: { indexPattern: 'kibana_sample_data_logs', sourceField: 'max' },
+                  params: { id: 'number' },
+                },
+                label: 'max',
+              },
+              {
+                columnId: 'fc9aa5bf-df9b-40e6-8919-903605702130',
+                fieldName: 'goal',
+                meta: {
+                  type: 'number',
+                  esType: 'long',
+                  sourceParams: {
+                    indexPattern: 'kibana_sample_data_logs',
+                    sourceField: 'goal',
+                  },
+                  params: { id: 'number' },
+                },
+                label: 'goal',
+              },
+            ],
+            timeField: '@timestamp',
+          },
+        },
+      },
+    },
+    internalReferences: [
+      {
+        type: 'index-pattern',
+        id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        name: 'textBasedLanguages-datasource-layer-13bab0dc-1cf2-4342-8599-097f94455119',
+      },
+    ],
+    adHocDataViews: {
+      e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a: {
+        id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        title: 'kibana_sample_data_logs',
+        timeFieldName: '@timestamp',
+        sourceFilters: [],
+        type: 'esql',
+        fieldFormats: {},
+        runtimeFieldMap: {},
+        allowNoIndex: false,
+        name: 'kibana_sample_data_logs',
+        allowHidden: false,
+        managed: false,
+      },
+    },
+  },
+  version: 1,
+  references: [],
+};

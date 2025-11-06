@@ -17,12 +17,15 @@ import {
   comprehensiveGaugeWithDataView,
   esqlGauge,
 } from './lens_api_config.mock';
-import { gaugeAttributes } from './lens_state_config.mock';
+import { gaugeAttributes, gaugeESQLAttributes } from './lens_state_config.mock';
 
 describe('Gauge', () => {
   describe('validateConverter', () => {
     it('should convert a gauge chart with full config', () => {
       validateConverter(gaugeAttributes, gaugeStateSchema);
+    });
+    it('should convert a gauge chart with ESQL dataset', () => {
+      validateConverter(gaugeESQLAttributes, gaugeStateSchema);
     });
   });
   describe('validateAPIConverter', () => {
