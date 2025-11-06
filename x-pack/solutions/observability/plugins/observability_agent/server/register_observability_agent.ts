@@ -64,7 +64,7 @@ export async function registerObservabilityAgent({
     return;
   }
 
-  const observabilityGetServicesTool = await createObservabilityGetServicesTool({
+  const getServicesTool = await createObservabilityGetServicesTool({
     core,
     plugins,
     logger,
