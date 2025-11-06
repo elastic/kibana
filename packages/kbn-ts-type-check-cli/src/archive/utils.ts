@@ -310,7 +310,7 @@ export async function locateLocalArchive(shas: string[]): Promise<ArchiveCandida
   }
 
   for (const sha of shas) {
-    const candidatePath = Path.join(LOCAL_CACHE_ROOT, `${sha}.tar`);
+    const candidatePath = Path.join(LOCAL_CACHE_ROOT, `${sha}.tar.gz`);
     try {
       await Fs.promises.access(candidatePath);
       return { kind: 'local', archivePath: candidatePath, sha };
@@ -479,6 +479,7 @@ export const getTarCreateArgs = (fileArg: string, fileListPath: string): string[
   '--create',
   '--file',
   fileArg,
+  '--gzip',
   '--directory',
   REPO_ROOT,
   '--null',
@@ -486,9 +487,15 @@ export const getTarCreateArgs = (fileArg: string, fileListPath: string): string[
   fileListPath,
 ];
 
-export const resolveTarEnvironment = (): NodeJS.ProcessEnv => ({
-  ...process.env,
-  // these should speed up archiving on MacOS
-  COPYFILE_DISABLE: '1',
-  COPY_EXTENDED_ATTRIBUTES_DISABLE: '1',
-});
+export const resolveTarEnvironment = (): NodeJS.ProcessEnv => {
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    // these should speed up archiving on MacOS
+    COPYFILE_DISABLE: '1',
+    COPY_EXTENDED_ATTRIBUTES_DISABLE: '1',
+  };
+
+  env.GZIP = `-1`;
+
+  return env;
+};

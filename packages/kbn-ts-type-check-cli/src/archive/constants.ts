@@ -24,7 +24,7 @@ export const CACHE_IGNORE_GLOBS = [
   'build/**',
 ];
 
-export const ARCHIVE_FILE_NAME = 'ts-build-artifacts.tar';
+export const ARCHIVE_FILE_NAME = 'ts-build-artifacts.tar.gz';
 export const ARCHIVE_METADATA_FILE_NAME = 'ts-build-artifacts.meta.json';
 
 const GCS_BUCKET_NAME = 'ci-typescript-archives.kibana.dev/ts_type_check';

@@ -79,7 +79,13 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
 const extractBaseArgs = ['--directory', REPO_ROOT, ...getTarPlatformOptions()];
 
-const buildExtractArgs = (fileArg: string) => ['--extract', '--file', fileArg, ...extractBaseArgs];
+const buildExtractArgs = (fileArg: string) => [
+  '--extract',
+  '--file',
+  fileArg,
+  '--gzip',
+  ...extractBaseArgs,
+];
 
 const extractLocalArchive = async (archivePath: string) => {
   const tarArgs = buildExtractArgs(archivePath);

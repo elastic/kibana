@@ -200,7 +200,7 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
         buffer: false,
       });
 
-      const destinationPath = Path.join(LOCAL_CACHE_ROOT, `${commitSha}.tar`);
+      const destinationPath = Path.join(LOCAL_CACHE_ROOT, `${commitSha}.tar.gz`);
 
       await Fs.promises.rename(archivePath, destinationPath);
 
