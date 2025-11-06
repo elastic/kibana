@@ -28,7 +28,6 @@ interface ResponsiveMenuState {
  *
  * @param isCollapsed - Whether the side nav is currently collapsed (affects layout recalculation).
  * @param items - All primary navigation items, in priority order.
- *
  * @returns A ref for the primary menu, the visible items and the overflow items.
  */
 export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
@@ -163,13 +162,15 @@ const countVisibleItems = (heights: number[], gap: number, menuHeight: number): 
 
 /**
  * Get a stable reference to the items array that changes only when we need to recalculate the height.
- * @param items - menu items
+ *
+ * @param items - menu items.
+ * @returns the stable items reference.
  */
 const useStableItemsReference = (items: MenuItem[]): MenuItem[] => {
   const ref = useRef<MenuItem[]>(items);
   const out = haveSameHeightSignature(ref.current, items) ? ref.current : items;
 
-  // don’t write to a ref during render
+  // Don’t write to a ref during render
   useLayoutEffect(() => {
     if (!haveSameHeightSignature(ref.current, items)) {
       ref.current = items;
@@ -180,9 +181,11 @@ const useStableItemsReference = (items: MenuItem[]): MenuItem[] => {
 };
 
 /**
- * Precheck to see if the item's height might have changed and if we need to do a full recalculation.
- * @param prev - prev menu items
- * @param next - next menu items
+ * Pre-check to see if the item's height might have changed and if we need to do a full recalculation.
+ *
+ * @param prev - previous menu items.
+ * @param next - next menu items.
+ * @returns (boolean) whether the menu items have the same height signature.
  */
 const haveSameHeightSignature = (prev: MenuItem[], next: MenuItem[]): boolean => {
   if (prev === next) return true;

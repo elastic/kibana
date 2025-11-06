@@ -11,11 +11,15 @@ import type { EuiToolTip } from '@elastic/eui';
 import { useCallback, useRef } from 'react';
 
 /**
- * Custom hook to manage tooltip visibility
+ * Hook to manage tooltip visibility.
  *
  * TODO: both of the `EuiToolTip` usages use `disableScreenReaderOutput`
  * Likely for such usages, the tooltip should fade out on mouse out
  * and not be persisted. The a11y argument no longer applies.
+ *
+ * @returns An object containing:
+ * - `tooltipRef` - a ref to the `EuiToolTip` component.
+ * - `handleMouseOut` - a callback to handle the mouse out event.
  */
 export const useTooltip = () => {
   const tooltipRef = useRef<EuiToolTip | null>(null);
