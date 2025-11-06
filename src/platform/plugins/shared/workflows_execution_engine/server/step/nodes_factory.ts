@@ -22,8 +22,8 @@ import type {
   ExitRetryNode,
   GDriveGraphNode,
   GraphNodeUnion,
-  SlackSearchNode,
   HttpGraphNode,
+  SlackSearchNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import {
@@ -37,7 +37,6 @@ import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { GDriveStepImpl } from './gdrive_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
-import { SlackSearchStepImpl } from './slack';
 
 import {
   EnterConditionBranchNodeImpl,
@@ -58,6 +57,7 @@ import {
   ExitTryBlockNodeImpl,
 } from './on_failure/fallback-step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import { SlackSearchStepImpl } from './slack';
 import {
   EnterStepTimeoutZoneNodeImpl,
   EnterWorkflowTimeoutZoneNodeImpl,
