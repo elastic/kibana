@@ -179,8 +179,8 @@ export const AccessModeContainer = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge iconType={getSpaceIcon(space.solution)} color="hollow">
-                  {space.name}
+                <EuiBadge iconType={getSpaceIcon(space?.solution)} color="hollow">
+                  {space?.name}
                 </EuiBadge>
               </EuiFlexItem>
               {!canManageAccessControl && (
