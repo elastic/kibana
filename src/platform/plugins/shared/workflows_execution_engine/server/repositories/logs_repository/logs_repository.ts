@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
+import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../../../common';
 import { createIndexWithMappings } from '../../../common/create_index';
 
 export interface WorkflowLogEvent {
@@ -62,7 +62,7 @@ export interface LogSearchResult {
 }
 
 export class LogsRepository {
-  private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
+  private indexName = WORKFLOWS_EXECUTION_LOGS_INDEX;
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
