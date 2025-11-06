@@ -171,7 +171,6 @@ export const Navigation = ({
               setAnyPopoverOpen={setAnyPopoverOpen}
               trigger={
                 <SideNav.PrimaryMenu.Item
-                  as="button"
                   data-test-subj="sideNavMoreMenuItem"
                   hasContent
                   iconType="boxesVertical"
