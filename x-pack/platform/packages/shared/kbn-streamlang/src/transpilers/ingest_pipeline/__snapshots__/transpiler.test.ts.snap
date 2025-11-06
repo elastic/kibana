@@ -181,6 +181,23 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "convert": Object {
+        "field": "http.status_code",
+        "if": "
+  try {
+  if (($('http.error', null) !== null && (($('http.error', null) instanceof Number && $('http.error', null).toString() == \\"404\\") || $('http.error', null) == 404))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "target_field": "http.status_code_str",
+        "type": "string",
+      },
+    },
+    Object {
       "rename": Object {
         "field": "attributes.old_name",
         "target_field": "attributes.new_name",

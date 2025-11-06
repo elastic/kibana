@@ -39,7 +39,7 @@ export function GroupByCardinality({
   }
 
   if (isGroupByCardinalityLoading && !groupByCardinality) {
-    return <EuiCallOut size="s" title={<EuiLoadingSpinner />} />;
+    return <EuiCallOut announceOnMount size="s" title={<EuiLoadingSpinner />} />;
   }
 
   if (!groupByCardinality) {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useMemo } from 'react';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { createEmptyLensState } from '../../../react_embeddable/helper';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { useLensSelector } from '../../../state_management';
 import { extractReferencesFromState } from '../../../utils';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';

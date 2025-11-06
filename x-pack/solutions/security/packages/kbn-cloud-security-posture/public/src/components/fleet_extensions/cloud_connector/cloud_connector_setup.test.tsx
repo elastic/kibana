@@ -11,14 +11,14 @@ import { render, act } from '@testing-library/react';
 import { CloudConnectorSetup } from './cloud_connector_setup';
 import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
-import { TestProvider } from '../test/test_provider';
-import { getMockPolicyAWS, getMockPackageInfoAWS } from '../test/mock';
+import { TestProvider } from './test/test_provider';
+import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import { CloudConnectorTabs } from './cloud_connector_tabs';
 import { isCloudConnectorReusableEnabled } from './utils';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSetupProps } from './cloud_connector_setup';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import type { CloudConnector, CloudProvider } from '@kbn/fleet-plugin/public';
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
 import { AWS_PROVIDER } from './constants';

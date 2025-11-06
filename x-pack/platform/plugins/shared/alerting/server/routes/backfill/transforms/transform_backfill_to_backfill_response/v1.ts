@@ -8,7 +8,7 @@
 import type { Backfill } from '../../../../application/backfill/result/types';
 
 export const transformBackfillToBackfillResponse = (backfill: Backfill) => {
-  const { createdAt, rule, spaceId, schedule, ...rest } = backfill;
+  const { createdAt, rule, spaceId, schedule, initiator, initiatorId, ...rest } = backfill;
   const {
     alertTypeId,
     apiKeyOwner,
@@ -34,6 +34,8 @@ export const transformBackfillToBackfillResponse = (backfill: Backfill) => {
       updated_by: updatedBy,
       updated_at: updatedAt,
     },
+    initiator,
+    initiator_id: initiatorId,
     schedule: schedule.map(({ runAt, status, interval }) => ({
       run_at: runAt,
       status,

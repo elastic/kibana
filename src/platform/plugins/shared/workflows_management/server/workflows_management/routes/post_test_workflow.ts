@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { ADMIN_SECURITY } from './route_security';
+import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -18,7 +18,7 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
     {
       path: '/api/workflows/test',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: ADMIN_SECURITY,
+      security: WORKFLOW_EXECUTE_SECURITY,
       validate: {
         body: schema.object({
           inputs: schema.recordOf(schema.string(), schema.any()),

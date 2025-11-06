@@ -110,30 +110,7 @@ describe('Agent Status API route handler', () => {
     });
   });
 
-  it('should NOT use space ID in creating SO client when feature is disabled', async () => {
-    // @ts-expect-error
-    apiTestSetup.endpointAppContextMock.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-      false;
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
-      'foo'
-    );
-    await apiTestSetup
-      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
-      .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
-
-    expect(httpResponseMock.ok).toHaveBeenCalled();
-    expect(
-      apiTestSetup.endpointAppContextMock.service.savedObjects.createInternalScopedSoClient
-    ).toHaveBeenCalledWith({
-      spaceId: 'default',
-    });
-  });
-
   it('should use a scoped SO client when spaces awareness feature is enabled', async () => {
-    // @ts-expect-error write to readonly property
-    apiTestSetup.endpointAppContextMock.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-      true;
-
     ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
       'foo'
     );

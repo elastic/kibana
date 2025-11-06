@@ -13,11 +13,16 @@ import type { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
 
 import { useDebouncedValue } from '@kbn/visualization-utils';
 
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { ToolbarPopover } from '../../../shared_components';
 import { type GaugeVisualizationState } from '../constants';
 import { AppearanceSettings } from './appearance_settings';
 import { TitlesAndTextSettings } from './titles_and_text_settings';
+
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   return (
@@ -89,5 +94,3 @@ const TitlesAndTextPopover = (props: VisualizationToolbarProps<GaugeVisualizatio
     </ToolbarPopover>
   );
 };
-
-export { GaugeFlyoutToolbar } from './flyout_toolbar';
