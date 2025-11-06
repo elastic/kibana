@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getWorkflowOutput } from './execute_workflow';
+import { getWorkflowOutput } from './get_workflow_output';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import { ExecutionStatus } from '@kbn/workflows/types/v1';
 
@@ -35,6 +35,17 @@ describe('getWorkflowOutput', () => {
 
       const result = getWorkflowOutput(steps);
       expect(result).toBeNull();
+    });
+
+    it('should handle non-empty initial stack', () => {
+      const steps: WorkflowStepExecutionDto[] = [
+        createStep('step1', { result: 'first' }, [{ stepId: 'top-wrapper' }]),
+        createStep('step2', { result: 'second' }, [{ stepId: 'top-wrapper' }]),
+        createStep('step3', { result: 'third' }, [{ stepId: 'top-wrapper' }]),
+      ];
+
+      const result = getWorkflowOutput(steps);
+      expect(result).toEqual({ result: 'third' });
     });
   });
 

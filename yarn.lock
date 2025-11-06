@@ -6275,6 +6275,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/developer-toolbar-plugin@link:src/platform/plugins/shared/developer_toolbar":
+  version "0.0.0"
+  uid ""
+
+"@kbn/developer-toolbar@link:src/platform/packages/shared/kbn-developer-toolbar":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""
@@ -8488,6 +8496,10 @@
   uid ""
 
 "@kbn/shared-ux-card-no-data@link:src/platform/packages/shared/shared-ux/card/no_data/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-document-data-cascade@link:src/platform/packages/shared/shared-ux/document_data_cascade/impl":
   version "0.0.0"
   uid ""
 
@@ -12831,6 +12843,30 @@
   dependencies:
     "@tanstack/query-core" "4.29.11"
     use-sync-external-store "^1.2.0"
+
+"@tanstack/react-table@^8.21.3":
+  version "8.21.3"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-table/-/react-table-8.21.3.tgz#2c38c747a5731c1a07174fda764b9c2b1fb5e91b"
+  integrity sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==
+  dependencies:
+    "@tanstack/table-core" "8.21.3"
+
+"@tanstack/react-virtual@^3.13.9":
+  version "3.13.12"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-virtual/-/react-virtual-3.13.12.tgz#d372dc2783739cc04ec1a728ca8203937687a819"
+  integrity sha512-Gd13QdxPSukP8ZrkbgS2RwoZseTTbQPLnQEn7HY/rqtM+8Zt95f7xKC7N0EsKs7aoz0WzZ+fditZux+F8EzYxA==
+  dependencies:
+    "@tanstack/virtual-core" "3.13.12"
+
+"@tanstack/table-core@8.21.3":
+  version "8.21.3"
+  resolved "https://registry.yarnpkg.com/@tanstack/table-core/-/table-core-8.21.3.tgz#2977727d8fc8dfa079112d9f4d4c019110f1732c"
+  integrity sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==
+
+"@tanstack/virtual-core@3.13.12":
+  version "3.13.12"
+  resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.13.12.tgz#1dff176df9cc8f93c78c5e46bcea11079b397578"
+  integrity sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA==
 
 "@testim/chrome-version@^1.1.4":
   version "1.1.4"
@@ -29330,9 +29366,9 @@ react-use@^17.6.0:
     tslib "^2.1.0"
 
 react-virtualized-auto-sizer@^1.0.24:
-  version "1.0.24"
-  resolved "https://registry.yarnpkg.com/react-virtualized-auto-sizer/-/react-virtualized-auto-sizer-1.0.24.tgz#3ebdc92f4b05ad65693b3cc8e7d8dd54924c0227"
-  integrity sha512-3kCn7N9NEb3FlvJrSHWGQ4iVl+ydQObq2fHMn12i5wbtm74zHOPhz/i64OL3c1S1vi9i2GXtZqNqUJTQ+BnNfg==
+  version "1.0.26"
+  resolved "https://registry.yarnpkg.com/react-virtualized-auto-sizer/-/react-virtualized-auto-sizer-1.0.26.tgz#e9470ef6a778dc4f1d5fd76305fa2d8b610c357a"
+  integrity sha512-CblNyiNVw2o+hsa5/49NH2ogGxZ+t+3aweRvNSq7TVjDIlwk7ir4lencEg5HxHeSzwNarSkNkiu0qJSOXtxm5A==
 
 react-virtualized@^9.22.6:
   version "9.22.6"
