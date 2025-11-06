@@ -16861,6 +16861,52 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_store/engines:
+    delete:
+      operationId: DeleteEntityEngines
+      parameters:
+        - description: The entity type of the engine ('user', 'host', 'service', 'generic').
+          in: query
+          name: entityTypes
+          required: false
+          schema:
+            description: Array of engine types to delete. Empty by default, which results in all the engines being deleted.
+            items:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+            type: array
+        - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+                    type: array
+                  still_running:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+                    type: array
+          description: Successful response
+      summary: Delete Entity Engines
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     get:
       operationId: ListEntityEngines
       responses:
@@ -16900,6 +16946,13 @@ paths:
           schema:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
         - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+        - deprecated: true
+          description: Control flag to also delete the entity data.
           in: query
           name: data
           required: false
