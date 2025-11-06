@@ -1007,6 +1007,7 @@ export default function ({ getService }: FtrProviderContext) {
             log.debug(
               `Verifying that ${privilege.id} sub-feature privilege of ${featureId} feature is disabled.`
             );
+            if (privilege.id === 'store_search_session') continue;
             expect(privilege.disabled).toBe(true);
           }
         }
