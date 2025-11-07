@@ -21,8 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const es = getService('es');
   const log = getService('log');
-  const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
