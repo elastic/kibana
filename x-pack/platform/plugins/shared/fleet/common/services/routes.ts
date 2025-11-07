@@ -210,6 +210,9 @@ export const agentlesPolicyRouteService = {
   getCreatePath: () => {
     return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
   },
+  getDeletePath: (policyId: string) => {
+    return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+  },
 };
 
 export const agentPolicyRouteService = {
