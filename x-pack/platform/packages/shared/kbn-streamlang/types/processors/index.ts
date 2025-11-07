@@ -266,6 +266,28 @@ export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<RemoveProcessor>;
 
+/**
+ * Replace processor
+ */
+
+export interface ReplaceProcessor extends ProcessorBaseWithWhere {
+  action: 'replace';
+  from: string;
+  pattern: string;
+  replacement: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('replace'),
+  from: StreamlangSourceField,
+  pattern: NonEmptyString,
+  replacement: z.string(),
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<ReplaceProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -276,6 +298,7 @@ export type StreamlangProcessorDefinition =
   | ConvertProcessor
   | RemoveByPrefixProcessor
   | RemoveProcessor
+  | ReplaceProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -287,6 +310,7 @@ export const streamlangProcessorSchema = z.union([
   appendProcessorSchema,
   removeByPrefixProcessorSchema,
   removeProcessorSchema,
+  replaceProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
@@ -303,6 +327,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     grokProcessorSchema,
     dissectProcessorSchema,
     convertProcessorSchema,
+    replaceProcessorSchema,
   ])
 );
 
