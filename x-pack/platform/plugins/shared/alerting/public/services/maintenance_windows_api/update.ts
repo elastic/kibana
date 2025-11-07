@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpSetup } from '@kbn/core/public';
-import type { MaintenanceWindow } from '../../../common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
 import type { UpdateMaintenanceWindowRequestBody } from '../../../common/routes/maintenance_window/internal/apis/update';
 import type { MaintenanceWindowResponse } from '../../../common/routes/maintenance_window/internal/response';
 

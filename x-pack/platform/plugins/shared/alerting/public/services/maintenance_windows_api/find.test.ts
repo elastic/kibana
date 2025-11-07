@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { findMaintenanceWindows } from './find';
-import { MaintenanceWindowStatus } from '../../../common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 
 const http = httpServiceMock.createStartContract();
 

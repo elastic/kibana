@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
 import type { MaintenanceWindowResponse } from '../../../common/routes/maintenance_window/internal/response';
-import type { MaintenanceWindow } from '../../../common';
 
 export const transformMaintenanceWindowResponse = (
   response: MaintenanceWindowResponse

@@ -3,13 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "scripts/**/*",
-    "../../../../../typings/**/*"
-  ],
+  "include": ["server/**/*", "server/**/*.json", "public/**/*", "common/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/actions-plugin",

@@ -30,6 +30,6 @@
       "spaces",
       "serverless"
     ],
-    "extraPublicDirs": ["common", "common/parse_duration"]
+    "extraPublicDirs": ["common"]
   }
 }

@@ -103,11 +103,9 @@ export const MAINTENANCE_WINDOWS_APP_ID = 'maintenanceWindows';
 export const MANAGEMENT_APP_ID = 'management';
 
 export const MAINTENANCE_WINDOW_PATHS = {
-  alerting: {
-    maintenanceWindows: `/${MAINTENANCE_WINDOWS_APP_ID}`,
-    maintenanceWindowsCreate: '/create',
-    maintenanceWindowsEdit: '/edit/:maintenanceWindowId',
-  },
+  maintenanceWindows: `/${MAINTENANCE_WINDOWS_APP_ID}`,
+  maintenanceWindowsCreate: '/create',
+  maintenanceWindowsEdit: '/edit/:maintenanceWindowId',
 };
 
 export const MAINTENANCE_WINDOW_DEEP_LINK_IDS = {

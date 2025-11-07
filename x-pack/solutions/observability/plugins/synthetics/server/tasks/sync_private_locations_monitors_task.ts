@@ -18,7 +18,7 @@ import type {
   RruleSchedule,
 } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
 import { getFilterForTestNowRun } from '../synthetics_service/private_location/clean_up_task';
 import { syntheticsMonitorSOTypes, syntheticsParamType } from '../../common/types/saved_objects';
