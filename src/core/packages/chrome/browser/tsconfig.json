@@ -24,9 +24,11 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-fleet",
     "@kbn/deeplinks-shared",
-    "@kbn/deeplinks-chat",
+    "@kbn/deeplinks-workplace-ai",
     "@kbn/projects-solutions-groups",
-    "@kbn/deeplinks-workflows"
+    "@kbn/deeplinks-workflows",
+    "@kbn/deeplinks-agent-builder",
+    "@kbn/deeplinks-data-connectors"
   ],
   "exclude": [
     "target/**/*",
