@@ -63,5 +63,6 @@
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
+    "@kbn/cloud-security-posture-graph",
   ]
 }
