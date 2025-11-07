@@ -113,6 +113,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
         onChange={handleChange}
         fullWidth
         singleSelection={{ asPlainText: true }}
+        compressed={true}
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorPlaceholder',
           { defaultMessage: 'Grok, Dissect ...' }

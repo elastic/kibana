@@ -116,7 +116,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" wrap={true}>
               <div>
                 <EuiButtonEmpty
                   data-test-subj="streamsAppWhereBlockConfigurationCancelButton"
@@ -144,7 +144,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
                       )
                     : i18n.translate(
                         'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.confirmCreateCondition',
-                        { defaultMessage: 'Create condition' }
+                        { defaultMessage: 'Create' }
                       )}
                 </EuiButton>
               </div>
