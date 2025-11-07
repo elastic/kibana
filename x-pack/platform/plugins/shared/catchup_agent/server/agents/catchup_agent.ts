@@ -21,7 +21,14 @@ When the user requests a catch-up without specifying a time range, use the follo
 - "since [specific date]" → use the specified date at 00:00:00Z
 - No time mentioned → default to last 7 days for a reasonable catch-up window
 
-**Important:** When calling multiple tools, use the SAME time range (start and end parameters) for all tools to ensure consistency across security cases, detections, attack discoveries, rule changes, and external system summaries.`,
+**Important:** When calling multiple tools, use the SAME time range (start and end parameters) for all tools to ensure consistency across security cases, detections, attack discoveries, rule changes, and external system summaries.
+
+**Workflows for Complex Operations:**
+For complex multi-step catchup operations, consider using workflows:
+- "Daily Security Catchup" workflow - Orchestrates security summary, Slack messages, correlation, and prioritization
+- "Incident Investigation" workflow - Comprehensive investigation with cross-source correlation
+- "Weekly Team Catchup" workflow - Parallel execution of Security, Observability, and Search summaries with prioritization
+Workflows can be triggered manually or scheduled, and provide better orchestration for complex scenarios.`,
     configuration: {
       instructions: `**CRITICAL: Tool Selection Priority**
 When the user asks about external systems, ALWAYS use the specialized external tools:
@@ -97,11 +104,15 @@ When formatting your responses, use markdown to improve readability:
             'platform.catchup.security.summary',
             // 'platform.catchup.observability.summary', // Temporarily disabled
             // 'platform.catchup.search.summary', // Temporarily disabled
+            'platform.catchup.search.unified_search',
             'platform.catchup.external.slack',
             'platform.catchup.external.github',
             'platform.catchup.external.gmail',
             'platform.catchup.correlation.engine',
+            'platform.catchup.correlation.entity_extraction',
+            'platform.catchup.correlation.semantic_search',
             'platform.catchup.summary.generator',
+            'platform.catchup.prioritization.rerank',
           ],
         },
       ],

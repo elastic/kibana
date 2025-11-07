@@ -1,0 +1,97 @@
+version: '1'
+name: 'Daily Security Catchup'
+description: 'Orchestrates a comprehensive daily security catchup by fetching security summaries, Slack messages, correlating events, and prioritizing critical items using rerankers.'
+enabled: true
+tags:
+  - security
+  - daily
+  - catchup
+triggers:
+  - type: scheduled
+    with:
+      rrule:
+        freq: 'DAILY'
+        interval: 1
+        tzid: 'UTC'
+        byhour: [8]
+        byminute: [0]
+  - type: manual
+inputs:
+  - type: string
+    name: start
+    description: 'ISO datetime string for the start time (defaults to 24 hours ago)'
+    required: false
+    default: '__DYNAMIC_24H_AGO__'
+  - type: string
+    name: end
+    description: 'ISO datetime string for the end time (defaults to now)'
+    required: false
+    default: '__DYNAMIC_NOW__'
+steps:
+  - name: calculate_time_range
+    type: console
+    with:
+      message: 'Calculating time range for daily security catchup'
+
+  - name: fetch_security_summary
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'platform.catchup.workflow.security.summary'
+        tool_params:
+          start: '{{ inputs.start }}'
+          end: '{{ inputs.end }}'
+
+  - name: fetch_slack_messages
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'platform.catchup.workflow.external.slack'
+        tool_params:
+          since: '{{ inputs.start }}'
+          keywords: []
+          includeDMs: false
+
+  - name: correlate_events
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'platform.catchup.workflow.correlation.engine'
+        tool_params:
+          results:
+            security_summary: '{{ steps.fetch_security_summary.output }}'
+            external:
+              slack: '{{ steps.fetch_slack_messages.output }}'
+
+  - name: prioritize_with_reranker
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'platform.catchup.workflow.prioritization.rerank'
+        tool_params:
+          items: '{{ steps.correlate_events.output }}'
+          query: 'security incidents critical alerts'
+          limit: 10
+
+  - name: generate_summary
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'platform.catchup.summary.generator'
+        tool_params:
+          correlatedData:
+            security_summary: '{{ steps.fetch_security_summary.output }}'
+            external:
+              slack: '{{ steps.fetch_slack_messages.output }}'
+            correlations: '{{ steps.correlate_events.output }}'
+          format: 'markdown'

@@ -63,7 +63,10 @@ export class WorkflowTemplatingEngine {
 
     // Handle string values - render them using the template engine
     if (typeof value === 'string') {
-      return this.renderString(value, context);
+      const rendered = this.renderString(value, context);
+      // renderString may return an object if it's a single expression that evaluates to an object
+      // In that case, we should return it as-is rather than treating it as a string
+      return rendered;
     }
 
     // Handle arrays - recursively render each element
@@ -84,8 +87,35 @@ export class WorkflowTemplatingEngine {
     return value;
   }
 
-  private renderString(template: string, context: Record<string, unknown>): string {
+  private renderString(template: string, context: Record<string, unknown>): string | unknown {
     try {
+      // Check if the template is a single expression (e.g., "{{ steps.step.output }}")
+      // If so, evaluate it directly to preserve object types instead of stringifying
+      const trimmed = template.trim();
+      const isSingleExpression =
+        trimmed.startsWith('{{') &&
+        trimmed.endsWith('}}') &&
+        trimmed.indexOf('{{') === trimmed.lastIndexOf('{{') &&
+        trimmed.indexOf('}}') === trimmed.lastIndexOf('}}');
+
+      if (isSingleExpression) {
+        // This is a single expression - evaluate it directly to preserve object types
+        try {
+          const result = this.evaluateExpression(trimmed, context);
+          // If the result is an object, return it as-is (not as a string)
+          // This allows objects to be passed through correctly
+          if (typeof result === 'object' && result !== null) {
+            return result;
+          }
+          // For primitives, convert to string as expected
+          return String(result);
+        } catch (e) {
+          // If evaluation fails, fall back to parseAndRenderSync
+          // This handles cases where the expression might have filters or other Liquid syntax
+        }
+      }
+
+      // For templates with multiple expressions or mixed content, use parseAndRenderSync
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

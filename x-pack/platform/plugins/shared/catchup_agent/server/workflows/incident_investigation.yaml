@@ -1,0 +1,115 @@
+version: '1'
+name: 'Incident Investigation'
+description: 'Comprehensive incident investigation workflow that fetches security alert/case details, searches observability alerts, Slack messages, GitHub PRs, and correlates all sources using entity extraction.'
+enabled: true
+tags:
+  - security
+  - incident
+  - investigation
+triggers:
+  - type: manual
+inputs:
+  - type: string
+    name: incident_id
+    description: 'Security alert ID or case ID to investigate'
+    required: true
+  - type: string
+    name: service_name
+    description: 'Optional service name to search for related issues'
+    required: false
+steps:
+  - name: Fetch security alert/case
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.security.detections'
+        toolParams:
+          start: '{{ (now | date_sub("7d") | date_format("iso")) }}'
+          alert_id: '{{ inputs.incident_id }}'
+
+  - name: Search observability alerts
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.observability.summary'
+        toolParams:
+          start: '{{ (now | date_sub("7d") | date_format("iso")) }}'
+          service_name: '{{ inputs.service_name || null }}'
+
+  - name: Search Slack for mentions
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.external.slack'
+        toolParams:
+          since: '{{ (now | date_sub("7d") | date_format("iso")) }}'
+          keywords:
+            - '{{ inputs.incident_id }}'
+            - '{{ inputs.service_name || "" }}'
+          includeDMs: false
+
+  - name: Search GitHub
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.external.github'
+        toolParams:
+          since: '{{ (now | date_sub("7d") | date_format("iso")) }}'
+          keywords:
+            - '{{ inputs.incident_id }}'
+            - '{{ inputs.service_name || "" }}'
+
+  - name: Extract entities
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.correlation.entity_extraction'
+        toolParams:
+          data:
+            security: '{{ steps.fetch_security_alert_case.output }}'
+            observability: '{{ steps.search_observability_alerts.output }}'
+            slack: '{{ steps.search_slack_for_mentions.output }}'
+            github: '{{ steps.search_github.output }}'
+
+  - name: Correlate all sources
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.correlation.engine'
+        toolParams:
+          results:
+            security_summary: '{{ steps.fetch_security_alert_case.output }}'
+            observability: '{{ steps.search_observability_alerts.output }}'
+            external:
+              slack: '{{ steps.search_slack_for_mentions.output }}'
+              github: '{{ steps.search_github.output }}'
+          entities: '{{ steps.extract_entities.output }}'
+
+  - name: Generate investigation report
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.summary.generator'
+        toolParams:
+          correlatedData:
+            security_summary: '{{ steps.fetch_security_alert_case.output }}'
+            observability: '{{ steps.search_observability_alerts.output }}'
+            external:
+              slack: '{{ steps.search_slack_for_mentions.output }}'
+              github: '{{ steps.search_github.output }}'
+            correlations: '{{ steps.correlate_all_sources.output }}'
+          format: 'markdown'

@@ -38,10 +38,50 @@ The Elastic CatchUp Agent helps users catch up on everything that happened while
 2. **platform.catchup.external.github** - Summarizes GitHub PRs and issues (requires connector or token)
 3. **platform.catchup.external.gmail** - Summarizes Gmail conversations (requires connector)
 
-#### Correlation & Summary Tools (2 tools)
+#### Correlation & Summary Tools (4 tools)
 
-1. **platform.catchup.correlation.engine** - Correlates events across sources by shared identifiers
-2. **platform.catchup.summary.generator** - Generates unified markdown or JSON summary
+1. **platform.catchup.correlation.engine** - Correlates events across sources by shared identifiers (enhanced with entity extraction)
+2. **platform.catchup.correlation.entity_extraction** - Extracts entities (service names, alert IDs, case IDs, PR numbers) from messages/alerts
+3. **platform.catchup.correlation.semantic_search** - Uses semantic search with embeddings (ELSER/E5) and hybrid search (RRF) for fuzzy correlation
+4. **platform.catchup.summary.generator** - Generates unified markdown or JSON summary
+
+#### Prioritization Tools (1 tool)
+
+1. **platform.catchup.prioritization.rerank** - Uses ES|QL RERANK command to prioritize items by relevance
+
+#### Search Tools (2 tools)
+
+1. **platform.catchup.search.summary** - Summarizes analytics from `.ent-search-analytics-*`
+2. **platform.catchup.search.unified_search** - Searches across Security, Observability, Search, and External sources using hybrid search (RRF)
+
+### Workflows
+
+The plugin includes three pre-built workflows that demonstrate orchestration capabilities:
+
+1. **Daily Security Catchup** (`daily_security_catchup`) - Scheduled daily at 8 AM UTC
+
+   - Fetches security summary for last 24 hours
+   - Retrieves Slack messages from security channels
+   - Correlates security events with Slack discussions
+   - Uses reranker to prioritize most critical items
+   - Generates formatted summary
+
+2. **Incident Investigation** (`incident_investigation`) - Manual trigger
+
+   - Fetches security alert/case details
+   - Searches observability alerts for related service issues
+   - Searches Slack for mentions of alert/case ID or service name
+   - Searches GitHub for related PRs/issues
+   - Correlates all sources using entity extraction
+   - Generates comprehensive investigation report
+
+3. **Weekly Team Catchup** (`weekly_team_catchup`) - Scheduled weekly on Mondays at 9 AM UTC
+   - Parallel execution: Security, Observability, Search summaries
+   - Fetches Slack messages from team channels
+   - Fetches GitHub PRs/issues from team repos
+   - Uses hybrid search (RRF) to find related content across sources
+   - Applies reranker to surface most important updates
+   - Generates team digest
 
 ## Implementation Status
 
@@ -51,19 +91,32 @@ The Elastic CatchUp Agent helps users catch up on everything that happened while
 - ✅ All Security tools (using ES|QL queries)
 - ✅ Observability tool (using ES|QL queries)
 - ✅ Search tool (using ES|QL queries)
-- ✅ Correlation engine (basic correlation logic)
+- ✅ Correlation engine (enhanced with entity extraction and semantic search)
+- ✅ Entity extraction tool
+- ✅ Semantic search tool (with hybrid search support)
+- ✅ Reranker prioritization tool (using ES|QL RERANK)
+- ✅ Unified search tool (demonstrates "Better Together" story)
 - ✅ Summary generator (markdown and JSON output)
+- ✅ Three workflows (Daily Security Catchup, Incident Investigation, Weekly Team Catchup)
 - ✅ Agent registration with all tools
 - ✅ Protected namespace registration
 - ✅ Allow list updates
 
-### Pending (MVP Stretch Goals)
+### Elastic Differentiators Used
 
-- ⏳ External API tools - Full implementation requires:
-  - Access to encrypted connector secrets via Actions plugin
-  - Actual API calls to Slack, GitHub, Gmail
-  - Currently placeholder implementations
-- ⏳ Enhanced correlation logic (vector embeddings, smarter matching)
+This plugin demonstrates Elastic's search and relevance capabilities:
+
+- **Rerankers**: Uses ES|QL `RERANK` command to prioritize items by relevance
+- **Hybrid Search (RRF)**: Combines keyword and semantic search using Reciprocal Rank Fusion
+- **Entity Extraction**: Identifies and extracts entities (services, alerts, cases, PRs) for correlation
+- **Semantic Search**: Uses embeddings (ELSER/E5) for similarity matching
+- **"Better Together" Story**: Integrates Security, Observability, and Search solutions with external context
+
+### Pending (Future Enhancements)
+
+- ⏳ Full ES|QL RERANK integration (requires rerank inference endpoint configuration)
+- ⏳ Full hybrid search (RRF) implementation with Elasticsearch API
+- ⏳ Enhanced entity extraction using Elastic's entity models
 - ⏳ Unit and integration tests
 - ⏳ Error handling improvements
 - ⏳ Rate limiting for external API calls

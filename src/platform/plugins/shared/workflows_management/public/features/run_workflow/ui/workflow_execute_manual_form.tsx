@@ -95,7 +95,19 @@ const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
       if (typeof placeholder === 'function') {
         placeholder = placeholder(input);
       }
-      inputPlaceholder[input.name] = input.default || placeholder;
+
+      // Calculate dynamic dates for date-related inputs (always calculate, ignore YAML defaults)
+      if (input.type === 'string' && input.name === 'start') {
+        // Default to 24 hours ago
+        const dayAgo = new Date();
+        dayAgo.setTime(dayAgo.getTime() - 24 * 60 * 60 * 1000);
+        inputPlaceholder[input.name] = dayAgo.toISOString();
+      } else if (input.type === 'string' && input.name === 'end') {
+        // Default to now
+        inputPlaceholder[input.name] = new Date().toISOString();
+      } else {
+        inputPlaceholder[input.name] = input.default || placeholder;
+      }
     });
   }
 

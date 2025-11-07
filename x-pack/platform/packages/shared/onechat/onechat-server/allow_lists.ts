@@ -20,13 +20,23 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'platform.catchup.observability.summary',
   // Search CatchUp tools
   'platform.catchup.search.summary',
+  'platform.catchup.search.unified_search',
   // External CatchUp tools
   'platform.catchup.external.slack',
   'platform.catchup.external.github',
   'platform.catchup.external.gmail',
   // Correlation and Summary tools
   'platform.catchup.correlation.engine',
+  'platform.catchup.correlation.entity_extraction',
+  'platform.catchup.correlation.semantic_search',
   'platform.catchup.summary.generator',
+  // Prioritization tools
+  'platform.catchup.prioritization.rerank',
+  // Workflow-specific simplified tools (optimized for workflow execution)
+  'platform.catchup.workflow.security.summary',
+  'platform.catchup.workflow.external.slack',
+  'platform.catchup.workflow.correlation.engine',
+  'platform.catchup.workflow.prioritization.rerank',
 ];
 
 /**

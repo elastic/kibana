@@ -13,6 +13,7 @@ import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { RuleRegistryPluginStart } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-plugin/server';
 import type { CatchupAgentConfigType } from './config';
 
 export interface CatchupAgentPluginSetup {
@@ -29,6 +30,7 @@ export interface CatchupAgentPluginStart {
 
 export interface CatchupAgentSetupDependencies {
   onechat: OnechatPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface CatchupAgentStartDependencies {

@@ -1,0 +1,146 @@
+version: '1'
+name: 'Weekly Team Catchup'
+description: 'Comprehensive weekly team catchup that fetches Security, Observability, and Search summaries in parallel, combines with Slack and GitHub updates, uses hybrid search (RRF) to find related content, and applies reranker to surface most important updates.'
+enabled: true
+tags:
+  - weekly
+  - team
+  - catchup
+triggers:
+  - type: scheduled
+    with:
+      rrule:
+        freq: 'WEEKLY'
+        interval: 1
+        tzid: 'UTC'
+        byweekday: ['MO']
+        byhour: [9]
+        byminute: [0]
+  - type: manual
+inputs:
+  - type: string
+    name: start
+    description: 'ISO datetime string for the start time (defaults to 7 days ago)'
+    required: false
+  - type: string
+    name: end
+    description: 'ISO datetime string for the end time (defaults to now)'
+    required: false
+steps:
+  - name: Parallel fetch summaries
+    type: parallel
+    branches:
+      - name: security
+        steps:
+          - name: Fetch security summary
+            type: kibana.request
+            with:
+              method: 'POST'
+              path: '/internal/onechat/tools/execute'
+              body:
+                toolId: 'platform.catchup.security.summary'
+                toolParams:
+                  start: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
+                  end: '{{ inputs.end || null }}'
+      - name: observability
+        steps:
+          - name: Fetch observability summary
+            type: kibana.request
+            with:
+              method: 'POST'
+              path: '/internal/onechat/tools/execute'
+              body:
+                toolId: 'platform.catchup.observability.summary'
+                toolParams:
+                  start: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
+      - name: search
+        steps:
+          - name: Fetch search summary
+            type: kibana.request
+            with:
+              method: 'POST'
+              path: '/internal/onechat/tools/execute'
+              body:
+                toolId: 'platform.catchup.search.summary'
+                toolParams:
+                  start: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
+
+  - name: Merge summaries
+    type: merge
+    sources:
+      - parallel_fetch_summaries.branches.security.steps.fetch_security_summary
+      - parallel_fetch_summaries.branches.observability.steps.fetch_observability_summary
+      - parallel_fetch_summaries.branches.search.steps.fetch_search_summary
+    steps:
+      - name: Log merged summaries
+        type: console
+        with:
+          message: 'Merged summaries from Security, Observability, and Search'
+
+  - name: Fetch Slack messages
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.external.slack'
+        toolParams:
+          since: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
+          keywords: []
+          includeDMs: false
+
+  - name: Fetch GitHub updates
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.external.github'
+        toolParams:
+          since: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
+
+  - name: Unified search with hybrid search
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.search.unified_search'
+        toolParams:
+          query: 'team updates important changes'
+          sources:
+            - security
+            - observability
+            - search
+            - external
+          limit: 50
+
+  - name: Prioritize with reranker
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.prioritization.rerank'
+        toolParams:
+          items: '{{ steps.unified_search_with_hybrid_search.output.results }}'
+          query: 'weekly team updates important changes'
+          limit: 20
+
+  - name: Generate team digest
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/internal/onechat/tools/execute'
+      body:
+        toolId: 'platform.catchup.summary.generator'
+        toolParams:
+          correlatedData:
+            security_summary: '{{ steps.merge_summaries.output.security }}'
+            observability: '{{ steps.merge_summaries.output.observability }}'
+            search: '{{ steps.merge_summaries.output.search }}'
+            external:
+              slack: '{{ steps.fetch_slack_messages.output }}'
+              github: '{{ steps.fetch_github_updates.output }}'
+            prioritized_items: '{{ steps.prioritize_with_reranker.output }}'
+          format: 'markdown'
