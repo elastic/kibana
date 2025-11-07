@@ -126,7 +126,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         connector_id: '0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d',
         status: 'error',
         errorSource: 'framework',
-        message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"object\",\n    \"received\": \"undefined\",\n    \"path\": [],\n    \"message\": \"Required\"\n  }\n]`,
+        message: `error validating connector type secrets: Required`,
         retry: false,
       });
     });

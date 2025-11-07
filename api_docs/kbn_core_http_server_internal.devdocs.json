@@ -1520,6 +1520,14 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
+              "<string[]>; object_src: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
               "<string[]>; frame_ancestors: ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -1552,7 +1560,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{} & { form_action: string[]; object_src: string[]; }> | undefined>; strict: ",
+              "<Readonly<{} & { object_src: string[]; form_action: string[]; }> | undefined>; strict: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -1581,6 +1589,60 @@
             "path": "src/core/packages/http/server-internal/src/csp/config.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-server.cspConfig.deprecations",
+            "type": "Function",
+            "tags": [],
+            "label": "deprecations",
+            "description": [],
+            "signature": [
+              "({ unusedFromRoot, deprecateFromRoot }: ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecationFactory",
+                "text": "ConfigDeprecationFactory"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              },
+              "[]"
+            ],
+            "path": "src/core/packages/http/server-internal/src/csp/config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-server.cspConfig.deprecations.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ unusedFromRoot, deprecateFromRoot }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.ConfigDeprecationFactory",
+                    "text": "ConfigDeprecationFactory"
+                  }
+                ],
+                "path": "src/core/packages/http/server-internal/src/csp/config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
