@@ -59,8 +59,6 @@ export class MaintenanceWindowsPlugin
     core: CoreSetup<MaintenanceWindowsPluginsStart, unknown>,
     plugins: MaintenanceWindowsPluginsSetup
   ) {
-    this.logger.debug('maintenanceWindows: Setup');
-
     this.licenseState = new LicenseState(plugins.licensing.license$);
     // Note 1 - is it needed?
     core.capabilities.registerProvider(() => {
@@ -104,7 +102,6 @@ export class MaintenanceWindowsPlugin
   ): MaintenanceWindowsServerStart {
     const { maintenanceWindowClientFactory } = this;
 
-    this.logger.debug('maintenanceWindows: Started');
     maintenanceWindowClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,

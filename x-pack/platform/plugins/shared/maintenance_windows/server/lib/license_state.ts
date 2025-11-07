@@ -15,14 +15,14 @@ import { PLUGIN } from '../../common/constants/plugin';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
-export interface AlertingLicenseInformation {
+export interface MaintenanceWindowsLicenseInfo {
   showAppLink: boolean;
   enableAppLink: boolean;
   message: string;
 }
 
 export class LicenseState {
-  private licenseInformation: AlertingLicenseInformation = this.checkLicense(undefined);
+  private licenseInformation: MaintenanceWindowsLicenseInfo = this.checkLicense(undefined);
   private subscription: Subscription;
   private license?: ILicense;
 
@@ -52,16 +52,16 @@ export class LicenseState {
     return isEnabled;
   }
 
-  public checkLicense(license: ILicense | undefined): AlertingLicenseInformation {
+  public checkLicense(license: ILicense | undefined): MaintenanceWindowsLicenseInfo {
     if (!license || !license.isAvailable) {
       return {
         showAppLink: true,
         enableAppLink: false,
         message: i18n.translate(
-          'xpack.alerting.serverSideErrors.unavailableLicenseInformationErrorMessage',
+          'xpack.maintenanceWindows.serverSideErrors.unavailableLicenseInformationErrorMessage',
           {
             defaultMessage:
-              'Alerts is unavailable - license information is not available at this time.',
+              'Maintenance Windows is unavailable - license information is not available at this time.',
           }
         ),
       };
@@ -98,7 +98,7 @@ export class LicenseState {
     if (!this.license || !this.license?.isAvailable) {
       throw Boom.forbidden(
         i18n.translate(
-          'xpack.alerting.serverSideErrors.maintenanceWindow.unavailableLicenseErrorMessage',
+          'xpack.maintenanceWindows.serverSideErrors.maintenanceWindow.unavailableLicenseErrorMessage',
           {
             defaultMessage:
               'Maintenance window is disabled because license information is not available at this time.',
@@ -109,7 +109,7 @@ export class LicenseState {
     if (!this.license.hasAtLeast('platinum')) {
       throw Boom.forbidden(
         i18n.translate(
-          'xpack.alerting.serverSideErrors.maintenanceWindow.invalidLicenseErrorMessage',
+          'xpack.maintenanceWindows.serverSideErrors.maintenanceWindow.invalidLicenseErrorMessage',
           {
             defaultMessage:
               'Maintenance window is disabled because it requires a platinum license. Go to License Management to view upgrade options.',
