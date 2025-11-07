@@ -107,6 +107,13 @@ export const useCloudConnectorSetup = (
       const updatedPolicy = { ...newPolicy };
       const inputVars = input.streams?.find((i) => i.enabled)?.vars;
 
+      // Determine if name is valid (format only)
+      const isNameValid =
+        credentials.name &&
+        credentials.name.length >= 3 &&
+        credentials.name.length <= 64 &&
+        /^[a-zA-Z0-9-_ ]+$/.test(credentials.name);
+
       // Handle undefined cases safely
       if (inputVars) {
         const updatedInputVars = updateInputVarsWithCredentials(
@@ -120,6 +127,7 @@ export const useCloudConnectorSetup = (
         );
         updatePolicy({
           updatedPolicy: { ...updatedPolicyWithInputs, cloud_connector_id: undefined },
+          isValid: isNameValid ? undefined : false,
         });
       }
 
