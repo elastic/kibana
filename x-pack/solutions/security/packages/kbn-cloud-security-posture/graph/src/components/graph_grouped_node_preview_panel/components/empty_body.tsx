@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import { PanelBody } from '../styles';
 import { i18nNamespaceKey } from '../constants';
+import { EMPTY_BODY_TEST_ID, REFRESH_BUTTON_TEST_ID } from '../test_ids';
 
 const noItemsFound = i18n.translate(`${i18nNamespaceKey}.noItemsFound`, {
   defaultMessage: 'No items found in group',
@@ -28,14 +29,19 @@ export interface EmptyBodyProps {
 }
 
 export const EmptyBody: FC<EmptyBodyProps> = ({ onRefresh }) => (
-  <PanelBody>
+  <PanelBody data-test-subj={EMPTY_BODY_TEST_ID}>
     <EuiEmptyPrompt
       color="subdued"
       title={<h2>{noItemsFound}</h2>}
       layout="vertical"
       body={<p>{refreshContent}</p>}
       actions={[
-        <EuiButtonEmpty iconType="arrowLeft" flush="both" onClick={onRefresh} aria-label={refresh}>
+        <EuiButtonEmpty
+          data-test-subj={REFRESH_BUTTON_TEST_ID}
+          flush="both"
+          onClick={onRefresh}
+          aria-label={refresh}
+        >
           {refresh}
         </EuiButtonEmpty>,
       ]}
