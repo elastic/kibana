@@ -31,10 +31,6 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { apiKey, status, updateApiKey, toggleApiKeyVisibility } = useWorkplaceAIApiKey();
 
-  const titleLocale = i18n.translate('workplaceaiApiKeysComponents.apiKeyForm.title', {
-    defaultMessage: 'API Key',
-  });
-
   if (apiKey) {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -52,9 +48,12 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
                 color="text"
                 onClick={copy}
                 data-test-subj="copyAPIKeyButton"
-                aria-label={i18n.translate('workplaceaiApiKeysComponents.apiKeyForm.copyApiKey', {
-                  defaultMessage: 'Copy API Key',
-                })}
+                aria-label={i18n.translate(
+                  'xpack.workplaceai.apiKeyComponents.copyApiKeyAriaLabel',
+                  {
+                    defaultMessage: 'Copy API Key',
+                  }
+                )}
               />
             )}
           </EuiCopy>
@@ -66,7 +65,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
             color="text"
             onClick={toggleApiKeyVisibility}
             data-test-subj="showAPIKeyButton"
-            aria-label={i18n.translate('workplaceaiApiKeysComponents.apiKeyForm.showApiKey', {
+            aria-label={i18n.translate('xpack.workplaceai.apiKeyComponents.showApiKeyAriaLabel', {
               defaultMessage: 'Show API Key',
             })}
           />
@@ -80,16 +79,22 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
       {hasTitle && (
         <EuiFlexItem grow={0}>
           <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
-            <h6>{titleLocale}</h6>
+            <h6>
+              <FormattedMessage
+                id="xpack.workplaceai.apiKeyComponents.apiKeyTitle"
+                defaultMessage="API Key"
+              />
+            </h6>
           </EuiTitle>
         </EuiFlexItem>
       )}
       {status === Status.showUserPrivilegesError && (
         <EuiFlexItem grow={0}>
           <EuiBadge data-test-subj="apiKeyFormNoUserPrivileges">
-            {i18n.translate('workplaceaiApiKeysComponents.apiKeyForm.noUserPrivileges', {
-              defaultMessage: "You don't have access to manage API keys",
-            })}
+            <FormattedMessage
+              id="xpack.workplaceai.apiKeyComponents.noUserPrivilegesBadge"
+              defaultMessage="You don't have access to manage API keys"
+            />
           </EuiBadge>
         </EuiFlexItem>
       )}
@@ -104,7 +109,10 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
             isLoading={true}
             data-test-subj="apiKeyLoadingButton"
           >
-            {hasTitle ? titleLocale : 'API key'}
+            <FormattedMessage
+              id="xpack.workplaceai.apiKeyComponents.apiKeyButtonLabel"
+              defaultMessage="API Key"
+            />
           </EuiButton>
         </EuiFlexItem>
       )}
@@ -121,13 +129,13 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
           >
             {hasTitle ? (
               <FormattedMessage
-                id="workplaceaiApiKeysComponents.apiKeyForm.createButton"
+                id="xpack.workplaceai.apiKeyComponents.createApiKeyButtonLabel"
                 defaultMessage="Create an API Key"
               />
             ) : (
               <FormattedMessage
-                id="workplaceaiApiKeysComponents.apiKeyForm.apiKeyButton"
-                defaultMessage="API key"
+                id="xpack.workplaceai.apiKeyComponents.apiKeyButtonLabel"
+                defaultMessage="API Key"
               />
             )}
           </EuiButton>
