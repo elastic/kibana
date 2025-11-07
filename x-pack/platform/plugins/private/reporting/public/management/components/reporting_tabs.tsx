@@ -121,7 +121,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
         }
         data-test-subj="reportingPageHeader"
         pageTitle={
-          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reports" />
+          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reporting" />
         }
         description={
           <FormattedMessage
