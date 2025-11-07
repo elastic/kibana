@@ -24,7 +24,6 @@ import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
@@ -126,6 +125,7 @@ const ESQLEditorInternal = function ESQLEditor({
   disableAutoFocus,
   controlsContext,
   esqlVariables,
+  onOpenQueryInNewTab,
   expandToFitQueryOnMount,
   dataErrorsControl,
   formLabel,
@@ -139,8 +139,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { dataViews, application, core, fieldsMetadata, uiSettings, uiActions, data } =
-    kibana.services;
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data } = kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
@@ -456,13 +455,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
     const fn = memoize(
-      (
-        ...args: [
-          DataViewsPublicPluginStart,
-          CoreStart,
-          (() => Promise<ILicense | undefined>) | undefined
-        ]
-      ) => ({
+      (...args: [CoreStart, (() => Promise<ILicense | undefined>) | undefined]) => ({
         timestamp: Date.now(),
         result: getESQLSources(...args),
       })
@@ -511,7 +504,7 @@ const ESQLEditorInternal = function ESQLEditor({
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, fixedQuery);
         const getLicense = kibana.services?.esql?.getLicense;
-        const sources = await memoizedSources(dataViews, core, getLicense).result;
+        const sources = await memoizedSources(core, getLicense).result;
         return sources;
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -611,7 +604,6 @@ const ESQLEditorInternal = function ESQLEditor({
     dataSourcesCache,
     fixedQuery,
     memoizedSources,
-    dataViews,
     core,
     esqlFieldsCache,
     data.query.timefilter.timefilter,
@@ -769,7 +761,8 @@ const ESQLEditorInternal = function ESQLEditor({
     getJoinIndices,
     query,
     onLookupIndexCreate,
-    onNewFieldsAddedToLookupIndex
+    onNewFieldsAddedToLookupIndex,
+    onOpenQueryInNewTab
   );
 
   useDebounceWithOptions(

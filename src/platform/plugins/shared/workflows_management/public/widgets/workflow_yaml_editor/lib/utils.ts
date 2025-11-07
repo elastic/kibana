@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Node } from 'yaml';
+import type { Node, Range } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { YamlValidationErrorSeverity } from '../../../features/validate_workflow_yaml/model/types';
 
@@ -49,20 +49,21 @@ export function getMonacoRangeFromYamlNode(
   model: monaco.editor.ITextModel,
   node: Node
 ): monaco.Range | null {
-  const [startOffset, _, endOffset] = node.range ?? [];
-  if (!startOffset || !endOffset) {
+  if (!node.range) {
     return null;
   }
+  return getMonacoRangeFromYamlRange(model, node.range);
+}
+
+export function getMonacoRangeFromYamlRange(
+  model: monaco.editor.ITextModel,
+  range: Range
+): monaco.Range | null {
+  const [startOffset, _, endOffset] = range;
   const startPos = model.getPositionAt(startOffset);
   const endPos = model.getPositionAt(endOffset);
   if (!startPos || !endPos) {
     return null;
   }
-  const range = new monaco.Range(
-    startPos.lineNumber,
-    startPos.column,
-    endPos.lineNumber,
-    endPos.column
-  );
-  return range;
+  return new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
 }
