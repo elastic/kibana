@@ -314,17 +314,15 @@ describe('getUnifiedTraceSpan', () => {
   });
 
   describe('when unflattenKnownApmEventFields returns null/undefined', () => {
-    it('still returns SpanDocument with _id and _index when unflatten returns null', async () => {
+    it('returns undefined when unflatten returns null', async () => {
       const apmEventClient = getMockApmEventClient();
-      const mockId = 'test-id';
-      const mockIndex = 'test-index';
 
       mockSearch.mockResolvedValueOnce({
         hits: {
           hits: [
             {
-              _id: mockId,
-              _index: mockIndex,
+              _id: 'test-id',
+              _index: 'test-index',
               fields: {},
             },
           ],
@@ -339,23 +337,18 @@ describe('getUnifiedTraceSpan', () => {
         apmEventClient,
       });
 
-      expect(result).toEqual({
-        _id: mockId,
-        _index: mockIndex,
-      });
+      expect(result).toBeUndefined();
     });
 
-    it('still returns SpanDocument with _id and _index when unflatten returns undefined', async () => {
+    it('returns undefined when unflatten returns undefined', async () => {
       const apmEventClient = getMockApmEventClient();
-      const mockId = 'test-id';
-      const mockIndex = 'test-index';
 
       mockSearch.mockResolvedValueOnce({
         hits: {
           hits: [
             {
-              _id: mockId,
-              _index: mockIndex,
+              _id: 'test-id',
+              _index: 'test-index',
               fields: {},
             },
           ],
@@ -370,10 +363,7 @@ describe('getUnifiedTraceSpan', () => {
         apmEventClient,
       });
 
-      expect(result).toEqual({
-        _id: mockId,
-        _index: mockIndex,
-      });
+      expect(result).toBeUndefined();
     });
   });
 });

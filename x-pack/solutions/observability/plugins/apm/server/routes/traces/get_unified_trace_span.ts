@@ -50,14 +50,18 @@ export async function getUnifiedTraceSpan({
     return undefined;
   }
 
-  const _id = hit?._id;
-  const _index = hit?._index;
+  const _id = hit?._id!;
+  const _index = hit?._index!;
 
   const event = unflattenKnownApmEventFields(hit?.fields, []);
+
+  if (!event) {
+    return undefined;
+  }
 
   return {
     ...event,
     _id,
     _index,
-  };
+  } as SpanDocument;
 }
