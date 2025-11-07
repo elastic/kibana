@@ -16,11 +16,6 @@ import type {
 } from './time_range';
 import type { aggregateQuerySchema, querySchema } from './query';
 import type {
-  storedFilterSchema,
-  storedFilterMetaSchema,
-  filterStateStoreSchema,
-} from './stored_filter';
-import type {
   asCodeFilterSchema,
   asCodeConditionFilterSchema,
   asCodeGroupFilterSchema,
@@ -33,10 +28,6 @@ export type RelativeTimeRange = TypeOf<typeof relativeTimeRangeSchema>;
 
 export type Query = Writable<TypeOf<typeof querySchema>>;
 export type AggregateQuery = Writable<TypeOf<typeof aggregateQuerySchema>>;
-
-export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;
-export type StoredFilterMeta = Writable<TypeOf<typeof storedFilterMetaSchema>>;
-export type StoredFilterState = TypeOf<typeof filterStateStoreSchema>;
 
 /**
  * Schema-inferred types for As Code Filter API
