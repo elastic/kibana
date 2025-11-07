@@ -35,6 +35,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { PLUGIN_ID } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
+import {
+  selectHasChanges,
+  selectIsYamlSyntaxValid,
+  selectWorkflow,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -42,12 +48,6 @@ import {
   type WorkflowUrlStateTabType,
 } from '../../../hooks/use_workflow_url_state';
 import { getRunWorkflowTooltipContent } from '../../../shared/ui';
-import {
-  selectHasChanges,
-  selectIsYamlSyntaxValid,
-  selectWorkflow,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 const Translations = {

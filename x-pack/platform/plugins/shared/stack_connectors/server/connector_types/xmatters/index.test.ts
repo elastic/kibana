@@ -95,7 +95,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
+      `"error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
   });
 
@@ -107,7 +107,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
+      `"error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
   });
 
@@ -120,7 +120,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
+      `"error validating connector type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
   });
 
@@ -128,7 +128,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Both user and password must be specified."`
+      `"error validating connector type secrets: Both user and password must be specified."`
     );
   });
 
@@ -136,7 +136,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { password: 'supersecret' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Both user and password must be specified."`
+      `"error validating connector type secrets: Both user and password must be specified."`
     );
   });
 
@@ -144,7 +144,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Provide either secretsUrl link or user/password to authenticate"`
+      `"error validating connector type secrets: Provide either secretsUrl link or user/password to authenticate"`
     );
   });
 
@@ -155,7 +155,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type secrets: Invalid secretsUrl: TypeError: Invalid URL: example.com/do-something?apiKey=someKey"'
+      '"error validating connector type secrets: Invalid secretsUrl: TypeError: Invalid URL: example.com/do-something?apiKey=someKey"'
     );
   });
 
@@ -173,7 +173,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, secrets, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type secrets: target url is not present in allowedHosts"'
+      '"error validating connector type secrets: target url is not present in allowedHosts"'
     );
   });
 });
@@ -195,7 +195,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: Error configuring xMatters action: unable to parse url: Invalid URL: example.com/do-something"`
+      `"error validating connector type config: Error configuring xMatters action: unable to parse url: Invalid URL: example.com/do-something"`
     );
   });
 
@@ -214,7 +214,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: Error configuring xMatters action: target url is not present in allowedHosts"`
+      `"error validating connector type config: Error configuring xMatters action: target url is not present in allowedHosts"`
     );
   });
 
