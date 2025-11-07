@@ -1,0 +1,101 @@
+name: Value expression
+enabled: false
+triggers:
+  - type: manual
+settings:
+  on-failure:
+    continue: true
+steps:
+  - name: first
+    type: http
+    with:
+      url: http://localhost:3000/api/delayed-response/1000
+      method: POST
+      body:
+        object:
+          name: Brad
+          surname: Pitt
+        array:
+          - 'Brad Pitt'
+          - 'Angelina Jolie'
+          - 'Leonardo DiCaprio'
+          - 'Jennifer Aniston'
+          - 'Johnny Depp'
+          - 'Scarlett Johansson'
+          - 'Tom Cruise'
+          - 'Natalie Portman'
+          - 'Robert Downey Jr.'
+          - 'Emma Stone'
+        booleanTrue: true
+        booleanFalse: false
+        strValue: Lorem ipsum dolar sit amet
+        number: 20039
+
+  - name: second
+    type: http
+    with:
+      url: http://localhost:3000/api/delayed-response/1000
+      method: POST
+      body:
+        liquid: ${{steps.first.output.data}}
+        exprEval: $expr{{steps.first.output.data}}
+        jexl: $jexl{{steps.first.output.data}}
+
+  - name: console
+    type: console
+    with:
+      message: "{{steps.second.output.data | json}}"
+  
+  - name: if-liquid
+    type: if
+    condition: ${{steps.first.output.data.array contains 'Brad Pitt' and steps.first.output.data.booleanTrue}} # can't use filters within conditions. Too limited for condtions in general
+    steps:
+      - name: if-liquid-inner
+        type: console
+        with:
+          message: "Done!"
+  - name: if-expr
+    type: if
+    condition: $expr{{capitalize('brad Pitt') in steps.first.output.data.array and steps.first.output.data.booleanTrue}} # easy to call a function in a conditions. Not so readable if you need to apply multiple transformations (pipes/filters) comparing to jexl or liquid. For that you need to do this lover(capitalize('something')). (to be confirmed)
+    steps:
+      - name: if-expr-inner
+        type: console
+        with:
+          message: "Done!"
+  - name: if-jexl
+    type: if
+    condition: "$jexl{{('brad Pitt' | capitalize) in steps.first.output.data.array | slice(0, 3) && steps.first.output.data.booleanTrue}}" # easy to use liquid like syntax, but with ability to call transformations (pipes/filters) over data.
+    steps:
+      - name: if-jexl-inner
+        type: console
+        with:
+          message: "Done!"
+    
+  - name: foreach-liquid
+    type: foreach
+    foreach: '${{steps.first.output.data.array | slice: 0,5 | slice: 0,3}}'
+    steps:
+      - name: foreach-liquid-inner
+        type: console
+        with:
+          message: "{{foreach.item}}"
+
+  - name: foreach-expr
+    type: foreach
+    foreach: '$expr{{steps.first.output.data.booleanFalse ? slice(slice(steps.first.output.data.array, 0, 5), 0, 3) : ["nothing"]}}' # not very handy nesting but it works very well. Supports ternary operator which is very nice.  You can also provide fallback array whin ternary operator.
+    steps:
+      - name: foreach-expr-inner
+        type: console
+        with:
+          message: "{{foreach.item}}"
+  
+  - name: foreach-jexl
+    type: foreach
+    foreach: '$jexl{{steps.first.output.data.booleanFalse ? steps.first.output.data.array | slice(0,5) | slice(0,3) : ["nothing"]}}' # good transformations (pipes/filters) with ternary operator support. You can also provide fallback array whin ternary operator.
+    steps:
+      - name: foreach-jexl-inner
+        type: console
+        with:
+          message: "{{foreach.item}}"
+        
+    
