@@ -12,6 +12,21 @@
  */
 
 /**
+ * Check if an expression is a direct require() call with a string literal
+ * @param {import('@babel/types').Node} node - AST node to check
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {boolean} True if node is a simple require call
+ */
+function isSimpleRequireCall(node, t) {
+  return (
+    t.isCallExpression(node) &&
+    t.isIdentifier(node.callee, { name: 'require' }) &&
+    node.arguments.length === 1 &&
+    t.isStringLiteral(node.arguments[0])
+  );
+}
+
+/**
  * Check if an identifier is in a TypeScript type-only context
  * Returns true if the identifier is in a pure type context that won't exist at runtime
  */
@@ -229,7 +244,7 @@ function detectJestMockUsage(programPath, properties, t) {
  * Detect which imports are used in module-level code that runs at initialization
  * Returns a Set of variable names that should not be lazy-loaded
  */
-function detectModuleLevelUsage(programPath, properties, isSimpleRequireCall, t) {
+function detectModuleLevelUsage(programPath, properties, t) {
   const importsUsedInModuleLevelCode = new Set();
 
   // Helper to check if code uses any of our imports
@@ -286,7 +301,7 @@ function detectModuleLevelUsage(programPath, properties, isSimpleRequireCall, t)
 
       // Skip our own import transformations
       if (
-        varDeclPath.node.declarations.some((decl) => decl.init && isSimpleRequireCall(decl.init))
+        varDeclPath.node.declarations.some((decl) => decl.init && isSimpleRequireCall(decl.init, t))
       ) {
         return;
       }
@@ -482,6 +497,7 @@ function detectClassExtendsUsage(programPath, properties, t) {
 }
 
 module.exports = {
+  isSimpleRequireCall,
   isInTypeContext,
   shouldSkipIdentifier,
   detectModuleLevelUsage,

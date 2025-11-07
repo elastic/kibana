@@ -13,6 +13,7 @@
  */
 
 const {
+  isSimpleRequireCall,
   shouldSkipIdentifier,
   detectModuleLevelUsage,
   detectJsxUsage,
@@ -51,6 +52,14 @@ const {
 // Supports exact matches ('react') and trailing wildcards ('@testing-library/*')
 const EXCLUDED_MODULES = ['react', 'React', '@jest/globals', '@testing-library/*'];
 
+// File patterns for files that should skip transformation
+const MOCK_FILE_PATTERNS = ['.mock.', '.mocks.'];
+const TEST_MOCK_IMPORT_PATTERNS = ['.test.mocks', '.test.mock'];
+
+// Test file detection patterns
+const TEST_DIR_PATTERN = /(^|\/)(__tests__|__test__)(\/|$)/;
+const TEST_FILE_PATTERN = /\.(test|spec)\.[tj]sx?$/;
+
 /**
  * Check if a module path matches any exclusion pattern
  * @param {string} modulePath - The module path to check
@@ -70,20 +79,6 @@ function isExcludedModule(modulePath) {
  * @returns {import('@babel/core').PluginObj} Babel plugin object
  */
 module.exports = function lazyRequirePlugin({ types: t }) {
-  /**
-   * Check if an expression is a direct require() call with a string literal
-   * @param {import('@babel/types').Node} node - AST node to check
-   * @returns {boolean} True if node is a simple require call
-   */
-  function isSimpleRequireCall(node) {
-    return (
-      t.isCallExpression(node) &&
-      t.isIdentifier(node.callee, { name: 'require' }) &&
-      node.arguments.length === 1 &&
-      t.isStringLiteral(node.arguments[0])
-    );
-  }
-
   return {
     name: 'kbn-lazy-require',
     visitor: {
@@ -91,13 +86,11 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // Skip transformation for mock files - they need immediate access to all imports
         // for jest.mock() and jest.doMock() factory functions to work correctly
         const filename = state.filename || state.file.opts.filename || '';
-        if (filename.includes('.mock.') || filename.includes('.mocks.')) {
+        if (MOCK_FILE_PATTERNS.some((pattern) => filename.includes(pattern))) {
           return;
         }
 
-        const isTestFile =
-          /(^|\/)(__tests__|__test__)(\/|$)/.test(filename) ||
-          /\.(test|spec)\.[tj]sx?$/.test(filename);
+        const isTestFile = TEST_DIR_PATTERN.test(filename) || TEST_FILE_PATTERN.test(filename);
 
         // State tracking
         /** @type {Map<string, ModuleInfo>} - Maps module path to cache info */
@@ -130,7 +123,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             }
 
             const declarations = path.node.declarations;
-            const declIndicesToRemove = [];
 
             for (let i = 0; i < declarations.length; i++) {
               const decl = declarations[i];
@@ -138,12 +130,12 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               let requirePath = null;
               let outerFunc = null;
 
-              if (isSimpleRequireCall(decl.init)) {
+              if (isSimpleRequireCall(decl.init, t)) {
                 requirePath = decl.init.arguments[0].value;
               } else if (
                 t.isCallExpression(decl.init) &&
                 decl.init.arguments.length === 1 &&
-                isSimpleRequireCall(decl.init.arguments[0])
+                isSimpleRequireCall(decl.init.arguments[0], t)
               ) {
                 requirePath = decl.init.arguments[0].arguments[0].value;
                 outerFunc = decl.init.callee;
@@ -176,7 +168,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   declarationPath: path,
                   declarationIndex: i,
                 });
-                declIndicesToRemove.push(i);
               } else if (t.isObjectPattern(decl.id)) {
                 // Destructuring: const { a, b } = require('./foo')
                 // Only transform simple patterns (no nesting, rest, computed properties)
@@ -208,7 +199,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                       declarationIndex: i,
                     });
                   }
-                  declIndicesToRemove.push(i);
                 }
               }
             }
@@ -254,7 +244,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             }
 
             // Skip imports from mock files - they contain jest.doMock() setup that must run immediately
-            if (importPath.includes('.test.mocks') || importPath.includes('.test.mock')) {
+            if (TEST_MOCK_IMPORT_PATTERNS.some((pattern) => importPath.includes(pattern))) {
               return;
             }
 
@@ -293,12 +283,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         }
 
         // Detect and exclude module-level usage
-        const importsUsedInModuleLevelCode = detectModuleLevelUsage(
-          programPath,
-          properties,
-          isSimpleRequireCall,
-          t
-        );
+        const importsUsedInModuleLevelCode = detectModuleLevelUsage(programPath, properties, t);
 
         // Exclude from transformation (will remain as regular imports/requires)
         for (const localName of importsUsedInModuleLevelCode) {
