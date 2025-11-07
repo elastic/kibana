@@ -108,7 +108,8 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({
               alertIds: [alertId],
-              addTags: ['new-tag'],
+              addTags: ['new-tag', 'another-tag'],
+              removeTags: ['old-tag'],
               index,
             });
           expect(updated.statusCode).to.eql(200);

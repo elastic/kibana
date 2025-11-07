@@ -12,8 +12,8 @@ export const ADD_TAGS_UPDATE_SCRIPT = `
     ctx._source['${ALERT_WORKFLOW_TAGS}'] = new ArrayList();
   }
   for (item in params.addTags) {
-    if (!ctx._source['${ALERT_WORKFLOW_TAGS}'].contains(item)) {
-      ctx._source['${ALERT_WORKFLOW_TAGS}'].add(item);
+    if (!ctx._source['${ALERT_WORKFLOW_TAGS}'].contains(item.trim())) {
+      ctx._source['${ALERT_WORKFLOW_TAGS}'].add(item.trim());
     }
   }
 `;
@@ -21,8 +21,8 @@ export const ADD_TAGS_UPDATE_SCRIPT = `
 export const REMOVE_TAGS_UPDATE_SCRIPT = `
   if (ctx._source['${ALERT_WORKFLOW_TAGS}'] != null) {
     for (int i = 0; i < params.removeTags.length; i++) {
-      if (ctx._source['${ALERT_WORKFLOW_TAGS}'].contains(params.removeTags[i])) {
-        int index = ctx._source['${ALERT_WORKFLOW_TAGS}'].indexOf(params.removeTags[i]);
+      if (ctx._source['${ALERT_WORKFLOW_TAGS}'].contains(params.removeTags[i].trim())) {
+        int index = ctx._source['${ALERT_WORKFLOW_TAGS}'].indexOf(params.removeTags[i].trim());
         ctx._source['${ALERT_WORKFLOW_TAGS}'].remove(index);
       }
     }

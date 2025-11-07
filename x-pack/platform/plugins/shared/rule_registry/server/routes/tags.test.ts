@@ -100,6 +100,28 @@ describe('bulkPatchAlertTagsRoute', () => {
         message: 'Unable to patch tags',
       });
     });
+
+    test('returns 404 for alert not found at index', async () => {
+      clients.rac.patchTags.mockResolvedValue(null!);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'patch',
+          path: `${BASE_RAC_ALERTS_API_PATH}/tags`,
+          body: {
+            alertIds: ['alert-1'],
+            index: '.alerts-security.alerts',
+            addTags: ['new-tag'],
+          },
+        }),
+        context
+      );
+      expect(response.calls[0]).toEqual({
+        status: 404,
+        body: {
+          message: 'alerts with ids alert-1 and index .alerts-security.alerts not found',
+        },
+      });
+    });
   });
 
   describe('request validation', () => {
