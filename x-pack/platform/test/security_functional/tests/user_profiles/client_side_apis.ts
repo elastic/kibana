@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .expect(200);
 
         const cookie = parseCookie(response.headers['set-cookie'][0])!.cookieString();
-        const res = await supertestWithoutAuth
+        await supertestWithoutAuth
           .post('/internal/security/user_profile/_data')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', cookie)
