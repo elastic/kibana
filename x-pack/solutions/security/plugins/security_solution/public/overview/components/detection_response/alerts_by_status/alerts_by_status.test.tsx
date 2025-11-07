@@ -14,14 +14,10 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAlertsByStatus } from './use_alerts_by_status';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/lib/kibana/kibana_react');
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
 
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 jest.mock('./chart_label', () => {
@@ -65,7 +61,6 @@ describe('AlertsByStatus', () => {
       items: [],
       isLoading: true,
     });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: { read: true },
     });
@@ -172,28 +167,5 @@ describe('AlertsByStatus', () => {
       </TestProviders>
     );
     expect(container.querySelector(`[data-test-subj="query-toggle-header"]`)).toBeInTheDocument();
-  });
-
-  test('should render Lens embeddable when isChartEmbeddablesEnabled = true', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
-    const testProps = {
-      ...props,
-    };
-
-    (useAlertsByStatus as jest.Mock).mockReturnValue({
-      items: null,
-      isLoading: false,
-    });
-
-    const { container } = render(
-      <TestProviders>
-        <AlertsByStatus {...testProps} />
-      </TestProviders>
-    );
-    expect(
-      container.querySelector(`[data-test-subj="visualization-embeddable"]`)
-    ).toBeInTheDocument();
-    expect((useAlertsByStatus as jest.Mock).mock.calls[0][0].skip).toBeTruthy();
   });
 });

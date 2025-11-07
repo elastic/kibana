@@ -45,7 +45,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
       method: 'POST',
       body,
-      version: '1',
+      version: '2023-10-31',
     });
   },
   removeItemFromCurrentSpace(mlSavedObjectType: MlSavedObjectType, ids: string[]) {
@@ -113,7 +113,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
       method: 'POST',
       body,
-      version: '1',
+      version: '2023-10-31',
     });
   },
 });
