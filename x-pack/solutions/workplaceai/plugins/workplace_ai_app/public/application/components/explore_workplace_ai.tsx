@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiCard, EuiButton, EuiIcon } from '@elastic/eui';
 import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_AGENTS_CREATE } from '@kbn/deeplinks-agent-builder';
+import { DATA_CONNECTORS_APP_ID } from '@kbn/deeplinks-data-connectors';
 import { useKibana } from '../hooks/use_kibana';
 import searchWindowSVG from '../../assets/search_window_illustration.svg';
 import searchAnalyticsSVG from '../../assets/search_analytics.svg';
@@ -17,6 +18,14 @@ export const ExploreWorkplaceAI: React.FC = () => {
   const {
     services: { application, chrome },
   } = useKibana();
+
+  const onConnectSource = useCallback(() => {
+    const dataConnectorsUrl = chrome?.navLinks.get(DATA_CONNECTORS_APP_ID)?.url;
+
+    if (dataConnectorsUrl) {
+      application?.navigateToUrl(dataConnectorsUrl);
+    }
+  }, [application, chrome]);
 
   const onCreateAgent = useCallback(() => {
     const createAgentUrl = chrome?.navLinks.get(
@@ -40,7 +49,7 @@ export const ExploreWorkplaceAI: React.FC = () => {
             title="Connect data sources"
             description="Learn how to integrate apps like Salesforce, Google Drive, and Confluence."
             footer={
-              <EuiButton color="text" onClick={() => {}}>
+              <EuiButton color="text" onClick={onConnectSource}>
                 Connect a source
               </EuiButton>
             }
