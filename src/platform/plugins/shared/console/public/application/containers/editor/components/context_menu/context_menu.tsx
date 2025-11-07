@@ -84,6 +84,7 @@ export const ContextMenu = ({
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
   const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean | null>(null);
+  const [isEsqlQuerySelected, setIsEsqlQuerySelected] = useState<boolean>(false);
   const [defaultLanguage, setDefaultLanguage] = useState(
     storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
   );
@@ -159,6 +160,23 @@ export const ContextMenu = ({
 
   const checkIsKbnRequestSelected = async () => {
     setIsKbnRequestSelected(await getIsKbnRequestSelected());
+  };
+
+  const checkIsEsqlQuerySelected = async () => {
+    try {
+      const requests = await getRequests();
+      // Check if any selected request is an ES|QL query (POST to /_query)
+      const hasEsqlQuery = requests.some(
+        (req) =>
+          req.method === 'POST' &&
+          (req.url === '/_query' ||
+            req.url.startsWith('/_query?') ||
+            req.url.startsWith('/_query/'))
+      );
+      setIsEsqlQuerySelected(hasEsqlQuery);
+    } catch (error) {
+      setIsEsqlQuerySelected(false);
+    }
   };
 
   const onCopyAsSubmit = async (language?: string) => {
@@ -293,6 +311,7 @@ export const ContextMenu = ({
       onClick={() => {
         setIsPopoverOpen((prev) => !prev);
         checkIsKbnRequestSelected();
+        checkIsEsqlQuerySelected();
       }}
       data-test-subj="toggleConsoleMenu"
       aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
@@ -390,17 +409,21 @@ export const ContextMenu = ({
         defaultMessage="Open API reference"
       />
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="Display in Discover"
-      data-test-subj="consoleMenuOpenInDiscover"
-      onClick={openInDiscover}
-      icon="discoverApp"
-    >
-      <FormattedMessage
-        id="console.monaco.requestOptions.displayInDiscoverButtonLabel"
-        defaultMessage="Display in Discover"
-      />
-    </EuiContextMenuItem>,
+    ...(isEsqlQuerySelected
+      ? [
+          <EuiContextMenuItem
+            key="Display in Discover"
+            data-test-subj="consoleMenuOpenInDiscover"
+            onClick={openInDiscover}
+            icon="discoverApp"
+          >
+            <FormattedMessage
+              id="console.monaco.requestOptions.displayInDiscoverButtonLabel"
+              defaultMessage="Display in Discover"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
 
   return (
