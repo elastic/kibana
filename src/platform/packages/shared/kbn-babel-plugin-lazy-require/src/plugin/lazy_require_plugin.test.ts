@@ -34,7 +34,7 @@ describe('@kbn/babel-plugin-lazy-require', () => {
   }
 
   function transformCode(code: string, filename = 'file.js'): string {
-    const plugins: any[] = [lazyRequirePlugin];
+    const plugins: Array<string | typeof lazyRequirePlugin> = [lazyRequirePlugin];
     // Add JSX support if the code contains JSX
     if (code.includes('<') && code.includes('>')) {
       plugins.unshift('@babel/plugin-syntax-jsx');

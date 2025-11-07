@@ -8,7 +8,7 @@
  */
 
 import { parse } from '@babel/parser';
-import traverse from '@babel/traverse';
+import traverse, { type NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
 import {
   isSimpleRequireCall,
@@ -21,39 +21,53 @@ import {
   shouldSkipIdentifier,
 } from './helpers';
 
+interface PropertyInfo {
+  moduleRequirePath: string;
+  propertyKey: string | null;
+  isConst: boolean;
+  needsInterop?: boolean;
+  declarationType: 'import' | 'require';
+  declarationPath: NodePath;
+  declarationIndex?: number;
+}
+
 describe('helpers', () => {
   describe('isSimpleRequireCall', () => {
     it('returns true for simple require with string literal', () => {
       const ast = parse('require("./foo")');
-      const node = (ast.program.body[0] as any).expression;
-      expect(isSimpleRequireCall(node, t)).toBe(true);
+      const stmt = ast.program.body[0];
+      const node = t.isExpressionStatement(stmt) ? stmt.expression : null;
+      expect(isSimpleRequireCall(node!, t)).toBe(true);
     });
 
     it('returns false for require with variable', () => {
       const ast = parse('require(path)');
-      const node = (ast.program.body[0] as any).expression;
-      expect(isSimpleRequireCall(node, t)).toBe(false);
+      const stmt = ast.program.body[0];
+      const node = t.isExpressionStatement(stmt) ? stmt.expression : null;
+      expect(isSimpleRequireCall(node!, t)).toBe(false);
     });
 
     it('returns false for require with multiple arguments', () => {
       const ast = parse('require("./foo", {})');
-      const node = (ast.program.body[0] as any).expression;
-      expect(isSimpleRequireCall(node, t)).toBe(false);
+      const stmt = ast.program.body[0];
+      const node = t.isExpressionStatement(stmt) ? stmt.expression : null;
+      expect(isSimpleRequireCall(node!, t)).toBe(false);
     });
 
     it('returns false for non-require calls', () => {
       const ast = parse('foo("./bar")');
-      const node = (ast.program.body[0] as any).expression;
-      expect(isSimpleRequireCall(node, t)).toBe(false);
+      const stmt = ast.program.body[0];
+      const node = t.isExpressionStatement(stmt) ? stmt.expression : null;
+      expect(isSimpleRequireCall(node!, t)).toBe(false);
     });
   });
 
   describe('excludeImports', () => {
     it('removes specified names from properties map', () => {
-      const properties = new Map([
-        ['foo', { moduleRequirePath: './foo' } as any],
-        ['bar', { moduleRequirePath: './bar' } as any],
-        ['baz', { moduleRequirePath: './baz' } as any],
+      const properties = new Map<string, PropertyInfo>([
+        ['foo', { moduleRequirePath: './foo' } as PropertyInfo],
+        ['bar', { moduleRequirePath: './bar' } as PropertyInfo],
+        ['baz', { moduleRequirePath: './baz' } as PropertyInfo],
       ]);
 
       excludeImports(new Set(['foo', 'baz']), properties);
@@ -64,7 +78,9 @@ describe('helpers', () => {
     });
 
     it('handles empty exclusion set', () => {
-      const properties = new Map([['foo', { moduleRequirePath: './foo' } as any]]);
+      const properties = new Map<string, PropertyInfo>([
+        ['foo', { moduleRequirePath: './foo' } as PropertyInfo],
+      ]);
 
       excludeImports(new Set(), properties);
 
@@ -75,9 +91,9 @@ describe('helpers', () => {
   describe('ensureModule', () => {
     it('creates module entry if it does not exist', () => {
       const modules = new Map();
-      const scope = {
+      const scope: { generateUidIdentifier: (name: string) => t.Identifier } = {
         generateUidIdentifier: (name: string) => t.identifier(`_${name}_1`),
-      } as any;
+      };
 
       ensureModule('./foo', modules, scope, null);
 
@@ -92,9 +108,9 @@ describe('helpers', () => {
 
     it('does not overwrite existing module entry', () => {
       const modules = new Map();
-      const scope = {
+      const scope: { generateUidIdentifier: (name: string) => t.Identifier } = {
         generateUidIdentifier: (name: string) => t.identifier(`_${name}_1`),
-      } as any;
+      };
 
       ensureModule('./foo', modules, scope, null);
       const original = modules.get('./foo');
@@ -107,9 +123,9 @@ describe('helpers', () => {
 
     it('handles outerFunc parameter', () => {
       const modules = new Map();
-      const scope = {
+      const scope: { generateUidIdentifier: (name: string) => t.Identifier } = {
         generateUidIdentifier: (name: string) => t.identifier(`_${name}_1`),
-      } as any;
+      };
       const outerFunc = t.identifier('_interop');
 
       ensureModule('./foo', modules, scope, outerFunc);
@@ -123,28 +139,28 @@ describe('helpers', () => {
       const ast = parse('export { x } from "./a"; export { y } from "./b";', {
         sourceType: 'module',
       });
-      let programPath: any;
+      let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
         },
       });
 
-      const result = collectDirectReExportSources(programPath, t);
+      const result = collectDirectReExportSources(programPath!, t);
 
       expect(result).toEqual(new Set(['./a', './b']));
     });
 
     it('returns empty set when no re-exports exist', () => {
       const ast = parse('const x = 1;', { sourceType: 'module' });
-      let programPath: any;
+      let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
         },
       });
 
-      const result = collectDirectReExportSources(programPath, t);
+      const result = collectDirectReExportSources(programPath!, t);
 
       expect(result).toEqual(new Set());
     });
@@ -153,28 +169,28 @@ describe('helpers', () => {
   describe('hasImportThenExportPattern', () => {
     it('returns true when import is later exported', () => {
       const ast = parse('import { x } from "./a"; export { x };', { sourceType: 'module' });
-      let importPath: any;
+      let importPath: NodePath<t.ImportDeclaration> | undefined;
       traverse(ast, {
         ImportDeclaration(path) {
           importPath = path;
         },
       });
 
-      const result = hasImportThenExportPattern(importPath, t);
+      const result = hasImportThenExportPattern(importPath!, t);
 
       expect(result).toBe(true);
     });
 
     it('returns false when import is not exported', () => {
       const ast = parse('import { x } from "./a"; const y = x;', { sourceType: 'module' });
-      let importPath: any;
+      let importPath: NodePath<t.ImportDeclaration> | undefined;
       traverse(ast, {
         ImportDeclaration(path) {
           importPath = path;
         },
       });
 
-      const result = hasImportThenExportPattern(importPath, t);
+      const result = hasImportThenExportPattern(importPath!, t);
 
       expect(result).toBe(false);
     });
@@ -186,7 +202,7 @@ describe('helpers', () => {
         sourceType: 'module',
         plugins: ['typescript'],
       });
-      let identifierPath: any;
+      let identifierPath: NodePath<t.Identifier> | undefined;
       traverse(ast, {
         Identifier(path) {
           if (path.node.name === 'Foo') {
@@ -195,7 +211,7 @@ describe('helpers', () => {
         },
       });
 
-      const result = isInTypeContext(identifierPath, t);
+      const result = isInTypeContext(identifierPath!, t);
 
       expect(result).toBe(true);
     });
@@ -205,7 +221,7 @@ describe('helpers', () => {
         sourceType: 'module',
         plugins: ['typescript'],
       });
-      let identifierPath: any;
+      let identifierPath: NodePath<t.Identifier> | undefined;
       traverse(ast, {
         Identifier(path) {
           if (path.node.name === 'Foo') {
@@ -214,7 +230,7 @@ describe('helpers', () => {
         },
       });
 
-      const result = isInTypeContext(identifierPath, t);
+      const result = isInTypeContext(identifierPath!, t);
 
       expect(result).toBe(false);
     });
@@ -224,7 +240,7 @@ describe('helpers', () => {
         sourceType: 'module',
         plugins: ['typescript'],
       });
-      let identifierPath: any;
+      let identifierPath: NodePath<t.Identifier> | undefined;
       traverse(ast, {
         Identifier(path) {
           if (path.node.name === 'Foo') {
@@ -233,7 +249,7 @@ describe('helpers', () => {
         },
       });
 
-      const result = isInTypeContext(identifierPath, t);
+      const result = isInTypeContext(identifierPath!, t);
 
       expect(result).toBe(true);
     });
@@ -242,8 +258,8 @@ describe('helpers', () => {
   describe('shouldSkipIdentifier', () => {
     it('skips identifier not in properties map', () => {
       const ast = parse('const x = foo;');
-      let identifierPath: any;
-      let programPath: any;
+      let identifierPath: NodePath<t.Identifier> | undefined;
+      let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
@@ -255,16 +271,16 @@ describe('helpers', () => {
         },
       });
 
-      const properties = new Map();
-      const result = shouldSkipIdentifier(identifierPath, properties, programPath, t);
+      const properties = new Map<string, PropertyInfo>();
+      const result = shouldSkipIdentifier(identifierPath!, properties, programPath!, t);
 
       expect(result).toBe(true);
     });
 
     it('skips identifier in declaration position', () => {
       const ast = parse('const foo = 1;');
-      let identifierPath: any;
-      let programPath: any;
+      let identifierPath: NodePath<t.Identifier> | undefined;
+      let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
@@ -276,16 +292,16 @@ describe('helpers', () => {
         },
       });
 
-      const properties = new Map([['foo', {} as any]]);
-      const result = shouldSkipIdentifier(identifierPath, properties, programPath, t);
+      const properties = new Map<string, PropertyInfo>([['foo', {} as PropertyInfo]]);
+      const result = shouldSkipIdentifier(identifierPath!, properties, programPath!, t);
 
       expect(result).toBe(true);
     });
 
     it('skips identifier as object property key', () => {
       const ast = parse('const obj = { foo: 1 };');
-      let identifierPath: any;
-      let programPath: any;
+      let identifierPath: NodePath<t.Identifier> | undefined;
+      let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
@@ -297,16 +313,16 @@ describe('helpers', () => {
         },
       });
 
-      const properties = new Map([['foo', {} as any]]);
-      const result = shouldSkipIdentifier(identifierPath, properties, programPath, t);
+      const properties = new Map<string, PropertyInfo>([['foo', {} as PropertyInfo]]);
+      const result = shouldSkipIdentifier(identifierPath!, properties, programPath!, t);
 
       expect(result).toBe(true);
     });
 
     it('does not skip identifier in reference position', () => {
       const ast = parse('const foo = 1; const x = foo;');
-      let identifierPath: any;
-      let programPath: any;
+      let identifierPath: NodePath<t.Identifier> | undefined;
+      let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
@@ -323,8 +339,8 @@ describe('helpers', () => {
         },
       });
 
-      const properties = new Map([['foo', {} as any]]);
-      const result = shouldSkipIdentifier(identifierPath, properties, programPath, t);
+      const properties = new Map<string, PropertyInfo>([['foo', {} as PropertyInfo]]);
+      const result = shouldSkipIdentifier(identifierPath!, properties, programPath!, t);
 
       expect(result).toBe(false);
     });
@@ -333,20 +349,20 @@ describe('helpers', () => {
   describe('collectReferencedProperties', () => {
     it('collects referenced property names from a node', () => {
       const ast = parse('const x = foo; const y = bar; const z = baz;');
-      let programPath: any;
+      let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
         },
       });
 
-      const properties = new Map([
-        ['foo', {} as any],
-        ['bar', {} as any],
-        ['qux', {} as any],
+      const properties = new Map<string, PropertyInfo>([
+        ['foo', {} as PropertyInfo],
+        ['bar', {} as PropertyInfo],
+        ['qux', {} as PropertyInfo],
       ]);
 
-      const result = collectReferencedProperties(programPath, properties);
+      const result = collectReferencedProperties(programPath!, properties);
 
       expect(result).toEqual(new Set(['foo', 'bar']));
       expect(result.has('baz')).toBe(false); // baz not in properties
@@ -355,15 +371,15 @@ describe('helpers', () => {
 
     it('returns empty set when no properties are referenced', () => {
       const ast = parse('const x = 1;');
-      let programPath: any;
+      let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
         },
       });
 
-      const properties = new Map([['foo', {} as any]]);
-      const result = collectReferencedProperties(programPath, properties);
+      const properties = new Map<string, PropertyInfo>([['foo', {} as PropertyInfo]]);
+      const result = collectReferencedProperties(programPath!, properties);
 
       expect(result).toEqual(new Set());
     });
