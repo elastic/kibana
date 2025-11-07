@@ -16,7 +16,7 @@ const meta: Meta<typeof FailureStoreModal> = {
 export default meta;
 type Story = StoryObj<typeof FailureStoreModal>;
 
-export const Primary: Story = {
+export const BasicModal: Story = {
   args: {
     onCloseModal: () => {},
     onSaveModal: () => {},
@@ -24,5 +24,34 @@ export const Primary: Story = {
       failureStoreEnabled: false,
       defaultRetentionPeriod: '40d',
     },
+    isServerless: false,
+  },
+};
+export const BasicModalWithoutRetention: Story = {
+  args: {
+    onCloseModal: () => {},
+    onSaveModal: () => {},
+    failureStoreProps: {
+      failureStoreEnabled: true,
+    },
+  },
+};
+
+export const InheritanceModal: Story = {
+  args: {
+    onCloseModal: () => {},
+    onSaveModal: () => {},
+    failureStoreProps: {
+      failureStoreEnabled: true,
+      defaultRetentionPeriod: '30d',
+      customRetentionPeriod: '40d',
+    },
+    inheritOptions: {
+      canShowInherit: true,
+      isWired: true,
+      isCurrentlyInherited: false,
+    },
+    isServerless: false,
+    isLoading: false,
   },
 };

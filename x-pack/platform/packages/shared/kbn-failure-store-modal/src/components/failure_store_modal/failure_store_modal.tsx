@@ -42,20 +42,31 @@ export interface FailureStoreFormProps {
 }
 
 interface FailureStoreFormData {
-  failureStoreEnabled: boolean;
+  failureStoreEnabled?: boolean;
   customRetentionPeriod?: string;
+  inherit?: object;
 }
 
 interface Props {
   onCloseModal: () => void;
   onSaveModal: (data: FailureStoreFormData) => Promise<void> | void;
   failureStoreProps: FailureStoreFormProps;
+  inheritOptions?: {
+    canShowInherit: boolean;
+    isWired: boolean;
+    isCurrentlyInherited: boolean;
+  };
+  isServerless?: boolean;
+  isLoading?: boolean;
 }
 
 export const FailureStoreModal: FunctionComponent<Props> = ({
   onCloseModal,
   onSaveModal,
   failureStoreProps,
+  isServerless = false,
+  isLoading = false,
+  inheritOptions,
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
   const onSubmitForm = async () => {
@@ -63,6 +74,14 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
     const { isValid, data } = await form.submit();
 
     if (!isValid) {
+      setIsSaveInProgress(false);
+      return;
+    }
+    // If the inherit toggle is on, we need to save the inherit field.
+    if (data.inherit) {
+      await onSaveModal({
+        inherit: {},
+      });
       setIsSaveInProgress(false);
       return;
     }
@@ -98,20 +117,24 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
     ? defaultRetentionPeriod.size
     : '30';
 
+  // Store initial values to reset when inherit is enabled
+  const initialFormValues = {
+    inherit: inheritOptions?.isCurrentlyInherited ?? false,
+    failureStore: failureStoreProps.failureStoreEnabled ?? false,
+    periodType: failureStoreProps.customRetentionPeriod ? 'custom' : 'default',
+    retentionPeriodValue,
+    retentionPeriodUnit,
+  };
+
   const { form } = useForm({
-    defaultValue: {
-      failureStore: failureStoreProps.failureStoreEnabled ?? false,
-      periodType: failureStoreProps.customRetentionPeriod ? 'custom' : 'default',
-      retentionPeriodValue,
-      retentionPeriodUnit,
-    },
+    defaultValue: initialFormValues,
     schema: editFailureStoreFormSchema,
     id: 'editFailureStoreForm',
   });
 
-  const [{ failureStore, periodType }] = useFormData({
+  const [{ failureStore, periodType, inherit }] = useFormData({
     form,
-    watch: ['failureStore', 'periodType'],
+    watch: ['failureStore', 'periodType', 'inherit'],
   });
 
   const isDirty = useFormIsModified({ form });
@@ -148,6 +171,17 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
     }
   }, [failureStore, periodType, form]);
 
+  // Reset fields to initial values when inherit is toggled on
+  useEffect(() => {
+    if (inherit) {
+      form.setFieldValue('failureStore', initialFormValues.failureStore);
+      form.setFieldValue('periodType', initialFormValues.periodType);
+      form.setFieldValue('retentionPeriodValue', initialFormValues.retentionPeriodValue);
+      form.setFieldValue('retentionPeriodUnit', initialFormValues.retentionPeriodUnit);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inherit]);
+
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
 
@@ -156,7 +190,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
       onClose={() => onCloseModal()}
       data-test-subj="editFailureStoreModal"
       aria-labelledby={modalTitleId}
-      style={{ width: 450 }}
+      style={{ width: inheritOptions ? 540 : 450 }}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
@@ -169,13 +203,42 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
 
       <EuiModalBody>
         <Form form={form} data-test-subj="editFailureStoreForm">
+          {inheritOptions && inheritOptions.canShowInherit && (
+            <UseField
+              path="inherit"
+              component={ToggleField}
+              label={
+                inheritOptions.isWired
+                  ? i18n.translate('xpack.failureStoreModal.wiredInheritSwitchLabel', {
+                      defaultMessage: 'Inherit from parent stream',
+                    })
+                  : i18n.translate('xpack.failureStoreModal.classicInheritSwitchLabel', {
+                      defaultMessage: 'Inherit from index template',
+                    })
+              }
+              euiFieldProps={{
+                label: inheritOptions.isWired
+                  ? i18n.translate('xpack.failureStoreModal.wiredInheritSwitchDescription', {
+                      defaultMessage:
+                        "Use the failure retention configuration from this stream's parent",
+                    })
+                  : i18n.translate('xpack.failureStoreModal.classicInheritSwitchDescription', {
+                      defaultMessage:
+                        "Use failure retention configuration from this stream's index template",
+                    }),
+                'data-test-subj': 'inheritFailureStoreSwitch',
+                compressed: true,
+              }}
+            />
+          )}
+
           <UseField
             path="failureStore"
             component={ToggleField}
             label={
               <FormattedMessage
                 id="xpack.failureStoreModal.form.failureStoreLabel"
-                defaultMessage="Failure store"
+                defaultMessage="Enable failure store"
               />
             }
             euiFieldProps={{
@@ -183,6 +246,8 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                 defaultMessage: 'Store failed documents in a secondary index',
               }),
               'data-test-subj': 'enableFailureStoreToggle',
+              compressed: true,
+              disabled: inherit,
             }}
           />
           {failureStore && (
@@ -196,12 +261,13 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                 euiFieldProps={{
                   options: failureStorePeriodOptions,
                   'data-test-subj': 'selectFailureStorePeriodType',
+                  isDisabled: inherit,
                 }}
               />
 
-              <EuiFormRow>
+              <EuiFormRow fullWidth>
                 {isCustomPeriod || defaultRetentionPeriod ? (
-                  <RetentionPeriodField disabled={!isCustomPeriod} />
+                  <RetentionPeriodField disabled={!isCustomPeriod || inherit} />
                 ) : (
                   <EuiCallOut
                     announceOnMount
@@ -216,14 +282,16 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                   </EuiCallOut>
                 )}
               </EuiFormRow>
-              <EuiFormRow>
-                <EuiText size="s" color="subdued">
-                  <FormattedMessage
-                    id="xpack.failureStoreModal.form.retentionPeriodInfoText"
-                    defaultMessage="This retention period stores data in the hot tier for best indexing and search performance."
-                  />
-                </EuiText>
-              </EuiFormRow>
+              {!isServerless && (
+                <EuiFormRow fullWidth>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="xpack.failureStoreModal.form.retentionPeriodInfoText"
+                      defaultMessage="This retention period stores data in the hot tier for best indexing and search performance."
+                    />
+                  </EuiText>
+                </EuiFormRow>
+              )}
             </>
           )}
         </Form>
@@ -233,6 +301,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButtonEmpty
           data-test-subj="failureStoreModalCancelButton"
           onClick={() => onCloseModal()}
+          disabled={isSaveInProgress || isLoading}
           aria-label={i18n.translate('xpack.failureStoreModal.cancelButtonLabel', {
             defaultMessage: 'Cancel',
           })}
@@ -246,7 +315,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButton
           fill
           type="submit"
-          isLoading={isSaveInProgress}
+          isLoading={isSaveInProgress || isLoading}
           data-test-subj="failureStoreModalSaveButton"
           onClick={onSubmitForm}
           disabled={disableSubmit}
