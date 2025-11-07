@@ -14,6 +14,7 @@ import { extractReferences } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { SortOrder } from '@kbn/discover-utils';
 import type { DataGridDensity } from '@kbn/unified-data-table';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SAVED_SEARCH_TYPE } from './constants';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
@@ -67,7 +68,8 @@ export const saveDiscoverSession = async (
   discoverSession: SaveDiscoverSessionParams,
   options: SaveDiscoverSessionOptions,
   contentManagement: ContentManagementPublicStart['client'],
-  savedObjectsTagging: SavedObjectsTaggingApi | undefined
+  savedObjectsTagging: SavedObjectsTaggingApi | undefined,
+  dataViews: DataPublicPluginStart['dataViews']
 ): Promise<DiscoverSession | undefined> => {
   const isNew = options.copyOnSave || !discoverSession.id;
 
@@ -87,20 +89,31 @@ export const saveDiscoverSession = async (
   const tabReferences: SavedObjectReference[] = [];
 
   // TODO: SavedSearchAttributes['tabs'] shouldn't be nullable soon
-  const tabs: NonNullable<SavedSearchAttributes['tabs']> = discoverSession.tabs.map((tab) => {
+  const tabs: NonNullable<SavedSearchAttributes['tabs']> = [];
+
+  for (const tab of discoverSession.tabs) {
     const [serializedSearchSource, searchSourceReferences] = extractReferences(
       tab.serializedSearchSource,
       { refNamePrefix: `tab_${tab.id}` }
     );
 
+    const dataView = await (typeof tab.serializedSearchSource.index === 'string'
+      ? dataViews.get(tab.serializedSearchSource.index)
+      : dataViews.create(tab.serializedSearchSource.index!));
+
     tabReferences.push(...searchSourceReferences);
 
-    return {
+    const fieldSpecs = dataView
+      ? tab.columns.map((column) => dataView.getFieldByName(column))
+      : undefined;
+
+    tabs.push({
       id: tab.id,
       label: tab.label,
       attributes: {
         sort: tab.sort,
         columns: tab.columns,
+        fieldSpecs,
         grid: tab.grid,
         hideChart: tab.hideChart,
         isTextBasedQuery: tab.isTextBasedQuery,
@@ -122,8 +135,8 @@ export const saveDiscoverSession = async (
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
       },
-    };
-  });
+    });
+  }
 
   const attributes: SavedSearchAttributes = {
     title: discoverSession.title,

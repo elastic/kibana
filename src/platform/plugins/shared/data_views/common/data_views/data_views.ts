@@ -877,11 +877,12 @@ export class DataViewsService {
   private getSavedObjectAndInit = async (
     id: string,
     displayErrors: boolean = true,
-    refreshFields: boolean = false
+    refreshFields: boolean = false,
+    fieldSpecs?: FieldSpec[]
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
 
-    return this.initFromSavedObject(savedObject, displayErrors, refreshFields);
+    return this.initFromSavedObject(savedObject, displayErrors, refreshFields, fieldSpecs);
   };
 
   private initFromSavedObjectLoadFields = async ({
@@ -924,7 +925,8 @@ export class DataViewsService {
   private initFromSavedObject = async (
     savedObject: SavedObject<DataViewAttributes>,
     displayErrors: boolean = true,
-    refreshFields: boolean = false
+    refreshFields: boolean = false,
+    fieldSpecs?: FieldSpec[]
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
 
@@ -932,18 +934,10 @@ export class DataViewsService {
     let indices: string[] = [];
     let etag: string | undefined;
 
-    if (!displayErrors) {
-      const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
-        savedObjectId: savedObject.id,
-        spec,
-        displayErrors,
-        refreshFields,
-      });
-      fields = fieldsAndIndices.fields;
-      indices = fieldsAndIndices.indices;
-      etag = fieldsAndIndices.etag;
+    if (fieldSpecs) {
+      fields = this.fieldArrayToMap(fieldSpecs, spec.fieldAttrs);
     } else {
-      try {
+      if (!displayErrors) {
         const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
           savedObjectId: savedObject.id,
           spec,
@@ -953,17 +947,29 @@ export class DataViewsService {
         fields = fieldsAndIndices.fields;
         indices = fieldsAndIndices.indices;
         etag = fieldsAndIndices.etag;
-      } catch (err) {
-        if (err instanceof DataViewMissingIndices) {
-          // not considered an error, check dataView.matchedIndices.length to be 0
-        } else {
-          this.onError(
-            err,
-            {
-              title: createFetchFieldErrorTitle({ id: savedObject.id, title: spec.title }),
-            },
-            spec.title || ''
-          );
+      } else {
+        try {
+          const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
+            savedObjectId: savedObject.id,
+            spec,
+            displayErrors,
+            refreshFields,
+          });
+          fields = fieldsAndIndices.fields;
+          indices = fieldsAndIndices.indices;
+          etag = fieldsAndIndices.etag;
+        } catch (err) {
+          if (err instanceof DataViewMissingIndices) {
+            // not considered an error, check dataView.matchedIndices.length to be 0
+          } else {
+            this.onError(
+              err,
+              {
+                title: createFetchFieldErrorTitle({ id: savedObject.id, title: spec.title }),
+              },
+              spec.title || ''
+            );
+          }
         }
       }
     }
@@ -1073,7 +1079,8 @@ export class DataViewsService {
   get = async (
     id: string,
     displayErrors: boolean = true,
-    refreshFields = false
+    refreshFields = false,
+    fieldSpecs?: FieldSpec[]
   ): Promise<DataView> => {
     const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
       if (dataView && refreshFields) {
@@ -1086,7 +1093,12 @@ export class DataViewsService {
     if (dataViewFromCache) {
       indexPatternPromise = dataViewFromCache;
     } else {
-      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors, refreshFields);
+      indexPatternPromise = this.getSavedObjectAndInit(
+        id,
+        displayErrors,
+        refreshFields,
+        fieldSpecs
+      );
       this.dataViewCache.set(id, indexPatternPromise);
     }
 

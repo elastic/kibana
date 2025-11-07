@@ -22,6 +22,7 @@ const SCHEMA_SEARCH_BASE = schema.object({
 
   // Data grid
   columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  fieldSpecs: schema.arrayOf(schema.any(), { defaultValue: [] }),
   sort: schema.oneOf(
     [
       schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 })),

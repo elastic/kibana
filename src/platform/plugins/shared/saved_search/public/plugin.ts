@@ -134,7 +134,7 @@ export class SavedSearchPublicPlugin
   public start(
     _: CoreStart,
     {
-      data: { search },
+      data: { search, dataViews },
       spaces,
       savedObjectsTaggingOss,
       contentManagement: { client: contentManagement },
@@ -169,7 +169,7 @@ export class SavedSearchPublicPlugin
       },
       saveDiscoverSession: async (discoverSession, options) => {
         const service = await getSavedSearchesService(deps);
-        return service.saveDiscoverSession(discoverSession, options);
+        return service.saveDiscoverSession(discoverSession, options, dataViews);
       },
       checkForDuplicateTitle: async (props) => {
         const service = await getSavedSearchesService(deps);

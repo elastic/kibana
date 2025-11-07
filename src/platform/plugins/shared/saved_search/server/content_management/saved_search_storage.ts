@@ -36,6 +36,7 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'title',
         'sort',
         'columns',
+        'fieldSpecs',
         'description',
         'grid',
         'hideChart',

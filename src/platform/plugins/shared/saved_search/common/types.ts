@@ -8,6 +8,7 @@
  */
 
 import type {
+  FieldSpec,
   ISearchSource,
   RefreshInterval,
   SerializedSearchSourceFields,
@@ -104,6 +105,8 @@ export interface DiscoverSessionTab {
   label: string;
   sort: SortOrder[];
   columns: string[];
+  // Cached field specs for the columns
+  fieldSpecs?: FieldSpec[];
   grid: DiscoverGridSettings;
   hideChart: boolean;
   isTextBasedQuery: boolean;

@@ -92,14 +92,16 @@ export class SavedSearchesService {
 
   saveDiscoverSession = (
     discoverSession: SaveDiscoverSessionParams,
-    options: SaveDiscoverSessionOptions = {}
+    options: SaveDiscoverSessionOptions = {},
+    dataViews: DataPublicPluginStart['dataViews']
   ) => {
     const { contentManagement, savedObjectsTaggingOss } = this.deps;
     return saveDiscoverSession(
       discoverSession,
       options,
       contentManagement,
-      savedObjectsTaggingOss?.getTaggingApi()
+      savedObjectsTaggingOss?.getTaggingApi(),
+      dataViews
     );
   };
 
