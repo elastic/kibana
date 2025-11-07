@@ -191,8 +191,6 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
     panelsToggle,
   });
 
-  // TODO: debug how many rerenders happen here
-
   if (!unifiedHistogram.isInitialized) {
     return null;
   }

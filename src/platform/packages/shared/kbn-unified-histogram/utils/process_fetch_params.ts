@@ -47,7 +47,7 @@ export const processFetchParams = ({
     filters: params.filters ?? EMPTY_FILTERS,
     esqlVariables: params.esqlVariables ?? EMPTY_ESQL_VARIABLES,
     relativeTimeRange,
-    timeRange: getAbsoluteTimeRange(relativeTimeRange),
+    timeRange: params.timeRange ?? getAbsoluteTimeRange(relativeTimeRange),
     // additional
     triggeredAt: Date.now(),
     isTimeBased,

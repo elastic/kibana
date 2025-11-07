@@ -130,13 +130,13 @@ Object {
     "description": "fetch chart data and total hits",
   },
   "id": "unifiedHistogramLensComponent",
-  "lastReloadRequestTime": 1759269600000,
+  "lastReloadRequestTime": 1759874400000,
   "noPadding": true,
   "onLoad": [MockFunction],
   "searchSessionId": "id",
   "timeRange": Object {
-    "from": "2025-09-30T22:00:00.000Z",
-    "to": "2025-10-31T13:16:54.878Z",
+    "from": "2025-10-07T22:00:00.000Z",
+    "to": "2025-11-07T15:56:36.264Z",
   },
   "viewMode": "view",
 }
@@ -298,13 +298,13 @@ Object {
     "description": "fetch chart data and total hits",
   },
   "id": "unifiedHistogramLensComponent",
-  "lastReloadRequestTime": 1759269600000,
+  "lastReloadRequestTime": 1759874400000,
   "noPadding": true,
   "onLoad": [MockFunction],
   "searchSessionId": "id",
   "timeRange": Object {
-    "from": "2025-09-30T22:00:00.000Z",
-    "to": "2025-10-31T13:16:54.878Z",
+    "from": "2025-10-07T22:00:00.000Z",
+    "to": "2025-11-07T15:56:36.264Z",
   },
   "viewMode": "view",
 }
