@@ -23,8 +23,6 @@ interface BetaBadgeProps {
 /**
  * A badge to indicate that a feature is in beta.
  * It can be aligned to the middle or bottom of the text.
- *
- * TODO: support `bottom` and `text-bottom` alignment in EUI
  */
 export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeProps) => {
   const betaBadgeStyles = css`
