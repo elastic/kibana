@@ -7,6 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
 import { APIRoutes } from '../../types';
@@ -14,7 +15,9 @@ import { getAPIKeyById } from '../lib/get_key_by_id';
 import { createAPIKey } from '../lib/create_key';
 import { fetchClusterHasApiKeys, fetchUserStartPrivileges } from '../lib/privileges';
 
-const API_KEY_NAME = 'Unrestricted API Key';
+const API_KEY_NAME = i18n.translate('xpack.workplaceai.apiKeyServer.unrestrictedApiKeyName', {
+  defaultMessage: 'Unrestricted API Key',
+});
 
 export function registerWorkplaceAIApiKeysRoutes(router: IRouter, logger: Logger) {
   router.post(
@@ -43,7 +46,11 @@ export function registerWorkplaceAIApiKeysRoutes(router: IRouter, logger: Logger
 
         if (!apiKey) {
           return response.customError({
-            body: { message: 'API key is not found.' },
+            body: {
+              message: i18n.translate('xpack.workplaceai.apiKeyServer.apiKeyNotFoundErrorMessage', {
+                defaultMessage: 'API key is not found.',
+              }),
+            },
             statusCode: 404,
           });
         }
@@ -86,7 +93,14 @@ export function registerWorkplaceAIApiKeysRoutes(router: IRouter, logger: Logger
 
         if (!canCreateApiKeys) {
           return response.customError({
-            body: { message: 'User does not have required privileges' },
+            body: {
+              message: i18n.translate(
+                'xpack.workplaceai.apiKeyServer.userNoPrivilegesErrorMessage',
+                {
+                  defaultMessage: 'User does not have required privileges',
+                }
+              ),
+            },
             statusCode: 403,
           });
         }
@@ -95,7 +109,14 @@ export function registerWorkplaceAIApiKeysRoutes(router: IRouter, logger: Logger
 
         if (clusterHasApiKeys) {
           return response.customError({
-            body: { message: 'Project already has API keys' },
+            body: {
+              message: i18n.translate(
+                'xpack.workplaceai.apiKeyServer.projectHasApiKeysErrorMessage',
+                {
+                  defaultMessage: 'Project already has API keys',
+                }
+              ),
+            },
             statusCode: 400,
           });
         }
