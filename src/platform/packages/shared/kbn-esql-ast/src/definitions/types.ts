@@ -399,6 +399,18 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  forkNotAllowedWithSubqueries: {
+    message: string;
+    type: {};
+  };
+  inlineStatsNotAllowedAfterLimit: {
+    message: string;
+    type: {};
+  };
+  joinOnSingleExpression: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

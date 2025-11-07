@@ -22,6 +22,7 @@ export const ConfigSchema = z
     taskTypeConfig: z.object({}).passthrough().default({}),
     contextWindowLength: z.coerce.number().optional(),
     headers: z.record(z.string(), z.string()).optional(),
+    temperature: z.coerce.number().optional(),
   })
   .strict();
 

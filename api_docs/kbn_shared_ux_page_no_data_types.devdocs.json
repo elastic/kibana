@@ -104,8 +104,7 @@
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component."
         ],
         "signature": [
-          "KibanaDependencies & ",
-          "RedirectAppLinksKibanaDependencies"
+          "KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
         "deprecated": false,
@@ -128,9 +127,7 @@
             "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
             "section": "def-public.Services",
             "text": "Services"
-          },
-          " & ",
-          "RedirectAppLinksServices"
+          }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
         "deprecated": false,

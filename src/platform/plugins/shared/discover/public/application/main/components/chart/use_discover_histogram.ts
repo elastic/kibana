@@ -215,6 +215,7 @@ export const useDiscoverHistogram = (
     timeRangeRelative: relativeTimeRange,
     timeRangeAbsolute: timeRange,
     searchSessionId,
+    lastReloadRequestTime,
   } = requestParams;
 
   const dataView = useCurrentDataView();

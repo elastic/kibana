@@ -46,6 +46,7 @@ export const Chart = ({
   onViewDetails,
   fetchParams,
   discoverFetch$,
+  titleHighlight,
   size = 'm',
   esqlQuery,
   title,
@@ -98,6 +99,7 @@ export const Chart = ({
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
             syncCursor={syncCursor}
+            titleHighlight={titleHighlight}
             syncTooltips={syncTooltips}
           />
           {isSaveModalVisible && (

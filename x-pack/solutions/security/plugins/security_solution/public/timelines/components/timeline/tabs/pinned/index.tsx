@@ -37,8 +37,6 @@ import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
-import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
-import { NotesFlyout } from '../../properties/notes_flyout';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
@@ -205,73 +203,44 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-
-  const {
-    associateNote,
-    notes,
-    isNotesFlyoutVisible,
-    closeNotesFlyout,
-    showNotesFlyout,
-    eventId: noteEventId,
-    setNotesEventId,
-  } = useNotesInFlyout({
-    eventIdToNoteIds,
-    refetch,
-    timelineId,
-    activeTab: TimelineTabs.pinned,
-  });
 
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
-      const indexName = selectedPatterns.join(',');
-      if (eventId && !securitySolutionNotesDisabled) {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: timelineId,
-            },
-          },
-          left: {
-            id: DocumentDetailsLeftPanelKey,
-            path: {
-              tab: LeftPanelNotesTab,
-            },
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: timelineId,
-            },
-          },
-        });
-        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-          location: timelineId,
-        });
-        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-          location: timelineId,
-          panel: 'left',
-        });
-      } else {
-        if (eventId) {
-          setNotesEventId(eventId);
-          showNotesFlyout();
-        }
+      if (!eventId) {
+        return;
       }
+
+      const indexName = selectedPatterns.join(',');
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: LeftPanelNotesTab,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+      });
+      telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
+        location: timelineId,
+      });
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+        location: timelineId,
+        panel: 'left',
+      });
     },
-    [
-      openFlyout,
-      securitySolutionNotesDisabled,
-      selectedPatterns,
-      telemetry,
-      timelineId,
-      setNotesEventId,
-      showNotesFlyout,
-    ]
+    [openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({
@@ -283,44 +252,27 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onToggleShowNotes,
   });
 
-  const NotesFlyoutMemo = useMemo(() => {
-    return (
-      <NotesFlyout
-        associateNote={associateNote}
-        eventId={noteEventId}
-        show={isNotesFlyoutVisible}
-        notes={notes}
-        onClose={closeNotesFlyout}
-        onCancel={closeNotesFlyout}
-        timelineId={timelineId}
-      />
-    );
-  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
-
   return (
-    <>
-      {NotesFlyoutMemo}
-      <UnifiedTimelineBody
-        header={<></>}
-        columns={augmentedColumnHeaders}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
-        sort={sort}
-        events={events}
-        refetch={refetch}
-        dataLoadingState={queryLoadingState}
-        totalCount={totalCount}
-        onFetchMoreRecords={loadNextBatch}
-        activeTab={TimelineTabs.pinned}
-        updatedAt={refreshedAt}
-        isTextBasedQuery={false}
-        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        trailingControlColumns={rowDetailColumn}
-        onUpdatePageIndex={onUpdatePageIndex}
-      />
-    </>
+    <UnifiedTimelineBody
+      header={<></>}
+      columns={augmentedColumnHeaders}
+      rowRenderers={rowRenderers}
+      timelineId={timelineId}
+      itemsPerPage={itemsPerPage}
+      itemsPerPageOptions={itemsPerPageOptions}
+      sort={sort}
+      events={events}
+      refetch={refetch}
+      dataLoadingState={queryLoadingState}
+      totalCount={totalCount}
+      onFetchMoreRecords={loadNextBatch}
+      activeTab={TimelineTabs.pinned}
+      updatedAt={refreshedAt}
+      isTextBasedQuery={false}
+      leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+      trailingControlColumns={rowDetailColumn}
+      onUpdatePageIndex={onUpdatePageIndex}
+    />
   );
 };
 

@@ -114,9 +114,15 @@ async function validateAst(
    */
   const subqueries = getSubqueriesToValidate(rootCommands);
   for (const subquery of subqueries) {
-    const subqueryUpToThisCommand = { ...subquery, commands: subquery.commands.slice(0, -1) };
+    const currentCommand = subquery.commands[subquery.commands.length - 1];
+
+    const subqueryForColumns =
+      currentCommand.name === 'join'
+        ? subquery
+        : { ...subquery, commands: subquery.commands.slice(0, -1) };
+
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryUpToThisCommand, queryString, callbacks).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryString, callbacks).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
@@ -127,15 +133,10 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
     };
 
-    const commandMessages = validateCommand(
-      subquery.commands[subquery.commands.length - 1],
-      references,
-      rootCommands,
-      {
-        ...callbacks,
-        hasMinimumLicenseRequired,
-      }
-    );
+    const commandMessages = validateCommand(currentCommand, references, rootCommands, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
     messages.push(...commandMessages);
   }
 

@@ -26,6 +26,7 @@ export type LensProps = Pick<
   | 'searchSessionId'
   | 'executionContext'
   | 'onLoad'
+  | 'lastReloadRequestTime'
 >;
 
 export const useLensProps = ({
@@ -52,7 +53,7 @@ export const useLensProps = ({
           timeRange: fetchParams.timeRange,
           esqlVariables: fetchParams.esqlVariables,
           attributes,
-          onLoad,
+          onLoad, // TODO: add lastReloadRequestTime
         }),
       };
     },
@@ -80,12 +81,14 @@ export const getLensProps = ({
   attributes,
   esqlVariables,
   onLoad,
+  lastReloadRequestTime,
 }: {
   searchSessionId: string | undefined;
   timeRange: TimeRange;
   attributes: TypedLensByValueInput['attributes'];
   esqlVariables: ESQLControlVariable[] | undefined;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+  lastReloadRequestTime?: number;
 }): LensProps => ({
   id: 'unifiedHistogramLensComponent',
   viewMode: 'view',
@@ -98,4 +101,5 @@ export const getLensProps = ({
     description: 'fetch chart data and total hits',
   },
   onLoad,
+  lastReloadRequestTime,
 });
