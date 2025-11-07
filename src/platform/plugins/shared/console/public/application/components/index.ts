@@ -18,3 +18,4 @@ export { HelpPopover } from './help_popover';
 export { ShortcutsPopover } from './shortcuts_popover';
 export type { DevToolsVariable } from './variables/types';
 export { ConsoleTourStep, type ConsoleTourStepProps } from './console_tour_step';
+export { QueryDslHelpFlyout } from './query_dsl_help_flyout';
