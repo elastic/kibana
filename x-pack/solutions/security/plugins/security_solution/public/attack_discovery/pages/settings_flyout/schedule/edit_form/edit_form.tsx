@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { getSchema } from './schema';
 import type { AttackDiscoveryScheduleSchema } from './types';
 
@@ -51,8 +52,22 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     triggersActionsUi: { actionTypeRegistry },
     http,
   } = useKibana().services;
+  const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
 
-  const { data: connectors } = useLoadConnectors({ http });
+  const { data: allConnectors, isLoading: isLoadingAllConnectors } = useLoadConnectors({ http });
+
+  const connectors = useMemo(() => {
+    if (!isLoadingAllConnectors && allConnectors) {
+      if (
+        currentConnector &&
+        !allConnectors.some((connector) => connector.id === currentConnector.id)
+      ) {
+        return [...allConnectors, currentConnector];
+      }
+      return allConnectors;
+    }
+    return currentConnector ? [currentConnector] : [];
+  }, [currentConnector, isLoadingAllConnectors, allConnectors]);
 
   const schema = useMemo(
     () => getSchema({ actionTypeRegistry, connectors }),
@@ -157,6 +172,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
                 throttle: null,
                 summary: false,
               },
+              onNewConnectorCreated: (connector: ActionConnector) => setCurrentConnector(connector),
             }}
           />
         </EuiFlexItem>

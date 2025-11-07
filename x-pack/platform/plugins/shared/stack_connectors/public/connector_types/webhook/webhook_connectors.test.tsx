@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
+import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {

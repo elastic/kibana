@@ -171,6 +171,8 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     );
   }, [actionType, connectors]);
 
+  const connectorConfig = connector && 'config' in connector ? connector.config : undefined;
+
   const onDelete = (id: string) => {
     dispatch({ type: 'removeAction', payload: { uuid: id } });
   };
@@ -193,7 +195,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     async (params: RuleActionParam) => {
       const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
         .get(action.actionTypeId)
-        ?.validateParams(params, connector && 'config' in connector ? connector.config : undefined);
+        ?.validateParams(params, connectorConfig);
 
       dispatch({
         type: 'setActionParamsError',
@@ -203,7 +205,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         },
       });
     },
-    [actionTypeRegistry, action, dispatch, connector]
+    [actionTypeRegistry, action, dispatch, connectorConfig]
   );
 
   const onStoredActionParamsChange = useCallback(

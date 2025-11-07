@@ -132,7 +132,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   actionTypeTitle?: string;
   validateParams: (
     actionParams: ActionParams,
-    connectorConfig?: Record<string, unknown>
+    connectorConfig?: ActionConfig
   ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<ActionConnectorFieldsProps>

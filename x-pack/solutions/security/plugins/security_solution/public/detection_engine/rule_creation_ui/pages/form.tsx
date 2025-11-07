@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { useFormWithWarnings } from '../../../common/hooks/use_form_with_warnings';
 import type {
   AboutStepRule,
@@ -43,8 +44,9 @@ export const useRuleForms = ({
     triggersActionsUi: { actionTypeRegistry },
     http,
   } = useKibana().services;
+  const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
 
-  const { data: connectors } = useLoadConnectors({ http });
+  const { data: allConnectors, isLoading: isLoadingAllConnectors } = useLoadConnectors({ http });
 
   // DEFINE STEP FORM
   const { form: defineStepForm } = useFormWithWarnings<DefineStepRule>({
@@ -86,6 +88,26 @@ export const useRuleForms = ({
     'interval' in scheduleStepFormData ? scheduleStepFormData : scheduleStepDefault;
 
   // ACTIONS STEP FORM
+  const connectors = useMemo(() => {
+    if (!isLoadingAllConnectors && allConnectors) {
+      if (
+        currentConnector &&
+        !allConnectors.some((connector) => connector.id === currentConnector.id)
+      ) {
+        return [...allConnectors, currentConnector];
+      }
+      return allConnectors;
+    }
+    return currentConnector ? [currentConnector] : [];
+  }, [currentConnector, isLoadingAllConnectors, allConnectors]);
+
+  const handleNewConnectorCreated = useCallback(
+    (connector: ActionConnector) => {
+      setCurrentConnector(connector);
+    },
+    [setCurrentConnector]
+  );
+
   const schema = useMemo(
     () => getActionsRuleSchema({ actionTypeRegistry, connectors }),
     [actionTypeRegistry, connectors]
@@ -110,6 +132,7 @@ export const useRuleForms = ({
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
+    handleNewConnectorCreated,
   };
 };
 

@@ -11,7 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { WebhookMethods } from '../../../common/auth/constants';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/webhook/constants';
 import type { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
@@ -32,12 +32,11 @@ export function getConnectorType(): ConnectorTypeModel<
     }),
     validateParams: async (
       actionParams: WebhookActionParams,
-      connectorConfig?: Record<string, unknown>
+      connectorConfig?: WebhookConfig
     ): Promise<GenericValidationResult<WebhookActionParams>> => {
       const webhookMethod: WebhookMethods = connectorConfig?.method
-        ? (connectorConfig.method as unknown as WebhookMethods)
+        ? (connectorConfig.method as WebhookMethods)
         : WebhookMethods.POST;
-
       const translations = await import('./translations');
       const errors = {
         body: new Array<string>(),
