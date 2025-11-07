@@ -21,7 +21,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
     },
-
-    indexRefreshInterval: '1s',
   };
 }
