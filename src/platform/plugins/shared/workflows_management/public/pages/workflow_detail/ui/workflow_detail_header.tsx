@@ -37,6 +37,7 @@ import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
+  selectIsExecutionsTab,
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -103,6 +104,7 @@ export const WorkflowDetailHeader = React.memo(
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
     const hasUnsavedChanges = useSelector(selectHasChanges);
+    const isExecutionsTab = useSelector(selectIsExecutionsTab);
 
     const { name, isEnabled, lastUpdatedAt } = useMemo(
       () => ({
@@ -130,8 +132,12 @@ export const WorkflowDetailHeader = React.memo(
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
 
     const runWorkflowTooltipContent = useMemo(() => {
-      return getRunWorkflowTooltipContent(isSyntaxValid, canExecuteWorkflow, isEnabled, false);
-    }, [isSyntaxValid, canExecuteWorkflow, isEnabled]);
+      return getRunWorkflowTooltipContent({
+        isExecutionsTab,
+        isValid: isSyntaxValid,
+        canRunWorkflow: canExecuteWorkflow,
+      });
+    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
 
     const handleRunClickWithUnsavedCheck = useCallback(() => {
       if (hasUnsavedChanges) {
@@ -273,8 +279,7 @@ export const WorkflowDetailHeader = React.memo(
                     iconType="play"
                     size="s"
                     onClick={handleRunClickWithUnsavedCheck}
-                    disabled={!canExecuteWorkflow || isLoading || !isSyntaxValid}
-                    title={runWorkflowTooltipContent ?? undefined}
+                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
                     aria-label={Translations.runWorkflow}
                     data-test-subj="runWorkflowHeaderButton"
                   />

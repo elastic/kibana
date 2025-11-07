@@ -21,7 +21,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './run_step_button';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
-import { selectFocusedStepInfo, selectIsExecutionsTab } from '../../../entities/workflows/store';
+import { selectEditorFocusedStepInfo, selectIsExecutionsTab } from '../../../entities/workflows/store';
 
 export interface StepActionsProps {
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
@@ -29,7 +29,7 @@ export interface StepActionsProps {
 
 export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
 
   const togglePopover = useCallback(() => {

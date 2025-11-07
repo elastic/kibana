@@ -12,7 +12,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { useYamlValidation } from './use_yaml_validation';
-import { selectDetailState } from '../../../entities/workflows/store';
+import { selectDetail } from '../../../entities/workflows/store';
 import { createWorkflowsStore } from '../../../entities/workflows/store/store';
 import { setYamlString } from '../../../entities/workflows/store/workflow_detail/slice';
 import { createStartServicesMock } from '../../../mocks';
@@ -126,7 +126,7 @@ steps:
     // Wait for the Redux state to have computed data
     await waitFor(
       () => {
-        const state = selectDetailState(store.getState());
+        const state = selectDetail(store.getState());
         // Debug: log the state to understand what's happening
         // console.log('Redux state:', JSON.stringify(state, null, 2));
         expect(state.computed).toBeDefined();

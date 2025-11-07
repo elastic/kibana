@@ -38,14 +38,17 @@ import { useAvailableConnectors } from '../../../entities/connectors/model/use_a
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
 import {
-  selectFocusedStepInfo,
+  selectEditorFocusedStepInfo,
+  selectEditorYamlDocument,
   selectSchema,
-  selectYamlDocument,
   setCursorPosition,
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
+  selectEditorYaml,
   selectHasChanges,
+  selectIsExecutionsTab,
+  selectStepExecutions,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -124,45 +127,19 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
 };
 
 export interface WorkflowYAMLEditorProps {
-  workflowYaml: string;
-  isExecutionYaml?: boolean;
-  stepExecutions?: WorkflowStepExecutionDto[];
-  'data-testid'?: string;
   highlightDiff?: boolean;
-  onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
-  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationResult[]>>;
-  esHost?: string;
-  kibanaHost?: string;
-  selectedExecutionId?: string;
-  onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
+  onStepRun: (params: { stepId: string; actionType: string }) => void;
 }
 
 export const WorkflowYAMLEditor = ({
-  workflowYaml,
-  isExecutionYaml = false,
-  stepExecutions,
   highlightDiff = false,
-  onMount,
-  onValidationErrors,
-  esHost = 'http://localhost:9200',
-  kibanaHost,
-  selectedExecutionId,
-  onStepActionClicked,
-  ...props
+  onStepRun,
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
 
-  const dispatch = useDispatch();
-
-  const hasChanges = useSelector(selectHasChanges);
-  const workflow = useSelector(selectWorkflow);
-
-  const originalValue = workflow?.yaml ?? '';
-  const workflowId = workflow?.id ?? '';
-
   const saveYaml = useSaveYaml();
-
+  const dispatch = useDispatch();
   const onChange = useCallback(
     (yaml: string) => {
       dispatch(setYamlString(yaml));
@@ -170,25 +147,30 @@ export const WorkflowYAMLEditor = ({
     [dispatch]
   );
 
+  const workflowYaml = useSelector(selectEditorYaml) ?? '';
+  const isExecutionYaml = useSelector(selectIsExecutionsTab);
+  const hasChanges = useSelector(selectHasChanges);
+  const workflow = useSelector(selectWorkflow);
+
+  const originalValue = workflow?.yaml ?? '';
+
   // Refs
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
 
-  // Refs / Keep stepExecutionsRef in sync
-  useEffect(() => {
-    stepExecutionsRef.current = stepExecutions;
-  }, [stepExecutions]);
+  const stepExecutions = useSelector(selectStepExecutions);
+  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
+  stepExecutionsRef.current = stepExecutions;
 
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const workflowYamlSchema = useSelector(selectSchema);
   // The current yaml document in the editor (could be unsaved)
-  const yamlDocument = useSelector(selectYamlDocument);
+  const yamlDocument = useSelector(selectEditorYamlDocument);
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
 
@@ -292,21 +274,10 @@ export const WorkflowYAMLEditor = ({
       if (!model) {
         return;
       }
-      // Initial YAML parsing from main
-      const value = model.getValue();
-      if (value && value.trim() !== '') {
-        // Use setTimeout to defer state updates until after the current render cycle
-        // This prevents the flushSync warning while maintaining the correct order
-        setTimeout(() => {
-          dispatch(setYamlString(value));
-          setIsEditorMounted(true);
-        }, 0);
-      } else {
-        // If no model, just set the mounted state
-        setTimeout(() => {
-          setIsEditorMounted(true);
-        }, 0);
-      }
+      // If no model, just set the mounted state
+      setTimeout(() => {
+        setIsEditorMounted(true);
+      }, 0);
 
       // Setup Elasticsearch step providers if we have the required services
       if (http && notifications) {
@@ -321,7 +292,7 @@ export const WorkflowYAMLEditor = ({
         const kibanaHandler = new KibanaMonacoConnectorHandler({
           http,
           notifications,
-          kibanaHost: kibanaHost || window.location.origin,
+          kibanaHost: window.location.origin,
         });
         registerMonacoConnectorHandler(kibanaHandler);
 
@@ -337,8 +308,8 @@ export const WorkflowYAMLEditor = ({
           options: {
             http,
             notifications,
-            esHost,
-            kibanaHost: kibanaHost || window.location.origin,
+            esHost: 'http://localhost:9200',
+            kibanaHost: window.location.origin,
           },
         };
 
@@ -346,8 +317,6 @@ export const WorkflowYAMLEditor = ({
         const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
         disposablesRef.current.push(hoverDisposable);
       }
-
-      onMount?.(editor, monaco);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -356,38 +325,6 @@ export const WorkflowYAMLEditor = ({
   const handleEditorWillUnmount = useCallback(() => {
     unregisterKeyboardCommands();
   }, [unregisterKeyboardCommands]);
-
-  const changeSideEffects = useCallback(() => {
-    if (editorRef.current) {
-      const model = editorRef.current.getModel();
-
-      if (!model) {
-        return;
-      }
-      dispatch(setYamlString(model.getValue()));
-    }
-  }, [dispatch]);
-
-  const handleChange = useCallback(
-    (value: string) => {
-      if (onChange) {
-        onChange(value);
-      }
-
-      changeSideEffects();
-    },
-    [onChange, changeSideEffects]
-  );
-
-  useEffect(() => {
-    // After editor is mounted or workflowId changes, validate the initial content
-    if (isEditorMounted && editorRef.current) {
-      const model = editorRef.current.getModel();
-      if (model && model.getValue() !== '') {
-        changeSideEffects();
-      }
-    }
-  }, [changeSideEffects, isEditorMounted, workflowId]);
 
   // Clean up the monaco model and editor on unmount
   useEffect(() => {
@@ -555,7 +492,7 @@ export const WorkflowYAMLEditor = ({
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
       <div css={styles.stepActionsContainer} style={positionStyles ? positionStyles : {}}>
-        <StepActions onStepActionClicked={onStepActionClicked} />
+        <StepActions onStepActionClicked={onStepRun} />
       </div>
       {isDevelopment && (
         <div
@@ -593,12 +530,11 @@ export const WorkflowYAMLEditor = ({
         <YamlEditor
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
-          onChange={handleChange}
+          onChange={onChange}
           options={options}
           schemas={schemas}
           suggestionProvider={completionProvider}
           value={workflowYaml}
-          {...props}
         />
       </div>
       <div css={styles.validationErrorsContainer}>

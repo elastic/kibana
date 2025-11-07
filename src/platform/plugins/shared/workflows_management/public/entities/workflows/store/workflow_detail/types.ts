@@ -11,9 +11,9 @@ import type YAML from 'yaml';
 import type { LineCounter } from 'yaml';
 import type { WorkflowDetailDto, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
-import type { WorkflowLookup } from '../utils/build_workflow_lookup';
 
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
@@ -22,6 +22,12 @@ export interface WorkflowDetailState {
   workflow?: WorkflowDetailDto;
   /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
   computed?: ComputedData;
+  /** The currently selected execution (when viewing executions tab) */
+  execution?: WorkflowExecutionDto;
+  /** The computed data derived from the selected execution, it is updated by the loadExecutionThunk */
+  computedExecution?: ComputedData;
+  /** The active tab (workflow or executions) */
+  activeTab?: ActiveTab;
   /** The step id that is focused in the workflow yaml editor */
   focusedStepId?: string;
   /** The step id that is highlighted in the workflow yaml editor */
@@ -30,11 +36,7 @@ export interface WorkflowDetailState {
   isTestModalOpen: boolean;
   /** The connectors data */
   connectors?: ConnectorsResponse;
-  /** The currently selected execution (when viewing executions tab) */
-  execution?: WorkflowExecutionDto;
-  /** The active tab (workflow or executions) */
-  activeTab?: ActiveTab;
-  /** The schema for the workflow */
+  /** The schema for the workflow, depends on the connectors available */
   schema: WorkflowZodSchemaType;
 }
 

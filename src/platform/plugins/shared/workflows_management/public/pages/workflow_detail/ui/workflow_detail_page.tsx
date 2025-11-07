@@ -18,13 +18,13 @@ import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
+import { useLoadExecutionThunk } from '../../../entities/workflows/model/use_load_execution';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
   selectWorkflowName,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
-import { loadExecutionThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_execution_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
@@ -36,13 +36,20 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
   const loadConnectors = useAsyncThunk(loadConnectorsThunk);
   const [loadWorkflow, { isLoading, error }] = useAsyncThunkState(loadWorkflowThunk);
-  const loadExecution = useAsyncThunk(loadExecutionThunk);
+  const loadExecution = useLoadExecutionThunk();
+
   const activeTabInStore = useSelector(selectActiveTab);
+  const workflowName = useSelector(selectWorkflowName);
+
+  useWorkflowsBreadcrumbs(workflowName);
+
+  const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount
   }, [loadConnectors]);
 
+  // Load workflow when id changes
   useEffect(() => {
     if (id) {
       loadWorkflow({ id }); // sets loaded yaml string
@@ -50,11 +57,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       dispatch(setYamlString(workflowDefaultYaml));
     }
   }, [loadWorkflow, id, dispatch]);
-
-  const workflowName = useSelector(selectWorkflowName);
-  useWorkflowsBreadcrumbs(workflowName);
-
-  const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
   // Sync activeTab from URL state to store
   useEffect(() => {
@@ -65,12 +67,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   // Load execution when selectedExecutionId changes
   useEffect(() => {
-    if (selectedExecutionId) {
-      loadExecution({ id: selectedExecutionId });
-    } else {
+    if (!selectedExecutionId) {
       dispatch(setExecution(undefined));
     }
-  }, [selectedExecutionId, loadExecution, dispatch]);
+  }, [selectedExecutionId, dispatch]);
 
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
@@ -97,7 +97,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
             <FormattedMessage
               id="workflows.workflowDetail.error.body"
               defaultMessage="There was an error loading the workflow. {error}"
-              values={{ error }}
+              values={{ error: error.toString() }}
             />
           </p>
         }

@@ -19,6 +19,7 @@ import { validateVariables as validateVariablesInternal } from './validate_varia
 import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
+  selectIsWorkflowTab,
   selectWorkflowDefinition,
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -47,6 +48,7 @@ export function useYamlValidation(
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
   const lineCounter = useSelector(selectYamlLineCounter);
+  const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const { application } = useKibana().services;
 
   useEffect(() => {
@@ -56,6 +58,20 @@ export function useYamlValidation(
 
     const model = editor.getModel();
     if (!model) {
+      return;
+    }
+
+    if (!isWorkflowTab) {
+      // clear decorations and markers
+      if (decorationsCollection.current) {
+        decorationsCollection.current.clear();
+      }
+      monaco.editor.setModelMarkers(model, 'variable-validation', []);
+      monaco.editor.setModelMarkers(model, 'step-name-validation', []);
+      monaco.editor.setModelMarkers(model, 'liquid-template-validation', []);
+      monaco.editor.setModelMarkers(model, 'connector-id-validation', []);
+      setIsLoading(false);
+      setError(null);
       return;
     }
 
@@ -238,7 +254,15 @@ export function useYamlValidation(
       markers.filter((m) => m.source === 'connector-id-validation')
     );
     setError(null);
-  }, [editor, lineCounter, workflowDefinition, workflowGraph, yamlDocument, application]);
+  }, [
+    editor,
+    lineCounter,
+    workflowDefinition,
+    workflowGraph,
+    yamlDocument,
+    application,
+    isWorkflowTab,
+  ]);
 
   return {
     error,

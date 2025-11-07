@@ -9,7 +9,7 @@
 
 import { type AsyncThunk, type AsyncThunkAction, unwrapResult } from '@reduxjs/toolkit';
 import type { AsyncThunkFulfilledActionCreator } from '@reduxjs/toolkit/dist/createAsyncThunk';
-import { useCallback, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 type AsyncThunkDispatch = <R, P, C extends {}>(
@@ -19,19 +19,19 @@ type AsyncThunkDispatch = <R, P, C extends {}>(
 interface AsyncState<R> {
   result: R | undefined;
   isLoading: boolean;
-  error: string | null;
+  error: Error | null;
 }
 const initialState = <R>(): AsyncState<R> => ({ result: undefined, isLoading: false, error: null });
 
 type AsyncAction<R> =
   | { type: 'START' }
   | { type: 'SUCCESS'; payload: R }
-  | { type: 'ERROR'; payload: string | null };
+  | { type: 'ERROR'; payload: Error };
 
 function asyncReducer<R>(state: AsyncState<R>, action: AsyncAction<R>): AsyncState<R> {
   switch (action.type) {
     case 'START':
-      return { ...state, result: undefined, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null };
     case 'SUCCESS':
       return { ...state, result: action.payload, isLoading: false, error: null };
     case 'ERROR':
@@ -46,7 +46,7 @@ export const useAsyncThunkState = <R, P, C extends {}>(
   asyncThunk: AsyncThunk<R, P, C>
 ): [
   start: (params: P) => Promise<void>,
-  { result: R | undefined; isLoading: boolean; error: string | null }
+  { result: R | undefined; isLoading: boolean; error: Error | null }
 ] => {
   const dispatchAsyncThunk = useDispatch<AsyncThunkDispatch>();
   const [state, dispatch] = useReducer(asyncReducer<R>, initialState<R>());
@@ -87,4 +87,66 @@ export const useAsyncThunk = <R, P, C extends {}>(
   );
 
   return start;
+};
+
+/** Generic hook to dispatch an async thunk and return a promise of the thunk result */
+export const useAsyncThunkPolling = <R, P, C extends {}>(
+  asyncThunk: AsyncThunk<R, P, C>,
+  stopCondition: (result: R) => boolean,
+  pollingIntervalMs: number = 1000
+): [
+  pollingManager: { start: (params: P) => Promise<void>; stop: () => void },
+  { result: R | undefined; isLoading: boolean; error: Error | null }
+] => {
+  const dispatchAsyncThunk = useDispatch<AsyncThunkDispatch>();
+  const [state, dispatch] = useReducer(asyncReducer<R>, initialState<R>());
+  const abortControllerRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  const start = useCallback(
+    async (params: P): Promise<void> => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+      dispatch({ type: 'START' });
+      try {
+        let result: R | undefined;
+        let finished = false;
+        let aborted = false;
+        do {
+          const response = await dispatchAsyncThunk(asyncThunk(params));
+          result = unwrapResult(response);
+          aborted = abortControllerRef.current?.signal.aborted;
+          finished = aborted || stopCondition(result);
+          if (!finished) {
+            await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
+          }
+        } while (!finished);
+
+        if (!aborted) {
+          dispatch({ type: 'SUCCESS', payload: result });
+        }
+      } catch (err) {
+        dispatch({ type: 'ERROR', payload: err });
+      } finally {
+        if (abortControllerRef.current) {
+          abortControllerRef.current = null;
+        }
+      }
+    },
+    [asyncThunk, dispatchAsyncThunk, stopCondition, pollingIntervalMs]
+  );
+
+  const stop = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
+
+  const pollingManager = useMemo(() => ({ start, stop }), [start, stop]);
+
+  return [pollingManager, state];
 };

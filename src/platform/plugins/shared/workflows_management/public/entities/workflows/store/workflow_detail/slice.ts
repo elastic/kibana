@@ -10,16 +10,17 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
+import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
-import { findStepByLine } from '../utils/step_finder';
 
 // Initial state
 const initialState: WorkflowDetailState = {
   yamlString: '',
+  computed: undefined,
   workflow: undefined,
   execution: undefined,
+  computedExecution: undefined,
   activeTab: undefined,
-  computed: undefined,
   connectors: undefined,
   schema: getWorkflowZodSchema({}),
   focusedStepId: undefined,
@@ -65,6 +66,10 @@ const workflowDetailSlice = createSlice({
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
       state.execution = action.payload;
     },
+    clearExecution: (state) => {
+      state.execution = undefined;
+      state.computedExecution = undefined;
+    },
     setActiveTab: (state, action: { payload: ActiveTab | undefined }) => {
       state.activeTab = action.payload;
     },
@@ -78,6 +83,9 @@ const workflowDetailSlice = createSlice({
     },
     _setGeneratedSchemaInternal: (state, action: { payload: WorkflowDetailState['schema'] }) => {
       state.schema = action.payload;
+    },
+    _setComputedExecution: (state, action: { payload: ComputedData }) => {
+      state.computedExecution = action.payload;
     },
   },
 });
@@ -95,17 +103,20 @@ export const {
   setIsTestModalOpen,
   setConnectors,
   setExecution,
+  clearExecution,
   setActiveTab,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,
   _clearComputedData,
   _setGeneratedSchemaInternal,
+  _setComputedExecution,
 } = workflowDetailSlice.actions;
 
 // Ignore these non-serializable fields in the state
 export const ignoredPaths: Array<string | RegExp> = [
   /detail\.computed\.*/, // All computed data is not serializable
+  /detail\.computedExecution\.*/, // All computed execution data is not serializable
   'detail.schema', // Zod schema is not serializable
   'detail.workflow.definition', // WorkflowYaml definition schema is not serializable
   'detail.execution.definition', // WorkflowYaml definition schema is not serializable
@@ -114,4 +125,5 @@ export const ignoredPaths: Array<string | RegExp> = [
 export const ignoredActions: Array<string> = [
   'detail/_setComputedDataInternal',
   'detail/_setGeneratedSchemaInternal',
+  'detail/_setComputedExecution',
 ];

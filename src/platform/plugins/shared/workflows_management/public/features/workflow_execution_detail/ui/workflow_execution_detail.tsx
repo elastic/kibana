@@ -40,14 +40,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const showBackButton = activeTab === 'executions';
 
     useEffect(() => {
-      if (workflowExecution && !selectedStepExecutionId) {
-        // Auto-select the first step execution if none is selected
+      if (workflowExecution && !selectedStepExecutionId && !isLoading) {
+        // Auto-select the first step execution if none is selected it is not loading
         const firstStepExecutionId = workflowExecution.stepExecutions?.[0]?.id;
         if (firstStepExecutionId) {
           setSelectedStepExecution(firstStepExecutionId);
         }
       }
-    }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution]);
+    }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, isLoading]);
 
     const setSelectedStepExecutionId = useCallback(
       (stepExecutionId: string | null) => {
@@ -78,7 +78,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               definition={workflowDefinition}
               execution={workflowExecution ?? null}
               showBackButton={showBackButton}
-              isLoading={isLoading}
               error={error}
               onClose={onClose}
               onStepExecutionClick={setSelectedStepExecutionId}

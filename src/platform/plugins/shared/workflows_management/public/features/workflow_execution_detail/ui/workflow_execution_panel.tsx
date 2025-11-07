@@ -41,7 +41,6 @@ const i18nTexts = {
 export interface WorkflowExecutionPanelProps {
   execution: WorkflowExecutionDto | null;
   definition: WorkflowYaml | null;
-  isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
@@ -53,7 +52,6 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     execution,
     definition,
     showBackButton = true,
-    isLoading,
     error,
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
@@ -101,7 +99,6 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
                 <WorkflowStepExecutionTree
                   definition={definition}
                   execution={execution ?? null}
-                  isLoading={isLoading}
                   error={error}
                   onStepExecutionClick={onStepExecutionClick}
                   selectedId={selectedStepExecutionId ?? null}

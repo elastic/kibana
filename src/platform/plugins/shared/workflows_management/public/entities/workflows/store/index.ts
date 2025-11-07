@@ -11,7 +11,7 @@
 // Types
 export type * from './types';
 export type * from './workflow_detail/types';
-export type * from './utils/build_workflow_lookup';
+export type * from './workflow_detail/utils/build_workflow_lookup';
 
 // Action creators
 export * from './workflow_detail/slice';
@@ -19,7 +19,6 @@ export * from './workflow_detail/slice';
 export { createWorkflowsStore as createWorkflowDetailStore } from './store';
 
 // Selectors
-// TODO: do not export selectors from here, use the selectors from the workflow_detail/selectors file instead
 export * from './workflow_detail/selectors';
 
 // Middleware (if needed for custom store setup)

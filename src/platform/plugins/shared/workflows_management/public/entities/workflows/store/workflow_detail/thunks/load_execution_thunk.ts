@@ -12,7 +12,8 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { setExecution } from '../slice';
+import { _setComputedExecution, setExecution } from '../slice';
+import { performComputation } from '../utils/computation';
 
 export interface LoadExecutionParams {
   id: string;
@@ -26,13 +27,20 @@ export const loadExecutionThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/loadExecutionThunk',
-  async ({ id }, { dispatch, rejectWithValue, extra: { services } }) => {
+  async ({ id }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     try {
+      const previousExecution = getState().detail.execution;
+
       // Make the API call to load the execution
       const response = await http.get<WorkflowExecutionDto>(`/api/workflowExecutions/${id}`);
       dispatch(setExecution(response));
 
+      if (id !== previousExecution?.id) {
+        // avoid recomputing derived data if the execution is the same
+        const computed = performComputation(response.yaml, response.workflowDefinition);
+        dispatch(_setComputedExecution(computed));
+      }
       return response;
     } catch (error) {
       // Extract error message from HTTP error body if available
