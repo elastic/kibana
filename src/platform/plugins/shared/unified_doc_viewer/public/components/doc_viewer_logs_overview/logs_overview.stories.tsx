@@ -60,7 +60,7 @@ export const ApmErrorOtelExample: Story = {
 };
 
 /**
- * APM error with processor.event: error and culrpit
+ * APM error with processor.event: error and culprit
  */
 export const APMErrorExample: Story = {
   name: 'APM Error',
