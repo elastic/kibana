@@ -65,7 +65,7 @@ export function TraceWaterfallContextProvider({
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
 }) {
-  const { duration, traceWaterfall, maxDepth, rootItem, traceState } = useTraceWaterfall({
+  const { duration, traceWaterfall, maxDepth, rootItem, traceState, message } = useTraceWaterfall({
     traceItems,
   });
 
@@ -90,6 +90,7 @@ export function TraceWaterfallContextProvider({
         scrollElement,
         getRelatedErrorsHref,
         isEmbeddable,
+        message,
       }}
     >
       {children}
