@@ -10,7 +10,6 @@ import { isString } from 'lodash';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
 import { pipe } from 'fp-ts/pipeable';
 import { map, getOrElse } from 'fp-ts/Option';
 import type {
@@ -27,57 +26,47 @@ import {
 } from '@kbn/actions-plugin/common';
 import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/teams';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/teams';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import type { Result } from '../lib/result_type';
 import { isOk, promiseResult } from '../lib/result_type';
 
 export type TeamsConnectorType = ConnectorType<
-  {},
+  ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType,
   unknown
 >;
 export type TeamsConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType
 >;
 
-// secrets definition
-
-export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
-
-const secretsSchemaProps = {
-  webhookUrl: z.string(),
-};
-const SecretsSchema = z.object(secretsSchemaProps).strict();
-
-// params definition
-
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
-
-const ParamsSchema = z
-  .object({
-    message: z.string().min(1),
-  })
-  .strict();
-
-export const ConnectorTypeId = '.teams';
 // connector type definition
 export function getConnectorType(): TeamsConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.teams.title', {
-      defaultMessage: 'Microsoft Teams',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: z.object({}).strict().default({}) },
+      config: { schema: ConfigSchema },
       secrets: {
         schema: SecretsSchema,
         customValidator: validateConnectorTypeConfig,
