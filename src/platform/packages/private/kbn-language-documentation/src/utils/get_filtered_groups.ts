@@ -29,7 +29,6 @@ export const getFilteredGroups = (
     return sections?.groups.slice(numOfGroupsToOmit).map((group) => ({
       ...group,
       options: group.items,
-      hasLabelMatches: false,
     }));
   }
 

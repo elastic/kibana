@@ -82,4 +82,39 @@ describe('getFilteredGroups', () => {
       { ...sections.groups[1], options: [sections.groups[1].items[0]] },
     ]);
   });
+
+  test('Should prioritize items that match on label over items that match on description', () => {
+    const documentation = {
+      groups: [
+        {
+          label: 'Section one',
+          description: 'Values',
+          items: [],
+        },
+        {
+          label: 'Section two',
+          items: [
+            {
+              label: 'Section two item 1 blah blah',
+              description: <Markdown readOnly markdownContent={`Values`} />,
+            },
+            {
+              label: 'Values',
+              description: (
+                <Markdown readOnly markdownContent={`## Section two item 2 description `} />
+              ),
+            },
+          ],
+        },
+      ],
+      initialSection: <span>Here is the initial section</span>,
+    };
+    const filteredSections = getFilteredGroups('Values', true, documentation);
+    expect(filteredSections).toStrictEqual([
+      {
+        ...documentation.groups[1],
+        options: [documentation.groups[1].items[1], documentation.groups[1].items[0]],
+      },
+    ]);
+  });
 });
