@@ -12,6 +12,8 @@ import {
   EuiResizableContainer,
   EuiFlexItem,
   EuiProgress,
+  EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
@@ -77,16 +79,13 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     rule,
     streamRuleCreation,
     updates,
+    cancelRuleCreation,
     isStreaming: isAiRuleCreationInProgress,
+    isCancelled: isAiRuleCreationCancelled,
   } = useAiRuleCreationStream();
 
   const isValid = promptValue.length > 0 && selectedConnectorId != null;
-  const handlePromptSubmit = useCallback(() => {
-    // Prevent submitting the same prompt again
-    if (lastSubmittedPrompt.current === promptValue) {
-      setShowForm(true);
-      return;
-    }
+  const submitPrompt = useCallback(() => {
     if (isValid) {
       setSubmittedPromptValue(promptValue);
       streamRuleCreation({
@@ -101,6 +100,19 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
         });
     }
   }, [promptValue, isValid, streamRuleCreation, selectedConnectorId, addError]);
+
+  const handlePromptSubmit = useCallback(() => {
+    // Prevent submitting the same prompt again
+    if (lastSubmittedPrompt.current === promptValue) {
+      setShowForm(true);
+      return;
+    }
+    submitPrompt();
+  }, [promptValue, submitPrompt]);
+
+  const handleRegenerate = useCallback(() => {
+    submitPrompt();
+  }, [submitPrompt]);
 
   const onSendMessage = useCallback(() => {
     handlePromptSubmit();
@@ -174,11 +186,37 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                         onSendMessage={onSendMessage}
                         isAiRuleCreationInProgress={isAiRuleCreationInProgress}
                       />
-                      <EuiSpacer size="m" />
+                      {rule || isAiRuleCreationCancelled ? (
+                        <>
+                          <EuiSpacer size="m" />
+                          <EuiFlexGroup direction="row" justifyContent="flexStart" gutterSize="s">
+                            <EuiFlexItem grow={false}>
+                              <EuiButton
+                                onClick={handleRegenerate}
+                                isLoading={isAiRuleCreationInProgress}
+                                isDisabled={!isValid}
+                              >
+                                {'Regenerate'}
+                              </EuiButton>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </>
+                      ) : null}
+                      {isAiRuleCreationInProgress ? (
+                        <>
+                          <EuiSpacer size="m" />
+                          <EuiFlexGroup direction="row" justifyContent="flexStart" gutterSize="s">
+                            <EuiFlexItem grow={false}>
+                              <EuiButton color="danger" onClick={cancelRuleCreation}>
+                                {'Cancel'}
+                              </EuiButton>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </>
+                      ) : null}
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>
                   <EuiSpacer size="m" />
-
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
                       {isAiRuleCreationInProgress && (
@@ -186,8 +224,16 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                           <EuiProgress size="s" color="primary" />
                         </EuiFlexItem>
                       )}
-                      <EuiSpacer size="m" />
 
+                      {isAiRuleCreationCancelled ? (
+                        <EuiCallOut announceOnMount color="warning" iconType="warning">
+                          <EuiText size="s">
+                            {'The AI-assisted rule creation process was cancelled.'}
+                          </EuiText>
+                        </EuiCallOut>
+                      ) : null}
+
+                      <EuiSpacer size="m" />
                       <AiAssistedRuleUpdates
                         updates={updates}
                         isStreaming={isAiRuleCreationInProgress}

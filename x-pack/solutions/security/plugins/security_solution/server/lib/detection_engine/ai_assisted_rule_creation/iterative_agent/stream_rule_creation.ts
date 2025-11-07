@@ -18,14 +18,16 @@ export async function* streamRuleCreation(
   initialState: { userQuery: string; errors: string[] },
   options?: {
     recursionLimit?: number;
+    signal?: AbortSignal;
   }
 ): AsyncGenerator<RuleCreationStreamEvent, RuleCreationState | null, unknown> {
-  const { recursionLimit = 25 } = options || {};
+  const { recursionLimit = 25, signal } = options || {};
 
   try {
     const stream = graph.stream(initialState, {
       streamMode: 'updates',
       recursionLimit,
+      signal,
     });
 
     yield {

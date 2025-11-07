@@ -42,22 +42,16 @@ const streamCreateAiAssistedRuleAPI = async ({
 
 export const useAiRuleCreationStream = () => {
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [updates, setUpdates] = useState<RuleCreationStreamEvent[]>([]);
 
   const streamRuleCreation = useCallback(
-    async ({
-      message,
-      connectorId,
-      streamMode,
-    }: {
-      message: string;
-      connectorId: string;
-      streamMode?: 'values' | 'updates' | 'debug';
-    }) => {
+    async ({ message, connectorId }: { message: string; connectorId: string }) => {
       setIsStreaming(true);
+      setIsCancelled(false);
+      setUpdates([]);
 
-      // Create abort controller for cancellation
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
@@ -65,8 +59,8 @@ export const useAiRuleCreationStream = () => {
         const response = await streamCreateAiAssistedRuleAPI({
           message,
           connectorId,
+          signal: abortController.signal,
         });
-        setUpdates([]);
         const reader = response?.response?.body?.getReader?.();
         const decoder = new TextDecoder();
 
@@ -108,22 +102,28 @@ export const useAiRuleCreationStream = () => {
     []
   );
 
-  const cancelStream = useCallback(() => {
+  const cancelRuleCreation = useCallback(() => {
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+      try {
+        abortControllerRef.current.abort();
+      } catch (error) {
+        console.error('Error aborting AI-assisted rule creation stream:', error);
+      }
       setIsStreaming(false);
+      setIsCancelled(true);
     }
   }, []);
 
   const rule =
-    isStreaming === false
+    isStreaming === false && isCancelled === false
       ? (updates.at(-1)?.nodeState.rule as AIAssistedCreateRuleResponse['rule']) || null
       : null;
 
   return {
     streamRuleCreation,
-    cancelStream,
+    cancelRuleCreation,
     isStreaming,
+    isCancelled,
     rule,
     updates,
   };

@@ -156,7 +156,7 @@ export function getRuleCreationNodeInfo(update: RuleCreationStreamEvent): EuiCom
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <EuiText size="s">
-                {ruleState.knowledgeBase.documents.length === 0 ? (
+                {!ruleState.knowledgeBase?.documents?.length ? (
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.updates.processKnowledgeBase.noDocuments"
                     defaultMessage="No relevant knowledge base documents found."
