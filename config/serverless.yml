@@ -297,3 +297,7 @@ xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
+
+# Cross Project Search
+cps.enabled: true
+cps.cpsEnabled: false
