@@ -53,7 +53,7 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
 
         {/* Configuration Buttons Row */}
         <EuiFlexGroup gutterSize="s" wrap>
-          <EuiFlexItem grow={false} justifyContent="center">
+          <EuiFlexItem grow={false}>
             <EuiCodeBlock isCopyable paddingSize="none" fontSize="m">
               {elasticsearchUrl}
             </EuiCodeBlock>
