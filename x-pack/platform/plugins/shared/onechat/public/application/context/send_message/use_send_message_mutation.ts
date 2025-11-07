@@ -10,7 +10,6 @@ import { useRef, useState, useMemo } from 'react';
 import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAgentId, useConversation } from '../../hooks/use_conversation';
-import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
