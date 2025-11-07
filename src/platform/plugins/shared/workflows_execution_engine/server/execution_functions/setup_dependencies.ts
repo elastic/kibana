@@ -17,7 +17,7 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import type { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
