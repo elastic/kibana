@@ -7,8 +7,7 @@
 
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
-import type { AnomalySwimlaneEmbeddableStateViewBy } from '@kbn/ml-plugin/public/embeddables/anomaly_swimlane/types';
-import { SWIMLANE_TYPE } from '@kbn/ml-plugin/server/embeddable/schemas';
+import { SWIMLANE_TYPE } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
@@ -51,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
 
   describe('anomaly detection result views - cases attachments', function () {
-    this.tags(['ml', 'cases', 'dima']);
+    this.tags(['ml', 'cases']);
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
@@ -92,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
             tag: 'ml_swim_lane_case',
           });
 
-          const attachmentData: Omit<AnomalySwimlaneEmbeddableStateViewBy, 'id'> = {
+          const attachmentData: Omit<AnomalySwimLaneEmbeddableState, 'id'> = {
             swimlaneType: SWIMLANE_TYPE.VIEW_BY,
             viewBy: 'airline',
             jobIds: [JOB_CONFIG.job_id],
