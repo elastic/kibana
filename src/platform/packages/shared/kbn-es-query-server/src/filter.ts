@@ -53,7 +53,7 @@ const rangeSchema = schema.object({
 /**
  * Base properties shared by all simplified filters
  */
-const baseProperties = {
+const basePropertiesSchema = schema.object({
   pinned: schema.maybe(
     schema.boolean({
       meta: { description: 'Whether the filter is pinned' },
@@ -113,7 +113,7 @@ const baseProperties = {
       },
     })
   ),
-};
+});
 
 // ====================================================================
 // FILTER CONDITION SCHEMAS
@@ -122,15 +122,14 @@ const baseProperties = {
 /**
  * Common field property for all filter conditions
  */
-const conditionField = {
+const conditionFieldSchema = schema.object({
   field: schema.string({ meta: { description: 'Field the filter applies to' } }),
-};
+});
 
 /**
  * Schema for 'is' and 'is_not' operators with single value
  */
-const singleConditionSchema = schema.object({
-  ...conditionField,
+const singleConditionSchema = conditionFieldSchema.extends({
   operator: schema.oneOf([schema.literal('is'), schema.literal('is_not')], {
     meta: { description: 'Single value comparison operators' },
   }),
@@ -142,8 +141,7 @@ const singleConditionSchema = schema.object({
 /**
  * Schema for 'is_one_of' and 'is_not_one_of' operators with array values
  */
-const oneOfConditionSchema = schema.object({
-  ...conditionField,
+const oneOfConditionSchema = conditionFieldSchema.extends({
   operator: schema.oneOf([schema.literal('is_one_of'), schema.literal('is_not_one_of')], {
     meta: { description: 'Array value comparison operators' },
   }),
@@ -160,8 +158,7 @@ const oneOfConditionSchema = schema.object({
 /**
  * Schema for 'range' operator with range value
  */
-const rangeConditionSchema = schema.object({
-  ...conditionField,
+const rangeConditionSchema = conditionFieldSchema.extends({
   operator: schema.literal('range'),
   value: rangeSchema,
 });
@@ -169,8 +166,7 @@ const rangeConditionSchema = schema.object({
 /**
  * Schema for 'exists' and 'not_exists' operators without value
  */
-const existsConditionSchema = schema.object({
-  ...conditionField,
+const existsConditionSchema = conditionFieldSchema.extends({
   operator: schema.oneOf([schema.literal('exists'), schema.literal('not_exists')], {
     meta: { description: 'Field existence check operators' },
   }),
@@ -192,9 +188,8 @@ const conditionSchema = schema.oneOf(
 /**
  * Schema for condition filters
  */
-export const asCodeConditionFilterSchema = schema.object(
+export const asCodeConditionFilterSchema = basePropertiesSchema.extends(
   {
-    ...baseProperties,
     condition: conditionSchema,
   },
   { meta: { description: 'Condition filter' } }
@@ -205,9 +200,8 @@ export const asCodeConditionFilterSchema = schema.object(
  * Uses lazy schema to handle recursive references
  */
 const GROUP_FILTER_ID = '@kbn/es-query-server_groupFilter'; // package prefix for global uniqueness in OAS specs
-export const asCodeGroupFilterSchema = schema.object(
+export const asCodeGroupFilterSchema = basePropertiesSchema.extends(
   {
-    ...baseProperties,
     group: schema.object(
       {
         type: schema.oneOf([schema.literal('and'), schema.literal('or')]),
@@ -227,9 +221,8 @@ export const asCodeGroupFilterSchema = schema.object(
 /**
  * Schema for DSL filters
  */
-export const asCodeDSLFilterSchema = schema.object(
+export const asCodeDSLFilterSchema = basePropertiesSchema.extends(
   {
-    ...baseProperties,
     dsl: schema.object({
       query: schema.recordOf(schema.string(), schema.any(), {
         meta: { description: 'Elasticsearch Query DSL object' },
