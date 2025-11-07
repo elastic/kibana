@@ -204,6 +204,14 @@
                     "pluginId": "@kbn/onechat-common",
                     "scope": "common",
                     "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.BrowserToolCallEvent",
+                    "text": "BrowserToolCallEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
                     "section": "def-common.ToolProgressEvent",
                     "text": "ToolProgressEvent"
                   },
@@ -238,6 +246,14 @@
                     "docId": "kibKbnOnechatCommonPluginApi",
                     "section": "def-common.MessageCompleteEvent",
                     "text": "MessageCompleteEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.ThinkingCompleteEvent",
+                    "text": "ThinkingCompleteEvent"
                   },
                   " | ",
                   {
@@ -2519,6 +2535,14 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.BrowserToolCallEvent",
+                "text": "BrowserToolCallEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.ToolProgressEvent",
                 "text": "ToolProgressEvent"
               },
@@ -2553,6 +2577,14 @@
                 "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.MessageCompleteEvent",
                 "text": "MessageCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ThinkingCompleteEvent",
+                "text": "ThinkingCompleteEvent"
               },
               " | ",
               {
@@ -2938,6 +2970,14 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.BrowserToolCallEvent",
+                "text": "BrowserToolCallEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.ToolProgressEvent",
                 "text": "ToolProgressEvent"
               },
@@ -2972,6 +3012,14 @@
                 "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.MessageCompleteEvent",
                 "text": "MessageCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ThinkingCompleteEvent",
+                "text": "ThinkingCompleteEvent"
               },
               " | ",
               {
