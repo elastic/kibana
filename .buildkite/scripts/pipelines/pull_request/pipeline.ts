@@ -19,7 +19,7 @@ import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
 import {
   areChangesSkippable,
-  // doAnyChangesMatch,
+  doAnyChangesMatch,
   getAgentImageConfig,
   emitPipeline,
 } from '#pipeline-utils';
@@ -32,7 +32,7 @@ if (!prConfig) {
   process.exit(1);
 }
 
-// const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
+const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
