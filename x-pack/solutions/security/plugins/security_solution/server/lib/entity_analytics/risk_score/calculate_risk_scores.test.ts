@@ -60,7 +60,7 @@ describe('buildFiltersForEntityType', () => {
       mockExcludeAlertTags
     );
 
-    // Host filters should exclude the host-specific filter (must)
+    // Host filters should include the host-specific filter (must)
     expect(hostFilters).toHaveLength(5);
     expect(hostFilters[4]).toEqual(
       expect.objectContaining({
@@ -80,7 +80,7 @@ describe('buildFiltersForEntityType', () => {
       })
     );
 
-    // User filters should exclude the user-specific filter (must)
+    // User filters should include the user-specific filter (must)
     expect(userFilters).toHaveLength(5);
     expect(userFilters[4]).toEqual(
       expect.objectContaining({
