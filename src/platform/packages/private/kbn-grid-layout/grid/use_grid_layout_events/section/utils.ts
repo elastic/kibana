@@ -33,14 +33,14 @@ export const getNextKeyboardPosition = (
 
   switch (ev.code) {
     case KeyboardCode.Down: {
-      const bottomOfPageReached = isAtBottomOfPage();
+      const bottomOfPageReached = isAtBottomOfPage(scrollContainer);
 
       // check if next key will cross the bottom edge
       // if we're at the bottom of the page, the handle can go down even more so we can reorder with the last row
       const bottomMaxPosition = bottomOfPageReached
         ? handlePosition.clientY + stepY
         : handlePosition.clientY + 2 * stepY;
-      const { clientHeight } = getScrollDimensions();
+      const { clientHeight } = getScrollDimensions(scrollContainer);
       const isCloseToBottom = bottomMaxPosition > clientHeight;
 
       return {
