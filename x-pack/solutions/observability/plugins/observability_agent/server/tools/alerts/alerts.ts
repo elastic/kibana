@@ -71,7 +71,7 @@ export async function createObservabilityAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof alertsSchema> = {
     id: OBSERVABILITY_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve Observability alerts for services, hosts and containers. Requires start/end; supports kqlFilter. Defaults to active alerts (set includeRecovered to include recovered). Also returns selected alert fields (name:type) based on your request for use as table columns.`,
+    description: `Retrieve Observability alerts and relevant fields for a given time range. Defaults to active alerts (set includeRecovered to include recovered).`,
     schema: alertsSchema,
     tags: ['observability', 'alerts'],
     handler: async (

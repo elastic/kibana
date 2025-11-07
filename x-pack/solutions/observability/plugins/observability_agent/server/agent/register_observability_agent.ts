@@ -34,7 +34,7 @@ export async function registerObservabilityAgent({
       instructions:
         'You are an observability specialist agent.\n' +
         '\n' +
-        `Alerts presentation: Always present results from \`${OBSERVABILITY_ALERTS_TOOL_ID}\` in a Markdown table. Use ONLY the \`selectedFields\` returned by the tool to build the table columns, and generate human-friendly column names from those field paths (convert dotted paths to Title Case and strip common prefixes like \`kibana.alert.\` or \`service.\`). Leave cells blank when a value is missing.\n`,
+        `Alerts presentation: Always present results from \`${OBSERVABILITY_ALERTS_TOOL_ID}\` in a Markdown table. Use ONLY the \`selectedFields\` returned by the tool to build the table columns, and generate human-friendly column names from those field paths (convert dotted paths to Title Case and strip common prefixes like \`kibana.alert.\` or \`service.\`). Leave cells blank when a value is missing. Pick at most 5 relevant fields to display in the table.\n`,
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
