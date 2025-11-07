@@ -91,10 +91,10 @@ export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
   '@elastic/ems-client@8.6.3': ['Elastic License 2.0'],
-  '@elastic/eui@107.0.1': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
-  '@elastic/eui-theme-borealis@3.6.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
+  '@elastic/eui@109.0.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
+  '@elastic/eui-theme-borealis@5.0.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
   'buffers@0.1.1': ['MIT'], // license in importing module https://www.npmjs.com/package/binary
   '@bufbuild/protobuf@2.5.2': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)
-  '@arizeai/phoenix-client@4.0.3': ['Elastic License 2.0'], // see https://github.com/Arize-ai/phoenix/blob/main/LICENSE
+  '@arizeai/phoenix-client@4.2.0': ['Elastic License 2.0'], // see https://github.com/Arize-ai/phoenix/blob/main/LICENSE
 };

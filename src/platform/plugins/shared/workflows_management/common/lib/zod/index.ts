@@ -9,3 +9,4 @@
 
 export * from './zod_utils';
 export { getCompactTypeDescription, getDetailedTypeDescription } from './zod_type_description';
+export { formatZodError } from './format_zod_error';

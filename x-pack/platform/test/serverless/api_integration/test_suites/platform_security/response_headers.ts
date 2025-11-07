@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/response_headers', function () {
-    const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
+    const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
     const defaultPermissionsPolicy =
       'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=();report-to=violations-endpoint';

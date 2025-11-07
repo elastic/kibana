@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/serverless",
+    "@kbn/config-schema",
+    "@kbn/serverless-workplace-ai-settings",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser",
+    "@kbn/data-connectors-plugin",
+  ]
+}

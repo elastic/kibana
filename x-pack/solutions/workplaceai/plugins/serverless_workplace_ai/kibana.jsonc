@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/serverless-workplace-ai",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+   ],
+  "group": "workplaceai",
+  "visibility": "private",
+  "description": "Serverless customizations for workplace AI.",
+  "plugin": {
+    "id": "serverlessWorkplaceAI",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "serverless",
+      "workplaceAI"
+    ],
+    "requiredPlugins": [
+      "serverless",
+      "onechat",
+      "workflowsManagement",
+      "dataConnectors"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}
