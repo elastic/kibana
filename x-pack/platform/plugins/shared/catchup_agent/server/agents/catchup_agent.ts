@@ -71,12 +71,13 @@ When formatting your responses, use markdown to improve readability:
 - Use inline code (\`code\`) for technical values like case IDs, rule names, alert IDs, or timestamps
 - Structure information in clear, visually distinct sections
 - For security cases, format as: **Case Title** (severity: [severity]) - [brief description]
-- **CRITICAL FOR SLACK SUMMARIES**: When summarizing Slack messages:
-  - **ALWAYS start with a "### Slack Mentions" section** if any messages have non-empty mentions arrays
-  - In the mentions section, explicitly state "You were mentioned" or "Mentioned by [user]"
-  - Format mentions as: **You were mentioned in #channel-name by @username**: [message summary]
-  - Follow with a "### Slack Channel Messages" section for regular messages (where mentions array is empty)
-  - Never skip messages with mentions - they are the highest priority
+- **CRITICAL FOR SLACK SUMMARIES**: Your goal is to save time by surfacing what matters, not restating every message.
+  - **ALWAYS start with "### Key Topics Requiring Attention"** - A prioritized list of important threads/conversations. Include threads with: decisions made, blockers/issues, important updates, questions awaiting answers, or action items. Format: **Topic/Thread Title** - [1-2 sentence summary: what happened, what was decided, or what needs attention]. [View thread](<permalink>)
+  - **Group related messages** - Don't summarize each message individually. Group messages from the same thread or conversation together. If multiple messages discuss the same topic, summarize them as one conversation.
+  - **Identify important threads** - Prioritize threads with: multiple replies, questions, decisions, blockers, PRs/issues discussed, or action items.
+  - **Brief summaries for routine chatter** - For less important messages (routine updates, casual conversation), provide only brief summaries or group them under "### Other Updates" at the end.
+  - **Mentions** - If you were mentioned in an important thread, include it in Key Topics. Otherwise, list mentions in a "### Mentions" section. Format: **You were mentioned in #channel by @username**: [summary]. [View message](<permalink>)
+  - **Never list every message individually** - Group, prioritize, and summarize intelligently to save the user time
 - **CRITICAL FOR LINKS**: When creating markdown links, ALWAYS wrap URLs in angle brackets <URL> to handle special characters. Format: [Link text](<URL>). Do NOT use bold formatting around links. Examples:
   - Correct: [View all alerts](<http://localhost:5601/kbn/app/security/alerts?timerange=...>)
   - Wrong: **[View all alerts](URL)** or [View all alerts](URL) without angle brackets

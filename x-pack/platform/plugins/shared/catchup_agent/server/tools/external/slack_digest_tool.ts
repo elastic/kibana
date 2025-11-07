@@ -87,14 +87,19 @@ The tool returns messages in THREE separate arrays:
 - **dmMessages**: Direct messages (DMs) - only included when includeDMs=true
 
 **CRITICAL - Summarization Rules:**
-1. **Use userMentionMessages array for mentions** - ALL messages in this array mention the authenticated user
-2. **Use channelMessages array for regular messages** - These are general channel messages, NOT mentions
-3. **Use dmMessages array for DMs** - These are direct messages, only present when includeDMs=true
-4. **Structure summary**: (1) MENTIONS from userMentionMessages (group by channel), (2) Regular messages from channelMessages, (3) DMs from dmMessages if includeDMs=true
-5. **Format mentions**: "You were mentioned in #channel by @username: [summary]" (use user_name/user_real_name from mentions array, not user_id)
-6. **PRIORITIZE userMentionMessages** - these are the most important and should be listed first
-7. **Use human-readable names** - ALWAYS use user_name or user_real_name from mentions array, NEVER user_id
-8. **Include permalinks for EVERY message** - When mentioning ANY message in your summary, you MUST include the permalink URL from the message's \`permalink\` field. Link to EVERY message you mention, not just one. For threads, only one link is needed (thread replies share the parent message's permalink). Format links using markdown: [Link text](permalink_url). Example: [View message](https://elastic.slack.com/archives/C123/p456)
+1. **PRIORITIZE AND GROUP, DON'T LIST EVERYTHING** - Your goal is to save time by surfacing what matters, not restating every message. Group related messages into conversations/threads and prioritize by importance.
+2. **Start with "### Key Topics Requiring Attention"** - Begin your summary with a prioritized list of the most important threads/conversations. Include: (a) Threads with decisions made, (b) Blockers or issues needing resolution, (c) Important updates or announcements, (d) Questions awaiting answers, (e) Action items assigned. For each key topic, provide: **Topic/Thread Title** - [1-2 sentence summary of what happened, what was decided, or what needs attention]. [View thread](<permalink>)
+3. **Use userMentionMessages array for mentions** - ALL messages in this array mention the authenticated user. These are HIGH PRIORITY and should appear in the "Key Topics" section if they contain decisions, blockers, or action items.
+4. **Group related messages** - Don't summarize each message individually. Group messages from the same thread or conversation together. If multiple messages discuss the same topic, summarize them as one conversation.
+5. **Identify important threads** - Look for threads with: multiple replies (thread_replies_count > 0), questions being asked, decisions being made, blockers mentioned, PRs/issues being discussed, or action items assigned.
+6. **Brief summaries for routine chatter** - For less important messages (routine updates, casual conversation, non-blocking discussions), provide only brief summaries or group them under a "### Other Updates" section at the end. Don't waste space on low-value content.
+7. **Format mentions** - For mentions: "You were mentioned in #channel by @username: [summary]" (use user_name/user_real_name from mentions array, not user_id). If the mention is part of an important thread, include it in the Key Topics section.
+8. **Use human-readable names** - ALWAYS use user_name or user_real_name from mentions array, NEVER user_id
+9. **Include permalinks for important threads** - For key topics and important conversations, include the permalink. For threads, use the parent message's permalink (thread replies share the parent's permalink). Format: [View thread](<permalink>) or [View message](<permalink>)
+10. **Structure your summary**:
+    - Start with "### Key Topics Requiring Attention" (prioritized list)
+    - Follow with "### Mentions" (if any userMentionMessages that aren't already in Key Topics)
+    - End with "### Other Updates" (brief summaries of routine chatter, grouped by channel)
 
 The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 Optionally filters by keywords for user mentions or project names.`,

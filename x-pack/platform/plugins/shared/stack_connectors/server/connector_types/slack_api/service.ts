@@ -1243,6 +1243,18 @@ export const createExternalService = (
         `[Slack Service] Step 1 complete: ${allChannels.length} total conversations found`
       );
 
+      // Log channel configuration for debugging
+      if (hasAllowedChannels) {
+        logger.info(
+          `==> [Slack Service] ⚠️ allowedChannels is configured (${allowedChannelIds.length} channels). Regular channel messages will only be fetched from these channels. Mentions are searched across ALL channels via search.messages API.`
+        );
+        logger.info(`==> [Slack Service] Allowed channels: ${allowedChannelIds.join(', ')}`);
+      } else {
+        logger.info(
+          `==> [Slack Service] ✓ No allowedChannels configured. Fetching messages from ALL accessible channels. Mentions are also searched across ALL channels.`
+        );
+      }
+
       // Fetch participant info for DMs (im and mpim) to enable user attribution
       // Identify DMs by checking flags OR by channel ID prefix:
       // - 'D' prefix = 1-on-1 DMs (im)
@@ -2062,6 +2074,14 @@ export const createExternalService = (
         `[Slack Service] getChannelDigest complete: ${digestResponse.total} messages from ${digestResponse.channels_searched} channels ` +
           `+ ${searchResultMatches.length} mentions from all channels (via search.messages API)`
       );
+      logger.info(
+        `==> [Slack Service] Breakdown: ${userMentionMessages.length} mention messages, ${channelMessages.length} channel messages, ${dmMessages.length} DM messages`
+      );
+      if (hasAllowedChannels) {
+        logger.warn(
+          `==> [Slack Service] ⚠️ NOTE: Regular channel messages are only from ${digestResponse.channels_searched} allowed channels. Mentions are from ALL channels. Consider removing allowedChannels config to fetch from all channels.`
+        );
+      }
 
       return buildSlackExecutorSuccessResponse({ slackApiResponseData: digestResponse });
     } catch (error) {
