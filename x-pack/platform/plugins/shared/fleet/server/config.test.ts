@@ -142,6 +142,11 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
+  it('should return default value for internal.retrySetupOnBoot', () => {
+    const validatedConfig = config.schema.validate({});
+    expect(validatedConfig.internal?.retrySetupOnBoot).toBe(true);
+  });
+
   describe('deprecations', () => {
     it('should add a depreciations when trying to enable a non existing experimental feature', () => {
       const res = applyConfigDeprecations({
