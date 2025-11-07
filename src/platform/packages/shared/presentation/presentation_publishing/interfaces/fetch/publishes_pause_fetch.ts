@@ -11,14 +11,23 @@ import type { Observable } from 'rxjs';
 
 export interface PublishesPauseFetch {
   isFetchPaused$: Observable<boolean>;
+}
+
+export interface PublishesEditablePauseFetch extends PublishesPauseFetch {
   setFetchPaused: (paused: boolean) => void;
 }
 
 export const apiPublishesPauseFetch = (
   unknownApi: null | unknown
 ): unknownApi is PublishesPauseFetch => {
+  return Boolean(unknownApi && (unknownApi as PublishesPauseFetch)?.isFetchPaused$ !== undefined);
+};
+
+export const apiPublishesEditablePauseFetch = (
+  unknownApi: null | unknown
+): unknownApi is PublishesEditablePauseFetch => {
   return (
-    Boolean(unknownApi && (unknownApi as PublishesPauseFetch)?.isFetchPaused$ !== undefined) &&
-    typeof (unknownApi as PublishesPauseFetch)?.setFetchPaused === 'function'
+    apiPublishesPauseFetch(unknownApi) &&
+    typeof (unknownApi as PublishesEditablePauseFetch)?.setFetchPaused === 'function'
   );
 };

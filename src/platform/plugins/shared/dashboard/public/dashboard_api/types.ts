@@ -34,7 +34,7 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
-  PublishesPauseFetch,
+  PublishesEditablePauseFetch,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -118,7 +118,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
-  PublishesPauseFetch &
+  PublishesEditablePauseFetch &
   TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;

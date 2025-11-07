@@ -418,7 +418,7 @@ export class DiscoverPlugin
       onAdd: async (container, savedObject) => {
         const [
           { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME },
-          { apiPublishesPauseFetch },
+          { apiPublishesEditablePauseFetch, apiHasUniqueId },
           { apiPublishesESQLVariables },
         ] = await Promise.all([
           getEmbeddableServices(),
@@ -434,7 +434,7 @@ export class DiscoverPlugin
           Object.keys(savedSessionAttributes.controlGroupJson).length > 0;
 
         // pause fetching so that we don't try to build an ES|QL query without necessary variables
-        const shouldPauseFetch = mightHaveVariables && apiPublishesPauseFetch(container);
+        const shouldPauseFetch = mightHaveVariables && apiPublishesEditablePauseFetch(container);
         if (shouldPauseFetch) container.setFetchPaused(true);
 
         const api = await container.addNewPanel(
