@@ -18,7 +18,6 @@ import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
-import { useLoadExecutionThunk } from '../../../entities/workflows/model/use_load_execution';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -36,7 +35,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
   const loadConnectors = useAsyncThunk(loadConnectorsThunk);
   const [loadWorkflow, { isLoading, error }] = useAsyncThunkState(loadWorkflowThunk);
-  const loadExecution = useLoadExecutionThunk();
 
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowName = useSelector(selectWorkflowName);
