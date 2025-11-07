@@ -141,6 +141,7 @@ export function getDashboardApi({
 
   const dashboardApi = {
     isFetchPaused$,
+    setFetchPaused: (paused) => isFetchPaused$.next(paused),
     ...viewModeManager.api,
     ...dataLoadingManager.api,
     ...dataViewsManager.api,

@@ -35,6 +35,8 @@ export type { FetchContext } from './interfaces/fetch/fetch_context';
 export {
   type PublishesPauseFetch,
   apiPublishesPauseFetch,
+  type PublishesEditablePauseFetch,
+  apiPublishesEditablePauseFetch,
 } from './interfaces/fetch/publishes_pause_fetch';
 export {
   initializeTimeRangeManager,
