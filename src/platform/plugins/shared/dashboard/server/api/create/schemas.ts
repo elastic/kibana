@@ -14,7 +14,6 @@ export function getCreateRequestBody() {
   return schema.object({
     id: schema.maybe(schema.string()),
     data: getDashboardDataSchema(),
-    meta: dashboardMetaSchema,
     spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }
