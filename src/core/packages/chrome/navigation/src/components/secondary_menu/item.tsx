@@ -96,6 +96,7 @@ export const SecondaryMenuItemComponent = ({
     <li ref={activeItemRef}>
       {isHighlighted ? (
         <EuiButton
+          id={id}
           aria-current={isCurrent ? 'page' : undefined}
           id={id}
           css={buttonStyles}
@@ -112,6 +113,7 @@ export const SecondaryMenuItemComponent = ({
         </EuiButton>
       ) : (
         <EuiButtonEmpty
+          id={id}
           aria-current={isCurrent ? 'page' : undefined}
           id={id}
           color="text"

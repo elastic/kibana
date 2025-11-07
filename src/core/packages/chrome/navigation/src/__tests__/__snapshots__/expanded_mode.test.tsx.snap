@@ -170,6 +170,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-getting_started"
                 href="/getting-started"
                 rel="noreferrer"
+                tabindex="0"
               >
                 <span
                   aria-hidden="true"
@@ -199,6 +200,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-developer_tools"
                 href="/developer-tools"
                 rel="noreferrer"
+                tabindex="-1"
               >
                 <span
                   aria-hidden="true"
@@ -229,6 +231,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-integrations"
                 href="/integrations"
                 rel="noreferrer"
+                tabindex="-1"
               >
                 <span
                   aria-hidden="true"
@@ -258,6 +261,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-fourth_item"
                 href="/fourth-item"
                 rel="noreferrer"
+                tabindex="-1"
               >
                 <span
                   aria-hidden="true"
@@ -287,6 +291,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-fifth_item"
                 href="/fourth-item"
                 rel="noreferrer"
+                tabindex="-1"
               >
                 <span
                   aria-hidden="true"
