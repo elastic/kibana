@@ -144,7 +144,7 @@ Elastic Observability solution::
 * Adds missing transaction action links ({kibana-pull}241336[#241336]).
 * Fixes overlapping components in the Observability AI Assistant flyout on small screens ({kibana-pull}241026[#241026]).
 * Excludes stale SLOs from "group by" stats ({kibana-pull}240077[#240077]).
-* Fixes Kibana tool from failing when using a proxy ({kibana-pull}236653[#236653]).
+* Prevents Kibana tool from failing when using a proxy ({kibana-pull}236653[#236653]).
 Elastic Security solution::
 For the Elastic Security 8.19.7 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Machine Learning::
