@@ -26,7 +26,7 @@ import { CreateClassicStreamFlyout } from '@kbn/classic-stream-flyout';
 View and develop the component in Storybook:
 
 ```bash
-yarn storybook create_classic_stream_flyout
+yarn storybook classic_stream_flyout
 ```
 
 ### Testing
