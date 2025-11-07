@@ -219,7 +219,12 @@ export interface DataViewsServicePublicMethods {
    * @param id - Id of the data view to get.
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  get: (id: string, displayErrors?: boolean, refreshFields?: boolean) => Promise<DataView>;
+  get: (
+    id: string,
+    displayErrors?: boolean,
+    refreshFields?: boolean,
+    fieldSpecs?: FieldSpec[]
+  ) => Promise<DataView>;
   /**
    * Get populated data view saved object cache.
    */

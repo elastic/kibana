@@ -24,6 +24,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 import type {
   GetStateType,
+  IndexPatternField,
   LensApi,
   LensInternalApi,
   LensPublicCallbacks,
@@ -206,6 +207,26 @@ export function loadEmbeddableData(
       services
     );
 
+    // TODO this is super ugly... storing them on layers is probably not the best idea
+    const extractLayerIdFromReferenceName = (name: string) => {
+      const match = name.match(/indexpattern-datasource-layer-(.+)/);
+      return match ? match[1] : undefined;
+    };
+
+    const dataViewFields = new Map<string, IndexPatternField[]>();
+    for (const ref of currentState.attributes.references) {
+      if (ref.type === 'index-pattern') {
+        const layerId = extractLayerIdFromReferenceName(ref.name);
+        if (layerId) {
+          dataViewFields.set(
+            ref.id,
+            currentState.attributes.state.datasourceStates.formBased.layers[layerId].fieldSpecs ??
+              []
+          );
+        }
+      }
+    }
+
     // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
@@ -234,7 +255,8 @@ export function loadEmbeddableData(
       getUsedDataViews(
         currentState.attributes.references,
         currentState.attributes.state?.adHocDataViews,
-        services.dataViews
+        services.dataViews,
+        dataViewFields
       ),
     ]);
 

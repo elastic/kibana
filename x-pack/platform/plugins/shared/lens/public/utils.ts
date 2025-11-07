@@ -34,6 +34,7 @@ import type {
   DatasourceStates,
   VisualizationState,
   TriggerEvent,
+  IndexPatternField,
 } from '@kbn/lens-common';
 import {
   isOperation,
@@ -225,9 +226,12 @@ export function getIndexPatternsIds({
 
 export async function getIndexPatternsObjects(
   ids: string[],
-  dataViews: DataViewsContract
+  dataViews: DataViewsContract,
+  dataViewFields?: Map<string, IndexPatternField[]>
 ): Promise<{ indexPatterns: DataView[]; rejectedIds: string[] }> {
-  const responses = await Promise.allSettled(ids.map((id) => dataViews.get(id)));
+  const responses = await Promise.allSettled(
+    ids.map((id) => dataViews.get(id, undefined, undefined, dataViewFields?.get(id)))
+  );
   const fullfilled = responses.filter(
     (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
   );
