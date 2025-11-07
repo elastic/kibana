@@ -31,7 +31,7 @@ export async function takeSnapshot({
   serverHandles: ServerHandles;
 }): Promise<MigrationSnapshot> {
   try {
-    log.info(`Capturing current SO type definitions`);
+    log.info(`Taking snapshot of current SO type definitions`);
     const { coreStart } = serverHandles;
     const typeRegistry = coreStart.savedObjects.getTypeRegistry();
     const allTypes = typeRegistry.getAllTypes();
@@ -57,7 +57,9 @@ export async function takeSnapshot({
     log.error(
       '⚠️ Failed to obtain snapshot for current working tree. Skipping Saved Objects checks.'
     );
-    log.error(err);
+    if (err instanceof Error || typeof err === 'string') {
+      log.error(err);
+    }
     throw err;
   }
 }
