@@ -320,9 +320,9 @@ export default function (providerContext: FtrProviderContext) {
       it('should allow to delete an agentless policy and delete related resources', async () => {
         await apiClient.deleteAgentlessPolicy(policyId);
 
-        expectToRejectWithNotFound(() => apiClient.getPackagePolicy(policyId));
+        await expectToRejectWithNotFound(() => apiClient.getPackagePolicy(policyId));
 
-        expectToRejectWithNotFound(() => apiClient.getAgentPolicy(policyId));
+        await expectToRejectWithNotFound(() => apiClient.getAgentPolicy(policyId));
 
         expect(apiCalls.length).to.be(1);
         expect(apiCalls[0].url).to.be(`/agentless-api/api/v1/ess/deployments/${policyId}`);
