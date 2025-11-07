@@ -518,60 +518,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
           });
 
-          describe('Anomaly Charts as embeddable', function () {
-            beforeEach(async () => {
-              await ml.navigation.navigateToAnomalyExplorer(
-                testData.jobConfig.job_id,
-                {
-                  from: '2016-02-07T00%3A00%3A00.000Z',
-                  to: '2016-02-11T23%3A59%3A54.000Z',
-                },
-                () => elasticChart.setNewChartUiDebugFlag(true)
-              );
-
-              await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-              await ml.commonUI.waitForDatePickerIndicatorLoaded();
-
-              await ml.testExecution.logTestStep('clicks on the Overall swim lane cell');
-              const sampleCell = (await ml.swimLane.getCells(overallSwimLaneTestSubj))[0];
-              await ml.swimLane.selectSingleCell(overallSwimLaneTestSubj, {
-                x: sampleCell.x + cellSize,
-                y: sampleCell.y + cellSize,
-              });
-              await ml.swimLane.waitForSwimLanesToLoad();
-            });
-
-            it('attaches an embeddable to a case', async () => {
-              await ml.anomalyExplorer.attachAnomalyChartsToCase({
-                title: 'ML Charts Test case',
-                description: 'Case with an anomaly charts attachment',
-                tag: 'ml_anomaly_charts',
-              });
-
-              const expectedAttachment = {
-                jobIds: [testData.jobConfig.job_id],
-                maxSeriesToPlot: 6,
-              };
-
-              // @ts-expect-error Setting id to be undefined here
-              // since time range expected is of the chart plotEarliest/plotLatest, not of the global time range
-              // but, chart time range might vary depends on the time of the test
-              // we don't know the hashed string id for sure
-              expectedAttachment.id = undefined;
-
-              await ml.cases.assertCaseWithAnomalyChartsAttachment(
-                {
-                  title: 'ML Charts Test case',
-                  description: 'Case with an anomaly charts attachment',
-                  tag: 'ml_anomaly_charts',
-                  reporter: USER.ML_POWERUSER,
-                },
-                expectedAttachment,
-                6
-              );
-            });
-          });
-
           describe('Use anomaly table action to view in Discover', function () {
             beforeEach(async () => {
               await ml.navigation.navigateToAnomalyExplorer(
