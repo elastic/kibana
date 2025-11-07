@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type { Logger, LogMeta, AuditLogger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -154,6 +154,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
   private readonly config: ConfigType;
   private readonly logger: Logger;
+  private readonly auditLogger: AuditLogger;
   private readonly appClientFactory: AppClientFactory;
   private readonly productFeaturesService: ProductFeaturesService;
 
@@ -614,7 +615,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, productFeaturesService } = this;
+    const { config, logger, auditLogger, productFeaturesService } = this;
 
     this.ruleMonitoringService.start(core, plugins);
 
@@ -639,7 +640,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const fleetStartServices = plugins.fleet!;
     // Initialise entity analytics threat hunting hypothesis definitions
     if (config.experimentalFeatures.entityThreatHuntingEnabled) {
-      initThreatHuntingHypothesisDefinitions(savedObjectsClient, logger);
+      initThreatHuntingHypothesisDefinitions(savedObjectsClient, logger, auditLogger);
     }
     const { packageService } = fleetStartServices;
 
