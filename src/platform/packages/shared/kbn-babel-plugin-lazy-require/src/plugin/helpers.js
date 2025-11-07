@@ -66,6 +66,62 @@ function excludeImports(excludedNames, properties) {
 }
 
 /**
+ * Ensure a module entry exists in the modules map
+ * @param {string} modulePath - The module path
+ * @param {Map<string, ModuleInfo>} modules - Map of module info
+ * @param {Object} scope - Babel scope for generating unique identifiers
+ * @param {import('@babel/types').Node | null} outerFunc - Optional wrapper function
+ */
+function ensureModule(modulePath, modules, scope, outerFunc = null) {
+  if (!modules.has(modulePath)) {
+    modules.set(modulePath, {
+      cacheId: scope.generateUidIdentifier(`module`),
+      requirePath: modulePath,
+      outerFunc,
+    });
+  }
+}
+
+/**
+ * Collect direct re-export sources from a program
+ * Returns a Set of module paths that are directly re-exported (export { x } from './module')
+ * @param {NodePath} programPath - The program path
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {Set<string>} Set of module paths that are directly re-exported
+ */
+function collectDirectReExportSources(programPath, t) {
+  const directReExportSources = new Set();
+  programPath.traverse({
+    ExportNamedDeclaration(exportPath) {
+      if (exportPath.node.source && t.isStringLiteral(exportPath.node.source)) {
+        directReExportSources.add(exportPath.node.source.value);
+      }
+    },
+  });
+  return directReExportSources;
+}
+
+/**
+ * Check if an import has the import-then-export pattern
+ * Detects when imported variables are later exported (e.g., import X then export X)
+ * @param {NodePath} importPath - The import declaration path
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {boolean} True if any import specifier is later exported
+ */
+function hasImportThenExportPattern(importPath, t) {
+  return importPath.node.specifiers.some((specifier) => {
+    const binding = importPath.scope.getBinding(specifier.local.name);
+    return binding?.referencePaths.some(
+      (refPath) =>
+        refPath.isReferencedIdentifier() &&
+        (t.isExportSpecifier(refPath.parent) ||
+          t.isExportDefaultDeclaration(refPath.parent) ||
+          t.isExportNamedDeclaration(refPath.parent))
+    );
+  });
+}
+
+/**
  * Check if an identifier is in a TypeScript type-only context
  * Returns true if the identifier is in a pure type context that won't exist at runtime
  */
@@ -526,6 +582,9 @@ module.exports = {
   isSimpleRequireCall,
   collectReferencedProperties,
   excludeImports,
+  ensureModule,
+  collectDirectReExportSources,
+  hasImportThenExportPattern,
   isInTypeContext,
   shouldSkipIdentifier,
   detectModuleLevelUsage,

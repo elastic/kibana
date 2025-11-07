@@ -15,6 +15,9 @@
 const {
   isSimpleRequireCall,
   excludeImports,
+  ensureModule,
+  collectDirectReExportSources,
+  hasImportThenExportPattern,
   shouldSkipIdentifier,
   detectModuleLevelUsage,
   detectJsxUsage,
@@ -107,14 +110,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // =================================================================
 
         // Collect direct re-exports (export { x } from './module')
-        const directReExportSources = new Set();
-        programPath.traverse({
-          ExportNamedDeclaration(exportPath) {
-            if (exportPath.node.source && t.isStringLiteral(exportPath.node.source)) {
-              directReExportSources.add(exportPath.node.source.value);
-            }
-          },
-        });
+        const directReExportSources = collectDirectReExportSources(programPath, t);
 
         // Collect require() and import statements
         programPath.traverse({
@@ -149,14 +145,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
               const isConst = path.node.kind === 'const';
 
-              // Ensure module cache exists for this require path
-              if (!modules.has(requirePath)) {
-                modules.set(requirePath, {
-                  cacheId: programPath.scope.generateUidIdentifier(`module`),
-                  requirePath,
-                  outerFunc,
-                });
-              }
+              // Ensure module entry exists
+              ensureModule(requirePath, modules, programPath.scope, outerFunc);
 
               if (t.isIdentifier(decl.id)) {
                 // Simple assignment: const foo = require('./foo')
@@ -219,28 +209,11 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
             const isConst = true;
 
-            // Ensure module cache exists for this import path
-            if (!modules.has(importPath)) {
-              modules.set(importPath, {
-                cacheId: programPath.scope.generateUidIdentifier(`module`),
-                requirePath: importPath,
-                outerFunc: null, // We'll handle interop manually for imports
-              });
-            }
+            // Ensure module entry exists (outerFunc is null, we handle interop manually for imports)
+            ensureModule(importPath, modules, programPath.scope);
 
             // Skip if any import is re-exported (import then export pattern)
-            const hasReExport = path.node.specifiers.some((specifier) => {
-              const binding = path.scope.getBinding(specifier.local.name);
-              return binding?.referencePaths.some(
-                (refPath) =>
-                  refPath.isReferencedIdentifier() &&
-                  (t.isExportSpecifier(refPath.parent) ||
-                    t.isExportDefaultDeclaration(refPath.parent) ||
-                    t.isExportNamedDeclaration(refPath.parent))
-              );
-            });
-
-            if (hasReExport) {
+            if (hasImportThenExportPattern(path, t)) {
               return;
             }
 
