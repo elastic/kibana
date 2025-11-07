@@ -94,7 +94,11 @@ export abstract class AbstractFileSystem {
 
     const fileListPath = await this.writeFileList(options.files);
 
-    await this.archive(this.getArchivePath(archiveId), fileListPath);
+    const archivePath = this.getArchivePath(archiveId);
+
+    this.log.info(`Writing archive to ${archivePath}`);
+
+    await this.archive(archivePath, fileListPath);
 
     await this.writeMetadata(this.getMetadataPath(archiveId), metadata);
   }
