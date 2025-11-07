@@ -13,11 +13,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
-import { PRIMARY_NAVIGATION_ID } from '../../constants';
 import { PrimaryMenuItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
+import { PRIMARY_NAVIGATION_ID } from '../../constants';
 
 const getPrimaryMenuStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
   align-items: center;

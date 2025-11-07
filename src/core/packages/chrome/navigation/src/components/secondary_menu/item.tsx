@@ -17,7 +17,7 @@ import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
-import { PRIMARY_NAVIGATION_ID } from '../../constants';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
@@ -50,7 +50,7 @@ export const SecondaryMenuItemComponent = ({
   const { euiTheme } = useEuiTheme();
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
-  const resolvedTestSubjPrefix = testSubjPrefix ?? `${PRIMARY_NAVIGATION_ID}-secondaryItem`;
+  const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
 
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {

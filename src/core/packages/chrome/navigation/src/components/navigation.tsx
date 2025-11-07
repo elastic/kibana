@@ -14,7 +14,13 @@ import { i18n } from '@kbn/i18n';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
-import { MAX_FOOTER_ITEMS } from '../constants';
+import {
+  MAIN_PANEL_ID,
+  MAX_FOOTER_ITEMS,
+  MORE_MENU_ID,
+  NAVIGATION_ROOT_SELECTOR,
+  NAVIGATION_SELECTOR_PREFIX,
+} from '../constants';
 import { SideNav } from './side_nav';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
@@ -73,6 +79,10 @@ export const Navigation = ({
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
+  const popoverItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverItem`;
+  const popoverFooterItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverFooterItem`;
+  const sidePanelItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-sidePanelItem`;
+  const moreMenuTriggerTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-moreMenuTrigger`;
 
   const {
     actualActiveItemId,
@@ -94,8 +104,8 @@ export const Navigation = ({
   return (
     <div
       css={navigationWrapperStyles}
-      data-test-subj={rest['data-test-subj'] ?? 'navigation-root'}
-      id="navigation-root"
+      data-test-subj={rest['data-test-subj'] ?? NAVIGATION_ROOT_SELECTOR}
+      id={NAVIGATION_ROOT_SELECTOR}
     >
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
@@ -145,7 +155,7 @@ export const Navigation = ({
                                 closePopover();
                               }
                             }}
-                            testSubjPrefix="popoverItem"
+                            testSubjPrefix={popoverItemPrefix}
                             {...subItem}
                           >
                             {subItem.label}
@@ -171,10 +181,10 @@ export const Navigation = ({
               setAnyPopoverOpen={setAnyPopoverOpen}
               trigger={
                 <SideNav.PrimaryMenu.Item
-                  data-test-subj="sideNavMoreMenuItem"
+                  data-test-subj={moreMenuTriggerTestSubj}
                   hasContent
                   iconType="boxesVertical"
-                  id="more-menu"
+                  id={MORE_MENU_ID}
                   isCollapsed={isCollapsed}
                   isHighlighted={overflowMenuItems.some((item) => item.id === visuallyActivePageId)}
                   label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
@@ -191,7 +201,7 @@ export const Navigation = ({
               {(closePopover) => (
                 <SideNav.NestedSecondaryMenu>
                   <SideNav.NestedSecondaryMenu.Panel
-                    id="main"
+                    id={MAIN_PANEL_ID}
                     title={i18n.translate(
                       'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
                       { defaultMessage: 'More' }
@@ -289,7 +299,7 @@ export const Navigation = ({
                               }
                             }}
                             {...subItem}
-                            testSubjPrefix="popoverFooterItem"
+                            testSubjPrefix={popoverFooterItemPrefix}
                           >
                             {subItem.label}
                           </SideNav.SecondaryMenu.Item>
@@ -315,7 +325,7 @@ export const Navigation = ({
                     isCurrent={actualActiveItemId === subItem.id}
                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                     onClick={() => onItemClick?.(subItem)}
-                    testSubjPrefix="sidePanelItem"
+                    testSubjPrefix={sidePanelItemPrefix}
                     {...subItem}
                   >
                     {subItem.label}

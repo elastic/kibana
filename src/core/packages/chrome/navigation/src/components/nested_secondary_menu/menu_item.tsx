@@ -13,6 +13,7 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { SecondaryMenu } from '../secondary_menu';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface ItemProps
   extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isHighlighted' | 'href'> {
@@ -39,6 +40,8 @@ export const Item: FC<ItemProps> = ({
     width: 100%;
   `;
 
+  const nestedMenuItemTestSubjPrefix = `${NAVIGATION_SELECTOR_PREFIX}-nestedMenuItem`;
+
   return (
     <SecondaryMenu.Item
       id={id}
@@ -47,7 +50,7 @@ export const Item: FC<ItemProps> = ({
       isCurrent={isCurrent}
       {...props}
       key={`nested-item-${id}`}
-      testSubjPrefix="nestedMenuItem"
+      testSubjPrefix={nestedMenuItemTestSubjPrefix}
     >
       <div css={itemStyle}>
         <span>{children}</span>
