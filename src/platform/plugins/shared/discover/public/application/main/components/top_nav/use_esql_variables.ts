@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -97,9 +97,11 @@ export const useESQLVariables = ({
     }
 
     const variableSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
-      if (!isEqual(newVariables, currentEsqlVariables)) {
+      // ignore meta data when comparing and storing filters, since we do not use it
+      const variablesWithoutMetaData = newVariables.map((variable) => omit(variable, 'meta'));
+      if (!isEqual(variablesWithoutMetaData, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
-        dispatch(setEsqlVariables({ esqlVariables: newVariables }));
+        dispatch(setEsqlVariables({ esqlVariables: variablesWithoutMetaData }));
         stateContainer.dataState.fetch();
       }
     });

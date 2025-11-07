@@ -9,7 +9,7 @@
 
 import { pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
@@ -25,9 +25,7 @@ export const useLayoutApi = (
   childrenApi: ReturnType<typeof useChildrenApi>['childrenApi'],
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
 ) => {
-  const layout$Ref = useRef(
-    new BehaviorSubject<ControlsLayout>({ controls: {}, panels: {}, sections: {} })
-  );
+  const layout$Ref = useRef(new BehaviorSubject<ControlsLayout>({ controls: {} }));
 
   useEffect(() => {
     /** Keep `layout$` in sync with `lastSavedState$Ref` */
@@ -54,7 +52,7 @@ export const useLayoutApi = (
   }, [lastSavedState$Ref]);
 
   const layoutApi = useMemo(() => {
-    if (!state) return;
+    if (!state || !childrenApi) return;
 
     layout$Ref.current.next({
       controls: getControlsLayout(state.initialState?.initialChildControlState),
@@ -78,8 +76,6 @@ export const useLayoutApi = (
           },
         };
         layout$Ref.current.next({
-          panels: {},
-          sections: {},
           controls: {
             ...oldControls,
             [uuid]: {
@@ -124,6 +120,15 @@ export const useLayoutApi = (
         }
         childrenApi?.removeChild(idToRemove);
       },
+
+      childrenLoading$: combineLatest([childrenApi.children$, layout$Ref.current]).pipe(
+        map(([children, layout]) => {
+          const expectedChildCount = Object.values(layout.controls).length;
+          const currentChildCount = Object.keys(children).length;
+          return expectedChildCount !== currentChildCount;
+        }),
+        distinctUntilChanged()
+      ),
     };
   }, [state, childrenApi]);
 

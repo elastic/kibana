@@ -143,7 +143,7 @@ export const useChildrenApi = (
         'esqlVariable$',
         apiPublishesESQLVariable,
         []
-      ),
+      ).pipe(distinctUntilChanged(deepEqual)),
       appliedTimeslice$: combineCompatibleChildrenApis<AppliesTimeslice, TimeSlice | undefined>(
         { children$: children$Ref.current },
         'appliedTimeslice$',
@@ -152,7 +152,7 @@ export const useChildrenApi = (
         (values) => {
           return values.length === 0 ? undefined : values[values.length - 1];
         }
-      ),
+      ).pipe(distinctUntilChanged(deepEqual)),
     };
   }, [state, lastSavedChildState$Ref]);
 
