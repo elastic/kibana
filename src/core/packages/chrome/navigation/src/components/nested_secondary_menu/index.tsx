@@ -16,6 +16,7 @@ import { NestedMenuContext } from './use_nested_menu';
 import { Panel } from './menu_panel';
 import { PrimaryMenuItem } from './primary_menu_item';
 import { SecondaryMenu } from '../secondary_menu';
+import { MAIN_PANEL_ID } from '../../constants';
 
 interface NestedSecondaryMenuProps {
   children: ReactNode;
@@ -32,7 +33,7 @@ interface NestedSecondaryMenuComponent extends FC<NestedSecondaryMenuProps> {
 
 export const NestedSecondaryMenu: NestedSecondaryMenuComponent = ({
   children,
-  initialPanel = 'main',
+  initialPanel = MAIN_PANEL_ID,
 }) => {
   const [currentPanel, setCurrentPanel] = useState(initialPanel);
   const [panelStack, setPanelStack] = useState<Array<{ id: string; returnFocusId?: string }>>([]);

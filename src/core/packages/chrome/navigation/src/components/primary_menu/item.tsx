@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { MenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { MenuItem as MenuItemComponent } from '../menu_item';
-import { TOOLTIP_OFFSET } from '../../constants';
+import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
 import { useTooltip } from '../../hooks/use_tooltip';
 
 export interface PrimaryMenuItemProps extends Omit<MenuItem, 'href'> {
@@ -94,9 +94,11 @@ export const PrimaryMenuItem = forwardRef<
       return null;
     };
 
+    const primaryItemTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-primaryItem-${id}`;
+
     const menuItem = (
       <MenuItemComponent
-        data-test-subj={`sideNavPrimaryMenuItem-${id}`}
+        data-test-subj={primaryItemTestSubj}
         href={href}
         iconType={iconType}
         id={id}

@@ -13,6 +13,7 @@ import type { FC, ReactNode } from 'react';
 import { SecondaryMenu } from '../secondary_menu';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { useNestedMenu } from './use_nested_menu';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface PanelProps {
   children: ReactNode;
@@ -22,6 +23,7 @@ export interface PanelProps {
 
 export const Panel: FC<PanelProps> = ({ children, id, title }) => {
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
+  const nestedPanelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanel-${id}`;
 
   const panelRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -50,7 +52,7 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
   if (title) {
     return (
       <SecondaryMenu
-        data-test-subj={`nestedSecondaryMenuPanel-${id}`}
+        data-test-subj={nestedPanelTestSubj}
         ref={panelRef}
         title={title}
         isPanel={false}
@@ -61,7 +63,7 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
   }
 
   return (
-    <div data-test-subj={`nestedSecondaryMenuPanel-${id}`} ref={panelRef}>
+    <div data-test-subj={nestedPanelTestSubj} ref={panelRef}>
       {children}
     </div>
   );

@@ -14,6 +14,7 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 interface MenuItemBaseProps {
   children: ReactNode;
@@ -63,12 +64,14 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
 
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
 
+    const iconWrapperClassName = `${NAVIGATION_SELECTOR_PREFIX}-iconWrapper`;
+
     const buttonStyles = css`
       --menu-item-text-color: ${isHighlighted
         ? euiTheme.components.buttons.textColorPrimary
         : euiTheme.components.buttons.textColorText};
       --high-contrast-hover-indicator-color: var(--menu-item-text-color);
-      ${useHighContrastModeStyles('.iconWrapper')};
+      ${useHighContrastModeStyles(`.${iconWrapperClassName}`)};
 
       width: 100%;
       position: relative;
@@ -84,7 +87,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       /* Focus affordance with border on the iconWrapper instead */
       outline: none !important;
 
-      .iconWrapper {
+      .${iconWrapperClassName} {
         position: relative;
         display: flex;
         justify-content: center;
@@ -98,7 +101,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         z-index: 1;
       }
 
-      .iconWrapper::before {
+      .${iconWrapperClassName}::before {
         content: '';
         position: absolute;
         inset: 0;
@@ -108,18 +111,18 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       }
 
       /* TODO: consider using euiFocusRing (source: https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) */
-      &:focus-visible .iconWrapper {
+      &:focus-visible .${iconWrapperClassName} {
         border: ${euiTheme.border.width.thick} solid
           ${isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
       }
 
-      &:hover .iconWrapper::before {
+      &:hover .${iconWrapperClassName}::before {
         background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimaryHover
           : euiTheme.components.buttons.backgroundTextHover};
       }
 
-      &:active .iconWrapper::before {
+      &:active .${iconWrapperClassName}::before {
         background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimaryActive
           : euiTheme.components.buttons.backgroundTextActive};
@@ -157,7 +160,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
 
     const content = (
       <>
-        <div className="iconWrapper">
+        <div className={iconWrapperClassName}>
           <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
             <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
           </Suspense>

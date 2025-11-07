@@ -9,6 +9,8 @@
 
 import type { RefObject } from 'react';
 
+import { NAVIGATION_ROOT_SELECTOR } from '../constants';
+
 /**
  * Utility function to focus the adjacent trigger element.
  *
@@ -17,7 +19,7 @@ import type { RefObject } from 'react';
 export const focusAdjacentTrigger = (ref: RefObject<HTMLElement>, direction: -1 | 1) => {
   if (typeof window === 'undefined' || !ref.current) return;
 
-  const container = document.querySelector<HTMLElement>('#navigation-root');
+  const container = document.querySelector<HTMLElement>(`#${NAVIGATION_ROOT_SELECTOR}`);
   const triggers = container
     ? Array.from<HTMLElement>(container.querySelectorAll('[data-menu-item]')).filter((el) => {
         if (el.hasAttribute('disabled')) return false;

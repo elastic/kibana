@@ -20,21 +20,25 @@ import { css, Global } from '@emotion/react';
 import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
 import { Navigation } from '../components/navigation';
 import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
+import { NAVIGATION_ROOT_SELECTOR, NAVIGATION_SELECTOR_PREFIX } from '../constants';
 
-const styles = ({ euiTheme }: UseEuiTheme) => css`
-  body {
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  }
+const styles = ({ euiTheme }: UseEuiTheme) => {
+  const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 
-  #storybook-root {
-    display: flex;
-  }
+  return css`
+    body {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    }
 
-  div.side-nav,
-  div.side-nav-panel {
-    height: 100vh;
-  }
-`;
+    #storybook-root {
+      display: flex;
+    }
+
+    div.${NAVIGATION_ROOT_SELECTOR}, div.${sidePanelClassName} {
+      height: 100vh;
+    }
+  `;
+};
 
 type PropsAndArgs = ComponentProps<typeof Navigation>;
 

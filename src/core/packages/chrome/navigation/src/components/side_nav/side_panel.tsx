@@ -18,6 +18,7 @@ import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 /**
  * **Border and shadow**
@@ -62,6 +63,9 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
     [scrollStyles]
   );
 
+  const panelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
+  const panelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-panel`;
+
   return (
     <EuiSplitPanel.Outer
       aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
@@ -71,16 +75,16 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         },
       })}
       borderRadius="none"
-      className="side-nav-panel" // Used in Storybook to limit the height of the panel
+      className={panelClassName} // Used in Storybook to limit the height of the panel
       css={wrapperStyles}
-      data-test-subj={`side-navigation-panel side-navigation-panel_${openerNode.id}`}
+      data-test-subj={`${panelTestSubj} ${panelTestSubj}-${openerNode.id}`}
       hasShadow={false}
       role="region"
     >
       <EuiSplitPanel.Inner
         color="subdued"
         css={navigationPanelStyles}
-        data-test-subj="side-navigation-panel-content"
+        data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
         onKeyDown={handleRovingIndex}
         panelRef={panelRef}
         paddingSize="none"
@@ -89,7 +93,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner
         color="subdued"
-        data-test-subj="side-navigation-panel-footer"
+        data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
         paddingSize="none"
         grow={false}
       >

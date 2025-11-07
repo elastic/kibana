@@ -20,6 +20,7 @@ import { Popover } from './popover';
 import { PrimaryMenu } from '../primary_menu';
 import { SecondaryMenu } from '../secondary_menu';
 import { SidePanel } from './side_panel';
+import { NAVIGATION_ROOT_SELECTOR } from '../../constants';
 
 const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
   box-sizing: border-box;
@@ -66,7 +67,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   );
 
   return (
-    <div className="side-nav" css={wrapperStyles}>
+    <div className={NAVIGATION_ROOT_SELECTOR} css={wrapperStyles}>
       {children}
     </div>
   );

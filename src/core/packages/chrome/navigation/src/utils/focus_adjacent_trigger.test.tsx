@@ -11,10 +11,11 @@ import React, { forwardRef } from 'react';
 import { render } from '@testing-library/react';
 
 import { focusAdjacentTrigger } from './focus_adjacent_trigger';
+import { NAVIGATION_ROOT_SELECTOR } from '../constants';
 
 describe('focusAdjacentTrigger', () => {
   const TestComponent = forwardRef<HTMLButtonElement>((_, ref) => (
-    <div id="navigation-root">
+    <div id={NAVIGATION_ROOT_SELECTOR}>
       <button data-menu-item>First</button>
       <button ref={ref} data-menu-item>
         Second
@@ -132,13 +133,13 @@ describe('focusAdjacentTrigger', () => {
     triggers.forEach((t) => expect(t.focus).not.toHaveBeenCalled());
   });
 
-  it('handles missing `#navigation-root` gracefully', () => {
+  it('handles missing navigation root gracefully', () => {
     const { ref, triggers, unmount } = setup();
 
     const querySpy = jest
       .spyOn(document, 'querySelector')
       .mockImplementation((selector: string) => {
-        if (selector === '#navigation-root') {
+        if (selector === `#${NAVIGATION_ROOT_SELECTOR}`) {
           return null;
         }
         return HTMLElement.prototype.querySelector.call(document, selector);

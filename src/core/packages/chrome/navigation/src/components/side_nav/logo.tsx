@@ -14,6 +14,7 @@ import { css } from '@emotion/react';
 
 import type { SideNavLogo } from '../../../types';
 import { MenuItem } from '../menu_item';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { useTooltip } from '../../hooks/use_tooltip';
 
 export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
@@ -60,12 +61,15 @@ export const Logo = ({
     }
   `;
 
+  const logoWrapperTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-logoWrapper`;
+  const logoTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-logo`;
+
   const menuItem = (
-    <div data-test-subj="side-nav-logo-wrapper" css={wrapperStyles}>
+    <div data-test-subj={logoWrapperTestSubj} css={wrapperStyles}>
       <MenuItem
+        // TODO: add aria-label with i18n
         aria-label={`${label} homepage`}
-        // TODO: Change to `side-nav-logo`, might affect tests
-        data-test-subj="sideNavLogo"
+        data-test-subj={logoTestSubj}
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
         isLabelVisible={!isCollapsed}

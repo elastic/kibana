@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
 
 import type { MenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
-import { TOOLTIP_OFFSET } from '../../constants';
+import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
 import { focusMainContent } from '../../utils/focus_main_content';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useTooltip } from '../../hooks/use_tooltip';
@@ -42,7 +42,6 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
   ) => {
     const { euiTheme } = useEuiTheme();
     const { tooltipRef, handleMouseOut } = useTooltip();
-    // TODO: remove once the fix is available on EUI side
     const highContrastModeStyles = useHighContrastModeStyles();
 
     const handleFooterItemKeyDown = (e: KeyboardEvent) => {
@@ -67,6 +66,8 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       ${highContrastModeStyles}
     `;
 
+    const footerItemTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-footerItem-${id}`;
+
     const buttonProps: ComponentProps<typeof EuiButtonIcon> & {
       'data-highlighted': string;
       'data-menu-item': string;
@@ -76,7 +77,7 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       buttonRef: ref,
       color: isHighlighted ? 'primary' : 'text',
       'data-highlighted': isHighlighted ? 'true' : 'false',
-      'data-test-subj': `footerMenuItem-${id}`,
+      'data-test-subj': footerItemTestSubj,
       'data-menu-item': 'true',
       display: isHighlighted ? 'base' : 'empty',
       iconType: 'empty', // `iconType` is passed in Suspense below
