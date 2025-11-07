@@ -7,7 +7,6 @@
 
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { sleep } from 'openai/core';
 
 export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
   getService,
