@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { setIsTestModalOpen } from '../../../entities/workflows/store';
 import {
   selectHasChanges,
@@ -22,6 +21,7 @@ import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_de
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
 import { useCapabilities } from '../../../hooks/use_capabilities';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 export const WorkflowDetailTestModal = () => {
@@ -75,7 +75,7 @@ export const WorkflowDetailTestModal = () => {
         closeModal();
       }
     }
-  }, [closeModal, canExecuteWorkflow, isTestModalOpen, definition, notifications?.toasts]);
+  }, [closeModal, canExecuteWorkflow, isTestModalOpen, definition, notifications.toasts]);
 
   if (!isTestModalOpen || !definition || !canExecuteWorkflow) {
     return null;
