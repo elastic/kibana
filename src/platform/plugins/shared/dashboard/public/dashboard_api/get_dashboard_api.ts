@@ -35,9 +35,6 @@ import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import { initializeESQLVariablesManager } from './esql_variables_manager';
-import { initializeTimesliceManager } from './timeslice_manager';
-import { initializeFiltersManager } from './filters_manager';
 
 export function getDashboardApi({
   creationOptions,
