@@ -11,7 +11,7 @@ import { isLeft } from 'fp-ts/Either';
 import { fieldsMetadataDictionaryRT } from '../../../../common/fields_metadata';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
 import type { AnyFieldName, EcsFieldName, FieldMetadataPlain } from '../../../../common';
-import { FieldMetadata } from '../../../../common';
+import { FieldMetadata, extractPrefixParts } from '../../../../common';
 import type { TEcsFields } from '../../../../common/fields_metadata/types';
 
 export interface EcsFieldsRepositoryDeps {
@@ -24,56 +24,39 @@ interface FindOptions {
 
 export class EcsFieldsRepository {
   private readonly ecsFields: Record<EcsFieldName, FieldMetadata>;
-  private readonly attributesPrefixedFields: Record<string, FieldMetadata>;
-  private readonly resourceAttributesPrefixedFields: Record<string, FieldMetadata>;
 
   private constructor(ecsFields: Record<EcsFieldName, FieldMetadataPlain>) {
     this.ecsFields = mapValues(ecsFields, (field) =>
       FieldMetadata.create({ ...field, source: 'ecs' })
     );
-
-    // Create indexes for prefixed variants
-    this.attributesPrefixedFields = {};
-    this.resourceAttributesPrefixedFields = {};
-
-    Object.entries(this.ecsFields).forEach(([fieldName, fieldMetadata]) => {
-      // Create attributes.* prefixed variant
-      const attributesPrefixedName = `attributes.${fieldName}`;
-      this.attributesPrefixedFields[attributesPrefixedName] = FieldMetadata.create({
-        ...fieldMetadata.toPlain(),
-        name: attributesPrefixedName,
-        flat_name: attributesPrefixedName,
-      });
-
-      // Create resource.attributes.* prefixed variant
-      const resourceAttributesPrefixedName = `resource.attributes.${fieldName}`;
-      this.resourceAttributesPrefixedFields[resourceAttributesPrefixedName] = FieldMetadata.create({
-        ...fieldMetadata.toPlain(),
-        name: resourceAttributesPrefixedName,
-        flat_name: resourceAttributesPrefixedName,
-      });
-    });
   }
 
   getByName(fieldName: EcsFieldName | AnyFieldName): FieldMetadata | undefined {
     // Try direct lookup first
-    let field = this.ecsFields[fieldName as EcsFieldName];
-
-    // If not found and field starts with "resource.attributes.", look up from the prefixed index
-    if (!field && fieldName.startsWith('resource.attributes.')) {
-      field = this.resourceAttributesPrefixedFields[fieldName];
+    const field = this.ecsFields[fieldName as EcsFieldName];
+    if (field) {
+      return field;
     }
 
-    // If still not found and field starts with "attributes.", look up from the prefixed index
-    if (!field && fieldName.startsWith('attributes.')) {
-      field = this.attributesPrefixedFields[fieldName];
+    // Handle prefixed variants using shared utility
+    const { prefix, fieldNameWithoutPrefix } = extractPrefixParts(fieldName);
+    if (prefix) {
+      const baseField = this.ecsFields[fieldNameWithoutPrefix as EcsFieldName];
+      if (baseField) {
+        return FieldMetadata.create({
+          ...baseField.toPlain(),
+          name: fieldName,
+          flat_name: fieldName,
+        });
+      }
     }
 
-    return field;
+    return undefined;
   }
 
   find({ fieldNames }: FindOptions = {}): FieldsMetadataDictionary {
     if (!fieldNames) {
+      // Proxy is applied automatically by FieldsMetadataDictionary.create()
       return FieldsMetadataDictionary.create(this.ecsFields);
     }
 
@@ -87,6 +70,7 @@ export class EcsFieldsRepository {
       return fieldsMetadata;
     }, {} as Record<EcsFieldName, FieldMetadata>);
 
+    // Proxy is applied automatically by FieldsMetadataDictionary.create()
     return FieldsMetadataDictionary.create(fields);
   }
 
