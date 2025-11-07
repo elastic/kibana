@@ -32,7 +32,8 @@
     "@kbn/workplaceai-api-keys-server",
     "@kbn/deeplinks-agent-builder",
     "@kbn/deeplinks-data-connectors",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/deeplinks-workflows"
   ],
   "exclude": [
     "target/**/*",

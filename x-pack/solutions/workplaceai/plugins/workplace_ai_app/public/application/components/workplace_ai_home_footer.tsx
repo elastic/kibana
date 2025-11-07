@@ -16,6 +16,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '../hooks/use_kibana';
 
 export const WorkplaceAIHomeFooter: React.FC = () => {
@@ -28,6 +29,14 @@ export const WorkplaceAIHomeFooter: React.FC = () => {
 
     if (dashboardsUrl) {
       application?.navigateToUrl(dashboardsUrl);
+    }
+  }, [application, chrome]);
+
+  const onBrowseTemplates = useCallback(() => {
+    const workflowsUrl = chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
+
+    if (workflowsUrl) {
+      application?.navigateToUrl(workflowsUrl);
     }
   }, [application, chrome]);
 
@@ -58,7 +67,7 @@ export const WorkplaceAIHomeFooter: React.FC = () => {
             <p>Try prebuilt automations (e.g., summarize tickets, draft status reports).</p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiButton color="text" onClick={() => {}}>
+          <EuiButton color="text" onClick={onBrowseTemplates}>
             Browse templates
           </EuiButton>
         </EuiPanel>
