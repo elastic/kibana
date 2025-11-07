@@ -23,7 +23,7 @@ export const RedirectToLogs = () => {
   const time = getTimeFromLocation(location);
 
   useEffect(() => {
-    logsLocator.navigate(
+    logsLocator?.navigate(
       {
         time,
         filter,
