@@ -42,8 +42,8 @@ export const useStreamRoutingEvents = () => {
       changeRule: (routingRule: Partial<RoutingDefinitionWithUIAttributes>) => {
         service.send({ type: 'routingRule.change', routingRule });
       },
-      createNewRule: () => {
-        service.send({ type: 'routingRule.create' });
+      createNewRule: (routingDefinition?: Partial<RoutingDefinitionWithUIAttributes>) => {
+        service.send({ type: 'routingRule.create', routingDefinition });
       },
       removeRule: async () => {
         service.send({ type: 'routingRule.remove' });

@@ -43,7 +43,10 @@ export type StreamRoutingEvent =
   | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
-  | { type: 'routingRule.create' }
+  | {
+      type: 'routingRule.create';
+      routingDefinition?: Partial<RoutingDefinitionWithUIAttributes>;
+    }
   | { type: 'routingRule.edit'; id: string }
   | { type: 'routingRule.fork'; routingRule?: RoutingDefinition }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }

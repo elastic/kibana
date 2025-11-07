@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiCallOut, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React from 'react';
@@ -23,6 +23,7 @@ import {
 } from '../state_management/stream_routing_state_machine';
 import { CreateStreamConfirmationModal } from './create_stream_confirmation_modal';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 export interface ReviewSuggestionsFormProps
   extends Pick<
@@ -50,6 +51,12 @@ export function ReviewSuggestionsForm({
   rejectSuggestion,
   onRegenerate,
 }: ReviewSuggestionsFormProps) {
+  const {
+    dependencies: {
+      start: { observabilityAIAssistant },
+    },
+  } = useKibana();
+
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: 'reviewSuggestedRule' }) ? snapshot.context.suggestedRuleId : null
   );
@@ -102,20 +109,40 @@ export function ReviewSuggestionsForm({
           </NestedView>
         ))}
         <EuiSpacer size="m" />
-        <GenerateSuggestionButton
-          iconType="refresh"
-          size="s"
-          onClick={onRegenerate}
-          isLoading={isLoadingSuggestions}
-          aiFeatures={aiFeatures}
-        >
-          {i18n.translate(
-            'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-            {
-              defaultMessage: 'Regenerate',
-            }
-          )}
-        </GenerateSuggestionButton>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <GenerateSuggestionButton
+              iconType="refresh"
+              size="s"
+              onClick={onRegenerate}
+              isLoading={isLoadingSuggestions}
+              aiFeatures={aiFeatures}
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
+                {
+                  defaultMessage: 'Regenerate',
+                }
+              )}
+            </GenerateSuggestionButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="streamsAppStreamDetailOpenAIAssistantButton"
+              iconType="discuss"
+              size="s"
+              onClick={() => {
+                observabilityAIAssistant?.service.conversations.openNewConversation({
+                  messages: [],
+                });
+              }}
+            >
+              {i18n.translate('xpack.streams.streamDetailView.openAIAssistant', {
+                defaultMessage: 'Open AI Assistant',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiCallOut>
     </>
   );
