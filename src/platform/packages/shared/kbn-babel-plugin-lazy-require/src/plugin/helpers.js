@@ -503,7 +503,28 @@ function getRootIdentifierFromNode(node, t) {
 }
 
 /**
- * Detect which imports are used as constructors via `new`
+ * Collect root identifiers from all `new` expressions within a node path
+ * Example: in `new Validator()` or `new ns.Logger()`, collects the root ("Validator", "ns")
+ * @param {NodePath} nodePath - The node path to traverse
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {Set<string>} Set of root variable names used with `new`
+ */
+function collectNewExpressionRoots(nodePath, properties, t) {
+  const roots = new Set();
+  nodePath.traverse({
+    NewExpression(newPath) {
+      const root = getRootIdentifierFromNode(newPath.node.callee, t);
+      if (root && properties.has(root)) {
+        roots.add(root);
+      }
+    },
+  });
+  return roots;
+}
+
+/**
+ * Detect which imports are used as constructors via `new` anywhere in the file
  * Returns a Set of variable names that should not be lazy-loaded
  *
  * Handles:
@@ -516,19 +537,7 @@ function getRootIdentifierFromNode(node, t) {
  * @returns {Set<string>} Set of variable names used as constructors
  */
 function detectConstructorUsage(programPath, properties, t) {
-  const importsUsedAsConstructors = new Set();
-
-  programPath.traverse({
-    NewExpression(newPath) {
-      const callee = newPath.node.callee;
-      const rootName = getRootIdentifierFromNode(callee, t);
-      if (rootName && properties.has(rootName)) {
-        importsUsedAsConstructors.add(rootName);
-      }
-    },
-  });
-
-  return importsUsedAsConstructors;
+  return collectNewExpressionRoots(programPath, properties, t);
 }
 
 /**
@@ -541,18 +550,7 @@ function detectConstructorUsage(programPath, properties, t) {
  * @returns {Set<string>} Set of variable names constructed in constructor init flow
  */
 function detectConstructorInitNewUsage(programPath, properties, t) {
-  const importsUsedInCtorFlow = new Set();
-
-  const collectNewsInPath = (nodePath) => {
-    nodePath.traverse({
-      NewExpression(newPath) {
-        const root = getRootIdentifierFromNode(newPath.node.callee, t);
-        if (root && properties.has(root)) {
-          importsUsedInCtorFlow.add(root);
-        }
-      },
-    });
-  };
+  const importsUsedInConstructorFlow = new Set();
 
   programPath.traverse({
     ClassDeclaration(classPath) {
@@ -566,15 +564,16 @@ function detectConstructorInitNewUsage(programPath, properties, t) {
         }
       }
 
-      const ctor = methodsByName.get('constructor');
-      if (!ctor) return;
+      const constructorMethod = methodsByName.get('constructor');
+      if (!constructorMethod) return;
 
       // Collect direct `new` in constructor
-      collectNewsInPath(ctor);
+      const constructorNewExpressions = collectNewExpressionRoots(constructorMethod, properties, t);
+      constructorNewExpressions.forEach((name) => importsUsedInConstructorFlow.add(name));
 
       // Find calls like this.methodName(...) in constructor
       const calledMethodNames = new Set();
-      ctor.traverse({
+      constructorMethod.traverse({
         CallExpression(callPath) {
           const callee = callPath.node.callee;
           if (
@@ -591,13 +590,14 @@ function detectConstructorInitNewUsage(programPath, properties, t) {
       for (const name of calledMethodNames) {
         const methodPath = methodsByName.get(name);
         if (methodPath) {
-          collectNewsInPath(methodPath);
+          const methodNewExpressions = collectNewExpressionRoots(methodPath, properties, t);
+          methodNewExpressions.forEach((name) => importsUsedInConstructorFlow.add(name));
         }
       }
     },
   });
 
-  return importsUsedInCtorFlow;
+  return importsUsedInConstructorFlow;
 }
 
 /**
