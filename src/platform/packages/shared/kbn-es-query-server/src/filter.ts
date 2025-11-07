@@ -86,6 +86,33 @@ const baseProperties = {
       meta: { description: 'Human-readable label for the filter' },
     })
   ),
+  isMultiIndex: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Whether this filter can be applied to multiple indices' },
+    })
+  ),
+  filterType: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Filter type from legacy filters (e.g., "spatial_filter", "query_string") for backwards compatibility',
+      },
+    })
+  ),
+  key: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Field name metadata from legacy filters for backwards compatibility',
+      },
+    })
+  ),
+  value: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Value metadata from legacy filters for backwards compatibility',
+      },
+    })
+  ),
 };
 
 // ====================================================================
