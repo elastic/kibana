@@ -92,11 +92,26 @@ export const useCloudPostureDataTable = ({
 
   const onSort = useCallback(
     (sort: string[][]) => {
+      // Check if current sort is still the default [@timestamp, desc]
+      const isCurrentSortDefault =
+        urlQuery.sort?.length === 1 &&
+        urlQuery.sort[0][0] === '@timestamp' &&
+        urlQuery.sort[0][1] === 'desc';
+      const hasMultipleSorts = sort.length > 1;
+      const hasTimestampSort = sort.some(([field]) => field === '@timestamp');
+      let finalSort = sort;
+
+      // If transitioning from default sort and user adds another field,
+      // remove the default @timestamp to avoid confusing multi-field sorting, keeping user-selected sort
+      if (isCurrentSortDefault && hasMultipleSorts && hasTimestampSort) {
+        finalSort = sort.filter(([field]) => field !== '@timestamp');
+      }
+
       setUrlQuery({
-        sort,
+        sort: finalSort,
       });
     },
-    [setUrlQuery]
+    [setUrlQuery, urlQuery.sort]
   );
 
   const setTableOptions = useCallback(
