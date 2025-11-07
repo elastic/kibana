@@ -1254,7 +1254,6 @@
     "p-retry": "^4.2.0",
     "papaparse": "^5.5.3",
     "pbf": "3.2.1",
-    "pdf-lib": "^1.17.1",
     "pdfmake": "^0.2.20",
     "piscina": "^3.2.0",
     "polished": "^4.3.1",
