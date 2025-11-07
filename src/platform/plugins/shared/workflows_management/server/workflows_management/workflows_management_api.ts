@@ -255,7 +255,7 @@ export class WorkflowsManagementApi {
       );
     }
 
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const workflowJson = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
@@ -266,9 +266,9 @@ export class WorkflowsManagementApi {
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
         id: resolvedWorkflowId,
-        name: workflowToCreate.name,
-        enabled: workflowToCreate.enabled,
-        definition: workflowToCreate.definition,
+        name: workflowJson.name,
+        enabled: workflowJson.enabled,
+        definition: workflowJson.definition,
         yaml: resolvedYaml,
         isTestRun: true,
       },
