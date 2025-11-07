@@ -98,7 +98,6 @@ export const SecondaryMenuItemComponent = ({
         <EuiButton
           id={id}
           aria-current={isCurrent ? 'page' : undefined}
-          id={id}
           css={buttonStyles}
           data-highlighted="true"
           data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
@@ -115,7 +114,6 @@ export const SecondaryMenuItemComponent = ({
         <EuiButtonEmpty
           id={id}
           aria-current={isCurrent ? 'page' : undefined}
-          id={id}
           color="text"
           css={buttonStyles}
           data-highlighted="false"
