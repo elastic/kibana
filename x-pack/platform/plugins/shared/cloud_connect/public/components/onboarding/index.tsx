@@ -29,8 +29,8 @@ interface OnboardingPageProps {
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => {
   const { http, application } = useCloudConnectedAppContext();
   const hasPermissions =
-    application.capabilities.cloudConnected?.configure === true &&
-    application.capabilities.cloudConnected?.connect === true;
+    application.capabilities.cloudConnect?.configure === true &&
+    application.capabilities.cloudConnect?.connect === true;
 
   return (
     <EuiPageSection>
@@ -40,7 +40,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
-                id="xpack.cloudConnected.onboarding.pageTitle"
+                id="xpack.cloudConnect.onboarding.pageTitle"
                 defaultMessage="Get started with Cloud Connect"
               />
             </h1>
@@ -49,8 +49,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.cloudConnected.onboarding.pageDescription"
-                defaultMessage="Cloud Connected Services allows customers running self-managed Elastic Software to access Elastic capabilities as a Cloud service without the operational overhead of managing the infrastructure required to run."
+                id="xpack.cloudConnect.onboarding.pageDescription"
+                defaultMessage="Cloud Connect allows customers running self-managed Elastic Software to access Elastic capabilities as a Cloud service without the operational overhead of managing the infrastructure required to run."
               />
             </p>
           </EuiText>
@@ -60,8 +60,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
               <EuiText color="subdued" size="s" style={{ fontStyle: 'italic' }}>
                 <p>
                   <FormattedMessage
-                    id="xpack.cloudConnected.onboarding.noPermissionsDescription"
-                    defaultMessage="Only Admins can establish connection with Elastic Cloud. Reach out to your Admin to get started."
+                    id="xpack.cloudConnect.onboarding.noPermissionsDescription"
+                    defaultMessage="Only Admins can establish connection. Reach out to your Admin to get started."
                   />
                 </p>
               </EuiText>
@@ -71,7 +71,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
         <EuiFlexItem style={{ width: 90 }} grow={false} />
         <EuiFlexItem grow={false}>
           <EuiImage
-            alt={i18n.translate('xpack.cloudConnected.onboarding.illustration.alt', {
+            alt={i18n.translate('xpack.cloudConnect.onboarding.illustration.alt', {
               defaultMessage: 'Illustration for cloud data migration',
             })}
             src={

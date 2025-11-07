@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/cloud_connected'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/cloud_connect'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/cloud_connected',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/cloud_connect',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/cloud_connected/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/cloud_connect/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

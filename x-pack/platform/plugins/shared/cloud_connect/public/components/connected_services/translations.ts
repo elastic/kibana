@@ -7,6 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PLUGIN_NAME = i18n.translate('xpack.cloudConnected.name', {
-  defaultMessage: 'Cloud Connected',
+export const PAGE_TITLE = i18n.translate('xpack.cloudConnect.connectedServices.pageTitle', {
+  defaultMessage: 'Cloud Connect services',
 });

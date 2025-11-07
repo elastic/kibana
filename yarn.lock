@@ -4879,7 +4879,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-connected-plugin@link:x-pack/platform/plugins/shared/cloud_connected":
+"@kbn/cloud-connect-plugin@link:x-pack/platform/plugins/shared/cloud_connect":
   version "0.0.0"
   uid ""
 

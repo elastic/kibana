@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/server';
 
-export const CLOUD_CONNECTED_FEATURE_ID = 'cloudConnected';
-export const CLOUD_CONNECTED_APP_ID = 'cloud_connected';
+export const CLOUD_CONNECTED_FEATURE_ID = 'cloudConnect';
+export const CLOUD_CONNECTED_APP_ID = 'cloud_connect';
 
 export const cloudConnectedFeature: KibanaFeatureConfig = {
   id: CLOUD_CONNECTED_FEATURE_ID,
-  name: i18n.translate('xpack.cloudConnected.feature.featureName', {
-    defaultMessage: 'Cloud Connected',
+  name: i18n.translate('xpack.cloudConnect.feature.featureName', {
+    defaultMessage: 'Cloud Connect',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   order: 9035,

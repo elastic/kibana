@@ -29,8 +29,8 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
     >
       <EuiTitle size="s">
         <h2>
-          {i18n.translate('xpack.cloudConnected.serviceCards.title', {
-            defaultMessage: 'Cloud connected services',
+          {i18n.translate('xpack.cloudConnect.serviceCards.title', {
+            defaultMessage: 'Cloud Connect services',
           })}
         </h2>
       </EuiTitle>
@@ -41,10 +41,10 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
           <EuiCard
             hasBorder
             layout="horizontal"
-            title={i18n.translate('xpack.cloudConnected.serviceCards.autoOps.title', {
+            title={i18n.translate('xpack.cloudConnect.serviceCards.autoOps.title', {
               defaultMessage: 'AutoOps',
             })}
-            description={i18n.translate('xpack.cloudConnected.serviceCards.autoOps.description', {
+            description={i18n.translate('xpack.cloudConnect.serviceCards.autoOps.description', {
               defaultMessage:
                 'Get instant cluster diagnostics, performance tips, and cost-saving recommendations—no extra management needed.',
             })}
@@ -55,11 +55,11 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
           <EuiCard
             hasBorder
             layout="horizontal"
-            title={i18n.translate('xpack.cloudConnected.serviceCards.elasticInference.title', {
+            title={i18n.translate('xpack.cloudConnect.serviceCards.elasticInference.title', {
               defaultMessage: 'Elastic Inference Service',
             })}
             description={i18n.translate(
-              'xpack.cloudConnected.serviceCards.elasticInference.description',
+              'xpack.cloudConnect.serviceCards.elasticInference.description',
               {
                 defaultMessage:
                   'Tap into AI-powered search and chat—no ML model deployment or management needed. Fast, scalable, and hassle-free intelligent features.',
@@ -72,16 +72,16 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
           <EuiCard
             hasBorder
             layout="horizontal"
-            title={i18n.translate('xpack.cloudConnected.serviceCards.synthetic.title', {
+            title={i18n.translate('xpack.cloudConnect.serviceCards.synthetic.title', {
               defaultMessage: 'Synthetic',
             })}
-            description={i18n.translate('xpack.cloudConnected.serviceCards.synthetic.description', {
+            description={i18n.translate('xpack.cloudConnect.serviceCards.synthetic.description', {
               defaultMessage:
                 'Proactive, automated monitoring for apps and APIs—catch issues early, get deep diagnostics, and integrate easily.',
             })}
             titleSize="xs"
             betaBadgeProps={{
-              label: i18n.translate('xpack.cloudConnected.serviceCards.synthetic.comingSoon', {
+              label: i18n.translate('xpack.cloudConnect.serviceCards.synthetic.comingSoon', {
                 defaultMessage: 'COMING SOON',
               }),
             }}
@@ -94,7 +94,7 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="popout" iconSide="right">
-            {i18n.translate('xpack.cloudConnected.serviceCards.learnMore', {
+            {i18n.translate('xpack.cloudConnect.serviceCards.learnMore', {
               defaultMessage: 'Learn more',
             })}
           </EuiButtonEmpty>

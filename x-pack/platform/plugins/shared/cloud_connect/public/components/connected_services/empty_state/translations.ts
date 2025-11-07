@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_STATE_TITLE = i18n.translate(
-  'xpack.cloudConnected.connectedServices.emptyState.title',
+  'xpack.cloudConnect.connectedServices.emptyState.title',
   {
     defaultMessage: 'Connected services',
   }
 );
 
 export const EMPTY_STATE_DESCRIPTION = i18n.translate(
-  'xpack.cloudConnected.connectedServices.emptyState.description',
+  'xpack.cloudConnect.connectedServices.emptyState.description',
   {
     defaultMessage:
       'This page will show your connected services. The design is being finalized by our design team.',

@@ -31,9 +31,9 @@ export class CloudConnectedPlugin
   public setup(core: CoreSetup): CloudConnectedPluginSetup {
     // Register the app in the management section
     core.application.register({
-      id: 'cloud_connected',
-      title: i18n.translate('xpack.cloudConnected.appTitle', {
-        defaultMessage: 'Cloud Connected',
+      id: 'cloud_connect',
+      title: i18n.translate('xpack.cloudConnect.appTitle', {
+        defaultMessage: 'Cloud Connect',
       }),
       order: 9035,
       euiIconType: 'logoCloud',
