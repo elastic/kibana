@@ -104,7 +104,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     ? {
         ...emptyConnector,
         ...initialConnector,
-        actionTypeId: initialConnector.actionTypeId,
       }
     : emptyConnector;
 
