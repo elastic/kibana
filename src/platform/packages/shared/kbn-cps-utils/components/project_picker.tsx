@@ -42,6 +42,8 @@ export const ProjectPicker: React.FC<ProjectPickerProps> = ({
         setLinkedProjects(projectsData.linkedProjects);
       }
     );
+
+    cps.cpsManager.fetchProjects()
     return () => subscription.unsubscribe();
   }, [cps]);
 

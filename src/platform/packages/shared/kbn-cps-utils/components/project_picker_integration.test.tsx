@@ -63,10 +63,14 @@ describe('ProjectPicker', () => {
 
   const mockCPSManager = {
     projects$: mockProjectsSubject.asObservable(),
+    fetchProjects: jest.fn().mockResolvedValue({
+      origin: mockOriginProject,
+      linkedProjects: mockLinkedProjects,
+    }),
   };
 
   const mockCPSService = {
-    cpsManager: mockCPSManager as CPSManager,
+    cpsManager: mockCPSManager as unknown as CPSManager,
   };
 
   const renderProjectPicker = async (
@@ -119,6 +123,12 @@ describe('ProjectPicker', () => {
       await renderProjectPicker();
 
       expect(screen.getByTestId('project-picker-component')).toBeInTheDocument();
+    });
+
+    it('should call fetchProjects when component mounts', async () => {
+      await renderProjectPicker();
+
+      expect(mockCPSManager.fetchProjects).toHaveBeenCalledTimes(1);
     });
 
     it('should not render when cpsManager is not available', async () => {

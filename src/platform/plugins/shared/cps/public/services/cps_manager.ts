@@ -16,9 +16,14 @@ export interface ProjectsData {
   linkedProjects: Project[];
 }
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 1000;
+
 export class CPSManager {
   private readonly http: HttpSetup;
   private readonly projectsSubject: BehaviorSubject<ProjectsData>;
+  private fetchPromise: Promise<ProjectsData> | null = null;
+  private hasFetchedSuccessfully: boolean = false;
 
   constructor(http: HttpSetup) {
     this.http = http;
@@ -26,8 +31,6 @@ export class CPSManager {
       origin: null,
       linkedProjects: [],
     });
-
-    this.fetchProjects();
   }
 
   public get projects$(): Observable<ProjectsData> {
@@ -38,26 +41,92 @@ export class CPSManager {
     return this.projectsSubject.getValue();
   }
 
-  public async refresh(): Promise<void> {
-    await this.fetchProjects();
+  /**
+   * Check if projects have been successfully loaded at least once
+   * @returns true if projects have been fetched successfully
+   */
+  public hasLoadedProjects(): boolean {
+    return this.hasFetchedSuccessfully;
   }
 
-  private async fetchProjects(): Promise<void> {
-    try {
-      const response = await this.http.get<ProjectTagsResponse>('/internal/cps/projects_tags');
-      const origin = response.origin ? Object.values(response.origin)[0] : null;
-      const linkedProjects = response.linked_projects
-        ? Object.values(response.linked_projects).sort((a, b) => a._alias.localeCompare(b._alias))
-        : [];
-
-      this.projectsSubject.next({
-        origin,
-        linkedProjects,
-      });
-    } catch (error) {
-      // Silently handle errors - keep the current state
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch projects:', error);
+  /**
+   * Fetches projects from the server with caching and retry logic.
+   * Returns cached data if already loaded. If a fetch is already in progress, returns the existing promise.
+   * @returns Promise resolving to ProjectsData
+   */
+  public async fetchProjects(): Promise<ProjectsData> {
+    // Skip fetch if already loaded
+    if (this.hasFetchedSuccessfully) {
+      return this.projectsSubject.getValue();
     }
+
+    return this.doFetch();
+  }
+
+  /**
+   * Forces a refresh of projects from the server, bypassing the cache.
+   * @returns Promise resolving to ProjectsData
+   */
+  public async refresh(): Promise<ProjectsData> {
+    return this.doFetch();
+  }
+
+  private async doFetch(): Promise<ProjectsData> {
+    // If a fetch is already in progress, return the existing promise
+    if (this.fetchPromise) {
+      return this.fetchPromise;
+    }
+
+    this.fetchPromise = this.fetchProjectsWithRetry()
+      .then((projectsData) => {
+        this.projectsSubject.next(projectsData);
+        this.hasFetchedSuccessfully = true;
+        return projectsData;
+      })
+      .catch((error) => {
+        // Still emit a value to the projects subject so components can handle the empty state
+        const emptyData: ProjectsData = { origin: null, linkedProjects: [] };
+        this.projectsSubject.next(emptyData);
+        throw error;
+      })
+      .finally(() => {
+        this.fetchPromise = null;
+      });
+
+    return this.fetchPromise;
+  }
+
+  private async fetchProjectsWithRetry(): Promise<ProjectsData> {
+    let lastError: Error;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await this.http.get<ProjectTagsResponse>('/internal/cps/projects_tags');
+        const originValues = response.origin ? Object.values(response.origin) : [];
+
+        return {
+          origin: originValues.length > 0 ? originValues[0] : null,
+          linkedProjects: response.linked_projects
+          ? Object.values(response.linked_projects).sort((a, b) =>
+              a._alias.localeCompare(b._alias)
+            )
+          : [],
+        };
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        // eslint-disable-next-line no-console
+        console.error(`Failed to fetch projects (attempt ${attempt + 1}/${MAX_RETRIES + 1}):`, error);
+
+        // Don't wait after the last attempt
+        if (attempt < MAX_RETRIES) {
+          // Exponential backoff
+          await new Promise((resolve) =>
+            setTimeout(resolve, RETRY_DELAY_MS * Math.pow(2, attempt))
+          );
+        }
+      }
+    }
+
+    throw lastError!;
   }
 }

@@ -21,4 +21,5 @@ export type {
   Project,
   ProjectTagsResponse,
 } from './types';
-export type { CPSManager, ProjectsData } from './services/cps_manager';
+export { CPSManager } from './services/cps_manager';
+export type { ProjectsData } from './services/cps_manager';
