@@ -42,8 +42,8 @@ export default defineCypressConfig({
     excludeSpecPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
 
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
-      return require('@kbn/fleet-plugin/cypress/plugins')(on, config);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      return require('./plugins')(on, config);
     },
   },
 });
