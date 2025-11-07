@@ -15,7 +15,6 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { useStepDecorationsInExecution } from './use_step_decorations_in_execution';
 import { createMockStore } from '../../../../entities/workflows/store/__mocks__/store.mock';
-import type { StepInfo } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import {
   _setComputedDataInternal,
   setExecution,
@@ -23,6 +22,7 @@ import {
   setYamlString,
 } from '../../../../entities/workflows/store/workflow_detail/slice';
 import type { ComputedData } from '../../../../entities/workflows/store/workflow_detail/types';
+import type { StepInfo } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 // Mock Monaco Range
 jest.mock('@kbn/monaco', () => {

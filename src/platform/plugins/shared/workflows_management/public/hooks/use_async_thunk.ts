@@ -9,7 +9,7 @@
 
 import { type AsyncThunk, type AsyncThunkAction, unwrapResult } from '@reduxjs/toolkit';
 import type { AsyncThunkFulfilledActionCreator } from '@reduxjs/toolkit/dist/createAsyncThunk';
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useReducer } from 'react';
 import { useDispatch } from 'react-redux';
 
 type AsyncThunkDispatch = <R, P, C extends {}>(
