@@ -44,7 +44,7 @@ export function getDashboardApi({
   savedObjectId,
 }: {
   creationOptions?: DashboardCreationOptions;
-  incomingEmbeddables?: EmbeddablePackageState[] | undefined;
+  incomingEmbeddables: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
@@ -64,10 +64,8 @@ export function getDashboardApi({
     return getReferencesForPanelId(id, references$.value ?? []);
   };
 
-  const restEmbeddables = incomingEmbeddables;
-  console.log({ incomingEmbeddables });
   const layoutManager = initializeLayoutManager(
-    restEmbeddables,
+    incomingEmbeddables,
     initialState.panels,
     initialState.controlGroupInput,
     trackPanel,
@@ -118,8 +116,6 @@ export function getDashboardApi({
       panels,
       controlGroupInput,
     };
-
-    // ...(controlGroupReferences ?? []),
     return {
       dashboardState,
       references: [...(panelReferences ?? [])],

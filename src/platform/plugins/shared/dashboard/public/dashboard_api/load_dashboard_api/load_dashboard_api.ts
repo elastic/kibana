@@ -17,6 +17,8 @@ import { getDashboardApi } from '../get_dashboard_api';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import type { DashboardCreationOptions } from '../types';
 import { transformPanels } from './transform_panels';
+import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
+import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -27,7 +29,22 @@ export async function loadDashboardApi({
 }) {
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
+
+  // --------------------------------------------------------------------------------------
+  // Determine sizes of incoming embeddables. Done here due to async fetching.
+  // --------------------------------------------------------------------------------------
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
+  for (const embeddable of incomingEmbeddables ?? []) {
+    if (embeddable.size) continue; // don't overwrite size if it was provided
+    // otherwise, use the panel settings to determine the size
+    const panelSettings = await getPanelSettings(embeddable.type, embeddable.serializedState);
+    const panelPlacementSettings = {
+      ...DEFAULT_PANEL_PLACEMENT_SETTINGS,
+      ...panelSettings?.placementSettings,
+    };
+    embeddable.size = panelPlacementSettings;
+  }
+
   const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
     id: savedObjectId,
   });
