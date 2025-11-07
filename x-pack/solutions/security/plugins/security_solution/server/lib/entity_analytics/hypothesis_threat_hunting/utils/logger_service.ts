@@ -35,5 +35,6 @@ export const createThreatHuntingHypothesesLoggerService = (
     info: (msg: string) => log('info', msg),
     warn: (msg: string) => log('warn', msg),
     error: (msg: string) => log('error', msg),
+    debug: (msg: string) => log('debug', msg),
   };
 };

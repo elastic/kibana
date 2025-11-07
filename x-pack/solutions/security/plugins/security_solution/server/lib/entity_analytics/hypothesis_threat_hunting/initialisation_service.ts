@@ -6,11 +6,12 @@
  */
 
 import type { Logger, SavedObjectsClientContract, CoreAuditService } from '@kbn/core/server';
+import type { HypothesisUpsertResult } from './saved_objects/threat_hunting_hypothesis_descriptor';
 import { ThreatHuntingHypothesisDescriptorClient } from './saved_objects/threat_hunting_hypothesis_descriptor';
-import { ThreatHuntingHypothesisActions } from './auditing/actions';
-import { hypothesisDefinitions } from './lib/hypothesis_definitions';
 import { createThreatHuntingHypothesesAuditLoggerService } from './utils/audit_logger_service';
 import { createThreatHuntingHypothesesLoggerService } from './utils/logger_service';
+import { ThreatHuntingHypothesisActions } from './auditing/actions';
+import { hypothesisDefinitions } from './lib/hypothesis_definitions';
 
 export type ThreatHuntingHypothesesInitService = ReturnType<
   typeof createThreatHuntingHypothesesInitService
@@ -26,7 +27,8 @@ export const initThreatHuntingHypothesisDefinitions = async (
     logger,
     auditService
   );
-  await initService.init();
+  const initResult = await initService.init();
+  return initResult;
 };
 
 export const createThreatHuntingHypothesesInitService = (
@@ -44,34 +46,25 @@ export const createThreatHuntingHypothesesInitService = (
     savedObjectsClient,
   });
 
-  const init = async (): Promise<void> => {
-    if (await isSetupRequired()) {
-      try {
-        loggingService.info('Setup required - initializing Threat Hunting Hypotheses definitions');
-        const results = await descriptor.bulkCreate(hypothesisDefinitions);
-        loggingService.info(
-          `Initialized Threat Hunting Hypotheses definitions: ${results.length} created`
-        );
-      } catch (error) {
-        loggingService.error(
-          `Failed to initialize Threat Hunting Hypotheses definitions: ${error.message}`
-        );
-        auditLoggerService.log(
-          ThreatHuntingHypothesisActions.CREATE,
-          `Failed to initialize Threat Hunting Hypotheses definitions: ${error.message}`,
-          error
-        );
-      }
+  const init = async (): Promise<HypothesisUpsertResult> => {
+    try {
+      const upsertRes = await descriptor.bulkUpsert(hypothesisDefinitions);
+      loggingService.debug(
+        `Threat Hunting Hypotheses definitions upsert on startup: ${upsertRes.created} created, ${upsertRes.updated} updated`
+      );
+      return upsertRes;
+    } catch (error) {
+      loggingService.error(
+        `Failed to initialise Threat Hunting Hypotheses definitions: ${error.message}`
+      );
+      auditLoggerService.log(
+        ThreatHuntingHypothesisActions.CREATE,
+        `Failed to initialise Threat Hunting Hypotheses definitions: ${error.message}`,
+        error
+      );
     }
-  };
-
-  /**
-   * If there are no saved objects with Threat Hunting Hypotheses definitions, setup is required.
-   * @returns True if setup is required, false otherwise.
-   */
-  const isSetupRequired = async (): Promise<boolean> => {
-    const hypothesesSavedObjects = await descriptor.getAll();
-    return Object.keys(hypothesesSavedObjects).length === 0;
+    // return a safe default so orchestrator doesn't blow up
+    return { created: 0, updated: 0, results: [] };
   };
 
   return {
