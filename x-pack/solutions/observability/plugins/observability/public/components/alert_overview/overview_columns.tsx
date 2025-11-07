@@ -160,7 +160,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                     </EuiText>
                   );
                 }
-                
+
                 let formattedWarningComparator = warningComparator.toUpperCase();
                 if (
                   warningComparator === COMPARATORS.NOT_BETWEEN ||
@@ -168,7 +168,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                 ) {
                   formattedWarningComparator = 'NOT BETWEEN';
                 }
-                
+
                 return (
                   <EuiText size="s" key={`${warningThreshold}-${criticalIndex}`}>
                     <h4>{`${formattedWarningComparator} ${warningThreshold}`}</h4>
