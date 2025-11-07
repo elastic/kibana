@@ -33,6 +33,8 @@ export const TABS = {
 export const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html';
 
+export const CLOUD_CONNECTOR_NAME_FIELD = 'cloud_connector_name';
+
 export const AWS_CLOUD_CONNECTOR_FIELD_NAMES = {
   ROLE_ARN: 'role_arn',
   EXTERNAL_ID: 'external_id',

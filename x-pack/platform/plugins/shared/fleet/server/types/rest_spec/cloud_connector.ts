@@ -143,8 +143,8 @@ export const UpdateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.maybe(
       schema.string({
-        minLength: 1,
-        maxLength: 255,
+        minLength: 3,
+        maxLength: 64,
         meta: { description: 'The name of the cloud connector.' },
       })
     ),
