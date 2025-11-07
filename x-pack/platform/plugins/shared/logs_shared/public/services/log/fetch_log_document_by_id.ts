@@ -24,7 +24,6 @@ export const fetchLogDocumentById = async (
   _index: string | null;
   fields: Record<PropertyKey, any> | null;
 }> => {
-  // Get log indices directly from advanced settings (log sources)
   const logSources = await logSourcesService.getLogSources();
   const indexPattern = logSources
     .map((source: { indexPattern: string }) => source.indexPattern)
