@@ -251,7 +251,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           Object.values(FieldType).includes(
             newProvider?.configurations[k]?.type ?? ('' as FieldType)
           ) === false ||
-          // Tempo fix to ensure headers aren't sent until full custom header support is added here https://github.com/elastic/kibana/pull/242187
+          // Tempo fix for inference endpoint creation to ensure headers aren't sent until full custom header support is added here https://github.com/elastic/kibana/pull/242187
           (newProvider?.configurations[k]?.type === FieldType.MAP && enableCustomHeaders !== true)
         ) {
           delete newConfig[k];
