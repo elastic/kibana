@@ -285,8 +285,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should open URL in new tab when clicking on a link in the input editor', async () => {
         await PageObjects.console.clearEditorText();
-
-        // Enter a URL that will be detected as a link
         await PageObjects.console.enterText('# https://www.elastic.co');
 
         // Wait for Monaco to detect and decorate the link
@@ -296,38 +294,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return detectedLinks.length > 0;
         });
 
-        // Get the input editor container
         const inputEditor = await testSubjects.find('consoleMonacoEditor');
-
-        // Find the detected link element that Monaco created
         const detectedLink = await inputEditor.findByCssSelector('.detected-link');
 
         // Perform Cmd/Ctrl+Click on the detected link
-        // Following the pattern from ES|QL tests where we hover to show tooltip, then click the option
         const modifierKey = browser.keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-
-        await browser.getActions().keyDown(modifierKey).perform();
-
-        // Hover over the detected link to show the tooltip
-        await detectedLink.moveMouseTo();
-
-        // Wait for Monaco hover tooltip to appear
-        // Monaco shows a tooltip with "Follow link" when hovering over a URL with Cmd/Ctrl held
-        await retry.waitFor('Monaco hover tooltip to appear', async () => {
-          const links = await inputEditor.findAllByCssSelector(
-            '.monaco-hover .rendered-markdown a'
-          );
-          return links.length > 0;
-        });
-
-        // Click the "Follow link" anchor in the hover tooltip
-        // The HTML structure is: .monaco-hover > .hover-contents > .rendered-markdown > a
-        const followLinkElement = await inputEditor.findByCssSelector(
-          '.monaco-hover .rendered-markdown a'
-        );
-        await followLinkElement.click();
-
-        await browser.getActions().keyUp(modifierKey).perform();
+        await browser
+          .getActions()
+          .keyDown(modifierKey)
+          .click(detectedLink._webElement)
+          .keyUp(modifierKey)
+          .perform();
 
         // Wait for a new tab to open
         await retry.waitFor('new tab to open after clicking link', async () => {
@@ -335,11 +312,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return handles.length > initialWindowHandles.length;
         });
 
-        // Verify a new tab was opened
         const windowHandles = await browser.getAllWindowHandles();
         expect(windowHandles.length).to.be.greaterThan(initialWindowHandles.length);
 
-        // Switch to the new tab and verify the URL
         await browser.switchToWindow(windowHandles[windowHandles.length - 1]);
         const currentUrl = await browser.getCurrentUrl();
         expect(currentUrl).to.contain('elastic.co');

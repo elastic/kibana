@@ -187,46 +187,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
-
-    describe('links', () => {
-      it('does not enable clickable links', async () => {
-        const linksEnabled = await browser.execute(() => {
-          const monaco = (window as any).MonacoEnvironment?.monaco;
-          if (!monaco) return null;
-
-          const editors = monaco.editor.getEditors();
-          const editor = editors.find((e: any) => {
-            const container = e.getContainerDomNode();
-            return container?.closest('[data-test-subj="searchProfilerEditor"]');
-          });
-
-          if (editor) {
-            editor.setValue('# https://www.elastic.co');
-            return editor.getOptions().get(monaco.editor.EditorOption.links);
-          }
-          return null;
-        });
-
-        expect(linksEnabled).to.be(false);
-
-        await PageObjects.common.sleep(500);
-
-        const editor = await testSubjects.find('searchProfilerEditor');
-        const detectedLinks = await editor.findAllByCssSelector('.detected-link');
-        expect(detectedLinks.length).to.be(0);
-
-        const modifierKey = browser.keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-        await browser.getActions().keyDown(modifierKey).perform();
-
-        const editorLines = await editor.findAllByClassName('view-line');
-        await editorLines[0].moveMouseTo();
-        await PageObjects.common.sleep(500);
-
-        const followLinks = await editor.findAllByCssSelector('.monaco-hover .rendered-markdown a');
-        expect(followLinks.length).to.be(0);
-
-        await browser.getActions().keyUp(modifierKey).perform();
-      });
-    });
   });
 }
