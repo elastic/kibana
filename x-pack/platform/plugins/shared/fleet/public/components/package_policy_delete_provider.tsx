@@ -36,7 +36,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
   from?: 'fleet-policy-list' | undefined;
   packagePolicyPackage?: PackagePolicyPackage;
-  isAgentlessPolicy?: boolean;
+  isAgentlessPolicy?: boolean | null;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -239,12 +239,15 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     from,
     history,
     getPath,
+    isAgentlessPolicy,
   ]);
 
   const modalTitleId = useGeneratedHtmlId();
 
   const renderModal = () => {
-    const isAgentlessPolicy = agentPolicies?.find((policy) => policy?.supports_agentless === true);
+    const isAgentlessAgentPolicy = agentPolicies?.find(
+      (policy) => policy?.supports_agentless === true
+    );
     const packagePolicy = agentPolicies?.[0]?.package_policies?.find(
       (policy) => policy.id === packagePolicies[0]
     );
@@ -257,7 +260,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         aria-labelledby={modalTitleId}
         titleProps={{ id: modalTitleId }}
         title={
-          isAgentlessPolicy ? (
+          isAgentlessAgentPolicy ? (
             <FormattedMessage
               id="xpack.fleet.deletePackagePolicy.confirmModal.agentlessTitle"
               defaultMessage="You’re about to delete an integration"
@@ -344,7 +347,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
               color="danger"
               data-test-subj="affectedAgentsCallOut"
               title={
-                !isAgentlessPolicy && (
+                !isAgentlessAgentPolicy && (
                   <FormattedMessage
                     id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsTitle"
                     defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
@@ -353,7 +356,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 )
               }
             >
-              {hasMultipleAgentPolicies && !isAgentlessPolicy && (
+              {hasMultipleAgentPolicies && !isAgentlessAgentPolicy && (
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentPoliciesMessage"
                   defaultMessage="Fleet has detected that the related agent policies {toolTip} are already in use by some of your agents."
@@ -377,7 +380,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   }}
                 />
               )}{' '}
-              {!hasMultipleAgentPolicies && !isAgentlessPolicy && (
+              {!hasMultipleAgentPolicies && !isAgentlessAgentPolicy && (
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
                   defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
@@ -386,7 +389,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   }}
                 />
               )}
-              {!hasMultipleAgentPolicies && isAgentlessPolicy && (
+              {!hasMultipleAgentPolicies && isAgentlessAgentPolicy && (
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.agentless.confirmModal.message"
                   defaultMessage="Deleting {packagePolicyName} integration will stop data ingestion."
