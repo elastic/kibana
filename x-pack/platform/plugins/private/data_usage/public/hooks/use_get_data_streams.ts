@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataStreamsResponseBodySchemaBody } from '../../server/routes/internal/data_streams';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE, DEFAULT_SELECTED_OPTIONS } from '../../common';

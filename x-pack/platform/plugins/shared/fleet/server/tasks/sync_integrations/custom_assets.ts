@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type {
   ClusterGetComponentTemplateResponse,
   IngestGetPipelineResponse,
@@ -17,6 +17,8 @@ import { retryTransientEsErrors } from '../../services/epm/elasticsearch/retry';
 
 import { packagePolicyService } from '../../services';
 import { SO_SEARCH_LIMIT } from '../../constants';
+
+import { FleetError } from '../../errors';
 
 import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
@@ -286,23 +288,46 @@ async function updateIngestPipeline(
     }
   }
 
+  // Remove system-managed properties (dates) that cannot be set during create/update of ingest pipelines
+  const customAssetPipelineWithoutTimestamps = omit(customAsset.pipeline, [
+    'created_date',
+    'created_date_millis',
+    'modified_date',
+    'modified_date_millis',
+  ]);
+
+  const existingPipelineWithoutTimestamps = omit(existingPipeline, [
+    'created_date',
+    'created_date_millis',
+    'modified_date',
+    'modified_date_millis',
+  ]);
+
   let shouldUpdatePipeline = false;
   if (existingPipeline) {
     shouldUpdatePipeline =
       (existingPipeline.version && existingPipeline.version < customAsset.pipeline.version) ||
-      (!existingPipeline.version && !isEqual(existingPipeline, customAsset.pipeline));
+      (!existingPipeline.version &&
+        !isEqual(existingPipelineWithoutTimestamps, customAssetPipelineWithoutTimestamps));
   } else {
     shouldUpdatePipeline = true;
   }
 
+  if (shouldUpdatePipeline && customAsset.pipeline.processors.some((p: any) => p.enrich)) {
+    throw new FleetError(
+      `Syncing ingest pipelines that reference enrich policies is not supported. Please sync manually.`
+    );
+  }
+
   if (shouldUpdatePipeline) {
     logger.debug(`Updating ingest pipeline: ${customAsset.name}`);
+
     return retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline(
           {
             id: customAsset.name,
-            ...customAsset.pipeline,
+            ...customAssetPipelineWithoutTimestamps,
           },
           {
             signal: abortController.signal,

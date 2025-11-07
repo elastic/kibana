@@ -92,7 +92,11 @@ describe('editor_frame', () => {
   let datasourceMap: DatasourceMap;
 
   beforeEach(() => {
-    mockVisualization = createMockVisualization();
+    mockVisualization = {
+      ...createMockVisualization(),
+      ToolbarComponent: jest.fn(() => <div />),
+    };
+
     mockVisualization2 = createMockVisualization('testVis2', ['second']);
 
     mockDatasource = createMockDatasource();
@@ -156,12 +160,15 @@ describe('editor_frame', () => {
     const queryWorkspacePanel = () => screen.queryByTestId('lnsWorkspace');
     const queryDataPanel = () => screen.queryByTestId('lnsDataPanelWrapper');
 
+    const queryVisualizationToolbar = () => screen.queryByTestId('lnsVisualizationToolbar');
+
     return {
       ...rtlRender,
       store,
       queryLayerPanel,
       queryWorkspacePanel,
       queryDataPanel,
+      queryVisualizationToolbar,
       simulateLoadingDatasource: () =>
         store.dispatch(
           setState({
@@ -180,24 +187,31 @@ describe('editor_frame', () => {
 
   describe('initialization', () => {
     it('should render workspace panel, data panel and layer panel when all datasources are initialized', async () => {
-      const { queryWorkspacePanel, queryDataPanel, queryLayerPanel, simulateLoadingDatasource } =
-        renderEditorFrame(undefined, {
-          preloadedStateOverrides: {
-            datasourceStates: {
-              testDatasource: {
-                isLoading: true,
-                state: {
-                  internalState: 'datasourceState',
-                },
+      const {
+        queryWorkspacePanel,
+        queryDataPanel,
+        queryLayerPanel,
+        queryVisualizationToolbar,
+        simulateLoadingDatasource,
+      } = renderEditorFrame(undefined, {
+        preloadedStateOverrides: {
+          datasourceStates: {
+            testDatasource: {
+              isLoading: true,
+              state: {
+                internalState: 'datasourceState',
               },
             },
           },
-        });
+        },
+      });
 
       expect(mockVisualization.getConfiguration).not.toHaveBeenCalled();
+
       expect(queryWorkspacePanel()).not.toBeInTheDocument();
       expect(queryDataPanel()).not.toBeInTheDocument();
       expect(queryLayerPanel()).not.toBeInTheDocument();
+      expect(queryVisualizationToolbar()).not.toBeInTheDocument();
 
       act(() => {
         simulateLoadingDatasource();
@@ -210,7 +224,9 @@ describe('editor_frame', () => {
       expect(queryWorkspacePanel()).toBeInTheDocument();
       expect(queryDataPanel()).toBeInTheDocument();
       expect(queryLayerPanel()).toBeInTheDocument();
+      expect(queryVisualizationToolbar()).toBeInTheDocument();
     });
+
     it('should render the resulting expression using the expression renderer', async () => {
       renderEditorFrame();
       expect(screen.getByTestId('lnsExpressionRenderer')).toHaveTextContent(

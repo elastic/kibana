@@ -45,7 +45,7 @@ describe('validateVariables', () => {
     name: 'Test Workflow',
     version: '1',
     enabled: true,
-    triggers: [{ type: 'manual', enabled: true }],
+    triggers: [{ type: 'manual' }],
     steps: [
       {
         name: 'Test Step',

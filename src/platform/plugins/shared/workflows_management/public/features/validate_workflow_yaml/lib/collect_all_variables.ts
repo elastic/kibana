@@ -12,7 +12,7 @@ import type { monaco } from '@kbn/monaco';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { isEnterForeach } from '@kbn/workflows/graph';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import { getCurrentPath, getStepNode } from '../../../../common/lib/yaml_utils';
+import { getPathAtOffset, getStepNode } from '../../../../common/lib/yaml';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import type { VariableItem } from '../model/types';
 
@@ -44,7 +44,7 @@ export function collectAllVariables(
         endColumn: monacoPosition?.endColumn ?? 0,
         key: node.configuration.foreach,
         type: 'foreach',
-        yamlPath: getCurrentPath(yamlDocument, foreachValueNode.range[0]),
+        yamlPath: getPathAtOffset(yamlDocument, foreachValueNode.range[0]),
       });
     }
   }
@@ -63,7 +63,7 @@ export function collectAllVariables(
       endColumn: endPosition.column,
       key: match.groups?.key ?? null,
       type: 'regexp',
-      yamlPath: getCurrentPath(yamlDocument, startOffset),
+      yamlPath: getPathAtOffset(yamlDocument, startOffset),
     });
   }
 

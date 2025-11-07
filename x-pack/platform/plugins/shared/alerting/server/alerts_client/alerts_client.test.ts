@@ -36,6 +36,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
+  ALERT_STATE_NAMESPACE,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
@@ -753,7 +754,10 @@ describe('Alerts Client', () => {
                 },
               },
               // ongoing alert doc
-              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
+              getOngoingIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
               {
                 create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
@@ -865,6 +869,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
               {
                 create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -964,7 +969,11 @@ describe('Alerts Client', () => {
                 },
               },
               // ongoing alert doc
-              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc', [ALERT_CONSECUTIVE_MATCHES]: 0 }),
+              getOngoingIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_CONSECUTIVE_MATCHES]: 0,
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
             ],
           });
           expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
@@ -1050,12 +1059,16 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 72000000000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               }),
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
               // new alert doc
-              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid3, [ALERT_INSTANCE_ID]: '3' }),
+              getNewIndexedAlertDoc({
+                [ALERT_UUID]: uuid3,
+                [ALERT_INSTANCE_ID]: '3',
+              }),
               {
                 index: {
                   _id: 'abc',
@@ -1066,7 +1079,10 @@ describe('Alerts Client', () => {
                 },
               },
               // recovered alert doc
-              getRecoveredIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
+              getRecoveredIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
             ],
           });
           expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
@@ -1181,6 +1197,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -1227,6 +1244,9 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               },
             ],
           });
@@ -1316,6 +1336,9 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 37951841000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -1346,6 +1369,9 @@ describe('Alerts Client', () => {
                 [ALERT_UUID]: 'abc',
                 [ALERT_END]: startedAtDate,
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: startedAtDate },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
             ],
           });
@@ -1438,6 +1464,9 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 37951841000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -1468,6 +1497,9 @@ describe('Alerts Client', () => {
                 [ALERT_UUID]: 'abc',
                 [ALERT_END]: startedAtDate,
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: startedAtDate },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
             ],
           });
@@ -1647,6 +1679,9 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
             ],
           });
@@ -1786,6 +1821,99 @@ describe('Alerts Client', () => {
           await expect(alertsClient.persistAlerts()).rejects.toThrowError(
             'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
           );
+        });
+      });
+
+      describe('updatePersistedAlerts', () => {
+        beforeEach(() => {
+          clusterClient.updateByQuery.mockResponseOnce({
+            failures: [],
+            updated: 0,
+            total: 1,
+          });
+        });
+        test('should update the persistent alerts successfully', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService
+            .create('1')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+          alertExecutorService
+            .create('2')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+
+          await alertsClient.processAlerts();
+          await alertsClient.persistAlerts();
+
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid1 = rawActiveAlerts['1'].meta!.uuid!;
+          const uuid2 = rawActiveAlerts['2'].meta!.uuid!;
+
+          await alertsClient.updatePersistedAlerts();
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            conflicts: 'proceed',
+            index: '.alerts-test.alerts-default',
+            query: {
+              terms: {
+                _id: [uuid1, uuid2],
+              },
+            },
+            script: {
+              lang: 'painless',
+              params: {
+                [uuid1]: {
+                  date: '2023-03-28T22:27:28.159Z',
+                  group: 'default',
+                },
+                [uuid2]: {
+                  date: '2023-03-28T22:27:28.159Z',
+                  group: 'default',
+                },
+              },
+              source: `
+            if (params.containsKey(ctx._source['kibana.alert.uuid'])) {
+              ctx._source['kibana.alert.scheduled_action.group'] = params[ctx._source['kibana.alert.uuid']].group;
+              ctx._source['kibana.alert.scheduled_action.date'] = params[ctx._source['kibana.alert.uuid']].date;
+              if (params[ctx._source['kibana.alert.uuid']].containsKey('actions')) {
+                ctx._source['kibana.alert.scheduled_action.throttling'] = params[ctx._source['kibana.alert.uuid']].actions;
+              }
+            }
+          `,
+            },
+          });
+        });
+
+        test('should not call updateByQuery if there is no alert with last scheduled actions', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          await alertsClient.persistAlerts();
+
+          await alertsClient.updatePersistedAlerts();
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
         });
       });
 
@@ -3265,6 +3393,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
             ],
           });
@@ -3369,6 +3498,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
             ],
           });
