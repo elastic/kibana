@@ -346,6 +346,7 @@ describe('FailureStoreModal', () => {
       await waitFor(() => {
         expect(defaultProps.onSaveModal).toHaveBeenCalledWith({
           inherit: {},
+          failureStoreEnabled: false,
         });
       });
     });

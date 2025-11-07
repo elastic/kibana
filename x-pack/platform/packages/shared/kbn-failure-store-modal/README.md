@@ -127,7 +127,7 @@ const MyComponent = () => {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `failureStoreEnabled` | `boolean \| undefined` | Whether failure store should be enabled |
+| `failureStoreEnabled` | `boolean ` | Whether failure store should be enabled |
 | `customRetentionPeriod` | `string \| undefined` | Custom retention period if specified |
 | `inherit` | `object \| undefined` | Empty object when inheritance is enabled |
 

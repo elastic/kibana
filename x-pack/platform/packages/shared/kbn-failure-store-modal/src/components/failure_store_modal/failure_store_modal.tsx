@@ -42,7 +42,7 @@ export interface FailureStoreFormProps {
 }
 
 interface FailureStoreFormData {
-  failureStoreEnabled?: boolean;
+  failureStoreEnabled: boolean;
   customRetentionPeriod?: string;
   inherit?: object;
 }
@@ -81,6 +81,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
     if (data.inherit) {
       await onSaveModal({
         inherit: {},
+        failureStoreEnabled: data.failureStore,
       });
       setIsSaveInProgress(false);
       return;
