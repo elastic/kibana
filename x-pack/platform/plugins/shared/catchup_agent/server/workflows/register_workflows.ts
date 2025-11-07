@@ -46,7 +46,7 @@ export async function registerCatchupWorkflows(
       const workflowPath = join(workflowsDir, workflowFile);
       let workflowYaml = readFileSync(workflowPath, 'utf-8');
 
-      // Inject dynamic date defaults for daily_security_catchup workflow
+      // Inject dynamic date defaults for workflows
       if (workflowFile === 'daily_security_catchup.yaml') {
         const now = new Date();
         const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -56,6 +56,15 @@ export async function registerCatchupWorkflows(
         // Replace marker values with calculated dates
         workflowYaml = workflowYaml.replace(/'__DYNAMIC_24H_AGO__'/g, `'${dayAgoISO}'`);
         workflowYaml = workflowYaml.replace(/'__DYNAMIC_NOW__'/g, `'${nowISO}'`);
+      }
+
+      if (workflowFile === 'incident_investigation.yaml') {
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const sevenDaysAgoISO = sevenDaysAgo.toISOString();
+
+        // Replace marker value with calculated date
+        workflowYaml = workflowYaml.replace(/'__DYNAMIC_7D_AGO__'/g, `'${sevenDaysAgoISO}'`);
       }
 
       // Extract workflow name from YAML to check if it already exists
