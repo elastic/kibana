@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Stream } from 'stream';
 import type { WriteFileContent } from '../types';
 import { sanitizeSvg } from '../sanitizations/svg';
 import { validateFileSize } from './file_size';
 
 import { validateMimeType } from './file_mimetype';
 
-type ValidatedContent<T> = T extends Iterable<any>
+type ValidatedContent<T> = T extends Iterable<unknown>
   ? Buffer
-  : T extends string | NodeJS.ArrayBufferView
-  ? T | Buffer
-  : T; // Preserve original type for Stream/AsyncIterable
+  : T extends Stream | AsyncIterable<unknown>
+  ? T // Preserve original type for Stream/AsyncIterable
+  : T | Buffer;
 
 export function validateAndSanitizeFileData<T extends WriteFileContent>(
   data: T,
