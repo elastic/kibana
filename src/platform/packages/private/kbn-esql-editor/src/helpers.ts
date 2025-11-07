@@ -334,30 +334,28 @@ export const onKeyDownResizeHandler = (
 };
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
-  const hoverContainersCSS = css`
-    background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
-    line-height: 1.5rem;
-    border-radius: ${theme.euiTheme.border.radius.medium} !important;
-    box-shadow: ${theme.euiTheme.shadows.l.down} !important;
-  `;
   return css`
     .monaco-hover {
       display: block !important;
-      ${hoverContainersCSS}
+      background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
+      line-height: 1.5rem;
+      border-radius: ${theme.euiTheme.border.radius.medium} !important;
+      box-shadow: ${theme.euiTheme.shadows.l.down} !important;
     }
 
-    // Fixes inline suggestions hover styles
+    // Fixes inline suggestions hover styles and only
     .monaco-hover:has(.inlineSuggestionsHints) {
       height: auto !important;
       width: auto !important;
       overflow-y: hidden !important;
       a {
-        color: ${theme.euiTheme.colors.plainDark} !important;
+        color: ${theme.euiTheme.colors.textParagraph} !important;
       }
       .inlineSuggestionStatusBarItemLabel {
         font-size: 10px !important;
         display: flex;
         align-items: center;
+        color: ${theme.euiTheme.colors.textParagraph} !important;
       }
       .slider {
         display: none;
@@ -375,6 +373,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       }
       .codicon-inline-suggestion-hints-next {
         margin-right: ${theme.euiTheme.size.xs} !important;
+      }
+      .codicon-inline-suggestion-hints-previous,
+      .codicon-inline-suggestion-hints-next {
+        color: ${theme.euiTheme.colors.textParagraph} !important;
       }
     }
     .hover-row.status-bar {
