@@ -97,6 +97,7 @@ export const initializeSearchEmbeddableApi = async (
 
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
+  const fieldSpecs$ = new BehaviorSubject<FieldSpec[] | undefined>(initialState.fieldSpecs);
   const grid$ = new BehaviorSubject<DiscoverGridSettings | undefined>(initialState.grid);
   const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
   const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
@@ -132,6 +133,7 @@ export const initializeSearchEmbeddableApi = async (
    */
   const stateManager: SearchEmbeddableStateManager = {
     columns: columns$,
+    fieldSpecs: fieldSpecs$,
     columnsMeta: columnsMeta$,
     grid: grid$,
     headerRowHeight: headerRowHeight$,
