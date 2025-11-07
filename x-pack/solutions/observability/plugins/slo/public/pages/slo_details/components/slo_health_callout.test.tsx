@@ -112,9 +112,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'healthy',
               rollup: {
@@ -146,9 +146,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -183,9 +183,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -219,9 +219,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -256,9 +256,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -292,9 +292,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -337,9 +337,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -382,9 +382,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -428,9 +428,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -470,9 +470,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {
@@ -510,9 +510,9 @@ describe('SloHealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: 'test-slo-id',
-            sloRevision: 1,
-            sloName: 'Test SLO',
+            id: 'test-slo-id',
+            revision: 1,
+            name: 'Test SLO',
             health: {
               overall: 'unhealthy',
               rollup: {

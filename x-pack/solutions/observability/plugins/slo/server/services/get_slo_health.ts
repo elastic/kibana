@@ -9,6 +9,7 @@ import type {
   TransformGetTransformStatsTransformStats,
   AggregationsAggregate,
   FieldValue,
+  SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
@@ -54,9 +55,9 @@ export class GetSLOHealth {
       name: string;
     }> = [];
 
-    const sloList = params.list ?? (await this.getAllSLODefinitions());
+    const sloList = params.list.length > 0 ? params.list : await this.getAllSLODefinitions();
 
-    const enableMap = new Map<
+    const sloMapWithEnabledFlag = new Map<
       string,
       {
         instanceId: string;
@@ -134,7 +135,7 @@ export class GetSLOHealth {
       instanceId: item.instanceId,
       revision: item.revision,
       name: item.name,
-      enabled: enableMap.get(item.id)?.enabled,
+      enabled: sloMapWithEnabledFlag.get(item.id)?.enabled,
     }));
 
     const summaryDocsById = await this.getSummaryDocsById(filteredList);
@@ -170,7 +171,7 @@ export class GetSLOHealth {
   }
 
   private getAllSLODefinitions = async () => {
-    let searchAfter: FieldValue = '';
+    let searchAfter: SortResults | undefined;
     let results: SLODefinition[] = [];
 
     do {
@@ -179,9 +180,11 @@ export class GetSLOHealth {
       }
 
       const newResults: SLODefinition[] = await this.repository.getAll(searchAfter);
-      searchAfter = newResults[newResults.length - 1]?.id;
+      searchAfter = newResults[newResults.length - 1]?.id
+        ? [newResults[newResults.length - 1]?.id]
+        : undefined;
       results = results.concat(newResults);
-    } while (searchAfter);
+    } while (searchAfter?.length);
 
     return results;
   };
