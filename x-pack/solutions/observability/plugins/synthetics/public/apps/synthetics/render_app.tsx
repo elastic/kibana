@@ -26,6 +26,7 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     http: { basePath },
     i18n,
     theme,
+    featureFlags,
   } = kibanaService.coreStart;
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
@@ -66,6 +67,9 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     setBadge,
     appMountParameters,
     isServerless,
+    featureFlags: {
+      coreChromeLayoutType: featureFlags.getStringValue('core.chrome.layoutType', '') || undefined,
+    },
   };
 };
 

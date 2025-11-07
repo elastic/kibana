@@ -42,6 +42,9 @@ export interface SyntheticsAppProps {
   appMountParameters: AppMountParameters;
   isDev: boolean;
   isServerless: boolean;
+  featureFlags: {
+    coreChromeLayoutType?: 'grid';
+  };
 }
 
 export interface SyntheticsSettingsContextValues {
@@ -58,6 +61,9 @@ export interface SyntheticsSettingsContextValues {
   isServerless?: boolean;
   setBreadcrumbs?: (crumbs: ChromeBreadcrumb[]) => void;
   darkMode: boolean;
+  featureFlags: {
+    coreChromeLayoutType?: 'grid';
+  };
 }
 
 const { BASE_PATH } = CONTEXT_DEFAULTS;
@@ -79,6 +85,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
   canSave: false,
   canManagePrivateLocations: false,
   darkMode: false,
+  featureFlags: {},
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
@@ -95,6 +102,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     isDev,
     isServerless,
     darkMode,
+    featureFlags,
   } = props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
@@ -119,6 +127,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
       isServerless,
       canManagePrivateLocations,
+      featureFlags,
     };
   }, [
     darkMode,
@@ -133,6 +142,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     commonlyUsedRanges,
     isServerless,
     canManagePrivateLocations,
+    featureFlags,
   ]);
 
   return <SyntheticsSettingsContext.Provider value={value} children={children} />;
