@@ -31,6 +31,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
         data-test-subj="syntheticsViewDocumentButton"
         iconType="inspect"
         title={INSPECT_DOCUMENT(formattedTimestamp)}
+        aria-label={INSPECT_DOCUMENT(formattedTimestamp)}
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation();
           setIsFlyoutVisible(true);

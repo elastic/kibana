@@ -13,6 +13,7 @@ import {
   ElasticLlmTourCallout,
   useObservabilityAIAssistantFlyoutStateContext,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
   ElasticLlmTourCallout: jest.fn(({ children }) => (
@@ -38,7 +39,7 @@ jest.mock('./chat_context_menu', () => ({
   ChatContextMenu: () => <div data-test-subj="chat-context-menu" />,
 }));
 
-const elasticManagedConnector = {
+const elasticManagedConnector = createMockConnectorFindResult({
   id: 'elastic-llm',
   actionTypeId: '.inference',
   name: 'Elastic LLM',
@@ -54,7 +55,7 @@ const elasticManagedConnector = {
     },
   },
   referencedByCount: 0,
-};
+});
 
 describe('ChatHeader', () => {
   const baseProps = {
@@ -85,6 +86,7 @@ describe('ChatHeader', () => {
     copyConversationToClipboard: jest.fn(),
     copyUrl: jest.fn(),
     handleArchiveConversation: jest.fn(),
+    navigateToConnectorsManagementApp: jest.fn(),
   };
 
   beforeEach(() => {
@@ -105,6 +107,7 @@ describe('ChatHeader', () => {
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
           getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -128,6 +131,7 @@ describe('ChatHeader', () => {
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
           getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -155,6 +159,7 @@ describe('ChatHeader', () => {
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
           getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -182,6 +187,7 @@ describe('ChatHeader', () => {
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
           getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );

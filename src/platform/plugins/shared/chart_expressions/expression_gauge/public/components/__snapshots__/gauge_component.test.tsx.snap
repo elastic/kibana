@@ -182,6 +182,12 @@ exports[`GaugeComponent renders the chart 1`] = `
             "visible": false,
           },
         },
+        "brush": Object {
+          "fill": "#0B64DD",
+          "opacity": 0.1,
+          "stroke": "#0B64DD",
+          "strokeWidth": 1,
+        },
         "bubbleSeriesStyle": Object {
           "point": Object {
             "dimmed": Object {
@@ -244,7 +250,7 @@ exports[`GaugeComponent renders the chart 1`] = `
               4,
               4,
             ],
-            "stroke": "#CAD3E2",
+            "stroke": "#0B64DD",
             "strokeWidth": 1,
             "visible": true,
           },
@@ -253,7 +259,7 @@ exports[`GaugeComponent renders the chart 1`] = `
               4,
               4,
             ],
-            "stroke": "#CAD3E2",
+            "stroke": "#0B64DD",
             "strokeWidth": 1,
             "visible": true,
           },

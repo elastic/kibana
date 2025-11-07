@@ -29,7 +29,7 @@ import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -59,9 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule with a rule_id', async () => {
-        const { body } = await securitySolutionApi
-          .createRule({ body: getSimpleRule() })
-          .expect(200);
+        const { body } = await detectionsApi.createRule({ body: getSimpleRule() }).expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
@@ -92,13 +90,13 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         };
 
-        const { body: createdRuleResponse } = await securitySolutionApi
+        const { body: createdRuleResponse } = await detectionsApi
           .createRule({ body: ruleCreateProperties })
           .expect(200);
 
         expect(createdRuleResponse).toMatchObject(expectedRule);
 
-        const { body: createdRule } = await securitySolutionApi
+        const { body: createdRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-1' },
           })
@@ -119,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: 'user.name: root or user.name: admin',
         };
 
-        const { body } = await securitySolutionApi.createRule({ body: rule }).expect(200);
+        const { body } = await detectionsApi.createRule({ body: rule }).expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         const expectedRule = updateUsername(
@@ -166,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule without a rule_id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .createRule({ body: getSimpleRuleWithoutRuleId() })
           .expect(200);
 
@@ -180,11 +178,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {
-        await securitySolutionApi.createRule({ body: getSimpleRule() }).expect(200);
+        await detectionsApi.createRule({ body: getSimpleRule() }).expect(200);
 
-        const { body } = await securitySolutionApi
-          .createRule({ body: getSimpleRule() })
-          .expect(409);
+        const { body } = await detectionsApi.createRule({ body: getSimpleRule() }).expect(409);
 
         expect(body).toEqual({
           message: 'rule_id: "rule-1" already exists',
@@ -198,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('creates a rule with max_signals defaulted to 100 when not present', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams(),
             })
@@ -208,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('does NOT create a rule when max_signals is less than 1', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: {
                 ...getCustomQueryRuleParams(),
@@ -231,7 +227,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(customQueryRuleParams.required_fields).toBeUndefined();
 
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: customQueryRuleParams,
             })
@@ -239,7 +235,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body.required_fields).toEqual([]);
 
-          const { body: createdRule } = await securitySolutionApi
+          const { body: createdRule } = await detectionsApi
             .readRule({
               query: { rule_id: 'rule-without-required-fields' },
             })

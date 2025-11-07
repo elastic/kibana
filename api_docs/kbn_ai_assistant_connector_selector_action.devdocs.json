@@ -1,0 +1,499 @@
+{
+  "id": "@kbn/ai-assistant-connector-selector-action",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+        "id": "def-public.ConnectorSelectable",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorSelectable",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/ai-assistant-connector-selector-action",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+            "section": "def-public.ConnectorSelectableProps",
+            "text": "ConnectorSelectableProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectable.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ai-assistant-connector-selector-action",
+                "scope": "public",
+                "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+                "section": "def-public.ConnectorSelectableProps",
+                "text": "ConnectorSelectableProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+        "id": "def-public.ConnectorSelectableComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorSelectableComponent",
+        "description": [],
+        "signature": [
+          "<T extends { value: string; } = { value: string; }>(props: ",
+          {
+            "pluginId": "@kbn/ai-assistant-connector-selector-action",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+            "section": "def-public.ConnectorSelectableComponentProps",
+            "text": "ConnectorSelectableComponentProps"
+          },
+          "<T>) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ai-assistant-connector-selector-action",
+                "scope": "public",
+                "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+                "section": "def-public.ConnectorSelectableComponentProps",
+                "text": "ConnectorSelectableComponentProps"
+              },
+              "<T>"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+        "id": "def-public.ConnectorSelectableFooter",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorSelectableFooter",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/ai-assistant-connector-selector-action",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+            "section": "def-public.ConnectorSelectableFooterProps",
+            "text": "ConnectorSelectableFooterProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableFooter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ai-assistant-connector-selector-action",
+                "scope": "public",
+                "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+                "section": "def-public.ConnectorSelectableFooterProps",
+                "text": "ConnectorSelectableFooterProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+        "id": "def-public.ConnectorSelectableComponentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorSelectableComponentProps",
+        "description": [
+          "Props for the `ConnectorSelectableComponent`"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ai-assistant-connector-selector-action",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+            "section": "def-public.ConnectorSelectableComponentProps",
+            "text": "ConnectorSelectableComponentProps"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.preConfiguredConnectors",
+            "type": "Array",
+            "tags": [],
+            "label": "preConfiguredConnectors",
+            "description": [
+              "Pre-configured connectors to display in the selector"
+            ],
+            "signature": [
+              "(",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & T & { key?: undefined; checked?: undefined; })[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.customConnectors",
+            "type": "Array",
+            "tags": [],
+            "label": "customConnectors",
+            "description": [
+              "Custom connectors to display in the selector"
+            ],
+            "signature": [
+              "(",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & T & { key?: undefined; checked?: undefined; })[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.defaultConnectorId",
+            "type": "string",
+            "tags": [],
+            "label": "defaultConnectorId",
+            "description": [
+              "Default connector id if a default connector has been configured."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "['data-test-subj']",
+            "description": [
+              "Optional test subject for the component."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "Controlled selected connector value."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.defaultValue",
+            "type": "string",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [
+              "Uncontrolled initial selected connector value."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.onValueChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onValueChange",
+            "description": [
+              "Callback that provides the selected connector value (string)."
+            ],
+            "signature": [
+              "((value: string, option: ",
+              "ExclusiveUnion",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<T>, ",
+              "EuiSelectableLIOption",
+              "<T>>) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+                "id": "def-public.ConnectorSelectableComponentProps.onValueChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+                "id": "def-public.ConnectorSelectableComponentProps.onValueChange.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "option",
+                "description": [],
+                "signature": [
+                  "ExclusiveUnion",
+                  "<",
+                  "EuiSelectableGroupLabelOption",
+                  "<T>, ",
+                  "EuiSelectableLIOption",
+                  "<T>>"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.footer",
+            "type": "Object",
+            "tags": [],
+            "label": "footer",
+            "description": [
+              "Selectable footer component"
+            ],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.renderOption",
+            "type": "Function",
+            "tags": [],
+            "label": "renderOption",
+            "description": [
+              "Render option component"
+            ],
+            "signature": [
+              "((option: (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{}>, ",
+              "EuiSelectableLIOption",
+              "<{}>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{}>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{}>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }), searchValue: string) => React.ReactNode) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+        "id": "def-public.ConnectorSelectableFooterProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorSelectableFooterProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableFooterProps.onAddConnectorClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onAddConnectorClick",
+            "description": [
+              "Callback when the \"Add Connector\" button is clicked"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableFooterProps.onManageConnectorsClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onManageConnectorsClick",
+            "description": [
+              "Callback when the \"Manage Connectors\" button is clicked"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+        "id": "def-public.ConnectorSelectableProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorSelectableProps",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/ai-assistant-connector-selector-action",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+            "section": "def-public.ConnectorSelectableComponentProps",
+            "text": "ConnectorSelectableComponentProps"
+          },
+          "<{ value: string; }>, \"value\" | \"data-test-subj\" | \"renderOption\" | \"onValueChange\" | \"customConnectors\" | \"preConfiguredConnectors\" | \"defaultConnectorId\"> & Pick<",
+          {
+            "pluginId": "@kbn/ai-assistant-connector-selector-action",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantConnectorSelectorActionPluginApi",
+            "section": "def-public.ConnectorSelectableFooterProps",
+            "text": "ConnectorSelectableFooterProps"
+          },
+          ", \"onAddConnectorClick\" | \"onManageConnectorsClick\">"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

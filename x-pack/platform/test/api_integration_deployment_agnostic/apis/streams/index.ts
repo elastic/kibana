@@ -30,7 +30,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./conflicts'));
     loadTestFile(require.resolve('./permissions'));
     loadTestFile(require.resolve('./global_search'));
-    loadTestFile(require.resolve('./systems'));
+    loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./settings'));
   });
 }

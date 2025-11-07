@@ -513,6 +513,7 @@ describe('fetchSearchSourceQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -625,6 +626,7 @@ describe('fetchSearchSourceQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -652,6 +654,7 @@ describe('fetchSearchSourceQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (err) {
         expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
@@ -697,6 +700,7 @@ describe('fetchSearchSourceQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (err) {
         expect(getErrorSource(err)).not.toBeDefined();
@@ -839,6 +843,7 @@ describe('fetchSearchSourceQuery', () => {
           title: 'title',
           type: 'index-pattern',
           version: undefined,
+          managed: false,
         },
         true // skipFetchFields flag
       );

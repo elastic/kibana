@@ -26,6 +26,7 @@ import { PageTitle } from '../../common/components/page_title';
 import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 import { DashboardMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
+import { DashboardMigrationDataInputWrapper } from '../components/data_input_flyout/wrapper';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -83,28 +84,33 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       }
 
       return (
-        <>
-          {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-            <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />
-          )}
-          {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
-            <>
-              <DashboardMigrationsUploadMissingPanel
-                migrationStats={migrationStats}
-                topSpacerSize="s"
-              />
-              <EuiSpacer size="m" />
-              <MigrationDashboardsTable refetchData={refetchData} migrationStats={migrationStats} />
-            </>
-          )}
-          {[
-            SiemMigrationTaskStatus.READY,
-            SiemMigrationTaskStatus.INTERRUPTED,
-            SiemMigrationTaskStatus.STOPPED,
-          ].includes(migrationStats.status) && (
-            <MigrationReadyPanel migrationStats={migrationStats} />
-          )}
-        </>
+        <DashboardMigrationDataInputWrapper onFlyoutClosed={refetchData}>
+          <>
+            {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
+              <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />
+            )}
+            {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
+              <>
+                <DashboardMigrationsUploadMissingPanel
+                  migrationStats={migrationStats}
+                  topSpacerSize="s"
+                />
+                <EuiSpacer size="m" />
+                <MigrationDashboardsTable
+                  refetchData={refetchData}
+                  migrationStats={migrationStats}
+                />
+              </>
+            )}
+            {[
+              SiemMigrationTaskStatus.READY,
+              SiemMigrationTaskStatus.INTERRUPTED,
+              SiemMigrationTaskStatus.STOPPED,
+            ].includes(migrationStats.status) && (
+              <MigrationReadyPanel migrationStats={migrationStats} />
+            )}
+          </>
+        </DashboardMigrationDataInputWrapper>
       );
     }, [dashboardMigrationsStats, migrationId, refetchData]);
 
@@ -119,12 +125,13 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
           />
         </HeaderPage>
         <EuiSkeletonLoading
+          key={migrationId}
           data-test-subj="migrationDashboardsPageLoading"
           isLoading={isLoading}
           loadingContent={
             <>
-              <EuiSkeletonTitle />
-              <EuiSkeletonText />
+              <EuiSkeletonTitle data-test-subj="loadingSkeletonTitle" />
+              <EuiSkeletonText data-test-subj="loadingSkeletonText" />
             </>
           }
           loadedContent={content}

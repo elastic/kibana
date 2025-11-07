@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MapAttributes } from '../../common/content_management';
+import type { StoredMapAttributes } from '../saved_objects/types';
 import { inject } from './inject';
 
 test('Should return original state with by-reference embeddable state', () => {
@@ -31,7 +31,7 @@ test('Should inject refNames with by-value embeddable state', () => {
     attributes: {
       layerListJSON:
         '[{"sourceDescriptor":{"indexPatternRefName":"layer_0_source_index_pattern"}}]',
-    } as MapAttributes,
+    } as StoredMapAttributes,
     type: 'map',
   };
   const refernces = [

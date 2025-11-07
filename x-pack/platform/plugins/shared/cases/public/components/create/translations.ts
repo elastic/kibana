@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 export * from '../user_profiles/translations';
 
+export const CREATE_CASE_LABEL = i18n.translate('xpack.cases.create.createCaseFlyoutAriaLabel', {
+  defaultMessage: 'Create case',
+});
+
 export const STEP_ONE_TITLE = i18n.translate('xpack.cases.create.stepOneTitle', {
   defaultMessage: 'Select template',
 });

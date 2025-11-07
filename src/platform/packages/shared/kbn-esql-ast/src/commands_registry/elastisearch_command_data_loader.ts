@@ -13,9 +13,18 @@ import type { ICommand } from './registry';
 import { commandsMetadata } from '../definitions/generated/commands/commands';
 import type { ElasticsearchCommandDefinition } from '../definitions/types';
 
+function mapCommandNameToElasticsearchName(commandName: string): string {
+  const nameMapping: Record<string, string> = {
+    'inline stats': 'inline_stats',
+  };
+
+  return nameMapping[commandName] || commandName;
+}
+
 export function mergeCommandWithGeneratedCommandData(command: ICommand): ICommand {
+  const elasticsearchCommandName = mapCommandNameToElasticsearchName(command.name);
   const generatedMetadata = (commandsMetadata as Record<string, ElasticsearchCommandDefinition>)[
-    command.name
+    elasticsearchCommandName
   ];
 
   if (!generatedMetadata || Object.keys(generatedMetadata).length === 0) {

@@ -49,7 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('updateFiltersOnChange is false', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/225165
+    describe.skip('updateFiltersOnChange is false', () => {
       it('should contain dropdown with terms aggregation results as options', async () => {
         const menu = await comboBox.getOptionsList('listControlSelect0');
         expect(menu.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
@@ -86,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('input control is clear', async () => {
           return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
         });
+        await common.sleep(500); // Wait for DOM to stabilize after clear
         await comboBox.set('listControlSelect0', 'osx', { retryCount: 3 });
         await visEditor.inputControlSubmit();
         await common.sleep(1000);

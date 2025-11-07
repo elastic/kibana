@@ -31,8 +31,7 @@ export {
   buildDataTableRecordList,
   convertValueToString,
   createLogsContextService,
-  createTracesContextService,
-  createApmErrorsContextService,
+  createApmContextService,
   createMetricsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
@@ -45,6 +44,8 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getLogLevelFieldWithFallback,
+  getLogEventTypeFieldWithFallback,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
@@ -60,6 +61,7 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  prepareDataViewForEditing,
   LogLevelBadge,
   getDefaultSort,
   getSort,
@@ -72,8 +74,7 @@ export {
 
 export type {
   LogsContextService,
-  TracesContextService,
-  ApmErrorsContextService,
+  ApmContextService,
   MetricsContextService,
   SortOrder,
   SortInput,
@@ -83,3 +84,16 @@ export type {
 export * from './src/types';
 
 export * from './src/data_types/logs/constants';
+
+export {
+  ALL_RECOMMENDED_FIELDS_FOR_ESQL,
+  APACHE_ERROR_LOGS_PROFILE,
+  DEFAULT_LOGS_PROFILE,
+  KUBERNETES_CONTAINER_LOGS_PROFILE,
+} from './src/data_types/logs';
+
+export type {
+  ApacheErrorLogsProfile,
+  DefaultLogsProfile,
+  KubernetesContainerLogsProfile,
+} from './src/data_types/logs';

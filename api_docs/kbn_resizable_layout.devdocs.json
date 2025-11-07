@@ -11,7 +11,7 @@
         "label": "ResizableLayout",
         "description": [],
         "signature": [
-          "({ className, mode, direction, fixedPanelSize, minFixedPanelSize, minFlexPanelSize, fixedPanel, flexPanel, resizeButtonClassName, [\"data-test-subj\"]: dataTestSubj, onFixedPanelSizeChange, }: ",
+          "({ className, mode, direction, fixedPanelSize, minFixedPanelSize, minFlexPanelSize, fixedPanel, flexPanel, fixedPanelOrder, resizeButtonClassName, [\"data-test-subj\"]: dataTestSubj, onFixedPanelSizeChange, }: ",
           {
             "pluginId": "@kbn/resizable-layout",
             "scope": "public",
@@ -30,7 +30,7 @@
             "id": "def-public.ResizableLayout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  className,\n  mode,\n  direction,\n  fixedPanelSize,\n  minFixedPanelSize,\n  minFlexPanelSize,\n  fixedPanel,\n  flexPanel,\n  resizeButtonClassName,\n  ['data-test-subj']: dataTestSubj,\n  onFixedPanelSizeChange,\n}",
+            "label": "{\n  className,\n  mode,\n  direction,\n  fixedPanelSize,\n  minFixedPanelSize,\n  minFlexPanelSize,\n  fixedPanel,\n  flexPanel,\n  fixedPanelOrder,\n  resizeButtonClassName,\n  ['data-test-subj']: dataTestSubj,\n  onFixedPanelSizeChange,\n}",
             "description": [],
             "signature": [
               {
@@ -199,6 +199,29 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-public.ResizableLayoutProps.fixedPanelOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fixedPanelOrder",
+            "description": [
+              "\nThe side to render the fixed panel."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/resizable-layout",
+                "scope": "public",
+                "docId": "kibKbnResizableLayoutPluginApi",
+                "section": "def-public.ResizableLayoutOrder",
+                "text": "ResizableLayoutOrder"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayoutProps.resizeButtonClassName",
             "type": "string",
             "tags": [],
@@ -286,6 +309,18 @@
         "type": "Enum",
         "tags": [],
         "label": "ResizableLayoutMode",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-resizable-layout/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/resizable-layout",
+        "id": "def-public.ResizableLayoutOrder",
+        "type": "Enum",
+        "tags": [],
+        "label": "ResizableLayoutOrder",
         "description": [],
         "path": "src/platform/packages/shared/kbn-resizable-layout/types.ts",
         "deprecated": false,

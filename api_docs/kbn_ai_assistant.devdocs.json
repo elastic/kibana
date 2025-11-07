@@ -11,7 +11,7 @@
         "label": "ChatBody",
         "description": [],
         "signature": [
-          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n}: { connectors: ",
+          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToConnectorsManagementApp,\n}: { connectors: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "public",
@@ -61,7 +61,9 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; }) => React.JSX.Element"
+          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; navigateToConnectorsManagementApp: (application: ",
+          "ApplicationStart",
+          ") => void; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
         "deprecated": false,
@@ -72,7 +74,7 @@
             "id": "def-public.ChatBody.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n}",
+            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToConnectorsManagementApp,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
             "deprecated": false,
@@ -459,6 +461,40 @@
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.navigateToConnectorsManagementApp",
+                "type": "Function",
+                "tags": [],
+                "label": "navigateToConnectorsManagementApp",
+                "description": [],
+                "signature": [
+                  "(application: ",
+                  "ApplicationStart",
+                  ") => void"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.navigateToConnectorsManagementApp.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "application",
+                    "description": [],
+                    "signature": [
+                      "ApplicationStart"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
                   }
                 ],
                 "returnComment": []

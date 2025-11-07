@@ -26,7 +26,7 @@ describe('getTemperatureIfValid', () => {
     expect(
       getTemperatureIfValid(0.7, {
         connector: OPENAI_CONNECTOR,
-        modelName: 'gpt-fake-o1',
+        modelName: 'gpt-fake',
       })
     ).toEqual({
       temperature: 0.7,

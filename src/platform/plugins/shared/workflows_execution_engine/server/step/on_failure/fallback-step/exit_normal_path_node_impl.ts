@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitNormalPathNode } from '@kbn/workflows';
-import type { StepImplementation } from '../../step_base';
+import type { ExitNormalPathNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation } from '../../node_implementation';
 
-export class ExitNormalPathNodeImpl implements StepImplementation {
+export class ExitNormalPathNodeImpl implements NodeImplementation {
   constructor(
     private node: ExitNormalPathNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.exitScope();
-    this.wfExecutionRuntimeManager.goToStep(this.node.exitOnFailureZoneNodeId);
+    this.wfExecutionRuntimeManager.navigateToNode(this.node.exitOnFailureZoneNodeId);
   }
 }

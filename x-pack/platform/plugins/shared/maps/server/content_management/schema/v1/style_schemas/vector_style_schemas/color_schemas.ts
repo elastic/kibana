@@ -11,7 +11,8 @@ import {
   DATA_MAPPING_FUNCTION,
   STYLE_TYPE,
 } from '../../../../../../common/constants';
-import { fieldMetaOptions, styleField } from './vector_style_schemas';
+import { fieldMetaOptionsSchema } from './field_meta_options_schema';
+import { styleFieldSchema } from './style_field_schema';
 
 export const categoryColorStop = schema.object({
   stop: schema.nullable(schema.string()),
@@ -42,8 +43,8 @@ export const colorDynamicOptions = schema.object({
   useCustomColorPalette: schema.maybe(schema.boolean()),
   otherCategoryColor: schema.maybe(schema.string()),
 
-  field: schema.maybe(styleField),
-  fieldMetaOptions,
+  field: schema.maybe(styleFieldSchema),
+  fieldMetaOptions: fieldMetaOptionsSchema,
 
   type: schema.maybe(
     schema.oneOf([

@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import type { RiskScoreEntity } from '../tasks/risk_scores/common';
-
 export const HOST_RISK_SCORE_NO_DATA_DETECTED =
   '[data-test-subj="host-risk-score-no-data-detected"]';
 
 export const USER_RISK_SCORE_NO_DATA_DETECTED =
   '[data-test-subj="user-risk-score-no-data-detected"]';
-
-export const RISK_SCORE_INSTALLATION_SUCCESS_TOAST = (riskScoreEntity: RiskScoreEntity) =>
-  `[data-test-subj="${riskScoreEntity}EnableSuccessToast"]`;
 
 export const HOSTS_DONUT_CHART =
   '[data-test-subj="entity_analytics_hosts"] [data-test-subj="donut-chart"]';

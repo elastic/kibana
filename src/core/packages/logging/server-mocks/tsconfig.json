@@ -15,7 +15,8 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/core-logging-server",
-    "@kbn/core-logging-server-internal"
+    "@kbn/core-logging-server-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

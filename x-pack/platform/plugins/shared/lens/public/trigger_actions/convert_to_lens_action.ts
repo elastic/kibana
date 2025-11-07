@@ -8,8 +8,8 @@
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
+import type { VisualizeEditorContext } from '@kbn/lens-common';
 import { APP_ID } from '../../common/constants';
-import type { VisualizeEditorContext } from '../types';
 
 export const convertToLensActionFactory =
   (id: string, displayName: string, originatingApp: string) => (application: ApplicationStart) =>

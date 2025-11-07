@@ -11,7 +11,9 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
+      "actions",
       "alerting",
+      "console",
       "data",
       "encryptedSavedObjects",
       "features",
@@ -23,7 +25,7 @@
       "usageCollection",
       "fieldsMetadata"
     ],
-    "optionalPlugins": ["cloud", "serverless", "globalSearch"],
+    "optionalPlugins": ["cloud", "serverless", "globalSearch", "spaces"],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }

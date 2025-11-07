@@ -27,6 +27,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { useUserLimitStatus } from '../../../hooks/use_privileged_monitoring_health';
 
 enum IndexMode {
   STANDARD = 'standard',
@@ -76,6 +77,8 @@ export const CreateIndexModal = ({
   const [indexMode, setIndexMode] = useState<IndexMode>(IndexMode.STANDARD);
   const [error, setError] = useState<string | null>(null);
   const { createPrivMonImportIndex } = useEntityAnalyticsRoutes();
+  const { userStats } = useUserLimitStatus();
+  const maxUsersAllowed = userStats?.maxAllowed ?? 10000; // fallback to default config value
 
   const handleCreate = useCallback(async () => {
     setError(null);
@@ -113,7 +116,9 @@ export const CreateIndexModal = ({
       <EuiModalBody>
         {error && (
           <>
-            <EuiCallOut color="danger">{error}</EuiCallOut>
+            <EuiCallOut announceOnMount color="danger">
+              {error}
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         )}
@@ -121,9 +126,10 @@ export const CreateIndexModal = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.description"
-              defaultMessage="Create an index to store your privileged users. After creating it, make sure to index documents with the {nameField} field using your preferred method."
+              defaultMessage="Create an index to store your privileged users (maximum number allowed: {maxUsersAllowed}). After creating it, make sure to index documents with the {nameField} field using your preferred method."
               values={{
                 nameField: <EuiCode>{'user.name'}</EuiCode>,
+                maxUsersAllowed: <EuiCode>{maxUsersAllowed}</EuiCode>,
               }}
             />
           </p>
@@ -157,7 +163,13 @@ export const CreateIndexModal = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup justifyContent="flexEnd">
-              <EuiButtonEmpty onClick={onClose}>
+              <EuiButtonEmpty
+                onClick={onClose}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.cancelButtonAriaLabel',
+                  { defaultMessage: 'Cancel' }
+                )}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.cancelButtonLabel"
                   defaultMessage="Cancel"

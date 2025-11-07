@@ -28,9 +28,10 @@ import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
 import type { ProcessorFormState } from '../../../../types';
-import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
+import { AdditionalChargesCallout } from './additional_charges_callout';
+import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
-import type { AIFeatures } from './use_ai_features';
+import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
 
 export const GrokPatternAISuggestions = ({
   aiFeatures,
@@ -90,7 +91,7 @@ export const GrokPatternAISuggestions = ({
       <EuiFlexGroup gutterSize="l" alignItems="center">
         {aiFeatures.enabled && (
           <EuiFlexItem grow={false}>
-            <GeneratePatternButton
+            <GenerateSuggestionButton
               aiFeatures={aiFeatures}
               onClick={(connectorId) => {
                 refreshSuggestions({
@@ -101,7 +102,14 @@ export const GrokPatternAISuggestions = ({
               }}
               isLoading={suggestionsState.loading}
               isDisabled={!isValidField}
-            />
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
+                {
+                  defaultMessage: 'Generate pattern',
+                }
+              )}
+            </GenerateSuggestionButton>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
@@ -120,6 +128,7 @@ export const GrokPatternAISuggestions = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {aiFeatures &&
+        aiFeatures.enabled &&
         aiFeatures.isManagedAIConnector &&
         !aiFeatures.hasAcknowledgedAdditionalCharges && (
           <>
@@ -192,7 +201,7 @@ export function GrokPatternSuggestion({
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s">
+          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
               {

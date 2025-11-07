@@ -25,6 +25,7 @@ import type { RetryParams } from './retry_helper';
 import { getRetryParams } from './retry_helper';
 import { BulkActionTaskType } from './bulk_action_types';
 import { MigrateActionRunner } from './migrate_action_runner';
+import { ChangePrivilegeActionRunner } from './change_privilege_runner';
 
 /**
  * Create and run retry tasks of agent bulk actions
@@ -49,6 +50,7 @@ export class BulkActionsResolver {
         [BulkActionTaskType.UPGRADE_RETRY]: UpgradeActionRunner,
         [BulkActionTaskType.REQUEST_DIAGNOSTICS_RETRY]: RequestDiagnosticsActionRunner,
         [BulkActionTaskType.MIGRATE_RETRY]: MigrateActionRunner,
+        [BulkActionTaskType.PRIVILEGE_LEVEL_CHANGE_RETRY]: ChangePrivilegeActionRunner,
       };
 
       return createRetryTask(
@@ -143,7 +145,6 @@ export function createRetryTask(
         taskInstance.taskType,
         taskInstance.params.retryParams
       );
-
       appContextService
         .getLogger()
         .debug(

@@ -198,7 +198,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
               position="left"
               className="canvasArg__tooltip"
             >
-              <span>{strings.getGlobalCSSLabel()}</span>
+              <span tabIndex={0}>{strings.getGlobalCSSLabel()}</span>
             </EuiToolTip>
           }
         >

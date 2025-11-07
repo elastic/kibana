@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest
           .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
+          .set('x-elastic-internal-origin', 'kibana')
           .send({ ids: toolIds })
           .expect(200);
 
@@ -62,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest
           .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
+          .set('x-elastic-internal-origin', 'kibana')
           .send({ ids: mixedToolIds })
           .expect(200);
 

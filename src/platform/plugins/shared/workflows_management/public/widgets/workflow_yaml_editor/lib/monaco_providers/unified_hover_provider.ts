@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type YAML from 'yaml';
 import { i18n } from '@kbn/i18n';
-import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
-import { getMonacoConnectorHandler } from './provider_registry';
+import { monaco } from '@kbn/monaco';
 import type { HoverContext, ProviderConfig } from './provider_interfaces';
+import { getMonacoConnectorHandler } from './provider_registry';
+import { getPathAtOffset } from '../../../../../common/lib/yaml';
+import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 
 /**
  * Unified hover provider that delegates to connector-specific handlers
@@ -159,6 +162,30 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     try {
       // console.log('UnifiedHoverProvider: provideHover called at position', position);
 
+      // FIRST: Check if there are validation errors at this position OR nearby
+      // If there are, let the validation-only hover provider handle it
+      const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+      const validationMarkersNearby = markers.filter(
+        (marker) =>
+          marker.startLineNumber === position.lineNumber && // Same line
+          isYamlValidationMarkerOwner(marker.owner) && // Only check YAML validation errors
+          // Check if the position is within or very close to the marker range
+          ((marker.startColumn <= position.column && marker.endColumn >= position.column) ||
+            Math.abs(marker.startColumn - position.column) <= 3 || // Within 3 columns
+            Math.abs(marker.endColumn - position.column) <= 3)
+      );
+
+      if (validationMarkersNearby.length > 0) {
+        // console.log('UnifiedHoverProvider: Found validation errors nearby, skipping to let validation provider handle');
+        // console.log('Nearby validation markers:', validationMarkersNearby.map(m => ({
+        //  message: m.message,
+        //  startCol: m.startColumn,
+        //  endCol: m.endColumn,
+        //  currentCol: position.column
+        // })));
+        return null;
+      }
+
       // Get YAML document
       const yamlDocument = this.getYamlDocument();
       if (!yamlDocument) {
@@ -174,7 +201,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       }
 
       // console.log('✅ UnifiedHoverProvider: Context detected', {
-      //   connectorType: context.connectorType,
+      //    connectorType: context.connectorType,
       //   yamlPath: context.yamlPath,
       //   stepContext: context.stepContext,
       //   parameterContext: context.parameterContext,
@@ -183,17 +210,21 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Find appropriate Monaco handler
       const handler = getMonacoConnectorHandler(context.connectorType);
       if (!handler) {
-        // console.log(
-        //   'UnifiedHoverProvider: No Monaco handler found for connector type:',
-        //   context.connectorType
-        // );
+        /*
+        console.log(
+          'UnifiedHoverProvider: No Monaco handler found for connector type:',
+          context.connectorType
+        );
+        */
         return null;
       }
 
-      // console.log(
-      //   'UnifiedHoverProvider: Found Monaco handler for connector type:',
-      //   context.connectorType
-      // );
+      /*
+      console.log(
+        'UnifiedHoverProvider: Found Monaco handler for connector type:',
+        context.connectorType
+      );
+      */
 
       // Generate hover content
       const hoverContent = await handler.generateHoverContent(context);
@@ -231,7 +262,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     try {
       // Get current path in YAML
       const absolutePosition = model.getOffsetAt(position);
-      let yamlPath = getCurrentPath(yamlDocument, absolutePosition);
+      let yamlPath = getPathAtOffset(yamlDocument, absolutePosition);
 
       // If no path found (e.g., cursor after colon), try to find it from the current line
       if (yamlPath.length === 0) {
@@ -302,7 +333,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
           });
 
           // Try to get path from the key position
-          const keyPath = getCurrentPath(yamlDocument, keyAbsolutePosition);
+          const keyPath = getPathAtOffset(yamlDocument, keyAbsolutePosition);
           if (keyPath.length > 0) {
             // Add the key name to the path
             return [...keyPath, keyName];
@@ -319,7 +350,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Try positions along the line to find any valid path
       for (let offset = 0; offset < lineContent.length; offset++) {
         const testPosition = lineStartPosition + offset;
-        const testPath = getCurrentPath(yamlDocument, testPosition);
+        const testPath = getPathAtOffset(yamlDocument, testPosition);
         if (testPath.length > 0) {
           // console.log('🔍 Found fallback path at offset', offset, ':', testPath);
           return testPath;

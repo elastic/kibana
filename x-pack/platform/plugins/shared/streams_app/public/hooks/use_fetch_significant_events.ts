@@ -12,6 +12,7 @@ import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 export interface SignificantEventItem {
+  title: string;
   query: StreamQuery;
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
@@ -72,6 +73,7 @@ export const useFetchSignificantEvents = ({
           return res.map((series) => {
             const { occurrences, change_points: changePoints, ...query } = series;
             return {
+              title: query.title,
               query,
               change_points: changePoints,
               occurrences: occurrences.map((occurrence) => ({

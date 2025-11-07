@@ -24,6 +24,8 @@
     "@kbn/core-base-server-internal",
     "@kbn/core-http-context-server-mocks",
     "@kbn/core-execution-context-server-mocks",
+    "@kbn/lazy-object",
+    "@kbn/core-doc-links-server-mocks",
   ],
   "exclude": [
     "target/**/*",

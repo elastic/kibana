@@ -198,6 +198,7 @@ export const SearchApplicationIndices: React.FC = () => {
       {(hasAllUnreachableIndices || hasUnknownIndices) && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={

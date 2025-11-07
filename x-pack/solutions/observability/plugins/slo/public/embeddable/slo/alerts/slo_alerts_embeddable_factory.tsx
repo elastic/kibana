@@ -19,9 +19,7 @@ import {
   useBatchedPublishingSubjects,
   useFetchContext,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
@@ -31,7 +29,6 @@ import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { EmbeddableSloProps, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
-const history = createBrowserHistory();
 const queryClient = new QueryClient();
 
 export const getAlertsPanelTitle = () =>
@@ -169,18 +166,16 @@ export function getAlertsEmbeddableFactory({
                     sloClient,
                   }}
                 >
-                  <Router history={history}>
-                    <QueryClientProvider client={queryClient}>
-                      <SloAlertsWrapper
-                        onEdit={onEdit}
-                        deps={deps}
-                        slos={slos}
-                        timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
-                        reloadSubject={reload$}
-                        showAllGroupByInstances={showAllGroupByInstances}
-                      />
-                    </QueryClientProvider>
-                  </Router>
+                  <QueryClientProvider client={queryClient}>
+                    <SloAlertsWrapper
+                      onEdit={onEdit}
+                      deps={deps}
+                      slos={slos}
+                      timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
+                      reloadSubject={reload$}
+                      showAllGroupByInstances={showAllGroupByInstances}
+                    />
+                  </QueryClientProvider>
                 </PluginContext.Provider>
               </KibanaContextProvider>
             </I18nContext>

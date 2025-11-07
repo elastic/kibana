@@ -8,8 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { columnsAfter } from './columns_after';
-import { autocomplete } from '../stats/autocomplete';
-import { validate } from '../stats/validate';
+import { autocomplete } from './autocomplete';
+import { validate } from './validate';
 import type { ICommandContext } from '../../types';
 import type { ICommandMethods } from '../../registry';
 
@@ -20,22 +20,27 @@ const inlineStatsCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const inlineStatsCommand = {
-  name: 'inlinestats',
+  name: 'inline stats',
   methods: inlineStatsCommandMethods,
   metadata: {
-    hidden: true,
+    hidden: false,
+    preview: true,
     description: i18n.translate('kbn-esql-ast.esql.definitions.inlineStatsDoc', {
       defaultMessage:
-        'Unlike STATS, INLINESTATS preserves all columns from the previous pipe and returns them together with the new aggregate columns.',
+        'Unlike STATS, INLINE STATS preserves all columns from the previous pipe and returns them together with the new aggregate columns.',
     }),
-    declaration: `INLINESTATS [column1 =] expression1 [WHERE boolean_expression1][,
-      ...,
-      [columnN =] expressionN [WHERE boolean_expressionN]]
-      [BY grouping_expression1[, ..., grouping_expressionN]]`,
+    declaration: `INLINE STATS [column1 =] expression1 [WHERE boolean_expression1][,
+...,
+[columnN =] expressionN [WHERE boolean_expressionN]]
+[BY grouping_expression1[, ..., grouping_expressionN]]`,
     examples: [
-      '… | inlinestats avg = avg(a)',
-      '… | inlinestats sum(b) by b',
-      '… | inlinestats sum(b) by b % 2',
+      '… | INLINE STATS avg = avg(a)',
+      '… | INLINE STATS sum(b) BY b',
+      '… | INLINE STATS sum(b) BY b % 2',
     ],
+    subqueryRestrictions: {
+      hideInside: false,
+      hideOutside: true,
+    },
   },
 };

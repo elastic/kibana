@@ -33,7 +33,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     defendInsights: any[] = [
       {
-        group: 'Policy Response Failure',
+        group: 'policy_response_failure:::Policy Response Failure:::Windows',
         events: [
           {
             id: 'event-1',
@@ -100,7 +100,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
         notes: {
           llm_model: 'gpt-4',
         },
-        display_name: group,
+        display_name: group.split(':::')[1] || '',
       },
       remediation: {
         descriptive: remediationMessage,
@@ -119,8 +119,8 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
       buildExpectedInsight(
-        'Policy Response Failure',
-        'Policy response failed. Please check endpoint connectivity.'
+        params.defendInsights[0].group,
+        params.defendInsights[0].remediation?.message as string
       )
     );
   });
@@ -128,7 +128,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
   it('should handle multiple insights with remediation', async () => {
     const params = generateParams([
       {
-        group: 'Policy Response Failure - Network',
+        group: 'policy_response_test1_failure:::Policy Response test1 failure:::Windows',
         events: [
           {
             id: 'event-1',
@@ -137,11 +137,11 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
           },
         ],
         remediation: {
-          message: 'Network connectivity issues detected.',
+          message: 'Policy Response test1 failure detected.',
         },
       },
       {
-        group: 'Policy Response Failure - Authentication',
+        group: 'policy_response_test2_failure:::Policy Response test2 failure:::Windows',
         events: [
           {
             id: 'event-2',
@@ -150,7 +150,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
           },
         ],
         remediation: {
-          message: 'Authentication failed for policy response.',
+          message: 'Policy Response test2 failure detected.',
         },
       },
     ]);
@@ -160,14 +160,14 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual(
       buildExpectedInsight(
-        'Policy Response Failure - Network',
-        'Network connectivity issues detected.'
+        params.defendInsights[0].group,
+        params.defendInsights[0].remediation?.message as string
       )
     );
     expect(result[1]).toEqual(
       buildExpectedInsight(
-        'Policy Response Failure - Authentication',
-        'Authentication failed for policy response.'
+        params.defendInsights[1].group,
+        params.defendInsights[1].remediation?.message as string
       )
     );
   });
@@ -175,7 +175,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
   it('should filter out insights without remediation', async () => {
     const params = generateParams([
       {
-        group: 'Valid Insight',
+        group: 'valid_insight:::Valid Insight:::Windows',
         events: [
           {
             id: 'event-1',
@@ -188,7 +188,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
         },
       },
       {
-        group: 'Invalid Insight - No Remediation',
+        group: 'invalid_insight:::Invalid Insight - No Remediation:::Windows',
         events: [
           {
             id: 'event-2',
@@ -204,14 +204,17 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
-      buildExpectedInsight('Valid Insight', 'This insight has remediation.')
+      buildExpectedInsight(
+        params.defendInsights[0].group,
+        params.defendInsights[0].remediation?.message as string
+      )
     );
   });
 
   it('should filter out insights with remediation but no message', async () => {
     const params = generateParams([
       {
-        group: 'Valid Insight',
+        group: 'valid_insight:::Valid Insight:::Windows',
         events: [
           {
             id: 'event-1',
@@ -224,7 +227,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
         },
       },
       {
-        group: 'Invalid Insight - No Message',
+        group: 'invalid_insight:::Invalid Insight - No Message:::Windows',
         events: [
           {
             id: 'event-2',
@@ -241,13 +244,18 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
     const result = await buildPolicyResponseFailureWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual(buildExpectedInsight('Valid Insight', 'This insight has a message.'));
+    expect(result[0]).toEqual(
+      buildExpectedInsight(
+        params.defendInsights[0].group,
+        params.defendInsights[0].remediation?.message as string
+      )
+    );
   });
 
   it('should filter out insights with empty remediation message', async () => {
     const params = generateParams([
       {
-        group: 'Valid Insight',
+        group: 'valid_insight:::Valid Insight:::Windows',
         events: [
           {
             id: 'event-1',
@@ -260,7 +268,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
         },
       },
       {
-        group: 'Invalid Insight - Empty Message',
+        group: 'invalid_insight:::Invalid Insight - Empty Message:::Windows',
         events: [
           {
             id: 'event-2',
@@ -278,7 +286,10 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
-      buildExpectedInsight('Valid Insight', 'This insight has a valid message.')
+      buildExpectedInsight(
+        params.defendInsights[0].group,
+        params.defendInsights[0].remediation?.message as string
+      )
     );
   });
 

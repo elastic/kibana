@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-preboot-server-internal",
-    "@kbn/core-preboot-server"
+    "@kbn/core-preboot-server",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

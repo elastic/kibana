@@ -38,10 +38,10 @@ import {
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { ESQL_TABLE_TYPE, getAggsFormats } from '@kbn/data-plugin/common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import type { DataLayerConfig } from '../../common';
@@ -72,9 +72,13 @@ import type {
 } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LayerCellValueActions } from '../types';
 import { EuiThemeProvider } from '@elastic/eui';
+import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
+import type { CoreSetup } from '@kbn/core/public';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 
 const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();
@@ -82,7 +86,7 @@ const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
 
 describe('XYChart component', () => {
-  let getFormatSpy: jest.Mock;
+  let formatFactorySpy: jest.Mock;
   let convertSpy: jest.Mock;
   let defaultProps: Omit<XYChartRenderProps, 'args'>;
 
@@ -136,14 +140,31 @@ describe('XYChart component', () => {
   };
 
   beforeEach(() => {
-    convertSpy = jest.fn((x) => x);
-    getFormatSpy = jest.fn();
-    getFormatSpy.mockReturnValue({ convert: convertSpy });
+    // use the current fieldFormatRegistry
+    const fieldFormatsRegistry = getFieldFormatsRegistry({
+      uiSettings: { get: jest.fn() },
+    } as unknown as CoreSetup);
+
+    // attach the required aggsFormats to allow formatting special charts in esaggs
+    fieldFormatsRegistry.register(
+      getAggsFormats((serializedFieldFormat) =>
+        fieldFormatsRegistry.deserialize(serializedFieldFormat)
+      )
+    );
+
+    formatFactorySpy = jest.fn((mapping?: SerializedFieldFormat) => {
+      const fieldFormat = fieldFormatsRegistry.deserialize(mapping);
+      const originalConvert = fieldFormat.convert?.bind(fieldFormat) ?? ((v: unknown) => v);
+      convertSpy = jest.fn((value) => originalConvert(value));
+      fieldFormat.convert = convertSpy as typeof fieldFormat.convert;
+      return fieldFormat;
+    });
+
     jest.clearAllMocks();
 
     defaultProps = {
       data: dataPluginMock.createStartContract(),
-      formatFactory: getFormatSpy,
+      formatFactory: formatFactorySpy,
       timeZone: 'UTC',
       renderMode: 'view',
       chartsThemeService,
@@ -557,14 +578,17 @@ describe('XYChart component', () => {
             {...defaultProps}
             args={{
               ...args,
+
               layers: [
                 {
                   ...(args.layers[0] as DataLayerConfig),
                   isHistogram: true,
+                  xScaleType: 'ordinal',
                 },
               ],
               xAxisConfig: {
                 type: 'xAxisConfig',
+
                 extent: {
                   type: 'axisExtentConfig',
                   mode: 'custom',
@@ -1433,7 +1457,27 @@ describe('XYChart component', () => {
 
     const { args, data } = sampleArgs();
 
-    convertSpy.mockImplementation((x) => (typeof x === 'string' ? x.toUpperCase() : x));
+    // apply a formatter to the `d` x Accessor column
+    const columns: DatatableColumn[] = data.columns.map((c) => {
+      if (c.id === 'd') {
+        return {
+          ...c,
+          meta: {
+            type: 'string',
+            params: {
+              id: 'terms',
+              params: {
+                id: 'string',
+                params: {
+                  transform: 'upper',
+                },
+              },
+            },
+          },
+        };
+      }
+      return c;
+    });
 
     const wrapper = mountWithIntl(
       <XYChart
@@ -1456,7 +1500,7 @@ describe('XYChart component', () => {
               xScaleType: 'ordinal',
               isHistogram: false,
               palette: mockPaletteOutput,
-              table: data,
+              table: { ...data, columns },
             },
           ],
         }}
@@ -1472,7 +1516,7 @@ describe('XYChart component', () => {
         {
           column: 3,
           row: 1,
-          table: data,
+          table: { ...data, columns },
           value: 'Bar',
         },
       ],
@@ -1717,6 +1761,10 @@ describe('XYChart component', () => {
           layers: [
             {
               ...(args.layers[0] as DataLayerConfig),
+              table: {
+                ...(args.layers[0] as DataLayerConfig).table,
+                rows: [],
+              },
               xAccessor: undefined,
               splitAccessors: ['e'],
               seriesType: 'bar',
@@ -2117,7 +2165,7 @@ describe('XYChart component', () => {
 
     shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
-    expect(getFormatSpy).toHaveBeenCalledWith({ id: 'string' });
+    expect(formatFactorySpy).toHaveBeenCalledWith({ id: 'string' });
   });
 
   test('it gets the formatter for the y axis if there is only one accessor', () => {
@@ -2132,19 +2180,23 @@ describe('XYChart component', () => {
         }}
       />
     );
-    expect(getFormatSpy).toHaveBeenCalledWith({
+    expect(formatFactorySpy).toHaveBeenCalledWith({
       id: 'number',
       params: { pattern: '0,0.000' },
     });
   });
 
   test('it should pass the formatter function to the axis', () => {
+    const localConvertSpy = jest.fn((x) => x);
+    const getFormatSpy = jest.fn();
+    getFormatSpy.mockReturnValue({ convert: localConvertSpy });
+
     const { args } = sampleArgs();
 
-    shallow(<XYChart {...defaultProps} args={{ ...args }} />);
+    shallow(<XYChart {...defaultProps} formatFactory={getFormatSpy} args={{ ...args }} />);
 
-    expect(convertSpy).toHaveBeenCalledWith(1652034840000);
-    expect(convertSpy).toHaveBeenCalledWith(1652122440000);
+    expect(localConvertSpy).toHaveBeenCalledWith('Foo');
+    expect(localConvertSpy).toHaveBeenCalledWith('Bar');
   });
 
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
@@ -2346,7 +2398,7 @@ describe('XYChart component', () => {
     });
   });
 
-  test('it should remove invalid rows', () => {
+  test('should not remove null values', () => {
     const data1: Datatable = {
       type: 'datatable',
       columns: [
@@ -2357,6 +2409,7 @@ describe('XYChart component', () => {
       rows: [
         { a: undefined, b: 2, c: 'I', d: 'Row 1' },
         { a: 1, b: 5, c: 'J', d: 'Row 2' },
+        { a: null, b: 2, c: 'I', d: 'Row 3' },
       ],
     };
 
@@ -2367,10 +2420,7 @@ describe('XYChart component', () => {
         { id: 'b', name: 'b', meta: { type: 'number' } },
         { id: 'c', name: 'c', meta: { type: 'string' } },
       ],
-      rows: [
-        { a: undefined, b: undefined, c: undefined },
-        { a: undefined, b: undefined, c: undefined },
-      ],
+      rows: [],
     };
 
     const args: XYProps = {
@@ -2428,8 +2478,8 @@ describe('XYChart component', () => {
           isHorizontal: false,
           showLines: true,
           xAccessor: 'a',
-          accessors: ['c'],
-          splitAccessors: ['b'],
+          accessors: ['b'],
+          splitAccessors: ['c'],
           columnToLabel: '',
           xScaleType: 'ordinal',
           isHistogram: false,
@@ -2444,8 +2494,8 @@ describe('XYChart component', () => {
           seriesType: 'line',
           showLines: true,
           xAccessor: 'a',
-          accessors: ['c'],
-          splitAccessors: ['b'],
+          accessors: ['b'],
+          splitAccessors: ['c'],
           columnToLabel: '',
           xScaleType: 'ordinal',
           isHistogram: false,
@@ -2462,9 +2512,12 @@ describe('XYChart component', () => {
 
     const series = component.find(DataLayers).dive().find(LineSeries);
 
-    // Only one series should be rendered, even though 2 are configured
-    // This one series should only have one row, even though 2 are sent
-    expect(series.prop('data')).toEqual([{ a: 1, b: 5, c: 'J', d: 'Row 2' }]);
+    // 2 series are rendered, undefined values is casted to a NULL_LABEL
+    expect(series.prop('data')).toEqual([
+      { a: NULL_LABEL, b: 2, c: 'I', d: 'Row 1' },
+      { a: '1', b: 5, c: 'J', d: 'Row 2' },
+      { a: NULL_LABEL, b: 2, c: 'I', d: 'Row 3' },
+    ]);
   });
 
   test('it should not remove rows with falsy but non-undefined values', () => {
@@ -2554,9 +2607,11 @@ describe('XYChart component', () => {
 
     const series = component.find(DataLayers).dive().find(LineSeries);
 
+    // accessors a and b (x and split) are formatted as text because the chart is
+    // an ordinal chart
     expect(series.prop('data')).toEqual([
-      { a: 0, b: 2, c: 5 },
-      { a: 1, b: 0, c: 7 },
+      { a: '0', b: '2', c: 5 },
+      { a: '1', b: '0', c: 7 },
     ]);
   });
 

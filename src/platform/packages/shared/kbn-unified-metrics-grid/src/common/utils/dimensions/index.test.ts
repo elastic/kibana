@@ -8,16 +8,17 @@
  */
 
 import { categorizeDimensions, sortDimensions } from '.';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 describe('dimension_utils', () => {
   const dimensions = [
-    { name: 'resource.attributes.cloud.region', type: 'keyword' },
-    { name: 'attributes.state', type: 'keyword' },
-    { name: 'host.name', type: 'string' },
-    { name: 'cpu.core', type: 'number' },
-    { name: 'attributes.region', type: 'string' },
-    { name: 'memory.type', type: 'string' },
-    { name: 'cpu.arch', type: 'string' },
+    { name: 'resource.attributes.cloud.region', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'attributes.state', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'cpu.core', type: ES_FIELD_TYPES.LONG },
+    { name: 'attributes.region', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'memory.type', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'cpu.arch', type: ES_FIELD_TYPES.KEYWORD },
   ];
 
   describe('categorizeDimensions', () => {
@@ -29,15 +30,15 @@ describe('dimension_utils', () => {
       );
 
       expect(requiredDimensions).toEqual([
-        { name: 'attributes.state', type: 'keyword' },
-        { name: 'cpu.core', type: 'number' },
-        { name: 'attributes.region', type: 'string' },
-        { name: 'cpu.arch', type: 'string' },
+        { name: 'attributes.state', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'cpu.core', type: ES_FIELD_TYPES.LONG },
+        { name: 'attributes.region', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'cpu.arch', type: ES_FIELD_TYPES.KEYWORD },
       ]);
       expect(optionalDimensions).toEqual([
-        { name: 'resource.attributes.cloud.region', type: 'keyword' },
-        { name: 'host.name', type: 'string' },
-        { name: 'memory.type', type: 'string' },
+        { name: 'resource.attributes.cloud.region', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'memory.type', type: ES_FIELD_TYPES.KEYWORD },
       ]);
     });
 
@@ -54,13 +55,13 @@ describe('dimension_utils', () => {
       const metricName = 'cpu.usage';
       const sorted = sortDimensions(dimensions, metricName);
       expect(sorted).toEqual([
-        { name: 'attributes.region', type: 'string' },
-        { name: 'attributes.state', type: 'keyword' },
-        { name: 'cpu.arch', type: 'string' },
-        { name: 'cpu.core', type: 'number' },
-        { name: 'host.name', type: 'string' },
-        { name: 'memory.type', type: 'string' },
-        { name: 'resource.attributes.cloud.region', type: 'keyword' },
+        { name: 'attributes.region', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'attributes.state', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'cpu.arch', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'cpu.core', type: ES_FIELD_TYPES.LONG },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'memory.type', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'resource.attributes.cloud.region', type: ES_FIELD_TYPES.KEYWORD },
       ]);
     });
 

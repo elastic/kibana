@@ -60,7 +60,6 @@ describe('Observability AI Assistant Management plugin', () => {
           get: jest.fn(() => ({
             logSourcesEnabled: true,
             spacesEnabled: true,
-            visibilityEnabled: true,
           })),
         },
         env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },

@@ -29,6 +29,7 @@ import {
   generateEvent,
   fetchRule,
   waitForAlertToComplete,
+  refreshIndex,
 } from '../../../utils';
 import {
   deleteAllRules,
@@ -41,7 +42,7 @@ import { createUserAndRole, deleteUserAndRole } from '../../../../../config/serv
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
@@ -71,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('elastic admin', () => {
         it('creates a custom query rule', async () => {
           const username = await utils.getUsername();
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({ body: getCustomQueryRuleParams() })
             .expect(200);
 
@@ -92,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
             saved_id: 'my-saved-query-id',
           });
 
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({ body: savedQueryRuleParams })
             .expect(200);
 
@@ -127,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('expects rule runs successfully', async () => {
           const {
             body: { id },
-          } = await securitySolutionApi
+          } = await detectionsApi
             .createRule({ body: getCustomQueryRuleParams({ enabled: true }) })
             .expect(200);
 
@@ -141,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('expects rule partial failure due to index pattern matching nothing', async () => {
           const {
             body: { id },
-          } = await securitySolutionApi
+          } = await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams({
                 index: ['does-not-exist-*'],
@@ -167,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('expects rule runs successfully with only one index pattern matching existing index', async () => {
           const {
             body: { id },
-          } = await securitySolutionApi
+          } = await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams({
                 index: ['does-not-exist-*', 'logs-test'],
@@ -188,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
             index: undefined,
           });
 
-          const { body } = await securitySolutionApi.createRule({ body: ruleParams }).expect(200);
+          const { body } = await detectionsApi.createRule({ body: ruleParams }).expect(200);
 
           expect(body.index).toBeUndefined();
           expect(body).toEqual(expect.objectContaining(omit(ruleParams, 'index')));
@@ -199,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: undefined,
           });
 
-          const { body } = await securitySolutionApi.createRule({ body: ruleParams }).expect(200);
+          const { body } = await detectionsApi.createRule({ body: ruleParams }).expect(200);
 
           expect(body).toEqual(
             expect.objectContaining({ ...ruleParams, rule_id: expect.any(String) })
@@ -207,7 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('creates a ML rule with legacy machine_learning_job_id', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({ body: getMLRuleParams({ machine_learning_job_id: 'some_job_id' }) })
             .expect(200);
 
@@ -219,17 +220,17 @@ export default ({ getService }: FtrProviderContext) => {
         it('creates a ML rule', async () => {
           const ruleParams = getMLRuleParams({ machine_learning_job_id: ['some_job_id'] });
 
-          const { body } = await securitySolutionApi.createRule({ body: ruleParams }).expect(200);
+          const { body } = await detectionsApi.createRule({ body: ruleParams }).expect(200);
 
           expect(body).toEqual(expect.objectContaining(ruleParams));
         });
 
         it('causes a 409 conflict if the same rule_id is used twice', async () => {
-          await securitySolutionApi
+          await detectionsApi
             .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-1' }) })
             .expect(200);
 
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-1' }) })
             .expect(409);
 
@@ -242,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('exception', () => {
         it('does NOT create a rule if trying to add more than one default rule exception list', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams({
                 exceptions_list: [
@@ -270,7 +271,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('does NOT create a rule when there is an attempt to share non sharable exception ("rule_default" type)', async () => {
-          const { body: ruleWithException } = await securitySolutionApi
+          const { body: ruleWithException } = await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams({
                 rule_id: 'rule-1',
@@ -286,7 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams({
                 rule_id: 'rule-2',
@@ -309,7 +310,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('creates a rule when shared exception type is used ("detection" type)', async () => {
-          await securitySolutionApi
+          await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams({
                 rule_id: 'rule-1',
@@ -325,7 +326,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await securitySolutionApi
+          await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams({
                 rule_id: 'rule-2',
@@ -368,7 +369,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('threshold validation', () => {
         it('returns HTTP 400 error when NO threshold field is provided', async () => {
           const ruleParams = getThresholdRuleParams();
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               // @ts-expect-error we are testing the invalid payload
               body: omit(ruleParams, 'threshold'),
@@ -383,7 +384,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('returns HTTP 400 error when there are more than 5 threshold fields provided', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: getThresholdRuleParams({
                 threshold: {
@@ -402,7 +403,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('returns HTTP 400 error when threshold value is less than 1', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: getThresholdRuleParams({
                 threshold: {
@@ -421,7 +422,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('returns HTTP 400 error when cardinality is also an agg field', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: getThresholdRuleParams({
                 threshold: {
@@ -447,7 +448,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('investigation_fields', () => {
         it('creates a rule with investigation_fields', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: getCustomQueryRuleParams({
                 investigation_fields: {
@@ -463,7 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('does NOT create a rule with legacy investigation_fields', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .createRule({
               body: {
                 ...getCustomQueryRuleParams(),
@@ -481,10 +482,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless missing timestamps', () => {
+      const EVENTS_INDEX_NAME = 'myfakeindex-1';
+
       beforeEach(async () => {
-        await es.indices.delete({ index: 'myfakeindex-1', ignore_unavailable: true });
+        await es.indices.delete({ index: EVENTS_INDEX_NAME, ignore_unavailable: true });
         await es.indices.create({
-          index: 'myfakeindex-1',
+          index: EVENTS_INDEX_NAME,
           mappings: {
             properties: {
               '@timestamp': {
@@ -494,13 +497,14 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
         await es.index({
-          index: 'myfakeindex-1',
+          index: EVENTS_INDEX_NAME,
           document: generateEvent({ '@timestamp': Date.now() - 1 }),
         });
         await es.index({
-          index: 'myfakeindex-1',
+          index: EVENTS_INDEX_NAME,
           document: generateEvent({ '@timestamp': Date.now() - 2 }),
         });
+        await refreshIndex(es, EVENTS_INDEX_NAME);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
@@ -508,10 +512,10 @@ export default ({ getService }: FtrProviderContext) => {
       it('expects partial failure for a rule with timestamp override and index pattern matching no indices', async () => {
         const {
           body: { id },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .createRule({
             body: getCustomQueryRuleParams({
-              index: ['myfakeindex-1'],
+              index: [EVENTS_INDEX_NAME],
               timestamp_override: 'event.ingested',
               enabled: true,
             }),
@@ -529,17 +533,17 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(rule?.execution_summary?.last_execution.status).toEqual('partial failure');
         expect(rule?.execution_summary?.last_execution.message).toEqual(
-          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1"]'
+          `The following indices are missing the timestamp override field "event.ingested": ["${EVENTS_INDEX_NAME}"]`
         );
       });
 
-      it('generates two signals with a "partial failure" status', async () => {
+      it('generates two alerts with a "partial failure" status', async () => {
         const {
           body: { id },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .createRule({
             body: getCustomQueryRuleParams({
-              index: ['myfa*'],
+              index: [EVENTS_INDEX_NAME],
               timestamp_override: 'event.ingested',
               enabled: true,
             }),
@@ -569,7 +573,7 @@ export default ({ getService }: FtrProviderContext) => {
         [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
           (throttle) => {
             it(`sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
-              const { body } = await securitySolutionApi
+              const { body } = await detectionsApi
                 .createRule({
                   body: getCustomQueryRuleParams({
                     throttle,
@@ -587,7 +591,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         ['300s', '5m', '3h', '4d'].forEach((throttle) => {
           it(`transforms correctly 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
-            const { body } = await securitySolutionApi
+            const { body } = await detectionsApi
               .createRule({
                 body: getCustomQueryRuleParams({
                   // Action throttle cannot be shorter than the schedule interval
@@ -621,7 +625,7 @@ export default ({ getService }: FtrProviderContext) => {
         ].forEach((throttle) => {
           it(`does NOT change action frequency when 'throttle' is '${throttle}'`, async () => {
             const actionsWithFrequencies = await getActionsWithFrequencies(supertest);
-            const { body } = await securitySolutionApi
+            const { body } = await detectionsApi
               .createRule({
                 body: getCustomQueryRuleParams({
                   throttle,
@@ -642,7 +646,7 @@ export default ({ getService }: FtrProviderContext) => {
           (throttle) => {
             it(`overrides each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
               const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
-              const { body } = await securitySolutionApi
+              const { body } = await detectionsApi
                 .createRule({
                   body: getCustomQueryRuleParams({
                     throttle,
@@ -663,7 +667,7 @@ export default ({ getService }: FtrProviderContext) => {
         ['430s', '7m', '1h', '8d'].forEach((throttle) => {
           it(`transforms correctly 'throttle = ${throttle}' and overrides frequency attribute of each action`, async () => {
             const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
-            const { body } = await securitySolutionApi
+            const { body } = await detectionsApi
               .createRule({
                 body: getCustomQueryRuleParams({
                   // Action throttle cannot be shorter than the schedule interval

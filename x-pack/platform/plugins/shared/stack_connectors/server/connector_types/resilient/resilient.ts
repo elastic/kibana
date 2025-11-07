@@ -9,8 +9,7 @@ import type { AxiosError } from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector, getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type {
@@ -23,10 +22,10 @@ import type {
   ResilientConfig,
   ResilientSecrets,
   UpdateIncidentParams,
-} from './types';
-import * as i18n from './translations';
-import { SUB_ACTION } from './constants';
+  ResilientFieldMeta,
+} from '@kbn/connector-schemas/resilient';
 import {
+  SUB_ACTION,
   ExecutorSubActionCommonFieldsParamsSchema,
   ExecutorSubActionGetIncidentTypesParamsSchema,
   ExecutorSubActionGetSeverityParamsSchema,
@@ -34,8 +33,10 @@ import {
   GetIncidentTypesResponseSchema,
   GetSeverityResponseSchema,
   GetIncidentResponseSchema,
-} from './schema';
-import { formatUpdateRequest } from './utils';
+  CONNECTOR_NAME,
+} from '@kbn/connector-schemas/resilient';
+import * as i18n from './translations';
+import { formatUpdateRequest, prepareAdditionalFieldsForCreation } from './utils';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
@@ -54,7 +55,7 @@ export class ResilientConnector extends CaseConnector<
 
   constructor(
     params: ServiceParams<ResilientConfig, ResilientSecrets>,
-    pushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
+    pushToServiceParamsExtendedSchema: Record<string, z.ZodType<unknown>>
   ) {
     super(params, pushToServiceParamsExtendedSchema);
 
@@ -156,19 +157,27 @@ export class ResilientConnector extends CaseConnector<
         };
       }
 
+      if (incident.additionalFields) {
+        const fieldsMetaData = await this.getFields({}, connectorUsageCollector);
+        const { properties, ...rest } = prepareAdditionalFieldsForCreation(
+          fieldsMetaData,
+          incident.additionalFields
+        );
+        data = { ...data, ...(rest ? rest : {}), ...(properties ? { properties } : {}) };
+      }
+
       const res = await this.request(
         {
           url: `${this.urls.incident}?text_content_output_format=objects_convert`,
           method: 'POST',
           data,
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object(
-            {
-              id: schema.number(),
-              create_date: schema.number(),
-            },
-            { unknowns: 'allow' }
-          ),
+          responseSchema: z
+            .object({
+              id: z.coerce.number(),
+              create_date: z.coerce.number(),
+            })
+            .passthrough(),
         },
         connectorUsageCollector
       );
@@ -183,7 +192,7 @@ export class ResilientConnector extends CaseConnector<
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to create incident. Error: ${error.message}.`)
       );
     }
   }
@@ -194,10 +203,15 @@ export class ResilientConnector extends CaseConnector<
   ): Promise<ExternalServiceIncidentResponse> {
     try {
       const latestIncident = await this.getIncident({ id: incidentId }, connectorUsageCollector);
+      const fields = await this.getFields({}, connectorUsageCollector);
 
       // Remove null or undefined values. Allowing null values sets the field in IBM Resilient to empty.
       const newIncident = omitBy(isNil, incident);
-      const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident });
+      const data = formatUpdateRequest({
+        oldIncident: latestIncident,
+        newIncident,
+        fields,
+      });
 
       const res = await this.request(
         {
@@ -205,13 +219,15 @@ export class ResilientConnector extends CaseConnector<
           url: `${this.urls.incident}/${incidentId}`,
           data,
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object({ success: schema.boolean() }, { unknowns: 'allow' }),
+          responseSchema: z
+            .object({ success: z.boolean(), message: z.string().nullable().default(null) })
+            .passthrough(),
         },
         connectorUsageCollector
       );
 
       if (!res.data.success) {
-        throw new Error('Error while updating incident');
+        throw new Error(`Error while updating incident: ${res.data.message}`);
       }
 
       const updatedIncident = await this.getIncident({ id: incidentId }, connectorUsageCollector);
@@ -225,7 +241,7 @@ export class ResilientConnector extends CaseConnector<
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          CONNECTOR_NAME,
           `Unable to update incident with id ${incidentId}. Error: ${error.message}.`
         )
       );
@@ -243,14 +259,14 @@ export class ResilientConnector extends CaseConnector<
           url: this.urls.comment.replace('{inc_id}', incidentId),
           data: { text: { format: 'text', content: comment } },
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object({}, { unknowns: 'allow' }),
+          responseSchema: z.object({}).passthrough(),
         },
         connectorUsageCollector
       );
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          CONNECTOR_NAME,
           `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}.`
         )
       );
@@ -278,7 +294,10 @@ export class ResilientConnector extends CaseConnector<
       return res.data;
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}.`)
+        getErrorMessage(
+          CONNECTOR_NAME,
+          `Unable to get incident with id ${id}. Error: ${error.message}.`
+        )
       );
     }
   }
@@ -306,7 +325,7 @@ export class ResilientConnector extends CaseConnector<
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to get incident types. Error: ${error.message}.`)
       );
     }
   }
@@ -333,12 +352,15 @@ export class ResilientConnector extends CaseConnector<
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get severity. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to get severity. Error: ${error.message}.`)
       );
     }
   }
 
-  public async getFields(params: unknown, connectorUsageCollector: ConnectorUsageCollector) {
+  public async getFields(
+    params: unknown,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<ResilientFieldMeta[]> {
     try {
       const res = await this.request(
         {
@@ -357,12 +379,16 @@ export class ResilientConnector extends CaseConnector<
           read_only: field.read_only,
           required: field.required,
           text: field.text,
+          prefix: field.prefix,
+          values: field.values,
         };
       });
 
       return fields;
     } catch (error) {
-      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
+      throw new Error(
+        getErrorMessage(CONNECTOR_NAME, `Unable to get fields. Error: ${error.message}.`)
+      );
     }
   }
 }

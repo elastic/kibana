@@ -16,7 +16,11 @@ export const NoConversationsPrompt: React.FC = () => {
         <EuiIcon type="newChat" size="l" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText color="subdued" textAlign="center">
+        <EuiText
+          color="subdued"
+          textAlign="center"
+          data-test-subj="agentBuilderNoConversationsMessage"
+        >
           <p>
             {i18n.translate('xpack.onechat.conversationSidebar.noConversations', {
               defaultMessage: "You haven't started any conversations yet.",

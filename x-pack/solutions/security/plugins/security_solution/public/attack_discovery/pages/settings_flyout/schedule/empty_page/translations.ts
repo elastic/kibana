@@ -34,10 +34,3 @@ export const LEARN_MORE = i18n.translate(
     defaultMessage: 'Learn more',
   }
 );
-
-export const CREATE_SCHEDULE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.settingsFlyout.schedule.createButton',
-  {
-    defaultMessage: 'Create new schedule',
-  }
-);

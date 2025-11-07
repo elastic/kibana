@@ -133,6 +133,11 @@ export function createTelemetryConfigurationTaskConfig() {
           telemetryConfiguration.query_config = configArtifact.query_config;
         }
 
+        if (configArtifact.encryption_public_keys) {
+          log.debug('Updating encryption public keys');
+          telemetryConfiguration.encryption_public_keys = configArtifact.encryption_public_keys;
+        }
+
         await taskMetricsService.end(trace);
 
         log.debug('Updated TelemetryConfiguration');

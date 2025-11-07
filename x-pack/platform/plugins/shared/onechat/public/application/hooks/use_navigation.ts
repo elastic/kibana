@@ -9,16 +9,21 @@ import { useCallback } from 'react';
 import { ONECHAT_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
+export interface LocationState {
+  shouldStickToBottom?: boolean;
+}
+
 export const useNavigation = () => {
   const {
     services: { application },
   } = useKibana();
 
   const navigateToOnechatUrl = useCallback(
-    (path: string, params?: Record<string, string>) => {
+    (path: string, params?: Record<string, string>, state?: LocationState) => {
       const queryParams = new URLSearchParams(params);
       application.navigateToApp(ONECHAT_APP_ID, {
         path: queryParams.size ? `${path}?${queryParams}` : path,
+        state,
       });
     },
     [application]
@@ -34,8 +39,17 @@ export const useNavigation = () => {
     [application]
   );
 
+  const navigateToManageConnectors = useCallback(
+    () =>
+      application.navigateToApp('management', {
+        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      }),
+    [application]
+  );
+
   return {
     createOnechatUrl,
     navigateToOnechatUrl,
+    navigateToManageConnectors,
   };
 };

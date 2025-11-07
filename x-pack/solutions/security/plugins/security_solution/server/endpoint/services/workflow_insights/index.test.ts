@@ -250,8 +250,12 @@ describe('SecurityWorkflowInsightsService', () => {
         insight, // intentional dupe to confirm de-duping
       ];
 
-      const request = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
+      const request = { body: { insightType: workflowInsights[0].type } } as KibanaRequest<
+        unknown,
+        unknown,
+        DefendInsightsPostRequestBody
+      >;
 
       const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
@@ -277,8 +281,8 @@ describe('SecurityWorkflowInsightsService', () => {
         request
       );
 
-      // three since it calls securityWorkflowInsightsService.create + fetch
-      expect(isInitializedSpy).toHaveBeenCalledTimes(3);
+      // four since it calls fetch + update + fetch + create
+      expect(isInitializedSpy).toHaveBeenCalledTimes(4);
       expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
         defendInsights,
         request,
@@ -439,7 +443,7 @@ describe('SecurityWorkflowInsightsService', () => {
               },
               {
                 terms: {
-                  types: ['incompatible_antivirus'],
+                  type: ['incompatible_antivirus'],
                 },
               },
               {
@@ -505,10 +509,6 @@ describe('SecurityWorkflowInsightsService', () => {
     let request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
 
     const setupWithMockFleet = () => {
-      // @ts-expect-error write to readonly property
-      mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       const { ensureInCurrentSpace } = mockEndpointAppContextService.getInternalFleetServices();
 
       securityWorkflowInsightsService.setup({
@@ -530,16 +530,6 @@ describe('SecurityWorkflowInsightsService', () => {
     });
 
     describe('ensureAgentIdsInCurrentSpace', () => {
-      it('should not call fleetServices.ensureInCurrentSpace when the experimental feature is disabled', async () => {
-        // @ts-expect-error write to readonly property
-        mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-          false;
-
-        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request, ['agent-1']);
-
-        expect(mockEndpointAppContextService.getInternalFleetServices).not.toHaveBeenCalled();
-      });
-
       it('should call fleetServices.ensureInCurrentSpace with correct agent IDs when feature is enabled', async () => {
         const { ensureInCurrentSpace } = setupWithMockFleet();
 

@@ -12,15 +12,17 @@ export const ResponseActionStatusBadge = memo(
     color,
     status,
     'data-test-subj': dataTestSubj,
+    tabIndex,
   }: {
     color: EuiBadgeProps['color'];
     'data-test-subj'?: string;
     status: string;
+    tabIndex?: number;
   }) => {
     return (
       // We've a EuiTooltip that wraps this component,
       // Thus we don't need to add a title tooltip as well.
-      <EuiBadge data-test-subj={dataTestSubj} color={color} title="">
+      <EuiBadge data-test-subj={dataTestSubj} color={color} title="" tabIndex={tabIndex}>
         {status}
       </EuiBadge>
     );

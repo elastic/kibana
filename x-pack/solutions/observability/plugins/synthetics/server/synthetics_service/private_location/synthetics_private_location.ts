@@ -65,7 +65,7 @@ export class SyntheticsPrivateLocation {
     return newPolicy;
   }
 
-  getPolicyId(config: HeartbeatConfig, locId: string, spaceId: string) {
+  getPolicyId(config: { origin?: string; id: string }, locId: string, spaceId: string) {
     if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
       return `${config.id}-${locId}`;
     }
@@ -148,7 +148,6 @@ export class SyntheticsPrivateLocation {
     if (configs.length === 0) {
       return { created: [], failed: [] };
     }
-
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy();
 
@@ -270,7 +269,9 @@ export class SyntheticsPrivateLocation {
     maintenanceWindows: MaintenanceWindow[]
   ) {
     if (configs.length === 0) {
-      return {};
+      return {
+        failedUpdates: [],
+      };
     }
 
     const [newPolicyTemplate, existingPolicies] = await Promise.all([

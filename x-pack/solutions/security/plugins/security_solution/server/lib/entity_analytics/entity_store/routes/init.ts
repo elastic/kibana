@@ -24,7 +24,8 @@ import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 import { buildInitRequestBodyValidation } from './validation';
-import { buildIndexPatterns } from '../utils';
+import { buildIndexPatternsByEngine } from '../utils';
+import { checkAndInitPrivilegeMonitoringResources } from '../../privilege_monitoring/check_and_init_privmon_resources';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -60,8 +61,9 @@ export const initEntityEngineRoute = (
         const entityStoreClient = secSol.getEntityStoreDataClient();
 
         try {
-          const securitySolutionIndices = await buildIndexPatterns(
+          const securitySolutionIndices = await buildIndexPatternsByEngine(
             getSpaceId(),
+            EntityType[request.params.entityType],
             getAppClient(),
             getDataViewsService()
           );
@@ -82,6 +84,7 @@ export const initEntityEngineRoute = (
           }
 
           await checkAndInitAssetCriticalityResources(context, logger);
+          await checkAndInitPrivilegeMonitoringResources(context, logger);
 
           const body: InitEntityEngineResponse = await entityStoreClient.init(
             EntityType[request.params.entityType],

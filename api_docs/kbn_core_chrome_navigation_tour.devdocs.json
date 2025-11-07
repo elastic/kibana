@@ -1,0 +1,285 @@
+{
+  "id": "@kbn/core-chrome-navigation-tour",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation-tour",
+        "id": "def-public.TourManager",
+        "type": "Class",
+        "tags": [],
+        "label": "TourManager",
+        "description": [],
+        "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.state$",
+            "type": "Object",
+            "tags": [],
+            "label": "state$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "TourState",
+              ">"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "TourState"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.startTour",
+            "type": "Function",
+            "tags": [],
+            "label": "startTour",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.activateTour",
+            "type": "Function",
+            "tags": [],
+            "label": "activateTour",
+            "description": [],
+            "signature": [
+              "(visibleStepIds: ",
+              "TourStepId",
+              "[]) => void"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-navigation-tour",
+                "id": "def-public.TourManager.activateTour.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "visibleStepIds",
+                "description": [],
+                "signature": [
+                  "TourStepId",
+                  "[]"
+                ],
+                "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.waitForTourEnd",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForTourEnd",
+            "description": [],
+            "signature": [
+              "() => Promise<\"skipped\" | \"completed\">"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.nextStep",
+            "type": "Function",
+            "tags": [],
+            "label": "nextStep",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.skipTour",
+            "type": "Function",
+            "tags": [],
+            "label": "skipTour",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.finishTour",
+            "type": "Function",
+            "tags": [],
+            "label": "finishTour",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation-tour",
+        "id": "def-public.Tour",
+        "type": "Function",
+        "tags": [],
+        "label": "Tour",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "TourProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/navigation-tour/src/tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.Tour.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "TourProps"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation-tour",
+        "id": "def-public.TourProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "TourProps",
+        "description": [],
+        "path": "src/core/packages/chrome/navigation-tour/src/tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourProps.tourManager",
+            "type": "Object",
+            "tags": [],
+            "label": "tourManager",
+            "description": [],
+            "signature": [
+              "TourManager"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation-tour",
+        "id": "def-public.TourStepId",
+        "type": "Type",
+        "tags": [],
+        "label": "TourStepId",
+        "description": [],
+        "signature": [
+          "\"sidenav-home\" | \"sidenav-more\" | \"sidenav-manage-data\""
+        ],
+        "path": "src/core/packages/chrome/navigation-tour/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

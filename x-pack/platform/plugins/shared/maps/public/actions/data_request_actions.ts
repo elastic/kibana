@@ -193,7 +193,11 @@ export function syncDataForLayerDueToDrawing(layer: ILayer) {
       true,
       false
     );
-    if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
+    if (
+      getState().map.__pauseSyncData ||
+      !layer.isVisible() ||
+      !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)
+    ) {
       return;
     }
     await layer.syncData(dataRequestContext);
@@ -209,7 +213,11 @@ export function syncDataForLayer(layer: ILayer, isForceRefresh: boolean) {
       false,
       isForceRefresh
     );
-    if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
+    if (
+      getState().map.__pauseSyncData ||
+      !layer.isVisible() ||
+      !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)
+    ) {
       return;
     }
     await layer.syncData(dataRequestContext);

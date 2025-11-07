@@ -10,9 +10,9 @@ import axios, { AxiosError } from 'axios';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { TinesConnector } from './tines';
+import { TinesConnector, WEBHOOK_AGENT_TYPE } from './tines';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { API_MAX_RESULTS, TINES_CONNECTOR_ID } from '../../../common/tines/constants';
+import { API_MAX_RESULTS, CONNECTOR_ID } from '@kbn/connector-schemas/tines';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 jest.mock('axios');
@@ -59,10 +59,9 @@ const webhookResult = {
   id: webhookAgent.id,
   name: webhookAgent.name,
   storyId: webhookAgent.story_id,
-  path: webhookAgent.options.path,
-  secret: webhookAgent.options.secret,
 };
 const webhookUrl = `${url}/webhook/${webhookAgent.options.path}/${webhookAgent.options.secret}`;
+const actionUrl = `${url}/api/v1/actions/${webhookAgent.id}`;
 
 const ignoredRequestFields = {
   axios: expect.anything(),
@@ -93,7 +92,20 @@ const agentsGetRequestExpected = {
     'x-user-token': token,
     'Content-Type': 'application/json',
   },
-  params: { story_id: story.id, per_page: API_MAX_RESULTS },
+  params: { story_id: story.id, action_type: WEBHOOK_AGENT_TYPE, per_page: API_MAX_RESULTS },
+  connectorUsageCollector: expect.any(ConnectorUsageCollector),
+};
+
+const actionGetRequestExpected = {
+  ...ignoredRequestFields,
+  method: 'get',
+  data: {},
+  url: actionUrl,
+  headers: {
+    'x-user-email': email,
+    'x-user-token': token,
+    'Content-Type': 'application/json',
+  },
   connectorUsageCollector: expect.any(ConnectorUsageCollector),
 };
 
@@ -104,7 +116,7 @@ describe('TinesConnector', () => {
   const connector = new TinesConnector({
     configurationUtilities: actionsConfigMock.create(),
     config: { url },
-    connector: { id: '1', type: TINES_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     secrets: { email, token },
     logger,
     services: actionsMock.createServices(),
@@ -211,11 +223,15 @@ describe('TinesConnector', () => {
   });
 
   describe('runWebhook', () => {
-    beforeAll(() => {
-      mockRequest.mockReturnValue({ data: { took: 5, requestId: '123', status: 'ok' } });
-    });
-
     it('should send data to Tines webhook using selected webhook parameter', async () => {
+      mockRequest
+        .mockReturnValueOnce({
+          data: {
+            ...webhookAgent,
+          },
+        })
+        .mockReturnValueOnce({ data: { took: 5, requestId: '123', status: 'ok' } });
+
       await connector.runWebhook(
         {
           webhook: webhookResult,
@@ -224,8 +240,9 @@ describe('TinesConnector', () => {
         connectorUsageCollector
       );
 
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
+      expect(mockRequest).toBeCalledTimes(2);
+      expect(mockRequest).toHaveBeenNthCalledWith(1, actionGetRequestExpected);
+      expect(mockRequest).toHaveBeenNthCalledWith(2, {
         ...ignoredRequestFields,
         method: 'post',
         data: '[]',
@@ -238,6 +255,7 @@ describe('TinesConnector', () => {
     });
 
     it('should send data to Tines webhook using webhook url parameter', async () => {
+      mockRequest.mockReturnValue({ data: { took: 5, requestId: '123', status: 'ok' } });
       await connector.runWebhook(
         {
           webhookUrl,

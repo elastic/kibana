@@ -20,6 +20,7 @@ import {
   EuiIcon,
   EuiIconTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { SlmPolicy } from '../../../../../../common/types';
@@ -32,6 +33,18 @@ import {
   PolicyDeleteProvider,
 } from '../../../../components';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
+
+const styles = {
+  /*
+   * 1. Make in progress snapshot loading indicator be centered vertically
+   *    when it is inside tooltip wrapper
+   */
+  policyTable: css`
+    .euiToolTipAnchor {
+      display: flex;
+    }
+  `,
+};
 
 interface Props {
   policies: SlmPolicy[];
@@ -410,7 +423,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 
   return (
     <EuiInMemoryTable
-      className="snapshotRestore__policyTable"
+      css={styles.policyTable}
       items={policies}
       itemId="name"
       columns={columns}

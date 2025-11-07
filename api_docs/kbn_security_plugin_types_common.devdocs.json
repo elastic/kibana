@@ -893,7 +893,14 @@
             "label": "_transform_error",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleTransformError",
+                "text": "RoleTransformError"
+              },
+              "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -978,6 +985,59 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RoleKibanaApplication",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleKibanaApplication",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleKibanaApplication.application",
+            "type": "string",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleKibanaApplication.privileges",
+            "type": "Array",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleKibanaApplication.resources",
+            "type": "Array",
+            "tags": [],
+            "label": "resources",
+            "description": [],
+            "signature": [
+              "string[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -1148,6 +1208,52 @@
             "description": [],
             "signature": [
               "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RoleTransformError",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleTransformError",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleTransformError.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RoleTransformError.state",
+            "type": "Array",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleKibanaApplication",
+                "text": "RoleKibanaApplication"
+              },
+              "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -1929,7 +2035,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RoleTransformErrorReason",
+        "type": "Enum",
+        "tags": [],
+        "label": "RoleTransformErrorReason",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/roles/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/security-plugin-types-common",

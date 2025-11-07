@@ -38,7 +38,7 @@ export const GroupWrapperLoading = <T,>({
         renderChildComponent: () => <></>,
         onGroupClose: () => {},
         selectedGroup: '',
-        takeActionItems: () => [],
+        takeActionItems: () => ({ items: [], panels: [] }),
       })}
     </div>
   );
@@ -105,7 +105,7 @@ export const GroupWrapper = <T,>({
           onChangeGroupsPage,
           renderChildComponent,
           onGroupClose: () => {},
-          takeActionItems: () => [],
+          takeActionItems: () => ({ items: [], panels: [] }),
         })}
       </div>
     </div>

@@ -801,7 +801,28 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
 
       test('should build filter query with searchTerm filter', () => {
         const result = getFilterQuery({ searchTerm: 'test' });
-        expect(result.bool.filter[1]).toEqual({ match: { 'elastic_dashboard.title': 'test' } });
+        expect(result).toEqual({
+          bool: {
+            filter: [
+              { term: { migration_id: 'migration1' } },
+              {
+                bool: {
+                  should: [
+                    { match: { 'elastic_dashboard.title': 'test' } },
+                    {
+                      bool: {
+                        must: [
+                          { term: { status: 'failed' } },
+                          { match: { 'original_dashboard.title': 'test' } },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        });
       });
 
       test('should build filter query with multiple statuses', () => {
@@ -953,35 +974,32 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
         expect(result).toEqual({
           bool: {
             filter: [
-              { term: { migration_id: migrationId } },
+              { term: { migration_id: 'migration1' } },
               { terms: { _id: ['doc1', 'doc2'] } },
-              { bool: { must_not: { term: { status: SiemMigrationStatus.FAILED } } } },
-              { term: { translation_result: MigrationTranslationResult.FULL } },
+              { bool: { must_not: { term: { status: 'failed' } } } },
+              { term: { translation_result: 'full' } },
+              { bool: { must_not: { term: { translation_result: 'partial' } } } },
+              { bool: { must_not: { term: { translation_result: 'untranslatable' } } } },
               {
                 bool: {
-                  must_not: { term: { translation_result: MigrationTranslationResult.PARTIAL } },
+                  should: [
+                    { match: { 'elastic_dashboard.title': 'test' } },
+                    {
+                      bool: {
+                        must: [
+                          { term: { status: 'failed' } },
+                          { match: { 'original_dashboard.title': 'test' } },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
-              {
-                bool: {
-                  must_not: {
-                    term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE },
-                  },
-                },
-              },
-              { match: { 'elastic_dashboard.title': 'test' } },
               { exists: { field: 'elastic_dashboard.id' } },
               {
                 bool: {
                   must: [
-                    {
-                      terms: {
-                        translation_result: [
-                          MigrationTranslationResult.FULL,
-                          MigrationTranslationResult.PARTIAL,
-                        ],
-                      },
-                    },
+                    { terms: { translation_result: ['full', 'partial'] } },
                     { bool: { must_not: { exists: { field: 'elastic_dashboard.id' } } } },
                   ],
                 },

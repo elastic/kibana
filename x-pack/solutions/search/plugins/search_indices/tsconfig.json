@@ -44,6 +44,9 @@
     "@kbn/search-queries",
     "@kbn/sample-data-ingest",
     "@kbn/management-settings-ids",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

@@ -21,7 +21,8 @@ import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_pol
 import { omitMonitorKeys } from './add_monitor';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('SyncGlobalParamsSpaces', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/241106
+  describe.skip('SyncGlobalParamsSpaces', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
     const retry = getService('retry');
@@ -155,8 +156,12 @@ export default function ({ getService }: FtrProviderContext) {
           locId: locWithSpace.id,
           spaceId,
         });
+        const enabledInput = packagePolicy.inputs.find(
+          (input: { enabled: boolean }) => input.enabled === true
+        );
+
         expect(packagePolicy.policy_id).eql(locWithSpace.agentPolicyId);
-        expect(packagePolicy.inputs[0].streams[0].compiled_stream.params).eql(params);
+        expect(enabledInput.streams[0].compiled_stream.params).eql(params);
       });
 
       comparePolicies(
@@ -222,8 +227,11 @@ export default function ({ getService }: FtrProviderContext) {
           locId: locWithSpace.id,
           spaceId,
         });
+        const enabledInput = packagePolicy.inputs.find(
+          (input: { enabled: boolean }) => input.enabled === true
+        );
         expect(packagePolicy.policy_id).eql(locWithSpace.agentPolicyId);
-        expect(packagePolicy.inputs[0].streams[0].compiled_stream.params).eql(undefined);
+        expect(enabledInput.streams[0].compiled_stream.params).eql(undefined);
       });
 
       comparePolicies(

@@ -21,7 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
+import { type AgentDefinition } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -32,6 +32,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../agent_avatar';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const columnNames = {
   name: i18n.translate('xpack.onechat.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -59,6 +60,7 @@ const actionLabels = {
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useOnechatAgents();
+  const { manageAgents } = useUiPrivileges();
   const { createOnechatUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
 
@@ -67,8 +69,8 @@ export const AgentsList: React.FC = () => {
       width: '48px',
       align: 'center',
       render: (agent) =>
-        agent.id === oneChatDefaultAgentId ? (
-          <EuiIcon type="logoElastic" size="xl" />
+        agent.readonly && !agent.avatar_symbol ? (
+          <EuiIcon type={agent.avatar_icon ?? 'logoElastic'} size="xl" />
         ) : (
           <AgentAvatar agent={agent} size="m" />
         ),
@@ -80,7 +82,7 @@ export const AgentsList: React.FC = () => {
       render: (name: string, agent: AgentDefinition) => (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            {agent.id === oneChatDefaultAgentId ? (
+            {agent.readonly ? (
               <EuiText size="s">{name}</EuiText>
             ) : (
               <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
@@ -127,8 +129,7 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
-          // Don't display edit action for default agent
-          available: (agent) => agent.id !== oneChatDefaultAgentId,
+          available: (agent) => !agent.readonly && manageAgents,
         },
         {
           type: 'icon',
@@ -138,6 +139,7 @@ export const AgentsList: React.FC = () => {
           showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
+          available: () => manageAgents,
         },
         {
           // Have to use a custom action to display the danger color
@@ -149,9 +151,6 @@ export const AgentsList: React.FC = () => {
                   <EuiIcon type="trash" color="danger" />
                   <EuiLink
                     onClick={() => {
-                      if (agent.id === oneChatDefaultAgentId) {
-                        return;
-                      }
                       deleteAgent({ agent });
                     }}
                     color="danger"
@@ -162,14 +161,13 @@ export const AgentsList: React.FC = () => {
               </EuiToolTip>
             );
           },
-          // Don't display delete action for default agent
-          available: (agent) => agent.id !== oneChatDefaultAgentId,
+          available: (agent) => !agent.readonly && manageAgents,
         },
       ],
     };
 
     return [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
-  }, [createOnechatUrl, deleteAgent]);
+  }, [createOnechatUrl, deleteAgent, manageAgents]);
 
   const errorMessage = useMemo(
     () =>

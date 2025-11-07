@@ -23,6 +23,7 @@ import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
+import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { getPercentageFormatter } from '../../../util/formatters';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
@@ -50,6 +51,7 @@ import {
 } from './empty_prompts';
 import { PreviewFlyout, MemoPreviewTable } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
+import { RowSelectionContext } from '../shared/preview_table';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -174,6 +176,9 @@ const PreviewDocumentsGroupBy = () => {
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
+
+  const { fieldTypes: dataViewFieldTypes, dataView: streamDataView } =
+    useStreamDataViewFieldTypes(streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
     (state) => state.context.previewColumnsSorting
@@ -205,9 +210,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
     const step = currentProcessorRef.getSnapshot().context.step;
 
-    if (!isActionBlock(step)) return undefined;
-
-    return getSourceField(step);
+    if (isActionBlock(step)) return getSourceField(step);
   });
 
   const docViewsRegistry = useDocViewerSetup(true);
@@ -373,23 +376,29 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     }
   }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
 
+  const rowSelectionContextValue = useMemo(
+    () => ({ selectedRowIndex, onRowSelected }),
+    [selectedRowIndex, onRowSelected]
+  );
+
   return (
     <>
-      <MemoPreviewTable
-        documents={previewDocuments}
-        originalSamples={originalSamples}
-        showRowSourceAvatars={shouldShowRowSourceAvatars}
-        onRowSelected={onRowSelected}
-        selectedRowIndex={selectedRowIndex}
-        displayColumns={previewColumns}
-        rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
-        toolbarVisibility
-        setVisibleColumns={setVisibleColumns}
-        sorting={previewColumnsSorting}
-        setSorting={setPreviewColumnsSorting}
-        columnOrderHint={previewColumnsOrder}
-        renderCellValue={renderCellValue}
-      />
+      <RowSelectionContext.Provider value={rowSelectionContextValue}>
+        <MemoPreviewTable
+          documents={previewDocuments}
+          originalSamples={originalSamples}
+          showRowSourceAvatars={shouldShowRowSourceAvatars}
+          displayColumns={previewColumns}
+          rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
+          toolbarVisibility
+          setVisibleColumns={setVisibleColumns}
+          sorting={previewColumnsSorting}
+          setSorting={setPreviewColumnsSorting}
+          columnOrderHint={previewColumnsOrder}
+          renderCellValue={renderCellValue}
+          dataViewFieldTypes={dataViewFieldTypes}
+        />
+      </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>
         <PreviewFlyout
           currentDoc={currentDoc}
@@ -397,6 +406,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
           streamName={streamName}
+          streamDataView={streamDataView}
         />
       </DocViewerContext.Provider>
     </>

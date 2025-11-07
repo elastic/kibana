@@ -7,44 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { serializedValueSchema } from './serializedValue';
 
-const colorByValueSchema = schema.object({
+const colorByValueBase = schema.object({
   type: schema.literal('dynamic'), // Specifies that the color assignment is dynamic (by value). Possible value: 'dynamic'
-  /**
-   * The minimum value for the color range. Used as the lower bound for value-based color assignment.
-   */
-  min: schema.number({
-    meta: {
-      description:
-        'The minimum value for the color range. Used as the lower bound for value-based color assignment.',
-    },
-  }),
-  /**
-   * The maximum value for the color range. Used as the upper bound for value-based color assignment.
-   */
-  max: schema.number({
-    meta: {
-      description:
-        'The maximum value for the color range. Used as the upper bound for value-based color assignment.',
-    },
-  }),
-  /**
-   * Determines whether the range is interpreted as absolute or as a percentage of the data.
-   * Possible values: 'absolute', 'percentage'
-   */
-  range: schema.oneOf(
-    [
-      schema.literal('absolute'), // Range is interpreted as absolute values. Possible value: 'absolute'
-      schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
-    ],
-    {
-      meta: {
-        description:
-          "Determines whether the range is interpreted as absolute or as a percentage of the data. Possible values: 'absolute', 'percentage'",
-      },
-    }
-  ),
+
   /**
    * Array of color steps defining the mapping from values to colors.
    * Each step can be:
@@ -101,11 +70,65 @@ const colorByValueSchema = schema.object({
          */
         color: schema.string({ meta: { description: 'The color to use for this exact value.' } }),
       }),
-    ])
+    ]),
+    {
+      validate(steps) {
+        if (
+          steps.some((step) => step.type === 'from') &&
+          steps.findIndex((step) => step.type === 'from') !== 0
+        ) {
+          return 'The "from" step must be the first step in the array.';
+        }
+        if (
+          steps.some((step) => step.type === 'to') &&
+          steps.findIndex((step) => step.type === 'to') !== steps.length - 1
+        ) {
+          return 'The "to" step must be the last step in the array.';
+        }
+        return undefined;
+      },
+    }
   ),
 });
 
-const staticColorSchema = schema.object({
+export const colorByValueAbsolute = schema.allOf([
+  colorByValueBase,
+  schema.object({ range: schema.literal('absolute') }),
+]);
+
+export const colorByValueSchema = schema.oneOf([
+  colorByValueAbsolute,
+  schema.allOf([
+    colorByValueBase,
+    schema.object({
+      /**
+       * The minimum value for the color range. Used as the lower bound for value-based color assignment.
+       */
+      min: schema.number({
+        meta: {
+          description:
+            'The minimum value for the color range. Used as the lower bound for value-based color assignment.',
+        },
+      }),
+      /**
+       * The maximum value for the color range. Used as the upper bound for value-based color assignment.
+       */
+      max: schema.number({
+        meta: {
+          description:
+            'The maximum value for the color range. Used as the upper bound for value-based color assignment.',
+        },
+      }),
+      /**
+       * Determines whether the range is interpreted as absolute or as a percentage of the data.
+       * Possible values: 'absolute', 'percentage'
+       */
+      range: schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
+    }),
+  ]),
+]);
+
+export const staticColorSchema = schema.object({
   type: schema.literal('static'), // Specifies that the color assignment is static (single color for all values). Possible value: 'static'
   /**
    * The static color to be used for all values.
@@ -113,96 +136,80 @@ const staticColorSchema = schema.object({
   color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
 });
 
-const colorDefinitionSchema = schema.object({
-  /**
-   * Optional. Defines a categorical color assignment.
-   */
-  categorical: schema.maybe(
-    schema.object({
-      /**
-       * The index of the color in the palette.
-       */
-      index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
-      /**
-       * (Optional) The palette name to use for color assignment.
-       */
-      palette: schema.maybe(schema.string()), // The palette name to use for color assignment.
-    })
-  ),
-  /**
-   * Optional. The static color value to use.
-   */
-  static: schema.maybe(schema.string()), // The static color value to use.
+const colorFromPaletteSchema = schema.object({
+  type: schema.literal('from_palette'),
+  index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
+  palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
 });
 
-const colorMappingSchema = schema.oneOf([
+const colorCodeSchema = schema.object({
+  type: schema.literal('colorCode'),
+  value: schema.string({ meta: { description: 'The static color value to use.' } }),
+});
+
+const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
+
+const categoricalColorMappingSchema = schema.object({
+  mode: schema.literal('categorical'),
+  palette: schema.string({
+    meta: { description: 'The palette name to use for color assignment.' },
+  }),
+  mapping: schema.arrayOf(
+    schema.object({
+      values: schema.arrayOf(serializedValueSchema),
+      color: colorDefSchema,
+    })
+  ),
+  unassignedColor: schema.maybe(colorCodeSchema),
+});
+
+const gradientColorMappingSchema = schema.object({
+  mode: schema.literal('gradient'),
+  palette: schema.string({
+    meta: { description: 'The palette name to use for color assignment.' },
+  }),
+  mapping: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        values: schema.arrayOf(serializedValueSchema),
+      })
+    )
+  ),
+  gradient: schema.maybe(schema.arrayOf(colorDefSchema)),
+  unassignedColor: schema.maybe(colorCodeSchema),
+});
+
+export const colorMappingSchema = schema.oneOf([
   /**
    * Categorical color mapping: assigns colors from a palette to specific values.
    */
-  schema.object({
-    /**
-     * The palette name to use for color assignment.
-     */
-    palette: schema.string({
-      meta: { description: 'The palette name to use for color assignment.' },
-    }),
-    /**
-     * The color mapping mode.
-     * Possible value: 'categorical'
-     */
-    type: schema.literal('categorical'), // The color mapping mode. Possible value: 'categorical'
-    /**
-     * Object mapping values to colors.
-     * 'values' is an array of string values to which the categorical color applies.
-     */
-    colorMapping: schema.object({
-      values: schema.arrayOf(
-        schema.string({ meta: { description: 'A value to which the categorical color applies.' } })
-      ),
-    }),
-    /**
-     * Color definition for values not explicitly mapped.
-     */
-    otherColors: colorDefinitionSchema,
-  }),
+  categoricalColorMappingSchema,
   /**
    * Gradient color mapping: assigns a gradient of colors to a range of values.
    */
-  schema.object({
-    /**
-     * The palette name to use for the gradient color assignment.
-     */
-    palette: schema.string({
-      meta: { description: 'The palette name to use for the gradient color assignment.' },
-    }),
-    /**
-     * The color mapping mode.
-     * Possible value: 'gradient'
-     */
-    type: schema.literal('gradient'), // The color mapping mode. Possible value: 'gradient'
-    /**
-     * Array of color definitions representing the gradient.
-     */
-    gradient: schema.arrayOf(colorDefinitionSchema),
-    /**
-     * Array of objects, each with 'values' as an array of strings to which a gradient color applies.
-     */
-    colorMapping: schema.arrayOf(
-      schema.object({
-        values: schema.arrayOf(
-          schema.string({ meta: { description: 'A value to which the gradient color applies.' } })
-        ),
-      })
-    ),
-    /**
-     * Color definition for values not explicitly mapped.
-     */
-    otherColors: colorDefinitionSchema,
-  }),
+  gradientColorMappingSchema,
 ]);
 
-export const coloringTypeSchema = schema.oneOf([
+export const allColoringTypeSchema = schema.oneOf([
   colorByValueSchema,
   staticColorSchema,
   colorMappingSchema,
 ]);
+
+export type StaticColorType = TypeOf<typeof staticColorSchema>;
+export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
+export type ColorByValueAbsoluteType = TypeOf<typeof colorByValueAbsolute>;
+export type ColorMappingType = TypeOf<typeof colorMappingSchema>;
+export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingSchema>;
+export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
+export type ColorMappingColorDefType = TypeOf<typeof colorDefSchema>;
+export type AllColoringTypes = TypeOf<typeof allColoringTypeSchema>;
+/**
+ * Schema for where to apply the color (to value or background).
+ */
+export const applyColorToSchema = schema.oneOf(
+  [schema.literal('value'), schema.literal('background')],
+  {
+    meta: { description: 'Where to apply the color' },
+  }
+);

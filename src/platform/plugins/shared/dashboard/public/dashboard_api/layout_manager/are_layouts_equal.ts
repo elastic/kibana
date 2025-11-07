@@ -42,10 +42,7 @@ export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: Da
   // then compare panel grid data
   for (const embeddableId of newPanelUuids) {
     if (
-      !deepEqual(
-        originalLayout?.panels[embeddableId]?.gridData,
-        newLayout?.panels[embeddableId]?.gridData
-      )
+      !deepEqual(originalLayout?.panels[embeddableId]?.grid, newLayout?.panels[embeddableId]?.grid)
     ) {
       return false;
     }

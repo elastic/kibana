@@ -62,6 +62,8 @@ export interface Props {
   onChange?: (state: FieldEditorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
+  /** If disabled, the field editor will not be editable */
+  isDisabled?: boolean;
 }
 
 const changeWarning = i18n.translate('indexPatternFieldEditor.editor.form.changeWarning', {
@@ -111,7 +113,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
+const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisabled }: Props) => {
   const { fieldTypeToProcess, fieldName$, subfields$, dataView } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
@@ -260,7 +262,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
             data-test-subj="nameField"
             componentProps={{
               euiFieldProps: {
-                disabled: fieldTypeToProcess === 'concrete',
+                disabled: fieldTypeToProcess === 'concrete' || isDisabled,
                 'aria-label': i18n.translate('indexPatternFieldEditor.editor.form.nameAriaLabel', {
                   defaultMessage: 'Name field',
                 }),
@@ -272,7 +274,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
         {/* Type */}
         <EuiFlexItem>
           <TypeField
-            isDisabled={fieldTypeToProcess === 'concrete'}
+            isDisabled={fieldTypeToProcess === 'concrete' || isDisabled}
             includeComposite={true}
             path="type"
           />
@@ -282,6 +284,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
         <>
           <EuiSpacer size="xs" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             title={changeWarning}
             iconType="warning"
@@ -294,6 +297,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       {field?.parentName && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             iconType="info"
             title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
               defaultMessage: "Field value is defined by ''{parentName}''",
@@ -304,9 +308,9 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
         </>
       )}
       {updatedType && updatedType[0].value !== 'composite' ? (
-        <FieldDetail />
+        <FieldDetail isDisabled={isDisabled} />
       ) : (
-        <CompositeEditor onReset={resetTypes} />
+        <CompositeEditor onReset={resetTypes} isDisabled={isDisabled} />
       )}
     </Form>
   );

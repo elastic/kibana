@@ -1541,16 +1541,18 @@ describe('<CspPolicyTemplateForm />', () => {
         'azure.credentials.type': { value: 'service_principal_with_client_secret' },
       });
 
-      const { getByLabelText, getByRole } = render(
+      const { getByRole, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
 
       expect(
         getByRole('option', { name: 'Service principal with Client Secret', selected: true })
       ).toBeInTheDocument();
-      expect(getByLabelText('Tenant ID')).toBeInTheDocument();
-      expect(getByLabelText('Client ID')).toBeInTheDocument();
-      await waitFor(() => expect(getByLabelText('Client Secret')).toBeInTheDocument());
+      expect(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+      expect(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
+      await waitFor(() =>
+        expect(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)).toBeInTheDocument()
+      );
     });
 
     it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {
@@ -1559,11 +1561,11 @@ describe('<CspPolicyTemplateForm />', () => {
         'azure.credentials.type': { value: 'service_principal_with_client_secret' },
       });
 
-      const { rerender, getByLabelText, getByTestId } = render(
+      const { rerender, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
 
-      await userEvent.type(getByLabelText('Tenant ID'), 'a');
+      await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID), 'a');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.tenant_id': { value: 'a' },
@@ -1579,7 +1581,7 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
 
-      await userEvent.type(getByLabelText('Client ID'), 'b');
+      await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_id': { value: 'b' },
       });
@@ -1594,7 +1596,7 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
 
-      await userEvent.type(getByTestId('passwordInput-client-secret'), 'c');
+      await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET), 'c');
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_secret': { value: 'c' },
       });
@@ -1770,6 +1772,7 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
+        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -1819,6 +1822,7 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
+        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -1923,6 +1927,7 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
+        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -1975,6 +1980,7 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
+        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -2192,11 +2198,11 @@ describe('<CspPolicyTemplateForm />', () => {
       'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
     });
 
-    const { rerender, getByLabelText, getByTestId } = render(
+    const { rerender, getByTestId } = render(
       <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
     );
 
-    await userEvent.type(getByLabelText('Tenant ID'), 'a');
+    await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID), 'a');
 
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.tenant_id': { value: 'a' },
@@ -2211,7 +2217,7 @@ describe('<CspPolicyTemplateForm />', () => {
       <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
     );
 
-    await userEvent.type(getByLabelText('Client ID'), 'b');
+    await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID), 'b');
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.client_id': { value: 'b' },
     });
@@ -2225,7 +2231,10 @@ describe('<CspPolicyTemplateForm />', () => {
       <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
     );
 
-    await userEvent.type(getByLabelText('Client Certificate Path'), 'c');
+    await userEvent.type(
+      getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH),
+      'c'
+    );
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.client_certificate_path': { value: 'c' },
     });

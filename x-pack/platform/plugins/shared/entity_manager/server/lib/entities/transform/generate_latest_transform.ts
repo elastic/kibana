@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityDefinition } from '@kbn/entities-schema';
+import { type EntityDefinition } from '@kbn/entities-schema';
 import type {
   QueryDslQueryContainer,
   TransformPutTransformRequest,

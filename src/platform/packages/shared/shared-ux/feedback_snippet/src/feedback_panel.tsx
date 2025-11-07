@@ -50,13 +50,6 @@ const thumbDownIconLabel = i18n.translate(
   }
 );
 
-const faceHappyIconLabel = i18n.translate(
-  'sharedUXPackages.feedbackSnippet.feedbackPanel.faceHappyIconLabel',
-  {
-    defaultMessage: 'Happy face',
-  }
-);
-
 /**
  * A panel to gather user feedback.
  * There are 3 available views:
@@ -95,7 +88,7 @@ export const FeedbackPanel = ({
   const closePanelIcon = (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
-        data-test-subj="feedbackSnippetPanelDismiss"
+        data-test-subj={`${feedbackSnippetId}PanelDismiss`}
         iconType="cross"
         color="text"
         onClick={handleDismissPanel}
@@ -114,6 +107,7 @@ export const FeedbackPanel = ({
     <>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj={`${feedbackSnippetId}PanelThumbDown`}
           onClick={handleNegativeFeedback}
           id={`${feedbackSnippetId}PanelThumbDown`}
           color="danger"
@@ -124,6 +118,7 @@ export const FeedbackPanel = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj={`${feedbackSnippetId}PanelThumbUp`}
           onClick={handlePositiveFeedback}
           id={`${feedbackSnippetId}PanelThumbUp`}
           color="success"
@@ -137,12 +132,19 @@ export const FeedbackPanel = ({
 
   const positiveFooter = (
     <EuiFlexItem grow={false}>
-      <EuiIcon type="faceHappy" color="success" size="l" aria-label={faceHappyIconLabel} />
+      <EuiIcon
+        data-test-subj="feedbackSnippetPanelPositiveIcon"
+        type="thumbUp"
+        color="success"
+        size="l"
+        aria-label={thumbUpIconLabel}
+      />
     </EuiFlexItem>
   );
 
   const negativeFooter = (
     <EuiButton
+      data-test-subj={`${feedbackSnippetId}PanelSurveyLink`}
       onClick={handleOpenSurveyAndDismissPanel}
       fill
       fullWidth

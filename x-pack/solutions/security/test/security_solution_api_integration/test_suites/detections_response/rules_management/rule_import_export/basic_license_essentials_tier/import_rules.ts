@@ -14,7 +14,7 @@ import { deleteAllRules } from '../../../../../config/services/detections_respon
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @serverlessQA import_rules', () => {
@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should set the response content types to be expected', async () => {
         const ndjson = combineToNdJson(getCustomQueryRuleParams());
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect('Content-Type', 'application/json; charset=utf-8')
@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should reject with an error if the file type is not that of a ndjson', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(''), 'rules.txt')
           .expect(400);
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should report that it imported a simple rule successfully', async () => {
         const ndjson = combineToNdJson(getCustomQueryRuleParams());
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -65,12 +65,12 @@ export default ({ getService }: FtrProviderContext): void => {
         const ruleToImport = getCustomQueryRuleParams({ rule_id: 'rule-to-import' });
         const ndjson = combineToNdJson(ruleToImport);
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: importedRule } = await securitySolutionApi
+        const { body: importedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-to-import' },
           })
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -146,12 +146,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const ndjson = combineToNdJson(ruleToImport);
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: importedRule } = await securitySolutionApi
+        const { body: importedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-1' },
           })
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -195,7 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
           )
         );
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -234,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
           )
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(500);
@@ -255,7 +255,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -286,7 +286,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -304,11 +304,11 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-1',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(ruleToImport);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -334,11 +334,11 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-1',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(ruleToImport);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -356,7 +356,7 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-to-overwrite',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
@@ -365,12 +365,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: importedRule } = await securitySolutionApi
+        const { body: importedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-to-overwrite' },
           })
@@ -386,9 +386,9 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-to-overwrite',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: ruleToImport });
 
-        const { body: ruleBeforeOverwriting } = await securitySolutionApi
+        const { body: ruleBeforeOverwriting } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-to-overwrite' },
           })
@@ -401,12 +401,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: ruleAfterOverwriting } = await securitySolutionApi
+        const { body: ruleAfterOverwriting } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-to-overwrite' },
           })
@@ -425,7 +425,7 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'existing-rule',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
@@ -439,7 +439,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -461,12 +461,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report a mix of conflicts and a mix of successes', async () => {
-        await securitySolutionApi.createRule({
+        await detectionsApi.createRule({
           body: getCustomQueryRuleParams({
             rule_id: 'existing-rule-1',
           }),
         });
-        await securitySolutionApi.createRule({
+        await detectionsApi.createRule({
           body: getCustomQueryRuleParams({
             rule_id: 'existing-rule-2',
           }),
@@ -484,7 +484,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -523,29 +523,29 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'non-existing-rule',
         });
 
-        await securitySolutionApi.createRule({ body: existingRule1 });
-        await securitySolutionApi.createRule({ body: existingRule2 });
+        await detectionsApi.createRule({ body: existingRule1 });
+        await detectionsApi.createRule({ body: existingRule2 });
 
         const ndjson = combineToNdJson(existingRule1, existingRule2, ruleToImportSuccessfully);
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: rule1 } = await securitySolutionApi
+        const { body: rule1 } = await detectionsApi
           .readRule({
             query: { rule_id: 'existing-rule-1' },
           })
           .expect(200);
 
-        const { body: rule2 } = await securitySolutionApi
+        const { body: rule2 } = await detectionsApi
           .readRule({
             query: { rule_id: 'existing-rule-2' },
           })
           .expect(200);
 
-        const { body: rule3 } = await securitySolutionApi
+        const { body: rule3 } = await detectionsApi
           .readRule({
             query: { rule_id: 'non-existing-rule' },
           })

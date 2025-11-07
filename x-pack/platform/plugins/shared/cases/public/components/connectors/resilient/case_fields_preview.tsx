@@ -20,7 +20,7 @@ import { ConnectorCard } from '../card';
 const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<ResilientFieldsType>
 > = ({ connector, fields }) => {
-  const { incidentTypes = null, severityCode = null } = fields ?? {};
+  const { incidentTypes = null, severityCode = null, additionalFields = null } = fields ?? {};
   const { http } = useKibana().services;
 
   const {
@@ -70,8 +70,17 @@ const ResilientFieldsComponent: React.FunctionComponent<
             },
           ]
         : []),
+      ...(additionalFields != null && additionalFields.length > 0
+        ? [
+            {
+              title: i18n.ADDITIONAL_FIELDS_LABEL,
+              description: additionalFields,
+              displayAsCodeBlock: true,
+            },
+          ]
+        : []),
     ],
-    [incidentTypes, severityCode, allIncidentTypes, severity]
+    [incidentTypes, severityCode, allIncidentTypes, severity, additionalFields]
   );
 
   return (

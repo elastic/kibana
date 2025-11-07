@@ -13,6 +13,7 @@ import { registerConnectorTypes } from './connector_types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { ConfigService } from './common/config_service';
 
 export type Setup = void;
 export type Start = void;
@@ -34,6 +35,8 @@ export class StackConnectorsPublicPlugin
   }
   public setup(core: CoreSetup, { triggersActionsUi, actions }: StackConnectorsPublicSetupDeps) {
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
+    ConfigService.init({ config: this.config });
+
     registerConnectorTypes({
       connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
       services: {

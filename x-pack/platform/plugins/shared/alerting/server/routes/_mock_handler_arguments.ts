@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { HasPrivilegesResponseApplication } from '@kbn/security-plugin-types-server';
@@ -32,6 +36,7 @@ export function mockHandlerArguments(
     actionsClient = actionsClientMock.create(),
     rulesSettingsClient = rulesSettingsClientMock.create(),
     maintenanceWindowClient = maintenanceWindowClientMock.create(),
+    savedObjectsClient = savedObjectsClientMock.create(),
     listTypes: listTypesRes = new Map(),
     getFrameworkHealth,
     areApiKeysEnabled,
@@ -42,6 +47,7 @@ export function mockHandlerArguments(
     actionsClient?: ActionsClientMock;
     rulesSettingsClient?: RulesSettingsClientMock;
     maintenanceWindowClient?: MaintenanceWindowClientMock;
+    savedObjectsClient?: SavedObjectsClientContract;
     listTypes?: Map<string, RegistryRuleType>;
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
@@ -62,6 +68,9 @@ export function mockHandlerArguments(
   const actionsClientMocked = actionsClient || actionsClientMock.create();
 
   actionsClient.isSystemAction.mockImplementation((id) => id === 'system_action-id');
+  const core = coreMock.createRequestHandlerContext();
+
+  core.savedObjects.getClient = jest.fn().mockReturnValue(savedObjectsClient);
 
   return [
     {
@@ -92,6 +101,7 @@ export function mockHandlerArguments(
           return actionsClientMocked;
         },
       },
+      core,
     } as unknown as AlertingRequestHandlerContext,
     request as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(response),

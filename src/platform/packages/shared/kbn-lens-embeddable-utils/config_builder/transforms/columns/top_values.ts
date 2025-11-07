@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { TermsIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiTermsOperation } from '../../schema/bucket_ops';
 import { fromFormatAPIToLensState } from './format';
 import { isColumnOfReferableType } from './utils';
@@ -67,7 +67,7 @@ export function fromTermsLensApiToLensState(
     params: {
       secondaryFields,
       size, // it cannot be 0 (zero)
-      accuracyMode: Boolean(increase_accuracy),
+      ...(increase_accuracy != null ? { accuracyMode: increase_accuracy } : {}),
       include: includes?.values ?? [],
       includeIsRegex: includes?.as_regex ?? false,
       exclude: excludes?.values ?? [],
@@ -119,9 +119,11 @@ function getRankByConfig(
     };
   }
   if (params.orderBy.type === 'column') {
-    const index = columns.findIndex(
-      (column) => params.orderBy.type === 'column' && column.id === params.orderBy.columnId!
-    );
+    const index = columns
+      .filter(({ column }) => !column.isBucketed)
+      .findIndex(
+        (column) => params.orderBy.type === 'column' && column.id === params.orderBy.columnId!
+      );
     if (index > -1) {
       return {
         type: 'column',
@@ -141,12 +143,12 @@ export function fromTermsLensStateToAPI(
   return {
     operation: 'terms',
     fields: [column.sourceField].concat(column.params.secondaryFields ?? []),
-    label,
+    ...(label ? { label } : {}),
     size: column.params.size,
     ...(column.params.accuracyMode != null
       ? { increase_accuracy: column.params.accuracyMode }
       : {}),
-    ...(column.params.include
+    ...(column.params.include?.length
       ? {
           includes: {
             as_regex: column.params.includeIsRegex,
@@ -154,7 +156,7 @@ export function fromTermsLensStateToAPI(
           },
         }
       : {}),
-    ...(column.params.exclude
+    ...(column.params.exclude?.length
       ? {
           excludes: {
             as_regex: column.params.excludeIsRegex,

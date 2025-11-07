@@ -13,29 +13,28 @@ import type {
   InternalEnvironmentServicePreboot,
   InternalEnvironmentServiceSetup,
 } from '@kbn/core-environment-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createPrebootContractMock = () => {
-  const prebootContract: jest.Mocked<InternalEnvironmentServicePreboot> = {
+  const prebootContract: jest.Mocked<InternalEnvironmentServicePreboot> = lazyObject({
     instanceUuid: 'uuid',
-  };
+  });
   return prebootContract;
 };
 
 const createSetupContractMock = () => {
-  const prebootContract: jest.Mocked<InternalEnvironmentServiceSetup> = {
+  const prebootContract: jest.Mocked<InternalEnvironmentServiceSetup> = lazyObject({
     instanceUuid: 'uuid',
-  };
+  });
   return prebootContract;
 };
 
 type EnvironmentServiceContract = PublicMethodsOf<EnvironmentService>;
 const createMock = () => {
-  const mocked: jest.Mocked<EnvironmentServiceContract> = {
-    preboot: jest.fn(),
-    setup: jest.fn(),
-  };
-  mocked.preboot.mockResolvedValue(createPrebootContractMock());
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  const mocked: jest.Mocked<EnvironmentServiceContract> = lazyObject({
+    preboot: jest.fn().mockResolvedValue(createPrebootContractMock()),
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
+  });
   return mocked;
 };
 

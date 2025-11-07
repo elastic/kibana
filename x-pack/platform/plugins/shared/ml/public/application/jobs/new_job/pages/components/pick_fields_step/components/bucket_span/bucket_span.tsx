@@ -28,6 +28,9 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   const titleId = useGeneratedHtmlId({
     prefix: 'bucketSpan',
   });
+  const errorId = useGeneratedHtmlId({
+    prefix: 'bucketSpanError',
+  });
 
   useEffect(() => {
     jobCreator.bucketSpan = bucketSpan;
@@ -51,7 +54,7 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   }, [estimating]);
 
   return (
-    <Description validation={validation} titleId={titleId}>
+    <Description validation={validation} titleId={titleId} errorId={errorId}>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <BucketSpanInput
@@ -61,6 +64,7 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
             bucketSpan={bucketSpan}
             isInvalid={validation.valid === false}
             disabled={estimating}
+            errorId={errorId}
           />
         </EuiFlexItem>
         {hideEstimateButton === false && (

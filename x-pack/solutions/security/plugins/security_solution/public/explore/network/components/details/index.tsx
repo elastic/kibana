@@ -7,7 +7,6 @@
 
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import React from 'react';
-
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import type {
@@ -16,7 +15,6 @@ import type {
 } from '../../../../../common/search_strategy';
 import type { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-
 import {
   autonomousSystemRenderer,
   hostIdRenderer,
@@ -24,7 +22,7 @@ import {
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
-} from '../../../../timelines/components/field_renderers/field_renderers';
+} from '../field_renderers/field_renderers';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -89,13 +87,13 @@ export const IpOverview = React.memo<IpOverviewProps>(
         description: locationRenderer(
           [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
           data,
-          contextID
+          scopeId
         ),
       },
       {
         title: i18n.AUTONOMOUS_SYSTEM,
         description: typeData
-          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, contextID)
+          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, scopeId)
           : getEmptyTagValue(),
       },
     ];
@@ -167,7 +165,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
                   scopeId,
                   host: data.host,
                   ipFilter: ip,
-                  contextID,
                   isFlyoutOpen,
                 })
               : getEmptyTagValue(),

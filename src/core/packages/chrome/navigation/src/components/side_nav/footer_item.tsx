@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KeyboardEvent, ForwardedRef } from 'react';
-import React, { forwardRef } from 'react';
+import type { KeyboardEvent, ForwardedRef, ComponentProps } from 'react';
+import React, { Suspense, forwardRef } from 'react';
 import { css } from '@emotion/react';
 import type { EuiButtonIconProps, IconType } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import type { MenuItem } from '../../../types';
-import { useTooltip } from '../../hooks/use_tooltip';
 import { BetaBadge } from '../beta_badge';
 import { TOOLTIP_OFFSET } from '../../constants';
+import { focusMainContent } from '../../utils/focus_main_content';
+import { useTooltip } from '../../hooks/use_tooltip';
+import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
@@ -31,13 +33,24 @@ export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconTy
 /**
  * Toggle button pattern: https://eui.elastic.co/docs/components/navigation/buttons/button/#toggle-button
  */
-export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
+export const SideNavFooterItem = forwardRef<HTMLAnchorElement, SideNavFooterItemProps>(
   (
-    { badgeType, hasContent, iconType, id, isHighlighted, isCurrent, label, ...props },
-    ref: ForwardedRef<HTMLDivElement>
+    { badgeType, hasContent, iconType, id, isCurrent, isHighlighted, label, ...props },
+    ref: ForwardedRef<HTMLAnchorElement>
   ) => {
     const { euiTheme } = useEuiTheme();
     const { tooltipRef, handleMouseOut } = useTooltip();
+    // TODO: remove once the fix is available on EUI side
+    const highContrastModeStyles = useHighContrastModeStyles();
+
+    const handleFooterItemKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        // Required for entering the popover with Enter or Space key
+        // Otherwise the navigation happens immediately
+        e.preventDefault();
+        focusMainContent();
+      }
+    };
 
     const wrapperStyles = css`
       display: flex;
@@ -45,18 +58,36 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
       width: 100%;
     `;
 
+    const buttonStyles = css`
+      --high-contrast-hover-indicator-color: ${isHighlighted
+        ? euiTheme.colors.textPrimary
+        : euiTheme.colors.textParagraph};
+      ${highContrastModeStyles}
+    `;
+
+    const buttonProps: ComponentProps<typeof EuiButtonIcon> & {
+      'data-highlighted': string;
+      'data-menu-item': string;
+    } = {
+      'aria-current': isCurrent ? 'page' : undefined,
+      'aria-label': label,
+      buttonRef: ref,
+      color: isHighlighted ? 'primary' : 'text',
+      'data-highlighted': isHighlighted ? 'true' : 'false',
+      'data-test-subj': `footerMenuItem-${id}`,
+      'data-menu-item': 'true',
+      display: isHighlighted ? 'base' : 'empty',
+      iconType: 'empty', // `iconType` is passed in Suspense below
+      onKeyDown: handleFooterItemKeyDown,
+      size: 's',
+      css: buttonStyles,
+      ...props,
+    };
+
     const menuItem = (
-      <EuiButtonIcon
-        aria-current={isCurrent ? 'page' : undefined}
-        aria-label={label}
-        color={isHighlighted ? 'primary' : 'text'}
-        data-highlighted={isHighlighted ? 'true' : 'false'}
-        data-test-subj={`footerMenuItem-${id}`}
-        display={isHighlighted ? 'base' : 'empty'}
-        iconType={iconType || 'empty'}
-        size="s"
-        {...props}
-      />
+      <Suspense fallback={<EuiButtonIcon buttonRef={ref} {...buttonProps} />}>
+        <EuiButtonIcon buttonRef={ref} {...buttonProps} iconType={iconType || 'empty'} />
+      </Suspense>
     );
 
     if (!hasContent) {
@@ -76,7 +107,6 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
 
       return (
         <EuiToolTip
-          ref={tooltipRef}
           anchorProps={{
             css: wrapperStyles,
           }}
@@ -84,6 +114,7 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
           disableScreenReaderOutput
           onMouseOut={handleMouseOut}
           position="right"
+          ref={tooltipRef}
           repositionOnScroll
           offset={TOOLTIP_OFFSET}
         >
@@ -92,10 +123,6 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
       );
     }
 
-    return (
-      <div ref={ref} css={wrapperStyles}>
-        {menuItem}
-      </div>
-    );
+    return <div css={wrapperStyles}>{menuItem}</div>;
   }
 );

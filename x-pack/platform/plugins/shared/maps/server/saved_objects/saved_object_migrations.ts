@@ -21,12 +21,12 @@ import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin'
 import { moveAttribution } from '../../common/migrations/move_attribution';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
 import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
-import type { MapAttributes } from '../../common/content_management';
+import type { StoredMapAttributes } from './types';
 
 function logMigrationWarning(
   context: SavedObjectMigrationContext,
   errorMsg: string,
-  doc: SavedObjectUnsanitizedDoc<MapAttributes>
+  doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>
 ) {
   context.log.warn(
     `map migration failed (${context.migrationVersion}). ${errorMsg}. attributes: ${JSON.stringify(
@@ -44,7 +44,7 @@ function logMigrationWarning(
  */
 export const savedObjectMigrations = {
   '7.2.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -61,7 +61,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.4.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -77,7 +77,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.5.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -93,7 +93,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.6.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -110,7 +110,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.7.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -127,7 +127,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.8.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -143,7 +143,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.9.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -159,7 +159,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -175,7 +175,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.12.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -191,7 +191,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.14.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -207,7 +207,7 @@ export const savedObjectMigrations = {
     }
   },
   '8.0.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -223,7 +223,7 @@ export const savedObjectMigrations = {
     }
   },
   '8.1.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -239,7 +239,7 @@ export const savedObjectMigrations = {
     }
   },
   '8.4.0': (
-    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
+    doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {

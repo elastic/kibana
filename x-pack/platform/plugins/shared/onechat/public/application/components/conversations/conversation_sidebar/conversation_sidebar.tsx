@@ -5,46 +5,60 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  useEuiOverflowScroll,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React from 'react';
+import { useConversationList } from '../../../hooks/use_conversation_list';
 import { ConversationSections } from './conversation_sections';
+import { ConversationSidebarNav } from './conversation_sidebar_nav';
 
+const sidebarContainerStyles = css`
+  block-size: 100%;
+`;
 const loadingStyles = css`
   align-self: center;
   justify-content: center;
 `;
 
-interface ConversationsSidebarProps {
-  conversations: ConversationWithoutRounds[];
-  isLoading: boolean;
-}
-
-export const ConversationSidebar: React.FC<ConversationsSidebarProps> = ({
-  conversations,
-  isLoading,
-}) => {
+export const ConversationSidebar: React.FC = () => {
+  const { conversations = [], isLoading } = useConversationList();
+  const { euiTheme } = useEuiTheme();
   const scrollStyles = css`
     ${useEuiOverflowScroll('y')}
   `;
+  const conversationsContainerStyles = css`
+    padding: ${euiTheme.size.base};
+  `;
   return (
-    <EuiFlexGroup
-      css={scrollStyles}
-      direction="column"
-      gutterSize="l"
-      aria-label={i18n.translate('xpack.onechat.conversationSidebar.conversations', {
-        defaultMessage: 'Conversations',
-      })}
-    >
+    <EuiFlexGroup css={sidebarContainerStyles} direction="column">
       {isLoading ? (
         <EuiFlexItem css={loadingStyles}>
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
       ) : (
-        <ConversationSections conversations={conversations} />
+        <EuiFlexItem css={scrollStyles}>
+          <EuiFlexGroup
+            css={conversationsContainerStyles}
+            direction="column"
+            gutterSize="l"
+            aria-label={i18n.translate('xpack.onechat.conversationSidebar.conversations', {
+              defaultMessage: 'Conversations',
+            })}
+          >
+            <ConversationSections conversations={conversations} />
+          </EuiFlexGroup>
+        </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <ConversationSidebarNav />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

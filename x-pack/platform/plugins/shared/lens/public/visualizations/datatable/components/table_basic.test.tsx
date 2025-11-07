@@ -17,7 +17,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
-import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
+import { LENS_EDIT_PAGESIZE_ACTION } from '@kbn/lens-common';
 import type { DatatableRenderProps } from './types';
 import type { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
@@ -306,7 +306,7 @@ describe('DatatableComponent', () => {
     renderDatatableComponent({
       data: {
         ...data,
-        rows: [{ a: undefined, b: undefined, c: undefined }],
+        rows: [],
       },
     });
     expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');

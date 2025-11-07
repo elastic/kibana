@@ -17,6 +17,7 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
 } from '../test_ids';
 import type {
   ItemExpandPopoverListItemProps,
@@ -90,8 +91,9 @@ export const useEntityNodeExpandPopover = (
         ? 'hide'
         : 'show';
 
-      const shouldShowEntityDetailsListItem =
-        onShowEntityDetailsClick && getNodeDocumentMode(node.data) === 'single-entity';
+      const shouldDisableEntityDetailsListItem =
+        !onShowEntityDetailsClick ||
+        !['single-entity', 'grouped-entities'].includes(getNodeDocumentMode(node.data));
 
       return [
         {
@@ -160,28 +162,40 @@ export const useEntityNodeExpandPopover = (
             onToggleExploreRelatedEntitiesClick(node, relatedEntitiesAction);
           },
         },
-        ...(shouldShowEntityDetailsListItem
-          ? ([
-              {
-                type: 'separator',
-              },
-              {
-                type: 'item',
-                iconType: 'expand',
-                testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-                label: i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-                  {
-                    defaultMessage: 'Show entity details',
-                  }
-                ),
-                onClick: () => {
-                  onShowEntityDetailsClick(node);
-                },
-              },
-            ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
-          : []),
-      ];
+        {
+          type: 'separator',
+        },
+        {
+          type: 'item',
+          iconType: 'expand',
+          testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+          label: i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+            {
+              defaultMessage: 'Show entity details',
+            }
+          ),
+          disabled: shouldDisableEntityDetailsListItem,
+          onClick: () => {
+            onShowEntityDetailsClick?.(node);
+          },
+          showToolTip: shouldDisableEntityDetailsListItem,
+          toolTipText: shouldDisableEntityDetailsListItem
+            ? i18n.translate(
+                'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+                {
+                  defaultMessage: 'Details not available',
+                }
+              )
+            : undefined,
+          toolTipProps: shouldDisableEntityDetailsListItem
+            ? {
+                position: 'bottom',
+                'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+              }
+            : undefined,
+        },
+      ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
     },
     [
       onToggleActionsByEntityClick,

@@ -62,6 +62,24 @@ describe('"esql" tag query construction', () => {
     expect(query.print()).toBe('FROM index | WHERE foo > ?hole | LIMIT ?closure');
     expect(query.getParams()).toEqual({ hole: 42, closure: 10 });
   });
+
+  test('can construct a query with SET header instruction', () => {
+    const query = esql`SET a = 123; FROM index | LIMIT 10`;
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print('basic')).toBe('SET a = 123; FROM index | LIMIT 10');
+    expect(query.ast.header).toBeDefined();
+    expect(query.ast.header).toHaveLength(1);
+  });
+
+  test('can construct a query with multiple SET header instructions', () => {
+    const query = esql`SET a = 123; SET b = "test"; FROM index | WHERE field > ?a`;
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print('basic')).toContain('SET a = 123');
+    expect(query.print('basic')).toContain('SET b = "test"');
+    expect(query.ast.header).toHaveLength(2);
+  });
 });
 
 describe('query construction from string', () => {
@@ -153,6 +171,97 @@ describe('query.from()', () => {
         },
       ],
     });
+  });
+
+  test('can create with METADATA fields', () => {
+    const query0 = esql.from(['index'], []);
+    const query1 = esql.from(['index'], ['_id']);
+    const query2 = esql.from(
+      ['index', 'index2', esql.src('index', 'cluster1')],
+      ['_id', '_source', 'more']
+    );
+
+    expect(query0.print()).toBe('FROM index');
+    expect(query1.print()).toBe('FROM index METADATA _id');
+    expect(query2.print()).toBe('FROM index, index2, cluster1:index METADATA _id, _source, more');
+  });
+});
+
+describe('query.ts()', () => {
+  test('errors on no arguments', () => {
+    expect(() => {
+      // @ts-expect-error - .from() requires at least one argument
+      esql.ts();
+    }).toThrow();
+  });
+
+  test('can create a query with one source', () => {
+    const query = esql.ts('index');
+
+    expect(query.print()).toBe('TS index');
+  });
+
+  test('can provide AST nodes as arguments', () => {
+    const query = esql.ts(esql.src('index', 'cluster1'), esql.src('index2', void 0, 'selector'));
+
+    expect(query.print()).toBe('TS cluster1:index, index2::selector');
+  });
+
+  test('can create a query with with multiple sources', () => {
+    const query = esql.ts('index, index2, cluster:index3');
+
+    expect(query.print()).toBe('TS index, index2, cluster:index3');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [
+        {
+          name: 'ts',
+          args: [
+            { type: 'source', index: { type: 'literal', value: 'index' } },
+            { type: 'source', index: { type: 'literal', value: 'index2' } },
+            {
+              type: 'source',
+              prefix: { type: 'literal', value: 'cluster' },
+              index: { type: 'literal', value: 'index3' },
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  test('index with selector', () => {
+    const query = esql.ts('index::selector');
+
+    expect(query.print()).toBe('TS index::selector');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [
+        {
+          name: 'ts',
+          args: [
+            {
+              type: 'source',
+              index: { type: 'literal', value: 'index' },
+              selector: { type: 'literal', value: 'selector' },
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  test('can create with METADATA fields', () => {
+    const query0 = esql.ts(['index'], []);
+    const query1 = esql.ts(['index'], ['_id']);
+    const query2 = esql.ts(
+      ['index', 'index2', esql.src('index', 'cluster1')],
+      ['_id', '_source', 'more']
+    );
+
+    expect(query0.print()).toBe('TS index');
+    expect(query1.print()).toBe('TS index METADATA _id');
+    expect(query2.print()).toBe('TS index, index2, cluster1:index METADATA _id, _source, more');
   });
 });
 

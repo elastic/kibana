@@ -111,26 +111,28 @@ export function isFilterConditionObject(condition: Condition): condition is Filt
 
 export function getConditionFields(
   condition: Condition
-): Array<{ name: string; type: 'number' | 'string' }> {
+): Array<{ name: string; type: 'boolean' | 'number' | 'string' }> {
   const fields = collectFields(condition);
-  // deduplicate fields, if mapped as string and number, keep as number
-  const uniqueFields = new Map<string, 'number' | 'string'>();
-  fields.forEach((field) => {
-    const existing = uniqueFields.get(field.name);
-    if (existing === 'number') {
-      return;
+  // deduplicate fields, if already mapped, prefer boolean over number, and number over string
+  const uniqueFields = new Map<string, 'boolean' | 'number' | 'string'>();
+
+  const typePrecedenceAscOrder = ['string', 'number', 'boolean'] as const;
+  fields.forEach(({ name, type }) => {
+    const existing = uniqueFields.get(name);
+    if (
+      !existing ||
+      typePrecedenceAscOrder.indexOf(type) > typePrecedenceAscOrder.indexOf(existing)
+    ) {
+      uniqueFields.set(name, type);
     }
-    if (existing === 'string' && field.type === 'number') {
-      uniqueFields.set(field.name, 'number');
-      return;
-    }
-    uniqueFields.set(field.name, field.type);
   });
 
   return Array.from(uniqueFields).map(([name, type]) => ({ name, type }));
 }
 
-function collectFields(condition: Condition): Array<{ name: string; type: 'number' | 'string' }> {
+function collectFields(
+  condition: Condition
+): Array<{ name: string; type: 'boolean' | 'number' | 'string' }> {
   if (isFilterCondition(condition)) {
     return [{ name: condition.field, type: getFieldTypeForFilterCondition(condition) }];
   }
@@ -147,8 +149,11 @@ function collectFields(condition: Condition): Array<{ name: string; type: 'numbe
   return [];
 }
 
-function getFieldTypeForFilterCondition(condition: FilterCondition): 'number' | 'string' {
+function getFieldTypeForFilterCondition(
+  condition: FilterCondition
+): 'boolean' | 'number' | 'string' {
   const operator = getFilterOperator(condition);
+  const value = getFilterValue(condition);
 
   switch (operator) {
     case 'gt':
@@ -158,6 +163,15 @@ function getFieldTypeForFilterCondition(condition: FilterCondition): 'number' | 
       return 'number';
     case 'neq':
     case 'eq':
+      // Return number or boolean if the value is of that type, otherwise string
+      if (typeof value === 'number') {
+        return 'number';
+      }
+      if (typeof value === 'boolean') {
+        return 'boolean';
+      }
+      return 'string';
+
     case 'exists':
     case 'contains':
     case 'startsWith':

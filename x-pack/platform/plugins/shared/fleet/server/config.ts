@@ -27,7 +27,7 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.4';
+const REGISTRY_SPEC_MAX_VERSION = '3.5';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -43,6 +43,7 @@ export const config: PluginConfigDescriptor = {
       },
     },
     enableExperimental: true,
+    experimentalFeatures: true,
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
     },
@@ -118,16 +119,50 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
-    // Log invalid experimental values
+    // Log invalid experimental values listed in xpack.fleet.enableExperimental
     (fullConfig, fromPath, addDeprecation) => {
       for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
         if (!isValidExperimentalValue(key)) {
           addDeprecation({
-            configPath: 'xpack.fleet.fleet.enableExperimental',
-            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].`,
+            configPath: 'xpack.fleet.enableExperimental',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.enableExperimental].`,
             correctiveActions: {
               manualSteps: [
-                `Use [xpack.fleet.fleet.enableExperimental] with an array of valid experimental features.`,
+                `Use [xpack.fleet.enableExperimental] with an array of valid experimental features.`,
+              ],
+            },
+            level: 'warning',
+          });
+        }
+      }
+    },
+
+    // Prefer using xpack.fleet.experimentalFeatures over xpack.fleet.enableExperimental
+    (fullConfig, fromPath, addDeprecation) => {
+      if (fullConfig?.xpack?.fleet?.enableExperimental?.length > 0) {
+        addDeprecation({
+          configPath: 'xpack.fleet.enableExperimental',
+          message: `Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.`,
+          correctiveActions: {
+            manualSteps: [
+              `Use [xpack.fleet.experimentalFeatures] to enable or disable experimental features.`,
+            ],
+          },
+          level: 'warning',
+        });
+      }
+    },
+
+    // Log invalid experimental values listed in xpack.fleet.experimentalFeatures
+    (fullConfig, fromPath, addDeprecation) => {
+      for (const key of Object.keys(fullConfig?.xpack?.fleet?.experimentalFeatures ?? {})) {
+        if (!isValidExperimentalValue(key)) {
+          addDeprecation({
+            configPath: 'xpack.fleet.experimentalFeatures',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.experimentalFeatures].`,
+            correctiveActions: {
+              manualSteps: [
+                `Use [xpack.fleet.experimentalFeatures] with an object containing valid experimental features.`,
               ],
             },
             level: 'warning',
@@ -224,6 +259,19 @@ export const config: PluginConfigDescriptor = {
         defaultValue: () => [],
       }),
 
+      /**
+       * A record of experimental features that can be enabled or disabled.
+       * Keys must be one of the values listed in `allowedExperimentalValues`.
+       *
+       * @example
+       * xpack.fleet.experimentalFeatures:
+       *   enableAgentStatusAlerting: false # Disable agent status alerting (enabled by default)
+       *   enableAgentPrivilegeLevelChange: true # Enable agent privilege level change (disabled by default)
+       */
+      experimentalFeatures: schema.recordOf(schema.string(), schema.boolean(), {
+        defaultValue: {},
+      }),
+
       internal: schema.object({
         useMeteringApi: schema.boolean({
           defaultValue: false,
@@ -242,7 +290,7 @@ export const config: PluginConfigDescriptor = {
             min: 0,
           })
         ),
-        retrySetupOnBoot: schema.boolean({ defaultValue: false }),
+        retrySetupOnBoot: schema.boolean({ defaultValue: true }),
         registry: schema.object(
           {
             kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
@@ -341,6 +389,7 @@ export const config: PluginConfigDescriptor = {
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),
+      integrationRollbackTTL: schema.maybe(schema.string()),
     },
     {
       validate: (configToValidate) => {

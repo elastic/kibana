@@ -36,6 +36,7 @@ export const ToggleField = ({
         label={label}
         checked={field.value ?? false}
         onChange={(e) => field.onChange(e.target.checked)}
+        compressed
       />
     </EuiFormRow>
   );

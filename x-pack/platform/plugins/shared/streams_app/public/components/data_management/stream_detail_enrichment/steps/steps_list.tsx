@@ -21,6 +21,8 @@ export interface StepConfigurationProps {
   rootLevelMap: RootLevelMap;
   stepUnderEdit?: StreamlangStepWithUIAttributes;
   stepsProcessingSummaryMap?: StepsProcessingSummaryMap;
+  isFirstStepInLevel: boolean;
+  isLastStepInLevel: boolean;
 }
 
 export const StepsListItem = (props: StepConfigurationProps) => {

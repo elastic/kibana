@@ -593,7 +593,6 @@ describe('Response actions history', () => {
     });
 
     it('should contain agent type info in each expanded row', async () => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
       render();
       const { getAllByTestId } = renderResult;
 
@@ -1525,8 +1524,8 @@ describe('Response actions history', () => {
 
     beforeEach(() => {
       featureFlags = {
-        responseActionUploadEnabled: true,
         crowdstrikeRunScriptEnabled: true,
+        microsoftDefenderEndpointCancelEnabled: true,
       };
 
       mockedContext.setExperimentalFlag(featureFlags);
@@ -1546,7 +1545,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions (with `runscript`) when opened', async () => {
+    it('should show a list of actions (with `runscript` and `cancel`) when opened', async () => {
       // Note: when we enable new commands, it might be needed to increase the height
       render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;
@@ -1568,6 +1567,40 @@ describe('Response actions history', () => {
         'upload. To check this option, press Enter.',
         'scan. To check this option, press Enter.',
         'runscript. To check this option, press Enter.',
+        'cancel. To check this option, press Enter.',
+        'memory-dump. To check this option, press Enter.',
+      ]);
+    });
+
+    it('should show a list of actions (without `cancel`) when cancel feature flag is disabled', async () => {
+      // Set the cancel feature flag to false
+      const featureFlagsWithoutCancel = {
+        ...featureFlags,
+        microsoftDefenderEndpointCancelEnabled: false,
+      };
+      mockedContext.setExperimentalFlag(featureFlagsWithoutCancel);
+
+      render({ 'data-test-height': 350 });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
+        RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1
+      );
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
+        'scan. To check this option, press Enter.',
+        'runscript. To check this option, press Enter.',
+        'memory-dump. To check this option, press Enter.',
       ]);
     });
 
@@ -1863,11 +1896,6 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of agents and action types when opened in page view', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneV1Enabled: true,
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-        responseActionsMSDefenderEndpointEnabled: true,
-      });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;
 

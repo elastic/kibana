@@ -8,8 +8,15 @@
 export {
   AgentType,
   oneChatDefaultAgentId,
-  type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentResearchStepConfiguration,
+  type AgentAnswerStepConfiguration,
 } from './definition';
-export { agentIdRegexp } from './agent_ids';
+export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
+export {
+  type AgentCapabilities,
+  type ResolvedAgentCapabilities,
+  getKibanaDefaultAgentCapabilities,
+} from './capabilities';
+export { AgentExecutionErrorCode } from './execution_errors';

@@ -64,6 +64,7 @@ export interface ESQLCallbacks {
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  isServerless?: boolean;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
@@ -77,11 +78,13 @@ const commandOptionNameToLocation: Record<string, Location> = {
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
+  on: Location.RERANK,
   dissect: Location.DISSECT,
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  rerank: Location.RERANK,
 };
 
 /**

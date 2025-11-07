@@ -11,6 +11,7 @@ import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
 import styled from 'styled-components';
+import { STATUS_BUTTON_TEST_ID } from '../../../../../flyout/document_details/right/components/test_ids';
 
 const mapping = {
   open: 'primary',
@@ -44,7 +45,7 @@ const RuleStatusComponent: React.FC<Props> = ({
       onClickAriaLabel={onClickAriaLabel}
       iconType={iconType}
       iconSide={iconSide}
-      data-test-subj="rule-status-badge"
+      data-test-subj={STATUS_BUTTON_TEST_ID}
     >
       {value}
     </StyledEuiBadge>

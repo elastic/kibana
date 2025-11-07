@@ -256,6 +256,12 @@ describe('config schema', () => {
           "roleMappingManagementEnabled": true,
           "userManagementEnabled": true,
         },
+        "uiam": Object {
+          "enabled": false,
+          "ssl": Object {
+            "verificationMode": "full",
+          },
+        },
       }
     `);
   });
@@ -1386,6 +1392,121 @@ describe('config schema', () => {
       });
     });
 
+    describe('`origin`', () => {
+      it('should be a valid URI or an array of URIs', () => {
+        const uriErrorMessage =
+          '[authc.providers]: types that failed validation:\n' +
+          '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+          '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+          ' - [origin.0]: value must be a valid URI (see RFC 3986).\n' +
+          ' - [origin.1]: could not parse array value from json input';
+
+        const authConfig = {
+          authc: {
+            providers: {
+              basic: { provider1: { order: 0, origin: 'not-a-valid-uri' as any } },
+            },
+          },
+        };
+
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+
+        authConfig.authc.providers.basic.provider1.origin = 'test.com';
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+
+        authConfig.authc.providers.basic.provider1.origin = 'http:/test.com:5601';
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+
+        authConfig.authc.providers.basic.provider1.origin = 12345;
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(
+          '[authc.providers]: types that failed validation:\n' +
+            '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+            '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+            ' - [origin.0]: expected value of type [string] but got [number].\n' +
+            ' - [origin.1]: expected value of type [array] but got [number]'
+        );
+
+        authConfig.authc.providers.basic.provider1.origin = { prop: 'should not be an object' };
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(
+          '[authc.providers]: types that failed validation:\n' +
+            '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+            '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+            ' - [origin.0]: expected value of type [string] but got [Object].\n' +
+            ' - [origin.1]: expected value of type [array] but got [Object]'
+        );
+
+        authConfig.authc.providers.basic.provider1.origin = 'http://test.com:5601';
+        expect(
+          (ConfigSchema.validate(authConfig).authc.providers as any).basic.provider1.origin
+        ).toEqual('http://test.com:5601');
+
+        authConfig.authc.providers.basic.provider1.origin = 'http://127.0.0.1:5601';
+        expect(
+          (ConfigSchema.validate(authConfig).authc.providers as any).basic.provider1.origin
+        ).toEqual('http://127.0.0.1:5601');
+
+        authConfig.authc.providers.basic.provider1.origin = [
+          'https://elastic.co',
+          'https://localhost:5601',
+        ];
+        expect(
+          (ConfigSchema.validate(authConfig).authc.providers as any).basic.provider1.origin
+        ).toEqual(['https://elastic.co', 'https://localhost:5601']);
+      });
+
+      it('should only allow the origin component of the URI', () => {
+        const uriErrorMessage =
+          '[authc.providers]: types that failed validation:\n' +
+          '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+          '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+          ' - [origin.0]: expected a lower-case origin (scheme, host, and optional port) but got: http://test.com/too-long\n' +
+          ' - [origin.1]: could not parse array value from json input';
+
+        const authConfig = {
+          authc: {
+            providers: {
+              basic: { provider1: { order: 0, origin: 'http://test.com/too-long' as any } },
+            },
+          },
+        };
+
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+      });
+
+      it('should be allowed for all provider types', () => {
+        const origin = 'https://elastic.co';
+
+        const authConfig = ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 0, origin } },
+              token: { token1: { order: 1, origin } },
+              pki: { pki1: { order: 2, origin } },
+              kerberos: { kerberos1: { order: 3, origin } },
+              oidc: { oidc1: { order: 4, realm: 'oidc-realm', origin } },
+              saml: { saml1: { order: 5, realm: 'saml-realm', origin } },
+              anonymous: {
+                anonymous1: {
+                  order: 6,
+                  credentials: 'elasticsearch_anonymous_user',
+                  origin,
+                },
+              },
+            },
+          },
+        });
+
+        const providers = authConfig.authc.providers as any;
+        expect(providers.basic.basic1.origin).toEqual(origin);
+        expect(providers.token.token1.origin).toEqual(origin);
+        expect(providers.pki.pki1.origin).toEqual(origin);
+        expect(providers.kerberos.kerberos1.origin).toEqual(origin);
+        expect(providers.oidc.oidc1.origin).toEqual(origin);
+        expect(providers.saml.saml1.origin).toEqual(origin);
+        expect(providers.anonymous.anonymous1.origin).toEqual(origin);
+      });
+    });
+
     it('`name` should be unique across all provider types', () => {
       expect(() =>
         ConfigSchema.validate({
@@ -1609,6 +1730,99 @@ describe('config schema', () => {
           "lifespan": "P30D",
         }
       `);
+    });
+  });
+
+  describe('uiam', () => {
+    it('should throw error if UIAM is enabled, but UIAM URL is not specified', () => {
+      expect(() =>
+        ConfigSchema.validate({ uiam: { enabled: true } }, { serverless: true })
+      ).toThrow('[uiam.url]: expected value of type [string] but got [undefined].');
+
+      expect(() =>
+        ConfigSchema.validate(
+          { uiam: { enabled: true, sharedSecret: 'some-secret' } },
+          { serverless: true }
+        )
+      ).toThrow('[uiam.url]: expected value of type [string] but got [undefined].');
+    });
+
+    it('should throw error if UIAM is enabled, but UIAM shared secret is not specified', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          { uiam: { enabled: true, url: 'https://uaim.service' } },
+          { serverless: true }
+        )
+      ).toThrow('[uiam.sharedSecret]: expected value of type [string] but got [undefined]');
+    });
+
+    it('does not require UIAM URL or shared secret if UIAM is disabled', () => {
+      expect(
+        ConfigSchema.validate({ uiam: { enabled: false } }, { serverless: true }).uiam
+      ).toEqual({ enabled: false, ssl: { verificationMode: 'full' } });
+    });
+
+    it('accepts both HTTP and HTTPS URLs for UIAM service', () => {
+      for (const url of ['http://uaim.service', 'https://uaim.service']) {
+        expect(
+          ConfigSchema.validate(
+            { uiam: { enabled: true, url, sharedSecret: 'some-secret' } },
+            { serverless: true }
+          ).uiam
+        ).toEqual({
+          enabled: true,
+          url,
+          sharedSecret: 'some-secret',
+          ssl: { verificationMode: 'full' },
+        });
+      }
+
+      expect(() =>
+        ConfigSchema.validate(
+          { uiam: { enabled: true, url: 'ftp://uaim.service', sharedSecret: 'some-secret' } },
+          { serverless: true }
+        )
+      ).toThrow('[uiam.url]: expected URI with scheme [https|http].');
+    });
+
+    it('accepts full UIAM config', () => {
+      expect(
+        ConfigSchema.validate(
+          { uiam: { enabled: true, url: 'https://uaim.service', sharedSecret: 'some-secret' } },
+          { serverless: true }
+        ).uiam
+      ).toEqual({
+        enabled: true,
+        url: 'https://uaim.service',
+        sharedSecret: 'some-secret',
+        ssl: { verificationMode: 'full' },
+      });
+
+      const validConfigs = [
+        {
+          enabled: true,
+          url: 'https://uaim.service',
+          sharedSecret: 'some-secret',
+          ssl: { verificationMode: 'certificate', certificateAuthorities: ['/path-1'] },
+        },
+        {
+          enabled: true,
+          url: 'https://uaim.service',
+          sharedSecret: 'some-secret',
+          ssl: { verificationMode: 'certificate', certificateAuthorities: '/path-1' },
+        },
+        {
+          enabled: true,
+          url: 'https://uaim.service',
+          sharedSecret: 'some-secret',
+          ssl: { verificationMode: 'none' },
+        },
+      ];
+      for (const uiamConfig of validConfigs) {
+        expect(ConfigSchema.validate({ uiam: uiamConfig }, { serverless: true }).uiam).toEqual(
+          uiamConfig
+        );
+      }
     });
   });
 });

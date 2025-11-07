@@ -105,7 +105,7 @@ async function isKnowledgeBaseSemanticTextCompatible({
 
 export function isSemanticTextUnsupportedError(error: Error) {
   const semanticTextUnsupportedError =
-    'The [sparse_vector] field type is not supported on indices created on versions 8.0 to 8.10';
+    '[semantic_text] is available on indices created with 8.11 or higher. Please create a new index to use [semantic_text]';
 
   const isSemanticTextUnspported =
     error instanceof errors.ResponseError &&

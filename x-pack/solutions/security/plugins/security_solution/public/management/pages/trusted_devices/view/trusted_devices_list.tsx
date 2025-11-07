@@ -31,7 +31,7 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.trustedDevices.list.pageAboutInfo', {
     defaultMessage:
-      'Add a trusted device to improve performance or alleviate compatibility issues with the Elastic Security app.',
+      'Allow a specific external device to connect to your endpoints, even when Device Control is enabled.',
   }),
   pageAddButtonTitle: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.pageAddButtonTitle',
@@ -116,7 +116,7 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.trustedDevices.list.emptyStateInfo', {
     defaultMessage:
-      'There are currently no trusted devices on your Endpoints. Add trusted devices to improve performance or alleviate compatibility issues with the Elastic Security app.',
+      'Add trusted devices to allow specific external devices to connect to your endpoints even when Device Control is enabled.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.emptyStatePrimaryButtonLabel',

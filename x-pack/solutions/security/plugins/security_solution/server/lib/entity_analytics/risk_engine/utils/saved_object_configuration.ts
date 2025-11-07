@@ -30,10 +30,11 @@ export const getDefaultRiskEngineConfiguration = ({
   interval: '1h',
   pageSize: 3_500,
   range: { start: 'now-30d', end: 'now' },
+  enableResetToZero: true,
   excludeAlertStatuses: ['closed'],
   _meta: {
     // Upgrade this property when changing mappings
-    mappingsVersion: 4,
+    mappingsVersion: 5,
   },
 });
 

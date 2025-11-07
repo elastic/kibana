@@ -3,11 +3,20 @@
   "id": "@kbn/feature-controls-examples-plugin",
   "owner": "@elastic/kibana-security",
   "description": "Demo of how to implement feature controls",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "featureControlsExamples",
     "server": true,
     "browser": true,
-    "requiredBundles": ["kibanaReact"],
-    "requiredPlugins": ["developerExamples", "security", "spaces", "features"]
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "requiredPlugins": [
+      "developerExamples",
+      "security",
+      "spaces",
+      "features"
+    ]
   }
 }

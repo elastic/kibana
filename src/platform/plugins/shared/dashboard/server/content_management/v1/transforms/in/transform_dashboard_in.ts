@@ -8,27 +8,21 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { DashboardAttributes } from '../../types';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
+import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
 import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
+import { transformTagsIn } from './transform_tags_in';
 
-export const transformDashboardIn = async ({
+export const transformDashboardIn = ({
   dashboardState,
-  replaceTagReferencesByName,
   incomingReferences = [],
 }: {
-  dashboardState: DashboardAttributes;
+  dashboardState: DashboardState;
   incomingReferences?: SavedObjectReference[];
-  replaceTagReferencesByName?: ({
-    references,
-    newTagNames,
-  }: {
-    references: SavedObjectReference[];
-    newTagNames: string[];
-  }) => Promise<SavedObjectReference[]>;
-}): Promise<
+}):
   | {
       attributes: DashboardSavedObjectAttributes;
       references: SavedObjectReference[];
@@ -38,43 +32,52 @@ export const transformDashboardIn = async ({
       attributes: null;
       references: null;
       error: Error;
-    }
-> => {
+    } => {
   try {
-    const tagReferences =
-      replaceTagReferencesByName && dashboardState.tags && dashboardState.tags.length
-        ? await replaceTagReferencesByName({
-            references: incomingReferences,
-            newTagNames: dashboardState.tags,
-          })
-        : incomingReferences;
-
-    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } =
+    const { controlGroupInput, options, filters, panels, query, tags, timeRange, ...rest } =
       dashboardState;
+
+    const tagReferences = transformTagsIn({
+      tags,
+      references: incomingReferences,
+    });
+
+    // TODO - remove once all references are provided server side
+    const nonTagIncomingReferences = incomingReferences.filter(
+      ({ type }) => type !== tagSavedObjectTypeName
+    );
+
     const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
-    const { searchSourceJSON, references: searchSourceReferences } =
-      transformSearchSourceIn(kibanaSavedObjectMeta);
+    const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
+      filters,
+      query
+    );
 
     const attributes = {
+      description: '',
       ...rest,
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
-      ...(options && {
-        optionsJSON: JSON.stringify(options),
-      }),
+      optionsJSON: JSON.stringify(options ?? {}),
       ...(panels && {
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
-      ...(kibanaSavedObjectMeta && {
-        kibanaSavedObjectMeta: { searchSourceJSON },
-      }),
+      ...(timeRange
+        ? { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }
+        : { timeRestore: false }),
+      kibanaSavedObjectMeta: { searchSourceJSON },
     };
     return {
       attributes,
-      references: [...tagReferences, ...panelReferences, ...searchSourceReferences],
+      references: [
+        ...tagReferences,
+        ...nonTagIncomingReferences,
+        ...panelReferences,
+        ...searchSourceReferences,
+      ],
       error: null,
     };
   } catch (e) {
