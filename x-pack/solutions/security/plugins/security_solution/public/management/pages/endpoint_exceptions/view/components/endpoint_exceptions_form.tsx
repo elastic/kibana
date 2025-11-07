@@ -131,8 +131,9 @@ export const EndpointExceptionsForm: React.FC<
     hasWrongOperatorWithWildcard([exception])
   );
 
-  const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] =
-    useState<boolean>(false);
+  const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] = useState<boolean>(
+    hasPartialCodeSignatureEntry([exception])
+  );
 
   const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
     ENDPOINT_ALERTS_INDEX_NAMES,
@@ -285,6 +286,7 @@ export const EndpointExceptionsForm: React.FC<
           name="os"
           options={OS_OPTIONS}
           fullWidth
+          data-test-subj={getTestId('osSelectField')}
           valueOfSelected={
             OS_OPTIONS.find(
               (option) => JSON.stringify(option.value) === JSON.stringify(exception?.os_types)
@@ -294,7 +296,7 @@ export const EndpointExceptionsForm: React.FC<
         />
       </EuiFormRow>
     ),
-    [handleOnOsChange, exception?.os_types]
+    [getTestId, handleOnOsChange, exception?.os_types]
   );
 
   const handleOnChangeComment = useCallback(
@@ -506,6 +508,7 @@ export const EndpointExceptionsForm: React.FC<
       <EuiHorizontalRule />
       {criteriaSection}
       {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+      {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
       {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
       {hasDuplicateFields && (
         <>

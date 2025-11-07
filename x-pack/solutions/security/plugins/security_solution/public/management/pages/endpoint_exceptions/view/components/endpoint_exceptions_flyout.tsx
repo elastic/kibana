@@ -42,7 +42,7 @@ import { EndpointExceptionsForm } from './endpoint_exceptions_form';
 import { EndpointExceptionsApiClient } from '../../service/api_client';
 import { ENDPOINT_EXCEPTIONS_PAGE_LABELS, getCreationErrorMessage } from '../../translations';
 
-type EndpointExceptionsFlyoutProps = Pick<
+export type EndpointExceptionsFlyoutProps = Pick<
   AddExceptionFlyoutProps,
   'onCancel' | 'onConfirm' | 'alertData' | 'isAlertDataLoading' | 'alertStatus' | 'rules'
 >;
@@ -153,6 +153,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
       size="l"
       onClose={handleCloseFlyout}
       aria-labelledby={endpointExceptionsFlyoutTitleId}
+      data-test-subj="addEndpointExceptionFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
@@ -223,7 +224,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
           {...confirmModalLabels}
           onSuccess={submitException}
           onCancel={() => setShowConfirmModal(false)}
-          data-test-subj="artifactConfirmModal"
+          data-test-subj="endpointExceptionConfirmModal"
         />
       )}
     </EuiFlyout>
