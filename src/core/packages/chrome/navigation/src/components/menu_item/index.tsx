@@ -48,8 +48,8 @@ interface MenuItemWithoutHref extends MenuItemBaseProps, MenuItemButtonRestProps
 export type MenuItemProps = MenuItemWithHref | MenuItemWithoutHref;
 
 export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuItemProps>(
-  (props, ref): JSX.Element => {
-    const {
+  (
+    {
       children,
       iconType,
       id,
@@ -57,8 +57,10 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       isHighlighted,
       isLabelVisible = true,
       isTruncated = true,
-    } = props;
-
+      ...props
+    },
+    ref
+  ): JSX.Element => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
 
@@ -183,24 +185,20 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     };
 
     if (props.href === undefined) {
-      const buttonProps: MenuItemWithoutHref = props;
-      // Destructure the `iconType` and `tabIndex` to avoid passing them to the `button` element
-      const { iconType: _iconType, tabIndex: _tabIndex, ...otherProps } = buttonProps;
+      const buttonProps = props as MenuItemWithoutHref;
 
       return (
         <button
           id={id}
           ref={ref as ForwardedRef<HTMLButtonElement>}
           {...commonProps}
-          {...otherProps}
+          {...buttonProps}
         >
           {content}
         </button>
       );
     } else {
-      const anchorProps: MenuItemWithHref = props;
-      // Destructure the `iconType` and `tabIndex` to avoid passing them to the `button` element
-      const { iconType: _iconType, tabIndex: _tabIndex, ...otherProps } = anchorProps;
+      const anchorProps = props as MenuItemWithHref;
 
       return (
         <a
@@ -208,7 +206,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
           id={id}
           ref={ref as ForwardedRef<HTMLAnchorElement>}
           {...commonProps}
-          {...otherProps}
+          {...anchorProps}
         >
           {content}
         </a>
