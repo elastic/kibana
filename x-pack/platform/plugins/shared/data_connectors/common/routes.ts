@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-// used to identify requests to EIS originating from OneChat
-export const MODEL_TELEMETRY_METADATA = {
-  pluginId: 'one_chat',
-} as const;
+export const DATA_CONNECTORS_ROUTE = '/app/data_connectors';

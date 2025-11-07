@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { tap } from 'rxjs';
 import { filter, of, defer, shareReplay, switchMap, merge, EMPTY } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -30,6 +31,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
+import type { TrackingService } from '../../telemetry';
 
 interface ChatServiceDeps {
   logger: Logger;
@@ -38,6 +40,7 @@ interface ChatServiceDeps {
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  trackingService?: TrackingService;
 }
 
 export const createChatService = (options: ChatServiceDeps): ChatService => {
@@ -69,6 +72,9 @@ class ChatServiceImpl implements ChatService {
     autoCreateConversationWithId = false,
     browserApiTools,
   }: ChatConverseParams): Observable<ChatEvent> {
+    const { trackingService } = this.dependencies;
+    const requestId = trackingService?.trackQueryStart();
+
     return withConverseSpan({ agentId, conversationId }, (span) => {
       // Resolve scoped services
       return defer(async () => {
@@ -143,6 +149,20 @@ class ChatServiceImpl implements ChatService {
           return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
             handleCancellation(abortSignal),
             convertErrors({ logger: this.dependencies.logger }),
+            tap((event) => {
+              // Track round completion and query-to-result time
+              try {
+                if (isRoundCompleteEvent(event) && trackingService) {
+                  if (requestId) trackingService.trackQueryEnd(requestId);
+                  const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
+                  if (conversationId) {
+                    trackingService.trackConversationRound(conversationId, currentRoundCount);
+                  }
+                }
+              } catch (error) {
+                this.dependencies.logger.error(error);
+              }
+            }),
             shareReplay()
           );
         })
