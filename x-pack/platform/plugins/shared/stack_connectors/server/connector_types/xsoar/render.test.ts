@@ -7,8 +7,8 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { renderParameterTemplates } from './render';
-import { SUB_ACTION } from '../../../common/xsoar/constants';
 import Mustache from 'mustache';
+import { SUB_ACTION } from '@kbn/connector-schemas/xsoar';
 
 const params = {
   subAction: SUB_ACTION.RUN,
