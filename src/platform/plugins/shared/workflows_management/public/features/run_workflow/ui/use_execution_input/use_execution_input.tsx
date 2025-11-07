@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const useExecutionInput = ({
   workflowName,
@@ -26,7 +26,7 @@ export const useExecutionInput = ({
   }, [workflowName, selectedTrigger]);
 
   useEffect(() => {
-    if (localStorageKey && !executionInput) {
+    if (localStorageKey) {
       try {
         const savedInput = localStorage.getItem(localStorageKey);
 
@@ -39,7 +39,7 @@ export const useExecutionInput = ({
         // Silently fail if localStorage is not available
       }
     }
-  }, [localStorageKey, executionInput]);
+  }, [localStorageKey]);
 
   useEffect(() => {
     if (localStorageKey) {

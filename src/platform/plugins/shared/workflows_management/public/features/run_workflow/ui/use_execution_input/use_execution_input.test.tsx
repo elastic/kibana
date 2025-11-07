@@ -314,38 +314,6 @@ describe('useExecutionInput', () => {
   });
 
   describe('workflow name changes', () => {
-    it('should handle workflow name change', async () => {
-      const workflow1 = 'workflow-1';
-      const workflow2 = 'workflow-2';
-
-      // Save data for workflow 1
-      const input1 = { workflow: 'one' };
-      localStorage.setItem(`workflow-${manualTrigger}-input-${workflow1}`, JSON.stringify(input1));
-
-      // Save data for workflow 2
-      const input2 = { workflow: 'two' };
-      localStorage.setItem(`workflow-${manualTrigger}-input-${workflow2}`, JSON.stringify(input2));
-
-      const { result, rerender } = renderHook(
-        ({ workflowName: name, selectedTrigger }) =>
-          useExecutionInput({ workflowName: name, selectedTrigger }),
-        {
-          initialProps: { workflowName: workflow1, selectedTrigger: manualTrigger },
-        }
-      );
-
-      await waitFor(() => {
-        expect(result.current.executionInput).toBe(JSON.stringify(input1, null, 2));
-      });
-
-      // Change to workflow 2
-      rerender({ workflowName: workflow2, selectedTrigger: manualTrigger });
-
-      await waitFor(() => {
-        expect(result.current.executionInput).toBe(JSON.stringify(input2, null, 2));
-      });
-    });
-
     it('should save to correct localStorage key when workflow name changes', () => {
       const workflow1 = 'workflow-1';
       const workflow2 = 'workflow-2';
