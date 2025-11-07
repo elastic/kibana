@@ -250,6 +250,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
             stream,
             kql: '',
             dropUnmapped: true,
+            signal: new AbortController().signal,
           });
 
           const featuresWithAnalysis = await Promise.all(

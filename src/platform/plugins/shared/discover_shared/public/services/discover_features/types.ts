@@ -84,7 +84,8 @@ export interface ObservabilityCreateSLOFeature {
 export interface ObservabilityLogEventsFeature {
   id: 'observability-log-events';
   render: (props: {
-    query: Query;
+    query?: Query;
+    nonHighlightingQuery?: Query;
     timeRange: TimeRange;
     index: string;
     displayOptions?: {
