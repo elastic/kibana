@@ -37,6 +37,14 @@ export const ExploreWorkplaceAI: React.FC = () => {
     }
   }, [application, chrome]);
 
+  const onChatNow = useCallback(() => {
+    const agentBuilderUrl = chrome?.navLinks.get(AGENT_BUILDER_APP_ID)?.url;
+
+    if (agentBuilderUrl) {
+      application?.navigateToUrl(agentBuilderUrl);
+    }
+  }, [application, chrome]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiTitle size="s">
@@ -73,7 +81,7 @@ export const ExploreWorkplaceAI: React.FC = () => {
             title="Chat with default agent"
             description="Ask questions grounded in your business data."
             footer={
-              <EuiButton color="text" onClick={() => {}}>
+              <EuiButton color="text" onClick={onChatNow}>
                 Chat now
               </EuiButton>
             }
