@@ -5167,6 +5167,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-layout-utils@link:src/core/packages/chrome/layout/core-chrome-layout-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
   version "0.0.0"
   uid ""
