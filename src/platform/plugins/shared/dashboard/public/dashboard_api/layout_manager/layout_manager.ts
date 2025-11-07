@@ -78,7 +78,6 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
-  console.log({ incomingEmbeddables });
   const children$ = new BehaviorSubject<DashboardChildren>({});
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
