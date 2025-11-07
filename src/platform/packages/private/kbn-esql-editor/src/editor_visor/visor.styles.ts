@@ -40,8 +40,7 @@ export const visorStyles = (
       boxShadow: visorBoxShadow,
     },
     comboBoxWrapper: {
-      background: euiTheme.colors.emptyShade,
-      height: '100%',
+      background: euiTheme.colors.backgroundBasePlain,
       justifyContent: 'center',
       borderBottomLeftRadius: euiTheme.size.s,
       borderTopLeftRadius: euiTheme.size.s,
@@ -66,7 +65,7 @@ export const visorStyles = (
     separator: {
       width: '1px',
       height: euiTheme.size.xl,
-      backgroundColor: euiTheme.colors.emptyShade,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
       flexShrink: 0,
       alignSelf: 'stretch',
       position: 'relative' as const,
@@ -82,8 +81,7 @@ export const visorStyles = (
       },
     },
     searchWrapper: css`
-      background: ${euiTheme.colors.emptyShade};
-      height: 100%;
+      background: ${euiTheme.colors.backgroundBasePlain};
       justify-content: center;
       border-bottom-right-radius: ${euiTheme.size.s};
       border-top-right-radius: ${euiTheme.size.s};
