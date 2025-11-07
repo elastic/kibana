@@ -26,6 +26,7 @@ import {
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -55,6 +56,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
       mlServices: {
         mlUsageCollection,
         mlApi: {
+          validateDatafeedPreview,
           jobs: { bulkCreateJobs },
           dataFrameAnalytics: { createDataFrameAnalytics },
           filters: { filters: getFilters },
@@ -144,33 +146,51 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         getFilters
       );
 
+      let datafeedValidations: { jobId: string; hasWarning: boolean; warningMessage?: string }[];
+
       if (loadedFile.jobType === 'anomaly-detector') {
         const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
           validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.job.job_id)
         );
         setAdJobs(tempJobs);
+
+        datafeedValidations = await jobImportService.validateJobDatafeeds(
+          tempJobs,
+          validateDatafeedPreview
+        );
       } else if (loadedFile.jobType === 'data-frame-analytics') {
         const tempJobs = (loadedFile.jobs as DataFrameAnalyticsConfig[]).filter((j) =>
           validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.id)
         );
         setDfaJobs(tempJobs);
+        datafeedValidations = [];
       }
 
-      setJobType(loadedFile.jobType);
       setJobIdObjects(
-        validatedJobs.jobs.map(({ jobId, destIndex }) => ({
-          jobId,
-          originalId: jobId,
-          jobIdValid: true,
-          jobIdInvalidMessage: '',
-          jobIdValidated: false,
-          destIndex,
-          originalDestIndex: destIndex,
-          destIndexValid: true,
-          destIndexInvalidMessage: '',
-          destIndexValidated: false,
-        }))
+        validatedJobs.jobs.map(({ jobId, destIndex }) => {
+          const datafeedValidation = datafeedValidations.find((v) => v.jobId === jobId);
+          return {
+            jobId,
+            originalId: jobId,
+            jobIdValid: true,
+            jobIdInvalidMessage: '',
+            jobIdValidated: false,
+            destIndex,
+            originalDestIndex: destIndex,
+            destIndexValid: true,
+            destIndexInvalidMessage: '',
+            destIndexValidated: false,
+            datafeedValid:
+              loadedFile.jobType === 'data-frame-analytics'
+                ? true
+                : !datafeedValidation?.hasWarning,
+            datafeedWarningMessage: datafeedValidation?.warningMessage,
+            datafeedValidated: true,
+          };
+        })
       );
+
+      setJobType(loadedFile.jobType);
 
       const ids = createIdsMash(validatedJobs.jobs as JobIdObject[], loadedFile.jobType);
       setIdsMash(ids);
@@ -371,6 +391,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           hideCloseButton
           size="m"
           data-test-subj="mlJobMgmtImportJobsFlyout"
+          aria-label={i18n.translate('xpack.ml.importExport.importFlyout.flyoutAriaLabel', {
+            defaultMessage: 'Import jobs flyout',
+          })}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
@@ -491,6 +514,26 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                                 />
                               </EuiFormRow>
                             )}
+
+                            {jobType === 'anomaly-detector' &&
+                              jobId.datafeedValid === false &&
+                              jobId.datafeedWarningMessage && (
+                                <EuiFormRow>
+                                  <EuiCallOut
+                                    title={i18n.translate(
+                                      'xpack.ml.importExport.importFlyout.datafeedWarning.title',
+                                      {
+                                        defaultMessage: 'Datafeed Warning',
+                                      }
+                                    )}
+                                    color="warning"
+                                    size="s"
+                                    announceOnMount
+                                  >
+                                    <p>{jobId.datafeedWarningMessage}</p>
+                                  </EuiCallOut>
+                                </EuiFormRow>
+                              )}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <DeleteJobButton index={i} />

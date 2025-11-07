@@ -7,10 +7,18 @@
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { i18n } from '@kbn/i18n';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
 import type { JobType } from '../../../../../common/types/saved_objects';
-import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
+import type {
+  Job,
+  Datafeed,
+  CombinedJob,
+} from '../../../../../common/types/anomaly_detection_jobs';
 import type { Filter } from '../../../../../common/types/filters';
+import type { DatafeedValidationResponse } from '../../../../../common/types/job_validation';
+import type { MlApi } from '../../../services/ml_api_service';
 
 export interface ImportedAdJob {
   job: Job;
@@ -31,6 +39,10 @@ export interface JobIdObject {
   destIndexInvalidMessage: string;
 
   destIndexValidated: boolean;
+
+  datafeedValid?: boolean;
+  datafeedWarningMessage?: string;
+  datafeedValidated?: boolean;
 }
 
 export interface SkippedJobs {
@@ -172,6 +184,64 @@ export class JobImportService {
       jobs: tempJobs,
       skippedJobs,
     };
+  }
+
+  public async validateJobDatafeeds(
+    jobs: ImportedAdJob[],
+    validateDatafeedPreview: MlApi['validateDatafeedPreview']
+  ): Promise<{ jobId: string; hasWarning: boolean; warningMessage?: string }[]> {
+    const results = await Promise.all(
+      jobs.map(async ({ job, datafeed }) => {
+        try {
+          const combinedJob: CombinedJob = {
+            ...job,
+            datafeed_config: datafeed,
+          };
+
+          const response: DatafeedValidationResponse = await validateDatafeedPreview({
+            job: combinedJob,
+          });
+
+          if (!response.valid) {
+            return {
+              jobId: job.job_id,
+              hasWarning: true,
+              warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewFailed', {
+                defaultMessage: 'Datafeed preview failed. This job may not run correctly.',
+              }),
+            };
+          }
+
+          if (!response.documentsFound) {
+            return {
+              jobId: job.job_id,
+              hasWarning: true,
+              warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewNoData', {
+                defaultMessage: 'Datafeed preview returned no data. This job will not run.',
+              }),
+            };
+          }
+
+          return {
+            jobId: job.job_id,
+            hasWarning: false,
+          };
+        } catch (error) {
+          return {
+            jobId: job.job_id,
+            hasWarning: true,
+            warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewValidationFailed', {
+              defaultMessage: `Unable to validate datafeed preview. Reason: {reason}`,
+              values: {
+                reason: extractErrorMessage(error),
+              },
+            }),
+          };
+        }
+      })
+    );
+
+    return results;
   }
 }
 
