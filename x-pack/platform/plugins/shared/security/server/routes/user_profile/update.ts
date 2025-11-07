@@ -24,8 +24,8 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
 const userProfileUpdateSchema = schema.object({
   avatar: schema.maybe(
     schema.object({
-      initials: schema.maybe(schema.string()),
-      color: schema.maybe(schema.string()),
+      initials: schema.nullable(schema.string()),
+      color: schema.nullable(schema.string()),
       imageUrl: schema.nullable(schema.string()),
     })
   ),

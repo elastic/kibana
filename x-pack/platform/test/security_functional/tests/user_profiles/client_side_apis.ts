@@ -46,13 +46,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .expect(200);
 
         const cookie = parseCookie(response.headers['set-cookie'][0])!.cookieString();
-        await supertestWithoutAuth
+        const res = await supertestWithoutAuth
           .post('/internal/security/user_profile/_data')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', cookie)
-          .send({ some: `data-${userPrefix}` })
+          .send({
+            avatar: { initials: `some-initials-${userPrefix}` },
+          })
           .expect(200);
 
+        if (userPrefix === 'one') {
+          console.log(res.body);
+        }
         const { body: profile } = await supertestWithoutAuth
           .get('/internal/security/user_profile')
           .set('Cookie', cookie)
@@ -77,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    it('can retrieve own user profile and user profiles for other users', async () => {
+    it.only('can retrieve own user profile and user profiles for other users', async () => {
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'user_profiles_app',
         '',
@@ -95,7 +100,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const userProfileText = await testSubjects.getVisibleText(
             `testEndpointsUserProfilesAppUserProfile_user_${userPrefix}`
           );
-          expect(userProfileText).to.equal(`user_${userPrefix}:{"some":"data-${userPrefix}"}`);
+          expect(userProfileText).to.equal(
+            `user_${userPrefix}:{"avatar":{"initials":"some-initials-${userPrefix},"imageUrl":null}}`
+          );
         }
       });
     });
