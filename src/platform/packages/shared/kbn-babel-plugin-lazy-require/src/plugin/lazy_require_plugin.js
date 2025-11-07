@@ -62,8 +62,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           /\.(test|spec)\.[tj]sx?$/.test(filename);
         // State tracking
         const modules = new Map(); // requirePath -> { cacheId, requirePath, outerFunc? }
-        const properties = new Map(); // varName -> { moduleRequirePath, propertyKey, isConst, needsInterop? }
-        const declarationsToRemove = new Map(); // varName -> { type, path, index? }
+        // Merged properties + declaration removal info
+        const properties = new Map(); // varName -> { moduleRequirePath, propertyKey, isConst, needsInterop?, declarationType, declarationPath, declarationIndex? }
         const importsVar = programPath.scope.generateUidIdentifier('imports');
 
         // =================================================================
@@ -130,9 +130,11 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   moduleRequirePath: requirePath,
                   propertyKey: null,
                   isConst,
+                  declarationType: 'require',
+                  declarationPath: path,
+                  declarationIndex: i,
                 });
                 declIndicesToRemove.push(i);
-                declarationsToRemove.set(varName, { type: 'require', path, index: i });
               } else if (t.isObjectPattern(decl.id)) {
                 // Destructuring: const { a, b } = require('./foo')
                 // Only transform simple patterns (no nesting, rest, computed properties)
@@ -151,7 +153,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
                 if (canTransform) {
                   // All destructured properties share the same declaration
-                  let isFirstProperty = true;
                   for (const prop of decl.id.properties) {
                     const varName = prop.value.name;
                     const propKey = prop.key.name;
@@ -160,13 +161,10 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                       moduleRequirePath: requirePath,
                       propertyKey: propKey,
                       isConst,
+                      declarationType: 'require',
+                      declarationPath: path,
+                      declarationIndex: i,
                     });
-
-                    // Only the first property needs to track the declaration for removal
-                    if (isFirstProperty) {
-                      declarationsToRemove.set(varName, { type: 'require', path, index: i });
-                      isFirstProperty = false;
-                    }
                   }
                   declIndicesToRemove.push(i);
                 }
@@ -241,8 +239,9 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                 propertyKey,
                 isConst,
                 needsInterop,
+                declarationType: 'import',
+                declarationPath: path,
               });
-              declarationsToRemove.set(varName, { type: 'import', path });
             }
           },
         });
@@ -262,7 +261,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // Exclude from transformation (will remain as regular imports/requires)
         for (const varName of importsUsedInModuleLevelCode) {
           properties.delete(varName);
-          declarationsToRemove.delete(varName);
         }
 
         // Detect and exclude JSX usage
@@ -272,7 +270,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // Exclude JSX components from transformation
         for (const varName of importsUsedInJsx) {
           properties.delete(varName);
-          declarationsToRemove.delete(varName);
         }
 
         // Exclude modules from the exclusion list
@@ -280,7 +277,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         for (const [varName, propInfo] of properties) {
           if (isExcludedModule(propInfo.moduleRequirePath)) {
             properties.delete(varName);
-            declarationsToRemove.delete(varName);
           }
         }
 
@@ -291,7 +287,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // Exclude from transformation
         for (const varName of importsUsedInJestMocks) {
           properties.delete(varName);
-          declarationsToRemove.delete(varName);
         }
 
         // Detect and exclude constructor usage (new Foo(), new ns.Foo()) in test files only.
@@ -302,7 +297,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           const importsUsedAsConstructors = detectConstructorUsage(programPath, properties, t);
           for (const varName of importsUsedAsConstructors) {
             properties.delete(varName);
-            declarationsToRemove.delete(varName);
           }
         }
 
@@ -312,7 +306,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         const importsUsedInCtorInit = detectConstructorInitNewUsage(programPath, properties, t);
         for (const varName of importsUsedInCtorInit) {
           properties.delete(varName);
-          declarationsToRemove.delete(varName);
         }
 
         // Detect imports used in class extends clauses
@@ -320,7 +313,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         const importsUsedInExtends = detectClassExtendsUsage(programPath, properties, t);
         for (const varName of importsUsedInExtends) {
           properties.delete(varName);
-          declarationsToRemove.delete(varName);
         }
 
         // Remove orphaned modules (no properties left)
@@ -338,18 +330,15 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           return;
         }
 
-        // Remove declarations that we're transforming
+        // Collect declaration paths to remove
         const requirePathsToProcess = new Set();
         const importPathsToRemove = new Set();
 
-        for (const [varName, declInfo] of declarationsToRemove) {
-          // Only process if this property is still being transformed
-          if (properties.has(varName)) {
-            if (declInfo.type === 'import') {
-              importPathsToRemove.add(declInfo.path);
-            } else if (declInfo.type === 'require') {
-              requirePathsToProcess.add(declInfo.path);
-            }
+        for (const [, propInfo] of properties) {
+          if (propInfo.declarationType === 'import') {
+            importPathsToRemove.add(propInfo.declarationPath);
+          } else if (propInfo.declarationType === 'require') {
+            requirePathsToProcess.add(propInfo.declarationPath);
           }
         }
 
