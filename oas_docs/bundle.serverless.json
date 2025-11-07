@@ -46605,9 +46605,6 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "id"
-                      ],
                       "type": "object"
                     }
                   },
@@ -46835,9 +46832,6 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "id"
-                      ],
                       "type": "object"
                     }
                   },
