@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CreateClassicStreamFlyout } from './components';
+export { CreateClassicStreamFlyout, type IndexTemplate } from './components';

@@ -21,20 +21,49 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { SelectTemplateStep } from './select_template_step';
 
 enum ClassicStreamStep {
   SELECT_TEMPLATE = 'select_template',
   NAME_AND_CONFIRM = 'name_and_confirm',
 }
 
+/**
+ * Simplified template interface for the flyout.
+ * Contains the essential fields needed for template selection.
+ */
+export interface IndexTemplate {
+  name: string;
+  ilmPolicy?: {
+    name: string;
+  };
+  indexPatterns?: string[];
+  /** Whether to show the ILM badge. If false, only the policy name is displayed. */
+  showIlmBadge?: boolean;
+}
+
 interface CreateClassicStreamFlyoutProps {
   onClose: () => void;
   onCreate: () => void;
+  onCreateTemplate?: () => void;
+  templates: IndexTemplate[];
+  selectedTemplate: string | null;
+  onTemplateSelect: (templateName: string | null) => void;
+  isLoadingTemplates?: boolean;
+  hasErrorLoadingTemplates?: boolean;
+  onRetryLoadTemplates?: () => void;
 }
 
 export const CreateClassicStreamFlyout = ({
   onClose,
   onCreate,
+  onCreateTemplate,
+  templates,
+  selectedTemplate,
+  onTemplateSelect,
+  isLoadingTemplates = false,
+  hasErrorLoadingTemplates = false,
+  onRetryLoadTemplates,
 }: CreateClassicStreamFlyoutProps) => {
   const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
     ClassicStreamStep.SELECT_TEMPLATE
@@ -43,6 +72,7 @@ export const CreateClassicStreamFlyout = ({
   const isFirstStep = currentStep === ClassicStreamStep.SELECT_TEMPLATE;
   const hasNextStep = isFirstStep;
   const hasPreviousStep = !isFirstStep;
+  const isNextButtonEnabled = selectedTemplate !== null;
 
   const goToNextStep = () => setCurrentStep(ClassicStreamStep.NAME_AND_CONFIRM);
   const goToPreviousStep = () => setCurrentStep(ClassicStreamStep.SELECT_TEMPLATE);
@@ -73,7 +103,17 @@ export const CreateClassicStreamFlyout = ({
   const renderCurrentStepContent = () => {
     switch (currentStep) {
       case ClassicStreamStep.SELECT_TEMPLATE:
-        return <div data-test-subj="selectTemplateStep" />;
+        return (
+          <SelectTemplateStep
+            templates={templates}
+            selectedTemplate={selectedTemplate}
+            onTemplateSelect={onTemplateSelect}
+            onCreateTemplate={onCreateTemplate}
+            isLoadingTemplates={isLoadingTemplates}
+            hasErrorLoadingTemplates={hasErrorLoadingTemplates}
+            onRetryLoadTemplates={onRetryLoadTemplates}
+          />
+        );
 
       case ClassicStreamStep.NAME_AND_CONFIRM:
         return <div data-test-subj="nameAndConfirmStep" />;
@@ -100,7 +140,19 @@ export const CreateClassicStreamFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        css={{
+          '.euiFlyoutBody__overflow': {
+            display: 'flex',
+            flexDirection: 'column',
+          },
+          '.euiFlyoutBody__overflowContent': {
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+          },
+        }}
+      >
         <EuiStepsHorizontal size="xs" steps={steps} />
         {renderCurrentStepContent()}
       </EuiFlyoutBody>
@@ -126,7 +178,12 @@ export const CreateClassicStreamFlyout = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {hasNextStep ? (
-              <EuiButton onClick={goToNextStep} fill data-test-subj="nextButton">
+              <EuiButton
+                onClick={goToNextStep}
+                fill
+                disabled={!isNextButtonEnabled}
+                data-test-subj="nextButton"
+              >
                 <FormattedMessage
                   id="xpack.createClassicStreamFlyout.footer.next"
                   defaultMessage="Next"

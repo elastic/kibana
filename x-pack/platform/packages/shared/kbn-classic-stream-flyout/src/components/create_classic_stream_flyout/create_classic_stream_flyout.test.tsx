@@ -8,11 +8,20 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent } from '@testing-library/react';
-import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
+import { CreateClassicStreamFlyout, type IndexTemplate } from './create_classic_stream_flyout';
+
+const MOCK_TEMPLATES: IndexTemplate[] = [
+  { name: 'template-1', ilmPolicy: { name: '30d' }, indexPatterns: ['template-1-*'] },
+  { name: 'template-2', ilmPolicy: { name: '90d' }, indexPatterns: ['template-2-*'] },
+  { name: 'template-3', indexPatterns: ['template-3-*'] },
+];
 
 const defaultProps = {
   onClose: jest.fn(),
   onCreate: jest.fn(),
+  templates: MOCK_TEMPLATES,
+  selectedTemplate: null,
+  onTemplateSelect: jest.fn(),
 };
 
 const renderFlyout = (props = {}) => {
@@ -38,9 +47,74 @@ describe('CreateClassicStreamFlyout', () => {
     });
   });
 
+  describe('empty state', () => {
+    it('renders empty state when there are no templates', () => {
+      const onCreateTemplate = jest.fn();
+      const { getByText, getByTestId } = renderFlyout({ templates: [], onCreateTemplate });
+
+      expect(getByText('No index templates detected')).toBeInTheDocument();
+      expect(
+        getByText(/To create a new classic stream, you must select an index template/i)
+      ).toBeInTheDocument();
+      expect(getByTestId('createTemplateButton')).toBeInTheDocument();
+    });
+
+    it('calls onCreateTemplate when Create index template button is clicked', () => {
+      const onCreateTemplate = jest.fn();
+      const { getByTestId } = renderFlyout({ templates: [], onCreateTemplate });
+
+      fireEvent.click(getByTestId('createTemplateButton'));
+
+      expect(onCreateTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not render Create index template button when onCreateTemplate is not provided', () => {
+      const { getByText, queryByTestId } = renderFlyout({
+        templates: [],
+        onCreateTemplate: undefined,
+      });
+
+      expect(getByText('No index templates detected')).toBeInTheDocument();
+      expect(queryByTestId('createTemplateButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('template selection', () => {
+    it('renders template search and list', () => {
+      const { getByTestId } = renderFlyout();
+
+      expect(getByTestId('templateSearch')).toBeInTheDocument();
+    });
+
+    it('disables Next button when no template is selected', () => {
+      const { getByTestId } = renderFlyout();
+
+      const nextButton = getByTestId('nextButton');
+      expect(nextButton).toBeDisabled();
+    });
+
+    it('enables Next button when a template is selected', () => {
+      const { getByTestId } = renderFlyout({ selectedTemplate: 'template-1' });
+
+      const nextButton = getByTestId('nextButton');
+      expect(nextButton).toBeEnabled();
+    });
+
+    it('calls onTemplateSelect when a template is selected', () => {
+      const onTemplateSelect = jest.fn();
+      const { getByTestId } = renderFlyout({ onTemplateSelect });
+
+      // Click on a template option
+      const templateOption = getByTestId('template-option-template-1');
+      fireEvent.click(templateOption);
+
+      expect(onTemplateSelect).toHaveBeenCalledWith('template-1');
+    });
+  });
+
   describe('navigation', () => {
-    it('navigates to second step when clicking Next button', () => {
-      const { getByTestId, queryByTestId } = renderFlyout();
+    it('navigates to second step when clicking Next button with selected template', () => {
+      const { getByTestId, queryByTestId } = renderFlyout({ selectedTemplate: 'template-1' });
 
       // Check that the first step content is rendered
       expect(getByTestId('selectTemplateStep')).toBeInTheDocument();
@@ -67,7 +141,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('navigates back to first step when clicking Back button', () => {
-      const { getByTestId, queryByTestId } = renderFlyout();
+      const { getByTestId, queryByTestId } = renderFlyout({ selectedTemplate: 'template-1' });
 
       // Navigate to second step
       fireEvent.click(getByTestId('nextButton'));
@@ -113,7 +187,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     it('calls onCreate when Create button is clicked', () => {
       const onCreate = jest.fn();
-      const { getByTestId } = renderFlyout({ onCreate });
+      const { getByTestId } = renderFlyout({ onCreate, selectedTemplate: 'template-1' });
 
       // Navigate to second step
       fireEvent.click(getByTestId('nextButton'));
@@ -127,7 +201,11 @@ describe('CreateClassicStreamFlyout', () => {
     it('does not call onCreate or onClose when navigating between steps', () => {
       const onClose = jest.fn();
       const onCreate = jest.fn();
-      const { getByTestId } = renderFlyout({ onCreate, onClose });
+      const { getByTestId } = renderFlyout({
+        onCreate,
+        onClose,
+        selectedTemplate: 'template-1',
+      });
 
       // Navigate forward
       fireEvent.click(getByTestId('nextButton'));
