@@ -19971,6 +19971,162 @@
         "x-state": "Technical Preview; added in 9.3.0"
       }
     },
+    "/api/fleet/agentless_policies/{policyId}": {
+      "delete": {
+        "description": "Delete an agentless policy",
+        "operationId": "delete-fleet-agentless-policies-policyid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the policy to delete.",
+            "in": "path",
+            "name": "policyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Force delete the policy even if the policy is managed.",
+            "in": "query",
+            "name": "force",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "createAgentlessPoliciesResponseExample": {
+                    "description": "Example response showing the successful result of communication initialisation over MCP protocol",
+                    "value": {
+                      "item": {
+                        "id": "d52a7812-5736-4fdc-aed8-72152afa1ffa"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Response for deleting an agentless package policy.",
+                  "properties": {
+                    "id": {
+                      "description": "The ID of the deleted agentless package policy.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "genericErrorResponseExample": {
+                    "description": "Example of a generic error response",
+                    "value": {
+                      "error": "Bad Request",
+                      "message": "An error message describing what went wrong",
+                      "statusCode": 400
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "conflictErrorResponseExample": {
+                    "description": "Example of a conflict error response",
+                    "value": {
+                      "error": "Conflict",
+                      "message": "An error message describing what went wrong",
+                      "statusCode": 409
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "summary": "Delete an agentless policy",
+        "tags": [
+          "Fleet agentless policies"
+        ],
+        "x-state": "Technical Preview; added in 9.3.0"
+      }
+    },
     "/api/fleet/agents": {
       "get": {
         "description": "[Required authorization] Route required privileges: fleet-agents-read.",
