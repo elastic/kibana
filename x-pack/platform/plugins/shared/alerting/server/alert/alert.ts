@@ -68,6 +68,7 @@ export class Alert<
     this.meta = meta;
     this.meta.uuid = meta.uuid ?? uuidV4();
     this.meta.maintenanceWindowIds = meta.maintenanceWindowIds ?? [];
+    this.meta.maintenanceWindowNames = meta.maintenanceWindowNames ?? [];
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
     }
