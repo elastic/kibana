@@ -16,6 +16,11 @@ import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
 import { HTTPAuthorizationHeader } from './http_authentication';
+import type {
+  AuthenticationProviderOptions,
+  AuthenticationProviderSpecificOptions,
+  BaseAuthenticationProvider,
+} from './providers';
 import {
   AnonymousAuthenticationProvider,
   BasicAuthenticationProvider,
@@ -25,11 +30,6 @@ import {
   PKIAuthenticationProvider,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
-} from './providers';
-import type {
-  AuthenticationProviderOptions,
-  AuthenticationProviderSpecificOptions,
-  BaseAuthenticationProvider,
 } from './providers';
 import { Tokens } from './tokens';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
@@ -541,7 +541,6 @@ export class Authenticator {
   async reauthenticate(request: KibanaRequest) {
     // Return early if request doesn't have any associated session. We retrieve session ID separately from the session
     // content because it doesn't trigger session invalidation for expired sessions.
-
     const sid = await this.session.getSID(request);
     if (!sid) {
       this.logger.debug(
@@ -821,14 +820,10 @@ export class Authenticator {
     }
 
     const isExistingSessionAuthenticated = isSessionAuthenticated(existingSessionValue);
-
     const isNewSessionAuthenticated = !!authenticationResult.user;
-
     const providerHasChanged = !!existingSessionValue && !ownsSession;
-
     const sessionHasBeenAuthenticated =
       !!existingSessionValue && !isExistingSessionAuthenticated && isNewSessionAuthenticated;
-
     const usernameHasChanged =
       isExistingSessionAuthenticated &&
       isNewSessionAuthenticated &&

@@ -669,13 +669,6 @@ export default function ({ getService }: FtrProviderContext) {
               ? sessionResponse.hits.total
               : sessionResponse.hits.total?.value;
 
-          const sessionIds = sessionResponse.hits.hits.map((hit) => {
-            return hit._id;
-          });
-
-          log.info(`Session IDs after handshakes: ${JSON.stringify(sessionIds)}`);
-          log.info(sessionResponse.hits.hits);
-
           // There should be only one intermediate session with all requestIds in it
           expect(totalHits).to.equal(1);
 
@@ -790,18 +783,8 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const finalSources = finalSessionResponse.hits.hits.map((hit) => {
-            if (!hit._source) {
-              return {
-                id: hit._id,
-                idleTimeoutExpiration: null,
-                isoExpirationDate: null,
-              };
-            }
-            const idleTimeout = hit._source.idleTimeoutExpiration;
             return {
               id: hit._id,
-              idleTimeoutExpiration: idleTimeout,
-              isoExpirationDate: idleTimeout ? new Date(idleTimeout).toISOString() : null,
             };
           });
 

@@ -44,6 +44,7 @@ import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
 export async function createMockIdpMetadata(kibanaUrl: string) {
   const signingKey = await readFile(KBN_CERT_PATH);
   const cert = new X509Certificate(signingKey);
+  const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
   <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"

@@ -45,7 +45,6 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
       if (!values.role) {
         return;
       }
-
       await switchCurrentUser({
         username: values.username,
         full_name: values.full_name,
