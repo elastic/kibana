@@ -6079,6 +6079,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-connectors-plugin@link:x-pack/platform/plugins/shared/data_connectors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""
@@ -6171,11 +6175,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-agent-builder@link:src/platform/packages/shared/deeplinks/agent_builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/deeplinks-analytics@link:src/platform/packages/shared/deeplinks/analytics":
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-chat@link:src/platform/packages/shared/deeplinks/chat":
+"@kbn/deeplinks-data-connectors@link:src/platform/packages/shared/deeplinks/data_connectors":
   version "0.0.0"
   uid ""
 
@@ -6212,6 +6220,10 @@
   uid ""
 
 "@kbn/deeplinks-workflows@link:src/platform/packages/shared/deeplinks/workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-workplace-ai@link:src/platform/packages/shared/deeplinks/workplace_ai":
   version "0.0.0"
   uid ""
 
@@ -34779,10 +34791,15 @@ yaml@^2.0.0, yaml@^2.2.1, yaml@^2.2.2:
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.3.4.tgz#53fc1d514be80aabf386dc6001eb29bf3b7523b2"
   integrity sha512-8aAvwVUSHpfEqTQ4w/KMlf3HcRdt50E5ODIQJBw1fQ5RL34xabzxtUlzTXVqc4rkZsPbvrXKWnABCD7kWSmocA==
 
-yaml@^2.4.2, yaml@^2.5.1:
+yaml@^2.4.2:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.5.1.tgz#c9772aacf62cb7494a95b0c4f1fb065b563db130"
   integrity sha512-bLQOjaX/ADgQ20isPJRvF0iRUHIxVhYvr53Of7wGcWlO2jvtUlH5m87DsmulFVxRpNLOnI4tB6p/oh8D7kpn9Q==
+
+yaml@^2.8.1:
+  version "2.8.1"
+  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.8.1.tgz#1870aa02b631f7e8328b93f8bc574fac5d6c4d79"
+  integrity sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw==
 
 yargs-parser@^18.1.2:
   version "18.1.3"
