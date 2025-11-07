@@ -53,7 +53,8 @@ export const useLensProps = ({
           timeRange: fetchParams.timeRange,
           esqlVariables: fetchParams.esqlVariables,
           attributes,
-          onLoad, // TODO: add lastReloadRequestTime
+          onLoad,
+          lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         }),
       };
     },

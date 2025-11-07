@@ -260,6 +260,10 @@ export interface UnifiedHistogramFetchParamsExternal {
   getModifiedVisAttributes?: (
     attributes: TypedLensByValueInput['attributes']
   ) => TypedLensByValueInput['attributes'];
+  /**
+   * The timestamp of the last data request
+   */
+  lastReloadRequestTime?: number;
 }
 
 export type UnifiedHistogramFetchParams = Omit<

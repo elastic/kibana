@@ -266,6 +266,7 @@ export const useDiscoverHistogram = (
           ? savedSearchState?.visContext
           : undefined,
       getModifiedVisAttributes,
+      lastReloadRequestTime,
     };
   }, [
     breakdownField,
@@ -282,6 +283,7 @@ export const useDiscoverHistogram = (
     query,
     savedSearchState?.visContext,
     getModifiedVisAttributes,
+    lastReloadRequestTime,
   ]);
 
   const usedFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
