@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { random } from 'lodash';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
 import type { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
