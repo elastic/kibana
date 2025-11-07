@@ -8,6 +8,7 @@
  */
 
 import Path from 'path';
+import { setTimeout as timer } from 'timers/promises';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { clearLog, defaultKibanaIndex, startElasticsearch } from '@kbn/migrator-test-kit';
 
@@ -18,7 +19,7 @@ import {
   getReindexingMigratorTestKit,
 } from '@kbn/migrator-test-kit/fixtures';
 import '../jest_matchers';
-import { delay, parseLogFile } from '../test_utils';
+import { parseLogFile } from '../test_utils';
 
 export const logFilePath = Path.join(__dirname, 'pickup_updated_types_only.test.log');
 
@@ -88,6 +89,6 @@ describe('pickupUpdatedMappings', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(2);
+    await timer(2_000);
   });
 });
