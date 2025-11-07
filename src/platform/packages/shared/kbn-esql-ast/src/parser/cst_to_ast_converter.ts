@@ -525,8 +525,23 @@ export class CstToAstConverter {
 
   // --------------------------------------------------------------------- FROM
 
-  private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> {
-    return this.fromFromCompatibleCommand('from', ctx);
+  private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> | undefined {
+    // When parsing queries with nested empty subqueries like "FROM a, (FROM b, ())",
+    // ANTLR incorrectly identifies the empty parentheses "()" as a fromCommand context.
+    // This phantom context contains only closing parentheses (e.g., ")" or "))")
+    // without any actual FROM keyword, which would lead to malformed AST nodes.
+    if (!ctx.FROM()) {
+      return undefined;
+    }
+
+    const command = this.fromFromCompatibleCommand('from', ctx);
+    const hasValidText = textExistsAndIsValid(ctx.getText());
+
+    if (!hasValidText) {
+      command.incomplete = true;
+    }
+
+    return command;
   }
 
   private fromFromCompatibleCommand<Name extends string>(
@@ -573,25 +588,10 @@ export class CstToAstConverter {
     const commands: ast.ESQLCommand[] = [];
 
     if (fromCommandCtx) {
-      // When parsing queries with nested empty subqueries like "FROM a, (FROM b, ())",
-      // ANTLR incorrectly identifies the empty parentheses "()" as a fromCommand context.
-      // This phantom context contains only closing parentheses (e.g., ")" or "))")
-      // without any actual FROM keyword, which would lead to malformed AST nodes.
+      const fromCommand = this.fromFromCommand(fromCommandCtx);
 
-      // Solution: Verify that the context actually contains the "FROM" keyword before processing.
-      const fromCommandText = fromCommandCtx.getText();
-      const hasFromKeyword = /FROM/i.test(fromCommandText);
-      const hasValidText = textExistsAndIsValid(fromCommandText);
-
-      if (hasFromKeyword) {
-        const fromCommand = this.fromFromCommand(fromCommandCtx);
-
-        if (fromCommand) {
-          if (!hasValidText) {
-            fromCommand.incomplete = true;
-          }
-          commands.push(fromCommand);
-        }
+      if (fromCommand) {
+        commands.push(fromCommand);
       }
     }
 
