@@ -14,6 +14,7 @@ import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 import { FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 
@@ -24,13 +25,10 @@ const OverlayRootContainer = styled.div`
   position: fixed;
   overflow: hidden;
 
-  top: var(--euiFixedHeadersOffset, 0);
-  bottom: 0;
-  right: 0;
-  left: var(--euiCollapsibleNavOffset, 0);
-
-  width: calc(100% - var(--euiCollapsibleNavOffset, 0));
-  height: calc(100% - var(--euiFixedHeadersOffset, 0));
+  top: ${layoutVar('application.top', '0px')};
+  bottom: ${layoutVar('application.bottom', '0px')};
+  right: ${layoutVar('application.right', '0px')};
+  left: ${layoutVar('application.left', '0px')};
 
   border-left: 1px solid ${({ theme: { eui } }) => eui.euiColorLightestShade};
 
