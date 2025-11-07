@@ -7,10 +7,10 @@
 
 import { unflattenKnownApmEventFields } from './unflatten_known_fields';
 import {
-  KNOWN_SINGLE_VALUED_FIELDS,
   type UnflattenedKnownFields,
   type FlattenedApmEvent,
   type MapToSingleOrMultiValue,
+  KNOWN_SINGLE_VALUED_FIELDS_SET,
 } from './utility_types';
 
 type RequiredApmFields<
@@ -27,8 +27,6 @@ type ProxiedApmEvent<
   T extends Partial<FlattenedApmEvent>,
   R extends keyof FlattenedApmEvent
 > = Readonly<MapToSingleOrMultiValue<RequiredApmFields<T, R>>>;
-
-const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<string>(KNOWN_SINGLE_VALUED_FIELDS);
 
 /**
  * Interface for exposing an `unflatten()` method on proxied APM documents.
@@ -74,7 +72,11 @@ export function accessKnownApmEventFields<
 
 export function accessKnownApmEventFields(fields: Record<string, any>, required?: string[]) {
   if (required) {
-    const missingRequiredFields = required.filter((key) => fields[key] == null);
+    const missingRequiredFields = required.filter((key) => {
+      const value = fields[key];
+
+      return value == null || (Array.isArray(value) && value.length === 0);
+    });
 
     if (missingRequiredFields.length) {
       throw new Error(`Missing required fields (${missingRequiredFields.join(', ')}) in event`);

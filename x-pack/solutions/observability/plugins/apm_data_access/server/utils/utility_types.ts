@@ -48,6 +48,8 @@ export const KNOWN_SINGLE_VALUED_FIELDS = [...ALL_FIELDS].filter(
   (field): field is KnownSingleValuedField => !KNOWN_MULTI_VALUED_FIELDS.includes(field as any)
 );
 
+export const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<string>(KNOWN_SINGLE_VALUED_FIELDS);
+
 interface TypeOverrideMap {
   [APM_EVENT_FIELDS_MAP.SPAN_DURATION]: number;
   [APM_EVENT_FIELDS_MAP.AGENT_NAME]: AgentName;

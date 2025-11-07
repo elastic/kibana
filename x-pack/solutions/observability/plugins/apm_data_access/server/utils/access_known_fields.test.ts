@@ -37,6 +37,10 @@ describe('accessKnownApmEventFields', () => {
     expect(() => accessKnownApmEventFields({}, ['@timestamp', 'service.name'])).toThrowError(
       'Missing required fields (@timestamp, service.name) in event'
     );
+
+    expect(() =>
+      accessKnownApmEventFields({ ...input, 'service.name': [] }, ['@timestamp', 'service.name'])
+    ).toThrowError('Missing required fields (service.name) in event');
   });
 
   it('exposes an `unflatten` method', () => {
