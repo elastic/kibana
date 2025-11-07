@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { ToolType } from '@kbn/onechat-common';
 import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
