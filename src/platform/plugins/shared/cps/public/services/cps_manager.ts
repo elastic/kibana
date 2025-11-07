@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { Project, ProjectTagsResponse } from '../types';
@@ -23,33 +22,12 @@ const RETRY_DELAY_MS = 1000;
 export class CPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
-  private readonly projectsSubject: BehaviorSubject<ProjectsData>;
   private fetchPromise: Promise<ProjectsData> | null = null;
-  private hasFetchedSuccessfully: boolean = false;
+  private cachedData: ProjectsData | null = null;
 
   constructor(deps: { http: HttpSetup; logger: Logger }) {
     this.http = deps.http;
     this.logger = deps.logger.get('cps_manager');
-    this.projectsSubject = new BehaviorSubject<ProjectsData>({
-      origin: null,
-      linkedProjects: [],
-    });
-  }
-
-  public get projects$(): Observable<ProjectsData> {
-    return this.projectsSubject.asObservable();
-  }
-
-  public getProjects(): ProjectsData {
-    return this.projectsSubject.getValue();
-  }
-
-  /**
-   * Check if projects have been successfully loaded at least once
-   * @returns true if projects have been fetched successfully
-   */
-  public hasLoadedProjects(): boolean {
-    return this.hasFetchedSuccessfully;
   }
 
   /**
@@ -58,9 +36,9 @@ export class CPSManager {
    * @returns Promise resolving to ProjectsData
    */
   public async fetchProjects(): Promise<ProjectsData> {
-    // Skip fetch if already loaded
-    if (this.hasFetchedSuccessfully) {
-      return this.projectsSubject.getValue();
+    // Return cached data if available
+    if (this.cachedData) {
+      return this.cachedData;
     }
 
     return this.doFetch();
@@ -82,15 +60,8 @@ export class CPSManager {
 
     this.fetchPromise = this.fetchProjectsWithRetry()
       .then((projectsData) => {
-        this.projectsSubject.next(projectsData);
-        this.hasFetchedSuccessfully = true;
+        this.cachedData = projectsData;
         return projectsData;
-      })
-      .catch((error) => {
-        // Still emit a value to the projects subject so components can handle the empty state
-        const emptyData: ProjectsData = { origin: null, linkedProjects: [] };
-        this.projectsSubject.next(emptyData);
-        throw error;
       })
       .finally(() => {
         this.fetchPromise = null;

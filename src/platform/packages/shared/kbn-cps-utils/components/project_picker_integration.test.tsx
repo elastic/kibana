@@ -11,7 +11,6 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { BehaviorSubject } from 'rxjs';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSManager, Project } from '@kbn/cps/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -56,13 +55,7 @@ describe('ProjectPicker', () => {
     },
   ];
 
-  const mockProjectsSubject = new BehaviorSubject({
-    origin: mockOriginProject,
-    linkedProjects: mockLinkedProjects,
-  });
-
   const mockCPSManager = {
-    projects$: mockProjectsSubject.asObservable(),
     fetchProjects: jest.fn().mockResolvedValue({
       origin: mockOriginProject,
       linkedProjects: mockLinkedProjects,
@@ -102,19 +95,14 @@ describe('ProjectPicker', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCPSManager.fetchProjects.mockResolvedValue({
+      origin: mockOriginProject,
+      linkedProjects: mockLinkedProjects,
+    });
     (mockUseKibana as jest.Mock).mockReturnValue({
       services: {
         cps: mockCPSService,
       } as TestServices,
-    });
-  });
-
-  afterEach(() => {
-    act(() => {
-      mockProjectsSubject.next({
-        origin: mockOriginProject,
-        linkedProjects: mockLinkedProjects,
-      });
     });
   });
 
@@ -147,22 +135,18 @@ describe('ProjectPicker', () => {
     });
 
     it('should not render when there is no origin project', async () => {
-      act(() => {
-        mockProjectsSubject.next({
-          origin: null!,
-          linkedProjects: mockLinkedProjects,
-        });
+      mockCPSManager.fetchProjects.mockResolvedValueOnce({
+        origin: null,
+        linkedProjects: mockLinkedProjects,
       });
       await renderProjectPicker();
       expect(screen.queryByTestId('project-picker-component')).not.toBeInTheDocument();
     });
 
     it('should not render when there are no linked projects', async () => {
-      act(() => {
-        mockProjectsSubject.next({
-          origin: mockOriginProject,
-          linkedProjects: [],
-        });
+      mockCPSManager.fetchProjects.mockResolvedValueOnce({
+        origin: mockOriginProject,
+        linkedProjects: [],
       });
 
       await renderProjectPicker();
@@ -184,32 +168,6 @@ describe('ProjectPicker', () => {
       await renderProjectPicker({ wrappingContainer: customWrapper });
       expect(screen.getByTestId('custom-wrapper')).toBeInTheDocument();
       expect(screen.getByTestId('project-picker-component')).toBeInTheDocument();
-    });
-  });
-
-  describe('observable subscription', () => {
-    it('should update when projects observable emits new values', async () => {
-      await renderProjectPicker();
-
-      expect(screen.getByText(/Origin Project/)).toBeInTheDocument();
-
-      // Update the observable with new data
-      const newOriginProject: Project = {
-        _id: 'new-origin',
-        _alias: 'New Origin Project',
-        _type: 'elasticsearch',
-        _csp: 'gcp',
-        _region: 'us-central1',
-      };
-
-      await act(async () => {
-        mockProjectsSubject.next({
-          origin: newOriginProject,
-          linkedProjects: mockLinkedProjects,
-        });
-      });
-
-      expect(screen.getByText(/New Origin Project/)).toBeInTheDocument();
     });
   });
 });

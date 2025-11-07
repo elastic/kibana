@@ -36,15 +36,10 @@ export const ProjectPicker: React.FC<ProjectPickerProps> = ({
     // Only fetch projects in serverless environments where cpsManager is available
     if (!cps?.cpsManager) return;
 
-    const subscription = cps.cpsManager.projects$.subscribe(
-      (projectsData: { origin: Project | null; linkedProjects: Project[] }) => {
-        setOriginProject(projectsData.origin);
-        setLinkedProjects(projectsData.linkedProjects);
-      }
-    );
-
-    cps.cpsManager.fetchProjects()
-    return () => subscription.unsubscribe();
+    cps.cpsManager.fetchProjects().then((projectsData) => {
+      setOriginProject(projectsData.origin);
+      setLinkedProjects(projectsData.linkedProjects);
+    });
   }, [cps]);
 
   // do not render the component if cpsManager is not available or required props are missing or there aren't linked projects

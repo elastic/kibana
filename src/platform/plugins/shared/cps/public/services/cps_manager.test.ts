@@ -62,18 +62,6 @@ describe('CPSManager', () => {
     jest.clearAllMocks();
   });
 
-  describe('initial state', () => {
-    it('should initialize with empty projects', () => {
-      const projects = cpsManager.getProjects();
-      expect(projects).toEqual({
-        origin: null,
-        linkedProjects: [],
-      });
-
-      expect(cpsManager.hasLoadedProjects()).toBe(false);
-    });
-  });
-
   describe('fetchProjects', () => {
     it('should fetch and store projects successfully', async () => {
       const result = await cpsManager.fetchProjects();
@@ -83,7 +71,6 @@ describe('CPSManager', () => {
         origin: mockOriginProject,
         linkedProjects: [mockLinkedProjects[1], mockLinkedProjects[0]], // sorted by alias
       });
-      expect(cpsManager.hasLoadedProjects()).toBe(true);
     });
 
     it('should sort linked projects by alias', async () => {
@@ -91,18 +78,6 @@ describe('CPSManager', () => {
 
       expect(result.linkedProjects[0]._alias).toBe('A Project');
       expect(result.linkedProjects[1]._alias).toBe('B Project');
-    });
-
-    it('should emit projects to observable', async () => {
-      const subscription = jest.fn();
-      cpsManager.projects$.subscribe(subscription);
-
-      await cpsManager.fetchProjects();
-
-      expect(subscription).toHaveBeenCalledWith({
-        origin: mockOriginProject,
-        linkedProjects: [mockLinkedProjects[1], mockLinkedProjects[0]],
-      });
     });
   });
 
@@ -127,7 +102,6 @@ describe('CPSManager', () => {
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow('Network error');
 
-      expect(cpsManager.hasLoadedProjects()).toBe(false);
       expect(mockHttp.get).toHaveBeenCalledTimes(3); // initial + 2 retries
 
       jest.useRealTimers();
@@ -208,21 +182,14 @@ describe('CPSManager', () => {
       jest.useRealTimers();
     });
 
-    it('should emit empty data on final failure', async () => {
+    it('should throw error on final failure', async () => {
       jest.useFakeTimers();
       mockHttp.get.mockRejectedValue(new Error('Error'));
-      const subscription = jest.fn();
-      cpsManager.projects$.subscribe(subscription);
 
       const promise = cpsManager.fetchProjects();
       const timerPromise = jest.runAllTimersAsync();
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow();
-
-      expect(subscription).toHaveBeenLastCalledWith({
-        origin: null,
-        linkedProjects: [],
-      });
 
       jest.useRealTimers();
     });
