@@ -116,17 +116,11 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const streamName = useStreamSamplesSelector(
-    (snapshot) => snapshot.context.definition.stream.name
-  );
-  const hasPrivileges = useStreamSamplesSelector(
-    (snapshot) => snapshot.context.definition.privileges.manage
-  );
+  const streamName = samplesSnapshot.context.definition.stream.name;
+  const hasPrivileges = samplesSnapshot.context.definition.privileges.manage;
 
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
-  const documents = useStreamSamplesSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
-  );
+  const documents = selectPreviewDocuments(samplesSnapshot.context);
 
   const condition = processCondition(samplesSnapshot.context.condition);
   const isProcessedCondition = condition ? isCondition(condition) : true;
