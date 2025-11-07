@@ -12,7 +12,7 @@ import { hypothesisDefinitions } from './lib/hypothesis_definitions';
 import { createThreatHuntingHypothesesAuditLoggerService } from './utils/audit_logger_service';
 import { createThreatHuntingHypothesesLoggerService } from './utils/logger_service';
 
-export type ThreatHuntingHypothesesService = ReturnType<
+export type ThreatHuntingHypothesesInitService = ReturnType<
   typeof createThreatHuntingHypothesesInitService
 >;
 
@@ -30,7 +30,7 @@ export const initThreatHuntingHypothesisDefinitions = async (
 };
 
 export const createThreatHuntingHypothesesInitService = (
-  soClient: SavedObjectsClientContract,
+  savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
   auditService: CoreAuditService
 ) => {
@@ -41,7 +41,7 @@ export const createThreatHuntingHypothesesInitService = (
   const auditLoggerService = createThreatHuntingHypothesesAuditLoggerService(auditService);
 
   const descriptor = new ThreatHuntingHypothesisDescriptorClient({
-    soClient,
+    savedObjectsClient,
   });
 
   const init = async (): Promise<void> => {

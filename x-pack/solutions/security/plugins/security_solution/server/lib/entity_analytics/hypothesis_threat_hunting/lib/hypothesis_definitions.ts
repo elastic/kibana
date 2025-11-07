@@ -7,13 +7,13 @@
 
 import type { ThreatHuntingHypothesis } from '../types';
 
-export const HYPOTHESES_VERSION = 2;
+export const HYPOTHESES_VERSION = 1;
 
 // Co-Pilot generated this example so far. More definitions can be added following this structure.
 export const hypothesisDefinitions: ThreatHuntingHypothesis[] = [
   {
-    title: 'UPDATED SUSPICIOUS POWERSHELL ACTIVITY', // test upsert
-    hypothesisId: 'suspicious_powershell_activity_2',
+    title: 'UPDATED SUSPICIOUS POWERSHELL ACTIVITY',
+    hypothesisId: 'suspicious_powershell_activity_v1',
     summary:
       'Detects potentially malicious PowerShell activity that may indicate an attacker is using PowerShell for reconnaissance or lateral movement within the network.',
     managed: true,

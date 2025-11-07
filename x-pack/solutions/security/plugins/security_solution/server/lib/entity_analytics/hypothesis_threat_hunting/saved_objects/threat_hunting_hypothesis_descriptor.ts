@@ -10,7 +10,7 @@ import type { ThreatHuntingHypothesis } from '../types';
 import { threatHuntingHypothesisTypeName } from './threat_hunting_hypothesis_type';
 
 interface ThreatHuntingHypothesisDependencies {
-  soClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export class ThreatHuntingHypothesisDescriptorClient {
@@ -20,7 +20,7 @@ export class ThreatHuntingHypothesisDescriptorClient {
   }
 
   async get(id: string): Promise<ThreatHuntingHypothesis> {
-    const { attributes } = await this.deps.soClient.get<ThreatHuntingHypothesis>(
+    const { attributes } = await this.deps.savedObjectsClient.get<ThreatHuntingHypothesis>(
       threatHuntingHypothesisTypeName,
       id
     );
@@ -28,7 +28,7 @@ export class ThreatHuntingHypothesisDescriptorClient {
   }
 
   async getAll(): Promise<Record<string, ThreatHuntingHypothesis>> {
-    const savedObjectsResponse = await this.deps.soClient.find<ThreatHuntingHypothesis>({
+    const savedObjectsResponse = await this.deps.savedObjectsClient.find<ThreatHuntingHypothesis>({
       type: threatHuntingHypothesisTypeName,
       perPage: 10000,
     });
@@ -40,11 +40,11 @@ export class ThreatHuntingHypothesisDescriptorClient {
   }
 
   async delete(id: string) {
-    await this.deps.soClient.delete(threatHuntingHypothesisTypeName, id);
+    await this.deps.savedObjectsClient.delete(threatHuntingHypothesisTypeName, id);
   }
 
   async bulkCreate(sources: ThreatHuntingHypothesis[]) {
-    const createdHypotheses = await this.deps.soClient.bulkCreate(
+    const createdHypotheses = await this.deps.savedObjectsClient.bulkCreate(
       sources.map((source) => ({
         type: threatHuntingHypothesisTypeName,
         attributes: { ...source },
@@ -55,7 +55,7 @@ export class ThreatHuntingHypothesisDescriptorClient {
   }
 
   async update(id: string, updates: Partial<ThreatHuntingHypothesis>) {
-    const { attributes } = await this.deps.soClient.update<ThreatHuntingHypothesis>(
+    const { attributes } = await this.deps.savedObjectsClient.update<ThreatHuntingHypothesis>(
       threatHuntingHypothesisTypeName,
       id,
       updates,
@@ -69,8 +69,8 @@ export class ThreatHuntingHypothesisDescriptorClient {
       return { created: 0, updated: 0, results: [] };
     }
     const existing = await this.getAll();
-    const createdCount = 0;
-    const updatedCount = 0;
+    let createdCount = 0;
+    let updatedCount = 0;
     const results: Array<{ action: 'created' | 'updated'; hypothesis: ThreatHuntingHypothesis }> =
       [];
     await asyncForEach(hypotheses, async (hypothesis) => {
@@ -78,20 +78,34 @@ export class ThreatHuntingHypothesisDescriptorClient {
         (eh) => eh.hypothesisId === hypothesis.hypothesisId
       );
       if (!existingHypothesis) {
-        await this.deps.soClient.create<ThreatHuntingHypothesis>(
-          threatHuntingHypothesisTypeName,
-          hypothesis,
-          { id: this.getSavedObjectId(), refresh: 'wait_for' }
-        );
-        results.push({ action: 'created', hypothesis });
+        try {
+          await this.deps.savedObjectsClient.create<ThreatHuntingHypothesis>(
+            threatHuntingHypothesisTypeName,
+            hypothesis,
+            { id: this.getSavedObjectId(), refresh: 'wait_for' }
+          );
+          createdCount++;
+          results.push({ action: 'created', hypothesis });
+        } catch (error) {
+          Error(
+            `Threat Hunting Hypotheses Reconciliation Failed: Error creating Threat Hunting Hypothesis: ${error}`
+          );
+        }
       } else {
-        await this.deps.soClient.update<ThreatHuntingHypothesis>(
-          threatHuntingHypothesisTypeName,
-          this.getSavedObjectId(),
-          hypothesis,
-          { refresh: 'wait_for' }
-        );
-        results.push({ action: 'updated', hypothesis });
+        try {
+          await this.deps.savedObjectsClient.update<ThreatHuntingHypothesis>(
+            threatHuntingHypothesisTypeName,
+            this.getSavedObjectId(),
+            hypothesis,
+            { refresh: 'wait_for' }
+          );
+          updatedCount++;
+          results.push({ action: 'updated', hypothesis });
+        } catch (error) {
+          Error(
+            `Threat Hunting Hypotheses Reconciliation Failed: Error updating Threat Hunting Hypothesis: ${error}`
+          );
+        }
       }
     });
     return { created: createdCount, updated: updatedCount, results };
