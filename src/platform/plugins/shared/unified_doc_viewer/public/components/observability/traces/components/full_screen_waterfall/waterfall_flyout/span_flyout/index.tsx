@@ -48,7 +48,7 @@ export const SpanFlyout = ({
       raw: {
         _index: span._index,
         _id: span._id,
-        _source: span,
+        _source: span as unknown as Record<string, unknown>,
       },
       flattened: flattenObject(span),
     };
