@@ -18,8 +18,7 @@ import type { aggregateQuerySchema, querySchema } from './query';
 import type {
   storedFilterSchema,
   storedFilterMetaSchema,
-  globalStateSchema,
-  appStateSchema,
+  filterStateStoreSchema,
 } from './stored_filter';
 import type {
   filterSchema,
@@ -37,7 +36,7 @@ export type AggregateQuery = Writable<TypeOf<typeof aggregateQuerySchema>>;
 
 export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;
 export type StoredFilterMeta = Writable<TypeOf<typeof storedFilterMetaSchema>>;
-export type StoredFilterState = TypeOf<typeof appStateSchema> | TypeOf<typeof globalStateSchema>;
+export type StoredFilterState = TypeOf<typeof filterStateStoreSchema>;
 
 /**
  * Schema-inferred types for Filter API

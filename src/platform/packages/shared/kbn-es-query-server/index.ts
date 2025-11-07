@@ -9,8 +9,8 @@
 
 export { timeRangeSchema } from './src/time_range';
 export { querySchema } from './src/query';
-export { appStateSchema, globalStateSchema, storedFilterSchema } from './src/stored_filter';
 export { filterSchema } from './src/filter';
+export { storedFilterSchema } from './src/stored_filter';
 
 export type {
   TimeRange,
