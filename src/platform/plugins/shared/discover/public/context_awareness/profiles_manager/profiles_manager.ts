@@ -9,6 +9,7 @@
 
 import { isEqual } from 'lodash';
 import { BehaviorSubject, skip } from 'rxjs';
+import { AbortReason } from '@kbn/data-plugin/public';
 import type {
   RootProfileService,
   DataSourceProfileService,
@@ -78,7 +79,7 @@ export class ProfilesManager {
     }
 
     const abortController = new AbortController();
-    this.rootProfileAbortController?.abort();
+    this.rootProfileAbortController?.abort(AbortReason.Replaced);
     this.rootProfileAbortController = abortController;
 
     let context = this.rootProfileService.defaultContext;

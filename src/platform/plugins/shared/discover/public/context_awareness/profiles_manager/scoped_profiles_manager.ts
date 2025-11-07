@@ -11,6 +11,7 @@ import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AbortReason } from '@kbn/data-plugin/public';
 import type { ContextWithProfileId } from '../profile_service';
 import type {
   DataSourceContext,
@@ -87,7 +88,7 @@ export class ScopedProfilesManager {
     }
 
     const abortController = new AbortController();
-    this.dataSourceProfileAbortController?.abort();
+    this.dataSourceProfileAbortController?.abort(AbortReason.Replaced);
     this.dataSourceProfileAbortController = abortController;
 
     let context = this.dataSourceProfileService.defaultContext;

@@ -84,6 +84,7 @@ import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
+import { AbortReason } from '../..';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -315,7 +316,7 @@ export class SearchInterceptor {
 
     const searchTracker = this.deps.session.isCurrentSession(sessionId)
       ? this.deps.session.trackSearch({
-          abort: () => searchAbortController.abort(),
+          abort: (reason?: AbortReason) => searchAbortController.abort(reason),
           poll: async (abortSignal) => {
             if (id) {
               await search({ abortSignal });
@@ -353,8 +354,14 @@ export class SearchInterceptor {
     );
 
     const cancel = async () => {
-      // If the request times out, we handle cancellation after we make the last call to retrieve the results
-      if (!id || isSavedToBackground || searchAbortController.isTimeout()) return;
+      // If the request times out/is canceled, we handle cancellation after we make the last call to retrieve the results
+      if (
+        !id ||
+        isSavedToBackground ||
+        searchAbortController.isTimeout() ||
+        searchAbortController.isCanceled()
+      )
+        return;
       try {
         await sendCancelRequest();
       } catch (e) {
@@ -396,14 +403,17 @@ export class SearchInterceptor {
           : response;
       }),
       catchError((e: Error) => {
-        // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
-        if (searchAbortController.isTimeout()) {
+        // If we aborted (search:timeout advanced setting) or the user canceled and there was a partial response, return it instead of just erroring out
+        if (searchAbortController.isTimeout() || searchAbortController.isCanceled()) {
           this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
             [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
             [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
           });
           return from(
-            this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
+            this.runSearch(
+              { id, ...request },
+              { ...options, abortSignal: new AbortController().signal, retrieveResults: true }
+            )
           ).pipe(
             map((response) =>
               options.strategy === ENHANCED_ES_SEARCH_STRATEGY
@@ -412,7 +422,9 @@ export class SearchInterceptor {
             ),
             tap(async () => {
               await sendCancelRequest();
-              this.handleSearchError(e, request?.params?.body ?? {}, options, true);
+              if (searchAbortController.isTimeout()) {
+                this.handleSearchError(e, request?.params?.body ?? {}, options, true);
+              }
             })
           );
         } else {
@@ -609,7 +621,8 @@ export class SearchInterceptor {
         // The underlaying search will not abort unless searchAbortController fires.
         const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
           map(() => {
-            throw new AbortError();
+            if (abortSignal?.reason !== AbortReason.Canceled) throw new AbortError();
+            return EMPTY;
           })
         );
 

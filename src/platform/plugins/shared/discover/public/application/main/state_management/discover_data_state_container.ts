@@ -21,6 +21,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import { AbortReason } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -284,8 +285,8 @@ export function getDataStateContainer({
             scopedEbtManager,
           };
 
-          abortController?.abort();
-          abortControllerFetchMore?.abort();
+          abortController?.abort(AbortReason.Replaced);
+          abortControllerFetchMore?.abort(AbortReason.Replaced);
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
@@ -437,8 +438,8 @@ export function getDataStateContainer({
   };
 
   const cancel = () => {
-    abortController?.abort();
-    abortControllerFetchMore?.abort();
+    abortController?.abort(AbortReason.Canceled);
+    abortControllerFetchMore?.abort(AbortReason.Canceled);
   };
 
   const getAbortController = () => {
