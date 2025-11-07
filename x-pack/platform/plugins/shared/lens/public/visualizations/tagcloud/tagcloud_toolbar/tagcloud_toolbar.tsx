@@ -14,6 +14,11 @@ import { ToolbarPopover } from '../../../shared_components';
 import type { TagcloudState } from '../types';
 import { TagcloudAppearanceSettings } from './appearance_settings';
 
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
+
 export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

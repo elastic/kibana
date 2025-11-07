@@ -34,7 +34,7 @@ import type {
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -150,11 +150,8 @@ export class WorkflowsManagementApi {
       })}`,
     };
 
-    // Convert back to YAML string
-    const clonedYaml = `name: ${updatedYaml.name}\n${workflow.yaml
-      .split('\n')
-      .slice(1)
-      .join('\n')}`;
+    // Convert back to YAML string using proper YAML stringification
+    const clonedYaml = stringifyWorkflowDefinition(updatedYaml as WorkflowYaml);
     return this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
