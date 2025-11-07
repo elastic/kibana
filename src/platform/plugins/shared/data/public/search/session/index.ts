@@ -16,3 +16,4 @@ export { noSearchSessionStorageCapabilityMessage } from './i18n';
 export { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 export type { WaitUntilNextSessionCompletesOptions } from './session_helpers';
 export { waitUntilNextSessionCompletes$ } from './session_helpers';
+export * from './ebt_manager';
