@@ -1190,19 +1190,17 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       alertIndexName?: string;
       connectorIndexName?: string;
     }) {
-      const results = await Promise.allSettled([
+      return Promise.allSettled([
         // Delete the rule by ID
         ruleId ? this.deleteRuleById({ roleAuthc, ruleId }) : this.deleteRules({ roleAuthc }),
-        // Delete alert documents in the alert index if specified
-        // If ruleId is provided, only delete alerts for that specific rule
-        // Otherwise, delete all alerts (useful for test setup cleanup)
+        // Delete all documents in the alert index if specified
         alertIndexName
           ? es
               .deleteByQuery({
                 index: alertIndexName,
                 conflicts: 'proceed',
                 refresh: true,
-                query: ruleId ? { term: { 'kibana.alert.rule.uuid': ruleId } } : { match_all: {} },
+                query: { match_all: {} },
               })
               .then(async () => {
                 // Explicitly refresh the index to ensure deletions are visible
@@ -1231,8 +1229,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         // Delete all action connectors
         this.deleteAllActionConnectors({ roleAuthc }),
       ]);
-
-      return results;
     },
   };
 }
