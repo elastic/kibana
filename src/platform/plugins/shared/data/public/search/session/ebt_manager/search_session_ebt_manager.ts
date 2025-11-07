@@ -112,12 +112,13 @@ export class SearchSessionEBTManager {
     });
   }
 
-  public trackBgsOpened({ session }: { session: UISession }) {
+  public trackBgsOpened({ session, resumeSource }: { session: UISession; resumeSource: string }) {
     this.reportEvent(BG_SEARCH_OPEN, {
       query_lang: this.getQueryLanguage(
         session.restoreState?.query as Query | AggregateQuery | undefined
       ),
       session_id: session.id,
+      resume_source: resumeSource || '',
       status: session.status,
     });
   }

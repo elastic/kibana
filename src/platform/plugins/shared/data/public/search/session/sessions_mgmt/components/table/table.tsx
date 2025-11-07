@@ -167,7 +167,10 @@ export function SearchSessionsMgmtTable({
     kibanaVersion,
     searchUsageCollector,
     onBackgroundSearchOpened: (attrs) => {
-      searchSessionEBTManager.trackBgsOpened({ session: attrs.session });
+      searchSessionEBTManager.trackBgsOpened({
+        session: attrs.session,
+        resumeSource: trackingProps.renderedIn,
+      });
       onBackgroundSearchOpened?.(attrs);
     },
   });

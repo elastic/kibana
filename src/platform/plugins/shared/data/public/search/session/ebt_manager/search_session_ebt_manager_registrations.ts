@@ -124,6 +124,12 @@ export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
         type: 'keyword',
         _meta: { description: 'The current status of the search session.' },
       },
+      resume_source: {
+        type: 'keyword',
+        _meta: {
+          description: 'The source from which the background search session was resumed.',
+        },
+      },
     },
   });
 
