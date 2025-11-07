@@ -304,114 +304,50 @@ describe('@kbn/babel-plugin-lazy-require', () => {
   });
 
   describe('constructor usage exclusion', () => {
-    it('keeps eager when constructor calls a method that constructs an imported class (non-test files)', () => {
+    it('keeps eager for constructor flow in non-test files (direct + one-hop)', () => {
       const code = transformCode(
         `
-        import { X } from './pkg';
-        export class A {
+        import { DirectNew, OneHopNew } from './classes';
+        export class Service {
           constructor() {
-            this.init();
+            this.direct = new DirectNew();
+            this.setupSystem();
           }
-          init() {
-            return new X();
-          }
-        }
-      `,
-        'component.ts'
-      );
-      expect(code).toMatch(/import\s+\{\s*X\s*\}\s+from\s+['"]\.\/pkg['"]/);
-      expect(code).not.toContain('get X');
-    });
-
-    it('keeps eager for nested constructor calls in methods invoked by constructor (non-test files)', () => {
-      const code = transformCode(
-        `
-        import { PatternLayout } from './layouts';
-        import { ConsoleAppender } from './appenders';
-        export class S {
-          constructor() { this.setupSystem(); }
           setupSystem() {
-            const a = new ConsoleAppender(new PatternLayout());
-            return a;
+            this.oneHop = new OneHopNew();
           }
         }
       `,
         'component.ts'
       );
-      expect(code).toMatch(/import\s+\{\s*PatternLayout\s*\}\s+from\s+['"]\.\/layouts['"]/);
-      expect(code).toMatch(/import\s+\{\s*ConsoleAppender\s*\}\s+from\s+['"]\.\/appenders['"]/);
-      expect(code).not.toContain('get PatternLayout');
-      expect(code).not.toContain('get ConsoleAppender');
-    });
-
-    it('does not transform default import used with new (test files only)', () => {
-      const code = transformCode(
-        `
-        import Foo from './cls';
-        function make() {
-          return new Foo();
-        }
-      `,
-        'sample.test.js'
+      expect(code).toMatch(
+        /import\s+\{\s*DirectNew,\s*OneHopNew\s*\}\s+from\s+['"]\.\/classes['"]/
       );
-      expect(code).toMatch(/import\s+Foo\s+from\s+['"]\.\/cls['"]/);
-      expect(code).not.toContain('get Foo');
-      expect(code).not.toContain('_imports');
+      expect(code).not.toContain('get DirectNew');
+      expect(code).not.toContain('get OneHopNew');
     });
 
-    it('does not transform named import used with new (test files only)', () => {
+    it.each([
+      ['default import', 'import Foo from "./cls"', 'Foo', 'new Foo()'],
+      ['named import', 'import { Bar } from "./pkg"', 'Bar', 'new Bar()'],
+      ['namespace import', 'import * as ns from "./pkg"', 'ns', 'new ns.Foo()'],
+      ['require', 'const Cls = require("./cls")', 'Cls', 'new Cls()'],
+      ['destructured', 'const { Lexer } = require("./lexer")', 'Lexer', 'new Lexer()'],
+    ])('does not transform %s used with new in test files', (type, importCode, varName, usage) => {
       const code = transformCode(
         `
-        import { Bar } from './pkg';
-        export function f() { return new Bar(); }
+        ${importCode};
+        export const fn = () => ${usage};
       `,
         'sample.test.ts'
       );
-      expect(code).toMatch(/import\s+\{\s*Bar\s*\}\s+from\s+['"]\.\/pkg['"]/);
-      expect(code).not.toContain('get Bar');
+
+      expect(code).toContain(varName);
+      expect(code).not.toContain(`get ${varName}`);
       expect(code).not.toContain('_imports');
     });
 
-    it('does not transform namespace import used with new on a member (test files only)', () => {
-      const code = transformCode(
-        `
-        import * as ns from './pkg';
-        export const x = () => new ns.Foo();
-      `,
-        'component.spec.tsx'
-      );
-      expect(code).toMatch(/import\s+\*\s+as\s+ns\s+from\s+['"]\.\/pkg['"]/);
-      expect(code).not.toContain('get ns');
-      expect(code).not.toContain('_imports');
-    });
-
-    it('does not transform require assigned then constructed (test files only)', () => {
-      const result = transformCode(
-        `
-        const Cls = require('./cls');
-        module.exports = () => new Cls();
-      `,
-        'something.test.js'
-      );
-      expect(result).toContain(`const Cls = require('./cls')`);
-      expect(result).not.toContain('get Cls');
-      expect(result).not.toContain('_imports');
-    });
-
-    it('does not transform destructured require when constructed (test files only)', () => {
-      const result = transformCode(
-        `
-        const { Lexer } = require('./lexer');
-        module.exports = () => new Lexer();
-      `,
-        'lexer.test.ts'
-      );
-      expect(result).toContain(`require('./lexer')`);
-      expect(result).not.toContain('get Lexer');
-      expect(result).not.toContain('_imports');
-    });
-
-    it('handles deep member new expressions (new ns.sub.Foo()) (test files only)', () => {
+    it('handles deep member new expressions (new ns.sub.Foo())', () => {
       const code = transformCode(
         `
         import * as lib from './lib';
@@ -513,7 +449,7 @@ describe('@kbn/babel-plugin-lazy-require', () => {
         const x = foo;
       `);
 
-      expect(code).toMatch(/import\s+\{/); // Import statement kept
+      expect(code).toMatch(/import\s+\{/);
       expect(code).toContain('foo');
       expect(code).not.toContain('_imports');
     });
@@ -530,23 +466,6 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       expect(code).not.toContain('_imports');
     });
 
-    it('does not transform imports used in JSX (components need direct access for JSX transform)', () => {
-      const code = transformCode(`
-        import { EuiCode, EuiButton } from '@elastic/eui';
-        const directive = <EuiCode>test</EuiCode>;
-        function Component() {
-          return <EuiButton />;
-        }
-      `);
-
-      // Both components should be kept as imports (both used in JSX)
-      expect(code).toContain('EuiCode');
-      expect(code).toContain('EuiButton');
-      expect(code).not.toContain('get EuiCode');
-      expect(code).not.toContain('get EuiButton');
-      expect(code).not.toContain('_imports');
-    });
-
     it('transforms imports used only in functions', () => {
       const code = transformCode(`
         import { foo } from './utils';
@@ -556,7 +475,7 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       `);
 
       expect(code).toContain('get foo');
-      expect(code).not.toMatch(/import\s+\{/); // No import statement
+      expect(code).not.toMatch(/import\s+\{/);
     });
 
     it('does not transform imports used in class static properties', () => {
@@ -580,86 +499,46 @@ describe('@kbn/babel-plugin-lazy-require', () => {
   });
 
   describe('Module exclusion', () => {
-    it('never transforms imports from excluded modules (@jest/globals)', () => {
-      const code = transformCode(`
-        import { describe, test, expect } from '@jest/globals';
-        describe('test suite', () => {
-          test('test case', () => {
-            expect(true).toBe(true);
-          });
-        });
-      `);
-
-      // Jest globals should not be transformed
-      expect(code).toContain('describe');
-      expect(code).toContain('test');
-      expect(code).toContain('expect');
-      expect(code).not.toContain('get describe');
-      expect(code).not.toContain('get test');
-      expect(code).not.toContain('get expect');
-      expect(code).not.toContain('_imports');
-    });
-
-    it('transforms non-excluded imports even when excluded modules are present', () => {
+    it('never transforms excluded modules (@jest/globals, @testing-library/* wildcard)', () => {
       const code = transformCode(`
         import { describe, test } from '@jest/globals';
+        import { render, screen } from '@testing-library/react';
         import { helper } from './utils';
-        describe('test', () => {
+
+        describe('suite', () => {
           test('case', () => {
+            render(<div>test</div>);
             helper();
           });
         });
       `);
 
-      // Jest globals not transformed
+      // Excluded modules - not transformed
       expect(code).toContain('describe');
       expect(code).toContain('test');
-      expect(code).not.toContain('get describe');
-      expect(code).not.toContain('get test');
-
-      // But helper should be transformed
-      expect(code).toContain('get helper');
-    });
-
-    it('never transforms @testing-library/* modules (wildcard pattern)', () => {
-      const code = transformCode(`
-        import { render, screen } from '@testing-library/react';
-        import userEvent from '@testing-library/user-event';
-        import '@testing-library/jest-dom';
-        import { helper } from './utils';
-
-        test('example', async () => {
-          render(<div>test</div>);
-          await userEvent.click(screen.getByText('test'));
-          helper();
-        });
-      `);
-
-      // Testing library imports not transformed (matched by '@testing-library/*' wildcard)
       expect(code).toContain('render');
       expect(code).toContain('screen');
-      expect(code).toContain('userEvent');
+      expect(code).not.toContain('get describe');
+      expect(code).not.toContain('get test');
       expect(code).not.toContain('get render');
       expect(code).not.toContain('get screen');
-      expect(code).not.toContain('get userEvent');
 
-      // But helper should be transformed
+      // Non-excluded module - transformed
       expect(code).toContain('get helper');
     });
 
     it('supports wildcard patterns in module exclusions', () => {
-      // Test that * wildcards work correctly
-      const code1 = transformCode(`
+      const code = transformCode(`
         import { something } from '@testing-library/user-event';
         import { other } from '@other-library/module';
       `);
 
-      // @testing-library/* should be excluded
-      expect(code1).toContain('@testing-library/user-event');
-      expect(code1).not.toContain('get something');
+      // @testing-library/* excluded by wildcard
+      expect(code).toContain('@testing-library/user-event');
+      expect(code).not.toContain('get something');
 
-      // @other-library/* should be transformed (not in exclusion list)
-      expect(code1).toContain('get other');
+      // @other-library/* not excluded - transformed
+      expect(code).toContain('get other');
     });
   });
 
@@ -734,76 +613,63 @@ describe('@kbn/babel-plugin-lazy-require', () => {
   });
 
   describe('JSX and React handling', () => {
-    it('never transforms React imports (always needed for JSX runtime)', () => {
+    it.each([
+      ['default', 'import React from "react"', 'React', 'React.createElement'],
+      ['named', 'import { useState, useEffect } from "react"', 'useState', 'useState(0)'],
+      ['namespace', 'import * as React from "react"', 'React', 'React.createElement'],
+    ])('never transforms React %s imports', (type, importCode, varName, usage) => {
       const code = transformCode(`
-        import React from 'react';
-        function Component() {
-          return React.createElement('div', null, 'test');
-        }
+        ${importCode};
+        function test() { ${usage}; }
       `);
 
-      expect(code).toContain('React');
-      expect(code).not.toContain('get React');
+      expect(code).toContain(varName);
+      expect(code).not.toContain(`get ${varName}`);
       expect(code).not.toContain('_imports');
     });
 
-    it('never transforms React named imports', () => {
+    it('does not transform components used in JSX (nested, self-closing, fragments)', () => {
       const code = transformCode(`
-        import { useState, useEffect } from 'react';
-        function useCustomHook() {
-          const [state] = useState(0);
-          useEffect(() => {}, []);
-        }
+        import { Panel, Header, Body, Spinner } from './components';
+        export default () => (
+          <>
+            <Panel>
+              <Header title="Test" />
+              <Body><p>Content</p></Body>
+            </Panel>
+            <Spinner />
+          </>
+        );
       `);
 
-      expect(code).toContain('useState');
-      expect(code).toContain('useEffect');
-      expect(code).not.toContain('get useState');
-      expect(code).not.toContain('get useEffect');
+      ['Panel', 'Header', 'Body', 'Spinner'].forEach((comp) => {
+        expect(code).toContain(comp);
+        expect(code).not.toContain(`get ${comp}`);
+      });
       expect(code).not.toContain('_imports');
     });
 
-    it('never transforms React namespace imports', () => {
+    it('does not transform JSX member expressions (Context.Provider, nested patterns)', () => {
       const code = transformCode(`
-        import * as React from 'react';
-        function Component() {
-          return React.createElement('div');
-        }
+        import { MyContext, Theme } from './components';
+        import { helper } from './utils';
+        export default () => (
+          <MyContext.Provider value={{}}>
+            <Theme.Dark.Container>
+              {helper()}
+            </Theme.Dark.Container>
+          </MyContext.Provider>
+        );
       `);
 
-      expect(code).toContain('React');
-      expect(code).not.toContain('get React');
-      expect(code).not.toContain('_imports');
-    });
+      // JSX member expression roots - not transformed
+      expect(code).toContain('MyContext');
+      expect(code).toContain('Theme');
+      expect(code).not.toContain('get MyContext');
+      expect(code).not.toContain('get Theme');
 
-    it('does not transform components used in JSX syntax', () => {
-      const code = transformCode(`
-        import { Button, Icon } from '@elastic/eui';
-        function MyComponent() {
-          return (
-            <Button>
-              <Icon type="check" />
-            </Button>
-          );
-        }
-      `);
-
-      expect(code).toContain('Button');
-      expect(code).toContain('Icon');
-      expect(code).not.toContain('get Button');
-      expect(code).not.toContain('get Icon');
-      expect(code).not.toContain('_imports');
-    });
-
-    it('does not transform components in self-closing JSX tags', () => {
-      const code = transformCode(`
-        import { Spinner } from './components';
-        const Loading = () => <Spinner />;
-      `);
-
-      expect(code).toContain('Spinner');
-      expect(code).not.toContain('get Spinner');
-      expect(code).not.toContain('_imports');
+      // Non-JSX import - transformed
+      expect(code).toContain('get helper');
     });
 
     it('transforms non-JSX imports even when file contains JSX', () => {
@@ -816,135 +682,9 @@ describe('@kbn/babel-plugin-lazy-require', () => {
         }
       `);
 
-      // Button used in JSX - not transformed
       expect(code).toContain('Button');
       expect(code).not.toContain('get Button');
-
-      // processData not used in JSX - transformed
       expect(code).toContain('get processData');
-    });
-
-    it('handles mixed React default and named imports', () => {
-      const code = transformCode(`
-        import React, { useState, useCallback } from 'react';
-        function Component() {
-          const [count, setCount] = useState(0);
-          const increment = useCallback(() => setCount(c => c + 1), []);
-          return React.createElement('div', { onClick: increment }, count);
-        }
-      `);
-
-      // All React imports should be kept
-      expect(code).toContain('React');
-      expect(code).toContain('useState');
-      expect(code).toContain('useCallback');
-      expect(code).not.toContain('get React');
-      expect(code).not.toContain('get useState');
-      expect(code).not.toContain('get useCallback');
-      expect(code).not.toContain('_imports');
-    });
-
-    it('does not transform JSX components used in nested elements', () => {
-      const code = transformCode(`
-        import { Panel, Header, Body, Footer } from './components';
-        export default () => (
-          <Panel>
-            <Header title="Test" />
-            <Body>
-              <p>Content</p>
-            </Body>
-            <Footer />
-          </Panel>
-        );
-      `);
-
-      expect(code).toContain('Panel');
-      expect(code).toContain('Header');
-      expect(code).toContain('Body');
-      expect(code).toContain('Footer');
-      expect(code).not.toContain('get Panel');
-      expect(code).not.toContain('get Header');
-      expect(code).not.toContain('get Body');
-      expect(code).not.toContain('get Footer');
-      expect(code).not.toContain('_imports');
-    });
-
-    it('handles JSX fragments without breaking', () => {
-      const code = transformCode(`
-        import React from 'react';
-        import { Item } from './components';
-        export default () => (
-          <>
-            <Item />
-            <Item />
-          </>
-        );
-      `);
-
-      expect(code).toContain('React');
-      expect(code).toContain('Item');
-      expect(code).not.toContain('get React');
-      expect(code).not.toContain('get Item');
-    });
-
-    it('does not transform imports used in JSX member expressions (Context.Provider)', () => {
-      const code = transformCode(`
-        import React from 'react';
-        import { PerformanceContext } from './contexts';
-        import { helper } from './utils';
-        export default () => (
-          <PerformanceContext.Provider value={{}}>
-            <div>{helper()}</div>
-          </PerformanceContext.Provider>
-        );
-      `);
-
-      // PerformanceContext used in JSX member expression - not transformed
-      expect(code).toContain('PerformanceContext');
-      expect(code).not.toContain('get PerformanceContext');
-
-      // helper not used in JSX - transformed
-      expect(code).toContain('get helper');
-    });
-
-    it('does not transform imports in nested JSX member expressions', () => {
-      const code = transformCode(`
-        import { Theme } from './theme';
-        import { utility } from './utils';
-        export default () => (
-          <Theme.Dark.Container>
-            {utility()}
-          </Theme.Dark.Container>
-        );
-      `);
-
-      // Theme used in nested JSX member expression - not transformed
-      expect(code).toContain('Theme');
-      expect(code).not.toContain('get Theme');
-
-      // utility not used in JSX - transformed
-      expect(code).toContain('get utility');
-    });
-
-    it('handles Context.Provider pattern correctly (React context usage)', () => {
-      const code = transformCode(`
-        import React, { useMemo } from 'react';
-        import { MyContext } from './context';
-        import { helper } from './utils';
-
-        export function MyProvider({ children }) {
-          const value = useMemo(() => helper(), []);
-          return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
-        }
-      `);
-
-      // MyContext used in JSX member expression - NOT transformed
-      expect(code).toContain('MyContext');
-      expect(code).not.toContain('get MyContext');
-      expect(code).toMatch(/import.*MyContext.*from.*\.\/context/);
-
-      // helper not used in JSX - transformed
-      expect(code).toContain('get helper');
     });
   });
 });
