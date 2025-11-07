@@ -244,6 +244,7 @@ export const getSavedObjectTypes = (
           ],
           schemas: {
             forwardCompatibility: SettingsSchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV5,
           },
         },
       },
