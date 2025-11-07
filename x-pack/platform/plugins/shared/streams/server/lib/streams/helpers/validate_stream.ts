@@ -98,6 +98,8 @@ function validateCondition(condition: Condition) {
   }
 }
 
+// TODO - many UI types are dependent on the processor definitions in Streamlang, but
+// drop is not ready for the UI yet so will need to figure out a good way to handle this
 const actionStepValidators: {
   [K in ProcessorType]: (step: Extract<StreamlangProcessorDefinition, { action: K }>) => void;
 } = {

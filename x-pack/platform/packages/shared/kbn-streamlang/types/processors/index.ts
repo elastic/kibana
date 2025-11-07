@@ -266,7 +266,7 @@ export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
  * Drop processor
  */
 
-export interface DropDocumentProcessor {
+export interface DropDocumentProcessor extends ProcessorBase {
   action: 'drop_document';
   where: Condition;
 }

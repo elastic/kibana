@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestProcessorContainer, Script } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestPipelineDropProcessor } from '../../../../types/processors/ingest_pipeline_processors';
 
 export const processDropProcessor = (
-  DropProcessor: IngestPipelineDropProcessor
+  dropProcessor: IngestPipelineDropProcessor
 ): IngestProcessorContainer[] => [
   {
-    drop: { ...DropProcessor },
+    drop: { ...dropProcessor, if: dropProcessor.if as Script },
   },
 ];
