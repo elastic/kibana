@@ -42,11 +42,9 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed
   const { euiTheme } = useEuiTheme();
 
   const handleRef = (node: HTMLElement | null) => {
-    if (!ref) return;
-
     if (typeof ref === 'function') {
       ref(node);
-    } else {
+    } else if (ref) {
       ref.current = node;
     }
 
