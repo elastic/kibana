@@ -29,7 +29,7 @@ const defaultInitResult = { browserFields: {} };
 export const useInitSourcerer = (
   scopeId:
     | SourcererScopeName.default
-    | SourcererScopeName.detections
+    | SourcererScopeName.alerts
     | SourcererScopeName.attacks
     | SourcererScopeName.explore = SourcererScopeName.default
 ) => {
@@ -307,7 +307,7 @@ export const useInitSourcerer = (
   // Related to the detection page
   useEffect(() => {
     if (
-      scopeId === SourcererScopeName.detections &&
+      scopeId === SourcererScopeName.alerts &&
       isSignalIndexExists &&
       signalIndexName != null &&
       initialDetectionSourcerer.current &&
@@ -316,29 +316,29 @@ export const useInitSourcerer = (
       initialDetectionSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.detections,
+          id: SourcererScopeName.alerts,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
-            SourcererScopeName.detections,
+            SourcererScopeName.alerts,
             signalIndexName,
             true
           ),
         })
       );
     } else if (
-      scopeId === SourcererScopeName.detections &&
+      scopeId === SourcererScopeName.alerts &&
       signalIndexNameSourcerer != null &&
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
       initialDetectionSourcerer.current = false;
       sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.detections,
+        id: SourcererScopeName.alerts,
         selectedDataViewId: defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           defaultDataView,
-          SourcererScopeName.detections,
+          SourcererScopeName.alerts,
           signalIndexNameSourcerer,
           true
         ),

@@ -82,7 +82,7 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.TIME_SAVED}
-        scopeId={SourcererScopeName.detections}
+        scopeId={SourcererScopeName.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

@@ -22,7 +22,7 @@ const getPatternListFromScope = (
     case SourcererScopeName.default:
     case SourcererScopeName.explore:
       return sortWithExcludesAtEnd(patternList.filter((index) => index !== signalIndexName));
-    case SourcererScopeName.detections:
+    case SourcererScopeName.alerts:
       // set to signalIndexName whether or not it exists yet in the patternList
       return signalIndexName != null ? [signalIndexName] : [];
     case SourcererScopeName.attacks:
@@ -129,7 +129,7 @@ export const checkIfIndicesExist = ({
   signalIndexName,
   isDefaultDataViewSelected,
 }: CheckIfIndicesExistParams) => {
-  if (scopeId === SourcererScopeName.detections) {
+  if (scopeId === SourcererScopeName.alerts) {
     return patternList.includes(`${signalIndexName}`);
   }
 

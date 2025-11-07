@@ -175,7 +175,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
 
   const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
 
-  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
+  const browserFields = useBrowserFields(DataViewManagerScopeName.alerts, dataView);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);

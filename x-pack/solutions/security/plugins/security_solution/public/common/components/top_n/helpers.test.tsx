@@ -12,13 +12,13 @@ import {
   alertEvents,
   allEvents,
   defaultOptions,
+  detectionAlertsTables,
   getOptions,
   getSourcererScopeName,
   isDetectionsAlertsTable,
   rawEvents,
   removeIgnoredAlertFilters,
   shouldIgnoreAlertFilters,
-  detectionAlertsTables,
 } from './helpers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -243,9 +243,7 @@ describe('getSourcererScopeName', () => {
 
     test(`it returns the 'detections' SourcererScopeName when the view is NOT 'raw' for detections alerts table '${tableId}'`, () => {
       const view = 'alert';
-      expect(getSourcererScopeName({ scopeId: tableId, view })).toEqual(
-        SourcererScopeName.detections
-      );
+      expect(getSourcererScopeName({ scopeId: tableId, view })).toEqual(SourcererScopeName.alerts);
     });
   });
 

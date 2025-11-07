@@ -102,7 +102,7 @@ export const useInitDataViewManager = () => {
     const listeners = [
       DataViewManagerScopeName.default,
       DataViewManagerScopeName.timeline,
-      DataViewManagerScopeName.detections,
+      DataViewManagerScopeName.alerts,
       DataViewManagerScopeName.attacks,
       DataViewManagerScopeName.analyzer,
       DataViewManagerScopeName.explore,

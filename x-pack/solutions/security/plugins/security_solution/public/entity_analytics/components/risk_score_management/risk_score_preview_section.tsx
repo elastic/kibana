@@ -161,11 +161,11 @@ const RiskEnginePreview: React.FC<{
   });
 
   const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
+    SourcererScopeName.alerts
   );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
 
   const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
 

@@ -164,11 +164,11 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Index for `add filter` action and toasts for errors
   const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
+    SourcererScopeName.alerts
   );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
 
   const { addError, addSuccess, remove } = useAppToasts();
 

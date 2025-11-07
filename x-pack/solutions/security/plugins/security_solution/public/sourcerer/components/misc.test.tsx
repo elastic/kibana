@@ -19,7 +19,7 @@ import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { TimelineId } from '../../../common/types/timeline';
 import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 
@@ -119,7 +119,7 @@ describe.skip('No data', () => {
   test('Hide sourcerer - detections ', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
+        <Sourcerer scope={sourcererModel.SourcererScopeName.alerts} />
       </TestProviders>
     );
 

@@ -127,7 +127,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               height={CHART_HEIGHT}
               id={`${uniqueQueryId}-embeddable`}
               inspectTitle={inspectTitle}
-              scopeId={SourcererScopeName.detections}
+              scopeId={SourcererScopeName.alerts}
               stackByField={stackByField0}
               timerange={timerange}
             />

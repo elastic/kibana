@@ -30,7 +30,7 @@ export const useCellActionsOptions = (
   >
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
 
   const {
     columns = [],
@@ -39,8 +39,8 @@ export const useCellActionsOptions = (
     pageSize = 0,
     dataGridRef,
   } = context ?? {};
-  const oldGetFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
-  const oldDataViewId = useDataViewId(SourcererScopeName.detections);
+  const oldGetFieldSpec = useGetFieldSpec(SourcererScopeName.alerts);
+  const oldDataViewId = useDataViewId(SourcererScopeName.alerts);
   const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
 
   const cellActionsMetadata = useMemo(

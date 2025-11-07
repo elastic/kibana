@@ -92,7 +92,7 @@ export const createInitListener = (
         // preventing race conditions
         // Whats more, portions of the state that already have selections applied to them will not be reset in the init listener.
         [
-          DataViewManagerScopeName.detections,
+          DataViewManagerScopeName.alerts,
           DataViewManagerScopeName.attacks,
           DataViewManagerScopeName.analyzer,
           DataViewManagerScopeName.timeline,

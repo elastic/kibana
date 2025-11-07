@@ -143,7 +143,7 @@ const PreviewHistogramComponent = ({
   return (
     <AlertTableCellContextProvider
       tableId={TableId.rulePreview}
-      sourcererScope={SourcererScopeName.detections}
+      sourcererScope={SourcererScopeName.alerts}
     >
       <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
         <EuiFlexGroup gutterSize="none" direction="column">
@@ -165,7 +165,7 @@ const PreviewHistogramComponent = ({
               height={CHART_HEIGHT}
               id={previewEmbeddableId}
               inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
-              scopeId={SourcererScopeName.detections}
+              scopeId={SourcererScopeName.alerts}
               stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
               timerange={timerange}
               withActions={INSPECT_ACTION}
@@ -196,7 +196,7 @@ const PreviewHistogramComponent = ({
           renderCellValue={PreviewRenderCellValue}
           rowRenderers={defaultRowRenderers}
           start={startDate}
-          sourcererScope={SourcererScopeName.detections}
+          sourcererScope={SourcererScopeName.alerts}
           indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
           bulkActions={false}
         />

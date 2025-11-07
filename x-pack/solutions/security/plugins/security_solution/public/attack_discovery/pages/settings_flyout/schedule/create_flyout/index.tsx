@@ -65,7 +65,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
   });
 
   const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.alerts);
 
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
     useCreateAttackDiscoverySchedule();

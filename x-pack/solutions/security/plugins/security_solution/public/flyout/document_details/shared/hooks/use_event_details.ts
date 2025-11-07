@@ -93,7 +93,7 @@ export const useEventDetails = ({
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
     pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
+      ? SourcererScopeName.alerts
       : SourcererScopeName.default;
 
   const sourcererDataView = useSourcererDataView(sourcererScope);

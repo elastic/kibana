@@ -23,11 +23,11 @@ interface FiltersProps {
 
 export const Filters: React.FC<FiltersProps> = React.memo(({ filters }) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
 
   // get the sourcerer `DataViewSpec` for alerts:
   const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(SourcererScopeName.detections);
+    useSourcererDataView(SourcererScopeName.alerts);
 
   // create a `DataView` from the `DataViewSpec`:
   const { dataView: oldDataView } = useCreateDataView({

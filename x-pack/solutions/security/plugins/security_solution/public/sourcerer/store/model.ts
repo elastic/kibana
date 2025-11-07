@@ -13,7 +13,7 @@ import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-pl
 /** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {
   default = 'default',
-  detections = 'detections',
+  alerts = 'alerts',
   attacks = 'attacks',
   timeline = 'timeline',
   analyzer = 'analyzer',
@@ -158,9 +158,9 @@ export const initialSourcererState: SourcererModel = {
       ...initSourcererScope,
       id: SourcererScopeName.default,
     },
-    [SourcererScopeName.detections]: {
+    [SourcererScopeName.alerts]: {
       ...initSourcererScope,
-      id: SourcererScopeName.detections,
+      id: SourcererScopeName.alerts,
     },
     [SourcererScopeName.attacks]: {
       ...initSourcererScope,

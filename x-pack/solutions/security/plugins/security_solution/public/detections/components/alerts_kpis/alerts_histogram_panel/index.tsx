@@ -293,7 +293,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             height={chartHeight ?? CHART_HEIGHT}
             id={visualizationId}
             inspectTitle={inspectTitle ?? title}
-            scopeId={SourcererScopeName.detections}
+            scopeId={SourcererScopeName.alerts}
             stackByField={selectedStackByOption}
             timerange={timerange}
           />

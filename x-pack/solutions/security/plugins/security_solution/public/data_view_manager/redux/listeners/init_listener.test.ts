@@ -45,7 +45,7 @@ const mockGetState = jest.fn(() => {
   const state = structuredClone(mockDataViewManagerState);
 
   state.dataViewManager.default.dataViewId = null;
-  state.dataViewManager.detections = structuredClone(state.dataViewManager.default);
+  state.dataViewManager.alerts = structuredClone(state.dataViewManager.default);
   state.dataViewManager.attacks = structuredClone(state.dataViewManager.default);
   state.dataViewManager.timeline = structuredClone(state.dataViewManager.default);
   state.dataViewManager.analyzer = structuredClone(state.dataViewManager.default);
@@ -116,7 +116,7 @@ describe('createInitListener', () => {
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.detections,
+        scope: DataViewManagerScopeName.alerts,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(

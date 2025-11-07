@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { useSourcererDataView } from '.';
@@ -19,12 +19,12 @@ import {
   SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../../common/constants';
-import { useUserInfo, initialState as userInfoState } from '../../detections/components/user_info';
+import { initialState as userInfoState, useUserInfo } from '../../detections/components/user_info';
 import {
+  createMockStore,
   mockGlobalState,
   mockSourcererState,
   TestProviders,
-  createMockStore,
 } from '../../common/mock';
 import type { SelectedDataView } from '../store/model';
 import { SourcererScopeName } from '../store/model';
@@ -396,7 +396,7 @@ describe.skip('Sourcerer Hooks', () => {
       signalIndexName: mockSourcererState.signalIndexName,
       isSignalIndexExists: true,
     }));
-    const { rerender } = renderHook(() => useInitSourcerer(SourcererScopeName.detections), {
+    const { rerender } = renderHook(() => useInitSourcerer(SourcererScopeName.alerts), {
       wrapper: StoreProvider,
     });
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -692,8 +692,8 @@ describe('getScopeFromPath', () => {
   });
 
   it('should return detections scope', async () => {
-    expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.detections);
+    expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.alerts);
+    expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.alerts);
+    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.alerts);
   });
 });

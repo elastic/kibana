@@ -124,7 +124,7 @@ export const usePickIndexPatterns = ({
 
   const getDefaultSelectedOptionsByDataView = useCallback(
     (id: string, isAlerts: boolean = false): Array<EuiComboBoxOptionOption<string>> =>
-      scopeId === SourcererScopeName.detections || isAlerts
+      scopeId === SourcererScopeName.alerts || isAlerts
         ? signalPatternListToOptions
         : patternListToOptions(
             getScopePatternListSelection(
@@ -165,9 +165,7 @@ export const usePickIndexPatterns = ({
 
   useEffect(() => {
     setSelectedOptions(
-      scopeId === SourcererScopeName.detections
-        ? signalPatternListToOptions
-        : selectedPatternsAsOptions
+      scopeId === SourcererScopeName.alerts ? signalPatternListToOptions : selectedPatternsAsOptions
     );
   }, [selectedPatterns, scopeId, selectedPatternsAsOptions, signalPatternListToOptions]);
   // when scope updates, check modified to set/remove alerts label

@@ -96,7 +96,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.COST_SAVINGS_TREND}
-        scopeId={SourcererScopeName.detections}
+        scopeId={SourcererScopeName.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

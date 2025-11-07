@@ -14,7 +14,7 @@ import { enableMapSet } from 'immer';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
-import { sourcererReducer, sourcererModel } from '../../sourcerer/store';
+import { sourcererModel, sourcererReducer } from '../../sourcerer/store';
 
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
@@ -82,9 +82,9 @@ export const createInitialState = (
       signalIndexName,
       true
     ),
-    [SourcererScopeName.detections]: getScopePatternListSelection(
+    [SourcererScopeName.alerts]: getScopePatternListSelection(
       defaultDataView,
-      SourcererScopeName.detections,
+      SourcererScopeName.alerts,
       signalIndexName,
       true
     ),
@@ -110,10 +110,10 @@ export const createInitialState = (
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.default],
         },
-        [SourcererScopeName.detections]: {
-          ...sourcererModel.initialSourcererState.sourcererScopes.detections,
+        [SourcererScopeName.alerts]: {
+          ...sourcererModel.initialSourcererState.sourcererScopes.alerts,
           selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[SourcererScopeName.detections],
+          selectedPatterns: initialPatterns[SourcererScopeName.alerts],
         },
         [SourcererScopeName.timeline]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.timeline,

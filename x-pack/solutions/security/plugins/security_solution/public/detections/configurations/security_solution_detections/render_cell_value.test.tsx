@@ -74,12 +74,12 @@ describe('RenderCellValue', () => {
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <AlertTableCellContextProvider
             tableId={TableId.test}
-            sourcererScope={SourcererScopeName.detections}
+            sourcererScope={SourcererScopeName.alerts}
           >
             <CellValue
               {...defaultProps}
               {...props}
-              sourcererScope={SourcererScopeName.detections}
+              sourcererScope={SourcererScopeName.alerts}
               tableType={TableId.test}
             />
           </AlertTableCellContextProvider>
@@ -95,7 +95,7 @@ describe('RenderCellValue', () => {
           <DragDropContextWrapper browserFields={mockBrowserFields}>
             <CellValue
               {...defaultProps}
-              sourcererScope={SourcererScopeName.detections}
+              sourcererScope={SourcererScopeName.alerts}
               tableType={TableId.test}
             />
           </DragDropContextWrapper>

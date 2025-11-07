@@ -62,8 +62,8 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
               ...state.sourcererScopes[SourcererScopeName.default],
               loading,
             },
-            [SourcererScopeName.detections]: {
-              ...state.sourcererScopes[SourcererScopeName.detections],
+            [SourcererScopeName.alerts]: {
+              ...state.sourcererScopes[SourcererScopeName.alerts],
               loading,
             },
             [SourcererScopeName.timeline]: {

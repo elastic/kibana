@@ -479,12 +479,12 @@ export const mockGlobalState: State = {
           true
         ),
       },
-      [SourcererScopeName.detections]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
+      [SourcererScopeName.alerts]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.alerts],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.detections,
+          SourcererScopeName.alerts,
           mockSourcererState.signalIndexName,
           true
         ),

@@ -84,7 +84,7 @@ describe('useBulkActionsByTableType', () => {
     renderHook(() => useBulkActionsByTableType(mockTableId, mockQuery, mockRefresh));
 
     expect(useBulkAlertActionItemsModule.useBulkAlertActionItems).toHaveBeenCalledWith({
-      scopeId: SourcererScopeName.detections,
+      scopeId: SourcererScopeName.alerts,
       filters: [],
       from: '2020-07-07T08:20:18.966Z',
       to: '2020-07-08T08:20:18.966Z',
@@ -96,7 +96,7 @@ describe('useBulkActionsByTableType', () => {
       localFilters: [],
       from: '2020-07-07T08:20:18.966Z',
       to: '2020-07-08T08:20:18.966Z',
-      scopeId: SourcererScopeName.detections,
+      scopeId: SourcererScopeName.alerts,
       tableId: mockTableId,
     });
   });

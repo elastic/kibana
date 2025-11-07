@@ -28,7 +28,7 @@ export const useSignalHelpers = (): {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { indicesExist, dataViewId: oldDataViewId } = useSourcererDataView(
-    SourcererScopeName.detections
+    SourcererScopeName.alerts
   );
 
   const { indexFieldsSearch } = useOldDataView();
@@ -49,9 +49,7 @@ export const useSignalHelpers = (): {
     ? experimentalSignalIndexName
     : signalIndexNameSourcerer;
 
-  const { dataView: experimentalDefaultDataView, status } = useDataView(
-    SourcererScopeName.detections
-  );
+  const { dataView: experimentalDefaultDataView, status } = useDataView(SourcererScopeName.alerts);
   const dataViewId = newDataViewPickerEnabled
     ? experimentalDefaultDataView?.id ?? null
     : oldDataViewId;
