@@ -24,6 +24,7 @@ import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
@@ -38,7 +39,7 @@ import {
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
 } from './time_utils';
-import type { Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
+import type { TimeSliderControlApi } from './types';
 import { isCompressed } from '../../control_group/utils/is_compressed';
 
 const displayName = i18n.translate('controls.timesliderControl.displayName', {
@@ -46,8 +47,8 @@ const displayName = i18n.translate('controls.timesliderControl.displayName', {
 });
 
 export const getTimesliderControlFactory = (): EmbeddableFactory<
-  TimesliderControlState,
-  TimesliderControlApi
+  TimeSliderControlState,
+  TimeSliderControlApi
 > => {
   return {
     type: TIME_SLIDER_CONTROL,
@@ -97,7 +98,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         setSelectedRange(to - from);
       }
 
-      function setTimeslice(timeslice?: Timeslice) {
+      function setTimeslice(timeslice?: TimeSlice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
         const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
           timeRangePercentage.getLatestState();
@@ -129,7 +130,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             : undefined;
       }
 
-      function onChange(timeslice?: Timeslice) {
+      function onChange(timeslice?: TimeSlice) {
         hasTimeSliceSelection$.next(Boolean(timeslice));
         setTimeslice(timeslice);
         const nextSelectedRange = timeslice
@@ -242,7 +243,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<TimesliderControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<TimeSliderControlState>({
         uuid,
         parentApi,
         serializeState,
@@ -346,7 +347,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           const to = useMemo(() => {
             return timeslice ? timeslice[TO_INDEX] : timeRangeMeta.timeRangeMax;
           }, [timeslice, timeRangeMeta.timeRangeMax]);
-          const value: Timeslice = useMemo(() => {
+          const value: TimeSlice = useMemo(() => {
             return [from, to];
           }, [from, to]);
 
