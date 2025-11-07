@@ -103,6 +103,19 @@ describe('FiltersSections', () => {
     expect(suggestionsSelect).toHaveLength(1);
   });
 
+  it('has the Delete disabled, when I have 1 filter and the selects have no values', async () => {
+    const initialFilters: Filter[] = [{ key: '', value: '' }];
+    const onChangeFilters = jest.fn();
+    const { getAllByTestId } = render(
+      <FiltersSection filters={initialFilters} onChangeFilters={onChangeFilters} />,
+      { wrapper: Wrapper }
+    );
+
+    const removeButtons = getAllByTestId('apmCustomLinkFiltersSectionButton');
+    expect(removeButtons).toHaveLength(1);
+    expect(removeButtons[0]).toBeDisabled();
+  });
+
   it('when many filters, it deletes the proper filter', async () => {
     const initialFilters: Filter[] = [
       { key: 'service.name', value: 'foo' },
