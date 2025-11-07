@@ -10,15 +10,15 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/torq/constants';
 
-const ACTION_TYPE_ID = '.torq';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
@@ -26,7 +26,7 @@ beforeAll(() => {
 
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
-    expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
+    expect(actionTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 

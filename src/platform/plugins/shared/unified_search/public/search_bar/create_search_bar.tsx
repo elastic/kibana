@@ -280,6 +280,7 @@ export function createSearchBar({
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
             hasDirtyState={props.hasDirtyState}
             esqlVariablesConfig={props.esqlVariablesConfig}
+            onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             useBackgroundSearchButton={props.useBackgroundSearchButton}
           />
         </core.i18n.Context>
