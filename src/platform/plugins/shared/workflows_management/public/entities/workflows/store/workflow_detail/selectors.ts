@@ -70,11 +70,6 @@ export const selectHighlightedStepId = createSelector(
   (detail) => detail.highlightedStepId
 );
 
-export const selectStepExecutions = createSelector(
-  selectDetailState,
-  (detail) => detail.stepExecutions
-);
-
 export const selectFocusedStepInfo = createSelector(
   selectFocusedStepId,
   selectWorkflowLookup,
@@ -89,3 +84,37 @@ export const selectIsTestModalOpen = createSelector(
 
 export const selectConnectors = createSelector(selectDetailState, (detail) => detail.connectors);
 export const selectSchemaLoose = createSelector(selectDetailState, (detail) => detail.schemaLoose);
+
+export const selectExecution = createSelector(selectDetailState, (detail) => detail.execution);
+export const selectActiveTab = createSelector(selectDetailState, (detail) => detail.activeTab);
+export const selectIsExecutionsTab = createSelector(
+  selectActiveTab,
+  (activeTab): activeTab is 'executions' => activeTab === 'executions'
+);
+export const selectIsExecutionYamlForEditor = createSelector(
+  selectIsExecutionsTab,
+  selectExecution,
+  (isExecutionsTab, execution) => Boolean(isExecutionsTab && execution?.yaml)
+);
+
+export const selectStepExecutions = createSelector(
+  selectExecution,
+  (execution) => execution?.stepExecutions
+);
+
+/**
+ * Selector that returns the correct YAML string for the editor based on the active tab.
+ * When activeTab is 'executions' and execution is defined, returns execution.yaml.
+ * Otherwise, returns yamlString (the currently edited workflow YAML).
+ */
+export const selectYamlForEditor = createSelector(
+  selectIsExecutionYamlForEditor,
+  selectExecution,
+  selectYamlString,
+  (isExecutionYamlForEditor, execution, yamlString) => {
+    if (isExecutionYamlForEditor) {
+      return execution?.yaml ?? ''; // Will always be defined if isExecutionYaml is true
+    }
+    return yamlString;
+  }
+);

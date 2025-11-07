@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import YAML from 'yaml';
+import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
@@ -41,7 +41,6 @@ import {
   selectSchemaLoose,
   selectYamlDocument,
   setCursorPosition,
-  setStepExecutions,
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
@@ -180,16 +179,7 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
   // The current yaml document in the editor (could be unsaved)
-  const currentYamlDocument = useSelector(selectYamlDocument);
-
-  const yamlDocument = useMemo(() => {
-    // if the yaml comes from an execution, we need to parse it to get the correct yaml document
-    if (isExecutionYaml) {
-      return YAML.parseDocument(workflowYaml, { keepSourceTokens: true });
-    }
-    return currentYamlDocument;
-  }, [isExecutionYaml, workflowYaml, currentYamlDocument]);
-
+  const yamlDocument = useSelector(selectYamlDocument);
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
@@ -453,10 +443,6 @@ export const WorkflowYAMLEditor = ({
     }
     updateContainerPosition(focusedStepInfo, editorRef.current!);
   }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
-
-  useEffect(() => {
-    dispatch(setStepExecutions({ stepExecutions }));
-  }, [stepExecutions, dispatch]);
 
   useEffect(() => {
     if (!isEditorMounted) {

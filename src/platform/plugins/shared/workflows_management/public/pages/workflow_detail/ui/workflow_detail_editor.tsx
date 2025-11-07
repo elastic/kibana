@@ -10,7 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -21,10 +21,11 @@ import {
 } from '@kbn/workflows';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import {
+  selectStepExecutions,
   selectWorkflowDefinition,
   selectWorkflowGraph,
+  selectYamlForEditor,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
@@ -51,37 +52,31 @@ interface WorkflowDetailEditorProps {
 export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
   const styles = useMemoCss(componentStyles);
   const { uiSettings } = useKibana().services;
-  const workflowYaml = useSelector(selectYamlString) ?? '';
+  const workflowYamlForEditor = useSelector(selectYamlForEditor) ?? '';
+  const workflowYamlForRun = useSelector(selectYamlString) ?? '';
   const workflowDefinition = useSelector(selectWorkflowDefinition);
   const workflowGraph = useSelector(selectWorkflowGraph);
+  const stepExecutions = useSelector(selectStepExecutions);
 
   const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
-
-  const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
   const { runIndividualStep } = useWorkflowActions();
 
   const [testStepId, setTestStepId] = useState<string | null>(null);
   const [contextOverride, setContextOverride] = useState<ContextOverrideData | null>(null);
 
-  const overrideYamlValue = useMemo<string | undefined>(() => {
-    if (activeTab === 'executions' && execution) {
-      return execution.yaml;
-    }
-  }, [activeTab, execution]);
-
   const submitStepRun = useCallback(
     async (stepId: string, mock: Partial<StepContext>) => {
       const response = await runIndividualStep.mutateAsync({
         stepId,
-        workflowYaml,
+        workflowYaml: workflowYamlForRun,
         contextOverride: mock,
       });
       setSelectedExecution(response.workflowExecutionId);
       setTestStepId(null);
       setContextOverride(null);
     },
-    [runIndividualStep, workflowYaml, setSelectedExecution, setTestStepId, setContextOverride]
+    [runIndividualStep, workflowYamlForRun, setSelectedExecution, setTestStepId, setContextOverride]
   );
 
   const handleStepRun = useCallback(
@@ -122,8 +117,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         <EuiFlexItem css={styles.yamlEditor}>
           <React.Suspense fallback={<EuiLoadingSpinner />}>
             <WorkflowYAMLEditor
-              stepExecutions={execution?.stepExecutions}
-              workflowYaml={overrideYamlValue ?? workflowYaml}
+              stepExecutions={stepExecutions}
+              workflowYaml={workflowYamlForEditor}
               isExecutionYaml={activeTab === 'executions'}
               highlightDiff={highlightDiff}
               selectedExecutionId={selectedExecutionId}
@@ -135,7 +130,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           <EuiFlexItem css={styles.visualEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>
               <WorkflowVisualEditor
-                workflowYaml={overrideYamlValue ?? workflowYaml}
+                workflowYaml={workflowYamlForEditor}
                 workflowExecutionId={selectedExecutionId}
               />
             </React.Suspense>
@@ -144,7 +139,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         {isExecutionGraphEnabled && (
           <EuiFlexItem css={styles.visualEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <ExecutionGraph workflowYaml={overrideYamlValue ?? workflowYaml} />
+              <ExecutionGraph workflowYaml={workflowYamlForEditor} />
             </React.Suspense>
           </EuiFlexItem>
         )}

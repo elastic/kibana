@@ -8,9 +8,9 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import type { EsWorkflow, WorkflowDetailDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
-import type { ComputedData, WorkflowDetailState } from '../types';
+import type { ActiveTab, ComputedData, WorkflowDetailState } from '../types';
 import { findStepByLine } from '../utils/step_finder';
 
 // Initial state
@@ -21,7 +21,6 @@ const initialState: WorkflowDetailState = {
   connectors: undefined,
   schemaLoose: getWorkflowZodSchemaLoose({}),
   focusedStepId: undefined,
-  stepExecutions: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
 };
@@ -52,12 +51,6 @@ const workflowDetailSlice = createSlice({
         state.computed.workflowLookup
       );
     },
-    setStepExecutions: (
-      state,
-      action: { payload: { stepExecutions?: WorkflowStepExecutionDto[] } }
-    ) => {
-      state.stepExecutions = action.payload.stepExecutions;
-    },
     setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
       state.highlightedStepId = action.payload.stepId;
     },
@@ -66,6 +59,12 @@ const workflowDetailSlice = createSlice({
     },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
+    },
+    setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
+      state.execution = action.payload;
+    },
+    setActiveTab: (state, action: { payload: ActiveTab | undefined }) => {
+      state.activeTab = action.payload;
     },
 
     // Internal actions - these are not for components usage
@@ -93,10 +92,11 @@ export const {
   updateWorkflow,
   setYamlString,
   setCursorPosition,
-  setStepExecutions,
   setHighlightedStepId,
   setIsTestModalOpen,
   setConnectors,
+  setExecution,
+  setActiveTab,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,

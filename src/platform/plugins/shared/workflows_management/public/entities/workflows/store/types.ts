@@ -10,11 +10,13 @@
 import type { EnhancedStore } from '@reduxjs/toolkit';
 import type YAML from 'yaml';
 import type { LineCounter } from 'yaml';
-import type { WorkflowDetailDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowDetailDto, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowZodSchemaLooseType } from '../../../../common/schema';
 import type { ConnectorsResponse } from '../../connectors/model/types';
+
+export type ActiveTab = 'workflow' | 'executions';
 
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
@@ -27,14 +29,16 @@ export interface WorkflowDetailState {
   focusedStepId?: string;
   /** The step id that is highlighted in the workflow yaml editor */
   highlightedStepId?: string;
-  /** The step executions for the workflow */
-  stepExecutions?: WorkflowStepExecutionDto[];
   /** The modal to test the workflow is open */
   isTestModalOpen: boolean;
   /** The connectors data */
   connectors?: ConnectorsResponse;
   /** The loose schema for the workflow */
   schemaLoose: WorkflowZodSchemaLooseType;
+  /** The currently selected execution (when viewing executions tab) */
+  execution?: WorkflowExecutionDto;
+  /** The active tab (workflow or executions) */
+  activeTab?: ActiveTab;
 }
 
 export interface ComputedData {
