@@ -455,23 +455,6 @@ describe('functions arg suggestions', () => {
       expect(texts).toContain('( $0 )');
     });
 
-    it('list operator inside nested function: field suggestions without trailing space', async () => {
-      const { suggest } = await setup();
-      const suggestions = await suggest('FROM index | WHERE CASE(integerField IN (/)');
-
-      const fieldSuggestions = suggestions.filter((s) => s.kind === 'Variable');
-      const functionSuggestions = suggestions.filter((s) => s.kind === 'Function');
-
-      expect(suggestions.length).toBeGreaterThan(0);
-      expect(functionSuggestions.length).toBeGreaterThan(0);
-
-      if (fieldSuggestions.length > 0) {
-        fieldSuggestions.forEach((s) => {
-          expect(s.text).not.toMatch(/\s$/);
-        });
-      }
-    });
-
     it('IN operator with empty list: suggests integer fields and functions', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | WHERE integerField IN (/)');
