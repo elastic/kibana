@@ -16,13 +16,16 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+import type { DiscoverAppState } from '../discover_app_state_container';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
   existingTab,
+  initialAppState,
 }: {
   tab: DiscoverSessionTab;
   existingTab?: TabState;
+  initialAppState?: DiscoverAppState;
 }): TabState => ({
   ...DEFAULT_TAB_STATE,
   ...existingTab,
@@ -33,7 +36,7 @@ export const fromSavedObjectTabToTabState = ({
     visContext: tab.visContext,
     controlGroupJson: tab.controlGroupJson,
   },
-  appState: {
+  appState: initialAppState ?? {
     columns: tab.columns,
     filters: tab.serializedSearchSource.filter,
     grid: tab.grid,

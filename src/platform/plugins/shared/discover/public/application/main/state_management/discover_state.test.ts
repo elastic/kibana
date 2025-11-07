@@ -119,7 +119,7 @@ describe('Discover state', () => {
       });
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
+        `"/#?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 
@@ -206,7 +206,7 @@ describe('Discover state', () => {
       await jest.runAllTimersAsync();
 
       expect(history.createHref(history.location)).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())&_tab=(tabId:the-saved-search-id-with-timefield)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
+        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_tab=(tabId:the-saved-search-id-with-timefield)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 
@@ -597,7 +597,7 @@ describe('Discover state', () => {
       await new Promise(process.nextTick);
       expect(newSavedSearch?.id).toBe('the-saved-search-id');
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())"`
+        `"/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
       );
       const { hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
@@ -624,7 +624,7 @@ describe('Discover state', () => {
       );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_tab=(tabId:the-saved-search-id)"`
+        `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_tab=(tabId:the-saved-search-id)"`
       );
       const { hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
@@ -1293,7 +1293,7 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.savedSearchState.getState().hideChart).toBe(false);
+      expect(state.savedSearchState.getState().hideChart).toBe(undefined);
       state.savedSearchState.update({ nextState: { hideChart: true } });
       expect(state.savedSearchState.getState().hideChart).toBe(true);
       await state.actions.onOpenSavedSearch(savedSearchMock.id!);
@@ -1302,7 +1302,7 @@ describe('Discover state', () => {
     });
 
     test('onOpenSavedSearch - cleanup of previous filter', async () => {
-      const { state, customizationService, history } = await getState(
+      const { state, customizationService } = await getState(
         "/#?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(customer_first_name),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,key:customer_first_name,negate:!f,params:(query:Mary),type:phrase),query:(match_phrase:(customer_first_name:Mary)))),hideChart:!f,index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,interval:auto,query:(language:kuery,query:''),sort:!())",
         { savedSearch: savedSearchMock }
       );
@@ -1320,17 +1320,7 @@ describe('Discover state', () => {
         })
       );
       expect(state.appState.get().filters).toHaveLength(1);
-      history.push('/');
-      await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
-          initializeSingleTabParams: {
-            stateContainer: state,
-            customizationService,
-            dataViewSpec: undefined,
-            defaultUrlState: undefined,
-          },
-        })
-      );
+      await state.actions.onOpenSavedSearch(savedSearchMock.id!);
       expect(state.appState.get().filters).toBeUndefined();
     });
 
@@ -1373,9 +1363,9 @@ describe('Discover state', () => {
         })
       );
       await new Promise(process.nextTick);
-      const initialUrlState =
-        '/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())';
-      expect(getCurrentUrl()).toBe(initialUrlState);
+      expect(getCurrentUrl()).toBe(
+        '/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())'
+      );
       expect(
         selectTabRuntimeState(
           runtimeStateManager,
@@ -1387,7 +1377,7 @@ describe('Discover state', () => {
       await state.actions.onChangeDataView(dataViewComplexMock.id!);
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!(!(data,desc)))"`
+        `"/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),interval:auto,sort:!(!(data,desc)))"`
       );
       await waitFor(() => {
         expect(state.dataState.fetch).toHaveBeenCalledTimes(2);
@@ -1402,7 +1392,9 @@ describe('Discover state', () => {
       // Undo all changes to the saved search, this should trigger a fetch, again
       await state.internalState.dispatch(internalStateActions.resetDiscoverSession());
       await new Promise(process.nextTick);
-      expect(getCurrentUrl()).toBe(initialUrlState);
+      expect(getCurrentUrl()).toBe(
+        '/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())'
+      );
       await waitFor(() => {
         expect(state.dataState.fetch).toHaveBeenCalledTimes(3);
       });
@@ -1480,7 +1472,7 @@ describe('Discover state', () => {
       });
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
+        `"/?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 

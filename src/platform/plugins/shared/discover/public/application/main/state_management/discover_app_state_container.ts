@@ -189,15 +189,11 @@ export const getDiscoverAppStateContainer = ({
   services: DiscoverServices;
   injectCurrentTab: TabActionInjector;
 }): DiscoverAppStateContainer => {
-  let previousState = getInitialState({
-    initialUrlState: getCurrentUrlState(stateStorage, services),
-    savedSearch: savedSearchContainer.getState(),
-    services,
-  });
-
   const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
     return selectTab(state, tabId).appState;
   };
+
+  let previousState = getAppState(internalState.getState());
 
   const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
     get: () => getAppState(internalState.getState()),
@@ -217,10 +213,6 @@ export const getDiscoverAppStateContainer = ({
     },
     state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
   };
-
-  internalState.dispatch(
-    injectCurrentTab(internalStateActions.setAppState)({ appState: previousState })
-  );
 
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
     return getInitialState({
@@ -397,7 +389,7 @@ export const getDiscoverAppStateContainer = ({
   };
 };
 
-function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
+export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
   return (
     cleanupUrlState(stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {}, services.uiSettings) ??
     {}
