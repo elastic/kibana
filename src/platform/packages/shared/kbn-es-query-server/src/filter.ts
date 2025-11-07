@@ -221,16 +221,11 @@ export const asCodeGroupFilterSchema = basePropertiesSchema.extends(
 /**
  * Schema for DSL filters
  */
-export const asCodeDSLFilterSchema = basePropertiesSchema.extends(
-  {
-    dsl: schema.object({
-      query: schema.recordOf(schema.string(), schema.any(), {
-        meta: { description: 'Elasticsearch Query DSL object' },
-      }),
-    }),
-  },
-  { meta: { description: 'Raw DSL filter' } }
-);
+export const asCodeDSLFilterSchema = basePropertiesSchema.extends({
+  dsl: schema.recordOf(schema.string(), schema.any(), {
+    meta: { description: 'Elasticsearch Query DSL object' },
+  }),
+});
 
 /**
  * Main discriminated union schema for Filter
