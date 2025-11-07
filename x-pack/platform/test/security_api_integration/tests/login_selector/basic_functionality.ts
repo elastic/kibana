@@ -704,7 +704,7 @@ export default function ({ getService }: FtrProviderContext) {
                   SAMLResponse: samlValues.samlResponse,
                 });
 
-              newCookie = parseCookie(firstResponse.headers['set-cookie'][0])!;
+              newCookie = parseCookie(firstResponse!.headers['set-cookie'][0])!;
             } else {
               const callbackFunc = () => {
                 return new Promise<Response>((resolve) => {
