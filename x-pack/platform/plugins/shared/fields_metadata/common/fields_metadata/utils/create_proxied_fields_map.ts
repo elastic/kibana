@@ -148,4 +148,3 @@ export function createProxiedPlainFields(
     flat_name: prefixedName,
   }));
 }
-
