@@ -33,7 +33,10 @@ const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<string>(KNOWN_SINGLE_VALUED_FIELD
 /**
  * Interface for exposing an `unflatten()` method on proxied APM documents.
  */
-interface UnflattenApmDocument<T extends Partial<FlattenedApmEvent>> {
+interface UnflattenApmDocument<
+  T extends Partial<FlattenedApmEvent>,
+  R extends keyof FlattenedApmEvent
+> {
   /**
    * Unflattens the APM Event, so fields can be accessed via `event.service?.name`.
    *
@@ -43,7 +46,7 @@ interface UnflattenApmDocument<T extends Partial<FlattenedApmEvent>> {
    * console.log(unflattened.service.name); // outputs "node-svc" for example
    * ```
    */
-  unflatten(): UnflattenedKnownFields<T>;
+  unflatten(): UnflattenedKnownFields<RequiredApmFields<T, R>>;
 }
 
 /**
@@ -67,7 +70,7 @@ interface UnflattenApmDocument<T extends Partial<FlattenedApmEvent>> {
 export function accessKnownApmEventFields<
   T extends Partial<FlattenedApmEvent>,
   R extends keyof FlattenedApmEvent
->(fields: T, required?: R[]): UnflattenApmDocument<T> & ProxiedApmEvent<T, R>;
+>(fields: T, required?: R[]): UnflattenApmDocument<T, R> & ProxiedApmEvent<T, R>;
 
 export function accessKnownApmEventFields(fields: Record<string, any>, required?: string[]) {
   if (required) {

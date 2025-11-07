@@ -66,10 +66,7 @@ describe('accessKnownApmEventFields', () => {
       'links.span_id': ['link1', 'link2'],
     };
 
-    const event = accessKnownApmEventFields(smallInput as Partial<FlattenedApmEvent>, [
-      '@timestamp',
-      'service.name',
-    ]);
+    const event = accessKnownApmEventFields(smallInput as Partial<FlattenedApmEvent>);
 
     // The proxied object is immutable. It will prevent mutations and will throw a TypeError
     expect(() => {
