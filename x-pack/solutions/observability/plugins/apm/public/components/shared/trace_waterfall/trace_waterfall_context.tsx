@@ -86,7 +86,7 @@ export function TraceWaterfallContextProvider({
   showLegend,
   serviceName,
 }: Props) {
-  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
+  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState, message } =
     useTraceWaterfall({
       traceItems,
     });
@@ -116,6 +116,7 @@ export function TraceWaterfallContextProvider({
         colorBy,
         showLegend,
         serviceName,
+        message,
       }}
     >
       {children}
