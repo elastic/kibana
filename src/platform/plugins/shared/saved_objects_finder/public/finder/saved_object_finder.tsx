@@ -221,11 +221,11 @@ class SavedObjectFinderUiClass extends React.Component<
       },
       this.debouncedFetch.bind(null, this.state.query)
     );
+
+    return foo;
   };
 
   public render() {
-    console.log(foo);
-
     const {
       onChoose,
       savedObjectMetaData,
