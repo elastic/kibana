@@ -9,7 +9,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { getESQLResults } from '@kbn/esql-utils';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { buildEsqlFilter } from '../util/esql_query_helpers';
+import { buildEsqlFilter } from '@kbn/streams-plugin/public';
 
 interface ExecuteEsqlParams {
   query: string;
