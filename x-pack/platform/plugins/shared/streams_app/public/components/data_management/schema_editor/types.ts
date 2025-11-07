@@ -48,7 +48,7 @@ export interface UnmappedSchemaField extends BaseSchemaField {
 export type SchemaField = MappedSchemaField | UnmappedSchemaField;
 
 export type SchemaEditorField = SchemaField & {
-  result?: 'modified' | 'unchanged';
+  result?: 'created' | 'modified' | 'unchanged';
   uncommitted?: boolean;
 };
 

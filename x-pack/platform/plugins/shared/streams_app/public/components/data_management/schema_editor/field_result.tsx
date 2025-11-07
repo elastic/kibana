@@ -11,6 +11,15 @@ import { i18n } from '@kbn/i18n';
 import type { SchemaEditorField } from './types';
 
 const FIELD_RESULT_MAP = {
+  created: {
+    color: 'success' as const,
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorCreatedResultLabel', {
+      defaultMessage: 'Created',
+    }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorCreatedResultTooltip', {
+      defaultMessage: 'The simulated processing steps newly create this field.',
+    }),
+  },
   modified: {
     color: 'warning' as const,
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorModifiedResultLabel', {

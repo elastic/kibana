@@ -135,7 +135,7 @@ export const TABLE_COLUMNS = {
   },
   status: {
     display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablestatusHeader', {
-      defaultMessage: 'Status',
+      defaultMessage: 'Mapping status',
     }),
   },
   source: {
