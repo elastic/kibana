@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { default as React, useCallback, useMemo } from 'react';
 import { useController } from 'react-hook-form';
-import { FieldSelector } from '../../../../shared/field_selector';
 import { useEnrichmentFieldSuggestions } from '../../../../../../hooks/use_field_suggestions';
 import { useStreamDataViewFieldTypes } from '../../../../../../hooks/use_stream_data_view_field_types';
+import { AutocompleteSelector } from '../../../../shared/autocomplete_selector';
 import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
 
 export interface ProcessorFieldSelectorProps {
@@ -78,7 +78,7 @@ export const ProcessorFieldSelector = ({
   );
 
   return (
-    <FieldSelector
+    <AutocompleteSelector
       value={field.value}
       onChange={handleChange}
       label={label ?? defaultLabel}
@@ -90,6 +90,7 @@ export const ProcessorFieldSelector = ({
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
       labelAppend={labelAppend}
+      showIcon={true}
     />
   );
 };
