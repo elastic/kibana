@@ -12,6 +12,7 @@ import { useHistory } from 'react-router-dom';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
@@ -133,7 +134,7 @@ export function TransactionDistribution({
         const [fieldName] = sortEntry;
         // Keep sorts for fields that are in the current columns array
         // Also keep @timestamp as it's not removable
-        return fieldName === '@timestamp' || (config.columns && config.columns.includes(fieldName));
+        return fieldName === AT_TIMESTAMP || (config.columns && config.columns.includes(fieldName));
       });
 
       // Clean up grid configuration to only include columns that exist
@@ -143,7 +144,7 @@ export function TransactionDistribution({
             columns: Object.fromEntries(
               Object.entries(config.grid.columns).filter(
                 ([fieldName]) =>
-                  fieldName === '@timestamp' || // `@timestamp` is always present
+                  fieldName === AT_TIMESTAMP || // `@timestamp` is always present
                   (config.columns && config.columns.includes(fieldName))
               )
             ),
