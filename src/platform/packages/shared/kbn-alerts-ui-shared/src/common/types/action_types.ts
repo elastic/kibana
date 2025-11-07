@@ -126,6 +126,8 @@ export interface CustomConnectorSelectionItem {
 
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
+  aliasFor?: string;
+  aliasName?: string;
   iconClass: IconType;
   selectMessage: string;
   selectMessagePreconfigured?: string;
