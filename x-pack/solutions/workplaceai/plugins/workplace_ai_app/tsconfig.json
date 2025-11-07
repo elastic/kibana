@@ -33,7 +33,8 @@
     "@kbn/deeplinks-agent-builder",
     "@kbn/deeplinks-data-connectors",
     "@kbn/deeplinks-analytics",
-    "@kbn/deeplinks-workflows"
+    "@kbn/deeplinks-workflows",
+    "@kbn/onechat-common"
   ],
   "exclude": [
     "target/**/*",

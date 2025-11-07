@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,14 +14,34 @@ import {
   EuiText,
   EuiSpacer,
   EuiBasicTable,
-  EuiBadge,
   EuiIcon,
 } from '@elastic/eui';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { AGENT_BUILDER_AGENTS } from '../../../common';
+import { useAgents } from '../hooks/use_agents';
+import { useKibana } from '../hooks/use_kibana';
 import salesForceSVG from '../../assets/salesforce.svg';
 import googleDriveSVG from '../../assets/google_drive.svg';
 import confluenceSVG from '../../assets/confluence.svg';
 
 export const SnapshotsSection: React.FC = () => {
+  const { data: agents = [], isLoading: isLoadingAgents } = useAgents();
+  const {
+    services: { application, chrome },
+  } = useKibana();
+
+  const agentCount = agents.length;
+
+  const getAgentEditUrl = useCallback(
+    (agentId: string) => {
+      const agentsBaseUrl = chrome?.navLinks.get(
+        `${AGENT_BUILDER_APP_ID}:${AGENT_BUILDER_AGENTS}`
+      )?.url;
+      return agentsBaseUrl ? `${agentsBaseUrl}/${agentId}/edit` : undefined;
+    },
+    [chrome]
+  );
+
   return (
     <div>
       <EuiTitle size="s">
@@ -36,38 +56,37 @@ export const SnapshotsSection: React.FC = () => {
               <h3>My Agents</h3>
             </EuiTitle>
             <EuiText size="s" color="subdued">
-              <p>1 active agent · Last created 3 days ago</p>
+              <p>{agentCount} active agent(s)</p>
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
-              items={[
-                { name: 'SupportAgent', type: 'Retrieval QA', status: 'Active' },
-                { name: 'SalesAgent', type: 'Summarization', status: 'Training' },
-                { name: 'TestAgent', type: 'Query', status: 'Active' },
-              ]}
+              items={agents}
+              loading={isLoadingAgents}
               columns={[
                 {
                   field: 'name',
                   name: 'Agent name',
-                  render: (name: string) => <a href="#">{name}</a>,
+                  render: (name: string, agent: any) => {
+                    const editUrl = getAgentEditUrl(agent.id);
+                    return editUrl ? (
+                      <a
+                        href={editUrl}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          application?.navigateToUrl(editUrl);
+                        }}
+                      >
+                        {name}
+                      </a>
+                    ) : (
+                      <span>{name}</span>
+                    );
+                  },
                 },
-                { field: 'type', name: 'Type' },
                 {
-                  field: 'status',
-                  name: 'Status',
-                  render: (status: string) => (
-                    <EuiBadge
-                      color={
-                        status === 'Active'
-                          ? 'success'
-                          : status === 'Training'
-                          ? 'warning'
-                          : 'default'
-                      }
-                    >
-                      {status}
-                    </EuiBadge>
-                  ),
+                  field: 'type',
+                  name: 'Type',
+                  render: (type: string) => type || '-',
                 },
               ]}
             />
