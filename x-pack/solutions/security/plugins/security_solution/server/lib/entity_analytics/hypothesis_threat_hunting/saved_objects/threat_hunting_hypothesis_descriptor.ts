@@ -11,13 +11,12 @@ import { threatHuntingHypothesisTypeName } from './threat_hunting_hypothesis_typ
 
 interface ThreatHuntingHypothesisDependencies {
   soClient: SavedObjectsClientContract;
-  namespace: string;
 }
 
 export class ThreatHuntingHypothesisDescriptorClient {
   constructor(private readonly deps: ThreatHuntingHypothesisDependencies) {}
   getSavedObjectId() {
-    return `${threatHuntingHypothesisTypeName}-${this.deps.namespace}`;
+    return `${threatHuntingHypothesisTypeName}`;
   }
 
   async get(id: string): Promise<ThreatHuntingHypothesis> {

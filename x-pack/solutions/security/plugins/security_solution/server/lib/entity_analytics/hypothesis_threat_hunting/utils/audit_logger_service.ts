@@ -12,10 +12,7 @@ export type ThreatHuntingHypothesesAuditLoggerService = ReturnType<
   typeof createThreatHuntingHypothesesAuditLoggerService
 >;
 
-export const createThreatHuntingHypothesesAuditLoggerService = (
-  namespace: string,
-  rootAuditLogger?: AuditLogger
-) => {
+export const createThreatHuntingHypothesesAuditLoggerService = (rootAuditLogger?: AuditLogger) => {
   const log = (action: ThreatHuntingHypothesisActions, msg: string, error?: Error) => {
     const outcome = error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.UNKNOWN;
 
@@ -29,7 +26,7 @@ export const createThreatHuntingHypothesesAuditLoggerService = (
     const category = AUDIT_CATEGORY.DATABASE;
 
     const event: AuditEvent = {
-      message: `[Hypotheses Threat Hunting][namespace: ${namespace}] ${msg}`,
+      message: `[Hypotheses Threat Hunting] ${msg}`,
       event: {
         action: `hypotheses_threat_hunting_${action}`,
         category,

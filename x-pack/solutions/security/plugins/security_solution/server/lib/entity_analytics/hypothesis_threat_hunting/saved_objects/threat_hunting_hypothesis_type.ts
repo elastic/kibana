@@ -60,6 +60,6 @@ export const threatHuntingHypothesisType: SavedObjectsType = {
   name: threatHuntingHypothesisTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'agnostic',
   mappings: threatHuntingHypothesisTypeNameMappings,
 };
