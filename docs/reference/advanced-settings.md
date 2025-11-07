@@ -493,6 +493,15 @@ $$$securitysolution-enableCcsWarning$$$`securitySolution:enableCcsWarning`
 $$$securitysolution-enablenewsfeed$$$`securitySolution:enableNewsFeed`
 :   Enables the security news feed on the Security **Overview** page.
 
+$$$securitySolution-enableVisualizationsInFlyout$$$`securitySolution:enableVisualizationsInFlyout`
+:   Enable visualizations (analyzer and session viewer) in document details flyout.
+
+$$$securitySolution-excludeColdAndFrozenTiersInAnalyzer$$$`securitySolution:excludeColdAndFrozenTiersInAnalyzer`
+:   When enabled, cold and frozen tiers will be skipped in analyzer queries
+
+$$$securitySolution-excludedDataTiersForRuleExecution$$$`securitySolution:excludedDataTiersForRuleExecution`
+:   When configured, events from the specified data tiers are not searched during rules executions. 
+
 $$$securitysolution-ipreputationlinks$$$`securitySolution:ipReputationLinks`
 :   A JSON array containing links for verifying the reputation of an IP address. The links are displayed on [IP detail](docs-content://solutions/security/explore/network-page.md) pages.
 
