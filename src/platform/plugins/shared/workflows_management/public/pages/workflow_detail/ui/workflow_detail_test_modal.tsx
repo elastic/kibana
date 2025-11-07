@@ -66,7 +66,7 @@ export const WorkflowDetailTestModal = () => {
         );
         closeModal();
       } else if (!definition) {
-        notifications?.toasts.addWarning(
+        notifications.toasts.addWarning(
           i18n.translate('workflows.detail.testModal.warningInvalidDefinition', {
             defaultMessage: 'Please fix the errors to run the workflow.',
           }),
