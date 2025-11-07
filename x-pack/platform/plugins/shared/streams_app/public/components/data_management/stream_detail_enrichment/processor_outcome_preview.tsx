@@ -176,11 +176,9 @@ const PreviewDocumentsGroupBy = () => {
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const [userSelectedViewMode, setViewMode] = useState<PreviewTableMode>('summary');
 
-  // Original logic - used for column determination
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
 
-  // Fetch DataView field types with automatic caching via React Query
   const { fieldTypes: dataViewFieldTypes, dataView: streamDataView } =
     useStreamDataViewFieldTypes(streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
