@@ -12,7 +12,6 @@ import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@svlOblt'] }, () => {
   // *** Compatible Cases ***
-
   apiTest(
     'should correctly replace a literal string in both Ingest Pipeline and ES|QL (in-place)',
     async ({ testBed, esql }) => {
@@ -182,51 +181,6 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
     }
   );
 
-  // *** Known Limitations ***
-
-  apiTest(
-    'should document multi-value array limitation: Ingest Pipeline supports arrays, ES|QL does not',
-    async ({ testBed, esql }) => {
-      // Note: The gsub processor in Ingest Pipelines supports multi-value arrays (arrays of strings),
-      // where all members of the array are converted. However, ES|QL cannot cleanly handle this
-      // due to inability to collapse MV_EXPAND results back to arrays.
-      // See: https://github.com/elastic/elasticsearch/issues/133988
-      //
-      // This test documents that single-value strings work correctly in both transpilers.
-      // Multi-value arrays would work in Ingest Pipeline but cannot be properly handled in ES|QL.
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'replace',
-            from: 'message',
-            pattern: 'error',
-            replacement: 'warning',
-          } as ReplaceProcessor,
-        ],
-      };
-
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
-
-      // Single-value string (compatible case)
-      const docs = [{ message: 'An error occurred' }];
-      await testBed.ingest('ingest-replace-single', docs, processors);
-      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-replace-single');
-
-      await testBed.ingest('esql-replace-single', docs);
-      const esqlResult = await esql.queryOnIndex('esql-replace-single', query);
-
-      expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'An warning occurred');
-
-      // Multi-value arrays would be supported in Ingest Pipeline gsub processor
-      // but cannot be cleanly handled in ES|QL, so we only test single values here
-    }
-  );
-
-  // *** Error Cases - Both Transpilers Should Fail Consistently ***
-
   apiTest(
     'should fail when source field is of non-string type (e.g., numeric) in both Ingest Pipeline and ES|QL',
     async ({ testBed, esql }) => {
@@ -265,8 +219,6 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
     }
   );
 
-  // *** Compatible Cases - Both Transpilers Should Overwrite Target Field ***
-
   apiTest(
     'should successfully overwrite non-string target field (e.g., numeric) in both Ingest Pipeline and ES|QL',
     async ({ testBed, esql }) => {
@@ -300,7 +252,6 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
     }
   );
 
-  // Template validation tests - both transpilers should consistently REJECT Mustache templates
   [
     {
       templateType: '{{ }}',
@@ -339,4 +290,51 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
       }
     );
   });
+
+  // *** Incompatible / Partially Compatible Cases ***
+  // Note that the Incompatible test suite doesn't necessarily mean the features are functionally incompatible,
+  // rather it highlights the nuanced behavioral differences in certain edge cases among transpilers.
+
+  apiTest(
+    'should document multi-value array limitation: Ingest Pipeline supports arrays, ES|QL does not',
+    async ({ testBed, esql }) => {
+      // Note: The gsub processor in Ingest Pipelines supports multi-value arrays (arrays of strings),
+      // where all members of the array are converted. However, ES|QL cannot cleanly handle this
+      // due to inability to collapse MV_EXPAND results back to arrays.
+      // See: https://github.com/elastic/elasticsearch/issues/133988
+      //
+      // This test documents that single-value strings work correctly in both transpilers.
+      // Multi-value arrays would work in Ingest Pipeline but cannot be properly handled in ES|QL.
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'replace',
+            from: 'message',
+            pattern: 'error',
+            replacement: 'warning',
+          } as ReplaceProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ message: ['An error occurred 01', 'An error occurred 02'] }];
+      await testBed.ingest('ingest-replace-single', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-replace-single');
+
+      await testBed.ingest('esql-replace-single', docs);
+      const esqlResult = await esql.queryOnIndex('esql-replace-single', query);
+
+      // Ingest Pipeline processes all array elements
+      expect(ingestResult[0]).toHaveProperty('message', [
+        'An warning occurred 01',
+        'An warning occurred 02',
+      ]);
+
+      // ES|QL sets the field to null since it cannot handle multi-value arrays for replace()
+      expect(esqlResult.documentsWithoutKeywords[0]).toHaveProperty('message', null);
+    }
+  );
 });
