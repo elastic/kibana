@@ -9,7 +9,7 @@
 
 export { timeRangeSchema } from './src/time_range';
 export { querySchema } from './src/query';
-export { filterSchema } from './src/filter';
+export { asCodeFilterSchema } from './src/filter';
 export { storedFilterSchema } from './src/stored_filter';
 
 export type {
@@ -21,5 +21,5 @@ export type {
   StoredFilterState,
   AggregateQuery,
   Query,
-  Filter,
+  AsCodeFilter,
 } from './src/types';

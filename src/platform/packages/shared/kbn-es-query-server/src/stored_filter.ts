@@ -40,7 +40,7 @@ export const storedFilterMetaSchema = schema.object(
     type: schema.maybe(schema.string()),
     key: schema.maybe(schema.string()),
     // We could consider creating FilterMetaParams as a schema to match the concrete Filter type.
-    // However, this is difficult because FilterMetaParams can be a `filterSchema` which is defined below.
+    // However, this is difficult because FilterMetaParams can be a `storedFilterSchema` which is defined below.
     // This would require a more complex schema definition that can handle recursive types.
     // For now, we use `schema.any()` to allow flexibility in the params field.
     params: schema.maybe(schema.any()),
@@ -59,5 +59,5 @@ export const storedFilterSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'kbn-es-query-server-filterSchema' } }
+  { meta: { id: 'kbn-es-query-server-storedFilterSchema' } }
 );

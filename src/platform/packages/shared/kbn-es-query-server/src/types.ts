@@ -21,10 +21,10 @@ import type {
   filterStateStoreSchema,
 } from './stored_filter';
 import type {
-  filterSchema,
-  conditionFilterSchema,
-  groupFilterSchema,
-  dslFilterSchema,
+  asCodeFilterSchema,
+  asCodeConditionFilterSchema,
+  asCodeGroupFilterSchema,
+  asCodeDSLFilterSchema,
 } from './filter';
 
 export type TimeRange = Writable<TypeOf<typeof timeRangeSchema>>;
@@ -43,7 +43,7 @@ export type StoredFilterState = TypeOf<typeof filterStateStoreSchema>;
  *
  * These types are inferred from validation schemas and provide runtime validation compatibility.
  */
-export type AsCodeFilter = Writable<TypeOf<typeof filterSchema>>;
-export type AsCodeConditionFilter = Writable<TypeOf<typeof conditionFilterSchema>>;
-export type AsCodeGroupFilter = Writable<TypeOf<typeof groupFilterSchema>>;
-export type AsCodeDSLFilter = Writable<TypeOf<typeof dslFilterSchema>>;
+export type AsCodeFilter = Writable<TypeOf<typeof asCodeFilterSchema>>;
+export type AsCodeConditionFilter = Writable<TypeOf<typeof asCodeConditionFilterSchema>>;
+export type AsCodeGroupFilter = Writable<TypeOf<typeof asCodeGroupFilterSchema>>;
+export type AsCodeDSLFilter = Writable<TypeOf<typeof asCodeDSLFilterSchema>>;

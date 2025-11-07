@@ -192,7 +192,7 @@ const conditionSchema = schema.oneOf(
 /**
  * Schema for condition filters
  */
-export const conditionFilterSchema = schema.object(
+export const asCodeConditionFilterSchema = schema.object(
   {
     ...baseProperties,
     condition: conditionSchema,
@@ -205,7 +205,7 @@ export const conditionFilterSchema = schema.object(
  * Uses lazy schema to handle recursive references
  */
 const GROUP_FILTER_ID = '@kbn/es-query-server_groupFilter'; // package prefix for global uniqueness in OAS specs
-export const groupFilterSchema = schema.object(
+export const asCodeGroupFilterSchema = schema.object(
   {
     ...baseProperties,
     group: schema.object(
@@ -227,7 +227,7 @@ export const groupFilterSchema = schema.object(
 /**
  * Schema for DSL filters
  */
-export const dslFilterSchema = schema.object(
+export const asCodeDSLFilterSchema = schema.object(
   {
     ...baseProperties,
     dsl: schema.object({
@@ -243,7 +243,7 @@ export const dslFilterSchema = schema.object(
  * Main discriminated union schema for Filter
  * Ensures exactly one of: condition, group, or dsl is present
  */
-export const filterSchema = schema.oneOf(
-  [conditionFilterSchema, groupFilterSchema, dslFilterSchema],
+export const asCodeFilterSchema = schema.oneOf(
+  [asCodeConditionFilterSchema, asCodeGroupFilterSchema, asCodeDSLFilterSchema],
   { meta: { description: 'A filter which can be a condition, group, or raw DSL' } }
 );
