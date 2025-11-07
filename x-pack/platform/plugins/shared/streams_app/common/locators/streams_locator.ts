@@ -29,7 +29,7 @@ export type StreamsAppLocatorParams = SerializableRecord &
       }
     | {
         name: string;
-        managementTab: Exclude<string, 'processing'>;
+        managementTab: string;
         pageState: never;
       }
   );
