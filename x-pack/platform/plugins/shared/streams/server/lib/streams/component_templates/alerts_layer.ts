@@ -21,45 +21,16 @@ export const baseFields: FieldDefinition = {
   'event.kind': { type: 'keyword', ignore_above: 1024 },
   'event.action': { type: 'keyword', ignore_above: 1024 },
   'event.original': { type: 'keyword', ignore_above: 1024 },
-  'kibana.alert.action_group': { type: 'keyword' },
-  'kibana.alert.case_ids': { type: 'keyword' },
-  'kibana.alert.consecutive_matches': { type: 'long' },
-  'kibana.alert.duration.us': { type: 'long' },
-  'kibana.alert.end': { type: 'date' },
-  'kibana.alert.flapping': { type: 'boolean' },
-  'kibana.alert.flapping_history': { type: 'boolean' },
-  'kibana.alert.index_pattern': { type: 'keyword' },
-  'kibana.alert.instance.id': { type: 'keyword' },
-  'kibana.alert.intended_timestamp': { type: 'date' },
-  'kibana.alert.last_detected': { type: 'date' },
-  'kibana.alert.maintenance_window_ids': { type: 'keyword' },
-  'kibana.alert.pending_recovered_count': { type: 'long' },
-  'kibana.alert.previous_action_group': { type: 'keyword' },
-  'kibana.alert.reason': { type: 'keyword', fields: { text: { type: 'match_only_text' } } },
-  'kibana.alert.rule.category': { type: 'keyword' },
-  'kibana.alert.rule.consumer': { type: 'keyword' },
-  'kibana.alert.rule.execution.timestamp': { type: 'date' },
-  'kibana.alert.rule.execution.type': { type: 'keyword' },
-  'kibana.alert.rule.execution.uuid': { type: 'keyword' },
-  'kibana.alert.rule.name': { type: 'keyword' },
-  'kibana.alert.rule.producer': { type: 'keyword' },
-  'kibana.alert.rule.uuid': { type: 'keyword' },
-  'kibana.alert.rule.rule_type_id': { type: 'keyword' },
-  'kibana.alert.rule.revision': { type: 'long' },
-  'kibana.alert.rule.tags': { type: 'keyword' },
-  'kibana.alert.severity_improving': { type: 'boolean' },
-  'kibana.alert.start': { type: 'date' },
-  'kibana.alert.status': { type: 'keyword' },
-  'kibana.alert.updated_at': { type: 'date' },
-  'kibana.alert.updated_by.user.id': { type: 'keyword' },
-  'kibana.alert.updated_by.user.name': { type: 'keyword' },
-  'kibana.alert.url': { type: 'keyword', index: false, ignore_above: 2048 },
-  'kibana.alert.uuid': { type: 'keyword' },
-  'kibana.alert.workflow_assignee_ids': { type: 'keyword' },
-  'kibana.alert.workflow_status': { type: 'keyword' },
-  'kibana.alert.workflow_tags': { type: 'keyword' },
-  'kibana.space_ids': { type: 'keyword' },
-  tags: { type: 'keyword' },
+  'attributes.alert.start': { type: 'date' },
+  'attributes.alert.end': { type: 'date' },
+  'attributes.alert.flapping': { type: 'boolean' },
+  'attributes.alert.status': { type: 'keyword', ignore_above: 1024 },
+  'attributes.alert.id': { type: 'keyword', ignore_above: 1024 },
+  'attributes.rule.query': { type: 'keyword', ignore_above: 2048 },
+  'attributes.rule.id': { type: 'keyword', ignore_above: 1024 },
+  'attributes.rule.execution.uuid': { type: 'keyword', ignore_above: 1024 },
+  'attributes.entity.key': { type: 'keyword', ignore_above: 2048 },
+  'attributes.lineage.parents': { type: 'keyword', ignore_above: 1024 },
 };
 
 export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
@@ -94,12 +65,46 @@ export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> 
       },
     },
   },
+  'alert.start': {
+    path: 'attributes.alert.start',
+    type: 'alias',
+  },
+  'alert.end': {
+    path: 'attributes.alert.end',
+    type: 'alias',
+  },
+  'alert.flapping': {
+    path: 'attributes.alert.flapping',
+    type: 'alias',
+  },
+  'alert.status': {
+    path: 'attributes.alert.status',
+    type: 'alias',
+  },
+  'alert.id': {
+    path: 'attributes.alert.id',
+    type: 'alias',
+  },
+  'rule.query': {
+    path: 'attributes.rule.query',
+    type: 'alias',
+  },
+  'rule.id': {
+    path: 'attributes.rule.id',
+    type: 'alias',
+  },
+  'rule.execution.uuid': {
+    path: 'attributes.rule.execution.uuid',
+    type: 'alias',
+  },
+  'entity.key': {
+    path: 'attributes.entity.key',
+    type: 'alias',
+  },
+  'lineage.parents': {
+    path: 'attributes.lineage.parents',
+    type: 'alias',
+  },
 };
 
 export const otelEquivalentLookupMap = logsOtelEquivalentLookupMap;
-
-export const baseSettings = {
-  index: {
-    default_pipeline: 'hijack_dot_alerts_to_streams',
-  },
-};
