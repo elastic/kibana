@@ -238,7 +238,7 @@ export const getSourcererScopeName = ({
   }
 
   if (isDetectionsAlertsTable(scopeId)) {
-    return SourcererScopeName.detections;
+    return SourcererScopeName.alerts;
   }
 
   if (scopeId === TimelineId.active) {

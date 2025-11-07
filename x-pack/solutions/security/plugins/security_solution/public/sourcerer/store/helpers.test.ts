@@ -59,10 +59,10 @@ describe.skip('sourcerer store helpers', () => {
       );
       expect(result).toEqual(['auditbeat-*', 'packetbeat-*']);
     });
-    it('default data view, SourcererScopeName.detections, returns patternList with only signals index', () => {
+    it('default data view, SourcererScopeName.alerts, returns patternList with only signals index', () => {
       const result = getScopePatternListSelection(
         dataView,
-        SourcererScopeName.detections,
+        SourcererScopeName.alerts,
         signalIndexName,
         true
       );
@@ -105,14 +105,14 @@ describe.skip('sourcerer store helpers', () => {
         mockGlobalState.sourcerer,
         {
           ...payload,
-          id: SourcererScopeName.detections,
+          id: SourcererScopeName.alerts,
           selectedPatterns: [],
         },
         true
       );
       expect(result).toEqual({
-        [SourcererScopeName.detections]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.detections],
+        [SourcererScopeName.alerts]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.alerts],
           selectedDataViewId: dataView.id,
           selectedPatterns: [signalIndexName],
         },
@@ -291,7 +291,7 @@ describe.skip('checkIfIndicesExist', () => {
   it('should return true when scopeId is "detections" and patternList includes signalIndexName', () => {
     const result = checkIfIndicesExist({
       patternList: ['index1', 'index2', 'signalIndex'],
-      scopeId: SourcererScopeName.detections,
+      scopeId: SourcererScopeName.alerts,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: false,
     });
@@ -302,7 +302,7 @@ describe.skip('checkIfIndicesExist', () => {
   it('should return false when scopeId is "detections" and patternList does not include signalIndexName', () => {
     const result = checkIfIndicesExist({
       patternList: ['index1', 'index2'],
-      scopeId: SourcererScopeName.detections,
+      scopeId: SourcererScopeName.alerts,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: false,
     });

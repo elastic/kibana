@@ -55,10 +55,10 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
 
   const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(
-    SourcererScopeName.detections
+    SourcererScopeName.alerts
   );
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

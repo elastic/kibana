@@ -82,7 +82,7 @@ export const useBulkActionsByTableType = (
       localFilters: filters,
       from,
       to,
-      scopeId: SourcererScopeName.detections,
+      scopeId: SourcererScopeName.alerts,
       tableId,
     };
   }, [filters, from, to, tableId]);
@@ -97,7 +97,7 @@ export const useBulkActionsByTableType = (
 
   const alertActionParams = useMemo(() => {
     return {
-      scopeId: SourcererScopeName.detections,
+      scopeId: SourcererScopeName.alerts,
       filters,
       from,
       to,

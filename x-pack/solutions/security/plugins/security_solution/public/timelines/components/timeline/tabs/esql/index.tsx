@@ -63,9 +63,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const dispatch = useDispatch();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { status: dataViewStatus } = useDataView(SourcererScopeName.detections);
+  const { status: dataViewStatus } = useDataView(SourcererScopeName.alerts);
 
-  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
+  const { dataViewId } = useSourcererDataView(SourcererScopeName.alerts);
 
   const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
 

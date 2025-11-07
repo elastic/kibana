@@ -21,7 +21,7 @@ import {
 const REGISTERED_SCOPES = [
   DataViewManagerScopeName.default,
   DataViewManagerScopeName.timeline,
-  DataViewManagerScopeName.detections,
+  DataViewManagerScopeName.alerts,
   DataViewManagerScopeName.attacks,
   DataViewManagerScopeName.analyzer,
   DataViewManagerScopeName.explore,

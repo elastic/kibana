@@ -78,7 +78,7 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
     [application, cases, data, fieldFormats, http, licensing, notifications, settings]
   );
 
-  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
+  const browserFields = useBrowserFields(DataViewManagerScopeName.alerts, dataView);
 
   const additionalContext: AdditionalTableContext = useMemo(() => ({ packages }), [packages]);
 

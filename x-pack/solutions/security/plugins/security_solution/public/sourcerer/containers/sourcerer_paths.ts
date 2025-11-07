@@ -56,7 +56,7 @@ export const getScopeFromPath = (
   newDataViewPickerEnabled?: boolean
 ):
   | SourcererScopeName.default
-  | SourcererScopeName.detections
+  | SourcererScopeName.alerts
   | SourcererScopeName.attacks
   | SourcererScopeName.explore => {
   if (
@@ -65,7 +65,7 @@ export const getScopeFromPath = (
       strict: false,
     })
   ) {
-    return SourcererScopeName.detections;
+    return SourcererScopeName.alerts;
   }
 
   if (

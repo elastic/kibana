@@ -319,7 +319,7 @@ export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {
   if (isTimelineScope(scopeId)) {
     return SourcererScopeName.timeline;
   } else if (isAlertsPageScope(scopeId)) {
-    return SourcererScopeName.detections;
+    return SourcererScopeName.alerts;
   } else {
     return SourcererScopeName.default;
   }

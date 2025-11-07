@@ -42,10 +42,10 @@ export const Wrapper = memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldSourcererDataViewIsLoading } =
-    useSourcererDataView(SourcererScopeName.detections);
+    useSourcererDataView(SourcererScopeName.alerts);
   // TODO rename to just dataView and status once we remove the newDataViewPickerEnabled feature flag
   const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
-    SourcererScopeName.detections
+    SourcererScopeName.alerts
   );
 
   const isLoading: boolean = useMemo(

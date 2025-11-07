@@ -46,11 +46,11 @@ const AdditionalToolbarControlsComponent = ({
   } = useKibana();
 
   const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
+    SourcererScopeName.alerts
   );
 
   const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
 
   const groupId = useMemo(() => groupIdSelector(), []);
   const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {

@@ -7,9 +7,9 @@
 
 import {
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -30,7 +30,6 @@ import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
 
-export const ATTACK_DISCOVERY_SETTINGS_ALERTS_COUNT_ID = 'attack-discovery-settings-alerts-count';
 export const RESET_FIELD = 'kibana.alert.rule.name';
 
 const DEFAULT_DATA_TEST_SUBJ = 'previewTab';
@@ -162,7 +161,7 @@ const PreviewTabComponent = ({
       // action to have any effect.
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.detections,
+          id: SourcererScopeName.alerts,
           selectedDataViewId: signalIndexName,
           selectedPatterns: [signalIndexName],
           shouldValidateSelectedPatterns: false,

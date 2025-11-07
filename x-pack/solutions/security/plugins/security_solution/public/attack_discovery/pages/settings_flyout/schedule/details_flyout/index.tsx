@@ -85,7 +85,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     });
 
   const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.alerts);
 
   const [isEditing, setIsEditing] = useState(false);
 

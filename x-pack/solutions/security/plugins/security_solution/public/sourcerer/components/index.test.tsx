@@ -14,7 +14,7 @@ import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import { fireEvent, waitFor, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
@@ -660,7 +660,7 @@ describe.skip('Sourcerer component', () => {
 
     mount(
       <TestProviders>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
+        <Sourcerer scope={sourcererModel.SourcererScopeName.alerts} />
       </TestProviders>
     );
     expect(pollForSignalIndexMock).toHaveBeenCalledTimes(1);

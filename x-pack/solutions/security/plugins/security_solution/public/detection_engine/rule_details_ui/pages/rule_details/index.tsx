@@ -269,9 +269,9 @@ export const RuleDetailsPage = connector(
       useListsConfig();
 
     const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-      useSourcererDataView(SourcererScopeName.detections);
+      useSourcererDataView(SourcererScopeName.alerts);
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+    const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.alerts);
     const isLoadingIndexPattern = newDataViewPickerEnabled
       ? status !== 'ready'
       : oldIsLoadingIndexPattern;

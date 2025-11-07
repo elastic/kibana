@@ -51,11 +51,11 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   const { euiTheme } = useEuiTheme();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.alerts);
 
   // get the sourcerer `DataViewSpec` for alerts:
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(SourcererScopeName.detections);
+    useSourcererDataView(SourcererScopeName.alerts);
 
   // create a `DataView` from the `DataViewSpec`:
   const { dataView: oldDataView, loading: oldIsLoadingDataView } = useCreateDataView({

@@ -112,7 +112,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
             id={`${ID}-area-embeddable`}
             height={300}
             inspectTitle={i18n.COST_SAVINGS_TREND}
-            scopeId={SourcererScopeName.detections}
+            scopeId={SourcererScopeName.alerts}
             withActions={[
               VisualizationContextMenuActions.addToExistingCase,
               VisualizationContextMenuActions.addToNewCase,

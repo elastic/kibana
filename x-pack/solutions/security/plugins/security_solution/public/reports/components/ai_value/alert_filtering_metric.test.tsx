@@ -88,7 +88,7 @@ describe('AlertFilteringMetric', () => {
           to: defaultProps.to,
         },
         id: 'AlertFilteringMetricQuery-area-embeddable',
-        scopeId: SourcererScopeName.detections,
+        scopeId: SourcererScopeName.alerts,
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

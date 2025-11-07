@@ -21,7 +21,7 @@ import { SECURITY_FEATURE_ID } from '../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
+import { isDashboardViewPath, isDetectionsPath } from '../../../helpers';
 import { Sourcerer } from '../../../sourcerer/components';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -89,7 +89,7 @@ export const GlobalHeader = React.memo(() => {
   const dataViewPicker = newDataViewPickerEnabled ? (
     <DataViewPicker
       scope={sourcererScope}
-      disabled={sourcererScope === DataViewManagerScopeName.detections}
+      disabled={sourcererScope === DataViewManagerScopeName.alerts}
     />
   ) : (
     <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />

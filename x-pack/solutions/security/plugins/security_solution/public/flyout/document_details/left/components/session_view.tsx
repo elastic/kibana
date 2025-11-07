@@ -61,12 +61,10 @@ export const SessionView: FC = memo(() => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(SourcererScopeName.alerts);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.alerts);
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns

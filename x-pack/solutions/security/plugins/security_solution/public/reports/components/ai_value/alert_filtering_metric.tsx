@@ -86,7 +86,7 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
         timerange={{ from, to }}
         id={`${ID}-area-embeddable`}
         inspectTitle={i18n.FILTERING_RATE}
-        scopeId={SourcererScopeName.detections}
+        scopeId={SourcererScopeName.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

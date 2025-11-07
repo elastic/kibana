@@ -73,7 +73,7 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         isDonut={true}
         donutTitleLabel={'Total alerts processed'}
         donutTextWrapperClassName={'donutText'}
-        scopeId={SourcererScopeName.detections}
+        scopeId={SourcererScopeName.alerts}
         timerange={{ from, to }}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,

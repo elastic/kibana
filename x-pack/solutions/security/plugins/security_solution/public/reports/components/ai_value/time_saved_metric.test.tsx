@@ -13,6 +13,7 @@ import { getTimeSavedMetricLensAttributes } from '../../../common/components/vis
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
+
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
 }));
@@ -102,7 +103,7 @@ describe('TimeSavedMetric', () => {
           to: defaultProps.to,
         },
         id: 'TimeSavedMetricQuery-metric',
-        scopeId: SourcererScopeName.detections,
+        scopeId: SourcererScopeName.alerts,
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

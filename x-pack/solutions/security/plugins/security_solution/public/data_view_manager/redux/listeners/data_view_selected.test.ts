@@ -36,7 +36,7 @@ const mockedState: RootState = {
       dataViewId: null,
       status: 'pristine',
     },
-    detections: {
+    alerts: {
       dataViewId: null,
       status: 'pristine',
     },

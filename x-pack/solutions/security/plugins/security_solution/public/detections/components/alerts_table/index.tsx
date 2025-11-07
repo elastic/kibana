@@ -151,7 +151,7 @@ const emptyInputFilters: Filter[] = [];
 const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
-  sourcererScope = SourcererScopeName.detections,
+  sourcererScope = SourcererScopeName.alerts,
   isLoading,
   onRuleChange,
   disableAdditionalToolbarControls,
@@ -379,7 +379,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [alertsTableRef]);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
-    SourcererScopeName.detections,
+    SourcererScopeName.alerts,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
@@ -460,7 +460,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
         <EuiDataGridContainer hideLastPage={false}>
           <AlertTableCellContextProvider
             tableId={tableType}
-            sourcererScope={SourcererScopeName.detections}
+            sourcererScope={SourcererScopeName.alerts}
           >
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
               ref={alertsTableRef}

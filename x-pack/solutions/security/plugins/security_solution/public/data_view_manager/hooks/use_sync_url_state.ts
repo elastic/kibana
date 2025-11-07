@@ -22,7 +22,7 @@ export const useSyncSourcererUrlState = (
     | SourcererScopeName.default
     | SourcererScopeName.explore
     | SourcererScopeName.attacks
-    | SourcererScopeName.detections = SourcererScopeName.default
+    | SourcererScopeName.alerts = SourcererScopeName.default
 ) => {
   const scopeDataViewId = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId);
@@ -48,9 +48,7 @@ export const useSyncSourcererUrlState = (
       // Initialize the store with value from UrlParam.
       if (initialState != null) {
         (Object.keys(initialState) as SourcererScopeName[]).forEach((scope) => {
-          if (
-            !(scope === SourcererScopeName.default && scopeId === SourcererScopeName.detections)
-          ) {
+          if (!(scope === SourcererScopeName.default && scopeId === SourcererScopeName.alerts)) {
             dispatch(
               sourcererActions.setSelectedDataView({
                 id: scope,
@@ -90,7 +88,7 @@ export const useRestoreDataViewManagerStateFromURL = (
     | SourcererScopeName.default
     | SourcererScopeName.explore
     | SourcererScopeName.attacks
-    | SourcererScopeName.detections = SourcererScopeName.default
+    | SourcererScopeName.alerts = SourcererScopeName.default
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -111,7 +109,7 @@ export const useRestoreDataViewManagerStateFromURL = (
         .map((scope) => {
           // NOTE: looks like this is about skipping the init when the active page is detections
           // We should investigate this.
-          if (scope === SourcererScopeName.default && scopeId === SourcererScopeName.detections) {
+          if (scope === SourcererScopeName.default && scopeId === SourcererScopeName.alerts) {
             return undefined;
           }
 

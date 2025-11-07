@@ -60,7 +60,7 @@ describe('AlertProcessingDonut', () => {
         isDonut: true,
         donutTitleLabel: 'Total alerts processed',
         donutTextWrapperClassName: 'donutText',
-        scopeId: SourcererScopeName.detections,
+        scopeId: SourcererScopeName.alerts,
         timerange: { from: defaultProps.from, to: defaultProps.to },
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,

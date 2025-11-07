@@ -28,7 +28,7 @@ export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => vo
     localFilters: [],
     from,
     to,
-    scopeId: SourcererScopeName.detections,
+    scopeId: SourcererScopeName.alerts,
     tableId: TableId.riskInputs,
   });
 

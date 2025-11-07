@@ -127,7 +127,7 @@ SourcererPopover.displayName = 'SourcererPopover';
  */
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
-  const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
+  const isDetectionsSourcerer = scopeId === SourcererScopeName.alerts;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
   const isDefaultSourcerer = scopeId === SourcererScopeName.default;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
