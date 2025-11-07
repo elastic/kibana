@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FilterStateStore } from '@kbn/es-query-constants';
 import type { Filter } from '../build_filters';
-import { buildQueryFilter, FilterStateStore } from '../build_filters';
+import { buildQueryFilter } from '../build_filters';
 import { uniqFilters } from './uniq_filters';
 
 describe('filter manager utilities', () => {

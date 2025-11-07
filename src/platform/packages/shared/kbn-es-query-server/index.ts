@@ -9,8 +9,8 @@
 
 export { timeRangeSchema } from './src/time_range';
 export { querySchema } from './src/query';
-export { appStateSchema, globalStateSchema, filterSchema } from './src/filter/stored_filter';
-export { simpleFilterSchema } from './src/filter/simple_filter';
+export { asCodeFilterSchema } from './src/filter';
+export { storedFilterSchema } from './src/stored_filter';
 
 // Re-export filter operator constants for server-side use
 export {
@@ -23,15 +23,7 @@ export type {
   TimeRange,
   AbsoluteTimeRange,
   RelativeTimeRange,
-  Filter,
-  FilterMeta,
   AggregateQuery,
   Query,
-  SimpleFilter,
-  SimpleFilterCondition,
-  SimpleFilterGroup,
-  SimpleDSLFilter,
-  SimpleFilterValue,
-  SimpleRangeValue,
-  StoredFilterState,
+  AsCodeFilter,
 } from './src/types';

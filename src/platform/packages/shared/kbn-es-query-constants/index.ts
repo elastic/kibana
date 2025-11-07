@@ -8,3 +8,4 @@
  */
 
 export { SIMPLE_FILTER_OPERATOR, FILTER_OPERATORS, type FilterOperator } from './src/constants';
+export { FilterStateStore } from './src/constants';

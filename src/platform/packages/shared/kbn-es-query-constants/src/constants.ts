@@ -38,3 +38,12 @@ export const FILTER_OPERATORS = [
  * Union type of all valid filter operators
  */
 export type FilterOperator = (typeof FILTER_OPERATORS)[number];
+
+/**
+ * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
+ * @public
+ */
+export enum FilterStateStore {
+  APP_STATE = 'appState',
+  GLOBAL_STATE = 'globalState',
+}

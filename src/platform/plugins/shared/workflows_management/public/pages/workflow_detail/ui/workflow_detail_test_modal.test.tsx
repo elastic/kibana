@@ -11,13 +11,13 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
-import { TestWrapper } from '../../../shared/test_utils';
-import { createMockStore } from '../../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _setComputedDataInternal,
   setIsTestModalOpen,
   setWorkflow,
-} from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+} from '../../../entities/workflows/store/workflow_detail/slice';
+import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
 const mockUseKibana = jest.fn();
@@ -37,7 +37,7 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
 
-jest.mock('../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk', () => ({
+jest.mock('../../../hooks/use_async_thunk', () => ({
   useAsyncThunk: () => mockUseAsyncThunk(),
 }));
 
