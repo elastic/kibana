@@ -11,7 +11,7 @@ import { fireEvent, waitFor, screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 
 jest.mock('../../../utils/kibana_react', () => {

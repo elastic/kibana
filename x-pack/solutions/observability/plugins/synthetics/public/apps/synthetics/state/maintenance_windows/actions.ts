@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plugin/server/application/methods/find/types';
+import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plugin/common';
 import { createAsyncAction } from '../utils/actions';
 
 export const getMaintenanceWindowsAction = createAsyncAction<void, FindMaintenanceWindowsResult>(

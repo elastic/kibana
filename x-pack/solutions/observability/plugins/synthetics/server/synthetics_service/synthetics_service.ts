@@ -18,7 +18,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { isEmpty } from 'lodash';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import type { SyntheticsServerSetup } from '../types';

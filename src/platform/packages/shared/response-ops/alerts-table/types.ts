@@ -43,7 +43,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Alert } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

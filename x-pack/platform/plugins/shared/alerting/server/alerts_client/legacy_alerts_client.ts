@@ -6,7 +6,7 @@
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys } from 'lodash';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';

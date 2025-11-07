@@ -6,7 +6,7 @@
  */
 
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/data/test_helpers';
+import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type {
   RuleExecutorOptions,

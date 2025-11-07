@@ -21,7 +21,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import type { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/maintenance-windows-plugin/common';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
@@ -174,12 +174,12 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       () => [
         {
           name: '',
-          render: ({ status, id }: { status: MaintenanceWindowStatus; id: string }) => {
+          render: (item: MaintenanceWindow) => {
             return (
               <TableActionsPopover
-                id={id}
+                id={item.id}
                 isLoading={isMutatingOrLoading}
-                status={status}
+                status={item.status as MaintenanceWindowStatus}
                 onEdit={onEdit}
                 onCancel={onCancel}
                 onArchive={onArchive}

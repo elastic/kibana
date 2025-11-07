@@ -22,7 +22,7 @@ import type {
   ALERT_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { Alert as LegacyAlert } from '../alert/alert';
 import type {
   AlertInstanceContext,

@@ -150,12 +150,12 @@ describe('updateMaintenanceWindowRoute', () => {
   test('should update the maintenance window with hourly frequency', async () => {
     const updateParams2 = {
       ...updateParams,
-      r_rule: { ...updateParams.r_rule, freq: 4 },
+      r_rule: { ...updateParams.r_rule, freq: 4 as const },
     } as UpdateMaintenanceWindowRequestBody;
 
     const mockMaintenanceWindow2 = {
       ...mockMaintenanceWindow,
-      rRule: { ...mockMaintenanceWindow.rRule, freq: 4 },
+      rRule: { ...mockMaintenanceWindow.rRule, freq: 4 as const },
     };
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

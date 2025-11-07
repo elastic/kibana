@@ -7,7 +7,7 @@
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 
 const gParams = { proxyUrl: 'https://proxy.com' };
 const testMW = [

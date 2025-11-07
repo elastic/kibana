@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { MaintenanceWindowClient } from '@kbn/maintenance-windows-plugin/server';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { withAlertingSpan } from '../lib';
 
 interface GetMaintenanceWindowsOpts {

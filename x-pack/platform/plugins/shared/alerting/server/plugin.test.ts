@@ -25,7 +25,7 @@ import { dataPluginMock as unifiedSearchPluginMock } from '@kbn/unified-search-p
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
-import { maintenanceWindowsMock } from '@kbn/maintenance-windows-plugin/server/mocks';
+import { maintenanceWindowsMock } from '@kbn/maintenance-windows-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';

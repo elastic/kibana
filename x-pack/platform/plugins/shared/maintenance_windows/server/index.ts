@@ -30,3 +30,11 @@ export type {
 } from './types';
 
 export type MaintenanceWindowClient = PublicMethodsOf<MaintenanceWindowClientClass>;
+
+export type { MaintenanceWindowsConfig } from './config';
+
+export { maintenanceWindowCategoryIdTypes } from '../server/application/constants';
+export { getMockMaintenanceWindow } from './data/test_helpers';
+export { maintenanceWindowClientMock } from './maintenance_window_client.mock';
+export type { MaintenanceWindowClientMock } from './maintenance_window_client.mock';
+export { maintenanceWindowsMock } from './mocks';

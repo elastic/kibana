@@ -80,9 +80,8 @@
     "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/es-types",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/maintenance-windows-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plugin/server/application/methods/find/types';
+import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plugin/common';
 import { INITIAL_REST_VERSION } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service/api_service';
 

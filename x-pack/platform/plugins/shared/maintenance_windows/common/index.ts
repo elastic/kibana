@@ -10,12 +10,14 @@ export type {
   DateRange,
   MaintenanceWindowSOProperties,
   MaintenanceWindowSOAttributes,
-  MaintenanceWindow,
   MaintenanceWindowCreateBody,
   MaintenanceWindowClientContext,
   MaintenanceWindowDeepLinkIds,
   ScopedQueryAttributes,
 } from './constants';
+
+export type { MaintenanceWindow } from '../server/application/types';
+export type { FindMaintenanceWindowsResult } from '../server/application/methods/find/types';
 
 export {
   MaintenanceWindowStatus,

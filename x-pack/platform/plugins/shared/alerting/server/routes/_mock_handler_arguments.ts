@@ -16,8 +16,8 @@ import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/serv
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { HasPrivilegesResponseApplication } from '@kbn/security-plugin-types-server';
-import type { MaintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server/maintenance_window_client.mock';
-import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server/maintenance_window_client.mock';
+import type { MaintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server';
+import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server';
 import type { RulesClientMock } from '../rules_client.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import type { RulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';

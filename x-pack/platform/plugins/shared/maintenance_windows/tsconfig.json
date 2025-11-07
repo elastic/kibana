@@ -14,7 +14,16 @@
     "@kbn/core-saved-objects-server",
     "@kbn/logging",
     "@kbn/logging-mocks",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/search-types",
+    "@kbn/data-plugin",
+    "@kbn/alerting-types",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/rrule",
+    "@kbn/shared-ux-router",
+    "@kbn/kibana-react-plugin",
+    "@kbn/rule-data-utils"
   ],
   "exclude": ["target/**/*"]
 }

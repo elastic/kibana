@@ -23,7 +23,7 @@ import {
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { recurringSummary } from '@kbn/response-ops-recurring-schedule-form/utils/recurring_summary';
 import { getPresets } from '@kbn/response-ops-recurring-schedule-form/utils/get_presets';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/maintenance-windows-plugin/common';
 import * as i18n from '../translations';
 import { useUiSetting } from '../../../utils/kibana_react';

@@ -76,7 +76,7 @@ import {
 } from './alerts_client_fixtures';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/data/test_helpers';
+import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
