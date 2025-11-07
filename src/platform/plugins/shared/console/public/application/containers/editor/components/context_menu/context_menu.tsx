@@ -229,16 +229,54 @@ export const ContextMenu = ({
       return;
     }
 
-    // ES|QL query: comfort food in description, with relevant fields
-    const hardcodedEsqlQuery =
-      'FROM kibana_sample_data_esql\n' +
-      '  | WHERE description:"comfort food"\n' +
-      '  | KEEP title, description, rating\n' +
-      '  | LIMIT 1000';
+    // Get the selected requests from the editor
+    const requests = await getRequests();
+
+    // Find ES|QL query request (POST to /_query or /_query/async)
+    const esqlRequest = requests.find(
+      (req) =>
+        req.method === 'POST' &&
+        (req.url === '/_query' || req.url.startsWith('/_query/') || req.url === '/_query/')
+    );
+
+    if (!esqlRequest) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('console.consoleMenu.noEsqlQuery', {
+          defaultMessage: 'No ES|QL query found. Please select a POST /_query request.',
+        }),
+      });
+      return;
+    }
+
+    // Extract the ES|QL query from the request body
+    let esqlQuery: string | undefined;
+    try {
+      // The data is an array of JSON strings
+      if (esqlRequest.data.length > 0) {
+        const requestBody = JSON.parse(esqlRequest.data[0]);
+        esqlQuery = requestBody.query;
+      }
+
+      if (!esqlQuery) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('console.consoleMenu.noQueryField', {
+            defaultMessage: 'No "query" field found in the request body.',
+          }),
+        });
+        return;
+      }
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.invalidRequestBody', {
+          defaultMessage: 'Failed to parse the request body.',
+        }),
+      });
+      return;
+    }
 
     try {
       await discoverLocator.navigate({
-        query: { esql: hardcodedEsqlQuery },
+        query: { esql: esqlQuery },
       });
     } catch (error) {
       notifications.toasts.addDanger({
