@@ -11,6 +11,7 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ScratchpadNode } from '../hooks/use_scratchpad_state';
+import type { Edge } from '@xyflow/react';
 
 export interface ScratchpadToolbarProps {
   onAddNode: (type: ScratchpadNode['type']) => void;
@@ -22,11 +23,44 @@ export interface ScratchpadToolbarProps {
 
 /**
  * Helper function to calculate a good position for a new node
- * Positions nodes in a grid-like pattern
+ * Positions nodes in a grid-like pattern, or near a selected node if provided
  */
-export function getNextNodePosition(nodes: ScratchpadNode[]): { x: number; y: number } {
+export function getNextNodePosition(
+  nodes: ScratchpadNode[],
+  selectedNode?: ScratchpadNode | null,
+  edges?: Edge[]
+): { x: number; y: number } {
   if (nodes.length === 0) {
     return { x: 250, y: 250 };
+  }
+
+  // If a node is selected, position the new node near it
+  if (selectedNode) {
+    // Default node dimensions (approximate)
+    const nodeWidth = 400; // Average width of nodes
+    const nodeHeight = 200; // Average height of nodes
+    const spacing = 400; // Spacing between node centers
+
+    // Count how many nodes are already connected to the selected node
+    // This helps us position new nodes in a radial pattern
+    const connectedNodes = nodes.filter(
+      (n) =>
+        n.id !== selectedNode.id &&
+        edges &&
+        (edges.some((e) => e.source === selectedNode.id && e.target === n.id) ||
+          edges.some((e) => e.source === n.id && e.target === selectedNode.id))
+    );
+
+    // Position new node in a radial pattern around the selected node
+    // Start at 0 degrees (right), then rotate by 45 degrees for each connected node
+    const angle = (connectedNodes.length * 45) % 360; // Rotate around selected node
+    const radians = (angle * Math.PI) / 180;
+
+    // Calculate position relative to selected node's center
+    return {
+      x: selectedNode.position.x + Math.cos(radians) * spacing,
+      y: selectedNode.position.y + Math.sin(radians) * spacing,
+    };
   }
 
   // Simple grid layout: 3 columns, spacing of 300px

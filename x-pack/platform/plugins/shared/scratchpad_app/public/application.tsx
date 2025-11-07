@@ -162,7 +162,8 @@ export function ScratchpadApplication({
 
   const handleAddNode = useCallback(
     (type: ScratchpadNode['type']) => {
-      const position = getNextNodePosition(nodes);
+      const selectedNode = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : null;
+      const position = getNextNodePosition(nodes, selectedNode || undefined, edges);
       const nodeId = `${type}-${Date.now()}`;
 
       const newNode: ScratchpadNode = {
@@ -185,7 +186,7 @@ export function ScratchpadApplication({
         createEdge(selectedNodeId, nodeId);
       }
     },
-    [nodes, addNode, selectedNodeId, createEdge]
+    [nodes, edges, addNode, selectedNodeId, createEdge]
   );
 
   const handleClearAll = useCallback(() => {
