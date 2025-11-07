@@ -27,6 +27,34 @@ function isSimpleRequireCall(node, t) {
 }
 
 /**
+ * Collect all referenced properties from a node path
+ * Traverses the node and finds all identifiers/JSX identifiers that reference tracked properties
+ * @param {NodePath} nodePath - AST node path to traverse
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @returns {Set<string>} Set of property names that are referenced
+ */
+function collectReferencedProperties(nodePath, properties) {
+  const referenced = new Set();
+
+  nodePath.traverse({
+    Identifier(idPath) {
+      const name = idPath.node.name;
+      if (properties.has(name) && idPath.isReferencedIdentifier()) {
+        referenced.add(name);
+      }
+    },
+    JSXIdentifier(jsxIdPath) {
+      const name = jsxIdPath.node.name;
+      if (properties.has(name)) {
+        referenced.add(name);
+      }
+    },
+  });
+
+  return referenced;
+}
+
+/**
  * Check if an identifier is in a TypeScript type-only context
  * Returns true if the identifier is in a pure type context that won't exist at runtime
  */
@@ -226,14 +254,10 @@ function detectJestMockUsage(programPath, properties, t) {
         return;
       }
 
-      factoryPath.traverse({
-        Identifier(idPath) {
-          const name = idPath.node.name;
-          if (properties.has(name) && idPath.isReferencedIdentifier()) {
-            importsUsedInJestMocks.add(name);
-          }
-        },
-      });
+      const referenced = collectReferencedProperties(factoryPath, properties);
+      for (const name of referenced) {
+        importsUsedInJestMocks.add(name);
+      }
     },
   });
 
@@ -246,24 +270,6 @@ function detectJestMockUsage(programPath, properties, t) {
  */
 function detectModuleLevelUsage(programPath, properties, t) {
   const importsUsedInModuleLevelCode = new Set();
-
-  // Helper to check if code uses any of our imports
-  const checkForImportUsage = (nodePath) => {
-    nodePath.traverse({
-      Identifier(idPath) {
-        const name = idPath.node.name;
-        if (properties.has(name) && idPath.isReferencedIdentifier()) {
-          importsUsedInModuleLevelCode.add(name);
-        }
-      },
-      JSXIdentifier(jsxIdPath) {
-        const name = jsxIdPath.node.name;
-        if (properties.has(name)) {
-          importsUsedInModuleLevelCode.add(name);
-        }
-      },
-    });
-  };
 
   programPath.traverse({
     // TypeScript import equals (export import alias = Module)
@@ -284,7 +290,10 @@ function detectModuleLevelUsage(programPath, properties, t) {
       }
 
       if (isTopLevel || isInTopLevelNamespace) {
-        checkForImportUsage(tsImportPath);
+        const referenced = collectReferencedProperties(tsImportPath, properties);
+        for (const name of referenced) {
+          importsUsedInModuleLevelCode.add(name);
+        }
       }
     },
 
@@ -306,7 +315,10 @@ function detectModuleLevelUsage(programPath, properties, t) {
         return;
       }
 
-      checkForImportUsage(varDeclPath);
+      const referenced = collectReferencedProperties(varDeclPath, properties);
+      for (const name of referenced) {
+        importsUsedInModuleLevelCode.add(name);
+      }
     },
 
     // Class static properties (initialize when class is defined)
@@ -336,7 +348,10 @@ function detectModuleLevelUsage(programPath, properties, t) {
           classDeclPath.parentPath.parent === programPath.node);
 
       if (isTopLevel && classPropPath.node.value) {
-        checkForImportUsage(classPropPath);
+        const referenced = collectReferencedProperties(classPropPath, properties);
+        for (const name of referenced) {
+          importsUsedInModuleLevelCode.add(name);
+        }
       }
     },
   });
@@ -498,6 +513,7 @@ function detectClassExtendsUsage(programPath, properties, t) {
 
 module.exports = {
   isSimpleRequireCall,
+  collectReferencedProperties,
   isInTypeContext,
   shouldSkipIdentifier,
   detectModuleLevelUsage,
