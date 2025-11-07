@@ -30,9 +30,6 @@ export async function registerObservabilityAgent({
     description: 'Agent specialized in logs, metrics, and traces',
     avatar_icon: 'logoObservability',
     configuration: {
-      answer: {
-        instructions: `${getLinkToKbInstructions(core)}`,
-      },
       instructions: 'You are an observability specialist agent',
       tools: [
         {
@@ -41,22 +38,4 @@ export async function registerObservabilityAgent({
       ],
     },
   });
-}
-
-function getLinkToKbInstructions(
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>
-) {
-  const kibanaPublicBaseUrl = core.http.basePath.publicBaseUrl;
-
-  if (!kibanaPublicBaseUrl) {
-    return '';
-  }
-
-  const knowledgeBaseLink =
-    `${kibanaPublicBaseUrl}/app/management/ai/observabilityAiAssistantManagement?tab=knowledge_base`.replaceAll(
-      '//',
-      '/'
-    );
-  const linkToKbInstructions = `Whenever you summarize knowledge base findings to the user, append a markdown link so they can manage entries: [Manage knowledge base](${knowledgeBaseLink}).`;
-  return linkToKbInstructions;
 }
