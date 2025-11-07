@@ -10,6 +10,7 @@
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { unflattenObject } from '@kbn/object-utils';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 interface Props {
@@ -53,7 +54,7 @@ export function useLog({ id }: Props) {
 
   return {
     loading,
-    logDoc: value?.fields ?? null,
+    log: value?.fields ? unflattenObject(value?.fields) : null,
     index: value?._index ?? null,
   };
 }

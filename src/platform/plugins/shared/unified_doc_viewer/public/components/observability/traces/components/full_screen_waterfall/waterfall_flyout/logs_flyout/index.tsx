@@ -28,23 +28,23 @@ export interface SpanFlyoutProps {
 }
 
 export function LogsFlyout({ onCloseFlyout, id, dataView }: SpanFlyoutProps) {
-  const { loading, logDoc, index } = useLog({ id });
+  const { loading, log, index } = useLog({ id });
   const { indexes } = useDataSourcesContext();
   const { dataView: logDataView, error, loading: loadingDataView } = useAdhocDataView({ index });
 
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
-    if (!logDoc || !id || !index) return null;
+    if (!log || !id || !index) return null;
 
     return {
       id,
       raw: {
         _index: index,
         _id: id,
-        _source: logDoc,
+        _source: log,
       },
-      flattened: flattenObject(logDoc),
+      flattened: flattenObject(log),
     };
-  }, [id, logDoc, index]);
+  }, [id, log, index]);
 
   return (
     <WaterfallFlyout
