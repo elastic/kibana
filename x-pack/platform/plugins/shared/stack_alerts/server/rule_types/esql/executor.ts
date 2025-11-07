@@ -75,6 +75,7 @@ export async function executor(
         state: { latestTimestamp, dateStart, dateEnd },
         payload: {
           [ALERT_GROUPING]: alert[ALERT_GROUPING],
+          'alert.flapping': alert['alert.flapping'] ? false : undefined, // if alert was previously flapping and recovered, it is no longer flapping
           'lineage.parents': getLineage({ ...alert, alertUuid }),
           'alert.start': alert['alert.start'],
           'alert.end': new Date().toISOString(),
