@@ -10,7 +10,7 @@ For Elastic Security known issues, refer to [Elastic Security known issues](docs
 
 ::::{dropdown} The connection between agentless integrations and {{fleet-server}} is broken
 
-Applies to: {{stack}} 9.0.0-9.1.5
+Applies to: {{stack}} <9.1.6
 
 **Details**
 
