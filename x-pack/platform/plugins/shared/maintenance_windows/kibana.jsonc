@@ -1,35 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/maintenance-windows-plugin",
-  "owner": ["@elastic/response-ops"],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/response-ops",
   "description": "Exposes the Maintenance Windows feature to define time windows to suppress notifications.",
   "plugin": {
     "id": "maintenanceWindows",
-    "browser": true,
     "server": true,
-    "configPath": ["xpack", "maintenance_windows"],
+    "browser": true,
     "requiredPlugins": [
-      "share",
-      "encryptedSavedObjects",
-      "eventLog",
-      "features",
-      "kibanaUtils",
-      "licensing",
-      "taskManager",
-      "kibanaReact",
-      "management",
-      "esUiShared",
-      "unifiedSearch"
-    ],
-    "optionalPlugins": [
-      "usageCollection",
-      "security",
-      "monitoringCollection",
-      "spaces",
-      "serverless"
-    ],
-    "extraPublicDirs": ["common"]
+      "navigation"
+    ]
   }
 }
