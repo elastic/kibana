@@ -36,26 +36,6 @@ export const TabbedTableFilter = (props: TabbedTableFilterProps) => {
             defaultMessage="Dashboards"
           />
         </EuiTab>
-        <EuiTab
-          onClick={() => props.onSelectedTabChanged('visualizations')}
-          isSelected={props.selectedTabId === 'visualizations'}
-          data-test-subj="visualizationsTab"
-        >
-          <FormattedMessage
-            id="contentManagement.tableList.tabsFilter.visualizationsTabLabel"
-            defaultMessage="Visualizations"
-          />
-        </EuiTab>
-        <EuiTab
-          onClick={() => props.onSelectedTabChanged('annotation-groups')}
-          isSelected={props.selectedTabId === 'annotation-groups'}
-          data-test-subj="annotationGroupsTab"
-        >
-          <FormattedMessage
-            id="contentManagement.tableList.tabsFilter.annotationGroupsTabLabel"
-            defaultMessage="Annotation Groups"
-          />
-        </EuiTab>
       </EuiTabs>
       <EuiSpacer size={'s'} />
     </>

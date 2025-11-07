@@ -51,8 +51,10 @@ import {
   UserFilterContextProvider,
   NULL_USER as USER_FILTER_NULL_USER,
 } from './user_filter_panel';
-import { FavoritesFilterPanel } from './favorites_filter_panel';
-import { TabbedTableFilter } from './tabbed_filter';
+import { FavoritesFilterButton } from './favorites_filter_panel';
+
+// Temporarily hiding tabs filter because we now have favorite filter as a button, and will rework tabs filter later
+// import { TabbedTableFilter } from './tabbed_filter';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -230,14 +232,14 @@ export function Table<T extends UserContentCommonSchema>({
       : null;
   }, [createdByEnabled]);
 
-  const favoritesFilterPanel = useMemo<SearchFilterConfig | null>(() => {
+  const favoritesFilterButton = useMemo<SearchFilterConfig | null>(() => {
     if (!favoritesEnabled) return null;
 
     return {
       type: 'custom_component',
       component: () => {
         return (
-          <FavoritesFilterPanel
+          <FavoritesFilterButton
             isFavoritesOnly={tableFilter.favorites}
             onToggleFavorites={() => {
               onFilterChange({ favorites: !tableFilter.favorites });
@@ -249,10 +251,10 @@ export function Table<T extends UserContentCommonSchema>({
   }, [favoritesEnabled, tableFilter.favorites, onFilterChange]);
 
   const searchFilters = useMemo(() => {
-    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterPanel].filter(
+    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterButton].filter(
       (f: SearchFilterConfig | null): f is SearchFilterConfig => Boolean(f)
     );
-  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterPanel]);
+  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterButton]);
 
   const search = useMemo((): Search => {
     const showHint = !!searchQuery.error && searchQuery.error.containsForbiddenChars;
@@ -352,13 +354,16 @@ export function Table<T extends UserContentCommonSchema>({
     tableSort.field === 'accessedAt' // "accessedAt" is a special case with a custom sorting
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
-  // Content type tabs filter (only shown in dashboards app)
-  const contentTypeTabsFilter = contentTypeTabsEnabled ? (
-    <TabbedTableFilter
-      selectedTabId={tableFilter.contentTypeTab ?? 'dashboards'}
-      onSelectedTabChanged={(newTab) => onFilterChange({ contentTypeTab: newTab })}
-    />
-  ) : undefined;
+
+  // const favoritesFilter =
+  //   favoritesEnabled && !favoritesError ? (
+  //     <TabbedTableFilter
+  //       selectedTabId={tableFilter.favorites ? 'favorite' : 'all'}
+  //       onSelectedTabChanged={(newTab) => {
+  //         onFilterChange({ favorites: newTab === 'favorite' });
+  //       }}
+  //     />
+  //   ) : undefined;
 
   return (
     <UserFilterContextProvider
@@ -397,7 +402,7 @@ export function Table<T extends UserContentCommonSchema>({
           rowHeader="attributes.title"
           tableCaption={tableCaption}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          childrenBetween={contentTypeTabsFilter}
+          // childrenBetween={favoritesFilter}
         />
       </TagFilterContextProvider>
     </UserFilterContextProvider>
