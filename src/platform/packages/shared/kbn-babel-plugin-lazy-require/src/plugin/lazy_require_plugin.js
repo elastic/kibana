@@ -14,6 +14,7 @@
 
 const {
   isSimpleRequireCall,
+  excludeImports,
   shouldSkipIdentifier,
   detectModuleLevelUsage,
   detectJsxUsage,
@@ -282,65 +283,32 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           return;
         }
 
-        // Detect and exclude module-level usage
-        const importsUsedInModuleLevelCode = detectModuleLevelUsage(programPath, properties, t);
+        // Exclude module-level usage (will remain as regular imports/requires)
+        excludeImports(detectModuleLevelUsage(programPath, properties, t), properties);
 
-        // Exclude from transformation (will remain as regular imports/requires)
-        for (const localName of importsUsedInModuleLevelCode) {
-          properties.delete(localName);
-        }
+        // Exclude JSX usage (JSX transforms happen at compile time, so components need direct access)
+        excludeImports(detectJsxUsage(programPath, properties, t), properties);
 
-        // Detect and exclude JSX usage
-        // JSX transforms happen at compile time, so components need direct access
-        const importsUsedInJsx = detectJsxUsage(programPath, properties, t);
-
-        // Exclude JSX components from transformation
-        for (const localName of importsUsedInJsx) {
-          properties.delete(localName);
-        }
-
-        // Exclude modules from the exclusion list
-        // Some modules must always be available (e.g., React for JSX, Jest for test structure)
+        // Exclude modules from the exclusion list (e.g., React for JSX, Jest for test structure)
         for (const [localName, propInfo] of properties) {
           if (isExcludedModule(propInfo.moduleRequirePath)) {
             properties.delete(localName);
           }
         }
 
-        // Detect and exclude jest.mock() factory usage
-        // Jest mock factories cannot reference out-of-scope variables
-        const importsUsedInJestMocks = detectJestMockUsage(programPath, properties, t);
+        // Exclude jest.mock() factory usage (factories cannot reference out-of-scope variables)
+        excludeImports(detectJestMockUsage(programPath, properties, t), properties);
 
-        // Exclude from transformation
-        for (const localName of importsUsedInJestMocks) {
-          properties.delete(localName);
-        }
-
-        // Detect and exclude constructor usage (new Foo(), new ns.Foo()) in test files only.
-        // This preserves eager import semantics for constructors in tests to avoid deferring
-        // module initialization past jest beforeEach/afterEach hooks (e.g., Date mocking),
-        // while keeping non-test files eligible for lazy loading.
+        // Exclude constructor usage in test files only (preserve eager semantics for Date mocking, etc.)
         if (isTestFile) {
-          const importsUsedAsConstructors = detectConstructorUsage(programPath, properties, t);
-          for (const localName of importsUsedAsConstructors) {
-            properties.delete(localName);
-          }
+          excludeImports(detectConstructorUsage(programPath, properties, t), properties);
         }
 
-        // Detect `new` usage inside constructors or methods invoked by constructors (one hop)
-        // Keep these eager even in non-test files, as constructor flows generally expect
-        // import-time semantics for dependencies used during instantiation.
-        const importsUsedInCtorInit = detectConstructorInitNewUsage(programPath, properties, t);
-        for (const localName of importsUsedInCtorInit) {
-          properties.delete(localName);
-        }
+        // Exclude constructor init usage (constructors expect import-time semantics)
+        excludeImports(detectConstructorInitNewUsage(programPath, properties, t), properties);
 
-        // Detect imports used in class extends clauses
-        // Classes need their parent class available at definition time, not instantiation time.
-        const importsUsedInExtends = detectClassExtendsUsage(programPath, properties, t);
-        for (const localName of importsUsedInExtends) {
-          properties.delete(localName);
-        }
+        // Exclude class extends usage (parent class needed at definition time)
+        excludeImports(detectClassExtendsUsage(programPath, properties, t), properties);
 
         // Remove orphaned modules (no properties left)
         const activeModules = new Set(

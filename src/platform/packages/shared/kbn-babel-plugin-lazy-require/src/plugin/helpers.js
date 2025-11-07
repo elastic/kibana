@@ -55,6 +55,17 @@ function collectReferencedProperties(nodePath, properties) {
 }
 
 /**
+ * Exclude imports from transformation by deleting them from the properties map
+ * @param {Set<string>} excludedNames - Set of variable names to exclude
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ */
+function excludeImports(excludedNames, properties) {
+  for (const localName of excludedNames) {
+    properties.delete(localName);
+  }
+}
+
+/**
  * Check if an identifier is in a TypeScript type-only context
  * Returns true if the identifier is in a pure type context that won't exist at runtime
  */
@@ -514,6 +525,7 @@ function detectClassExtendsUsage(programPath, properties, t) {
 module.exports = {
   isSimpleRequireCall,
   collectReferencedProperties,
+  excludeImports,
   isInTypeContext,
   shouldSkipIdentifier,
   detectModuleLevelUsage,
