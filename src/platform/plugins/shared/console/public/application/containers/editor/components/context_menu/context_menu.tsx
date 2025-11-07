@@ -76,7 +76,7 @@ export const ContextMenu = ({
 }: Props) => {
   // Get default language from local storage
   const {
-    services: { storage, esHostService },
+    services: { storage, esHostService, share },
     config: { isPackagedEnvironment },
   } = useServicesContext();
 
@@ -217,6 +217,38 @@ export const ContextMenu = ({
     autoIndent(event);
   };
 
+  const openInDiscover = async () => {
+    closePopover();
+    const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+    if (!discoverLocator) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('console.consoleMenu.discoverNotAvailable', {
+          defaultMessage: 'Discover is not available.',
+        }),
+      });
+      return;
+    }
+
+    // ES|QL query: comfort food in description, with relevant fields
+    const hardcodedEsqlQuery =
+      'FROM kibana_sample_data_esql\n' +
+      '  | WHERE description:"comfort food"\n' +
+      '  | KEEP title, description, rating\n' +
+      '  | LIMIT 1000';
+
+    try {
+      await discoverLocator.navigate({
+        query: { esql: hardcodedEsqlQuery },
+      });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.discoverNavigationFailed', {
+          defaultMessage: 'Failed to open in Discover',
+        }),
+      });
+    }
+  };
+
   const button = (
     <EuiButtonIcon
       onClick={() => {
@@ -317,6 +349,17 @@ export const ContextMenu = ({
       <FormattedMessage
         id="console.monaco.requestOptions.openDocumentationButtonLabel"
         defaultMessage="Open API reference"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="Display in Discover"
+      data-test-subj="consoleMenuOpenInDiscover"
+      onClick={openInDiscover}
+      icon="discoverApp"
+    >
+      <FormattedMessage
+        id="console.monaco.requestOptions.displayInDiscoverButtonLabel"
+        defaultMessage="Display in Discover"
       />
     </EuiContextMenuItem>,
   ];
