@@ -21,6 +21,7 @@ export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof 
 
 interface BaseCloudConnectorCredentials {
   cloudConnectorId?: string;
+  name?: string;
 }
 export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredentials {
   roleArn?: string;

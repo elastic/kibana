@@ -555,6 +555,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (cloudConnector) {
           enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
         }
+
+        // Remove cloud_connector_name from package policy vars as it's not part of the package schema
+        // It was only used to pass the name to cloud connector creation
+        enrichedPackagePolicy.inputs = enrichedPackagePolicy.inputs.map((input) => ({
+          ...input,
+          streams: input.streams.map((stream) => {
+            if (stream.vars?.cloud_connector_name) {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              const { cloud_connector_name, ...restVars } = stream.vars;
+              return { ...stream, vars: restVars };
+            }
+            return stream;
+          }),
+        }));
       }
 
       inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
@@ -3015,6 +3029,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy,
       logger
     );
+
+    // Extract cloud connector name from input vars
+    const vars = enrichedPackagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+    const cloudConnectorName = vars?.cloud_connector_name?.value;
+
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
         const existingCloudConnector = await soClient.get<CloudConnector>(
@@ -3040,8 +3059,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
+          // Use user-provided name if available, fallback to generated name
+          const connectorName =
+            cloudConnectorName || `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`;
           const cloudConnector = await cloudConnectorService.create(soClient, {
-            name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+            name: connectorName,
             vars: cloudConnectorVars,
             cloudProvider,
           });
@@ -3049,6 +3071,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           return cloudConnector;
         } catch (error) {
           logger.error(`Error creating cloud connector: ${error}`);
+          // If it's already a CloudConnectorCreateError, just rethrow it to preserve the original message
+          if (error instanceof CloudConnectorCreateError) {
+            throw error;
+          }
           throw new CloudConnectorCreateError(`${error}`);
         }
       }
