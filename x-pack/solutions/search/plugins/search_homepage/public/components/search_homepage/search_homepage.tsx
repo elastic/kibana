@@ -6,10 +6,8 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -20,9 +18,9 @@ import { i18n } from '@kbn/i18n';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchHomepageBody } from './search_homepage_body';
+import { PromoBanner } from './promo_banner';
 
 export const SearchHomepagePage = () => {
-  const [isCalloutDismissed, setIsCalloutDismissed] = useState(false);
   const {
     services: { console: consolePlugin, history, searchNavigation, security },
   } = useKibana();
@@ -58,19 +56,7 @@ export const SearchHomepagePage = () => {
       grow={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      {!isCalloutDismissed && (
-        <EuiCallOut
-          announceOnMount
-          title={
-            <FormattedMessage
-              id="xpack.searchHomepage.searchHomepagePage.euiCallOut.calloutTitleLabel"
-              defaultMessage="Callout title"
-            />
-          }
-          color="primary"
-          onDismiss={() => setIsCalloutDismissed(true)}
-        />
-      )}
+      <PromoBanner />
       <KibanaPageTemplate.Section restrictWidth={true} grow={false}>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

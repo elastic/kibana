@@ -18,129 +18,161 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { homepageNavLinkHeaderIconStyle, homepageNavLinkHeaderStyle } from './styles';
+import { useKibana } from '../../hooks/use_kibana';
 
-const DATA_NAV_LINK_CARDS = {
-  dataManagement: [
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.indexManagementTitle"
-          defaultMessage="Index Management"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.indexManagementDescription"
-          defaultMessage="Update your Elasticsearch indices individually or in bulk."
-        />
-      ),
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.ingestPipelinesTitle"
-          defaultMessage="Ingest Pipelines"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.ingestPipelinesDescription"
-          defaultMessage="Enrich your data before indexin into Elasticsearch."
-        />
-      ),
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.backupAndRestoreTitle"
-          defaultMessage="Backup and restore"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.backupAndRestoreDescription"
-          defaultMessage="Save and restore snapshots to recover cluster states."
-        />
-      ),
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.manageIndexLifecyclesTitle"
-          defaultMessage="Manage index lifecycles"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.manageIndexLifecyclesDescription"
-          defaultMessage="Automatically perform operations as an index ages."
-        />
-      ),
-    },
-  ],
-  stackManagement: [
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.monitorTheStackTitle"
-          defaultMessage="Monitor the stack"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.monitorTheStackDescription"
-          defaultMessage="Track the health of your deployment."
-        />
-      ),
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.managePermissions"
-          defaultMessage="Manage permissions"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.managePermissionsDescription"
-          defaultMessage="Control who has access and what tasks they can perform."
-        />
-      ),
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.rulesAndAlertsTitle"
-          defaultMessage="Rules and Alerts"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.rulesAndAlertsDescription"
-          defaultMessage="Receive alerts when a condition is met."
-        />
-      ),
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.inferenceEndpointsTitle"
-          defaultMessage="Inference Endpoints"
-        />
-      ),
-      description: (
-        <FormattedMessage
-          id="xpack.searchHomepage.homepageNavLinks.inferenceEndpointsDescription"
-          defaultMessage="Straemline the deployment and management of models."
-        />
-      ),
-    },
-  ],
+const getNavLinkHeader = (type: 'stackManagement' | 'dataManagement') => {
+  return type === 'stackManagement' ? (
+    <FormattedMessage
+      id="xpack.searchHomepage.homepageNavLinks.stackManagementTitle"
+      defaultMessage="Stack Management"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.searchHomepage.homepageNavLinks.dataManagementTitle"
+      defaultMessage="Data Management"
+    />
+  );
 };
 
 export const HomepageNavLinks = ({ type }: { type: 'dataManagement' | 'stackManagement' }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { application, chrome },
+  } = useKibana();
+
+  const DATA_NAV_LINK_CARDS = {
+    dataManagement: [
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.indexManagementTitle"
+            defaultMessage="Index Management"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.indexManagementDescription"
+            defaultMessage="Update your Elasticsearch indices individually or in bulk."
+          />
+        ),
+        onClick: () => {
+          const url = chrome.navLinks.get('management:index_management')?.url;
+          if (url) {
+            application.navigateToUrl(url);
+          }
+        },
+      },
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.ingestPipelinesTitle"
+            defaultMessage="Ingest pipelines"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.ingestPipelinesDescription"
+            defaultMessage="Enrich your data before indexin into Elasticsearch."
+          />
+        ),
+        onClick: () => {},
+      },
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.backupAndRestoreTitle"
+            defaultMessage="Backup and restore"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.backupAndRestoreDescription"
+            defaultMessage="Save and restore snapshots to recover cluster states."
+          />
+        ),
+        onClick: () => {},
+      },
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.manageIndexLifecyclesTitle"
+            defaultMessage="Manage index lifecycles"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.manageIndexLifecyclesDescription"
+            defaultMessage="Automatically perform operations as an index ages."
+          />
+        ),
+        onClick: () => {},
+      },
+    ],
+    stackManagement: [
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.monitorTheStackTitle"
+            defaultMessage="Monitor the stack"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.monitorTheStackDescription"
+            defaultMessage="Track the health of your deployment."
+          />
+        ),
+        onClick: () => {},
+      },
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.managePermissions"
+            defaultMessage="Manage permissions"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.managePermissionsDescription"
+            defaultMessage="Control who has access and what tasks they can perform."
+          />
+        ),
+        onClick: () => {},
+      },
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.rulesAndAlertsTitle"
+            defaultMessage="Rules and Alerts"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.rulesAndAlertsDescription"
+            defaultMessage="Receive alerts when a condition is met."
+          />
+        ),
+        onClick: () => {},
+      },
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.inferenceEndpointsTitle"
+            defaultMessage="Inference Endpoints"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.searchHomepage.homepageNavLinks.inferenceEndpointsDescription"
+            defaultMessage="Straemline the deployment and management of models."
+          />
+        ),
+        onClick: () => {},
+      },
+    ],
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -150,33 +182,14 @@ export const HomepageNavLinks = ({ type }: { type: 'dataManagement' | 'stackMana
               alignItems="center"
               responsive={false}
               gutterSize="s"
-              css={css({ padding: `${euiTheme.size.xs} 0` })}
+              css={homepageNavLinkHeaderStyle(euiTheme)}
             >
-              <EuiFlexItem
-                grow={false}
-                css={css({
-                  backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
-                  padding: euiTheme.size.s,
-                  borderRadius: euiTheme.border.radius.small,
-                })}
-              >
+              <EuiFlexItem grow={false} css={homepageNavLinkHeaderIconStyle(euiTheme)}>
                 <EuiIcon type="database" size="m" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <h4>
-                    {type === 'stackManagement' ? (
-                      <FormattedMessage
-                        id="xpack.searchHomepage.homepageNavLinks.stackManagementTitle"
-                        defaultMessage="Stack Management"
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.searchHomepage.homepageNavLinks.dataManagementTitle"
-                        defaultMessage="Data Management"
-                      />
-                    )}
-                  </h4>
+                  <h4>{getNavLinkHeader(type)}</h4>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -199,8 +212,8 @@ export const HomepageNavLinks = ({ type }: { type: 'dataManagement' | 'stackMana
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="l">
           {DATA_NAV_LINK_CARDS[type].map((card, index) => (
-            <EuiFlexItem grow={false} key={index}>
-              <EuiPanel hasBorder grow={false}>
+            <EuiFlexItem key={index}>
+              <EuiPanel hasBorder onClick={card.onClick}>
                 <EuiFlexGroup direction="column" gutterSize="s">
                   <EuiFlexItem>
                     <EuiTitle size="s">

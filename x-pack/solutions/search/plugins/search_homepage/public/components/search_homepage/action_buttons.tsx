@@ -5,11 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SEARCH_INDICES } from '@kbn/deeplinks-search';
+import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const ActionButtons = () => {
+  const {
+    services: { application, chrome, console },
+  } = useKibana();
+
+  const onFileUpload = useCallback(() => {
+    application.navigateToApp('ml', { path: 'filedatavisualizer' });
+  }, [application]);
+  const onCreateIndex = useCallback(() => {
+    const createIndexUrl = chrome?.navLinks.get(
+      `${SEARCH_INDICES}:${SEARCH_INDICES_CREATE_INDEX}`
+    )?.url;
+
+    if (createIndexUrl) {
+      application?.navigateToUrl(createIndexUrl);
+    }
+  }, [application, chrome]);
+
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -19,6 +39,7 @@ export const ActionButtons = () => {
               data-test-subj="search-homepage-upload-file-button"
               color="text"
               iconType="export"
+              onClick={onFileUpload}
             >
               {i18n.translate('xpack.searchHomepage.actions.uploadFile', {
                 defaultMessage: 'Upload a file',
@@ -41,6 +62,9 @@ export const ActionButtons = () => {
               data-test-subj="search-homepage-open-discover-button"
               color="text"
               iconType="discoverApp"
+              onClick={() => {
+                application.navigateToApp('discover');
+              }}
             >
               {i18n.translate('xpack.searchHomepage.actions.openDiscover', {
                 defaultMessage: 'Open Discover',
@@ -52,6 +76,9 @@ export const ActionButtons = () => {
               data-test-subj="search-homepage-create-dashboard-button"
               color="text"
               iconType="dashboardApp"
+              onClick={() => {
+                application.navigateToApp('dashboards');
+              }}
             >
               {i18n.translate('xpack.searchHomepage.actions.createDashboard', {
                 defaultMessage: 'Create a dashboard',
@@ -63,6 +90,7 @@ export const ActionButtons = () => {
               data-test-subj="search-homepage-create-index-button"
               color="text"
               iconType="indexManagementApp"
+              onClick={onCreateIndex}
             >
               {i18n.translate('xpack.searchHomepage.actions.createIndex', {
                 defaultMessage: 'Create an index',
@@ -74,6 +102,11 @@ export const ActionButtons = () => {
               data-test-subj="search-homepage-open-console-button"
               color="text"
               iconType="sessionViewer"
+              onClick={() => {
+                if (console && console.openEmbeddedConsole) {
+                  console.openEmbeddedConsole();
+                }
+              }}
             >
               {i18n.translate('xpack.searchHomepage.actions.openConsole', {
                 defaultMessage: 'Open Console',
