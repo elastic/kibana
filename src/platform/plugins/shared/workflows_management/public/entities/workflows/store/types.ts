@@ -8,50 +8,11 @@
  */
 
 import type { EnhancedStore } from '@reduxjs/toolkit';
-import type YAML from 'yaml';
-import type { LineCounter } from 'yaml';
-import type { WorkflowDetailDto, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowLookup } from './utils/build_workflow_lookup';
-import type { WorkflowZodSchemaLooseType } from '../../../../common/schema';
-import type { ConnectorsResponse } from '../../connectors/model/types';
+import type { WorkflowDetailState } from './workflow_detail/types';
 
-export type ActiveTab = 'workflow' | 'executions';
-
-export interface WorkflowDetailState {
-  /** The yaml string used by the workflow yaml editor */
-  yamlString: string;
-  /** The persisted workflow detail data */
-  workflow?: WorkflowDetailDto;
-  /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
-  computed?: ComputedData;
-  /** The step id that is focused in the workflow yaml editor */
-  focusedStepId?: string;
-  /** The step id that is highlighted in the workflow yaml editor */
-  highlightedStepId?: string;
-  /** The modal to test the workflow is open */
-  isTestModalOpen: boolean;
-  /** The connectors data */
-  connectors?: ConnectorsResponse;
-  /** The loose schema for the workflow */
-  schemaLoose: WorkflowZodSchemaLooseType;
-  /** The currently selected execution (when viewing executions tab) */
-  execution?: WorkflowExecutionDto;
-  /** The active tab (workflow or executions) */
-  activeTab?: ActiveTab;
-}
-
-export interface ComputedData {
-  yamlDocument?: YAML.Document; // This will be handled specially for serialization
-  yamlLineCounter?: LineCounter;
-  workflowLookup?: WorkflowLookup;
-  workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
-  workflowDefinition?: WorkflowYaml | null;
-}
-
-// Store types (will be properly typed when store.ts is imported)
 export interface RootState {
   detail: WorkflowDetailState;
 }
+
 export type WorkflowsStore = EnhancedStore<RootState>;
 export type AppDispatch = WorkflowsStore['dispatch'];

@@ -9,17 +9,19 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
-import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
-import type { ActiveTab, ComputedData, WorkflowDetailState } from '../types';
+import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
+import { getWorkflowZodSchema } from '../../../../../common/schema';
 import { findStepByLine } from '../utils/step_finder';
 
 // Initial state
 const initialState: WorkflowDetailState = {
   yamlString: '',
   workflow: undefined,
+  execution: undefined,
+  activeTab: undefined,
   computed: undefined,
   connectors: undefined,
-  schemaLoose: getWorkflowZodSchemaLoose({}),
+  schema: getWorkflowZodSchema({}),
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
@@ -74,11 +76,8 @@ const workflowDetailSlice = createSlice({
     _clearComputedData: (state) => {
       state.computed = {};
     },
-    _setGeneratedSchemaInternal: (
-      state,
-      action: { payload: WorkflowDetailState['schemaLoose'] }
-    ) => {
-      state.schemaLoose = action.payload;
+    _setGeneratedSchemaInternal: (state, action: { payload: WorkflowDetailState['schema'] }) => {
+      state.schema = action.payload;
     },
   },
 });
@@ -107,8 +106,9 @@ export const {
 // Ignore these non-serializable fields in the state
 export const ignoredPaths: Array<string | RegExp> = [
   /detail\.computed\.*/, // All computed data is not serializable
-  'detail.schemaLoose', // Zod schema loose is not serializable
+  'detail.schema', // Zod schema is not serializable
   'detail.workflow.definition', // WorkflowYaml definition schema is not serializable
+  'detail.execution.definition', // WorkflowYaml definition schema is not serializable
 ];
 // Ignore these specific action types that contain non-serializable data
 export const ignoredActions: Array<string> = [

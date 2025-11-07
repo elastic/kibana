@@ -9,26 +9,17 @@
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
 import { debounce } from 'lodash';
-import { selectYamlForEditor } from './selectors';
-import {
-  _clearComputedData,
-  _setComputedDataInternal,
-  setActiveTab,
-  setExecution,
-  setYamlString,
-} from './slice';
+import { _clearComputedData, _setComputedDataInternal, setYamlString } from './slice';
 import type { RootState } from '../types';
 import { performComputation } from '../utils/computation';
 
-const COMPUTATION_DEBOUNCE_MS = 100; // 100ms debounce
+const COMPUTATION_DEBOUNCE_MS = 500;
 
 const compute = (
   yamlString: string | undefined,
   store: MiddlewareAPI<Dispatch<AnyAction>, RootState>
 ) => {
-  // Get fresh state at execution time, not at scheduling time
-  const state = store.getState();
-  const computed = performComputation(yamlString, state.detail.schemaLoose);
+  const computed = performComputation(yamlString);
   if (computed) {
     store.dispatch(_setComputedDataInternal(computed));
   } else {
@@ -38,37 +29,30 @@ const compute = (
 
 const debouncedCompute = debounce(compute, COMPUTATION_DEBOUNCE_MS);
 
-/**
- * Triggers computation with the appropriate YAML string based on current state.
- */
-const triggerComputation = (store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => {
-  debouncedCompute.cancel();
-  const state = store.getState();
-  const yamlString = selectYamlForEditor(state); // Use the yaml being used in the editor (current workflow yaml or execution yaml)
-  const { computed } = state.detail;
-
-  // If yamlString is empty/undefined, clear computed data and return
-  if (!yamlString) {
-    store.dispatch(_clearComputedData());
-    return;
-  }
-
-  // Do computation immediately if not initialized yet, (computed is only undefined when never set)
-  if (!computed) {
-    compute(yamlString, store);
-  } else {
-    debouncedCompute(yamlString, store);
-  }
-};
-
-// Side effects middleware - computes derived data when yamlString, execution, or activeTab changes (debounced)
+// Side effects middleware - computes derived data when yamlString changes (debounced)
 const workflowComputationMiddleware: Middleware =
   (store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => (next) => (action) => {
     const result = next(action);
 
-    // React to changes that affect which YAML should be used for computation
-    if (setYamlString.match(action) || setExecution.match(action) || setActiveTab.match(action)) {
-      triggerComputation(store);
+    // Only react to yamlString changes
+    if (setYamlString.match(action)) {
+      debouncedCompute.cancel();
+
+      const yamlString = action.payload;
+      const { computed } = store.getState().detail;
+
+      // If yamlString is empty/undefined, clear computed data and return
+      if (!yamlString) {
+        store.dispatch(_clearComputedData());
+        return;
+      }
+
+      // Do computation immediately if not initialized yet, (computed is only undefined when never set)
+      if (!computed) {
+        compute(yamlString, store);
+      } else {
+        debouncedCompute(yamlString, store);
+      }
     }
 
     return result;

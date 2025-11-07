@@ -83,7 +83,7 @@ export const selectIsTestModalOpen = createSelector(
 );
 
 export const selectConnectors = createSelector(selectDetailState, (detail) => detail.connectors);
-export const selectSchemaLoose = createSelector(selectDetailState, (detail) => detail.schemaLoose);
+export const selectSchema = createSelector(selectDetailState, (detail) => detail.schema);
 
 export const selectExecution = createSelector(selectDetailState, (detail) => detail.execution);
 export const selectActiveTab = createSelector(selectDetailState, (detail) => detail.activeTab);
