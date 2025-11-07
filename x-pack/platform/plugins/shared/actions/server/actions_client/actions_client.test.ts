@@ -392,19 +392,9 @@ describe('create()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"param1\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
-    `);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Field \\"param1\\": Required"`
+    );
   });
 
   test('validates connector: config and secrets', async () => {
@@ -2254,19 +2244,9 @@ describe('update()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"param1\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
-    `);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Field \\"param1\\": Required"`
+    );
   });
 
   test('validates connector: config and secrets', async () => {
