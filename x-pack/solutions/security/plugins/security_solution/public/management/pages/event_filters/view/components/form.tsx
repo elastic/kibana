@@ -648,6 +648,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         <EuiHorizontalRule />
         {criteriaSection}
         {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
         {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
         {hasDuplicateFields && (
           <>

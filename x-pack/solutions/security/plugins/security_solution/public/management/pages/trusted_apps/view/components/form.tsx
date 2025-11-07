@@ -930,6 +930,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <>
               {exceptionBuilderComponentMemo}
               {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+              {conditionsState.hasWildcardWithWrongOperator &&
+                conditionsState.hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
               {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
             </>
           ) : (
