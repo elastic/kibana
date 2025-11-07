@@ -79,8 +79,6 @@ export class ThreatHuntingHypothesisDescriptorClient {
         (eh) => eh.hypothesisId === hypothesis.hypothesisId
       );
       if (!existingHypothesis) {
-        // eslint-disable-next-line no-console
-        console.log('Creating hypothesis:', hypothesis.hypothesisId);
         await this.deps.soClient.create<ThreatHuntingHypothesis>(
           threatHuntingHypothesisTypeName,
           hypothesis,
@@ -88,8 +86,6 @@ export class ThreatHuntingHypothesisDescriptorClient {
         );
         results.push({ action: 'created', hypothesis });
       } else {
-        // eslint-disable-next-line no-console
-        console.log('Updating hypothesis:', hypothesis.hypothesisId);
         await this.deps.soClient.update<ThreatHuntingHypothesis>(
           threatHuntingHypothesisTypeName,
           this.getSavedObjectId(),
