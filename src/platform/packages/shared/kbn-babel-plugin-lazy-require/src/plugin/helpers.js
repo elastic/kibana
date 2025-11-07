@@ -283,7 +283,8 @@ function detectJsxUsage(programPath, properties, t) {
   programPath.traverse({
     JSXIdentifier(jsxIdPath) {
       const name = jsxIdPath.node.name;
-      // Only care about opening/closing element names, not attribute names
+      // Only element names, not attributes
+      // Example: <MyComponent foo="bar" />  ← "MyComponent" yes, "foo" no
       if (
         properties.has(name) &&
         (t.isJSXOpeningElement(jsxIdPath.parent) || t.isJSXClosingElement(jsxIdPath.parent))
@@ -298,12 +299,11 @@ function detectJsxUsage(programPath, properties, t) {
         t.isJSXOpeningElement(jsxMemberPath.parent) ||
         t.isJSXClosingElement(jsxMemberPath.parent)
       ) {
-        // Traverse to find the root identifier
+        // Find the root identifier (Context in Context.Provider.Something)
         let current = jsxMemberPath.node;
         while (t.isJSXMemberExpression(current.object)) {
           current = current.object;
         }
-        // current.object should now be a JSXIdentifier
         if (t.isJSXIdentifier(current.object)) {
           const name = current.object.name;
           if (properties.has(name)) {
@@ -336,7 +336,6 @@ function detectJestMockUsage(programPath, properties, t) {
       // Check if this is a jest.mock(), jest.doMock(), or jest.unmock() call
       let isJestMock = false;
       if (t.isMemberExpression(callee)) {
-        // jest.mock(), jest.doMock(), jest.unmock()
         if (
           t.isIdentifier(callee.object, { name: 'jest' }) &&
           t.isIdentifier(callee.property) &&
@@ -350,13 +349,11 @@ function detectJestMockUsage(programPath, properties, t) {
         return;
       }
 
-      // Check the factory function (2nd argument) for import usage
       const factoryArg = callPath.node.arguments[1];
       if (!factoryArg) {
         return;
       }
 
-      // Traverse the factory function to find import references
       const factoryPath = callPath.get('arguments.1');
       if (!factoryPath) {
         return;
@@ -384,7 +381,8 @@ function detectModuleLevelUsage(programPath, properties, t) {
   const importsUsedInModuleLevelCode = new Set();
 
   programPath.traverse({
-    // TypeScript import equals (export import alias = Module)
+    // TypeScript import alias at module level
+    // Example: export import Foo = Bar.Baz;
     TSImportEqualsDeclaration(tsImportPath) {
       const isTopLevel = tsImportPath.parent === programPath.node;
 
@@ -409,7 +407,6 @@ function detectModuleLevelUsage(programPath, properties, t) {
       }
     },
 
-    // Top-level variable declarations
     VariableDeclaration(varDeclPath) {
       const isTopLevel =
         varDeclPath.parent === programPath.node ||
@@ -433,7 +430,8 @@ function detectModuleLevelUsage(programPath, properties, t) {
       }
     },
 
-    // Class static properties (initialize when class is defined)
+    // Class static properties execute at class definition time, not instantiation
+    // Example: class Foo { static config = loadConfig(); }  ← runs immediately
     ClassProperty(classPropPath) {
       if (!classPropPath.node.static) {
         return;
@@ -486,8 +484,9 @@ function getRootIdentifierFromNode(node, t) {
   if (t.isIdentifier(node)) {
     return node.name;
   }
-  // Handle cases like ns.Foo or ns.sub.Foo
+
   if (t.isMemberExpression(node)) {
+    // Walk up chain to find root: ns.sub.Foo → ns
     let current = node;
     while (t.isMemberExpression(current.object)) {
       current = current.object;
@@ -567,11 +566,12 @@ function detectConstructorInitNewUsage(programPath, properties, t) {
       const constructorMethod = methodsByName.get('constructor');
       if (!constructorMethod) return;
 
-      // Collect direct `new` in constructor
+      // Collect `new` expressions directly in constructor
+      // Example: constructor() { this.x = new Validator(); }  ← marks Validator
       const constructorNewExpressions = collectNewExpressionRoots(constructorMethod, properties, t);
       constructorNewExpressions.forEach((name) => importsUsedInConstructorFlow.add(name));
 
-      // Find calls like this.methodName(...) in constructor
+      // Find methods called by constructor: this.setup(), this.init(), etc.
       const calledMethodNames = new Set();
       constructorMethod.traverse({
         CallExpression(callPath) {
@@ -586,7 +586,8 @@ function detectConstructorInitNewUsage(programPath, properties, t) {
         },
       });
 
-      // For one hop, scan those methods for `new`
+      // One-hop analysis: check those called methods for `new` expressions
+      // Example: setup() { this.logger = new Logger(); }  ← marks Logger
       for (const name of calledMethodNames) {
         const methodPath = methodsByName.get(name);
         if (methodPath) {

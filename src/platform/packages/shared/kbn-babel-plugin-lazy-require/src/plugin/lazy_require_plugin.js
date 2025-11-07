@@ -202,27 +202,27 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
             const importPath = path.node.source.value;
 
-            // Skip imports from directly re-exported modules
+            // Skip direct re-exports to preserve module boundary semantics
+            // Example: export { x } from './module' should not lazy-load './module'
             if (directReExportSources.has(importPath)) {
               return;
             }
 
             const isConst = true;
 
-            // Ensure module entry exists (outerFunc is null, we handle interop manually for imports)
             ensureModule(importPath, modules, programPath.scope);
 
-            // Skip if any import is re-exported (import then export pattern)
+            // Skip import-then-export pattern to preserve re-export semantics
+            // Example: import x from './a'; export { x }; should not lazy-load './a'
             if (hasImportThenExportPattern(path, t)) {
               return;
             }
 
-            // Skip imports from mock files - they contain jest.doMock() setup that must run immediately
+            // Skip imports from mock setup files (jest.doMock() must run immediately)
             if (TEST_MOCK_IMPORT_PATTERNS.some((pattern) => importPath.includes(pattern))) {
               return;
             }
 
-            // Handle different import types
             for (const specifier of path.node.specifiers) {
               const localName = specifier.local.name;
               let propertyKey = null;
@@ -256,34 +256,39 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           return;
         }
 
-        // Exclude module-level usage (will remain as regular imports/requires)
+        // Module-level usage must execute immediately (can't defer side effects)
+        // Example: const config = loadConfig(); uses loadConfig at module init time
         excludeImports(detectModuleLevelUsage(programPath, properties, t), properties);
 
         // Exclude JSX usage (JSX transforms happen at compile time, so components need direct access)
         excludeImports(detectJsxUsage(programPath, properties, t), properties);
 
-        // Exclude modules from the exclusion list (e.g., React for JSX, Jest for test structure)
+        // Never transform explicitly excluded modules
         for (const [localName, propInfo] of properties) {
           if (isExcludedModule(propInfo.moduleRequirePath)) {
             properties.delete(localName);
           }
         }
 
-        // Exclude jest.mock() factory usage (factories cannot reference out-of-scope variables)
+        // Jest mock factories run in isolated scope and cannot access lazy getters
+        // Example: jest.mock('./a', () => ({ default: mockA })) cannot reference lazy imports
         excludeImports(detectJestMockUsage(programPath, properties, t), properties);
 
-        // Exclude constructor usage in test files only (preserve eager semantics for Date mocking, etc.)
+        // In test files, preserve eager loading for constructors (Date/timer mocking depends on timing)
         if (isTestFile) {
           excludeImports(detectConstructorUsage(programPath, properties, t), properties);
         }
 
-        // Exclude constructor init usage (constructors expect import-time semantics)
+        // Constructor flows expect dependencies available at instantiation
+        // Example: class Foo { constructor() { this.x = new Bar(); } } needs Bar eager
         excludeImports(detectConstructorInitNewUsage(programPath, properties, t), properties);
 
-        // Exclude class extends usage (parent class needed at definition time)
+        // Parent classes must be available when class is defined
+        // Example: class Child extends Parent {} needs Parent before class definition
         excludeImports(detectClassExtendsUsage(programPath, properties, t), properties);
 
-        // Remove orphaned modules (no properties left)
+        // Clean up modules that have no remaining properties after exclusions
+        // This happens when all imports from a module were excluded
         const activeModules = new Set(
           Array.from(properties.values()).map((info) => info.moduleRequirePath)
         );
@@ -298,7 +303,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           return;
         }
 
-        // Collect declaration paths to remove
+        // Collect declaration paths to remove from original source
         const requirePathsToProcess = new Set();
         const importPathsToRemove = new Set();
 
@@ -310,9 +315,9 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           }
         }
 
-        // Handle import removals (can be partial)
+        // Handle import removals (can be partial if only some specifiers are transformed)
+        // Example: import { a, b } from './x' where only 'a' is transformed
         for (const importPath of importPathsToRemove) {
-          // Check if ALL specifiers from this import are being transformed
           const specifiers = importPath.node.specifiers;
           const allTransformed = specifiers.every((spec) => {
             const localName = spec.local.name;
@@ -320,10 +325,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           });
 
           if (allTransformed) {
-            // Remove the entire import
             importPath.remove();
           } else {
-            // Partial removal - only remove the specifiers we're transforming
             const remainingSpecifiers = specifiers.filter((spec) => {
               return !properties.has(spec.local.name);
             });
@@ -411,7 +414,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // PHASE 4: Generate _imports object
         // =================================================================
 
-        // Check if we need _interopRequireDefault helper
         let needsInteropHelper = false;
         for (const [, propInfo] of properties) {
           if (propInfo.needsInterop) {
@@ -428,7 +430,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           const cacheInitialized = t.memberExpression(cacheId, t.identifier('initialized'));
           const cacheValue = t.memberExpression(cacheId, t.identifier('value'));
 
-          // Build require expression (always store raw module in cache)
           let requireExpression = t.callExpression(t.identifier('require'), [
             t.stringLiteral(propInfo.moduleRequirePath),
           ]);
@@ -448,7 +449,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               ])
             );
 
-          // Determine return value for getter
           let returnExpression;
           if (propInfo.needsInterop) {
             // Default import: apply interop wrapper
@@ -464,7 +464,6 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             returnExpression = t.memberExpression(cacheValue, t.identifier(propInfo.propertyKey));
           }
 
-          // Create getter
           importProperties.push(
             t.objectMethod(
               'get',
@@ -474,7 +473,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             )
           );
 
-          // Create setter for let/var (loads module for side effects before replacing)
+          // Create setter for let/var to allow reassignment
+          // Important: loads module first to trigger side effects before replacing binding
           if (!propInfo.isConst) {
             importProperties.push(
               t.objectMethod(
@@ -519,7 +519,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           );
         }
 
-        // Insert module cache variables (in reverse to maintain order)
+        // Insert in reverse because unshiftContainer adds to beginning
+        // This maintains correct declaration order in final output
         for (let i = moduleCacheDeclarations.length - 1; i >= 0; i--) {
           programPath.unshiftContainer('body', moduleCacheDeclarations[i]);
         }
