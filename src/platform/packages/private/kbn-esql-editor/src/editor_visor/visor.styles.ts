@@ -9,25 +9,35 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+const visorPadding = '1px';
+
 export const visorStyles = (
   euiTheme: EuiThemeComputed,
   comboBoxWidth: number,
   isSpaceReduced: boolean,
-  isVisible: boolean
+  isVisible: boolean,
+  isDarkMode: boolean
 ) => {
+  const visorBoxShadow = isDarkMode
+    ? '0px 6px 14px 0px rgba(137, 157, 170, 0.2)'
+    : '0px 6px 14px 0px rgba(11, 14, 22, 0.05)';
+
+  const totalHeight = `calc(${euiTheme.size.xl} + 2*${visorPadding})`;
+
   return {
     visorWrapper: {
-      background: 'linear-gradient(107.9deg, rgb(11, 100, 221) 21.85%, rgb(255, 39, 165) 98.82%)',
-      padding: '1px',
+      background:
+        'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);',
+      padding: visorPadding,
       width: isSpaceReduced ? '90%' : '50%',
-      height: isVisible ? euiTheme.size.xxl : '0',
-      boxShadow: 'rgba(11, 14, 22, 0.03) 0px 6px 14px 0px',
+      height: isVisible ? `${totalHeight}` : '0',
       margin: isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0',
       borderRadius: euiTheme.size.s,
       opacity: isVisible ? 1 : 0,
       pointerEvents: isVisible ? ('auto' as const) : ('none' as const),
       overflow: 'hidden',
       transition: 'all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
+      boxShadow: visorBoxShadow,
     },
     comboBoxWrapper: {
       background: euiTheme.colors.emptyShade,
@@ -43,7 +53,8 @@ export const visorStyles = (
       .euiComboBox__inputWrap {
         box-shadow: none;
         border-radius: 0;
-        border-right: 1px solid rgb(227, 232, 242);
+        border-bottom-left-radius: ${euiTheme.size.s};
+        border-top-left-radius: ${euiTheme.size.s};
       }
       .euiComboBox__inputWrap:focus,
       .euiComboBox__inputWrap:focus-within,
@@ -52,6 +63,24 @@ export const visorStyles = (
         outline: none !important;
       }
     `,
+    separator: {
+      width: '1px',
+      height: euiTheme.size.xl,
+      backgroundColor: euiTheme.colors.emptyShade,
+      flexShrink: 0,
+      alignSelf: 'stretch',
+      position: 'relative' as const,
+      '&::after': {
+        content: '""',
+        position: 'absolute' as const,
+        top: '50%',
+        left: '0',
+        transform: 'translateY(-50%)',
+        width: '1px',
+        height: '16px',
+        backgroundColor: euiTheme.colors.borderBasePlain,
+      },
+    },
     searchWrapper: css`
       background: ${euiTheme.colors.emptyShade};
       height: 100%;
@@ -60,6 +89,9 @@ export const visorStyles = (
       border-top-right-radius: ${euiTheme.size.s};
       padding-right: 2px;
 
+      .euiFormControlLayout--group {
+        border-radius: ${euiTheme.size.s};
+      }
       .euiFormControlLayout--group::after {
         border: none;
       }

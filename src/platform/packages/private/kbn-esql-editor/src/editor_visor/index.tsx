@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getESQLSources } from '../helpers';
@@ -38,6 +39,7 @@ export function QuickEditVisor({
   onClose: () => void;
   onUpdateAndSubmitQuery: (query: string) => void;
 }) {
+  const isDarkMode = useKibanaIsDarkMode();
   const kibana = useKibana<ESQLEditorDeps>();
   const { core } = kibana.services;
   const getLicense = kibana.services?.esql?.getLicense;
@@ -105,7 +107,13 @@ export function QuickEditVisor({
     return calculateWidthFromCharCount(selectedSource[0]?.label.length || 0);
   }, [selectedSource]);
 
-  const styles = visorStyles(euiTheme, comboBoxWidth, Boolean(isSpaceReduced), isVisible);
+  const styles = visorStyles(
+    euiTheme,
+    comboBoxWidth,
+    Boolean(isSpaceReduced),
+    isVisible,
+    isDarkMode
+  );
 
   return (
     <EuiFlexGroup
@@ -137,6 +145,7 @@ export function QuickEditVisor({
           compressed
         />
       </EuiFlexItem>
+      <EuiFlexItem grow={false} css={styles.separator} />
       <EuiFlexItem css={styles.searchWrapper}>
         <EuiFieldText
           placeholder={i18n.translate('esqlEditor.visor.searchPlaceholder', {
