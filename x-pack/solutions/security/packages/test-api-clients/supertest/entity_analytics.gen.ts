@@ -16,8 +16,6 @@
 
 import supertest_ from 'supertest';
 import type SuperTest from 'supertest';
-// TODO: Fix the linter rule for this test file, I'm not sure why this file in particular is complaining
-// eslint-disable-next-line import/no-nodejs-modules
 import { format as formatUrl } from 'url';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
