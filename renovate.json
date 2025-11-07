@@ -173,7 +173,6 @@
         "@smithy/types",
         "@types/aws4",
         "ajv",
-        "ajv-formats",
         "aws4",
         "eventsource-parser",
         "fast-glob",
