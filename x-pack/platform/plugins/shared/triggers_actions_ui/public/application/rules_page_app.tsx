@@ -107,7 +107,7 @@ const AppWithoutRouter = () => {
     >
       <PerformanceContextProvider>
         <Routes>
-          <Route path="/*" component={suspendedComponentWithProps(RulesPage, 'xl')} />
+          <Route path="/" component={suspendedComponentWithProps(RulesPage, 'xl')} />
         </Routes>
       </PerformanceContextProvider>
     </ConnectorProvider>

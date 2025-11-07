@@ -7,7 +7,8 @@
 
 import React, { lazy, useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { getEditRuleRoute } from '@kbn/rule-data-utils';
@@ -88,7 +89,7 @@ export const RulesPage = () => {
 
   const renderRulesList = useCallback(() => {
     return (
-      <EuiPageTemplate.Section>
+      <KibanaPageTemplate.Section>
         <RulesList
           consumers={NON_SIEM_CONSUMERS}
           rulesListKey="rules-page"
@@ -96,20 +97,20 @@ export const RulesPage = () => {
           setHeaderActions={setHeaderActions}
           navigateToEditRuleForm={navigateToEditRuleForm}
         />
-      </EuiPageTemplate.Section>
+      </KibanaPageTemplate.Section>
     );
   }, [navigateToEditRuleForm]);
 
   const renderLogsList = useCallback(() => {
     return (
-      <EuiPageTemplate.Section grow={false} paddingSize="none">
+      <KibanaPageTemplate.Section grow={false} paddingSize="none">
         {suspendedComponentWithProps(
           LogsList,
           'xl'
         )({
           setHeaderActions,
         })}
-      </EuiPageTemplate.Section>
+      </KibanaPageTemplate.Section>
     );
   }, []);
 
@@ -121,39 +122,45 @@ export const RulesPage = () => {
   }, [docTitle, setBreadcrumbs, currentSection]);
 
   return (
-    <EuiPageTemplate offset={0} grow={true} paddingSize="l">
-      <EuiPageTemplate.Header
-        paddingSize="none"
-        bottomBorder
-        pageTitle={
+    <KibanaPageTemplate
+      restrictWidth={false}
+      // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+      // this is a stop-gap for Stack management specifically until page components can be converted to template components
+      mainProps={{ paddingSize: 'l' }}
+      panelled
+      pageHeader={{
+        paddingSize: 'none',
+        bottomBorder: true,
+        pageTitle: (
           <span data-test-subj="rulesPageTitle">
             <FormattedMessage
               id="xpack.triggersActionsUI.rulesPage.pageTitle"
               defaultMessage="Rules"
             />
           </span>
-        }
-        rightSideItems={headerActions}
-        description={
+        ),
+        rightSideItems: headerActions,
+        description: (
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesPage.pageDescription"
             defaultMessage="Manage and monitor all of your rules in one place."
           />
-        }
-        tabs={tabs.map((tab) => ({
+        ),
+        tabs: tabs.map((tab) => ({
           label: tab.name,
           onClick: () => onSectionChange(tab.id),
           isSelected: tab.id === currentSection,
           key: tab.id,
           'data-test-subj': `${tab.id}Tab`,
-        }))}
-      />
+        })),
+      }}
+    >
       <EuiSpacer size="l" />
       <Routes>
         <Route exact path="/logs" component={renderLogsList} />
         <Route exact path="/rules" component={renderRulesList} />
         <Route exact path="/" component={renderRulesList} />
       </Routes>
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };
