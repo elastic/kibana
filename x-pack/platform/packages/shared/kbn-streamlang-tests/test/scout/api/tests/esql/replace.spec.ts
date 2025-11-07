@@ -91,6 +91,30 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
     expect(esqlResult.documents[0]).toHaveProperty('message', 'Error code [NUM] found');
   });
 
+  apiTest('should replace literal dot with escaped dot pattern', async ({ testBed, esql }) => {
+    const indexName = 'stream-e2e-test-replace-dot';
+
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'replace',
+          from: 'message',
+          pattern: '\\.',
+          replacement: '-',
+        } as ReplaceProcessor,
+      ],
+    };
+
+    const { query } = transpile(streamlangDSL);
+
+    const docs = [{ message: 'Android.log' }];
+    await testBed.ingest(indexName, docs);
+    const esqlResult = await esql.queryOnIndex(indexName, query);
+
+    expect(esqlResult.documents).toHaveLength(1);
+    expect(esqlResult.documents[0]).toHaveProperty('message', 'Android-log');
+  });
+
   apiTest('should replace using regex with capture groups', async ({ testBed, esql }) => {
     const indexName = 'stream-e2e-test-replace-capture-groups';
 
