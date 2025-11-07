@@ -55,9 +55,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           })
           .expect(200);
 
-        if (userPrefix === 'one') {
-          console.log(res.body);
-        }
         const { body: profile } = await supertestWithoutAuth
           .get('/internal/security/user_profile')
           .set('Cookie', cookie)
@@ -82,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    it.only('can retrieve own user profile and user profiles for other users', async () => {
+    it('can retrieve own user profile and user profiles for other users', async () => {
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'user_profiles_app',
         '',
