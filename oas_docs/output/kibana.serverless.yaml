@@ -46007,8 +46007,6 @@ paths:
                         type: string
                       version:
                         type: string
-                    required:
-                      - id
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -46172,8 +46170,6 @@ paths:
                         type: string
                       version:
                         type: string
-                    required:
-                      - id
                 required:
                   - item
           description: 'OK: A successful request.'
