@@ -57,6 +57,7 @@ export function ScratchpadApplication({
     updateNode,
     deleteNode,
     createEdge,
+    selectedNodeId,
   });
 
   const handleNodesChange = useCallback(

@@ -9,6 +9,7 @@ import React from 'react';
 import type { Node } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import { EuiCard, EuiText, useEuiTheme } from '@elastic/eui';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import type { ScratchpadNodeData } from '../../hooks/use_scratchpad_state';
 import { ESQLQueryNode } from './esql_query_node';
 import { KibanaLinkNode } from './kibana_link_node';
@@ -31,7 +32,6 @@ export function SimpleNode(node: Node<ScratchpadNodeData>) {
     return <KibanaLinkNode node={node as Node<any>} />;
   }
 
-  console.log(nodeData);
   // Use dedicated alert node component
   if (nodeData.type === 'alert') {
     return <AlertNode node={node as Node<any>} />;
@@ -56,7 +56,7 @@ export function SimpleNode(node: Node<ScratchpadNodeData>) {
       >
         <EuiText size="s">
           {nodeData.type === 'text_note' && (
-            <div>{String(nodeData.content || 'Empty note')}</div>
+            <Markdown markdown={String(nodeData.content || 'Empty note')} openLinksInNewTab />
           )}
         </EuiText>
       </EuiCard>

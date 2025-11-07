@@ -52,13 +52,11 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
   const { onUpdateNode, timeRange } = useScratchpadNodeContext();
   const {
     services: { share },
-  } = useKibana();
+  } = useKibana<{ share: { url: { locators: { get: (id: string) => any } } } }>();
   const isSelected = nodeData.selected || false;
 
   const [viewMode, setViewMode] = useState<'table' | 'chart'>(nodeData.viewMode || 'table');
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>(
-    nodeData.chartType || 'line'
-  );
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>(nodeData.chartType || 'line');
 
   const { loading, error, results, executeQuery } = useESQLQuery();
 
@@ -158,7 +156,7 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
       query: {
         esql: nodeData.query,
       },
-      timeRange: timeRange,
+      timeRange,
     };
 
     await discoverLocator.navigate(params);
@@ -191,9 +189,7 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
           border: isSelected
             ? `2px solid ${euiTheme.colors.primary}`
             : `1px solid ${euiTheme.colors.plainDark}`,
-          boxShadow: isSelected
-            ? `0 0 0 2px ${euiTheme.colors.primary}20`
-            : 'none',
+          boxShadow: isSelected ? `0 0 0 2px ${euiTheme.colors.primary}20` : 'none',
         }}
         textAlign="left"
       >
@@ -213,7 +209,7 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
         {error && (
           <>
             <EuiSpacer size="s" />
-            <EuiCallOut title="Error" color="danger" size="s">
+            <EuiCallOut title="Error" color="danger" size="s" announceOnMount={false}>
               {error}
             </EuiCallOut>
           </>
@@ -232,7 +228,6 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
                   ]}
                   idSelected={viewMode}
                   onChange={(id) => handleViewModeChange(id as 'table' | 'chart')}
-                  size="compressed"
                 />
               </EuiFlexItem>
               {viewMode === 'chart' && chartData.canChart && (
@@ -246,7 +241,6 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
                     ]}
                     idSelected={chartType}
                     onChange={(id) => handleChartTypeChange(id as 'line' | 'bar' | 'area')}
-                    size="compressed"
                   />
                 </EuiFlexItem>
               )}
@@ -277,7 +271,12 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
                 <ESQLChart series={chartData.series} chartType={chartType} height={300} />
               </div>
             ) : (
-              <EuiCallOut title="Cannot render chart" color="warning" size="s">
+              <EuiCallOut
+                title="Cannot render chart"
+                color="warning"
+                size="s"
+                announceOnMount={false}
+              >
                 <p>
                   Chart requires at least one time column (timestamp, time) and one numeric column,
                   or at least two numeric columns.

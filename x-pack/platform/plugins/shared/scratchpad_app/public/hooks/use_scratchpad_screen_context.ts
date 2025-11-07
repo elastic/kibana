@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import type { Edge } from '@xyflow/react';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ScratchpadNode } from './use_scratchpad_state';
+import { getNextNodePosition } from '../components/scratchpad_toolbar';
 
 export interface UseScratchpadScreenContextOptions {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
@@ -18,6 +19,7 @@ export interface UseScratchpadScreenContextOptions {
   updateNode: (nodeId: string, updates: Partial<ScratchpadNode>) => void;
   deleteNode: (nodeId: string) => void;
   createEdge: (sourceId: string, targetId: string) => void;
+  selectedNodeId?: string | null;
 }
 
 export function useScratchpadScreenContext({
@@ -28,6 +30,7 @@ export function useScratchpadScreenContext({
   updateNode,
   deleteNode,
   createEdge,
+  selectedNodeId,
 }: UseScratchpadScreenContextOptions) {
   useEffect(() => {
     if (!observabilityAIAssistant) return;
@@ -46,12 +49,12 @@ export function useScratchpadScreenContext({
         value: {
           nodeCount: nodes.length,
           edgeCount: edges.length,
-                  nodeTypes: {
-                    esql_query: nodes.filter((n) => n.type === 'esql_query').length,
-                    text_note: nodes.filter((n) => n.type === 'text_note').length,
-                    kibana_link: nodes.filter((n) => n.type === 'kibana_link').length,
-                    alert: nodes.filter((n) => n.type === 'alert').length,
-                  },
+          nodeTypes: {
+            esql_query: nodes.filter((n) => n.type === 'esql_query').length,
+            text_note: nodes.filter((n) => n.type === 'text_note').length,
+            kibana_link: nodes.filter((n) => n.type === 'kibana_link').length,
+            alert: nodes.filter((n) => n.type === 'alert').length,
+          },
           // Only include node IDs and types - full details available via read_node action
           nodeIds: nodes.map((n) => ({ id: n.id, type: n.type })),
           // Edge summary
@@ -132,6 +135,11 @@ export function useScratchpadScreenContext({
                   },
                   description: 'Optional time range for the query',
                 },
+                sourceNodeId: {
+                  type: 'string',
+                  description:
+                    'Optional ID of an existing node to connect this new node to. If provided, the new node will be positioned near the source node and an edge will be created automatically.',
+                },
                 position: {
                   type: 'object',
                   properties: {
@@ -139,7 +147,7 @@ export function useScratchpadScreenContext({
                     y: { type: 'number' },
                   },
                   description:
-                    'Optional position for the node. If not provided, will be auto-positioned.',
+                    'Optional position for the node. If not provided, will be auto-positioned near the source node (if sourceNodeId is provided) or using the default layout.',
                 },
               },
               required: ['query'],
@@ -147,6 +155,20 @@ export function useScratchpadScreenContext({
           },
           async ({ args }) => {
             try {
+              // Determine which node to use for positioning (sourceNodeId takes precedence over selectedNodeId)
+              const sourceNode =
+                args.sourceNodeId && nodes.find((n) => n.id === args.sourceNodeId)
+                  ? nodes.find((n) => n.id === args.sourceNodeId)
+                  : selectedNodeId
+                  ? nodes.find((n) => n.id === selectedNodeId)
+                  : null;
+
+              const position =
+                args.position &&
+                typeof args.position.x === 'number' &&
+                typeof args.position.y === 'number'
+                  ? { x: args.position.x, y: args.position.y }
+                  : getNextNodePosition(nodes, sourceNode || undefined, edges);
               const nodeId = addNode({
                 id: `esql-${Date.now()}`,
                 type: 'esql_query',
@@ -155,8 +177,17 @@ export function useScratchpadScreenContext({
                   query: args.query,
                   timeRange: args.timeRange,
                 },
-                position: args.position || { x: 100, y: 100 },
+                position,
               });
+
+              // Automatically create edge if sourceNodeId is provided
+              if (args.sourceNodeId) {
+                createEdge(args.sourceNodeId, nodeId);
+              } else if (selectedNodeId) {
+                // Also create edge if a node is selected in the UI
+                createEdge(selectedNodeId, nodeId);
+              }
+
               return {
                 content: `Successfully added ESQL query node "${nodeId}" to the scratchpad.`,
               };
@@ -187,13 +218,19 @@ export function useScratchpadScreenContext({
                   type: 'string',
                   description: 'Optional title for the note',
                 },
+                sourceNodeId: {
+                  type: 'string',
+                  description:
+                    'Optional ID of an existing node to connect this new node to. If provided, the new node will be positioned near the source node and an edge will be created automatically.',
+                },
                 position: {
                   type: 'object',
                   properties: {
                     x: { type: 'number' },
                     y: { type: 'number' },
                   },
-                  description: 'Optional position for the node',
+                  description:
+                    'Optional position for the node. If not provided, will be auto-positioned near the source node (if sourceNodeId is provided) or using the default layout.',
                 },
               },
               required: ['content'],
@@ -201,6 +238,20 @@ export function useScratchpadScreenContext({
           },
           async ({ args }) => {
             try {
+              // Determine which node to use for positioning (sourceNodeId takes precedence over selectedNodeId)
+              const sourceNode =
+                args.sourceNodeId && nodes.find((n) => n.id === args.sourceNodeId)
+                  ? nodes.find((n) => n.id === args.sourceNodeId)
+                  : selectedNodeId
+                  ? nodes.find((n) => n.id === selectedNodeId)
+                  : null;
+
+              const position =
+                args.position &&
+                typeof args.position.x === 'number' &&
+                typeof args.position.y === 'number'
+                  ? { x: args.position.x, y: args.position.y }
+                  : getNextNodePosition(nodes, sourceNode || undefined, edges);
               const nodeId = addNode({
                 id: `text-${Date.now()}`,
                 type: 'text_note',
@@ -209,8 +260,17 @@ export function useScratchpadScreenContext({
                   content: args.content,
                   title: args.title,
                 },
-                position: args.position || { x: 100, y: 100 },
+                position,
               });
+
+              // Automatically create edge if sourceNodeId is provided
+              if (args.sourceNodeId) {
+                createEdge(args.sourceNodeId, nodeId);
+              } else if (selectedNodeId) {
+                // Also create edge if a node is selected in the UI
+                createEdge(selectedNodeId, nodeId);
+              }
+
               return {
                 content: `Successfully added text note node "${nodeId}" to the scratchpad.`,
               };
@@ -249,13 +309,19 @@ export function useScratchpadScreenContext({
                   type: 'string',
                   description: 'The Kibana app ID (e.g., "discover", "dashboard")',
                 },
+                sourceNodeId: {
+                  type: 'string',
+                  description:
+                    'Optional ID of an existing node to connect this new node to. If provided, the new node will be positioned near the source node and an edge will be created automatically.',
+                },
                 position: {
                   type: 'object',
                   properties: {
                     x: { type: 'number' },
                     y: { type: 'number' },
                   },
-                  description: 'Optional position for the node',
+                  description:
+                    'Optional position for the node. If not provided, will be auto-positioned near the source node (if sourceNodeId is provided) or using the default layout.',
                 },
               },
               required: ['url', 'title', 'appId'],
@@ -263,6 +329,20 @@ export function useScratchpadScreenContext({
           },
           async ({ args }) => {
             try {
+              // Determine which node to use for positioning (sourceNodeId takes precedence over selectedNodeId)
+              const sourceNode =
+                args.sourceNodeId && nodes.find((n) => n.id === args.sourceNodeId)
+                  ? nodes.find((n) => n.id === args.sourceNodeId)
+                  : selectedNodeId
+                  ? nodes.find((n) => n.id === selectedNodeId)
+                  : null;
+
+              const position =
+                args.position &&
+                typeof args.position.x === 'number' &&
+                typeof args.position.y === 'number'
+                  ? { x: args.position.x, y: args.position.y }
+                  : getNextNodePosition(nodes, sourceNode || undefined, edges);
               const nodeId = addNode({
                 id: `link-${Date.now()}`,
                 type: 'kibana_link',
@@ -273,8 +353,17 @@ export function useScratchpadScreenContext({
                   description: args.description,
                   appId: args.appId,
                 },
-                position: args.position || { x: 100, y: 100 },
+                position,
               });
+
+              // Automatically create edge if sourceNodeId is provided
+              if (args.sourceNodeId) {
+                createEdge(args.sourceNodeId, nodeId);
+              } else if (selectedNodeId) {
+                // Also create edge if a node is selected in the UI
+                createEdge(selectedNodeId, nodeId);
+              }
+
               return {
                 content: `Successfully added Kibana link node "${nodeId}" to the scratchpad.`,
               };
@@ -301,13 +390,19 @@ export function useScratchpadScreenContext({
                   type: 'string',
                   description: 'The alert ID to fetch and display',
                 },
+                sourceNodeId: {
+                  type: 'string',
+                  description:
+                    'Optional ID of an existing node to connect this new node to. If provided, the new node will be positioned near the source node and an edge will be created automatically.',
+                },
                 position: {
                   type: 'object',
                   properties: {
                     x: { type: 'number' },
                     y: { type: 'number' },
                   },
-                  description: 'Optional position for the node',
+                  description:
+                    'Optional position for the node. If not provided, will be auto-positioned near the source node (if sourceNodeId is provided) or using the default layout.',
                 },
               },
               required: ['alertId'],
@@ -315,6 +410,20 @@ export function useScratchpadScreenContext({
           },
           async ({ args }) => {
             try {
+              // Determine which node to use for positioning (sourceNodeId takes precedence over selectedNodeId)
+              const sourceNode =
+                args.sourceNodeId && nodes.find((n) => n.id === args.sourceNodeId)
+                  ? nodes.find((n) => n.id === args.sourceNodeId)
+                  : selectedNodeId
+                  ? nodes.find((n) => n.id === selectedNodeId)
+                  : null;
+
+              const position =
+                args.position &&
+                typeof args.position.x === 'number' &&
+                typeof args.position.y === 'number'
+                  ? { x: args.position.x, y: args.position.y }
+                  : getNextNodePosition(nodes, sourceNode || undefined, edges);
               const nodeId = addNode({
                 id: `alert-${Date.now()}`,
                 type: 'alert',
@@ -322,8 +431,17 @@ export function useScratchpadScreenContext({
                   type: 'alert',
                   alertId: args.alertId,
                 },
-                position: args.position || { x: 100, y: 100 },
+                position,
               });
+
+              // Automatically create edge if sourceNodeId is provided
+              if (args.sourceNodeId) {
+                createEdge(args.sourceNodeId, nodeId);
+              } else if (selectedNodeId) {
+                // Also create edge if a node is selected in the UI
+                createEdge(selectedNodeId, nodeId);
+              }
+
               return {
                 content: `Successfully added alert node "${nodeId}" to the scratchpad. The alert details will be fetched automatically.`,
               };
@@ -445,5 +563,14 @@ export function useScratchpadScreenContext({
         ),
       ],
     });
-  }, [observabilityAIAssistant, nodes, edges, addNode, updateNode, deleteNode, createEdge]);
+  }, [
+    observabilityAIAssistant,
+    nodes,
+    edges,
+    addNode,
+    updateNode,
+    deleteNode,
+    createEdge,
+    selectedNodeId,
+  ]);
 }
