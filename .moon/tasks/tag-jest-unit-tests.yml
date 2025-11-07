@@ -1,0 +1,22 @@
+tasks:
+  jest:
+    description: Run jest tests
+    command: node
+    options:
+      runFromWorkspaceRoot: true
+      mergeArgs: append
+    args:
+      - scripts/jest.js
+      - '--cache'
+      - '--passWithNoTests'
+
+  jestCI:
+    description: Run jest tests (in band)
+    command: node
+    options:
+      runFromWorkspaceRoot: true
+      mergeArgs: append
+    args:
+      - scripts/jest.js
+      - '--passWithNoTests'
+      - '--runInBand'

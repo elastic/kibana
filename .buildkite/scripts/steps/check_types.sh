@@ -7,4 +7,11 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-node scripts/type_check
+if [[ "${RUN_FULL_CHECK:-}" == "true" ]]; then
+  echo "Running full type check..."
+  node scripts/type_check
+else
+  echo "Running type-check with caches..."
+  export NODE_OPTIONS="--max-old-space-size=8192"
+  yarn moon run :typecheck -c 3 --affected --remote -u
+fi
