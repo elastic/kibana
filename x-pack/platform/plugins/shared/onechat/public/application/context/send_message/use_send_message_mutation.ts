@@ -9,7 +9,7 @@ import { useMutation } from '@kbn/react-query';
 import { useRef, useState, useMemo } from 'react';
 import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useAgentId } from '../../hooks/use_conversation';
+import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
@@ -27,13 +27,15 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { chatService } = useOnechatServices();
   const { services } = useKibana();
   const { reportConverseError } = useReportConverseError();
-  const { conversationActions, browserApiTools } = useConversationContext();
+  const { conversationActions, getProcessedAttachments, browserApiTools } =
+    useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
+  const { conversation } = useConversation();
 
   const browserApiToolsMetadata = useMemo(() => {
     if (!browserApiTools) return undefined;
@@ -56,24 +58,32 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setPendingMessage(null);
   };
 
-  const { mutate: sendMessage, isLoading } = useMutation({
-    mutationKey: mutationKeys.sendMessage,
-    mutationFn: ({ message }: { message: string }) => {
-      const signal = messageControllerRef.current?.signal;
-      if (!signal) {
-        return Promise.reject(new Error('Abort signal not present'));
-      }
-      const events$ = chatService.chat({
-        signal,
-        input: message,
-        conversationId,
-        agentId,
-        connectorId,
-        browserApiTools: browserApiToolsMetadata,
-      });
+  const sendMessage = async ({ message }: { message: string }) => {
+    const signal = messageControllerRef.current?.signal;
+    if (!signal) {
+      return Promise.reject(new Error('Abort signal not present'));
+    }
 
-      return subscribeToChatEvents(events$);
-    },
+    const processedAttachments = getProcessedAttachments
+      ? await getProcessedAttachments(conversation)
+      : [];
+
+    const events$ = chatService.chat({
+      signal,
+      input: message,
+      conversationId,
+      agentId,
+      connectorId,
+      attachments: processedAttachments,
+      browserApiTools: browserApiToolsMetadata,
+    });
+
+    return subscribeToChatEvents(events$);
+  };
+
+  const { mutate, isLoading } = useMutation({
+    mutationKey: mutationKeys.sendMessage,
+    mutationFn: sendMessage,
     onMutate: ({ message }) => {
       const isNewConversation = !conversationId;
       isMutatingNewConversationRef.current = isNewConversation;
@@ -114,7 +124,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const canCancel = isLoading;
 
   return {
-    sendMessage,
+    sendMessage: mutate,
     isResponseLoading,
     conversationError,
     pendingMessage,
@@ -135,7 +145,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         throw new Error('Pending message is not present');
       }
 
-      sendMessage({ message: pendingMessage });
+      mutate({ message: pendingMessage });
     },
     canCancel,
     cancel: () => {
