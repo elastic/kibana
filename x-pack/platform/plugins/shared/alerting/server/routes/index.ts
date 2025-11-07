@@ -41,7 +41,7 @@ import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_ap
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
 import { snoozeRuleInternalRoute, snoozeRuleRoute } from './rule/apis/snooze';
 import { unsnoozeRuleRoute, unsnoozeRuleInternalRoute } from './rule/apis/unsnooze';
-import { runSoonRoute } from './run_soon';
+import { runSoonRoute } from './rule/apis/run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';

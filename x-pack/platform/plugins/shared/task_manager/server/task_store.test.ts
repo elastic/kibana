@@ -30,7 +30,7 @@ import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { MsearchError } from './lib/msearch_error';
+import { MsearchError } from './lib/errors';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
   EncryptedSavedObjectsClient,
