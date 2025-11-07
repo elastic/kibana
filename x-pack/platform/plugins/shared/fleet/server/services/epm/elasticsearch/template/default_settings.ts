@@ -81,7 +81,11 @@ export async function saveILMMigrationChanges(
   ) {
     appContextService
       .getLogger()
-      .info(`Saving ILM migration status changes: ${JSON.stringify(updatedILMMigrationStatusMap)}`);
+      .info(
+        `Saving ILM migration status changes: ${JSON.stringify(
+          Array.from(updatedILMMigrationStatusMap.entries())
+        )}`
+      );
 
     await saveSettings(soClient, {
       ilm_migration_status: {
