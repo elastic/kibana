@@ -11,6 +11,7 @@ import React from 'react';
 import type { HTMLAttributes } from 'react';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import type { SideNavLogo } from '../../../types';
 import { MenuItem } from '../menu_item';
@@ -67,8 +68,10 @@ export const Logo = ({
   const menuItem = (
     <div data-test-subj={logoWrapperTestSubj} css={wrapperStyles}>
       <MenuItem
-        // TODO: add aria-label with i18n
-        aria-label={`${label} homepage`}
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.logoAriaLabel', {
+          defaultMessage: '{label} homepage',
+          values: { label },
+        })}
         data-test-subj={logoTestSubj}
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
