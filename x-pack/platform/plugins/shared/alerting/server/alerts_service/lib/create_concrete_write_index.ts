@@ -263,7 +263,7 @@ export async function updateAliasesAndSetConcreteWriteIndex(
     );
 
     logger.info(`Successfully updated index aliases for alias: ${alias}.`);
-    return !concreteWriteIndex ? concreteIndex : concreteWriteIndex;
+    return concreteWriteIndex ?? concreteIndex;
   } catch (error) {
     throw new Error(`Failed to update index aliases for alias: ${alias}.`);
   }
