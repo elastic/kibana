@@ -59,10 +59,25 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButton fill>{SIGN_UP_BUTTON}</EuiButton>
+              <EuiButton
+                fill
+                href="https://cloud.elastic.co/registration?redirectTo=%2Faccount%2Fkeys"
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+              >
+                {SIGN_UP_BUTTON}
+              </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton>{LOGIN_BUTTON}</EuiButton>
+              <EuiButton
+                href="https://cloud.elastic.co/login?redirectTo=%2Faccount%2Fkeys"
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+              >
+                {LOGIN_BUTTON}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
