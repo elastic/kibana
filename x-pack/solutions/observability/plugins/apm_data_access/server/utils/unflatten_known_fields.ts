@@ -70,7 +70,9 @@ function mapToSingleOrMultiValue<T extends Record<string, any>>(
     (mappedFields, [field, value]) => {
       if (ALL_FIELDS.has(field as KnownField) && value != null) {
         mappedFields[0][field as KnownField] =
-          KNOWN_SINGLE_VALUED_FIELDS_SET.has(field) && Array.isArray(value) ? value[0] : value;
+          KNOWN_SINGLE_VALUED_FIELDS_SET.has(field as KnownField) && Array.isArray(value)
+            ? value[0]
+            : value;
       } else {
         mappedFields[1][field] = value;
       }

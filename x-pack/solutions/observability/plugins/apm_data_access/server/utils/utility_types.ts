@@ -44,11 +44,9 @@ export type KnownField = ValuesType<typeof CONCRETE_FIELDS>;
 type KnownSingleValuedField = Exclude<KnownField, KnownMultiValuedField>;
 type KnownMultiValuedField = ValuesType<typeof KNOWN_MULTI_VALUED_FIELDS>;
 
-export const KNOWN_SINGLE_VALUED_FIELDS = [...ALL_FIELDS].filter(
-  (field): field is KnownSingleValuedField => !KNOWN_MULTI_VALUED_FIELDS.includes(field as any)
+export const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<KnownField>(
+  [...ALL_FIELDS].filter((field) => !KNOWN_MULTI_VALUED_FIELDS.includes(field as any))
 );
-
-export const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<string>(KNOWN_SINGLE_VALUED_FIELDS);
 
 interface TypeOverrideMap {
   [APM_EVENT_FIELDS_MAP.SPAN_DURATION]: number;

@@ -11,6 +11,7 @@ import {
   type FlattenedApmEvent,
   type MapToSingleOrMultiValue,
   KNOWN_SINGLE_VALUED_FIELDS_SET,
+  type KnownField,
 } from './utility_types';
 
 type RequiredApmFields<
@@ -107,7 +108,9 @@ const accessHandler = {
 
     const value = fields[key];
 
-    return KNOWN_SINGLE_VALUED_FIELDS_SET.has(key) && Array.isArray(value) ? value[0] : value;
+    return KNOWN_SINGLE_VALUED_FIELDS_SET.has(key as KnownField) && Array.isArray(value)
+      ? value[0]
+      : value;
   },
 
   // Trap any setters to make the proxied object immutable.
