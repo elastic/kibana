@@ -33,7 +33,7 @@ import {
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
-import { SettingsResponseSchemaV5 } from '../types';
+import { SettingsSchemaV5 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -243,8 +243,7 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: SettingsResponseSchemaV5.extends({}, { unknowns: 'ignore' }),
-            create: SettingsResponseSchemaV5,
+            forwardCompatibility: SettingsSchemaV5.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
