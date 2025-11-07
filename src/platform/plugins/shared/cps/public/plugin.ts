@@ -31,7 +31,10 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
     const { cpsEnabled } = this.initializerContext.config.get();
     // Only initialize cpsManager in serverless environments when CPS is enabled
     if (cpsEnabled) {
-      this.cpsManager = new CPSManager(core.http);
+      this.cpsManager = new CPSManager({
+        http: core.http,
+        logger: this.initializerContext.logger.get('cps'),
+      });
     }
 
     return {

@@ -9,6 +9,7 @@
 
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type { Project, ProjectTagsResponse } from '../types';
 
 export interface ProjectsData {
@@ -21,12 +22,14 @@ const RETRY_DELAY_MS = 1000;
 
 export class CPSManager {
   private readonly http: HttpSetup;
+  private readonly logger: Logger;
   private readonly projectsSubject: BehaviorSubject<ProjectsData>;
   private fetchPromise: Promise<ProjectsData> | null = null;
   private hasFetchedSuccessfully: boolean = false;
 
-  constructor(http: HttpSetup) {
-    this.http = http;
+  constructor(deps: { http: HttpSetup; logger: Logger }) {
+    this.http = deps.http;
+    this.logger = deps.logger.get('cps_manager');
     this.projectsSubject = new BehaviorSubject<ProjectsData>({
       origin: null,
       linkedProjects: [],
@@ -97,7 +100,7 @@ export class CPSManager {
   }
 
   private async fetchProjectsWithRetry(): Promise<ProjectsData> {
-    let lastError: Error;
+    let lastError: Error = new Error('');
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
@@ -107,15 +110,16 @@ export class CPSManager {
         return {
           origin: originValues.length > 0 ? originValues[0] : null,
           linkedProjects: response.linked_projects
-          ? Object.values(response.linked_projects).sort((a, b) =>
-              a._alias.localeCompare(b._alias)
-            )
-          : [],
+            ? Object.values(response.linked_projects).sort((a, b) =>
+                a._alias.localeCompare(b._alias)
+              )
+            : [],
         };
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        // eslint-disable-next-line no-console
-        console.error(`Failed to fetch projects (attempt ${attempt + 1}/${MAX_RETRIES + 1}):`, error);
+        this.logger.error(`Failed to fetch projects (attempt ${attempt + 1}/${MAX_RETRIES + 1})`, {
+          error,
+        });
 
         // Don't wait after the last attempt
         if (attempt < MAX_RETRIES) {
@@ -127,6 +131,6 @@ export class CPSManager {
       }
     }
 
-    throw lastError!;
+    throw lastError;
   }
 }

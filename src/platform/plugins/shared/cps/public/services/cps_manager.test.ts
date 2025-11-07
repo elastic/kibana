@@ -10,11 +10,12 @@
 import { CPSManager } from './cps_manager';
 import type { HttpSetup } from '@kbn/core/public';
 import type { Project, ProjectTagsResponse } from '../types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('CPSManager', () => {
   let mockHttp: jest.Mocked<HttpSetup>;
+  const mockLogger = loggingSystemMock.createLogger();
   let cpsManager: CPSManager;
-  let consoleErrorSpy: jest.SpyInstance;
 
   const mockOriginProject: Project = {
     _id: 'origin-id',
@@ -53,14 +54,12 @@ describe('CPSManager', () => {
     mockHttp = {
       get: jest.fn().mockResolvedValue(mockResponse),
     } as unknown as jest.Mocked<HttpSetup>;
-    cpsManager = new CPSManager(mockHttp);
-    // Suppress console.error for tests that expect errors
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    cpsManager = new CPSManager({ http: mockHttp, logger: mockLogger });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    consoleErrorSpy.mockRestore();
   });
 
   describe('initial state', () => {
