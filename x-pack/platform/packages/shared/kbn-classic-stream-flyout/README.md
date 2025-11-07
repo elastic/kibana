@@ -1,4 +1,4 @@
-# @kbn/create-classic-stream-flyout
+# @kbn/classic-stream-flyout
 
 > ⚠️ **Work in Progress**: This package is currently under development.
 
@@ -16,7 +16,7 @@ The Create Classic Stream Flyout is a wizard-based interface that guides users t
 This package is part of the Kibana monorepo and is available as a shared browser package.
 
 ```typescript
-import { CreateClassicStreamFlyout } from '@kbn/create-classic-stream-flyout';
+import { CreateClassicStreamFlyout } from '@kbn/classic-stream-flyout';
 ```
 
 ## Development
@@ -34,5 +34,5 @@ yarn storybook create_classic_stream_flyout
 Run tests for the package:
 
 ```bash
-yarn jest --config x-pack/platform/packages/shared/kbn-create-classic-stream-flyout/jest.config.js
+yarn jest --config x-pack/platform/packages/shared/kbn-classic-stream-flyout/jest.config.js
 ```

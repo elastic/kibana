@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-create-classic-stream-flyout'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-classic-stream-flyout'],
 };

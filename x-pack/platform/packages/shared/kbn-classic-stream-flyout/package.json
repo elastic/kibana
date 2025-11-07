@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/create-classic-stream-flyout",
+  "name": "@kbn/classic-stream-flyout",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0"

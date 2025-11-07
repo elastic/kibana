@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/create-classic-stream-flyout",
+  "id": "@kbn/classic-stream-flyout",
   "owner": "@elastic/kibana_management",
   "group": "platform",
   "visibility": "shared"

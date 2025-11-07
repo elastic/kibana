@@ -4867,6 +4867,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/classic-stream-flyout@link:x-pack/platform/packages/shared/kbn-classic-stream-flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cleanup-before-exit@link:src/platform/packages/shared/kbn-cleanup-before-exit":
   version "0.0.0"
   uid ""
@@ -6024,10 +6028,6 @@
   uid ""
 
 "@kbn/cps@link:src/platform/plugins/shared/cps":
-  version "0.0.0"
-  uid ""
-
-"@kbn/create-classic-stream-flyout@link:x-pack/platform/packages/shared/kbn-create-classic-stream-flyout":
   version "0.0.0"
   uid ""
 
