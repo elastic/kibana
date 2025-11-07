@@ -39,6 +39,13 @@ export const Item: FC<ItemProps> = ({
     width: 100%;
   `;
 
+  const labelStyles = css`
+    display: inline-block;
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  `;
+
   return (
     <SecondaryMenu.Item
       id={id}
@@ -50,7 +57,7 @@ export const Item: FC<ItemProps> = ({
       testSubjPrefix="nestedMenuItem"
     >
       <div css={itemStyle}>
-        <span>{children}</span>
+        <span css={labelStyles}>{children}</span>
       </div>
     </SecondaryMenu.Item>
   );

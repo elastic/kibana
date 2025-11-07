@@ -87,9 +87,16 @@ export const SecondaryMenuItemComponent = ({
     gap: ${euiTheme.size.xs};
   `;
 
+  const labelStyles = css`
+    display: inline-block;
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  `;
+
   const content = (
     <div css={labelAndBadgeStyles}>
-      {children}
+      <span css={labelStyles}>{children}</span>
       {badgeType && <BetaBadge type={badgeType} />}
     </div>
   );
