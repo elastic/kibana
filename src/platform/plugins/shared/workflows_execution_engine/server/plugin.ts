@@ -273,6 +273,7 @@ export class WorkflowsExecutionEnginePlugin
                 triggerType: string;
               };
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await this.initialize(coreStart);
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
               const { actions, taskManager } = pluginsStart;
               const workflowRepository = new WorkflowRepository({
