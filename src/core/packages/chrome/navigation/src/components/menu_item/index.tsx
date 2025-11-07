@@ -23,7 +23,6 @@ export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLBu
   iconType: IconType;
   isHighlighted: boolean;
   isCurrent?: boolean;
-  isHorizontal?: boolean;
   isLabelVisible?: boolean;
   isTruncated?: boolean;
 }
@@ -39,7 +38,6 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       id,
       isCurrent = false,
       isHighlighted,
-      isHorizontal,
       isLabelVisible = true,
       isTruncated = true,
       ...props
@@ -62,11 +60,12 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       position: relative;
       overflow: hidden;
       align-items: center;
-      justify-content: ${isHorizontal ? 'initial' : 'center'};
+      justify-content: center;
       display: flex;
-      flex-direction: ${isHorizontal ? 'row' : 'column'};
+      flex-direction: column;
       // 3px is from Figma; there is no token
-      gap: ${isHorizontal ? euiTheme.size.s : '3px'};
+      gap: 3px;
+      // eslint-disable-next-line @elastic/eui/no-css-color
       color: var(--menu-item-text-color);
       // Focus affordance with border on the iconWrapper instead
       outline: none !important;
@@ -81,8 +80,6 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         border-radius: ${euiTheme.border.radius.medium};
         background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimary
-          : isHorizontal
-          ? euiTheme.colors.backgroundBaseSubdued
           : euiTheme.components.buttons.backgroundText};
         z-index: 1;
       }
@@ -132,18 +129,14 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             -webkit-line-clamp: 2;
           `);
 
-    const verticalStyles = css`
+    const textStyles = css`
       ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
       font-weight: ${euiTheme.font.weight.semiBold};
     `;
 
-    const horizontalStyles = css`
-      font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
-    `;
-
     const labelStyles = css`
       ${truncatedStyles}
-      ${isHorizontal ? horizontalStyles : verticalStyles}
+      ${textStyles}
       overflow: hidden;
       max-width: 100%;
       padding: 0 ${euiTheme.size.s};
@@ -157,7 +150,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
           </Suspense>
         </div>
         {isLabelVisible ? (
-          <EuiText size={isHorizontal ? 's' : 'xs'} textAlign="center" css={labelStyles}>
+          <EuiText size="xs" textAlign="center" css={labelStyles}>
             {children}
           </EuiText>
         ) : (
