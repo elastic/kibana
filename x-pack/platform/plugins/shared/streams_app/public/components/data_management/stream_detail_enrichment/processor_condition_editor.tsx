@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { default as React, useMemo } from 'react';
 import { useEnrichmentFieldSuggestions } from '../../../hooks/use_field_suggestions';
+import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
+import { useEnrichmentValueSuggestions } from '../../../hooks/use_value_suggestions';
+import { getFilterConditionField } from '../../../util/condition';
 import type { ConditionEditorProps } from '../shared/condition_editor';
 import { ConditionEditor } from '../shared/condition_editor';
-import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { useSimulatorSelector } from './state_management/stream_enrichment_state_machine/use_stream_enrichment';
 
 export type ProcessorConditionEditorProps = Omit<
@@ -19,9 +21,10 @@ export type ProcessorConditionEditorProps = Omit<
 
 export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorProps) {
   const fieldSuggestions = useEnrichmentFieldSuggestions();
+  const valueSuggestions = useEnrichmentValueSuggestions(getFilterConditionField(props.condition));
   const streamName = useSimulatorSelector((state) => state.context.streamName);
 
-  // Fetch DataView field types with automatic caching via React Query
+  // Fetch DataView field types for displaying field type icons
   const { fieldTypeMap } = useStreamDataViewFieldTypes(streamName);
 
   // Enrich field suggestions with types from DataView
@@ -33,6 +36,11 @@ export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorP
   }, [fieldSuggestions, fieldTypeMap]);
 
   return (
-    <ConditionEditor status="enabled" {...props} fieldSuggestions={enrichedFieldSuggestions} />
+    <ConditionEditor
+      status="enabled"
+      {...props}
+      fieldSuggestions={enrichedFieldSuggestions}
+      valueSuggestions={valueSuggestions}
+    />
   );
 }
