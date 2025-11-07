@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_BEDROCK_URL } from '../../../common/bedrock/constants';
+import { DEFAULT_URL } from '@kbn/connector-schemas/bedrock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { BedrockConnector } from './bedrock';
@@ -35,7 +35,7 @@ describe('Bedrock with proxy config', () => {
       configurationUtilities,
       connector: { id: '1', type: '.bedrock' },
       config: {
-        apiUrl: DEFAULT_BEDROCK_URL,
+        apiUrl: DEFAULT_URL,
         defaultModel: 'claude',
       },
       secrets: { accessKey: '123', secret: '567' },
@@ -73,7 +73,7 @@ describe('Bedrock with proxy config', () => {
       configurationUtilities,
       connector: { id: '1', type: '.bedrock' },
       config: {
-        apiUrl: DEFAULT_BEDROCK_URL,
+        apiUrl: DEFAULT_URL,
         defaultModel: 'claude',
       },
       secrets: { accessKey: '123', secret: '567' },

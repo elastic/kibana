@@ -17,7 +17,7 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/crowdstrike/constants';
 import type { NormalizedExternalConnectorClient } from '../../..';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';

@@ -6,9 +6,9 @@
  */
 
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+} from '@kbn/connector-schemas/sentinelone/constants';
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';

@@ -10,7 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 // Use a TS import type via a type alias to avoid parser issues with `import type` in some jest transforms
 type PostAttackDiscoveryGenerateRequestBody =
   import('@kbn/elastic-assistant-common').PostAttackDiscoveryGenerateRequestBody;
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { getKibanaFeatureFlags } from '../../helpers/get_kibana_feature_flags';
 import { performChecks } from '../../../helpers';

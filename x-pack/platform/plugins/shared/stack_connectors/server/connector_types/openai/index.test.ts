@@ -9,9 +9,9 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
-import type { Config, Secrets } from '../../../common/openai/types';
+import type { Config, Secrets } from '@kbn/connector-schemas/openai';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { DEFAULT_MODEL, OpenAiProviderType } from '@kbn/connector-schemas/openai';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -44,7 +44,7 @@ describe('OpenAI Connector', () => {
       const config: Config = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
       };
 
       expect(configValidator(config, { configurationUtilities })).toEqual(config);
@@ -54,7 +54,7 @@ describe('OpenAI Connector', () => {
       const config: Config = {
         apiUrl: 'example.com/do-something',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
@@ -67,7 +67,7 @@ describe('OpenAI Connector', () => {
       const config: Config = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: '' as OpenAiProviderType,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
@@ -80,7 +80,7 @@ describe('OpenAI Connector', () => {
       const config: Config = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: 'bad-one' as OpenAiProviderType,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
@@ -100,7 +100,7 @@ describe('OpenAI Connector', () => {
       const config: Config = {
         apiUrl: 'http://mylisteningserver.com:9200/endpoint',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
       };
 
       expect(() => {

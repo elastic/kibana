@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
+import { OpenAiProviderType, SUB_ACTION } from '@kbn/connector-schemas/openai/constants';
 import { DEFAULT_URL, getDefaultBody } from './constants';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 

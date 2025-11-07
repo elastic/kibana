@@ -11,7 +11,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
-import type { CrowdstrikeConfig, CrowdstrikeSecrets } from '../../../common/crowdstrike/types';
+import type { CrowdstrikeConfig, CrowdstrikeSecrets } from '@kbn/connector-schemas/crowdstrike';
 import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
 

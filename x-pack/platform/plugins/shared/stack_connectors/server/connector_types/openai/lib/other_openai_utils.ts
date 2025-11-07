@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { SSLSettings } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import type { Secrets } from '../../../../common/openai/types';
+import type { Secrets } from '@kbn/connector-schemas/openai';
 
 /**
  * Sanitizes the Other (OpenAI Compatible Service) request body to set stream to false
