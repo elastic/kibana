@@ -1,0 +1,82 @@
+{
+  "supportedSignals": [
+    "traces",
+    "metrics",
+    "logs",
+    "hosts",
+    "synthetics"
+  ],
+  "supportedEntities": [
+    "services",
+    "instances",
+    "agents",
+    "hosts"
+  ],
+  "enums": {
+    "agentNames": [
+      "android/java",
+      "custom",
+      "dotnet",
+      "go",
+      "iOS/swift",
+      "java",
+      "js-base",
+      "node-js",
+      "nodejs",
+      "opbeans-dotnet",
+      "opbeans-java",
+      "opbeans-node",
+      "opbeans-python",
+      "opbeans-ruby",
+      "opentelemetry",
+      "otlp",
+      "php",
+      "python",
+      "ruby",
+      "rum-js",
+      "synth-agent"
+    ],
+    "spanTypes": [
+      "app",
+      "custom",
+      "db",
+      "external",
+      "messaging",
+      "storage"
+    ],
+    "spanSubtypes": [
+      "azureblob",
+      "azurefile",
+      "azurequeue",
+      "azureservicebus",
+      "azuretable",
+      "cosmosdb",
+      "dynamodb",
+      "elasticsearch",
+      "external",
+      "http",
+      "internal",
+      "kafka",
+      "redis",
+      "s3",
+      "sns",
+      "sql",
+      "sqs"
+    ]
+  },
+  "correlationKeys": [
+    "@timestamp",
+    "agent.id",
+    "agent.name",
+    "container.id",
+    "container.name",
+    "host.hostname",
+    "host.name",
+    "service.environment",
+    "service.name",
+    "span.id",
+    "trace.id",
+    "transaction.id",
+    "transaction.name"
+  ]
+}

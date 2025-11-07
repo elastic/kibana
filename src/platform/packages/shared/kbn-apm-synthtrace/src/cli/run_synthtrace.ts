@@ -12,10 +12,14 @@ import type { Argv } from 'yargs';
 import yargs from 'yargs/yargs';
 import { readdirSync } from 'fs';
 import path from 'path';
+import fs from 'fs';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { intervalToMs } from './utils/interval_to_ms';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';
 import { startLiveDataUpload } from './utils/start_live_data_upload';
+import { generateSchema } from '../synth_schema/generator';
+import { executeSchema } from '../synth_schema/executor';
 
 function getBuiltinScenarios() {
   return readdirSync(path.resolve(__dirname, '../scenarios')).map((s) => s.replace(/\.ts$/, ''));
@@ -74,14 +78,6 @@ function options(y: Argv) {
       describe: 'Concurrency of Elasticsearch client bulk indexing',
       number: true,
       default: 1,
-    })
-    .option('debug', {
-      describe: 'Use a debug log level',
-      boolean: true,
-    })
-    .option('verbose', {
-      describe: 'Use a verbose log level',
-      boolean: true,
     })
     .option('logLevel', {
       describe: 'Log level',
@@ -173,6 +169,110 @@ export type RunCliFlags = ReturnType<typeof options>['argv'];
 
 export function runSynthtrace() {
   yargs(process.argv.slice(2))
+    .option('debug', {
+      describe: 'Use a debug log level',
+      boolean: true,
+      global: true,
+    })
+    .option('verbose', {
+      describe: 'Use a verbose log level',
+      boolean: true,
+      global: true,
+    })
+    .command(
+      'schema',
+      'Manage the synthtrace schema',
+      (y) => {
+        y.command('generate', 'Generate the synthtrace schema', {}, (argv) => {
+          // eslint-disable-next-line no-console
+          console.log('Generating schema...');
+          const schema = generateSchema();
+          const schemaPath = path.resolve(
+            REPO_ROOT,
+            'src/platform/packages/shared/kbn-apm-synthtrace/src/synth_schema/schema.json'
+          );
+          fs.writeFileSync(schemaPath, JSON.stringify(schema, null, 2));
+          // eslint-disable-next-line no-console
+          console.log(`Schema generated at ${schemaPath}`);
+        })
+          .command('validate', 'Validate the synthtrace schema', {}, (argv) => {
+            // eslint-disable-next-line no-console
+            console.log('Validating schema...');
+            const schemaPath = path.resolve(
+              REPO_ROOT,
+              'src/platform/packages/shared/kbn-apm-synthtrace/src/synth_schema/schema.json'
+            );
+            if (fs.existsSync(schemaPath)) {
+              // eslint-disable-next-line no-console
+              console.log('Schema validation successful: schema.json exists.');
+            } else {
+              // eslint-disable-next-line no-console
+              console.error('Schema validation failed: schema.json does not exist.');
+              process.exit(1);
+            }
+          })
+          .command(
+            'apply <file>',
+            'Apply a synthtrace schema',
+            (applyYargs) => {
+              applyYargs
+                .positional('file', {
+                  describe: 'Path to the schema file to apply',
+                  type: 'string',
+                  demandOption: true,
+                })
+                .option('target', {
+                  describe: 'Elasticsearch target',
+                  string: true,
+                })
+                .option('kibana', {
+                  describe:
+                    'Kibana target, used to bootstrap datastreams/mappings/templates/settings',
+                  string: true,
+                })
+                .option('apiKey', {
+                  describe: 'Kibana API key',
+                  string: true,
+                })
+                .option('from', {
+                  description: 'The start of the time window',
+                })
+                .option('to', {
+                  description: 'The end of the time window',
+                })
+                .option('concurrency', {
+                  describe: 'Concurrency of Elasticsearch client bulk indexing',
+                  number: true,
+                  default: 1,
+                })
+                .option('insecure', {
+                  describe: 'Skip SSL certificate validation (useful for self-signed certificates)',
+                  boolean: true,
+                  default: false,
+                });
+            },
+            (argv) => {
+              // eslint-disable-next-line no-console
+              console.log(`Applying schema from ${argv.file}...`);
+              const schemaPath = path.resolve(process.cwd(), argv.file as string);
+              if (!fs.existsSync(schemaPath)) {
+                // eslint-disable-next-line no-console
+                console.error(`Schema file not found: ${schemaPath}`);
+                process.exit(1);
+              }
+              const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf-8'));
+              executeSchema(schema, argv as any).catch((err) => {
+                // eslint-disable-next-line no-console
+                console.error(err);
+                process.exit(1);
+              });
+            }
+          )
+          .demandCommand(1, 'You must provide a subcommand for the schema command.')
+          .help();
+      },
+      () => {}
+    )
     .command('*', 'Generate data and index into Elasticsearch', options, (argv: RunCliFlags) => {
       run(argv).catch((err) => {
         // eslint-disable-next-line no-console
@@ -180,5 +280,6 @@ export function runSynthtrace() {
         process.exit(1);
       });
     })
+    .demandCommand(1, 'You must provide a command.')
     .parse();
 }

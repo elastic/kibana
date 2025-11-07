@@ -27,3 +27,20 @@ export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,
 } from './src/lib/utils/transform_helpers';
+
+// Synth Schema exports
+export { generateSchema } from './src/synth_schema/generator';
+export { executeSchema } from './src/synth_schema/executor';
+export type {
+  SynthSchema,
+  ServiceConfig,
+  InstanceConfig,
+  TraceConfig,
+  SpanConfig,
+  MetricConfig,
+  LogConfig,
+  HostConfig,
+  SyntheticsConfig,
+  Condition,
+  TimeVaryingValue,
+} from './src/synth_schema/synth_schema_template';

@@ -1,0 +1,44 @@
+{
+  "timeWindow": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "services": [
+    {
+      "id": "checkout-service",
+      "name": "checkout-service",
+      "environment": "production",
+      "agentName": "nodejs",
+      "instances": [
+        {
+          "id": "instance-1",
+          "traces": [
+            {
+              "id": "checkout-trace",
+              "name": "POST /api/checkout",
+              "count": 20,
+              "spans": [
+                {
+                  "name": "GET /api/inventory",
+                  "type": "external",
+                  "duration": { "value": 150, "unit": "ms" }
+                },
+                {
+                  "name": "SELECT * FROM orders",
+                  "type": "db",
+                  "duration": { "value": 200, "unit": "ms" }
+                },
+                {
+                  "name": "POST /api/payment",
+                  "type": "external",
+                  "duration": { "value": 300, "unit": "ms" }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

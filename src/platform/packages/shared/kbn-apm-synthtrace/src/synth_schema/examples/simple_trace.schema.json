@@ -1,0 +1,24 @@
+{
+  "timeWindow": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "services": [
+    {
+      "id": "my-app",
+      "name": "my-app",
+      "instances": [
+        {
+          "id": "instance-1",
+          "traces": [
+            {
+              "id": "trace-1",
+              "name": "GET /api/users",
+              "count": 10
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

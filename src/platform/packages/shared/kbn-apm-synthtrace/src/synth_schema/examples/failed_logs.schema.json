@@ -1,0 +1,55 @@
+{
+  "timeWindow": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "services": [
+    {
+      "id": "web-service",
+      "name": "web-service",
+      "agentName": "nodejs",
+      "environment": "production",
+      "instances": [
+        {
+          "id": "web-instance-1",
+          "logs": [
+            {
+              "message": "Processing user request",
+              "level": "info",
+              "rate": 50,
+              "interval": "1m",
+              "failureRate": 0.2
+            },
+            {
+              "message": "Error processing request",
+              "level": "error",
+              "rate": 5,
+              "interval": "1m",
+              "failureRate": 0.1
+            }
+          ]
+        },
+        {
+          "id": "web-instance-2",
+          "logs": [
+            {
+              "message": "Processing user request",
+              "level": "info",
+              "rate": 50,
+              "interval": "1m",
+              "failureRate": {
+                "type": "piecewise",
+                "segments": [
+                  { "to": "50%", "value": 0 },
+                  { "from": "50%", "to": "75%", "value": 0.3 },
+                  { "from": "75%", "value": 0 }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

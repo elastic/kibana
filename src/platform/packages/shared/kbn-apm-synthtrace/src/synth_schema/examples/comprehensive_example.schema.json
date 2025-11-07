@@ -1,0 +1,179 @@
+{
+  "$schema": "../schema.json",
+  "timeWindow": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "services": [
+    {
+      "id": "frontend-service",
+      "name": "frontend-service",
+      "environment": "production",
+      "agentName": "rum-js",
+      "instances": [
+        {
+          "id": "browser-1",
+          "traces": [
+            {
+              "id": "page-load-trace",
+              "name": "PageLoad /home",
+              "count": 50,
+              "spans": [
+                {
+                  "name": "Load Assets",
+                  "type": "resource",
+                  "duration": { "value": 200, "unit": "ms" }
+                },
+                {
+                  "name": "Render",
+                  "type": "app",
+                  "duration": { "value": 100, "unit": "ms" }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "backend-api",
+      "name": "backend-api",
+      "environment": "production",
+      "agentName": "nodejs",
+      "instances": [
+        {
+          "id": "instance-1",
+          "traces": [
+            {
+              "id": "api-requests",
+              "name": "POST /api/orders",
+              "count": 100,
+              "spans": [
+                {
+                  "name": "Validate Order",
+                  "type": "app",
+                  "duration": { "value": 50, "unit": "ms" }
+                },
+                {
+                  "name": "SELECT FROM products",
+                  "type": "db",
+                  "duration": { "value": 150, "unit": "ms" }
+                },
+                {
+                  "name": "INSERT INTO orders",
+                  "type": "db",
+                  "duration": { "value": 100, "unit": "ms" }
+                },
+                {
+                  "name": "POST payment-gateway",
+                  "type": "external",
+                  "duration": { "value": 300, "unit": "ms" }
+                }
+              ]
+            },
+            {
+              "id": "search-requests",
+              "name": "GET /api/search",
+              "count": 200,
+              "spans": [
+                {
+                  "name": "Elasticsearch query",
+                  "type": "db",
+                  "duration": { "value": 80, "unit": "ms" }
+                }
+              ]
+            }
+          ],
+          "metrics": [
+            {
+              "name": "system.memory.actual.free",
+              "behavior": 750
+            },
+            {
+              "name": "system.process.cpu.total.norm.pct",
+              "behavior": 0.45
+            }
+          ]
+        },
+        {
+          "id": "instance-2",
+          "traces": [
+            {
+              "id": "api-requests-2",
+              "name": "POST /api/orders",
+              "count": 100,
+              "spans": [
+                {
+                  "name": "Validate Order",
+                  "type": "app",
+                  "duration": { "value": 50, "unit": "ms" }
+                },
+                {
+                  "name": "SELECT FROM products",
+                  "type": "db",
+                  "duration": { "value": 150, "unit": "ms" }
+                }
+              ]
+            }
+          ],
+          "metrics": [
+            {
+              "name": "system.memory.actual.free",
+              "behavior": 850
+            },
+            {
+              "name": "system.process.cpu.total.norm.pct",
+              "behavior": 0.35
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "payment-service",
+      "name": "payment-service",
+      "environment": "production",
+      "agentName": "java",
+      "instances": [
+        {
+          "id": "instance-1",
+          "traces": [
+            {
+              "id": "process-payment",
+              "name": "POST /process-payment",
+              "count": 80,
+              "spans": [
+                {
+                  "name": "Validate Card",
+                  "type": "app",
+                  "duration": { "value": 100, "unit": "ms" }
+                },
+                {
+                  "name": "Call Bank API",
+                  "type": "external",
+                  "duration": { "value": 400, "unit": "ms" }
+                },
+                {
+                  "name": "Update Transaction DB",
+                  "type": "db",
+                  "duration": { "value": 120, "unit": "ms" }
+                }
+              ]
+            }
+          ],
+          "metrics": [
+            {
+              "name": "system.memory.actual.free",
+              "behavior": 900
+            },
+            {
+              "name": "system.process.cpu.total.norm.pct",
+              "behavior": 0.25
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

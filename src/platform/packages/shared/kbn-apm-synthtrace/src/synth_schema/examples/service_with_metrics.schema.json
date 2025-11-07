@@ -1,0 +1,37 @@
+{
+  "timeWindow": {
+    "from": "now-10m",
+    "to": "now"
+  },
+  "services": [
+    {
+      "id": "api-service",
+      "name": "api-service",
+      "environment": "production",
+      "agentName": "nodejs",
+      "instances": [
+        {
+          "id": "instance-1",
+          "traces": [
+            {
+              "id": "api-trace",
+              "name": "GET /api/data",
+              "count": 10
+            }
+          ],
+          "metrics": [
+            {
+              "name": "system.memory.actual.free",
+              "behavior": 800
+            },
+            {
+              "name": "system.process.cpu.total.norm.pct",
+              "behavior": 0.65
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
