@@ -69,16 +69,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`returns content summary for ${ATestSpace} space`, async () => {
       await supertest
-        .post(`/s/${ATestSpace}/api/content_management/rpc/create`)
+        .post(`/s/${ATestSpace}/api/dashboards/dashboard`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(sampleDashboard);
+        .send({ data: sampleDashboard });
 
       await supertest
-        .post(`/s/${ATestSpace}/api/content_management/rpc/create`)
+        .post(`/s/${ATestSpace}/api/dashboards/dashboard`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(sampleDashboard);
+        .send({ data: sampleDashboard });
 
       await supertest
         .get(`/internal/spaces/${ATestSpace}/content_summary`)
@@ -101,10 +101,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`returns content summary for ${BTestSpace} space`, async () => {
       await supertest
-        .post(`/s/${BTestSpace}/api/content_management/rpc/create`)
+        .post(`/s/${BTestSpace}/api/dashboards/dashboard`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(sampleDashboard);
+        .send({ data: sampleDashboard });
 
       await supertest
         .post(`/s/${BTestSpace}/api/content_management/rpc/create`)
