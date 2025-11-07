@@ -1570,8 +1570,7 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open",
-        "ci:bench-jest"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -3732,8 +3731,7 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open",
-        "ci:bench-jest"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -3772,8 +3770,7 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open",
-        "ci:bench-jest"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
