@@ -367,28 +367,6 @@ export const HOST_LABEL = i18n.translate('xpack.synthetics.alertRules.monitorSta
   defaultMessage: 'Host',
 });
 
-/**
- * Extracts step action from error message.
- * For example, from "error executing step: locator.textContent: Timeout 50000ms exceeded."
- * it will extract "locator.textContent"
- */
-const extractStepActionFromError = (errorMessage: string): string | undefined => {
-  // Pattern: "error executing step: <action>: <error details>"
-  const stepMatch = errorMessage.match(/error executing step:\s*([^:]+):/i);
-
-  if (stepMatch) {
-    return stepMatch[1].trim();
-  }
-
-  // Fallback to find a pattern like `locator.click`
-  const actionMatch = errorMessage.match(/\b\w+\.\w+\b/);
-  if (actionMatch) {
-    return actionMatch[0];
-  }
-
-  return undefined;
-};
-
 const MAX_SCRIPT_LENGTH = 200;
 
 /**
@@ -397,7 +375,6 @@ const MAX_SCRIPT_LENGTH = 200;
 export const formatStepInformation = (
   stepInfo: {
     stepName?: string;
-    stepAction?: string;
     scriptSource?: string;
     stepNumber?: number;
   } | null
@@ -408,40 +385,35 @@ export const formatStepInformation = (
 
   const parts: string[] = [];
 
-  if (stepInfo.stepName) {
+  // Format: "Step: 1. Step name"
+  if (stepInfo.stepNumber !== undefined && stepInfo.stepName) {
     parts.push(
-      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepName', {
-        defaultMessage: '\n- Step name: {stepName}  ',
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.step', {
+        defaultMessage: '\n- Step: {stepNumber}. {stepName}  ',
+        values: {
+          stepNumber: stepInfo.stepNumber,
+          stepName: stepInfo.stepName,
+        },
+      })
+    );
+  } else if (stepInfo.stepName) {
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepNameOnly', {
+        defaultMessage: '\n- Step: {stepName}  ',
         values: {
           stepName: stepInfo.stepName,
         },
       })
     );
-  }
-
-  if (stepInfo.stepNumber !== undefined) {
+  } else if (stepInfo.stepNumber !== undefined) {
     parts.push(
-      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepNumber', {
-        defaultMessage: '\n- Step number: {stepNumber}  ',
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepNumberOnly', {
+        defaultMessage: '\n- Step: {stepNumber}  ',
         values: {
           stepNumber: stepInfo.stepNumber,
         },
       })
     );
-  }
-
-  if (stepInfo.stepAction) {
-    const extractedAction = extractStepActionFromError(stepInfo.stepAction);
-    if (extractedAction) {
-      parts.push(
-        i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepAction', {
-          defaultMessage: '\n- Step action: {stepAction}  ',
-          values: {
-            stepAction: extractedAction,
-          },
-        })
-      );
-    }
   }
 
   if (stepInfo.scriptSource) {
@@ -450,8 +422,8 @@ export const formatStepInformation = (
     const script =
       stepInfo.scriptSource.length > MAX_SCRIPT_LENGTH ? `${truncatedScript}...` : truncatedScript;
     parts.push(
-      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.script', {
-        defaultMessage: '\n- Script: {script}  ',
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepScript', {
+        defaultMessage: '\n- Step script: {script}  ',
         values: {
           script,
         },

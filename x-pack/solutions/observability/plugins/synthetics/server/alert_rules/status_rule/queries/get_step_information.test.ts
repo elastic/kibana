@@ -71,7 +71,6 @@ describe('getStepInformation', () => {
 
     expect(result).toEqual({
       stepName: 'Click button',
-      stepAction: 'locator.click failed: Element not found',
       scriptSource: 'await page.click("button")',
       stepNumber: 3,
     });
@@ -98,7 +97,6 @@ describe('getStepInformation', () => {
 
     expect(result).toEqual({
       stepName: undefined,
-      stepAction: undefined,
       scriptSource: undefined,
       stepNumber: undefined,
     });
@@ -155,7 +153,6 @@ describe('getStepInformation', () => {
     // Should return information from the first failed step
     expect(result).toEqual({
       stepName: 'First step',
-      stepAction: 'First error',
       scriptSource: 'await page.click("first")',
       stepNumber: 1,
     });

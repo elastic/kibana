@@ -10,7 +10,6 @@ import type { SyntheticsEsClient } from '../../../lib';
 
 export interface StepInformation {
   stepName?: string;
-  stepAction?: string;
   scriptSource?: string;
   stepNumber?: number;
 }
@@ -24,7 +23,7 @@ export const getStepInformation = async (
   monitorType: string
 ): Promise<StepInformation | null> => {
   // Only fetch for browser monitors
-  if (monitorType !== 'browser' || !checkGroup) {
+  if (monitorType !== 'browser') {
     return null;
   }
 
@@ -41,13 +40,11 @@ export const getStepInformation = async (
     // Get the first failed step
     const failedStep = failedSteps[0];
     const stepName = failedStep.synthetics?.step?.name;
-    const stepAction = failedStep.error?.message;
     const scriptSource = failedStep.synthetics?.payload?.source;
     const stepNumber = failedStep.synthetics?.step?.index;
 
     return {
       stepName,
-      stepAction,
       scriptSource,
       stepNumber,
     };

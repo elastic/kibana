@@ -15,6 +15,8 @@ export const ALERT_DETAILS_URL = 'alertDetailsUrl';
 export const VIEW_IN_APP_URL = 'viewInAppUrl';
 export const RECOVERY_REASON = 'recoveryReason';
 export const FAILED_STEP_INFO = 'failedStepInfo';
+export const FAILED_STEP_NAME = 'failedStepName';
+export const FAILED_STEP_NUMBER = 'failedStepNumber';
 const GROUPING = 'grouping';
 
 export const getActionVariables = ({
@@ -32,6 +34,8 @@ export const getActionVariables = ({
       ACTION_VARIABLES[VIEW_IN_APP_URL],
       ACTION_VARIABLES[RECOVERY_REASON],
       ACTION_VARIABLES[FAILED_STEP_INFO],
+      ACTION_VARIABLES[FAILED_STEP_NAME],
+      ACTION_VARIABLES[FAILED_STEP_NUMBER],
       ACTION_VARIABLES[GROUPING],
       ...commonMonitorStateI18,
     ],
@@ -93,6 +97,24 @@ export const ACTION_VARIABLES = {
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.failedStepInfo.description',
       {
         defaultMessage: 'Detailed information about the failed step for browser monitors',
+      }
+    ),
+  },
+  [FAILED_STEP_NAME]: {
+    name: FAILED_STEP_NAME,
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.failedStepName.description',
+      {
+        defaultMessage: 'The name of the failed step for browser monitors',
+      }
+    ),
+  },
+  [FAILED_STEP_NUMBER]: {
+    name: FAILED_STEP_NUMBER,
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.failedStepNumber.description',
+      {
+        defaultMessage: 'The number/index of the failed step for browser monitors',
       }
     ),
   },

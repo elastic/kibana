@@ -40,7 +40,7 @@ import {
   formatStepInformation,
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
-import { getStepInformation } from './queries/get_step_information';
+import { getStepInformation, type StepInformation } from './queries/get_step_information';
 import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 import type { SyntheticsServerSetup } from '../../types';
 import type { SyntheticsEsClient } from '../../lib';
@@ -102,20 +102,19 @@ export class StatusRuleExecutor {
     this.logger.debug(`[Status Rule Executor][${this.ruleName}] ${message}`);
   }
 
-  async getFailedStepInfoForBrowserMonitor(
+  async getStepInformationForBrowserMonitor(
     checkGroup: string,
     monitorType: string
-  ): Promise<string> {
+  ): Promise<StepInformation | null> {
     if (monitorType !== 'browser') {
-      return '';
+      return null;
     }
 
     try {
-      const stepInfo = await getStepInformation(this.esClient, checkGroup, monitorType);
-      return formatStepInformation(stepInfo);
+      return await getStepInformation(this.esClient, checkGroup, monitorType);
     } catch (error) {
       this.debug(`Failed to fetch step information for check group ${checkGroup}: ${error}`);
-      return '';
+      return null;
     }
   }
 
@@ -636,6 +635,8 @@ export class StatusRuleExecutor {
 
     // Fetch step information for browser monitors synchronously before creating alert
     let failedStepInfo = '';
+    let failedStepName: string | undefined;
+    let failedStepNumber: number | undefined;
     // Get monitor type directly from saved object attributes
     const monitor = this.monitors.find((m) => m.id === configId);
     const monitorType = monitor?.attributes.type;
@@ -648,35 +649,42 @@ export class StatusRuleExecutor {
         allConfigs = getConfigsByIds(params.downConfigs).get(params.configId) || [];
       }
 
-      this.debug(`Fetching step info for browser monitor. Found ${allConfigs.length} configs`);
-
       const stepInfoPromises = allConfigs.map(async (config) => {
         if ('latestPing' in config && config.latestPing) {
           const checkGroup = config.latestPing.monitor?.check_group;
           if (checkGroup) {
-            this.debug(`Fetching step info for check group: ${checkGroup}`);
             try {
-              return await this.getFailedStepInfoForBrowserMonitor(checkGroup, 'browser');
+              return await this.getStepInformationForBrowserMonitor(checkGroup, 'browser');
             } catch (error) {
               this.debug(`Failed to fetch step information for alert ${alertId}: ${error}`);
             }
-          } else {
-            this.debug(`No check group found in config for alert ${alertId}`);
           }
         }
-        return '';
+        return null;
       });
-      const stepInfos = await Promise.all(stepInfoPromises);
-      failedStepInfo = stepInfos.filter((info) => info).join('\n');
-      this.debug(`Step information for alert ${alertId}: "${failedStepInfo}"`);
-    } else {
-      this.debug(`Monitor type is not browser (${monitorType}), skipping step info fetch`);
+      const stepInfoResults = await Promise.all(stepInfoPromises);
+      const validStepInfos = stepInfoResults.filter(
+        (info): info is StepInformation => info !== null
+      );
+
+      // Format step information for the alert body
+      const formattedStepInfos = validStepInfos.map((info) => formatStepInformation(info));
+      failedStepInfo = formattedStepInfos.filter((info) => info).join('\n');
+
+      // Extract first step name and number for the email subject
+      if (validStepInfos.length > 0) {
+        const firstStep = validStepInfos[0];
+        failedStepName = firstStep.stepName;
+        failedStepNumber = firstStep.stepNumber;
+      }
     }
 
     // Update monitor summary with step info
     const updatedMonitorSummary = {
       ...monitorSummary,
       failedStepInfo,
+      failedStepName,
+      failedStepNumber,
     };
 
     const alertDocument = getMonitorAlertDocument(
@@ -692,6 +700,8 @@ export class StatusRuleExecutor {
     const updatedContext = {
       ...context,
       ...(failedStepInfo ? { failedStepInfo } : {}),
+      ...(failedStepName ? { failedStepName } : {}),
+      ...(failedStepNumber !== undefined ? { failedStepNumber } : {}),
     };
 
     alertsClient.setAlertData({

@@ -94,6 +94,8 @@ describe('message_utils', () => {
         checks: undefined,
         monitorTags: undefined,
         failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       });
     });
 
@@ -147,6 +149,8 @@ describe('message_utils', () => {
         checks: undefined,
         monitorTags: undefined,
         failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       });
     });
   });
@@ -302,21 +306,18 @@ describe('message_utils', () => {
     it('formats basic step information without context', () => {
       const stepInfo = {
         stepName: 'Click button',
-        stepAction: 'locator.click',
         scriptSource: 'await page.click("button")',
       };
 
       const result = formatStepInformation(stepInfo);
 
-      expect(result).toContain('- Step name: Click button');
-      expect(result).toContain('- Step action: locator.click');
-      expect(result).toContain('- Script: await page.click("button")');
+      expect(result).toContain('- Step: Click button');
+      expect(result).toContain('- Step script: await page.click("button")');
     });
 
     it('formats complete step information with all fields', () => {
       const stepInfo = {
         stepName: 'Click button',
-        stepAction: 'locator.click',
         scriptSource: 'await page.click("button")',
         stepNumber: 3,
       };
@@ -324,10 +325,8 @@ describe('message_utils', () => {
       const result = formatStepInformation(stepInfo);
 
       // Check that it includes step details
-      expect(result).toContain('- Step name: Click button');
-      expect(result).toContain('- Step number: 3');
-      expect(result).toContain('- Step action: locator.click');
-      expect(result).toContain('- Script: await page.click("button")');
+      expect(result).toContain('- Step: 3. Click button');
+      expect(result).toContain('- Step script: await page.click("button")');
     });
 
     it('handles missing context gracefully', () => {
@@ -339,21 +338,19 @@ describe('message_utils', () => {
       const result = formatStepInformation(stepInfo);
 
       // Should include available info
-      expect(result).toContain('- Step name: Click button');
-      expect(result).toContain('- Step number: 3');
+      expect(result).toContain('- Step: 3. Click button');
     });
 
     it('handles partial step information', () => {
       const stepInfo = {
         stepName: 'Click button',
-        // Missing stepAction and scriptSource
+        // Missing scriptSource
       };
 
       const result = formatStepInformation(stepInfo);
 
-      expect(result).toContain('- Step name: Click button');
-      expect(result).not.toContain('- Step action:');
-      expect(result).not.toContain('- Script:');
+      expect(result).toContain('- Step: Click button');
+      expect(result).not.toContain('- Step script:');
     });
 
     it('truncates long script source', () => {
@@ -365,19 +362,7 @@ describe('message_utils', () => {
 
       const result = formatStepInformation(stepInfo);
 
-      expect(result).toContain('- Script: ' + 'a'.repeat(200) + '...');
-    });
-
-    it('handles step action extraction from error message', () => {
-      const stepInfo = {
-        stepName: 'Click button',
-        stepAction: 'Error: locator.click failed: Element not found',
-        scriptSource: 'await page.click("button")',
-      };
-
-      const result = formatStepInformation(stepInfo);
-
-      expect(result).toContain('- Step action: locator.click');
+      expect(result).toContain('- Step script: ' + 'a'.repeat(200) + '...');
     });
   });
 });

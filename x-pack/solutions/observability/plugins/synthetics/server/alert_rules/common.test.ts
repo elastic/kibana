@@ -328,6 +328,8 @@ describe('setRecoveredAlertsContext', () => {
         monitorType: undefined,
         serviceName: undefined,
         failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       },
     });
   });
@@ -430,6 +432,8 @@ describe('setRecoveredAlertsContext', () => {
         monitorType: undefined,
         serviceName: undefined,
         failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       },
     });
   });
@@ -528,6 +532,8 @@ describe('setRecoveredAlertsContext', () => {
         monitorType: undefined,
         serviceName: undefined,
         failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       },
     });
   });
@@ -611,6 +617,8 @@ describe('setRecoveredAlertsContext', () => {
         serviceName: undefined,
         stateId: undefined,
         failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       },
     });
   });

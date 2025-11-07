@@ -32,10 +32,13 @@ export const SyntheticsMonitorStatusTranslations = {
   defaultSubjectMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultSubjectMessage',
     {
-      defaultMessage: 'Monitor "{monitorName}" ({locationNames}) is down - Elastic Synthetics',
+      defaultMessage:
+        'Monitor "{monitorName}" ({locationNames}) is down{failedStepInfo} - Elastic Synthetics',
       values: {
         monitorName: '{{context.monitorName}}',
         locationNames: '{{context.locationNames}}',
+        failedStepInfo:
+          '{{#context.failedStepName}} at step {{context.failedStepNumber}} "{{context.failedStepName}}"{{/context.failedStepName}}',
       },
     }
   ),
