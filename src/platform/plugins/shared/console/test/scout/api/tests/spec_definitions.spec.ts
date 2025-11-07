@@ -13,7 +13,7 @@ import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'GET /api/console/api_server',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch', '@esGate'] },
+  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     apiTest.beforeAll(async ({ requestAuth }) => {
@@ -28,11 +28,11 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(statusCode).toBe(200);
-      expect(body.es).not.toBeNull();
+      expect(body).toHaveProperty('es');
       const {
         es: { name, globals, endpoints },
       } = body;
-      expect(name).not.toBeNull();
+      expect(name).toBe('es');
       expect(Object.keys(globals).length).toBeGreaterThan(0);
       expect(Object.keys(endpoints).length).toBeGreaterThan(0);
     });
