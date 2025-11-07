@@ -124,12 +124,11 @@
     "@kbn/presentation-util",
     "@kbn/content-management-table-list-view-common",
     "@kbn/controls-plugin",
-    "@kbn/controls-schemas",
-    "@kbn/controls-constants",
     "@kbn/visualizations-common",
     "@kbn/css-utils",
     "@kbn/lens-common",
     "@kbn/react-kibana-context-common",
+    "@kbn/control-group-renderer",
   ],
   "exclude": ["target/**/*"]
 }
