@@ -9,18 +9,6 @@ import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-const sampleDashboard = {
-  contentTypeId: 'dashboard',
-  data: {
-    title: 'Sample dashboard',
-  },
-  options: {
-    references: [],
-    overwrite: true,
-  },
-  version: 1,
-};
-
 const sampleIndexPattern = {
   contentTypeId: 'index-pattern',
   data: {
@@ -72,13 +60,23 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/s/${ATestSpace}/api/dashboards/dashboard`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send({ data: sampleDashboard });
+        .set('elastic-api-version', '1')
+        .send({
+          data: {
+            title: 'Sample dashboard',
+          },
+        });
 
       await supertest
         .post(`/s/${ATestSpace}/api/dashboards/dashboard`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send({ data: sampleDashboard });
+        .set('elastic-api-version', '1')
+        .send({
+          data: {
+            title: 'Sample dashboard',
+          },
+        });
 
       await supertest
         .get(`/internal/spaces/${ATestSpace}/content_summary`)
@@ -104,7 +102,12 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/s/${BTestSpace}/api/dashboards/dashboard`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send({ data: sampleDashboard });
+        .set('elastic-api-version', '1')
+        .send({
+          data: {
+            title: 'Sample dashboard',
+          },
+        });
 
       await supertest
         .post(`/s/${BTestSpace}/api/content_management/rpc/create`)

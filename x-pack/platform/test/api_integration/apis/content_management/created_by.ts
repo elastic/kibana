@@ -8,12 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { LoginAsInteractiveUserResponse } from './helpers';
-import {
-  loginAsInteractiveUser,
-  setupInteractiveUser,
-  sampleDashboard,
-  cleanupInteractiveUser,
-} from './helpers';
+import { loginAsInteractiveUser, setupInteractiveUser, cleanupInteractiveUser } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('created_by', function () {
@@ -23,7 +18,12 @@ export default function ({ getService }: FtrProviderContext) {
         const { body, status } = await supertest
           .post('/api/dashboards/dashboard')
           .set('kbn-xsrf', 'true')
-          .send({ data: sampleDashboard });
+          .set('elastic-api-version', '1')
+          .send({
+            data: {
+              title: 'Sample dashboard',
+            },
+          });
 
         expect(status).to.be(200);
         expect(body.data).to.be.ok();
@@ -49,7 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/dashboards/dashboard')
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
-          .send({ data: sampleDashboard });
+          .set('elastic-api-version', '1')
+          .send({
+            data: {
+              title: 'Sample dashboard',
+            },
+          });
 
         expect(createResponse.status).to.be(200);
         expect(createResponse.body.data).to.be.ok();
