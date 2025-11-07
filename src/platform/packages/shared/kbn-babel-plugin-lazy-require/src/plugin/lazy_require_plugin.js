@@ -22,10 +22,40 @@ const {
   detectClassExtendsUsage,
 } = require('./helpers');
 
+/**
+ * @typedef {import('@babel/types')} BabelTypes
+ * @typedef {import('@babel/traverse').NodePath} NodePath
+ */
+
+/**
+ * Information about a module being cached
+ * @typedef {Object} ModuleInfo
+ * @property {import('@babel/types').Identifier} cacheId - Generated cache variable identifier
+ * @property {string} requirePath - Module path to require
+ * @property {import('@babel/types').Node | null} outerFunc - Optional wrapper function (e.g., interopRequireDefault)
+ */
+
+/**
+ * Information about a property/variable imported from a module
+ * @typedef {Object} PropertyInfo
+ * @property {string} moduleRequirePath - Path to the module this variable imports from
+ * @property {string | null} propertyKey - Property name to access (null for namespace/whole module)
+ * @property {boolean} isConst - Whether declared with const (vs let/var)
+ * @property {boolean} [needsInterop] - Whether needs default import interop wrapper
+ * @property {'import' | 'require'} declarationType - Type of declaration
+ * @property {NodePath} declarationPath - AST path for removal
+ * @property {number} [declarationIndex] - Index in declaration array (for require statements)
+ */
+
 // Modules that should never be lazy-loaded
 // Supports exact matches ('react') and trailing wildcards ('@testing-library/*')
 const EXCLUDED_MODULES = ['react', 'React', '@jest/globals', '@testing-library/*'];
 
+/**
+ * Check if a module path matches any exclusion pattern
+ * @param {string} modulePath - The module path to check
+ * @returns {boolean} True if the module should be excluded from lazy loading
+ */
 function isExcludedModule(modulePath) {
   return EXCLUDED_MODULES.some((pattern) => {
     const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
@@ -33,9 +63,17 @@ function isExcludedModule(modulePath) {
   });
 }
 
+/**
+ * Babel plugin that transforms top-level require() and import statements into lazy-loaded getters
+ * @param {Object} api - Babel plugin API
+ * @param {BabelTypes} api.types - Babel types helper
+ * @returns {import('@babel/core').PluginObj} Babel plugin object
+ */
 module.exports = function lazyRequirePlugin({ types: t }) {
   /**
    * Check if an expression is a direct require() call with a string literal
+   * @param {import('@babel/types').Node} node - AST node to check
+   * @returns {boolean} True if node is a simple require call
    */
   function isSimpleRequireCall(node) {
     return (
@@ -60,10 +98,14 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         const isTestFile =
           /(^|\/)(__tests__|__test__)(\/|$)/.test(filename) ||
           /\.(test|spec)\.[tj]sx?$/.test(filename);
+
         // State tracking
-        const modules = new Map(); // requirePath -> { cacheId, requirePath, outerFunc? }
-        // Merged properties + declaration removal info
-        const properties = new Map(); // varName -> { moduleRequirePath, propertyKey, isConst, needsInterop?, declarationType, declarationPath, declarationIndex? }
+        /** @type {Map<string, ModuleInfo>} - Maps module path to cache info */
+        const modules = new Map();
+
+        /** @type {Map<string, PropertyInfo>} - Maps local variable name to import/require info */
+        const properties = new Map();
+
         const importsVar = programPath.scope.generateUidIdentifier('imports');
 
         // =================================================================
