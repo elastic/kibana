@@ -8,6 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { StaticToolRegistration } from '@kbn/onechat-server';
+import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/apm-plugin/common/agent_tool_ids';
 import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createGetDataSourcesTool,
@@ -34,6 +35,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
   OBSERVABILITY_ALERTS_TOOL_ID,
+  OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
