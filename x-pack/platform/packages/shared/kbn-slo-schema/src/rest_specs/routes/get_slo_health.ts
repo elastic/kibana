@@ -18,6 +18,7 @@ const fetchSLOHealthDataSchema = t.array(
       overall: transformHealthSchema,
       rollup: healthStatusSchema,
       summary: healthStatusSchema,
+      enabled: t.union([t.undefined, t.boolean]),
     }),
   })
 );

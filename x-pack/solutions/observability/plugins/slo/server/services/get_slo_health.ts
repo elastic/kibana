@@ -309,7 +309,7 @@ function getTransformHealth(
   const transformState = transformStat.state?.toLowerCase();
   return transformStat.health?.status?.toLowerCase() === 'green'
     ? {
-        status: 'unhealthy',
+        status: 'healthy',
         transformState: transformState as HealthStatus['transformState'],
       }
     : {
@@ -320,15 +320,31 @@ function getTransformHealth(
 
 function computeHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { id: string; instanceId: string; revision: number }
-): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
+  item: { id: string; instanceId: string; revision: number; enabled?: boolean }
+): {
+  overall: 'healthy' | 'unhealthy';
+  rollup: HealthStatus;
+  summary: HealthStatus;
+  enabled: boolean | undefined;
+} {
   const rollup = getTransformHealth(transformStatsById[getSLOTransformId(item.id, item.revision)]);
   const summary = getTransformHealth(
     transformStatsById[getSLOSummaryTransformId(item.id, item.revision)]
   );
 
-  const overall: 'healthy' | 'unhealthy' =
+  const enabledSyncedWithTransform =
+    item.enabled && rollup.transformState === 'started' && summary.transformState === 'started';
+
+  const disabledSyncedWithTransform =
+    !item.enabled && rollup.transformState === 'stopped' && summary.transformState === 'stopped';
+
+  const overallTransformHealth: 'healthy' | 'unhealthy' =
     rollup.status === 'healthy' && summary.status === 'healthy' ? 'healthy' : 'unhealthy';
 
-  return { overall, rollup, summary };
+  const overall =
+    enabledSyncedWithTransform || disabledSyncedWithTransform
+      ? overallTransformHealth
+      : 'unhealthy';
+
+  return { overall, rollup, summary, enabled: item.enabled };
 }
