@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiStepsHorizontal,
+  type EuiStepsHorizontalProps,
   EuiTitle,
   EuiButton,
   EuiFlyoutFooter,
@@ -19,7 +20,12 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useClassicStreamSteps, ClassicStreamStep } from '../../hooks';
+import { i18n } from '@kbn/i18n';
+
+enum ClassicStreamStep {
+  SELECT_TEMPLATE = 'select_template',
+  NAME_AND_CONFIRM = 'name_and_confirm',
+}
 
 interface CreateClassicStreamFlyoutProps {
   onClose: () => void;
@@ -30,16 +36,38 @@ export const CreateClassicStreamFlyout = ({
   onClose,
   onCreate,
 }: CreateClassicStreamFlyoutProps) => {
-  const {
-    steps,
-    currentStep,
-    goToNextStep,
-    goToPreviousStep,
-    hasNextStep,
-    hasPreviousStep,
-    isNextButtonEnabled,
-    isCreateButtonEnabled,
-  } = useClassicStreamSteps();
+  const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
+    ClassicStreamStep.SELECT_TEMPLATE
+  );
+
+  const isFirstStep = currentStep === ClassicStreamStep.SELECT_TEMPLATE;
+  const hasNextStep = isFirstStep;
+  const hasPreviousStep = !isFirstStep;
+
+  const goToNextStep = () => setCurrentStep(ClassicStreamStep.NAME_AND_CONFIRM);
+  const goToPreviousStep = () => setCurrentStep(ClassicStreamStep.SELECT_TEMPLATE);
+
+  const steps: EuiStepsHorizontalProps['steps'] = useMemo(
+    () => [
+      {
+        title: i18n.translate('xpack.createClassicStreamFlyout.steps.selectTemplate.title', {
+          defaultMessage: 'Select template',
+        }),
+        status: isFirstStep ? 'current' : 'complete',
+        onClick: goToPreviousStep,
+        'data-test-subj': 'createClassicStreamStep-selectTemplate',
+      },
+      {
+        title: i18n.translate('xpack.createClassicStreamFlyout.steps.nameAndConfirm.title', {
+          defaultMessage: 'Name and confirm',
+        }),
+        status: isFirstStep ? 'incomplete' : 'current',
+        onClick: goToNextStep,
+        'data-test-subj': 'createClassicStreamStep-nameAndConfirm',
+      },
+    ],
+    [isFirstStep]
+  );
 
   // Render the content for the current step
   const renderCurrentStepContent = () => {
@@ -98,24 +126,14 @@ export const CreateClassicStreamFlyout = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {hasNextStep ? (
-              <EuiButton
-                onClick={goToNextStep}
-                disabled={!isNextButtonEnabled}
-                fill
-                data-test-subj="nextButton"
-              >
+              <EuiButton onClick={goToNextStep} fill data-test-subj="nextButton">
                 <FormattedMessage
                   id="xpack.createClassicStreamFlyout.footer.next"
                   defaultMessage="Next"
                 />
               </EuiButton>
             ) : (
-              <EuiButton
-                onClick={onCreate}
-                disabled={!isCreateButtonEnabled}
-                fill
-                data-test-subj="createButton"
-              >
+              <EuiButton onClick={onCreate} fill data-test-subj="createButton">
                 <FormattedMessage
                   id="xpack.createClassicStreamFlyout.footer.create"
                   defaultMessage="Create"

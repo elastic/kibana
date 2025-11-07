@@ -6,10 +6,3 @@
  */
 
 export { CreateClassicStreamFlyout } from './components';
-export {
-  useClassicStreamSteps,
-  ClassicStreamStep,
-  type UseClassicStreamStepsOptions,
-  type UseClassicStreamStepsResult,
-  type StepValidationState,
-} from './hooks';
