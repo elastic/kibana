@@ -10,19 +10,19 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
-import { useCapabilities } from '../../../hooks/use_capabilities';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { useAsyncThunk } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { setIsTestModalOpen } from '../../../entities/workflows/store';
 import {
   selectHasChanges,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
-import { runWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/run_workflow_thunk';
-import { testWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/test_workflow_thunk';
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
+import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
+import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
+import { useAsyncThunk } from '../../../hooks/use_async_thunk';
+import { useCapabilities } from '../../../hooks/use_capabilities';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
@@ -58,7 +58,7 @@ export const WorkflowDetailTestModal = () => {
   useEffect(() => {
     if (isTestModalOpen) {
       if (!canExecuteWorkflow) {
-        notifications.toasts.addWarning(
+        notifications?.toasts.addWarning(
           i18n.translate('workflows.detail.testModal.warningNoPermissions', {
             defaultMessage: 'You do not have permission to run workflows.',
           }),
@@ -66,7 +66,7 @@ export const WorkflowDetailTestModal = () => {
         );
         closeModal();
       } else if (!definition) {
-        notifications.toasts.addWarning(
+        notifications?.toasts.addWarning(
           i18n.translate('workflows.detail.testModal.warningInvalidDefinition', {
             defaultMessage: 'Please fix the errors to run the workflow.',
           }),
@@ -75,7 +75,7 @@ export const WorkflowDetailTestModal = () => {
         closeModal();
       }
     }
-  }, [closeModal, canExecuteWorkflow, isTestModalOpen, definition, notifications.toasts]);
+  }, [closeModal, canExecuteWorkflow, isTestModalOpen, definition, notifications?.toasts]);
 
   if (!isTestModalOpen || !definition || !canExecuteWorkflow) {
     return null;

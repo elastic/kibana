@@ -21,6 +21,7 @@ import { getFunctionSignatureHover } from './get_function_signature_hover';
 import { getQueryForFields } from '../autocomplete/get_query_for_fields';
 import { getFunctionArgumentHover } from './get_function_argument_hover';
 import { getColumnHover } from './get_column_hover';
+import { getAstContext } from '../shared/context';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -70,9 +71,11 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     return hoverContent;
   }
 
-  // getColumnMap has its own cache, shared with the autocomplete system
+  const astContext = getAstContext(correctedQuery, root, offset);
+  const astForContext = astContext.astForContext;
+
   const { getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(fullText, root),
+    getQueryForFields(fullText, astForContext),
     fullText,
     callbacks
   );

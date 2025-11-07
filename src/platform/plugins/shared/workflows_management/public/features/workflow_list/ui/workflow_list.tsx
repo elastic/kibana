@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
@@ -158,7 +157,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'name',
         name: 'Name',
         dataType: 'string',
-        width: '45%',
         render: (name: string, item) => (
           <div
             css={css`
@@ -185,7 +183,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText
-                  size="s"
+                  size="xs"
                   color="subdued"
                   title={item.description}
                   css={css`
@@ -220,7 +218,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         field: 'triggers',
         name: 'Trigger',
-        width: '16%',
+        width: '12%',
         render: (value: unknown, item: WorkflowListItemDto) => (
           <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
             <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
@@ -434,13 +432,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         showStart={showStart}
         showEnd={showEnd}
       />
-      <EuiSpacer />
       <EuiBasicTable
         css={css`
           .euiBasicTableAction-showOnHover {
             opacity: 1 !important;
           }
         `}
+        rowProps={() => ({
+          style: { height: '68px' },
+        })}
         columns={columns}
         items={workflows?.results ?? []}
         itemId="id"

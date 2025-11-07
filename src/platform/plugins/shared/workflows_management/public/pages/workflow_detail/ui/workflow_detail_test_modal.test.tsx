@@ -10,15 +10,15 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
-import { TestWrapper } from '../../../shared/test_utils';
-import { createMockStore } from '../../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
 import {
   selectHasChanges,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { runWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/run_workflow_thunk';
-import { testWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/test_workflow_thunk';
+} from '../../../entities/workflows/store';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
+import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
+import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
 const mockUseKibana = jest.fn();
@@ -38,10 +38,10 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
 
-jest.mock('../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk', () => ({
+jest.mock('../../../hooks/use_async_thunk', () => ({
   useAsyncThunk: (...args: unknown[]) => mockUseAsyncThunk(...args),
 }));
-jest.mock('../../../widgets/workflow_yaml_editor/lib/store/selectors', () => ({
+jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
   selectHasChanges: jest.fn(),
   selectIsTestModalOpen: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
