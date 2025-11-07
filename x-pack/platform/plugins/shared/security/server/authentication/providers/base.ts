@@ -79,6 +79,10 @@ export abstract class BaseAuthenticationProvider {
     this.logger = options.logger;
   }
 
+  doesSessionNeedToBeCheckedForRequestIds(state?: unknown): boolean {
+    return false;
+  }
+
   /**
    * Performs initial login request and creates user session. Provider isn't required to implement
    * this method if it doesn't support initial login request.

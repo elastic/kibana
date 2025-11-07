@@ -28,7 +28,6 @@ import type {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
-  SAMLProviderState,
 } from './providers';
 import { Tokens } from './tokens';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
@@ -824,12 +823,10 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
-      if (
-        this.isSamlProvider(provider) &&
-        this.hasRemainingRequestIds(existingSessionValue?.state as SAMLProviderState)
-      ) {
-        this.logger.debug(
-          'Existing unauthenticated session still has pending SAML requests. Keeping session alive until so all pending requestIds can complete'
+      const providerInstance = this.providers.get(provider.name);
+      if (providerInstance?.doesSessionNeedToBeCheckedForRequestIds(existingSessionValue?.state)) {
+        this.logger.info(
+          'Existing unauthenticated session still has pending requestIds. Keeping session alive until so all pending requestIds can complete'
         );
 
         intermediateSessionStillNeedsToExist = true;
@@ -918,20 +915,6 @@ export class Authenticator {
         isNewSessionAuthenticated &&
         (providerHasChanged || usernameHasChanged),
     };
-  }
-
-  private isSamlProvider(provider: AuthenticationProvider) {
-    return provider.type === 'saml';
-  }
-
-  private hasRemainingRequestIds(state: SAMLProviderState): boolean {
-    let result = false;
-
-    if (state && state.requestIdMap && Object.keys(state.requestIdMap).length > 0) {
-      result = true;
-    }
-
-    return result;
   }
 
   /**

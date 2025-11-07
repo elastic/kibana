@@ -127,6 +127,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.useRelayStateDeepLink = samlOptions?.useRelayStateDeepLink ?? false;
   }
 
+  public doesSessionNeedToBeCheckedForRequestIds(state?: unknown): boolean {
+    const samlState = state as ProviderState | undefined;
+    return !!(samlState?.requestIdMap && Object.keys(samlState.requestIdMap).length > 0);
+  }
+
   /**
    * Performs initial login request using SAMLResponse payload.
    * @param request Request instance.
