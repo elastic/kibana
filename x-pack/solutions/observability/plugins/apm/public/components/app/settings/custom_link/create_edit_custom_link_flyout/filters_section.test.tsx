@@ -153,7 +153,6 @@ function getIsDisabled(filters: Filter[]) {
 
 describe('AddFilterButton isDisabled logic', () => {
   it('disables AddFilterButton when all filter slots are used', () => {
-    // * test like this? ------------------------------------------------------------------------------------
     const filters: Filter[] = [
       { key: 'service.name', value: 'Service Name' },
       { key: 'transaction.type', value: 'Transaction Type' },
@@ -174,7 +173,6 @@ describe('AddFilterButton isDisabled logic', () => {
   });
 
   it('should disable if any filter has empty key', () => {
-    // * OR test like that? ------------------------------------------------------------------------------------
     const filters: Filter[] = [
       { key: '', value: 'Transaction Name' },
       { key: 'service.environment', value: 'Service Environment' },
