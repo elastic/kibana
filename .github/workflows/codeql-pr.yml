@@ -9,11 +9,13 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: kibana
+    # Hardcoded list of users will be removed once testing is complete
     if: |
-      contains(github.event.pull_request.labels.*.name, 'ci:codeql') &&
+      contains(fromJSON('["elena-shostak", "SiddharthMantri", "azasypkin", "kc13greiner", "jeramysoucy", "rgodfrey-elastic"]'), github.event.pull_request.user.login) ||
+      (contains(github.event.pull_request.labels.*.name, 'ci:codeql') &&
       contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
       github.event.pull_request.user.type != 'Bot' &&
-      github.event.pull_request.draft == false
+      github.event.pull_request.draft == false)
     permissions:
       security-events: write
       packages: read
