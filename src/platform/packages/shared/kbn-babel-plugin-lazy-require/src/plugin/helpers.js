@@ -124,6 +124,9 @@ function hasImportThenExportPattern(importPath, t) {
 /**
  * Check if an identifier is in a TypeScript type-only context
  * Returns true if the identifier is in a pure type context that won't exist at runtime
+ * @param {NodePath} path - AST node path to check
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {boolean} True if in type-only context
  */
 function isInTypeContext(path, t) {
   let currentPath = path;
@@ -165,6 +168,11 @@ function isInTypeContext(path, t) {
 /**
  * Check if an identifier should be skipped during replacement
  * Returns true if this identifier is not a variable reference we should transform
+ * @param {NodePath} path - The identifier path to check
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @param {NodePath} programPath - The program path
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {boolean} True if this identifier should be skipped
  */
 function shouldSkipIdentifier(path, properties, programPath, t) {
   const varName = path.node.name;
@@ -239,6 +247,10 @@ function shouldSkipIdentifier(path, properties, programPath, t) {
  * Detect which imports are used in JSX syntax anywhere in the file
  * Returns a Set of variable names that should not be lazy-loaded
  * JSX transforms happen at compile time, so components need to be directly available
+ * @param {NodePath} programPath - The program path
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {Set<string>} Set of variable names used in JSX
  */
 function detectJsxUsage(programPath, properties, t) {
   const importsUsedInJsx = new Set();
@@ -284,6 +296,10 @@ function detectJsxUsage(programPath, properties, t) {
  * Detect which imports are used in jest.mock() factory functions
  * Returns a Set of variable names that should not be lazy-loaded
  * Jest mock factories cannot reference out-of-scope variables
+ * @param {NodePath} programPath - The program path
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {Set<string>} Set of variable names used in jest.mock factories
  */
 function detectJestMockUsage(programPath, properties, t) {
   const importsUsedInJestMocks = new Set();
@@ -334,6 +350,10 @@ function detectJestMockUsage(programPath, properties, t) {
 /**
  * Detect which imports are used in module-level code that runs at initialization
  * Returns a Set of variable names that should not be lazy-loaded
+ * @param {NodePath} programPath - The program path
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {Set<string>} Set of variable names used in module-level code
  */
 function detectModuleLevelUsage(programPath, properties, t) {
   const importsUsedInModuleLevelCode = new Set();
@@ -433,6 +453,9 @@ function detectModuleLevelUsage(programPath, properties, t) {
  *   - Foo => 'Foo'
  *   - ns.Foo => 'ns'
  *   - ns.sub.Foo => 'ns'
+ * @param {import('@babel/types').Node} node - AST node to extract from
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {string | null} The root identifier name or null if not found
  */
 function getRootIdentifierFromNode(node, t) {
   if (t.isIdentifier(node)) {
@@ -462,6 +485,10 @@ function getRootIdentifierFromNode(node, t) {
  *   - new Foo()
  *   - new ns.Foo()
  *   - new ns.sub.Foo()
+ * @param {NodePath} programPath - The program path
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {Set<string>} Set of variable names used as constructors
  */
 function detectConstructorUsage(programPath, properties, t) {
   const importsUsedAsConstructors = new Set();
@@ -483,6 +510,10 @@ function detectConstructorUsage(programPath, properties, t) {
  * Detect imports used via `new` inside a class constructor or inside class methods
  * that are directly invoked from the constructor (one hop).
  * Returns a Set of variable names that should not be lazy-loaded.
+ * @param {NodePath} programPath - The program path
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {Set<string>} Set of variable names constructed in constructor init flow
  */
 function detectConstructorInitNewUsage(programPath, properties, t) {
   const importsUsedInCtorFlow = new Set();
@@ -550,6 +581,10 @@ function detectConstructorInitNewUsage(programPath, properties, t) {
  *
  * Classes need their parent class available at definition time, not instantiation time.
  * Example: class Foo extends Bar needs Bar to be eagerly loaded.
+ * @param {NodePath} programPath - The program path
+ * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {Set<string>} Set of variable names used in class extends
  */
 function detectClassExtendsUsage(programPath, properties, t) {
   const importsUsedInExtends = new Set();
