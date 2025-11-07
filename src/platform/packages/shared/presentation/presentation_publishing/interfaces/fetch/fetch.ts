@@ -22,8 +22,17 @@ import {
   type Observable,
 } from 'rxjs';
 
+import type { Filter } from '@kbn/es-query';
+import {
+  apiPublishesESQLVariables,
+  type ESQLControlVariable,
+  type PublishesESQLVariables,
+} from '@kbn/esql-types';
+import { apiHasSections } from '@kbn/presentation-containers';
+
 import { useStateFromPublishingSubject } from '../../publishing_subject';
 import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
+import { apiHasUniqueId } from '../has_uuid';
 import {
   isReloadTimeFetchContextEqual,
   type FetchContext,
@@ -39,6 +48,19 @@ import {
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
 
+function filterByMetaData<FilterType extends ESQLControlVariable | Filter>(
+  api: unknown,
+  sectionId: string | undefined,
+  filters: FilterType[] | undefined
+): FilterType[] | undefined {
+  const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
+  return filters?.filter(
+    (current) =>
+      current.meta?.controlledBy !== uuid &&
+      (current.meta?.group ? sectionId === current.meta.group : true)
+  );
+}
+
 function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
 }
@@ -52,10 +74,18 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     searchSessionId: of(undefined),
     timeRange: of(undefined),
     timeslice: of(undefined),
+    esqlVariables: of(undefined),
   };
 
+  const sectionId$ =
+    apiHasUniqueId(api) && apiHasParentApi(api) && apiHasSections(api.parentApi)
+      ? api.parentApi.getPanelSection$(api.uuid)
+      : of(undefined);
+
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
-    observables.filters = api.parentApi.filters$;
+    observables.filters = combineLatest([api.parentApi.filters$, sectionId$]).pipe(
+      map(([allFilters, sectionId]) => filterByMetaData(api, sectionId, allFilters))
+    );
     observables.query = api.parentApi.query$;
   }
 
@@ -76,6 +106,12 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
       map((timeslice) => {
         return hasLocalTimeRange(api) ? undefined : timeslice;
       })
+    );
+  }
+
+  if (apiHasParentApi(api) && apiPublishesESQLVariables(api.parentApi)) {
+    observables.esqlVariables = combineLatest([api.parentApi.esqlVariables$, sectionId$]).pipe(
+      map(([allVariables, sectionId]) => filterByMetaData(api, sectionId, allVariables))
     );
   }
 
@@ -133,11 +169,15 @@ export function fetch$(api: unknown): Observable<FetchContext> {
 export const useFetchContext = (api: unknown): FetchContext => {
   const context$ = useMemo(() => {
     const typeApi = api as Partial<
-      PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
+      PublishesTimeRange &
+        HasParentApi<
+          Partial<PublishesUnifiedSearch & PublishesSearchSession & PublishesESQLVariables>
+        >
     >;
     return new BehaviorSubject<FetchContext>({
       filters: typeApi?.parentApi?.filters$?.value,
       query: typeApi?.parentApi?.query$?.value,
+      esqlVariables: typeApi.parentApi?.esqlVariables$?.value,
       searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
       timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,
       timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,

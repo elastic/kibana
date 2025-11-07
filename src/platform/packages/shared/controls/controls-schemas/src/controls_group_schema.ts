@@ -19,11 +19,10 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { optionsListDSLControlSchema } from './options_list_schema';
+import { optionsListDSLControlSchema, optionsListESQLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
 import { timeSliderControlSchema } from './time_slider_schema';
-import { esqlControlSchema } from './esql_control_schema';
-
+\
 export const controlWidthSchema = schema.oneOf(
   [
     schema.literal(CONTROL_WIDTH_SMALL),
@@ -72,13 +71,11 @@ export const controlsGroupSchema = schema.object({
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
-      schema
-        .allOf([
-          schema.object({ type: schema.literal(ESQL_CONTROL) }),
-          esqlControlSchema,
-          stickyControlSchema,
-        ])
-        .extendsDeep({ unknowns: 'allow' }),
+      schema.allOf([
+        schema.object({ type: schema.literal(ESQL_CONTROL) }),
+        optionsListESQLControlSchema,
+        stickyControlSchema,
+      ]), // variable controls do not need `unknowns: 'allow'` because they have no legacy values
     ]),
     {
       defaultValue: [],
