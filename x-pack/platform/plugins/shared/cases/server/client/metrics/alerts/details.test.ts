@@ -31,6 +31,24 @@ describe('AlertDetails', () => {
     jest.clearAllMocks();
   });
 
+  it('calls getAllDocumentsAttachedToCase with alerts attachments filter', async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
+      return [];
+    });
+
+    const handler = new AlertDetails({
+      caseId: '',
+      casesClient: client,
+      clientArgs: { services: {} } as CasesClientArgs,
+    });
+    await handler.compute();
+
+    expect(jest.mocked(client.attachments.getAllDocumentsAttachedToCase)).toHaveBeenCalledWith({
+      attachmentTypes: ['alert'],
+      caseId: '',
+    });
+  });
+
   it('returns empty alert details metrics when there are no alerts', async () => {
     client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
       return [];
