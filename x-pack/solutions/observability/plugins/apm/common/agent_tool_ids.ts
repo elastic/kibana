@@ -7,3 +7,4 @@
 
 export const OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
   'observability.get_apm_downstream_dependencies';
+export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
