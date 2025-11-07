@@ -438,12 +438,12 @@ export class OneChatPageObject extends FtrService {
     return `agentBuilderAgentsListRow-${agentId}`;
   }
 
-  agentExistsOrFail(agentId: string) {
-    return this.testSubjects.existOrFail(this.agentListRowSelector(agentId));
+  async agentExistsOrFail(agentId: string) {
+    await this.testSubjects.existOrFail(this.agentListRowSelector(agentId));
   }
 
-  agentMissingOrFail(agentId: string) {
-    return this.testSubjects.missingOrFail(this.agentListRowSelector(agentId));
+  async agentMissingOrFail(agentId: string) {
+    await this.testSubjects.missingOrFail(this.agentListRowSelector(agentId));
   }
 
   agentAction(agentId: string, actionSubj: string) {
@@ -463,11 +463,12 @@ export class OneChatPageObject extends FtrService {
     };
   }
 
-  getAgentRowDisplayName(agentId: string) {
+  async getAgentRowDisplayName(agentId: string) {
     const rowSelector = this.agentListRowSelector(agentId);
     const nameAndDescriptionCellSelector = 'agentBuilderAgentsListNameAndDescription';
     const displayNameSelector = `${rowSelector} > ${nameAndDescriptionCellSelector} > agentBuilderAgentsListName`;
-    return this.testSubjects.getVisibleText(displayNameSelector);
+    const agentDisplayName = await this.testSubjects.getVisibleText(displayNameSelector);
+    return agentDisplayName;
   }
 
   async getAgentLabels(agentId: string) {
@@ -555,8 +556,9 @@ export class OneChatPageObject extends FtrService {
    * Agents: form
    * ==========================
    */
-  getAgentFormPageTitle() {
-    return this.testSubjects.getVisibleText('agentFormPageTitle');
+  async getAgentFormPageTitle() {
+    const pageTitle = await this.testSubjects.getVisibleText('agentFormPageTitle');
+    return pageTitle;
   }
 
   getAgentIdInput() {
