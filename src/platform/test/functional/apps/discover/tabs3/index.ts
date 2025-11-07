@@ -64,6 +64,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    loadTestFile(require.resolve('./_tab_preview'));
     loadTestFile(require.resolve('./_time_range'));
   });
 }

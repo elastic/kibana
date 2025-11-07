@@ -77,7 +77,7 @@ export {
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
   isToolValidationError,
-  isTokenLimitReachedError,
+  isOutputTokenLimitReachedError,
   isToolNotFoundError,
 } from './errors';
 
