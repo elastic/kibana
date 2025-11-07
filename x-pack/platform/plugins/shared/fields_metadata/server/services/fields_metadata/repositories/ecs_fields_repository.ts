@@ -23,21 +23,25 @@ interface FindOptions {
 }
 
 export class EcsFieldsRepository {
-  private readonly ecsFields: Record<EcsFieldName, FieldMetadata>;
+  private readonly fieldsDictionary: FieldsMetadataDictionary;
 
   private constructor(ecsFields: Record<EcsFieldName, FieldMetadataPlain>) {
-    this.ecsFields = mapValues(ecsFields, (field) =>
+    const fields = mapValues(ecsFields, (field) =>
       FieldMetadata.create({ ...field, source: 'ecs' })
     );
+    // Create dictionary once - it contains proxied fields for prefix support
+    this.fieldsDictionary = FieldsMetadataDictionary.create(fields);
   }
 
   getByName(fieldName: EcsFieldName | AnyFieldName): FieldMetadata | undefined {
-    return this.ecsFields[fieldName as EcsFieldName];
+    // Access from the dictionary's proxied fields - handles both direct and prefixed lookups
+    return this.fieldsDictionary.getFields()[fieldName];
   }
 
   find({ fieldNames }: FindOptions = {}): FieldsMetadataDictionary {
     if (!fieldNames) {
-      return FieldsMetadataDictionary.create(this.ecsFields);
+      // Return the entire dictionary
+      return this.fieldsDictionary;
     }
 
     const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
@@ -50,6 +54,7 @@ export class EcsFieldsRepository {
       return fieldsMetadata;
     }, {} as Record<EcsFieldName, FieldMetadata>);
 
+    // Create a new dictionary with the filtered fields (also gets proxy)
     return FieldsMetadataDictionary.create(fields);
   }
 
