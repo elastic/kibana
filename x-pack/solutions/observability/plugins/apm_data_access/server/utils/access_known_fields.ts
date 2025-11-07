@@ -26,7 +26,7 @@ type RequiredApmFields<
 type ProxiedApmEvent<
   T extends Partial<FlattenedApmEvent>,
   R extends keyof FlattenedApmEvent
-> = MapToSingleOrMultiValue<RequiredApmFields<T, R>>;
+> = Readonly<MapToSingleOrMultiValue<RequiredApmFields<T, R>>>;
 
 const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<string>(KNOWN_SINGLE_VALUED_FIELDS);
 
@@ -90,5 +90,10 @@ const accessHandler = {
     const value = fields[key];
 
     return KNOWN_SINGLE_VALUED_FIELDS_SET.has(key) && Array.isArray(value) ? value[0] : value;
+  },
+
+  // Trap any setters to make the proxied object immutable.
+  set() {
+    return false;
   },
 };

@@ -58,4 +58,26 @@ describe('accessKnownApmEventFields', () => {
       links: { span_id: ['link1', 'link2'] },
     });
   });
+
+  it('prevents mutations on the original object', () => {
+    const smallInput = {
+      '@timestamp': ['2024-10-10T10:10:10.000Z'],
+      'service.name': ['node-svc'],
+      'links.span_id': ['link1', 'link2'],
+    };
+
+    const event = accessKnownApmEventFields(smallInput as Partial<FlattenedApmEvent>, [
+      '@timestamp',
+      'service.name',
+    ]);
+
+    // The proxied object is immutable. It will prevent mutations and will throw a TypeError
+    expect(() => {
+      // Disabling type checking here to ensure we also have runtime protection of immutability,
+      // so people can't just cast their way out of this. Normally, doing the setter op will
+      // error at compile time.
+      // @ts-ignore
+      event['agent.name'] = 'nodejs';
+    }).toThrowError("'set' on proxy: trap returned falsish for property 'agent.name'");
+  });
 });
