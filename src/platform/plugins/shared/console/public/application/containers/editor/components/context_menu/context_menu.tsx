@@ -232,11 +232,12 @@ export const ContextMenu = ({
     // Get the selected requests from the editor
     const requests = await getRequests();
 
-    // Find ES|QL query request (POST to /_query or /_query/async)
+    // Find ES|QL query request (POST to /_query with optional query params or path)
+    // Handles: /_query, /_query?format=txt, /_query/async, etc.
     const esqlRequest = requests.find(
       (req) =>
         req.method === 'POST' &&
-        (req.url === '/_query' || req.url.startsWith('/_query/') || req.url === '/_query/')
+        (req.url === '/_query' || req.url.startsWith('/_query?') || req.url.startsWith('/_query/'))
     );
 
     if (!esqlRequest) {
