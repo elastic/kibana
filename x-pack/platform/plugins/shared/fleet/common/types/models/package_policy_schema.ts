@@ -354,7 +354,8 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   namespace: schema.maybe(
     schema.string({
       meta: {
-        description: 'Policy namespace. When not specified, it inherits the agent policy namespace.',
+        description:
+          'Policy namespace. When not specified, it inherits the agent policy namespace.',
       },
     })
   ),
