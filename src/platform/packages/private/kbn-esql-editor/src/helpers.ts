@@ -366,14 +366,16 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
         opacity: 1 !important;
       }
       .monaco-keybinding-key {
-        background-color: ${theme.euiTheme.colors.backgroundBaseNeutral} !important;
+        background-color: ${theme.euiTheme.colors.backgroundBaseSubdued} !important;
         box-shadow: none !important;
-        border: 1px solid ${theme.euiTheme.border.color} !important;
+        border: 1px solid ${theme.euiTheme.colors.borderBasePlain} !important;
       }
-    }
-
-    .monaco-scrollable-element {
-      ${hoverContainersCSS}
+      .codicon-toolbar-more {
+        opacity: 0 !important;
+      }
+      .codicon-inline-suggestion-hints-next {
+        margin-right: ${theme.euiTheme.size.xs} !important;
+      }
     }
     .hover-row.status-bar {
       display: none;
