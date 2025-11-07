@@ -915,17 +915,15 @@ export class AlertsClient {
       const bulkUpdateRequest = [];
 
       for (const item of mgetRes.docs) {
-        if ('found' in item && item.found) {
-          bulkUpdateRequest.push(
-            {
-              update: {
-                _index: item._index,
-                _id: item._id,
-              },
+        bulkUpdateRequest.push(
+          {
+            update: {
+              _index: item._index,
+              _id: item._id,
             },
-            { script }
-          );
-        }
+          },
+          { script }
+        );
       }
 
       if (bulkUpdateRequest.length === 0) {
@@ -936,6 +934,7 @@ export class AlertsClient {
         refresh: 'wait_for',
         body: bulkUpdateRequest,
       });
+
       return bulkUpdateResponse;
     } else if (query) {
       try {
