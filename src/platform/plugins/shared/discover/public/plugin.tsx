@@ -26,8 +26,6 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
-import { apiHasUniqueId, apiPublishesPauseFetch } from '@kbn/presentation-publishing';
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -418,8 +416,16 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME } =
-          await getEmbeddableServices();
+        const [
+          { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME },
+          { apiPublishesPauseFetch },
+          { apiPublishesESQLVariables },
+        ] = await Promise.all([
+          getEmbeddableServices(),
+          import('@kbn/presentation-publishing'),
+          import('@kbn/esql-types'),
+        ]);
+
         const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
 
         const mightHaveVariables =
