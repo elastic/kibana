@@ -110,7 +110,6 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         z-index: 0;
       }
 
-      /* TODO: consider using euiFocusRing (source: https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) */
       &:focus-visible .${iconWrapperClassName} {
         border: ${euiTheme.border.width.thick} solid
           ${isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
@@ -184,29 +183,32 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     };
 
     if (props.href === undefined) {
-      const buttonProps: MenuItemButtonRestProps = props;
+      const buttonProps: MenuItemWithoutHref = props;
+      // Destructure the `iconType` and `tabIndex` to avoid passing them to the `button` element
+      const { iconType: _iconType, tabIndex: _tabIndex, ...otherProps } = buttonProps;
 
       return (
         <button
           id={id}
           ref={ref as ForwardedRef<HTMLButtonElement>}
           {...commonProps}
-          {...buttonProps}
+          {...otherProps}
         >
           {content}
         </button>
       );
     } else {
-      const anchorProps: MenuItemAnchorRestProps = props;
+      const anchorProps: MenuItemWithHref = props;
+      // Destructure the `iconType` and `tabIndex` to avoid passing them to the `button` element
+      const { iconType: _iconType, tabIndex: _tabIndex, ...otherProps } = anchorProps;
 
       return (
         <a
           aria-current={isCurrent ? 'page' : undefined}
-          href={props.href}
           id={id}
           ref={ref as ForwardedRef<HTMLAnchorElement>}
           {...commonProps}
-          {...anchorProps}
+          {...otherProps}
         >
           {content}
         </a>
