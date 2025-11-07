@@ -1247,7 +1247,7 @@ export default function (providerContext: FtrProviderContext) {
         };
 
         const { body } = await supertest
-          .put(`/api/fleet/cloud_connectors/${createdConnectorId}`)
+          .put(`/api/fleet/cloud_connectors/${createdAwsConnectorId}`)
           .set('kbn-xsrf', 'xxxx')
           .send(updateData)
           .expect(400);
@@ -1271,7 +1271,7 @@ export default function (providerContext: FtrProviderContext) {
         };
 
         const { body } = await supertest
-          .put(`/api/fleet/cloud_connectors/${createdConnectorId}`)
+          .put(`/api/fleet/cloud_connectors/${createdAwsConnectorId}`)
           .set('kbn-xsrf', 'xxxx')
           .send(updateData)
           .expect(400);
