@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -22,6 +22,7 @@ import {
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { getUnifiedTimeRange } from '@kbn/cloud-security-posture-graph/src/components/utils/get_event_time_range';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -72,6 +73,7 @@ export const GraphVisualization: React.FC = memo(() => {
     eventIds,
     timestamp = new Date().toISOString(),
     isAlert,
+    originalEventTime,
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
@@ -173,7 +175,23 @@ export const GraphVisualization: React.FC = memo(() => {
     [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
 
-  const originEventIds = eventIds.map((id) => ({ id, isAlert }));
+  const originEventIds = useMemo(
+    () =>
+      eventIds.map((id) => ({
+        id,
+        isAlert,
+      })),
+    [eventIds, isAlert]
+  );
+
+  // Calculate unified time range that covers both alert and original event times
+  const { start, end } = getUnifiedTimeRange(
+    timestamp ?? new Date().toISOString(),
+    isAlert,
+    originalEventTime
+  );
+  const initialTimeRange = useMemo(() => ({ from: start, to: end }), [start, end]);
+
   const { investigateInTimeline } = useInvestigateInTimeline();
   const openTimelineCallback = useCallback(
     (query: Query | undefined, filters: Filter[], timeRange: TimeRange) => {
@@ -233,10 +251,7 @@ export const GraphVisualization: React.FC = memo(() => {
             initialState={{
               dataView,
               originEventIds,
-              timeRange: {
-                from: `${timestamp}||-30m`,
-                to: `${timestamp}||+30m`,
-              },
+              timeRange: initialTimeRange,
             }}
             showInvestigateInTimeline={true}
             showToggleSearch={true}

@@ -224,5 +224,31 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       await alertsPage.flyout.assertPreviewPanelIsOpen('alert');
     });
+
+    it('expanded flyout - alert with log event from different time period', async () => {
+      // This test validates the unified time range functionality
+      // Alert created on Oct 15th, but references a log event from Oct 1st
+      // The graph should render correctly by using a unified time range that spans both dates
+      await alertsPage.navigateToAlertsPage(
+        `${alertsPage.getAbsoluteTimerangeFilter(
+          '2024-10-01T00:00:00.000Z',
+          '2024-10-16T00:00:00.000Z'
+        )}&${alertsPage.getFlyoutFilter(
+          '838ea37ab43ab7d2754d007fbe8191be53d7d637bea62f6189f8db1503c0e251'
+        )}`
+      );
+      await alertsPage.waitForListToHaveAlerts();
+
+      await alertsPage.flyout.expandVisualizations();
+      await alertsPage.flyout.assertGraphPreviewVisible();
+      await alertsPage.flyout.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.expandGraph();
+      await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.assertElementVisible('label-node-event-count-button');
+      await expandedFlyoutGraph.assertElementVisible('label-node-alert-count-button');
+    });
   });
 }
