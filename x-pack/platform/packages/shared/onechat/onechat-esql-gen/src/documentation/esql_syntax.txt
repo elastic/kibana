@@ -1,0 +1,253 @@
+<documentation>
+    An ES|QL query is composed of a source command followed by a series
+    of processing commands, separated by a pipe character: |.
+
+    For example:
+    ```esql
+    <source-command>
+    | <processing-command1>
+    | <processing-command2>
+    ```
+
+    <source-commands>
+        Source commands select a data source.
+
+        There are three source commands:
+        - FROM: Selects one or multiple indices, data streams or aliases to use as source.
+        - ROW: Produces a row with one or more columns with values that you specify.
+        - SHOW: returns information about the deployment.
+    </source-commands>
+
+    <processing-commands>
+        ES|QL processing commands change an input table by adding, removing, or
+        changing rows and columns.
+
+        The following processing commands are available:
+
+        - DISSECT: extracts structured data out of a string, using a dissect pattern
+        - DROP: drops one or more columns
+        - ENRICH: adds data from existing indices as new columns
+        - EVAL: adds a new column with calculated values, using various type of functions
+        - GROK: extracts structured data out of a string, using a grok pattern
+        - KEEP: keeps one or more columns, drop the ones that are not kept
+        - LIMIT: returns the first n number of rows. The maximum value for this is 10000
+        - MV_EXPAND: expands multi-value columns into a single row per value
+        - RENAME: renames a column
+        - STATS ... BY: groups rows according to a common value and calculates
+        one or more aggregated values over the grouped rows. STATS supports aggregation
+        function and can group using grouping functions.
+        - SORT: sorts the row in a table by a column. Expressions are not supported.
+        - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL.
+    </processing-commands>
+
+    <grouping-functions>
+        BUCKET: Creates groups of values out of a datetime or numeric input
+        CATEGORIZE: Organize textual data into groups of similar format
+    </grouping-functions>
+
+    <aggregation-functions>
+        AVG: calculates the average of a numeric field
+        COUNT: returns the total number of input values
+        COUNT_DISTINCT: return the number of distinct values in a field
+        MAX: calculates the maximum value of a field
+        MEDIAN: calculates the median value of a numeric field
+        MEDIAN_ABSOLUTE_DEVIATION: calculates the median absolute deviation of a numeric field
+        MIN: calculates the minimum value of a field
+        PERCENTILE: calculates a specified percentile of a numeric field
+        STD_DEV: calculates the standard deviation of a numeric field
+        SUM: calculates the total sum of a numeric expression
+        TOP: collects the top values for a specified field
+        VALUES: returns all values in a group as a multivalued field
+        WEIGHTED_AVG: calculates the weighted average of a numeric expression
+    </aggregation-functions>
+
+    <conditional-functions>
+        CASE: accepts pairs of conditions and values and returns the value that belongs to the first condition that evaluates to true
+        COALESCE: returns the first non-null argument from the list of provided arguments
+        GREATEST: returns the maximum value from multiple columns
+        LEAST: returns the smallest value from multiple columns
+    </conditional-functions>
+
+    <search-functions>
+        MATCH: execute a match query on a specified field (tech preview)
+        QSTR: performs a Lucene query string query (tech preview)
+    </search-functions>
+
+    <date-time-functions>
+        DATE_DIFF: calculates the difference between two timestamps in a given unit
+        DATE_EXTRACT: extract a specific part of a date
+        DATE_FORMAT: returns a string representation of a date using the provided format
+        DATE_PARSE: convert a date string into a date
+        DATE_TRUNC: rounds down a date to the nearest specified interval
+        NOW: returns the current date and time
+    </date-time-functions>
+
+    <mathematical-functions>
+        ABS: returns the absolute value of a number
+        ACOS: returns the arccosine of a number
+        ASIN: returns the arcsine of a number
+        ATAN: returns the arctangent of a number
+        ATAN2: returns the angle from the positive x-axis to a point (x, y)
+        CBRT: calculates the cube root of a given number
+        CEIL: rounds a number up to the nearest integer
+        COS: returns the cosine of a given angle
+        COSH: returns the hyperbolic cosine of a given angle
+        E: returns Euler's number
+        EXP: returns the value of Euler's number raised to the power of a given number
+        FLOOR: rounds a number down to the nearest integer
+        HYPOT: calculate the hypotenuse of two numbers
+        LOG: calculates the logarithm of a given value to a specified base
+        LOG10: calculates the logarithm of a value to base 10
+        PI: returns the mathematical constant Pi
+        POW: calculates the value of a base raised to the power of an exponent
+        ROUND: rounds a numeric value to a specified number of decimal
+        SIGNUM: returns the sign of a given number
+        SIN: calculates the sine of a given angle
+        SINH: calculates the hyperbolic sine of a given angle
+        SQRT: calculates the square root of a given number
+        TAN: calculates the tangent of a given angle
+        TANH: calculates the hyperbolic tangent of a given angle
+        TAU: returns the mathematical constant τ (tau)
+    </mathematical-functions>
+
+    <string-functions>
+        BIT_LENGTH: calculates the bit length of a string
+        BYTE_LENGTH: calculates the byte length of a string
+        CONCAT: combines two or more strings into one
+        ENDS_WITH: checks if a given string ends with a specified suffix
+        FROM_BASE64: decodes a base64 string
+        HASH: computes the hash of a given input using a specified algorithm
+        LEFT: extracts a specified number of characters from the start of a string
+        LENGTH: calculates the character length of a given string
+        LOCATE: returns the position of a specified substring within a string
+        LTRIM: remove leading whitespaces from a string
+        REPEAT: generates a string by repeating a specified string a certain number of times
+        REPLACE: substitutes any match of a regular expression within a string with a replacement string
+        REVERSE: reverses a string
+        RIGHT: extracts a specified number of characters from the end of a string
+        RTRIM: remove trailing whitespaces from a string
+        SPACE: creates a string composed of a specific number of spaces
+        SPLIT: split a single valued string into multiple strings based on a delimiter
+        STARTS_WITH: checks if a given string begins with another specified string
+        SUBSTRING: extracts a portion of a string
+        TO_BASE64: encodes a string to a base64
+        TO_LOWER: converts a string to lowercase
+        TO_UPPER: converts a string to uppercase
+        TRIM: removes leading and trailing whitespaces from a string
+    </string-functions>
+
+    <ip-functions>
+        CIDR_MATCH: checks if an IP address falls within specified network blocks
+        IP_PREFIX: truncates an IP address to a specified prefix length
+    </ip-functions>
+
+    <type-conversion-functions>
+        TO_BOOLEAN
+        TO_CARTESIANPOINT
+        TO_CARTESIANSHAPE
+        TO_DATETIME (prefer DATE_PARSE to convert strings to datetime)
+        TO_DATEPERIOD
+        TO_DEGREES
+        TO_DOUBLE
+        TO_GEOPOINT
+        TO_GEOSHAPE
+        TO_INTEGER
+        TO_IP
+        TO_LONG
+        TO_RADIANS
+        TO_STRING
+        TO_TIMEDURATION
+        TO_UNSIGNED_LONG
+        TO_VERSION
+    </type-conversion-functions>
+
+    <multivalue-functions>
+        Multivalue function are used to manipulate and transform multi-value fields.
+
+        MV_APPEND: concatenates the values of two multi-value fields
+        MV_AVG: returns the average of all values in a multivalued field
+        MV_CONCAT: transforms a multivalued string expression into a single valued string
+        MV_COUNT: counts the total number of values in a multivalued expression
+        MV_DEDUPE: eliminates duplicate values from a multivalued field
+        MV_FIRST: returns the first value of a multivalued field
+        MV_LAST: returns the last value of a multivalued field
+        MV_MAX: returns the max value of a multivalued field
+        MV_MEDIAN: returns the median value of a multivalued field
+        MV_MEDIAN_ABSOLUTE_DEVIATION: returns the median absolute deviation of a multivalued field
+        MV_MIN: returns the min value of a multivalued field
+        MV_PERCENTILE: returns the specified percentile of a multivalued field
+        MV_SLIDE: extract a subset of a multivalued field using specified start and end index values
+        MV_SORT: sorts a multivalued field in lexicographical order.
+        MV_SUM: returns the sum of all values of a multivalued field
+        MV_ZIP: combines the values from two multivalued fields with a specified delimiter
+    </multivalue-functions>
+
+    <spatial-functions>
+        ST_CONTAINS: checks if the first specified geometry encompasses the second one
+        ST_DISJOINT: checks if two geometries or geometry columns are disjoint
+        ST_DISTANCE: calculates the distance between two points
+        ST_ENVELOPE: calculates the minimum bounding box for the provided geometry
+        ST_INTERSECTS: checks if two geometries intersect
+        ST_WITHIN: checks if the first geometry is located within the second geometry
+        ST_X: extracts the x coordinate from a given point
+        ST_XMAX: extracts the maximum value of the x coordinates from a geometry
+        ST_XMIN: extracts the minimum value of the x coordinates from a geometry
+        ST_Y: extracts the y coordinate from a given point
+        ST_YMAX: extracts the maximum value of the y coordinates from a geometry
+        ST_YMIN: extracts the minimum value of the y coordinates from a geometry
+        ST_EXTENT_AGG: calculates the spatial extent over a field that has a geometry type
+        ST_CENTROID_AGG: calculates the spatial centroid over a spatial point geometry field
+    </spatial-functions>
+
+    <operators>
+        Binary operators: ==, !=, <, <=, >, >=, +, -, *, /, %
+        Logical operators: AND, OR, NOT
+        Predicates: IS NULL, IS NOT NULL
+        Unary operators: -
+        IN: test if a field or expression is in a list of literals
+        LIKE: filter data based on string patterns using wildcards
+        RLIKE: filter data based on string patterns using regular expressions
+        Cast (`::`): provides a convenient alternative syntax to the `TO_<type>` conversion functions
+    </operators>
+
+    <timespan_literals>
+        Time spans represent intervals between two datetime values.
+        A time span requires two elements: an integer value and a temporal unit.
+        Time spans work with grouping functions such as BUCKET, scalar functions such as DATE_TRUNC and arithmetic operators such as + and -.
+        Convert strings to time spans using TO_DATEPERIOD, TO_TIMEDURATION
+
+        Supported temporal units:
+
+        | Temporal Units | Valid Abbreviations |
+        |---|---|
+        | year | y, yr, years |
+        | quarter | q, quarters |
+        | month | mo, months |
+        | week | w, weeks |
+        | day | d, days |
+        | hour | h, hours |
+        | minute | min, minutes |
+        | second | s, sec, seconds |
+        | millisecond | ms, milliseconds |
+
+        Example of using temporal units:
+
+        ```esql
+        FROM events
+        | WHERE @timestamp >= NOW() - 1 day
+        | STATS event_count = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour)
+        | SORT hour
+        ```
+    </literals>
+
+    <other_features>
+      Some functions, like `MATCH`, support named parameters for additional options:
+
+      ```esql
+      FROM library
+      | WHERE MATCH(author, "Frank Herbert", {"minimum_should_match": 2, "operator": "AND"})
+      | LIMIT 5
+      ```
+    </other_features>
+
+</documentation>
