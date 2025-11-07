@@ -80,7 +80,7 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.logDoc).toBeNull();
+    expect(result.current.log).toBeNull();
     expect(result.current.index).toBeNull();
     expect(mockFetchLogDocumentById).not.toHaveBeenCalled();
   });
@@ -91,12 +91,12 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.logDoc).toBeNull();
+    expect(result.current.log).toBeNull();
     expect(result.current.index).toBeNull();
     expect(mockFetchLogDocumentById).not.toHaveBeenCalled();
   });
 
-  it('should start with loading true and logDoc/index as null', async () => {
+  it('should start with loading true and log/index as null', async () => {
     mockFetchLogDocumentById.mockImplementation(
       () => new Promise(() => {}) // Never resolves to keep loading
     );
@@ -104,7 +104,7 @@ describe('useLog', () => {
     const { result } = renderHook(() => useLog({ id }));
 
     expect(result.current.loading).toBe(true);
-    expect(result.current.logDoc).toBeNull();
+    expect(result.current.log).toBeNull();
     expect(result.current.index).toBeNull();
     expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
       {
@@ -114,7 +114,7 @@ describe('useLog', () => {
     );
   });
 
-  it('should update logDoc and index when data is fetched successfully', async () => {
+  it('should update log and index when data is fetched successfully', async () => {
     const mockLogData = {
       _index: 'logs-*',
       fields: {
@@ -130,7 +130,7 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.logDoc).toEqual(mockLogData.fields);
+    expect(result.current.log).toEqual(mockLogData.fields);
     expect(result.current.index).toBe(mockLogData._index);
     expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
       {
@@ -148,7 +148,7 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.logDoc).toBeNull();
+    expect(result.current.log).toBeNull();
     expect(result.current.index).toBeNull();
     expect(mockFetchLogDocumentById).toHaveBeenCalledTimes(1);
   });
@@ -166,7 +166,7 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.logDoc).toBeNull();
+    expect(result.current.log).toBeNull();
     expect(result.current.index).toBeNull();
   });
 
@@ -179,7 +179,7 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.logDoc).toBeNull();
+    expect(result.current.log).toBeNull();
     expect(result.current.index).toBeNull();
     expect(mockFetchLogDocumentById).toHaveBeenCalledTimes(1);
   });
@@ -238,7 +238,7 @@ describe('useLog', () => {
     );
 
     await waitFor(() => !result.current.loading);
-    expect(result.current.logDoc?.message).toBe('log 1');
+    expect(result.current.log?.message).toBe('log 1');
     expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
       {
         id: 'log-1',
@@ -249,7 +249,7 @@ describe('useLog', () => {
     rerender({ logId: 'log-2' });
 
     await waitFor(() => !result.current.loading);
-    expect(result.current.logDoc?.message).toBe('log 2');
+    expect(result.current.log?.message).toBe('log 2');
     expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
       {
         id: 'log-2',
