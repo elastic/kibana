@@ -31,6 +31,7 @@ const nodeTypes: NodeTypes = {
   esql_query: SimpleNode as any,
   text_note: SimpleNode as any,
   kibana_link: SimpleNode as any,
+  alert: SimpleNode as any,
 };
 
 interface ScratchpadCanvasProps {
@@ -67,6 +68,7 @@ export function ScratchpadCanvas({
   const [reactFlowEdges, setReactFlowEdges, onEdgesChangeInternal] = useEdgesState(edges);
   const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null);
   const layoutKeyRef = useRef<number | undefined>(layoutKey);
+  const edgesInitializedRef = useRef(false);
 
   // Trigger fitView when shouldFitView is true
   useEffect(() => {
@@ -77,13 +79,17 @@ export function ScratchpadCanvas({
     }
   }, [shouldFitView]);
 
+  // Sync edges from external state to ReactFlow
   useEffect(() => {
-    const edgeIds = new Set(edges.map((e) => e.id));
-    const reactFlowEdgeIds = new Set(reactFlowEdges.map((e) => e.id));
+    // Create a string representation of edge IDs for comparison
+    const edgesKey = edges.map((e) => e.id).sort().join(',');
+    const reactFlowEdgesKey = reactFlowEdges.map((e) => e.id).sort().join(',');
 
-    // Only sync if edges were added or removed
-    if (edges.length !== reactFlowEdges.length || !edges.every((e) => reactFlowEdgeIds.has(e.id))) {
+    // Always sync on initial load (when edges are first loaded from localStorage)
+    // or when edges have actually changed
+    if (!edgesInitializedRef.current || edgesKey !== reactFlowEdgesKey) {
       setReactFlowEdges(edges);
+      edgesInitializedRef.current = true;
     }
   }, [edges, reactFlowEdges, setReactFlowEdges]);
 

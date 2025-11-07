@@ -85,6 +85,11 @@ export function ScratchpadToolbar({
           Add Link
         </EuiButton>
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton size="s" iconType="bell" onClick={() => handleAddNode('alert')}>
+          Add Alert
+        </EuiButton>
+      </EuiFlexItem>
       {onLayout && (
         <EuiFlexItem grow={false}>
           <EuiButton size="s" iconType="grid" onClick={onLayout}>

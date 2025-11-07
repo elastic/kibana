@@ -9,7 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 
 export interface ScratchpadNodeData {
-  type: 'esql_query' | 'text_note' | 'kibana_link';
+  type: 'esql_query' | 'text_note' | 'kibana_link' | 'alert';
   [key: string]: unknown;
 }
 

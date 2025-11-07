@@ -18,9 +18,11 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
   useEuiTheme,
   type EuiInMemoryTableProps,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ScratchpadNodeData } from '../../hooks/use_scratchpad_state';
 import { useESQLQuery } from '../../hooks/use_esql_query';
 import { useScratchpadNodeContext } from '../scratchpad_canvas/node_context';
@@ -48,6 +50,9 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
   const nodeData = node.data;
   const { euiTheme } = useEuiTheme();
   const { onUpdateNode, timeRange } = useScratchpadNodeContext();
+  const {
+    services: { share },
+  } = useKibana();
   const isSelected = nodeData.selected || false;
 
   const [viewMode, setViewMode] = useState<'table' | 'chart'>(nodeData.viewMode || 'table');
@@ -144,11 +149,42 @@ export function ESQLQueryNode({ node }: ESQLQueryNodeProps) {
     }
   };
 
+  const handleOpenInDiscover = async () => {
+    if (!nodeData.query || !share) return;
+    const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+    if (!discoverLocator) return;
+
+    const params = {
+      query: {
+        esql: nodeData.query,
+      },
+      timeRange: timeRange,
+    };
+
+    await discoverLocator.navigate(params);
+  };
+
   return (
     <div>
       <Handle type="target" position={Position.Top} />
       <EuiCard
-        title="ESQL Query"
+        title={
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>ESQL Query</EuiFlexItem>
+            {nodeData.query && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  iconType="discoverApp"
+                  onClick={handleOpenInDiscover}
+                  title="Open in Discover"
+                >
+                  Open in Discover
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        }
         style={{
           minWidth: '500px',
           maxWidth: '800px',

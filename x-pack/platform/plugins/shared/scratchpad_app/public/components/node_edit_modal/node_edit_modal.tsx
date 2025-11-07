@@ -48,6 +48,7 @@ export function NodeEditModal({ node, onClose, onSave, timeRange }: NodeEditModa
   const [content, setContent] = useState('');
   const [query, setQuery] = useState('');
   const [url, setUrl] = useState('');
+  const [alertId, setAlertId] = useState('');
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
   const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line');
 
@@ -59,6 +60,7 @@ export function NodeEditModal({ node, onClose, onSave, timeRange }: NodeEditModa
       setContent(String(node.data.content || ''));
       setQuery(String(node.data.query || ''));
       setUrl(String(node.data.url || ''));
+      setAlertId(String(node.data.alertId || ''));
       setViewMode((node.data as any).viewMode || 'table');
       setChartType((node.data as any).chartType || 'line');
     }
@@ -149,6 +151,7 @@ export function NodeEditModal({ node, onClose, onSave, timeRange }: NodeEditModa
           results: displayResults, // Use the latest results (from hook or saved)
         }),
         ...(node.data.type === 'kibana_link' && { url, title }),
+        ...(node.data.type === 'alert' && { alertId }),
       },
     };
     onSave(node.id, updates);
@@ -317,6 +320,18 @@ export function NodeEditModal({ node, onClose, onSave, timeRange }: NodeEditModa
               </EuiFormRow>
               <EuiFormRow label="URL">
                 <EuiFieldText value={url} onChange={(e) => setUrl(e.target.value)} fullWidth />
+              </EuiFormRow>
+            </>
+          )}
+          {node.data.type === 'alert' && (
+            <>
+              <EuiFormRow label="Alert ID" helpText="Enter the alert ID to fetch alert details">
+                <EuiFieldText
+                  value={alertId}
+                  onChange={(e) => setAlertId(e.target.value)}
+                  placeholder="Alert ID"
+                  fullWidth
+                />
               </EuiFormRow>
             </>
           )}

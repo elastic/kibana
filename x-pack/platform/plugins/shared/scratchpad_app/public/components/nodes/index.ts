@@ -8,3 +8,4 @@
 export * from './simple_node';
 export * from './esql_query_node';
 export * from './kibana_link_node';
+export * from './alert_node';

@@ -174,6 +174,7 @@ export function ScratchpadApplication({
           ...(type === 'text_note' && { content: 'New note', title: 'Note' }),
           ...(type === 'esql_query' && { query: 'FROM index | LIMIT 10' }),
           ...(type === 'kibana_link' && { url: '', title: 'Link', appId: '' }),
+          ...(type === 'alert' && { alertId: '' }),
         },
       };
 

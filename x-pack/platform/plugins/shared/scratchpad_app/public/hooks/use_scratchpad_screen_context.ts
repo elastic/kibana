@@ -46,11 +46,12 @@ export function useScratchpadScreenContext({
         value: {
           nodeCount: nodes.length,
           edgeCount: edges.length,
-          nodeTypes: {
-            esql_query: nodes.filter((n) => n.type === 'esql_query').length,
-            text_note: nodes.filter((n) => n.type === 'text_note').length,
-            kibana_link: nodes.filter((n) => n.type === 'kibana_link').length,
-          },
+                  nodeTypes: {
+                    esql_query: nodes.filter((n) => n.type === 'esql_query').length,
+                    text_note: nodes.filter((n) => n.type === 'text_note').length,
+                    kibana_link: nodes.filter((n) => n.type === 'kibana_link').length,
+                    alert: nodes.filter((n) => n.type === 'alert').length,
+                  },
           // Only include node IDs and types - full details available via read_node action
           nodeIds: nodes.map((n) => ({ id: n.id, type: n.type })),
           // Edge summary
@@ -60,7 +61,7 @@ export function useScratchpadScreenContext({
     ];
 
     return setScreenContext({
-      screenDescription: `The user is working on a scratchpad with ${nodes.length} node(s) and ${edges.length} connection(s). The scratchpad is a mindmap-style graph where nodes can be ESQL queries, text notes, or links to Kibana locations. Users can add nodes, connect them with edges, and view ESQL query results. Note: To execute ESQL queries, use the built-in "query" function - ESQL query nodes display queries but execution is handled separately.`,
+      screenDescription: `The user is working on a scratchpad with ${nodes.length} node(s) and ${edges.length} connection(s). The scratchpad is a mindmap-style graph where nodes can be ESQL queries, text notes, links to Kibana locations, or alerts. Users can add nodes, connect them with edges, and view ESQL query results. Note: To execute ESQL queries, use the built-in "query" function - ESQL query nodes display queries but execution is handled separately.`,
       data: contextData,
       actions: [
         // Read Node Details (bi-directional - returns full node data)
@@ -276,6 +277,55 @@ export function useScratchpadScreenContext({
               });
               return {
                 content: `Successfully added Kibana link node "${nodeId}" to the scratchpad.`,
+              };
+            } catch (error) {
+              return {
+                content: {
+                  error: error instanceof Error ? error.message : 'Unknown error occurred',
+                },
+              };
+            }
+          }
+        ),
+
+        // Add Alert Node
+        createScreenContextAction(
+          {
+            name: 'add_alert_node',
+            description:
+              'Add a new alert node to the scratchpad. The node will fetch and display alert information from the alert ID.',
+            parameters: {
+              type: 'object',
+              properties: {
+                alertId: {
+                  type: 'string',
+                  description: 'The alert ID to fetch and display',
+                },
+                position: {
+                  type: 'object',
+                  properties: {
+                    x: { type: 'number' },
+                    y: { type: 'number' },
+                  },
+                  description: 'Optional position for the node',
+                },
+              },
+              required: ['alertId'],
+            } as const,
+          },
+          async ({ args }) => {
+            try {
+              const nodeId = addNode({
+                id: `alert-${Date.now()}`,
+                type: 'alert',
+                data: {
+                  type: 'alert',
+                  alertId: args.alertId,
+                },
+                position: args.position || { x: 100, y: 100 },
+              });
+              return {
+                content: `Successfully added alert node "${nodeId}" to the scratchpad. The alert details will be fetched automatically.`,
               };
             } catch (error) {
               return {

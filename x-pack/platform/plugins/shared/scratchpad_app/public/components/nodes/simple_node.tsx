@@ -12,6 +12,7 @@ import { EuiCard, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ScratchpadNodeData } from '../../hooks/use_scratchpad_state';
 import { ESQLQueryNode } from './esql_query_node';
 import { KibanaLinkNode } from './kibana_link_node';
+import { AlertNode } from './alert_node';
 import { useScratchpadNodeContext } from '../scratchpad_canvas/node_context';
 
 export function SimpleNode(node: Node<ScratchpadNodeData>) {
@@ -28,6 +29,12 @@ export function SimpleNode(node: Node<ScratchpadNodeData>) {
   // Use dedicated Kibana link node component
   if (nodeData.type === 'kibana_link') {
     return <KibanaLinkNode node={node as Node<any>} />;
+  }
+
+  console.log(nodeData);
+  // Use dedicated alert node component
+  if (nodeData.type === 'alert') {
+    return <AlertNode node={node as Node<any>} />;
   }
 
   return (
