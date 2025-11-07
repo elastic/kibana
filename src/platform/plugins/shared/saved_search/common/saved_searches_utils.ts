@@ -31,6 +31,7 @@ export const fromSavedSearchAttributes = <
     title,
     sort: attributes.sort,
     columns: attributes.columns,
+    fieldSpecs: attributes.fieldSpecs ?? [],
     description,
     tags,
     grid: attributes.grid,

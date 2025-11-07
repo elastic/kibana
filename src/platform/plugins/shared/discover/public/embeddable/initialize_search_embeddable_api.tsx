@@ -13,7 +13,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   PublishesWritableUnifiedSearch,
@@ -38,11 +38,12 @@ import type {
 
 const initializeSearchSource = async (
   dataService: DiscoverServices['data'],
-  serializedSearchSource?: SerializedSearchSourceFields
+  serializedSearchSource?: SerializedSearchSourceFields,
+  fieldSpecs?: FieldSpec[]
 ) => {
   const [searchSource, parentSearchSource] = await Promise.all([
-    dataService.search.searchSource.create(serializedSearchSource),
-    dataService.search.searchSource.create(),
+    dataService.search.searchSource.create(serializedSearchSource, fieldSpecs),
+    dataService.search.searchSource.create(undefined, fieldSpecs),
   ]);
   searchSource.setParent(parentSearchSource);
   const dataView = searchSource.getField('index');
@@ -86,7 +87,8 @@ export const initializeSearchEmbeddableApi = async (
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
     discoverServices.data,
-    initialState.serializedSearchSource
+    initialState.serializedSearchSource,
+    initialState.fieldSpecs
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);

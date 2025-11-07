@@ -45,6 +45,7 @@ export type SearchEmbeddableState = Pick<
   | 'rowsPerPage'
   | 'headerRowHeight'
   | 'columns'
+  | 'fieldSpecs'
   | 'sort'
   | 'sampleSize'
   | 'viewMode'

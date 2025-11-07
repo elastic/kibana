@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewsContract, DataViewLazy } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract, DataViewLazy, FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { migrateLegacyQuery } from './migrate_legacy_query';
@@ -40,7 +40,8 @@ export const createSearchSource = (
   let dataViewLazy: DataViewLazy | undefined;
   const createFields = async (
     searchSourceFields: SerializedSearchSourceFields = {},
-    useDataViewLazy = false
+    useDataViewLazy = false,
+    fieldSpecs?: FieldSpec[]
   ) => {
     const { index, parent, ...restOfFields } = searchSourceFields;
     const fields: SearchSourceFields = {
@@ -52,7 +53,7 @@ export const createSearchSource = (
       if (!useDataViewLazy) {
         fields.index =
           typeof searchSourceFields.index === 'string'
-            ? await indexPatterns.get(searchSourceFields.index)
+            ? await indexPatterns.get(searchSourceFields.index, undefined, undefined, fieldSpecs)
             : await indexPatterns.create(searchSourceFields.index);
       } else {
         dataViewLazy =
@@ -86,9 +87,10 @@ export const createSearchSource = (
 
   const createSearchSourceFn = async (
     searchSourceFields: SerializedSearchSourceFields = {},
-    useDataViewLazy?: boolean
+    useDataViewLazy?: boolean,
+    fieldSpecs?: FieldSpec[]
   ) => {
-    const fields = await createFields(searchSourceFields, !!useDataViewLazy);
+    const fields = await createFields(searchSourceFields, !!useDataViewLazy, fieldSpecs);
     const searchSource = new SearchSource(fields, searchSourceDependencies);
 
     // todo: move to migration script .. create issue

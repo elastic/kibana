@@ -49,6 +49,7 @@ export interface SavedSearchAttributes {
   title: string;
   sort: SortOrder[];
   columns: string[];
+  fieldSpecs: FieldSpec[];
   description: string;
   grid: DiscoverGridSettings;
   hideChart: boolean;

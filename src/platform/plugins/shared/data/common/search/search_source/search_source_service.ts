@@ -10,7 +10,7 @@
 import { mapValues } from 'lodash';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SearchSourceDependencies, SerializedSearchSourceFields } from '.';
 import { createSearchSource, extractReferences, injectReferences, SearchSource } from '.';
@@ -54,7 +54,10 @@ export class SearchSourceService {
       /**
        * creates searchsource based on serialized search source fields
        */
-      create: createSearchSource(indexPatterns, dependencies),
+      create: (
+        searchSourceFields: SerializedSearchSourceFields = {},
+        fieldSpecs: FieldSpec[] = []
+      ) => createSearchSource(indexPatterns, dependencies)(searchSourceFields, false, fieldSpecs),
       createLazy: (searchSourceFields: SerializedSearchSourceFields = {}) => {
         const fn = createSearchSource(indexPatterns, dependencies);
         return fn(searchSourceFields, true);

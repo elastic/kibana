@@ -13,7 +13,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { ISearchOptions } from '@kbn/search-types';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { SearchField } from '@kbn/es-types';
 import type { AggConfigSerialized, IAggConfigs } from '../../../public';
 import type { SearchSource } from './search_source';
@@ -34,7 +34,10 @@ export interface ISearchStartSearchSource
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields
    */
-  create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
+  create: (
+    fields?: SerializedSearchSourceFields,
+    fieldSpecs?: FieldSpec[]
+  ) => Promise<ISearchSource>;
 
   createLazy: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
   /**

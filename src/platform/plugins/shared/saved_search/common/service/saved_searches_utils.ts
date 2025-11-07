@@ -39,6 +39,7 @@ export const toSavedSearchAttributes = (
     title: savedSearch.title ?? '',
     sort: savedSearch.sort ?? [],
     columns: savedSearch.columns ?? [],
+    fieldSpecs: savedSearch.fieldSpecs ?? [],
     description: savedSearch.description ?? '',
     grid: savedSearch.grid ?? {},
     hideChart: savedSearch.hideChart ?? false,

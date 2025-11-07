@@ -59,6 +59,7 @@ export const deserializeState = async ({
       // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
       ...panelState,
       ...savedObjectOverride,
+      fieldSpecs: so.fieldSpecs,
 
       // back up the original saved object attributes for comparison
       rawSavedObjectAttributes,
