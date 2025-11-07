@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - apm
+    - console
     - discover_enhanced
     - maps
     - observability_onboarding
