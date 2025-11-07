@@ -6,78 +6,17 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  ExecutionStatus as WorkflowExecutionStatus,
-  type WorkflowStepExecutionDto,
-} from '@kbn/workflows/types/v1';
+import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types/v1';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
-import type { JsonValue } from '@kbn/utility-types';
+import { getWorkflowOutput } from './get_workflow_output';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
 const WORKFLOW_MAX_WAIT = 60_000;
 const WORKFLOW_INITIAL_WAIT = 1000;
 const WORKFLOW_CHECK_INTERVAL = 2_500;
-
-/**
- * Recursively extracts the output from a workflow execution's step executions.
- * At top-level (scopeDepth=0), finds the last step. At nested levels (scopeDepth>0),
- * considers all steps at that level. If steps have children, recurses into them.
- * Otherwise, returns their output(s).
- */
-export const getWorkflowOutput = (
-  stepExecutions: WorkflowStepExecutionDto[],
-  scopeDepth: number = 0
-): JsonValue => {
-  if (stepExecutions.length === 0) {
-    return null;
-  }
-
-  // Filter for steps at the current scope depth
-  const stepsAtThisLevel = stepExecutions.filter((step) => step.scopeStack.length === scopeDepth);
-
-  if (stepsAtThisLevel.length === 0) {
-    return null;
-  }
-
-  // At top-level (scopeDepth = 0), only consider the last step
-  // At nested levels (scopeDepth > 0), consider all steps
-  const stepsToProcess =
-    scopeDepth === 0 ? [stepsAtThisLevel[stepsAtThisLevel.length - 1]] : stepsAtThisLevel;
-
-  // Find all children of the steps we're processing
-  const children = stepExecutions.filter((step) => {
-    if (step.scopeStack.length !== scopeDepth + 1) return false;
-    const lastFrame = step.scopeStack[step.scopeStack.length - 1];
-    return stepsToProcess.some((parentStep) => lastFrame.stepId === parentStep.stepId);
-  });
-
-  // If there are children, recurse into them
-  // Pass only descendants (steps that have any of stepsToProcess in their scopeStack)
-  if (children.length > 0) {
-    const descendants = stepExecutions.filter((step) =>
-      step.scopeStack.some((frame) =>
-        stepsToProcess.some((parentStep) => frame.stepId === parentStep.stepId)
-      )
-    );
-    return getWorkflowOutput(descendants, scopeDepth + 1);
-  }
-
-  // Else, return the output(s)
-  // At scopeDepth > 0, always return as array to aggregate sibling iterations
-  // At scopeDepth = 0 with a single step, return the output directly
-  if (scopeDepth === 0 && stepsToProcess.length === 1) {
-    return stepsToProcess[0].output ?? null;
-  }
-
-  const outputs = stepsToProcess
-    .map((step) => step.output)
-    .filter((output): output is JsonValue => output !== undefined);
-
-  return outputs.length > 0 ? outputs : null;
-};
 
 export const executeWorkflow = async ({
   workflowId,
