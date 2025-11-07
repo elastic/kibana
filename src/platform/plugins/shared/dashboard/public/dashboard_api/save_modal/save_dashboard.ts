@@ -18,6 +18,7 @@ export const saveDashboard = async ({
   saveOptions,
   dashboardState,
   references,
+  accessMode,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   /**
    * Save the saved object using the content management
@@ -27,7 +28,7 @@ export const saveDashboard = async ({
   try {
     const result = idToSaveTo
       ? await dashboardClient.update(idToSaveTo, dashboardState, references)
-      : await dashboardClient.create(dashboardState, references);
+      : await dashboardClient.create(dashboardState, references, accessMode);
 
     const newId = result.item.id;
 

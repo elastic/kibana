@@ -11,6 +11,7 @@ import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
 import type {
   DashboardAPIGetOut,
@@ -35,13 +36,20 @@ const cache = new LRUCache<string, DashboardAPIGetOut>({
 });
 
 export const dashboardClient = {
-  create: async (dashboardState: DashboardState, references: Reference[]) => {
+  create: async (
+    dashboardState: DashboardState,
+    references: Reference[],
+    accessMode?: SavedObjectAccessControl['accessMode']
+  ) => {
     // TODO replace with call to dashboard REST create endpoint
     return contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
       contentTypeId: DASHBOARD_CONTENT_ID,
       data: dashboardState,
       options: {
         references,
+        accessControl: {
+          accessMode,
+        },
       },
     });
   },
