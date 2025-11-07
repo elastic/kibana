@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 import { setupAgents } from './setup/setup_agents';
 
@@ -13,8 +13,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { onechat } = getPageObjects(['onechat']);
   const browser = getService('browser');
 
-  describe('Edit agent', async function () {
-    const agents = setupAgents({ getPageObjects, getService });
+  describe('Edit agent', function () {
+    const { agents, agentsHooks } = setupAgents({ getPageObjects, getService });
+    before(async function () {
+      await agentsHooks.before();
+    });
+    after(async function () {
+      await agentsHooks.after();
+    });
     let agent = agents[0];
 
     it('should navigate to agent edit form', async function () {

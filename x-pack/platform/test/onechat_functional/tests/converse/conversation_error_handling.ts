@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../../../onechat_api_integration/utils/proxy_scenario';

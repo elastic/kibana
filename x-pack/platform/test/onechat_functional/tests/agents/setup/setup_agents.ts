@@ -21,21 +21,24 @@ export function setupAgents({
 }) {
   const { onechat } = getPageObjects(['onechat']);
   const es = getService('es');
-  before(async function () {
-    for (const agent of agents) {
-      await onechat.createAgentViaUI(agent);
-    }
-  });
 
-  after(async function () {
-    await es.deleteByQuery({
-      index: chatSystemIndex('agents'),
-      query: { match_all: {} },
-      wait_for_completion: true,
-      refresh: true,
-      conflicts: 'proceed',
-    });
-  });
-
-  return agents;
+  return {
+    agents,
+    agentsHooks: {
+      async before() {
+        for (const agent of agents) {
+          await onechat.createAgentViaUI(agent);
+        }
+      },
+      async after() {
+        await es.deleteByQuery({
+          index: chatSystemIndex('agents'),
+          query: { match_all: {} },
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      },
+    },
+  };
 }

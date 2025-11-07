@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
 export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {

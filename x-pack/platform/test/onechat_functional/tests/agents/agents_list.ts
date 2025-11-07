@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 import { setupAgents } from './setup/setup_agents';
 
@@ -15,7 +15,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('Agents List', function () {
-    const agents = setupAgents({ getPageObjects, getService });
+    const { agents, agentsHooks } = setupAgents({ getPageObjects, getService });
+    before(async function () {
+      await agentsHooks.before();
+    });
+    after(async function () {
+      await agentsHooks.after();
+    });
 
     it('renders', async function () {
       await onechat.navigateToApp('agents');
