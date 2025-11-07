@@ -15,7 +15,7 @@ import { create } from './create';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
-    path: `${PUBLIC_API_PATH}/{id?}`,
+    path: PUBLIC_API_PATH,
     summary: 'Create a dashboard',
     ...commonRouteConfig,
   });
