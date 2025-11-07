@@ -36,35 +36,12 @@ import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assis
 import type { ToolingLog } from '@kbn/tooling-log';
 import { isAxiosError } from 'axios';
 import { inspect } from 'util';
-import type {
-  Message,
-  ObservabilityAIAssistantScreenContext,
-} from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common/types';
-import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { HttpHandler } from '@kbn/core/public';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-
-type InnerMessage = Message['message'];
-type StringOrMessageList = string | InnerMessage[];
-
-interface Options {
-  screenContexts?: ObservabilityAIAssistantScreenContext[];
-}
-
-interface CompleteFunctionParams {
-  messages: StringOrMessageList;
-  conversationId?: string;
-  options?: Options;
-  scope?: AssistantScope;
-}
-
-type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
-  conversationId?: string;
-  messages: InnerMessage[];
-  errors: ChatCompletionErrorEvent[];
-}>;
+import type { ChatClient, ConverseParams, ConverseResponse } from './types';
 
 function serializeAndHandleRetryableErrors<T extends StreamingChatResponseEvent>(
   log: ToolingLog
@@ -150,23 +127,19 @@ function normalizeMessages(message: string | Array<Message['message']>): Array<M
   return message;
 }
 
-export class ObservabilityAIAssistantEvaluationChatClient {
+export class ObservabilityAIAssistantEvaluationChatClient implements ChatClient {
   constructor(
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
   ) {}
 
-  complete: CompleteFunction = async ({
-    messages: messagesArg,
-    conversationId,
-    options = {},
-    scope,
-  }) => {
-    this.log.info('Calling complete');
+  async converse(params: ConverseParams): Promise<ConverseResponse> {
+    const { messages: messagesArg, conversationId, options = {}, scope } = params;
+    this.log.info('Calling converse');
 
     const messages = [
-      ...normalizeMessages(messagesArg!).map((msg) => ({
+      ...normalizeMessages(messagesArg).map((msg) => ({
         message: msg,
         '@timestamp': new Date().toISOString(),
       })),
@@ -178,7 +151,7 @@ export class ObservabilityAIAssistantEvaluationChatClient {
         this.fetch('/internal/observability_ai_assistant/chat/complete', {
           method: 'POST',
           body: JSON.stringify({
-            screenContexts: options.screenContexts || [],
+            screenContexts: options?.screenContexts || [],
             conversationId,
             messages,
             connectorId: this.connectorId,
@@ -254,17 +227,21 @@ export class ObservabilityAIAssistantEvaluationChatClient {
       );
 
     return {
-      errors: events.filter(
-        (event): event is ChatCompletionErrorEvent =>
-          event.type === StreamingChatResponseEventType.ChatCompletionError
-      ),
-      messages: messagesWithAdded,
       conversationId:
         conversationId ||
         events.find(
           (event): event is ConversationCreateEvent =>
             event.type === StreamingChatResponseEventType.ConversationCreate
         )?.conversation.id,
+      messages: messagesWithAdded.map((msg) => ({
+        content: msg.content ?? '',
+        role: msg.role,
+        function_call: msg.function_call,
+      })),
+      errors: events.filter(
+        (event): event is ChatCompletionErrorEvent =>
+          event.type === StreamingChatResponseEventType.ChatCompletionError
+      ),
     };
-  };
+  }
 }
