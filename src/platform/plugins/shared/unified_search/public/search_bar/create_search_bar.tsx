@@ -283,6 +283,7 @@ export function createSearchBar({
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
             esqlVariablesConfig={props.esqlVariablesConfig}
+            onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             useBackgroundSearchButton={props.useBackgroundSearchButton}
             showProjectPicker={props.showProjectPicker}
             projectRouting={props.projectRouting}
