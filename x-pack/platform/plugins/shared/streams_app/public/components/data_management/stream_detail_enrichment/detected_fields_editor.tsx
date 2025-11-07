@@ -78,7 +78,7 @@ export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEdito
         </EuiText>
       )}
       <SchemaEditor
-        defaultColumns={['name', 'type', 'format', 'status', 'source', 'result']}
+        defaultColumns={['name', 'type', 'format', 'status', 'result']}
         fields={schemaEditorFields}
         stream={definition.stream}
         onFieldUpdate={(field) => {

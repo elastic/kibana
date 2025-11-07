@@ -15,12 +15,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { Streams } from '@kbn/streams-schema';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ManagementBottomBar } from '../management_bottom_bar';
@@ -92,38 +92,16 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
   const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
-  const inheritedFields = useStreamEnrichmentSelector((state) => {
-    const def = state.context.definition;
-    if (Streams.WiredStream.GetResponse.is(def)) {
-      return def.inherited_fields;
-    }
-    return undefined;
-  });
 
   // Calculate schemaEditorFields with result property
   const schemaEditorFields = React.useMemo(() => {
     // Create lookup maps for efficient comparison
     const definitionFieldsMap = new Map(definitionFields.map((field) => [field.name, field]));
-    const inheritedFieldsMap = new Map(inheritedFields ? Object.entries(inheritedFields) : []);
 
     // Convert definitionFields to SchemaEditorField[] for uncommitted comparison
     const storedFields: SchemaEditorField[] = [];
     definitionFieldsMap.forEach((field, name) => {
-      storedFields.push({
-        ...field,
-        name,
-        status: 'mapped',
-      } as SchemaEditorField);
-    });
-    inheritedFieldsMap.forEach((field, name) => {
-      if (!definitionFieldsMap.has(name) && field.type !== 'system') {
-        storedFields.push({
-          ...field,
-          name,
-          status: 'inherited',
-          parent: field.from,
-        } as SchemaEditorField);
-      }
+      storedFields.push(field);
     });
 
     const result: SchemaEditorField[] = [];
@@ -134,7 +112,6 @@ export function StreamDetailEnrichmentContentImpl() {
     // Process only detected fields
     detectedFields.forEach((detectedField) => {
       const definitionField = definitionFieldsMap.get(detectedField.name);
-      const inheritedField = inheritedFieldsMap.get(detectedField.name);
       const isInSamples = fieldsInSamplesSet.has(detectedField.name);
       let fieldResult: SchemaEditorField['result'];
 
@@ -149,17 +126,10 @@ export function StreamDetailEnrichmentContentImpl() {
       let editorField: SchemaEditorField;
 
       // If the detected field matches an inherited field, preserve the inherited properties
-      if (inheritedField && !definitionField && inheritedField.type !== 'system') {
-        editorField = {
-          ...detectedField,
-          status: 'inherited',
-          parent: inheritedField.from,
-          type: detectedField.type ?? inheritedField.type,
-          result: fieldResult,
-        } as SchemaEditorField;
-      } else if (definitionField) {
+      if (definitionField) {
         // Merge with definition field to preserve any additional properties
         editorField = {
+          ...definitionField,
           ...detectedField,
           result: fieldResult,
         };
@@ -177,7 +147,7 @@ export function StreamDetailEnrichmentContentImpl() {
     });
 
     return result;
-  }, [detectedFields, fieldsInSamples, definitionFields, inheritedFields]);
+  }, [detectedFields, fieldsInSamples, definitionFields]);
 
   const hasDefinitionError = useSimulatorSelector((snapshot) =>
     Boolean(snapshot.context.simulation?.definition_error)
