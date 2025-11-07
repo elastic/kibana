@@ -9,33 +9,69 @@
 import type { LanguageDocumentationSections } from '../types';
 import { elementToString } from './element_to_string';
 
+/**
+ * Filters the documentation groups based on the search criteria.
+ * Returns the groups and items ranked as follows:
+ * 1- Groups with items that match the search text in their label
+ * 2- Groups with items that match the search text in their description
+ * 3- Groups that match the search text in their label
+ */
 export const getFilteredGroups = (
   searchText: string,
   searchInDescription?: boolean,
   sections?: LanguageDocumentationSections,
-  numOfGroupsToOmit?: number
+  numOfGroupsToOmit = 0
 ) => {
   const normalizedSearchText = searchText.trim().toLocaleLowerCase();
-  return sections?.groups
-    .slice(numOfGroupsToOmit ?? 0)
-    .map((group) => {
-      const options = group.items.filter((helpItem) => {
-        return (
-          !normalizedSearchText ||
-          helpItem.label.toLocaleLowerCase().includes(normalizedSearchText) ||
-          // Converting the JSX element to a string first
-          (searchInDescription &&
+
+  // If no search text, return all groups with all items
+  if (!normalizedSearchText) {
+    return sections?.groups.slice(numOfGroupsToOmit).map((group) => ({
+      ...group,
+      options: group.items,
+      hasLabelMatches: false,
+    }));
+  }
+
+  return (
+    sections?.groups
+      .slice(numOfGroupsToOmit)
+      .map((group) => {
+        // Separate items that match on label vs description
+        const labelMatches: typeof group.items = [];
+        const descriptionMatches: typeof group.items = [];
+
+        group.items.forEach((helpItem) => {
+          const labelMatch = helpItem.label.toLocaleLowerCase().includes(normalizedSearchText);
+          const descriptionMatch =
+            searchInDescription &&
             elementToString(helpItem.description)
               ?.toLocaleLowerCase()
-              .includes(normalizedSearchText))
-        );
-      });
-      return { ...group, options };
-    })
-    .filter((group) => {
-      if (group.options.length > 0 || !normalizedSearchText) {
-        return true;
-      }
-      return group.label.toLocaleLowerCase().includes(normalizedSearchText);
-    });
+              .includes(normalizedSearchText);
+
+          if (labelMatch) {
+            labelMatches.push(helpItem);
+          } else if (descriptionMatch) {
+            descriptionMatches.push(helpItem);
+          }
+        });
+
+        // Show items with label matches first
+        const options = [...labelMatches, ...descriptionMatches];
+        return { ...group, options, hasLabelMatches: labelMatches.length > 0 };
+      })
+      .filter((group) => {
+        if (group.options.length > 0) {
+          return true;
+        }
+        return group.label.toLocaleLowerCase().includes(normalizedSearchText);
+      })
+      // Show groups with items label matching first
+      .sort((a, b) => (b.hasLabelMatches ? 1 : 0) - (a.hasLabelMatches ? 1 : 0))
+      // Clean hasLabelMatches field
+      .map((group) => {
+        const { hasLabelMatches, ...rest } = group;
+        return rest;
+      })
+  );
 };

@@ -18,7 +18,7 @@ export const functions = {
   description: i18n.translate(
     'languageDocumentation.documentationESQL.functionsDocumentationESQLDescription',
     {
-      defaultMessage: `Functions are supported by ROW, EVAL and WHERE.`,
+      defaultMessage: `ES|QL provides a comprehensive set of functions for working with data.`,
     }
   ),
   // items are managed by scripts/generate_esql_docs.ts

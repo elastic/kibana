@@ -9,12 +9,18 @@
 import type { LicenseType } from '@kbn/licensing-types';
 
 export interface LanguageDocumentationSections {
-  groups: Array<{
-    label: string;
-    description?: string;
-    items: Array<{ label: string; description?: JSX.Element }>;
-  }>;
+  groups: DocumentationGroup[];
   initialSection: JSX.Element;
+}
+export interface DocumentationGroup {
+  label: string;
+  description?: string;
+  items: Array<DocumentationGroupItem>;
+}
+
+export interface DocumentationGroupItem {
+  label: string;
+  description?: JSX.Element;
 }
 
 export interface Signature {
