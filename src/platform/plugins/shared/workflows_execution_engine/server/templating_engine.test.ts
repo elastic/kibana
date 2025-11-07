@@ -8,6 +8,7 @@
  */
 
 import { WorkflowTemplatingEngine } from './templating_engine';
+import { Parser } from 'expr-eval';
 
 describe('WorkflowTemplatingEngine', () => {
   let templatingEngine: WorkflowTemplatingEngine;
@@ -510,5 +511,26 @@ describe('WorkflowTemplatingEngine', () => {
       });
       expect(Array.isArray(rendered.items)).toBe(true);
     });
+  });
+
+  it('foo', () => {
+    const context = {
+      inputs: {
+        isActive: false,
+        tags: ['admin', 'user'],
+        count: 5,
+      },
+      user: {
+        name: 'Alice',
+      },
+    };
+    const parser = new Parser();
+    // const parsed = parser.parse('inputs.isActive and user.name == "Alice"');
+    const parsed = parser.parse('user.name');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const evaluated = parsed.evaluate(context as any);
+
+    expect(evaluated).toBe(true);
   });
 });
