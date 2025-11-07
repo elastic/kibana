@@ -167,8 +167,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
               if (t.isIdentifier(decl.id)) {
                 // Simple assignment: const foo = require('./foo')
-                const varName = decl.id.name;
-                properties.set(varName, {
+                const localName = decl.id.name;
+                properties.set(localName, {
                   moduleRequirePath: requirePath,
                   propertyKey: null,
                   isConst,
@@ -196,10 +196,10 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                 if (canTransform) {
                   // All destructured properties share the same declaration
                   for (const prop of decl.id.properties) {
-                    const varName = prop.value.name;
+                    const localName = prop.value.name;
                     const propKey = prop.key.name;
 
-                    properties.set(varName, {
+                    properties.set(localName, {
                       moduleRequirePath: requirePath,
                       propertyKey: propKey,
                       isConst,
@@ -260,7 +260,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
             // Handle different import types
             for (const specifier of path.node.specifiers) {
-              const varName = specifier.local.name;
+              const localName = specifier.local.name;
               let propertyKey = null;
               let needsInterop = false;
 
@@ -276,7 +276,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                 propertyKey = specifier.imported.name;
               }
 
-              properties.set(varName, {
+              properties.set(localName, {
                 moduleRequirePath: importPath,
                 propertyKey,
                 isConst,
@@ -301,8 +301,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         );
 
         // Exclude from transformation (will remain as regular imports/requires)
-        for (const varName of importsUsedInModuleLevelCode) {
-          properties.delete(varName);
+        for (const localName of importsUsedInModuleLevelCode) {
+          properties.delete(localName);
         }
 
         // Detect and exclude JSX usage
@@ -310,15 +310,15 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         const importsUsedInJsx = detectJsxUsage(programPath, properties, t);
 
         // Exclude JSX components from transformation
-        for (const varName of importsUsedInJsx) {
-          properties.delete(varName);
+        for (const localName of importsUsedInJsx) {
+          properties.delete(localName);
         }
 
         // Exclude modules from the exclusion list
         // Some modules must always be available (e.g., React for JSX, Jest for test structure)
-        for (const [varName, propInfo] of properties) {
+        for (const [localName, propInfo] of properties) {
           if (isExcludedModule(propInfo.moduleRequirePath)) {
-            properties.delete(varName);
+            properties.delete(localName);
           }
         }
 
@@ -327,8 +327,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         const importsUsedInJestMocks = detectJestMockUsage(programPath, properties, t);
 
         // Exclude from transformation
-        for (const varName of importsUsedInJestMocks) {
-          properties.delete(varName);
+        for (const localName of importsUsedInJestMocks) {
+          properties.delete(localName);
         }
 
         // Detect and exclude constructor usage (new Foo(), new ns.Foo()) in test files only.
@@ -337,8 +337,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // while keeping non-test files eligible for lazy loading.
         if (isTestFile) {
           const importsUsedAsConstructors = detectConstructorUsage(programPath, properties, t);
-          for (const varName of importsUsedAsConstructors) {
-            properties.delete(varName);
+          for (const localName of importsUsedAsConstructors) {
+            properties.delete(localName);
           }
         }
 
@@ -346,15 +346,15 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // Keep these eager even in non-test files, as constructor flows generally expect
         // import-time semantics for dependencies used during instantiation.
         const importsUsedInCtorInit = detectConstructorInitNewUsage(programPath, properties, t);
-        for (const varName of importsUsedInCtorInit) {
-          properties.delete(varName);
+        for (const localName of importsUsedInCtorInit) {
+          properties.delete(localName);
         }
 
         // Detect imports used in class extends clauses
         // Classes need their parent class available at definition time, not instantiation time.
         const importsUsedInExtends = detectClassExtendsUsage(programPath, properties, t);
-        for (const varName of importsUsedInExtends) {
-          properties.delete(varName);
+        for (const localName of importsUsedInExtends) {
+          properties.delete(localName);
         }
 
         // Remove orphaned modules (no properties left)
@@ -457,8 +457,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             }
 
             // Replace: foo → _imports.foo
-            const varName = path.node.name;
-            path.replaceWith(t.memberExpression(importsVar, t.identifier(varName)));
+            const localName = path.node.name;
+            path.replaceWith(t.memberExpression(importsVar, t.identifier(localName)));
           },
         });
 
@@ -496,7 +496,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
         const importProperties = [];
 
-        for (const [varName, propInfo] of properties) {
+        for (const [localName, propInfo] of properties) {
           const moduleInfo = modules.get(propInfo.moduleRequirePath);
           const cacheId = moduleInfo.cacheId;
           const cacheInitialized = t.memberExpression(cacheId, t.identifier('initialized'));
@@ -542,7 +542,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           importProperties.push(
             t.objectMethod(
               'get',
-              t.identifier(varName),
+              t.identifier(localName),
               [],
               t.blockStatement([createInitBlock(), t.returnStatement(returnExpression)])
             )
@@ -553,7 +553,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             importProperties.push(
               t.objectMethod(
                 'set',
-                t.identifier(varName),
+                t.identifier(localName),
                 [t.identifier('newValue')],
                 t.blockStatement([
                   createInitBlock(),
