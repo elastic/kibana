@@ -379,7 +379,7 @@ Please note that the plugin name is the name of the plugin as defined in the `pa
 
 ```bash
 # Generate test for Maps plugin (stateful) - browser starts at Maps app
-node scripts/scout.js codegen --stateful --plugin x-pack/platform/plugins/shared/maps --url /app/maps --output full_screen_mode
+node scripts/scout.js record --stateful --plugin x-pack/platform/plugins/shared/maps --url /app/maps --output full_screen_mode
 
 # Generate test for APM plugin (serverless observability) - browser starts at APM app
 node scripts/scout.js codegen --serverless=oblt --plugin x-pack/solutions/observability/plugins/apm --url /app/apm --output service_inventory
