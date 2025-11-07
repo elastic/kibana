@@ -11,7 +11,7 @@ export const catchupAgentDefinition = (): BuiltInAgentDefinition => {
   return {
     id: 'platform.catchup.agent',
     name: 'Elastic CatchUp Agent',
-    description: `Provides context-rich summaries of Elastic Security and external system activity (Slack, GitHub, Gmail) since a given timestamp. Helps users catch up on security updates, cases, rules, and related external communications while they were away.
+    description: `Provides context-rich summaries of Elastic Security, Observability, and external system activity (Slack, GitHub, Gmail) since a given timestamp. Helps users catch up on security updates, observability alerts, cases, rules, and related external communications while they were away.
 
 **Time Range Handling:**
 When the user requests a catch-up without specifying a time range, use the following defaults:
@@ -21,20 +21,20 @@ When the user requests a catch-up without specifying a time range, use the follo
 - "since [specific date]" → use the specified date at 00:00:00Z
 - No time mentioned → default to last 7 days for a reasonable catch-up window
 
-**Important:** When calling multiple tools, use the SAME time range (start and end parameters) for all tools to ensure consistency across security cases, detections, attack discoveries, rule changes, and external system summaries.
-
-**Workflows for Complex Operations:**
-For complex multi-step catchup operations, consider using workflows:
-- "Daily Security Catchup" workflow - Orchestrates security summary, Slack messages, correlation, and prioritization
-- "Incident Investigation" workflow - Comprehensive investigation with cross-source correlation
-- "Weekly Team Catchup" workflow - Parallel execution of Security, Observability, and Search summaries with prioritization
-Workflows can be triggered manually or scheduled, and provide better orchestration for complex scenarios.`,
+**Important:** When calling multiple tools, use the SAME time range (start and end parameters) for all tools to ensure consistency across security cases, detections, attack discoveries, rule changes, and external system summaries.`,
     configuration: {
-      instructions: `**CRITICAL: Tool Selection Priority**
-When the user asks about external systems, ALWAYS use the specialized external tools:
-- "Gmail", "my gmail", "latest emails", "email" → Use 'platform.catchup.external.gmail' (NOT platform.core.search)
-- "Slack", "slack messages", "slack conversations" → Use 'platform.catchup.external.slack' (NOT platform.core.search)
-- "GitHub", "pull requests", "issues", "commits" → Use 'platform.catchup.external.github' (NOT platform.core.search)
+      instructions: `**CRITICAL: Tool Selection Priority - READ IN ORDER**
+
+1. **OBSERVABILITY QUERIES**
+   When the user asks about Observability, observability alerts, observability updates, "catch me up on Observability", or wants to catch up on Observability activity, use 'platform.catchup.observability.summary'.
+   Examples: "catch me up on Observability", "observability updates", "observability alerts", "what happened in Observability"
+
+2. **EXTERNAL SYSTEMS**
+   When the user asks about external systems, ALWAYS use the specialized external tools:
+   - "Gmail", "my gmail", "latest emails", "email" → Use 'platform.catchup.external.gmail' (NOT platform.core.search)
+   - "Slack", "slack messages", "slack conversations" → Use 'platform.catchup.external.slack' (NOT platform.core.search)
+   - "GitHub", "pull requests", "issues", "commits" → Use 'platform.catchup.external.github' (NOT platform.core.search)
+
 
 External system queries should NEVER use platform.core.search as those systems are not indexed in Elasticsearch.
 
@@ -78,13 +78,12 @@ When formatting your responses, use markdown to improve readability:
 - Use inline code (\`code\`) for technical values like case IDs, rule names, alert IDs, or timestamps
 - Structure information in clear, visually distinct sections
 - For security cases, format as: **Case Title** (severity: [severity]) - [brief description]
-- **CRITICAL FOR SLACK SUMMARIES**: Your goal is to save time by surfacing what matters, not restating every message.
-  - **ALWAYS start with "### Key Topics Requiring Attention"** - A prioritized list of important threads/conversations. Include threads with: decisions made, blockers/issues, important updates, questions awaiting answers, or action items. Format: **Topic/Thread Title** - [1-2 sentence summary: what happened, what was decided, or what needs attention]. [View thread](<permalink>)
-  - **Group related messages** - Don't summarize each message individually. Group messages from the same thread or conversation together. If multiple messages discuss the same topic, summarize them as one conversation.
-  - **Identify important threads** - Prioritize threads with: multiple replies, questions, decisions, blockers, PRs/issues discussed, or action items.
-  - **Brief summaries for routine chatter** - For less important messages (routine updates, casual conversation), provide only brief summaries or group them under "### Other Updates" at the end.
-  - **Mentions** - If you were mentioned in an important thread, include it in Key Topics. Otherwise, list mentions in a "### Mentions" section. Format: **You were mentioned in #channel by @username**: [summary]. [View message](<permalink>)
-  - **Never list every message individually** - Group, prioritize, and summarize intelligently to save the user time
+- **CRITICAL FOR SLACK SUMMARIES**: When summarizing Slack messages:
+  - **ALWAYS start with a "### Slack Mentions" section** if any messages have non-empty mentions arrays
+  - In the mentions section, explicitly state "You were mentioned" or "Mentioned by [user]"
+  - Format mentions as: **You were mentioned in #channel-name by @username**: [message summary]
+  - Follow with a "### Slack Channel Messages" section for regular messages (where mentions array is empty)
+  - Never skip messages with mentions - they are the highest priority
 - **CRITICAL FOR LINKS**: When creating markdown links, ALWAYS wrap URLs in angle brackets <URL> to handle special characters. Format: [Link text](<URL>). Do NOT use bold formatting around links. Examples:
   - Correct: [View all alerts](<http://localhost:5601/kbn/app/security/alerts?timerange=...>)
   - Wrong: **[View all alerts](URL)** or [View all alerts](URL) without angle brackets
@@ -102,17 +101,14 @@ When formatting your responses, use markdown to improve readability:
             'platform.catchup.security.rule_changes',
             // Security summary tool (for general catch-up queries)
             'platform.catchup.security.summary',
-            // 'platform.catchup.observability.summary', // Temporarily disabled
+            // Observability summary tool (for observability catch-up queries)
+            'platform.catchup.observability.summary',
             // 'platform.catchup.search.summary', // Temporarily disabled
-            'platform.catchup.search.unified_search',
             'platform.catchup.external.slack',
             'platform.catchup.external.github',
             'platform.catchup.external.gmail',
-            'platform.catchup.correlation.engine',
-            'platform.catchup.correlation.entity_extraction',
-            'platform.catchup.correlation.semantic_search',
-            'platform.catchup.summary.generator',
-            'platform.catchup.prioritization.rerank',
+            // 'platform.catchup.correlation.engine', // Removed from agent - this tool is for workflows only, requires results parameter from multiple tools
+            // 'platform.catchup.summary.generator', // Removed from agent - this tool is for workflows only, requires correlatedData parameter
           ],
         },
       ],

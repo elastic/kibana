@@ -24,9 +24,21 @@ export const summaryGeneratorTool = (): BuiltinToolDefinition<typeof summaryGene
   return {
     id: 'platform.catchup.summary.generator',
     type: ToolType.builtin,
-    description: `Generates a unified digest from correlated catchup data.
+    description: `Generates a unified digest from correlated catchup data. **DO NOT use this tool for simple catch-up queries.** This tool is ONLY for generating summaries AFTER you have already called the correlation engine (platform.catchup.correlation.engine) and have correlated data to format.
     
-Accepts correlated results from the correlation engine and generates a formatted summary.
+**When to use this tool:**
+- ONLY after calling platform.catchup.correlation.engine and receiving correlated results
+- When you need to format correlated data from multiple sources (Security + Observability + External) into a unified summary
+
+**When NOT to use this tool:**
+- For simple catch-up queries - use the specific summary tools instead:
+  - "catch me up on security" → use platform.catchup.security.summary
+  - "catch me up on observability" → use platform.catchup.observability.summary
+  - "catch me up on slack" → use platform.catchup.external.slack
+- When you don't have correlated data from the correlation engine
+
+**Required parameter:** correlatedData (object) - Must contain correlated results from the correlation engine. This is a REQUIRED parameter - do not call this tool without it.
+
 Output can be in markdown (human-readable) or JSON (structured) format.`,
     schema: summaryGeneratorSchema,
     handler: async ({ correlatedData, format = 'markdown' }, { logger }) => {
