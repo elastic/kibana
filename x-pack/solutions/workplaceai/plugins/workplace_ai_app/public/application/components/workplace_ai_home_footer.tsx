@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,8 +15,22 @@ import {
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
+import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
+import { useKibana } from '../hooks/use_kibana';
 
 export const WorkplaceAIHomeFooter: React.FC = () => {
+  const {
+    services: { application, chrome },
+  } = useKibana();
+
+  const onBrowseDashboards = useCallback(() => {
+    const dashboardsUrl = chrome?.navLinks.get(DASHBOARD_APP_ID)?.url;
+
+    if (dashboardsUrl) {
+      application?.navigateToUrl(dashboardsUrl);
+    }
+  }, [application, chrome]);
+
   return (
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem>
@@ -29,7 +43,7 @@ export const WorkplaceAIHomeFooter: React.FC = () => {
             <p>Learn how to create dashboards to Measure adoption, trust, and performance.</p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiButton color="text" onClick={() => {}}>
+          <EuiButton color="text" onClick={onBrowseDashboards}>
             Explore dashboards
           </EuiButton>
         </EuiPanel>
