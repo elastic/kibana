@@ -31,7 +31,11 @@ export function StreamDetailLifecycle({
         data={data}
       />
       <EuiSpacer size="m" />
-      <StreamDetailFailureStore definition={definition} data={data} />
+      <StreamDetailFailureStore
+        definition={definition}
+        data={data}
+        refreshDefinition={refreshDefinition}
+      />
     </EuiFlexGroup>
   );
 }

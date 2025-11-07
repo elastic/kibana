@@ -17,7 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
-  FailureStore,
+  EffectiveFailureStore,
   FailureStoreStatsResponse,
   DataStreamWithFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -315,7 +315,7 @@ export async function getFailureStore({
   name: string;
   scopedClusterClient: IScopedClusterClient;
   isServerless: boolean;
-}): Promise<FailureStore> {
+}): Promise<EffectiveFailureStore> {
   // TODO: remove DataStreamWithFailureStore here and in streams-schema once failure store is added to the IndicesDataStream type
   const dataStream = (await getDataStream({
     name,
@@ -440,37 +440,5 @@ export async function getFailureStoreCreationDate({
     } else {
       throw e;
     }
-  }
-}
-
-export async function updateFailureStore({
-  name,
-  enabled,
-  customRetentionPeriod,
-  scopedClusterClient,
-  isServerless,
-}: {
-  name: string;
-  enabled: boolean;
-  customRetentionPeriod?: string;
-  scopedClusterClient: IScopedClusterClient;
-  isServerless: boolean;
-}): Promise<void> {
-  try {
-    await scopedClusterClient.asCurrentUser.indices.putDataStreamOptions(
-      {
-        name,
-        failure_store: {
-          enabled,
-          lifecycle: {
-            data_retention: customRetentionPeriod,
-            ...(isServerless ? {} : { enabled }),
-          },
-        },
-      },
-      { meta: true }
-    );
-  } catch (error) {
-    throw new Error(`Failed to update failure store for stream "${name}": ${error}`);
   }
 }

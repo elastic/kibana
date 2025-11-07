@@ -35,6 +35,7 @@ import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
   field_overrides: boolean;
+  failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
 }
@@ -44,6 +45,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     processing: false,
     field_overrides: false,
     lifecycle: false,
+    failure_store: false,
     settings: false,
   };
 
@@ -101,6 +103,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       !_.isEqual(
         this._definition.ingest.classic.field_overrides,
         startingStateStreamDefinition.ingest.classic.field_overrides
+      );
+
+    this._changes.failure_store =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.ingest.failure_store,
+        startingStateStreamDefinition.ingest.failure_store
       );
 
     return { cascadingChanges: [], changeStatus: 'upserted' };
@@ -249,6 +258,19 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     if (
+      this._definition.ingest.failure_store &&
+      !('inherit' in this._definition.ingest.failure_store)
+    ) {
+      actions.push({
+        type: 'set_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store: this._definition.ingest.failure_store,
+        },
+      });
+    }
+
+    if (
       this._definition.ingest.classic.field_overrides &&
       isMappingProperties(this._definition.ingest.classic.field_overrides)
     ) {
@@ -315,6 +337,20 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           lifecycle: this.getLifecycle(),
+        },
+      });
+    }
+
+    if (this._changes.failure_store) {
+      actions.push({
+        type: 'set_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store:
+            this._definition.ingest.failure_store &&
+            !('inherit' in this._definition.ingest.failure_store)
+              ? this._definition.ingest.failure_store
+              : undefined,
         },
       });
     }
