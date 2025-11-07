@@ -166,81 +166,106 @@ function isInTypeContext(path, t) {
 }
 
 /**
- * Check if an identifier should be skipped during replacement
- * Returns true if this identifier is not a variable reference we should transform
- * @param {NodePath} path - The identifier path to check
- * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
- * @param {NodePath} programPath - The program path
+ * Check if identifier is in a declaration position (being defined)
+ * @param {NodePath} path - The identifier path
  * @param {import('@babel/types')} t - Babel types helper
- * @returns {boolean} True if this identifier should be skipped
+ * @returns {boolean} True if identifier is being declared
  */
-function shouldSkipIdentifier(path, properties, programPath, t) {
-  const varName = path.node.name;
-
-  // Not one of our tracked imports
-  if (!properties.has(varName)) {
-    return true;
-  }
-
-  // Skip variable/function declarations (where names are defined)
-  if (
+function isDeclarationPosition(path, t) {
+  return (
     (t.isVariableDeclarator(path.parent) && path.parent.id === path.node) ||
     (t.isFunctionDeclaration(path.parent) && path.parent.id === path.node)
-  ) {
-    return true;
-  }
+  );
+}
 
-  // Skip export/import specifiers
-  if (
+/**
+ * Check if identifier is in an import/export specifier
+ * @param {NodePath} path - The identifier path
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {boolean} True if in import/export specifier
+ */
+function isImportExportSpecifier(path, t) {
+  return (
     t.isExportSpecifier(path.parent) ||
     t.isImportSpecifier(path.parent) ||
     t.isImportDefaultSpecifier(path.parent) ||
     t.isImportNamespaceSpecifier(path.parent) ||
     t.isTSImportEqualsDeclaration(path.parent)
-  ) {
-    return true;
-  }
+  );
+}
 
-  // Skip object property keys (non-computed)
-  if (
-    (t.isObjectProperty(path.parent) || t.isObjectMethod(path.parent)) &&
-    path.parent.key === path.node &&
-    !path.parent.computed
-  ) {
-    return true;
-  }
+/**
+ * Check if identifier is a non-computed property key (object or class)
+ * @param {NodePath} path - The identifier path
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {boolean} True if identifier is a non-computed property key
+ */
+function isNonComputedPropertyKey(path, t) {
+  const parent = path.parent;
+  const isKey = parent.key === path.node;
+  const isNonComputed = !parent.computed;
 
-  // Skip member expression properties (e.g., 'bar' in 'foo.bar' or 'foo?.bar')
-  if (
-    (t.isMemberExpression(path.parent) || t.isOptionalMemberExpression(path.parent)) &&
-    path.parent.property === path.node &&
-    !path.parent.computed
-  ) {
-    return true;
-  }
+  return (
+    isKey &&
+    isNonComputed &&
+    (t.isObjectProperty(parent) ||
+      t.isObjectMethod(parent) ||
+      t.isClassMethod(parent) ||
+      t.isClassProperty(parent))
+  );
+}
 
-  // Skip class method/property keys
-  if (
-    (t.isClassMethod(path.parent) || t.isClassProperty(path.parent)) &&
-    path.parent.key === path.node &&
-    !path.parent.computed
-  ) {
-    return true;
-  }
+/**
+ * Check if identifier is a member expression property (e.g., 'bar' in 'foo.bar')
+ * @param {NodePath} path - The identifier path
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {boolean} True if identifier is a member expression property
+ */
+function isMemberExpressionProperty(path, t) {
+  const parent = path.parent;
+  return (
+    (t.isMemberExpression(parent) || t.isOptionalMemberExpression(parent)) &&
+    parent.property === path.node &&
+    !parent.computed
+  );
+}
 
-  // Skip TypeScript type contexts
-  if (isInTypeContext(path, t)) {
-    return true;
-  }
+/**
+ * Check if identifier is shadowed by a local variable
+ * @param {NodePath} path - The identifier path
+ * @param {NodePath} programPath - The program path
+ * @returns {boolean} True if identifier is shadowed
+ */
+function isShadowedVariable(path, programPath) {
+  const binding = path.scope.getBinding(path.node.name);
+  return binding && binding.scope !== programPath.scope;
+}
 
-  // Check scope: only replace if binding is from program scope
-  const binding = path.scope.getBinding(varName);
-  if (binding && binding.scope !== programPath.scope) {
-    // This is a local variable shadowing our import
-    return true;
-  }
+/**
+ * Determines if a variable name occurrence should NOT be transformed to lazy access
+ *
+ * When we see a variable name like "foo" in the code, we need to decide if we should
+ * transform it to "_imports.foo" (lazy access) or leave it alone.
+ *
+ * @param {NodePath} path - The AST path for the variable name occurrence
+ * @param {Map<string, PropertyInfo>} properties - Map of imported variable names we're tracking
+ * @param {NodePath} programPath - The root program path
+ * @param {import('@babel/types')} t - Babel types helper
+ * @returns {boolean} True if we should NOT transform this occurrence
+ */
+function shouldSkipIdentifier(path, properties, programPath, t) {
+  const varName = path.node.name;
 
-  return false;
+  // Skip if not one of our tracked imports OR if in a non-reference position
+  return (
+    !properties.has(varName) ||
+    isDeclarationPosition(path, t) ||
+    isImportExportSpecifier(path, t) ||
+    isNonComputedPropertyKey(path, t) ||
+    isMemberExpressionProperty(path, t) ||
+    isInTypeContext(path, t) ||
+    isShadowedVariable(path, programPath)
+  );
 }
 
 /**
