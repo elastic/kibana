@@ -14,9 +14,9 @@ import type {
   EventAttachmentAttributes,
 } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common';
-import type { AlertResponse, AttachmentsFindResponse } from '../../../common/types/api';
+import type { DocumentResponse, AttachmentsFindResponse } from '../../../common/types/api';
 import {
-  AlertResponseRt,
+  DocumentResponseRt,
   FindAttachmentsQueryParamsRt,
   AttachmentsFindResponseRt,
 } from '../../../common/types/api';
@@ -41,9 +41,9 @@ import { Operations } from '../../authorization';
 import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
 
 const normalizeDocumentResponse = (
-  alerts: Array<SavedObject<AlertAttachmentAttributes | EventAttachmentAttributes>>
-): AlertResponse =>
-  alerts.reduce((acc: AlertResponse, alert) => {
+  documents: Array<SavedObject<AlertAttachmentAttributes | EventAttachmentAttributes>>
+): DocumentResponse =>
+  documents.reduce((acc: DocumentResponse, alert) => {
     const { ids, indices } = getIDsAndIndicesAsArrays(alert.attributes);
 
     if (ids.length !== indices.length) {
@@ -67,7 +67,7 @@ export const getAllDocumentsAttachedToCase = async (
   { caseId, filter, attachmentTypes }: GetAllDocumentsAttachedToCase,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<AlertResponse> => {
+): Promise<DocumentResponse> => {
   const {
     authorization,
     services: { attachmentService },
@@ -102,7 +102,7 @@ export const getAllDocumentsAttachedToCase = async (
 
     const res = normalizeDocumentResponse(documents);
 
-    return decodeOrThrow(AlertResponseRt)(res);
+    return decodeOrThrow(DocumentResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get documents attached to case id: ${caseId}: ${error}`,

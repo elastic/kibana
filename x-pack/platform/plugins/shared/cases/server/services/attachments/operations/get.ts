@@ -148,7 +148,7 @@ export class AttachmentGetter {
     attachmentTypes = [AttachmentType.alert, AttachmentType.event],
   }: GetAllDocumentsAttachedToCaseArgs): Promise<Array<SavedObject<DocumentAttachmentAttributes>>> {
     try {
-      this.context.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
+      this.context.log.debug(`Attempting to GET all documents for case id ${caseId}`);
       const documentsFilter = buildFilter({
         filters: attachmentTypes,
         field: 'type',
@@ -177,7 +177,7 @@ export class AttachmentGetter {
 
       return result;
     } catch (error) {
-      this.context.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
+      this.context.log.error(`Error on GET all documents for case id ${caseId}: ${error}`);
       throw error;
     }
   }

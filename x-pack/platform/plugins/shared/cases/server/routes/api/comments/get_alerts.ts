@@ -36,7 +36,7 @@ export const getAllAlertsAttachedToCaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const res: alertApiV1.AlertResponse =
+      const res: alertApiV1.DocumentResponse =
         await casesClient.attachments.getAllDocumentsAttachedToCase({
           caseId,
           attachmentTypes: [AttachmentType.alert],

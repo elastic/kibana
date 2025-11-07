@@ -7,7 +7,7 @@
 
 import type { Case, Attachments, Attachment } from '../../../common/types/domain';
 import type {
-  AlertResponse,
+  DocumentResponse,
   AttachmentsFindResponse,
   BulkGetAttachmentsResponse,
 } from '../../../common/types/api';
@@ -64,7 +64,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all documents attached to a case given a single case ID
    */
-  getAllDocumentsAttachedToCase(params: GetAllDocumentsAttachedToCase): Promise<AlertResponse>;
+  getAllDocumentsAttachedToCase(params: GetAllDocumentsAttachedToCase): Promise<DocumentResponse>;
   /**
    * Gets all attachments for a single case.
    */

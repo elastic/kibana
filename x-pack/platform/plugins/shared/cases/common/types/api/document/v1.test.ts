@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AlertResponseRt } from './v1';
+import { DocumentResponseRt } from './v1';
 
-describe('Alerts', () => {
-  describe('AlertResponseRt', () => {
+describe('Documents', () => {
+  describe('DocumentResponseRt', () => {
     it('has expected attributes in request', () => {
       const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
 
-      const query = AlertResponseRt.decode(defaultRequest);
+      const query = DocumentResponseRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -25,7 +25,7 @@ describe('Alerts', () => {
         { id: '1', index: '2', attached_at: '3' },
         { id: '2', index: '3', attached_at: '4' },
       ];
-      const query = AlertResponseRt.decode(defaultRequest);
+      const query = DocumentResponseRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -35,7 +35,7 @@ describe('Alerts', () => {
 
     it('removes foo:bar attributes from request', () => {
       const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
-      const query = AlertResponseRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
+      const query = DocumentResponseRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
