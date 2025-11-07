@@ -14,6 +14,7 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { $Values } from '@kbn/utility-types';
 import type {
   DateRange,
+  IndexPatternField,
   IndexPatternRef,
   Operation,
   TimeScaleUnit,
@@ -77,7 +78,10 @@ export interface FormBasedLayer {
 }
 
 export interface FormBasedPersistedState {
-  layers: Record<string, Omit<FormBasedLayer, 'indexPatternId'>>;
+  layers: Record<
+    string,
+    Omit<FormBasedLayer, 'indexPatternId'> & { fieldSpecs?: IndexPatternField[] }
+  >;
 }
 
 export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;

@@ -890,6 +890,8 @@ export interface DatasourcePublicAPI {
   datasourceId: string;
   datasourceAliasIds?: string[];
   getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
+  getIndexPatternId: () => string;
+  getLayerId: () => string;
   getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
   /**
    * Collect all default visual values given the current state

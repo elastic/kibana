@@ -66,6 +66,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
         'title',
         'description',
         'visualizationType',
+        'fieldSpecs',
         'version',
         'state',
       ],

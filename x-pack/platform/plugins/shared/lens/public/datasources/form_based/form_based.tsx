@@ -13,7 +13,7 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import { type DataViewsPublicPluginStart, type DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -239,6 +239,9 @@ export function getFormBasedDatasource({
   const DATASOURCE_ID = 'formBased';
   const ALIAS_IDS = ['indexpattern'];
 
+  // TODO - pass indexPatterns into getPersistableState instead
+  let indexPatterns: Record<string, IndexPattern> | undefined;
+
   // Not stateful. State is persisted to the frame
   const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState, Query> = {
     id: DATASOURCE_ID,
@@ -249,9 +252,11 @@ export function getFormBasedDatasource({
       references?: Reference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
-      indexPatterns?: Record<string, IndexPattern>,
+      _indexPatterns?: Record<string, IndexPattern>,
       dateRange?: DateRange
     ) {
+      indexPatterns = _indexPatterns;
+
       return loadInitialState({
         persistedState,
         references,
@@ -266,6 +271,21 @@ export function getFormBasedDatasource({
 
     getPersistableState(state: FormBasedPrivateState) {
       const { references, state: persistableState } = extractReferences(state);
+      if (indexPatterns) {
+        for (const layerId of Object.keys(state.layers)) {
+          const usedFields: string[] = [];
+          const layer = state.layers[layerId];
+          const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
+          const spec = getTableSpec(layer, visibleColumnIds);
+          usedFields.push(...new Set(spec.map(({ fields }) => fields).flat()));
+          const indexPattern = indexPatterns[layer.indexPatternId];
+          if (indexPattern) {
+            persistableState.layers[layerId].fieldSpecs = usedFields
+              .map(indexPattern.getFieldByName)
+              .filter(Boolean) as IndexPatternField[];
+          }
+        }
+      }
       const newPersistableState = cleanupFormulaColumns(persistableState);
       return { references, state: newPersistableState };
     },
@@ -711,29 +731,9 @@ export function getFormBasedDatasource({
       return {
         datasourceId: DATASOURCE_ID,
         datasourceAliasIds: ALIAS_IDS,
-        getTableSpec: () => {
-          // consider also referenced columns in this case
-          // but map fields to the top referencing column
-          const fieldsPerColumn: Record<string, string[]> = {};
-          Object.keys(layer.columns).forEach((colId) => {
-            const visibleColumnId = getReferenceRoot(layer, colId);
-            fieldsPerColumn[visibleColumnId] = fieldsPerColumn[visibleColumnId] || [];
-
-            const column = layer.columns[colId];
-            if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
-              fieldsPerColumn[visibleColumnId].push(
-                ...[column.sourceField].concat(column.params.secondaryFields ?? [])
-              );
-            }
-            if ('sourceField' in column && column.sourceField !== DOCUMENT_FIELD_NAME) {
-              fieldsPerColumn[visibleColumnId].push(column.sourceField);
-            }
-          });
-          return visibleColumnIds.map((colId, i) => ({
-            columnId: colId,
-            fields: [...new Set(fieldsPerColumn[colId] || [])],
-          }));
-        },
+        getIndexPatternId: () => layer.indexPatternId,
+        getLayerId: () => layerId,
+        getTableSpec: () => getTableSpec(layer, visibleColumnIds),
         isTextBasedLanguage: () => false,
         getOperationForColumnId: (columnId: string) => {
           if (layer && layer.columns[columnId]) {
@@ -942,6 +942,30 @@ export function getFormBasedDatasource({
   };
 
   return formBasedDatasource;
+}
+
+function getTableSpec(layer, visibleColumnIds) {
+  // consider also referenced columns in this case
+  // but map fields to the top referencing column
+  const fieldsPerColumn: Record<string, string[]> = {};
+  Object.keys(layer.columns).forEach((colId) => {
+    const visibleColumnId = getReferenceRoot(layer, colId);
+    fieldsPerColumn[visibleColumnId] = fieldsPerColumn[visibleColumnId] || [];
+
+    const column = layer.columns[colId];
+    if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
+      fieldsPerColumn[visibleColumnId].push(
+        ...[column.sourceField].concat(column.params.secondaryFields ?? [])
+      );
+    }
+    if ('sourceField' in column && column.sourceField !== DOCUMENT_FIELD_NAME) {
+      fieldsPerColumn[visibleColumnId].push(column.sourceField);
+    }
+  });
+  return visibleColumnIds.map((colId, i) => ({
+    columnId: colId,
+    fields: [...new Set(fieldsPerColumn[colId] || [])],
+  }));
 }
 
 function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedLayer {
