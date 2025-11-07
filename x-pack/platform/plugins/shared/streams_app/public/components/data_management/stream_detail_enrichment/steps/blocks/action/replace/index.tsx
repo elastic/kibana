@@ -26,15 +26,10 @@ export const ReplaceProcessorForm = () => {
   >({
     name: 'pattern',
     rules: {
-      validate: (value) => {
-        if (!value || !value.trim()) {
-          return i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processor.replacePatternRequiredError',
-            { defaultMessage: 'Pattern is required.' }
-          );
-        }
-        return true;
-      },
+      required: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.replacePatternRequiredError',
+        { defaultMessage: 'Pattern is required.' }
+      ),
     },
   });
 

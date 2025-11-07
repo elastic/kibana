@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { NonEmptyOrWhitespaceString, NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '@kbn/zod-helpers';
 import type { Condition } from '../conditions';
 import { conditionSchema } from '../conditions';
@@ -282,8 +282,8 @@ export interface ReplaceProcessor extends ProcessorBaseWithWhere {
 export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('replace'),
   from: StreamlangSourceField,
-  pattern: NonEmptyString,
-  replacement: z.string(),
+  pattern: NonEmptyOrWhitespaceString, // Allows space " " as valid pattern
+  replacement: z.string(), // Required, should be '' for empty replacement
   to: z.optional(StreamlangTargetField),
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<ReplaceProcessor>;

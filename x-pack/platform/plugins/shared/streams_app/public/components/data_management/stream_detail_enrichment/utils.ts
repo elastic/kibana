@@ -170,9 +170,9 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   from: '',
   pattern: '',
   replacement: '',
-  ignore_missing: false,
+  ignore_missing: true,
+  ignore_failure: true,
   where: ALWAYS_CONDITION,
-  ignore_failure: false,
 });
 
 const configDrivenDefaultFormStates = mapValues(
