@@ -15,15 +15,18 @@ import { getReferencesForPanelId } from '../../common';
 
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import type { DashboardState } from '../../common/types';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import type { DashboardAPIGetOut } from '../../server/content_management';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { initializeESQLVariablesManager } from './esql_variables_manager';
+import { initializeFiltersManager } from './filters_manager';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
+import { saveDashboard } from './save_modal/save_dashboard';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
+import { initializeTimesliceManager } from './timeslice_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
@@ -32,10 +35,6 @@ import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import { initializeESQLVariablesManager } from './esql_variables_manager';
-import { initializeTimesliceManager } from './timeslice_manager';
-import { initializeFiltersManager } from './filters_manager';
-// import { mergeControlGroupStates } from './merge_control_group_states';
 
 export function getDashboardApi({
   creationOptions,
@@ -47,15 +46,19 @@ export function getDashboardApi({
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddables?: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
-  savedObjectResult?: LoadDashboardReturn;
+  savedObjectResult?: DashboardAPIGetOut;
   savedObjectId?: string;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
-  const isManaged = savedObjectResult?.managed ?? false;
+  const isManaged = savedObjectResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
-  const viewModeManager = initializeViewModeManager(incomingEmbeddables, savedObjectResult);
+  const viewModeManager = initializeViewModeManager({
+    incomingEmbeddables,
+    isManaged,
+    savedObjectId,
+  });
   const trackPanel = initializeTrackPanel(async (id: string) => {
     await layoutManager.api.getChildApi(id);
   }, dashboardContainerRef$);
@@ -105,7 +108,7 @@ export function getDashboardApi({
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
-    lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: savedObjectResult?.data ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
     savedObjectId$,
     settingsManager,
@@ -216,7 +219,7 @@ export function getDashboardApi({
     runQuickSave: async () => {
       if (isManaged) return;
       const { dashboardState, references } = getState();
-      const saveResult = await getDashboardContentManagementService().saveDashboardState({
+      const saveResult = await saveDashboard({
         dashboardState,
         references,
         saveOptions: {},

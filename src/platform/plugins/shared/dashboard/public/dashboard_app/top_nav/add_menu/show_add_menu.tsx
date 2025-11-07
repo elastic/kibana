@@ -14,6 +14,7 @@ import {
   EuiContextMenu,
   EuiWrappingPopover,
   type EuiContextMenuPanelDescriptor,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -206,6 +207,9 @@ export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
       button={anchorElement}
       panelPaddingSize="none"
       repositionOnScroll
+      attachToAnchor
+      anchorPosition="downLeft"
+      panelStyle={{ maxWidth: 200 }}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiWrappingPopover>
@@ -218,11 +222,15 @@ export function showAddMenu({ dashboardApi, anchorElement }: AddMenuProps) {
     return;
   }
 
+  const theme = coreServices.theme.getTheme();
+
   isOpen = true;
   document.body.appendChild(container);
   ReactDOM.render(
     <KibanaContextProvider services={coreServices}>
-      <AddMenu dashboardApi={dashboardApi} anchorElement={anchorElement} />
+      <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
+        <AddMenu dashboardApi={dashboardApi} anchorElement={anchorElement} />
+      </EuiThemeProvider>
     </KibanaContextProvider>,
     container
   );

@@ -11,6 +11,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import classnames from 'classnames';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -35,6 +36,20 @@ import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors'
 import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
+import type { StepInfo } from '../../../entities/workflows/store';
+import {
+  selectFocusedStepInfo,
+  selectSchema,
+  selectYamlDocument,
+  setCursorPosition,
+  setStepExecutions,
+  setYamlString,
+} from '../../../entities/workflows/store';
+import {
+  selectHasChanges,
+  selectWorkflow,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
@@ -42,8 +57,7 @@ import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
-import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
-import { YamlEditor } from '../../../shared/ui/yaml_editor';
+import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -55,23 +69,18 @@ import {
 } from '../lib/monaco_providers';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
-import type { StepInfo } from '../lib/store';
-import {
-  selectFocusedStepInfo,
-  selectSchemaLoose,
-  selectYamlDocument,
-  setCursorPosition,
-  setStepExecutions,
-  setYamlString,
-} from '../lib/store';
-import { selectHasChanges, selectWorkflow } from '../lib/store/selectors';
-import { setIsTestModalOpen } from '../lib/store/slice';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
-import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
-import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
+import {
+  EXECUTION_YAML_SNAPSHOT_CLASS,
+  useWorkflowEditorStyles,
+} from '../styles/use_workflow_editor_styles';
+import {
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '../styles/use_workflows_monaco_theme';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -83,11 +92,12 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   lineNumbersMinChars: 2,
   insertSpaces: true,
   fontSize: 14,
+  lineHeight: 23, // default ~21px + 2px
   renderWhitespace: 'none',
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
-  theme: 'workflows-subdued',
+  theme: WORKFLOWS_MONACO_EDITOR_THEME,
   padding: {
     top: 24,
     bottom: 16,
@@ -174,7 +184,7 @@ export const WorkflowYAMLEditor = ({
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
-  const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
+  const workflowYamlSchema = useSelector(selectSchema);
   // The current yaml document in the editor (could be unsaved)
   const currentYamlDocument = useSelector(selectYamlDocument);
 
@@ -237,7 +247,7 @@ export const WorkflowYAMLEditor = ({
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchemaLoose as z.ZodSchema,
+      workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -590,7 +600,10 @@ export const WorkflowYAMLEditor = ({
           </EuiFlexGroup>
         </div>
       )}
-      <div css={styles.editorContainer}>
+      <div
+        css={styles.editorContainer}
+        className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
+      >
         <YamlEditor
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
@@ -609,7 +622,7 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          rightSide={<WorkflowYAMLEditorShortcuts />}
+          rightSide={<WorkflowYAMLEditorShortcuts onOpenActionsMenu={setActionsPopoverOpen} />}
         />
       </div>
     </div>
