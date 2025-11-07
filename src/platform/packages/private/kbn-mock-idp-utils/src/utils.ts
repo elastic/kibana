@@ -10,11 +10,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { X509Certificate } from 'crypto';
 import { readFile } from 'fs/promises';
-import url from 'url';
-import { promisify } from 'util';
 import { SignedXml } from 'xml-crypto';
-import { parseString } from 'xml2js';
-import zlib from 'zlib';
 
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
@@ -30,9 +26,6 @@ import {
   MOCK_IDP_ROLE_MAPPING_NAME,
 } from './constants';
 
-const inflateRawAsync = promisify(zlib.inflateRaw);
-const parseStringAsync = promisify(parseString);
-
 /**
  * Creates XML metadata for our mock identity provider.
  *
@@ -43,8 +36,6 @@ const parseStringAsync = promisify(parseString);
 export async function createMockIdpMetadata(kibanaUrl: string) {
   const signingKey = await readFile(KBN_CERT_PATH);
   const cert = new X509Certificate(signingKey);
-  const trimTrailingSlash = (urlString: string) =>
-    urlString.endsWith('/') ? urlString.slice(0, -1) : urlString;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
   <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
@@ -212,16 +203,4 @@ export async function ensureSAMLRoleMapping(client: Client) {
       },
     },
   });
-}
-
-export async function getSAMLRequestId(urlWithSAMLRequestId: string) {
-  const inflatedSAMLRequest = (await inflateRawAsync(
-    Buffer.from(
-      url.parse(urlWithSAMLRequestId, true /* parseQueryString */).query.SAMLRequest as string,
-      'base64'
-    )
-  )) as Buffer;
-
-  const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
-  return parsedSAMLRequest['saml2p:AuthnRequest'].$.ID;
 }

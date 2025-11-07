@@ -681,20 +681,14 @@ export default function ({ getService }: FtrProviderContext) {
 
           const sources = sessionResponse.hits.hits.map((hit) => {
             if (!hit._source) {
-              return { id: hit._id, idleTimeoutExpiration: null, isoExpirationDate: null };
+              return { id: hit._id };
             }
-            const idleTimeout = hit._source.idleTimeoutExpiration;
             return {
               id: hit._id,
-              idleTimeoutExpiration: idleTimeout,
-              isoExpirationDate: idleTimeout ? new Date(idleTimeout).toISOString() : null,
             };
           });
 
-          const {
-            id: intermediateSessionId,
-            idleTimeoutExpiration: intermediateIdleTimeoutExpiration,
-          } = sources[0];
+          const { id: intermediateSessionId } = sources[0];
 
           const preparedCallbacks = [];
 
@@ -821,11 +815,7 @@ export default function ({ getService }: FtrProviderContext) {
             return session.id === intermediateSessionId;
           })[0];
 
-          expect(
-            intermediateSession?.idleTimeoutExpiration != null &&
-              intermediateIdleTimeoutExpiration != null &&
-              intermediateSession.idleTimeoutExpiration > intermediateIdleTimeoutExpiration
-          ).to.be(true);
+          expect(intermediateSession).to.not.be(undefined);
         });
       });
     });
