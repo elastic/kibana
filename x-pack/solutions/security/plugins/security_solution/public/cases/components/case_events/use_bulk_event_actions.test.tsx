@@ -10,6 +10,8 @@ import { useBulkAddEventsToCaseActions } from './use_bulk_event_actions';
 import { TestProviders } from '../../../common/mock';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
+const mockObservable = [{ typeKey: 'ip', value: '127.0.0.1', description: null }];
+const mockGetObservablesFromEcs = jest.fn().mockReturnValue(mockObservable);
 const mockOpenNewCase = jest.fn();
 const mockOpenExistingCase = jest.fn();
 const mockCanUseCases = jest.fn(() => ({ create: true, read: true }));
@@ -27,6 +29,7 @@ jest.mock('../../../common/lib/kibana', () => ({
       cases: {
         helpers: {
           canUseCases: mockCanUseCases,
+          getObservablesFromEcs: mockGetObservablesFromEcs,
         },
         ui: {
           getCasesContext: mockGetCasesContext,
@@ -69,6 +72,7 @@ describe('useBulkAddEventsToCaseActions', () => {
     });
     expect(mockOpenNewCase).toHaveBeenCalledWith({
       attachments: [{ type: 'event', eventId: ['1', '2'], index: ['foo', 'bar'] }],
+      observables: mockObservable,
     });
   });
 
@@ -86,6 +90,7 @@ describe('useBulkAddEventsToCaseActions', () => {
     expect(mockOpenExistingCase).toHaveBeenCalled();
     const mappedEvents = mockOpenExistingCase.mock.lastCall[0].getAttachments();
     expect(mappedEvents[0].eventId).toEqual(['1', '2']);
+    expect(mockOpenExistingCase.mock.lastCall[0].getObservables()).toEqual(mockObservable);
   });
 
   it('returns empty array if permissions are missing', () => {
