@@ -13,6 +13,9 @@ import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { isRegisteredOwner } from '../files';
 import type { CaseAttachmentWithoutOwner } from '../types';
 
+/**
+ * Events Based Tracking for Case Event attachments being created
+ */
 export const useAttachEventsEBT = () => {
   const { analytics } = useKibana().services;
   const { owner } = useCasesContext();
