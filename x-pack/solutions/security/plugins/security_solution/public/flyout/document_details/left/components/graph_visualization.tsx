@@ -18,6 +18,7 @@ import {
   getNodeDocumentMode,
   getSingleDocumentData,
   type NodeViewModel,
+  NETWORK_PREVIEW_BANNER,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
@@ -38,6 +39,7 @@ import {
 } from '../../preview/constants';
 import { useToasts } from '../../../../common/lib/kibana';
 import { GenericEntityPanelKey } from '../../../entity_details/shared/constants';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -77,6 +79,23 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const onOpenNetworkPreview = useCallback(
+    (ip: string, previewScopeId: string) => {
+      openPreviewPanel({
+        id: 'network-preview',
+        params: {
+          ip,
+          scopeId: previewScopeId,
+          flowTarget: FlowTargetSourceDest.source,
+          banner: NETWORK_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel]
+  );
+
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
       const singleDocumentData = getSingleDocumentData(node);
@@ -101,6 +120,8 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
+            // TODO: Remove hardcoded value once https://github.com/elastic/kibana/issues/232226 is implemented
+            isEngineMetadataExist: true,
           },
         });
       } else if (docMode === 'grouped-entities' && node.documentsData) {
@@ -221,6 +242,7 @@ export const GraphVisualization: React.FC = memo(() => {
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
+            onOpenNetworkPreview={onOpenNetworkPreview}
           />
         </React.Suspense>
       )}

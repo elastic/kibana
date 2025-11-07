@@ -23,12 +23,14 @@ interface CallInitializeImportRoute {
   mappings: MappingTypeMapping;
   ingestPipelines?: IngestPipelineWrapper[];
   existingIndex?: boolean;
+  signal?: AbortSignal;
 }
 
 interface CallImportRoute {
   index: string;
   ingestPipelineId: string;
   data: ImportDoc[];
+  signal?: AbortSignal;
 }
 
 export function callInitializeImportRoute({
@@ -37,6 +39,7 @@ export function callInitializeImportRoute({
   mappings,
   ingestPipelines,
   existingIndex,
+  signal,
 }: CallInitializeImportRoute) {
   const body = JSON.stringify({
     index,
@@ -51,10 +54,11 @@ export function callInitializeImportRoute({
     method: 'POST',
     version: '1',
     body,
+    signal,
   });
 }
 
-export function callImportRoute({ index, data, ingestPipelineId }: CallImportRoute) {
+export function callImportRoute({ index, data, ingestPipelineId, signal }: CallImportRoute) {
   const body = JSON.stringify({
     index,
     ingestPipelineId,
@@ -66,5 +70,6 @@ export function callImportRoute({ index, data, ingestPipelineId }: CallImportRou
     method: 'POST',
     version: '2',
     body,
+    signal,
   });
 }

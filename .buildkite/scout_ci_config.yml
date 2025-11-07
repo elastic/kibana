@@ -8,6 +8,7 @@ plugins:
     - observability
     - observability_onboarding
     - painless_lab
+    - profiling
     - security_solution
     - streams_app
     - slo
@@ -16,4 +17,6 @@ plugins:
 packages:
   enabled:
     - kbn-streamlang-tests
+    - kbn-scout-release-testing
   disabled:
+    - kbn-scout # Internal scout tests are run in advance to validate Scout integrity (see .buildkite/scripts/steps/test/scout_test_run_builder.sh)
