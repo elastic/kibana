@@ -16,6 +16,8 @@ import {
   EuiImage,
   EuiCodeBlock,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { ApiKeyForm } from '@kbn/workplaceai-api-keys-components';
 import { useCurrentUser } from '../hooks/use_current_user';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
@@ -30,13 +32,21 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
     <EuiFlexGroup alignItems="center" gutterSize="xl">
       <EuiFlexItem grow={7}>
         <EuiTitle size="l">
-          <h1>Welcome, {user?.full_name || user?.username || 'User'}</h1>
+          <h1>
+            <FormattedMessage
+              id="xpack.workplaceai.gettingStarted.homeHeader.welcomeTitle"
+              defaultMessage="Welcome, {name}"
+              values={{ name: user?.full_name || user?.username || 'User' }}
+            />
+          </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="m">
           <p>
-            Connect data, create agents, and automate workflows powered by your enterprise
-            knowledge.
+            <FormattedMessage
+              id="xpack.workplaceai.gettingStarted.homeHeader.description"
+              defaultMessage="Connect data, create agents, and automate workflows powered by your enterprise knowledge."
+            />
           </p>
         </EuiText>
         <EuiSpacer size="xxl" />
@@ -60,7 +70,10 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
               iconSide="left"
               onClick={() => {}}
             >
-              MCP Endpoint
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.homeHeader.mcpEndpointButtonLabel"
+                defaultMessage="MCP Endpoint"
+              />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -72,7 +85,10 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
               iconSide="left"
               onClick={() => {}}
             >
-              Connection settings
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.homeHeader.connectionSettingsButtonLabel"
+                defaultMessage="Connection settings"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -80,7 +96,13 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
 
       {/* Hero Illustration */}
       <EuiFlexItem grow={3}>
-        <EuiImage src={headerHeroSvg} alt="Workplace AI Hero" size="l" />
+        <EuiImage
+          src={headerHeroSvg}
+          alt={i18n.translate('xpack.workplaceai.gettingStarted.homeHeader.heroImageAlt', {
+            defaultMessage: 'Workplace AI Hero',
+          })}
+          size="l"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '../hooks/use_kibana';
@@ -45,30 +46,56 @@ export const WorkplaceAIHomeFooter: React.FC = () => {
       <EuiFlexItem>
         <EuiPanel paddingSize="l">
           <EuiTitle size="xs">
-            <h5>Browse dashboards</h5>
+            <h5>
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.homeFooter.browseDashboardsTitle"
+                defaultMessage="Browse dashboards"
+              />
+            </h5>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            <p>Learn how to create dashboards to Measure adoption, trust, and performance.</p>
+            <p>
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.homeFooter.browseDashboardsDescription"
+                defaultMessage="Learn how to create dashboards to Measure adoption, trust, and performance."
+              />
+            </p>
           </EuiText>
           <EuiSpacer size="m" />
           <EuiButton color="text" onClick={onBrowseDashboards}>
-            Explore dashboards
+            <FormattedMessage
+              id="xpack.workplaceai.gettingStarted.homeFooter.exploreDashboardsButtonLabel"
+              defaultMessage="Explore dashboards"
+            />
           </EuiButton>
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel paddingSize="l">
           <EuiTitle size="xs">
-            <h5>Use a workflow template</h5>
+            <h5>
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.homeFooter.workflowTemplateTitle"
+                defaultMessage="Use a workflow template"
+              />
+            </h5>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            <p>Try prebuilt automations (e.g., summarize tickets, draft status reports).</p>
+            <p>
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.homeFooter.workflowTemplateDescription"
+                defaultMessage="Try prebuilt automations (e.g., summarize tickets, draft status reports)."
+              />
+            </p>
           </EuiText>
           <EuiSpacer size="m" />
           <EuiButton color="text" onClick={onBrowseTemplates}>
-            Browse templates
+            <FormattedMessage
+              id="xpack.workplaceai.gettingStarted.homeFooter.browseTemplatesButtonLabel"
+              defaultMessage="Browse templates"
+            />
           </EuiButton>
         </EuiPanel>
       </EuiFlexItem>

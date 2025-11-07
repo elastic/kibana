@@ -35,7 +35,7 @@ export const useBreadcrumb = (breadcrumbs: WorkplaceAIBreadcrumb[]) => {
   const baseCrumbs: ChromeBreadcrumb[] = useMemo(() => {
     return [
       {
-        text: i18n.translate('workplaceAIApp.breadcrumb.workplaceAI', {
+        text: i18n.translate('xpack.workplaceai.breadcrumb.workplaceAI', {
           defaultMessage: 'Workplace AI',
         }),
         href: appUrl,

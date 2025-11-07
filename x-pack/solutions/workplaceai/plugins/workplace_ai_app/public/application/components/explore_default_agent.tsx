@@ -17,6 +17,8 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 export const ExploreDefaultAgent: React.FC = () => {
   const [chatInput, setChatInput] = useState('');
@@ -24,7 +26,12 @@ export const ExploreDefaultAgent: React.FC = () => {
   return (
     <EuiPanel paddingSize="l">
       <EuiTitle size="s">
-        <h5>Explore default Elastic agent</h5>
+        <h5>
+          <FormattedMessage
+            id="xpack.workplaceai.gettingStarted.exploreDefaultAgent.title"
+            defaultMessage="Explore default Elastic agent"
+          />
+        </h5>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
@@ -32,7 +39,10 @@ export const ExploreDefaultAgent: React.FC = () => {
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton size="s" iconType="at" color="text" onClick={() => {}}>
-              Add context
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.exploreDefaultAgent.addContextButtonLabel"
+                defaultMessage="Add context"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -41,7 +51,12 @@ export const ExploreDefaultAgent: React.FC = () => {
 
         {/* Input text area */}
         <EuiTextArea
-          placeholder="How can I help you today?"
+          placeholder={i18n.translate(
+            'xpack.workplaceai.gettingStarted.exploreDefaultAgent.chatInputPlaceholder',
+            {
+              defaultMessage: 'How can I help you today?',
+            }
+          )}
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
           rows={3}
@@ -79,7 +94,10 @@ export const ExploreDefaultAgent: React.FC = () => {
                   iconSide="left"
                   onClick={() => {}}
                 >
-                  Modify
+                  <FormattedMessage
+                    id="xpack.workplaceai.gettingStarted.exploreDefaultAgent.modifyButtonLabel"
+                    defaultMessage="Modify"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -91,7 +109,10 @@ export const ExploreDefaultAgent: React.FC = () => {
                   iconSide="left"
                   onClick={() => {}}
                 >
-                  Tools
+                  <FormattedMessage
+                    id="xpack.workplaceai.gettingStarted.exploreDefaultAgent.toolsButtonLabel"
+                    defaultMessage="Tools"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -99,7 +120,12 @@ export const ExploreDefaultAgent: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="arrowUp"
-              aria-label="Submit"
+              aria-label={i18n.translate(
+                'xpack.workplaceai.gettingStarted.exploreDefaultAgent.submitAriaLabel',
+                {
+                  defaultMessage: 'Submit',
+                }
+              )}
               color="primary"
               display="fill"
               size="m"

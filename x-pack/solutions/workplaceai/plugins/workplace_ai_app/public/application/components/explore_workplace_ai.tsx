@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiCard, EuiButton, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_AGENTS_CREATE } from '@kbn/deeplinks-agent-builder';
 import { DATA_CONNECTORS_APP_ID } from '@kbn/deeplinks-data-connectors';
 import { useKibana } from '../hooks/use_kibana';
@@ -48,17 +49,35 @@ export const ExploreWorkplaceAI: React.FC = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiTitle size="s">
-        <h4>Explore Workplace AI</h4>
+        <h4>
+          <FormattedMessage
+            id="xpack.workplaceai.gettingStarted.exploreSection.title"
+            defaultMessage="Explore Workplace AI"
+          />
+        </h4>
       </EuiTitle>
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon type={searchWindowSVG} size="xl" />}
-            title="Connect data sources"
-            description="Learn how to integrate apps like Salesforce, Google Drive, and Confluence."
+            title={
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.exploreSection.connectDataSourcesTitle"
+                defaultMessage="Connect data sources"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.exploreSection.connectDataSourcesDescription"
+                defaultMessage="Learn how to integrate apps like Salesforce, Google Drive, and Confluence."
+              />
+            }
             footer={
               <EuiButton color="text" onClick={onConnectSource}>
-                Connect a source
+                <FormattedMessage
+                  id="xpack.workplaceai.gettingStarted.exploreSection.connectSourceButtonLabel"
+                  defaultMessage="Connect a source"
+                />
               </EuiButton>
             }
           />
@@ -66,11 +85,24 @@ export const ExploreWorkplaceAI: React.FC = () => {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon type={searchAnalyticsSVG} size="xl" />}
-            title="Create your first agent"
-            description="Build an intelligent agent using your connected data."
+            title={
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.exploreSection.createFirstAgentTitle"
+                defaultMessage="Create your first agent"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.exploreSection.createFirstAgentDescription"
+                defaultMessage="Build an intelligent agent using your connected data."
+              />
+            }
             footer={
               <EuiButton color="text" onClick={onCreateAgent}>
-                Create an agent
+                <FormattedMessage
+                  id="xpack.workplaceai.gettingStarted.exploreSection.createAgentButtonLabel"
+                  defaultMessage="Create an agent"
+                />
               </EuiButton>
             }
           />
@@ -78,11 +110,24 @@ export const ExploreWorkplaceAI: React.FC = () => {
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon type={searchResultsSVG} size="xl" />}
-            title="Chat with default agent"
-            description="Ask questions grounded in your business data."
+            title={
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.exploreSection.chatWithAgentTitle"
+                defaultMessage="Chat with default agent"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.exploreSection.chatWithAgentDescription"
+                defaultMessage="Ask questions grounded in your business data."
+              />
+            }
             footer={
               <EuiButton color="text" onClick={onChatNow}>
-                Chat now
+                <FormattedMessage
+                  id="xpack.workplaceai.gettingStarted.exploreSection.chatNowButtonLabel"
+                  defaultMessage="Chat now"
+                />
               </EuiButton>
             }
           />
