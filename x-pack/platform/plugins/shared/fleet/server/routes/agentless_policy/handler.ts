@@ -13,6 +13,7 @@ import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
+import type { DeleteAgentlessPolicyRequestSchema } from '../../../common/types/rest_spec/agentless_policy';
 
 export const createAgentlessPolicyHandler: FleetRequestHandler<
   undefined,
@@ -45,6 +46,38 @@ export const createAgentlessPolicyHandler: FleetRequestHandler<
         request.query.format === inputsFormat.Simplified
           ? packagePolicyToSimplifiedPackagePolicy(packagePolicy)
           : packagePolicy,
+    },
+  });
+};
+
+export const deleteAgentlessPolicyHandler: FleetRequestHandler<
+  TypeOf<typeof DeleteAgentlessPolicyRequestSchema.params>,
+  TypeOf<typeof DeleteAgentlessPolicyRequestSchema.query>
+> = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  const logger = appContextService.getLogger().get('agentless');
+
+  const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+    fleetContext.packagePolicyService.asCurrentUser,
+    soClient,
+    esClient,
+    logger
+  );
+
+  await agentlessPoliciesService.deleteAgentlessPolicy(
+    request.params.policyId,
+    { force: request.query.force },
+    context,
+    request
+  );
+
+  return response.ok({
+    body: {
+      id: request.params.policyId,
     },
   });
 };

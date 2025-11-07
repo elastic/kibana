@@ -49,6 +49,41 @@ export const CreateAgentlessPolicyRequestSchema = {
   }),
 };
 
+export const DeleteAgentlessPolicyRequestSchema = {
+  query: schema.object({
+    force: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: 'Force delete the policy even if the policy is managed.',
+        },
+      })
+    ),
+  }),
+  params: schema.object({
+    policyId: schema.string({
+      meta: {
+        description: 'The ID of the policy to delete.',
+      },
+    }),
+  }),
+};
+
+export const DeleteAgentlessPolicyResponseSchema = schema.object(
+  {
+    id: schema.string({
+      meta: {
+        description: 'The ID of the deleted agentless package policy.',
+      },
+    }),
+  },
+  {
+    meta: {
+      description: 'Response for deleting an agentless package policy.',
+    },
+  }
+);
+
 export const CreateAgentlessPolicyResponseSchema = schema.object({
   item: PackagePolicyResponseSchema.extends(
     {},
@@ -65,4 +100,11 @@ export type CreateAgentlessPolicyResponse = TypeOf<typeof CreateAgentlessPolicyR
 export interface CreateAgentlessPolicyRequest {
   body: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>;
   query: TypeOf<typeof CreateAgentlessPolicyRequestSchema.query>;
+}
+
+export type DeleteAgentlessPolicyResponse = TypeOf<typeof DeleteAgentlessPolicyResponseSchema>;
+
+export interface DeleteAgentlessPolicyRequest {
+  params: TypeOf<typeof DeleteAgentlessPolicyRequestSchema.params>;
+  query: TypeOf<typeof DeleteAgentlessPolicyRequestSchema.query>;
 }

@@ -43,6 +43,13 @@ export interface AgentlessPoliciesService {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ) => Promise<any>;
+
+  deleteAgentlessPolicy: (
+    policyId: string,
+    options?: { force?: boolean },
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
+  ) => Promise<void>;
 }
 
 const getAgentlessPolicy = (packageInfo?: PackageInfo) => {
@@ -183,5 +190,29 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
       throw err;
     }
+  }
+
+  async deleteAgentlessPolicy(
+    policyId: string,
+    options?: { force?: boolean },
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
+  ) {
+    this.logger.debug(`Deleting agentless policy ${policyId}`);
+
+    const user = request
+      ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
+      : undefined;
+
+    const agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+    if (!agentPolicy?.supports_agentless) {
+      throw new Error(`Policy ${policyId} is not an agentless policy`);
+    }
+
+    // Delete agent policy
+    await agentPolicyService.delete(this.soClient, this.esClient, policyId, {
+      force: options?.force,
+      user,
+    });
   }
 }

@@ -24,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
     const { getService } = providerContext;
     const es = getService('es');
     const supertest = getService('supertest');
-    const mockAgentlessApiService = setupMockServer();
+
     const kibanaServer = getService('kibanaServer');
 
     skipIfNoDockerRegistry(providerContext);
@@ -34,6 +34,7 @@ export default function (providerContext: FtrProviderContext) {
     let mockApiServer: http.Server;
     describe('Create Agentless Policy', () => {
       before(async () => {
+        const mockAgentlessApiService = setupMockServer();
         mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
       });
 
@@ -256,6 +257,76 @@ export default function (providerContext: FtrProviderContext) {
         await apiClient.getAgentPolicy(agentPolicyRes.item.id);
 
         await expectToRejectWithNotFound(() => apiClient.getPackagePolicy(packagePolicyId));
+      });
+    });
+
+    describe('Delete Agentless Policy', () => {
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      let apiCalls: Array<{
+        url: string;
+        method: string;
+      }> = [];
+      let policyId: string;
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+
+        policyId = uuidv4();
+
+        await apiClient.createAgentlessPolicy({
+          id: policyId,
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: `test_agentless-${Date.now()}`,
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        apiCalls = [];
+        mockApiServer.addListener('request', (request) => {
+          apiCalls.push({
+            url: request.url || '',
+            method: request.method || '',
+          });
+        });
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it('should allow to delete an agentless policy and delete related resources', async () => {
+        await apiClient.deleteAgentlessPolicy(policyId);
+
+        expectToRejectWithNotFound(() => apiClient.getPackagePolicy(policyId));
+
+        expectToRejectWithNotFound(() => apiClient.getAgentPolicy(policyId));
+
+        expect(apiCalls.length).to.be(1);
+        expect(apiCalls[0].url).to.be(`/agentless-api/api/v1/ess/deployments/${policyId}`);
+        expect(apiCalls[0].method).to.be('DELETE');
       });
     });
   });

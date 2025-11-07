@@ -227,4 +227,74 @@ describe('AgentlessPoliciesService', () => {
       );
     });
   });
+
+  describe('deleteAgentlessPolicy', () => {
+    let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
+    beforeEach(() => {
+      const cloudSetup = cloudMock.createSetup();
+      cloudSetup.isCloudEnabled = true;
+
+      appContextService.start({
+        ...createAppContextStartContractMock({
+          agentless: { enabled: true },
+        }),
+        cloud: cloudSetup,
+      });
+
+      jest.resetAllMocks();
+      packagePolicyService = createPackagePolicyServiceMock();
+
+      jest.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({} as any));
+    });
+
+    it('should delete an existing agentless policy', async () => {
+      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+        supports_agentless: true,
+      } as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await agentlessPoliciesService.deleteAgentlessPolicy('existing-agentless-policy-id');
+
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'existing-agentless-policy-id',
+        expect.objectContaining({})
+      );
+    });
+
+    it('should throw when deleting a non agentless policy', async () => {
+      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+        supports_agentless: false,
+      } as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await expect(() =>
+        agentlessPoliciesService.deleteAgentlessPolicy('non-agentless-policy-id')
+      ).rejects.toThrow(`Policy non-agentless-policy-id is not an agentless policy`);
+
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(0);
+    });
+  });
 });
