@@ -5,13 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiCard, EuiButton, EuiIcon } from '@elastic/eui';
+import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_AGENTS_CREATE } from '@kbn/deeplinks-agent-builder';
+import { useKibana } from '../hooks/use_kibana';
 import searchWindowSVG from '../../assets/search_window_illustration.svg';
 import searchAnalyticsSVG from '../../assets/search_analytics.svg';
 import searchResultsSVG from '../../assets/search_results_illustration.svg';
 
 export const ExploreWorkplaceAI: React.FC = () => {
+  const {
+    services: { application, chrome },
+  } = useKibana();
+
+  const onCreateAgent = useCallback(() => {
+    const createAgentUrl = chrome?.navLinks.get(
+      `${AGENT_BUILDER_APP_ID}:${AGENT_BUILDER_AGENTS_CREATE}`
+    )?.url;
+
+    if (createAgentUrl) {
+      application?.navigateToUrl(createAgentUrl);
+    }
+  }, [application, chrome]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiTitle size="s">
@@ -36,7 +52,7 @@ export const ExploreWorkplaceAI: React.FC = () => {
             title="Create your first agent"
             description="Build an intelligent agent using your connected data."
             footer={
-              <EuiButton color="text" onClick={() => {}}>
+              <EuiButton color="text" onClick={onCreateAgent}>
                 Create an agent
               </EuiButton>
             }

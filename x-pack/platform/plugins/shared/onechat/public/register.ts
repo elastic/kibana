@@ -9,6 +9,7 @@ import type { AppMountParameters } from '@kbn/core-application-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { AGENT_BUILDER_AGENTS_CREATE } from '@kbn/deeplinks-agent-builder';
 import { i18n } from '@kbn/i18n';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import { eventTypes } from '../common/events';
@@ -52,6 +53,13 @@ export const registerApp = ({
         id: 'agents',
         path: '/agents',
         title: i18n.translate('xpack.onechat.agents.title', { defaultMessage: 'Agents' }),
+      },
+      {
+        id: AGENT_BUILDER_AGENTS_CREATE,
+        path: '/agents/new',
+        title: i18n.translate('xpack.onechat.agents.createTitle', {
+          defaultMessage: 'Create Agent',
+        }),
       },
     ],
     async mount({ element, history }: AppMountParameters) {
