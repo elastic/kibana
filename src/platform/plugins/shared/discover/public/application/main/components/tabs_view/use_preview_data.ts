@@ -39,7 +39,7 @@ export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
             [tabId]: getPreviewDataObservable(
               runtimeStateManager,
               tabId,
-              tabState.initialAppState,
+              tabState.appState,
               tabState.initialInternalState,
               savedDataViews
             ),
@@ -142,7 +142,7 @@ const getPreviewTitle = (
 const getPreviewDataObservable = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string,
-  initialAppState: TabState['initialAppState'] | undefined,
+  appState: TabState['appState'],
   initialInternalState: TabState['initialInternalState'] | undefined,
   savedDataViews: DataViewListItem[]
 ) => {
@@ -155,27 +155,23 @@ const getPreviewDataObservable = (
         );
         return of({
           status: TabStatus.DEFAULT,
-          query: getPreviewQuery(initialAppState?.query, derivedDataViewName),
-          title: getPreviewTitle(initialAppState?.query, derivedDataViewName),
+          query: getPreviewQuery(appState.query, derivedDataViewName),
+          title: getPreviewTitle(appState.query, derivedDataViewName),
         });
       }
 
-      const { appState } = tabStateContainer;
-
       return combineLatest([
         tabStateContainer.dataState.data$.main$,
-        appState.state$.pipe(startWith(appState.get())),
         tabStateContainer.savedSearchState
           .getCurrent$()
           .pipe(startWith(tabStateContainer.savedSearchState.getState())),
       ]).pipe(
-        map(([{ fetchStatus }, { query }, { searchSource }]) => ({
+        map(([{ fetchStatus }, { searchSource }]) => ({
           fetchStatus,
-          query,
           dataViewName: searchSource?.getField('index')?.name,
         })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-        map(({ fetchStatus, query, dataViewName }) => {
+        map(({ fetchStatus, dataViewName }) => {
           let derivedDataViewName = dataViewName;
 
           if (!derivedDataViewName && initialInternalState?.serializedSearchSource) {
@@ -187,8 +183,8 @@ const getPreviewDataObservable = (
 
           return {
             status: getPreviewStatus(fetchStatus),
-            query: getPreviewQuery(query, derivedDataViewName),
-            title: getPreviewTitle(query, derivedDataViewName),
+            query: getPreviewQuery(appState.query, derivedDataViewName),
+            title: getPreviewTitle(appState.query, derivedDataViewName),
           };
         })
       );

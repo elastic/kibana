@@ -33,7 +33,7 @@ export const fromSavedObjectTabToTabState = ({
     visContext: tab.visContext,
     controlGroupJson: tab.controlGroupJson,
   },
-  initialAppState: {
+  appState: {
     columns: tab.columns,
     filters: tab.serializedSearchSource.filter,
     grid: tab.grid,
@@ -106,35 +106,32 @@ export const fromTabStateToSavedObjectTab = ({
   timeRestore: boolean;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
-  const allowedSampleSize = getAllowedSampleSize(
-    tab.initialAppState?.sampleSize,
-    services.uiSettings
-  );
+  const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
 
   return {
     id: tab.id,
     label: tab.label,
-    sort: (tab.initialAppState?.sort ?? []) as SortOrder[],
-    columns: tab.initialAppState?.columns ?? [],
-    grid: tab.initialAppState?.grid ?? {},
-    hideChart: tab.initialAppState?.hideChart ?? false,
-    isTextBasedQuery: isOfAggregateQueryType(tab.initialAppState?.query),
+    sort: (tab.appState.sort ?? []) as SortOrder[],
+    columns: tab.appState.columns ?? [],
+    grid: tab.appState.grid ?? {},
+    hideChart: tab.appState.hideChart ?? false,
+    isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
     usesAdHocDataView: isObject(tab.initialInternalState?.serializedSearchSource?.index),
     serializedSearchSource: tab.initialInternalState?.serializedSearchSource ?? {},
-    viewMode: tab.initialAppState?.viewMode,
-    hideAggregatedPreview: tab.initialAppState?.hideAggregatedPreview,
-    rowHeight: tab.initialAppState?.rowHeight,
-    headerRowHeight: tab.initialAppState?.headerRowHeight,
+    viewMode: tab.appState.viewMode,
+    hideAggregatedPreview: tab.appState.hideAggregatedPreview,
+    rowHeight: tab.appState.rowHeight,
+    headerRowHeight: tab.appState.headerRowHeight,
     timeRestore,
     timeRange: timeRestore ? tab.globalState.timeRange : undefined,
     refreshInterval: timeRestore ? tab.globalState.refreshInterval : undefined,
-    rowsPerPage: tab.initialAppState?.rowsPerPage,
+    rowsPerPage: tab.appState.rowsPerPage,
     sampleSize:
-      tab.initialAppState?.sampleSize && tab.initialAppState.sampleSize === allowedSampleSize
-        ? tab.initialAppState.sampleSize
+      tab.appState.sampleSize && tab.appState.sampleSize === allowedSampleSize
+        ? tab.appState.sampleSize
         : undefined,
-    breakdownField: tab.initialAppState?.breakdownField,
-    density: tab.initialAppState?.density,
+    breakdownField: tab.appState.breakdownField,
+    density: tab.appState.density,
     visContext: tab.initialInternalState?.visContext,
     controlGroupJson: tab.initialInternalState?.controlGroupJson,
   };

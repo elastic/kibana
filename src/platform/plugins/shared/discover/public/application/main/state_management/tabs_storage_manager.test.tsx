@@ -71,7 +71,7 @@ const mockRecentlyClosedTab = getRecentlyClosedTabStateMock({
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
   },
-  initialAppState: {
+  appState: {
     columns: ['e', 'f'],
   },
   closedAt: Date.now(),
@@ -113,7 +113,7 @@ describe('TabsStorageManager', () => {
     internalState: tab.id.startsWith('closedTab')
       ? tab.initialInternalState
       : mockGetInternalState(),
-    appState: tab.id.startsWith('closedTab') ? tab.initialAppState : mockGetAppState(tab.id),
+    appState: tab.id.startsWith('closedTab') ? tab.appState : mockGetAppState(tab.id),
     globalState: tab.globalState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
   });
@@ -122,8 +122,8 @@ describe('TabsStorageManager', () => {
     ...DEFAULT_TAB_STATE,
     id: storedTab.id,
     label: storedTab.label,
-    initialAppState: storedTab.id.startsWith('closedTab')
-      ? storedTab.initialAppState
+    appState: storedTab.id.startsWith('closedTab')
+      ? storedTab.appState
       : mockGetAppState(storedTab.id),
     globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),

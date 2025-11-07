@@ -177,7 +177,7 @@ export const createTabsStorageManager = ({
     const getInternalStateForTabWithoutRuntimeState = (tabId: string) =>
       getInternalState?.(tabId) || tabState.initialInternalState;
     const getAppStateForTabWithoutRuntimeState = (tabId: string) =>
-      getAppState?.(tabId) || tabState.initialAppState;
+      getAppState?.(tabId) || tabState.appState;
 
     return {
       id: tabState.id,
@@ -225,7 +225,7 @@ export const createTabsStorageManager = ({
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
-      initialAppState: appState,
+      appState: appState || {},
       globalState: globalState || {},
       esqlVariables,
     };

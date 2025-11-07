@@ -81,15 +81,15 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
 
     const tabState = selectTab(getState(), tabId);
 
-    if (tabState?.globalState) {
+    if (tabState.globalState) {
       tabInitialGlobalState = cloneDeep(tabState.globalState);
     }
 
-    if (tabState?.initialAppState) {
-      tabInitialAppState = cloneDeep(tabState.initialAppState);
+    if (tabState.appState) {
+      tabInitialAppState = cloneDeep(tabState.appState);
     }
 
-    if (tabState?.initialInternalState) {
+    if (tabState.initialInternalState) {
       tabInitialInternalState = cloneDeep(tabState.initialInternalState);
     }
 

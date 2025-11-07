@@ -25,12 +25,12 @@ import type { DiscoverAppState } from '../../discover_app_state_container';
 
 const createPersistedTab = ({
   tabId,
-  initialAppState,
+  appState,
   dataView,
   services,
 }: {
   tabId: string;
-  initialAppState?: DiscoverAppState;
+  appState?: DiscoverAppState;
   dataView: DataView;
   services: DiscoverServices;
 }) =>
@@ -40,7 +40,7 @@ const createPersistedTab = ({
       initialInternalState: {
         serializedSearchSource: { index: dataView.id },
       },
-      ...(initialAppState ? { initialAppState } : {}),
+      ...(appState ? { appState } : {}),
     }),
     timeRestore: false,
     services,
@@ -63,13 +63,13 @@ const setup = async () => {
     });
   const persistedTab1 = createPersistedTab({
     tabId: 'tab-1',
-    initialAppState: { columns: ['tab-1-column'] },
+    appState: { columns: ['tab-1-column'] },
     dataView: dataViewWithTimefieldMock,
     services,
   });
   const persistedTab2 = createPersistedTab({
     tabId: 'tab-2',
-    initialAppState: { columns: ['tab-2-column'] },
+    appState: { columns: ['tab-2-column'] },
     dataView: dataViewWithNoTimefieldMock,
     services,
   });

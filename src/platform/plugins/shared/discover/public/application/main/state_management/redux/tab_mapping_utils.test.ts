@@ -31,7 +31,7 @@ const tab1 = getTabStateMock({
     timeRange: { from: 'now-7d', to: 'now' },
     refreshInterval: { pause: true, value: 500 },
   },
-  initialAppState: { columns: ['column1'] },
+  appState: { columns: ['column1'] },
 });
 const tab2 = getTabStateMock({
   id: '2',
@@ -44,7 +44,7 @@ const tab2 = getTabStateMock({
     timeRange: { from: 'now-15m', to: 'now' },
     refreshInterval: { pause: false, value: 1000 },
   },
-  initialAppState: { columns: ['column2'] },
+  appState: { columns: ['column2'] },
 });
 
 describe('tab mapping utils', () => {
