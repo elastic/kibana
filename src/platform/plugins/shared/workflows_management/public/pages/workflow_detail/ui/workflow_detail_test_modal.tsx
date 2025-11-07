@@ -58,7 +58,7 @@ export const WorkflowDetailTestModal = () => {
   useEffect(() => {
     if (isTestModalOpen) {
       if (!canExecuteWorkflow) {
-        notifications?.toasts.addWarning(
+        notifications.toasts.addWarning(
           i18n.translate('workflows.detail.testModal.warningNoPermissions', {
             defaultMessage: 'You do not have permission to run workflows.',
           }),
