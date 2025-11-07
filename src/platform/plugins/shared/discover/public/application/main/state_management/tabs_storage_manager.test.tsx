@@ -27,20 +27,6 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
 
-const mockGetAppState = (tabId: string) => {
-  if (tabId === 'tab1') {
-    return {
-      columns: ['a', 'b'],
-    };
-  }
-
-  if (tabId === 'tab2') {
-    return {
-      columns: ['c', 'd'],
-    };
-  }
-};
-
 const mockGetInternalState = () => ({});
 
 const mockTab1 = getTabStateMock({
@@ -51,6 +37,9 @@ const mockTab1 = getTabStateMock({
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
   },
+  appState: {
+    columns: ['a', 'b'],
+  },
 });
 
 const mockTab2 = getTabStateMock({
@@ -60,6 +49,9 @@ const mockTab2 = getTabStateMock({
     timeRange: { from: '2025-04-17T03:07:55.127Z', to: '2025-04-17T03:12:55.127Z' },
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
+  },
+  appState: {
+    columns: ['c', 'd'],
   },
 });
 
@@ -113,7 +105,7 @@ describe('TabsStorageManager', () => {
     internalState: tab.id.startsWith('closedTab')
       ? tab.initialInternalState
       : mockGetInternalState(),
-    appState: tab.id.startsWith('closedTab') ? tab.appState : mockGetAppState(tab.id),
+    appState: tab.appState,
     globalState: tab.globalState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
   });
@@ -122,9 +114,7 @@ describe('TabsStorageManager', () => {
     ...DEFAULT_TAB_STATE,
     id: storedTab.id,
     label: storedTab.label,
-    appState: storedTab.id.startsWith('closedTab')
-      ? storedTab.appState
-      : mockGetAppState(storedTab.id),
+    appState: storedTab.appState,
     globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
   });
@@ -221,12 +211,7 @@ describe('TabsStorageManager', () => {
       recentlyClosedTabs: [mockRecentlyClosedTab],
     };
 
-    await tabsStorageManager.persistLocally(
-      props,
-      mockGetAppState,
-      mockGetInternalState,
-      'testDiscoverSessionId'
-    );
+    await tabsStorageManager.persistLocally(props, mockGetInternalState, 'testDiscoverSessionId');
 
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,

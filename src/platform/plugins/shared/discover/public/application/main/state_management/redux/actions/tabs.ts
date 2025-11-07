@@ -27,7 +27,6 @@ import {
 import {
   createTabRuntimeState,
   selectTabRuntimeState,
-  selectTabRuntimeAppState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
 } from '../runtime_state';
@@ -72,8 +71,7 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.initialInternalState =
         selectTabRuntimeInternalState(runtimeStateManager, tab.id) ??
         cloneDeep(tab.initialInternalState);
-      newRecentlyClosedTab.appState =
-        selectTabRuntimeAppState(runtimeStateManager, tab.id) ?? cloneDeep(tab.appState);
+      newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
       justRemovedTabs.push(newRecentlyClosedTab);
 
@@ -175,9 +173,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.initialInternalState =
           selectTabRuntimeInternalState(runtimeStateManager, item.duplicatedFromId) ??
           cloneDeep(existingTabToDuplicateFrom.initialInternalState);
-        tab.appState =
-          selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
-          cloneDeep(existingTabToDuplicateFrom.appState);
+        tab.appState = cloneDeep(existingTabToDuplicateFrom.appState);
         tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
         tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
       } else if (item.restoredFromId) {

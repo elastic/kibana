@@ -111,14 +111,6 @@ export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
     (tab) => tab.currentDataView$.getValue()?.id === dataViewId
   ).length > 1;
 
-export const selectTabRuntimeAppState = (
-  runtimeStateManager: RuntimeStateManager,
-  tabId: string
-) => {
-  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  return tabRuntimeState?.stateContainer$.getValue()?.appState?.get();
-};
-
 export const selectTabRuntimeInternalState = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string

@@ -29,11 +29,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import {
-  type RuntimeStateManager,
-  selectTabRuntimeAppState,
-  selectTabRuntimeInternalState,
-} from './runtime_state';
+import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
@@ -339,13 +335,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
         const discoverSession =
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
         const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
-        const getTabAppState = (tabId: string) =>
-          selectTabRuntimeAppState(runtimeStateManager, tabId);
         const getTabInternalState = (tabId: string) =>
           selectTabRuntimeInternalState(runtimeStateManager, tabId);
         void tabsStorageManager.persistLocally(
           action.payload,
-          getTabAppState,
           getTabInternalState,
           discoverSession?.id
         );
@@ -363,7 +356,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
         withTab(listenerApi.getState(), action, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
             internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
-            appState: selectTabRuntimeAppState(runtimeStateManager, tab.id),
+            appState: tab.appState,
             globalState: tab.globalState,
           });
         });
