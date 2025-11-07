@@ -563,15 +563,15 @@ export const updateAlertTags = () => {
 };
 
 export const addAlertTagToNAlerts = (alertCount: number, tag = 'Duplicate') => {
-   selectNumberOfAlerts(alertCount);
-    openAlertTaggingBulkActionMenu();
-    clickAlertTag(tag);
-    updateAlertTags();
-    cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    selectNumberOfAlerts(alertCount);
-    openAlertTaggingBulkActionMenu();
-    cy.get(SELECTED_ALERT_TAG).contains(tag);
-}
+  selectNumberOfAlerts(alertCount);
+  openAlertTaggingBulkActionMenu();
+  clickAlertTag(tag);
+  updateAlertTags();
+  cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  selectNumberOfAlerts(alertCount);
+  openAlertTaggingBulkActionMenu();
+  cy.get(SELECTED_ALERT_TAG).contains(tag);
+};
 
 export const showHoverActionsEventRenderedView = (fieldSelector: string) => {
   cy.get(fieldSelector).first().realHover();
