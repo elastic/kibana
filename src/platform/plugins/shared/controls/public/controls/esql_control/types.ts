@@ -11,14 +11,15 @@ import type { ESQLControlState, PublishesESQLVariable } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
   PublishesDataLoading,
-  PublishesTitle,
+  TitlesApi,
 } from '@kbn/presentation-publishing';
+import type { Filter } from '@kbn/es-query';
 import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultEmbeddableApi<ESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
-  Pick<Required<PublishesTitle>, 'defaultTitle$'> &
+  TitlesApi &
   PublishesDataLoading;
 
 type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
@@ -35,4 +36,11 @@ export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   HideSortUnusedState &
   DisableLoadSuggestionsUnusedState &
   DisableInvalidSelectionsUnusedState &
-  Pick<OptionsListComponentState, 'fieldName'>;
+  Pick<OptionsListComponentState, 'fieldName'> & {
+    useGlobalFilters?: boolean;
+    ignoreValidations?: boolean;
+    dataViewId: string;
+    blockingError?: Error;
+    filtersLoading: boolean;
+    appliedFilters: Filter[] | undefined;
+  };
