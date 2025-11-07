@@ -7,24 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  SimpleFilter,
-  SimpleFilterCondition,
-  Filter as StoredFilter,
-} from '@kbn/es-query-server';
+import type { AsCodeFilter, AsCodeConditionFilter } from '@kbn/es-query-server';
+import type { StoredFilter } from './types';
 import {
   toStoredFilter,
   convertFromSimpleCondition,
   convertFromFilterGroup,
   convertFromDSLFilter,
 } from './to_stored_filter';
+import { fromStoredFilter } from './from_stored_filter';
 import { FilterStateStore } from '../..';
 import { FilterConversionError } from './errors';
+import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
 describe('toStoredFilter', () => {
   describe('main conversion function', () => {
     it('should convert condition filters to stored format', () => {
-      const simplified: SimpleFilter = {
+      const simplified: AsCodeFilter = {
         condition: {
           field: 'status',
           operator: 'is',
@@ -51,7 +50,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should handle pinned filters', () => {
-      const simplified: SimpleFilter = {
+      const simplified: AsCodeFilter = {
         pinned: true,
         condition: {
           field: 'status',
@@ -66,7 +65,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should convert group filters to bool queries', () => {
-      const simplified: SimpleFilter = {
+      const simplified: AsCodeFilter = {
         group: {
           type: 'and',
           conditions: [
@@ -85,7 +84,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should convert DSL filters', () => {
-      const simplified: SimpleFilter = {
+      const simplified: AsCodeFilter = {
         dsl: {
           query: { script: { source: 'doc.field.value > 0' } },
         },
@@ -100,7 +99,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should throw for filters with no type', () => {
-      const simplified = {} as SimpleFilter;
+      const simplified = {} as AsCodeFilter;
 
       expect(() => toStoredFilter(simplified)).toThrow(FilterConversionError);
     });
@@ -114,7 +113,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should convert exists conditions', () => {
-      const condition: SimpleFilterCondition = {
+      const condition: AsCodeConditionFilter['condition'] = {
         field: 'username',
         operator: 'exists',
       };
@@ -126,7 +125,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should convert not_exists conditions', () => {
-      const condition: SimpleFilterCondition = {
+      const condition: AsCodeConditionFilter['condition'] = {
         field: 'username',
         operator: 'not_exists',
       };
@@ -138,7 +137,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should convert is conditions', () => {
-      const condition: SimpleFilterCondition = {
+      const condition: AsCodeConditionFilter['condition'] = {
         field: 'status',
         operator: 'is',
         value: 'active',
@@ -155,7 +154,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should convert range conditions', () => {
-      const condition: SimpleFilterCondition = {
+      const condition: AsCodeConditionFilter['condition'] = {
         field: 'age',
         operator: 'range',
         value: { gte: 18, lte: 65 },
@@ -179,8 +178,12 @@ describe('toStoredFilter', () => {
       const group = {
         type: 'and' as const,
         conditions: [
-          { field: 'status', operator: 'is', value: 'active' } as SimpleFilterCondition,
-          { field: 'type', operator: 'is', value: 'user' } as SimpleFilterCondition,
+          {
+            field: 'status',
+            operator: 'is',
+            value: 'active',
+          } as AsCodeConditionFilter['condition'],
+          { field: 'type', operator: 'is', value: 'user' } as AsCodeConditionFilter['condition'],
         ],
       };
 
@@ -202,8 +205,16 @@ describe('toStoredFilter', () => {
       const group = {
         type: 'or' as const,
         conditions: [
-          { field: 'status', operator: 'is', value: 'active' } as SimpleFilterCondition,
-          { field: 'status', operator: 'is', value: 'pending' } as SimpleFilterCondition,
+          {
+            field: 'status',
+            operator: 'is',
+            value: 'active',
+          } as AsCodeConditionFilter['condition'],
+          {
+            field: 'status',
+            operator: 'is',
+            value: 'pending',
+          } as AsCodeConditionFilter['condition'],
         ],
       };
 
@@ -235,6 +246,33 @@ describe('toStoredFilter', () => {
 
       expect(result.query).toEqual(dsl.query);
       expect(result.meta.type).toBe('custom');
+    });
+  });
+
+  describe('round-trip conversion', () => {
+    it('should preserve spatial filter data through round-trip conversion', () => {
+      const originalFilter = spatialFilterFixture as StoredFilter;
+
+      // Convert to SimpleFilter
+      const simpleFilter = fromStoredFilter(originalFilter);
+
+      // Convert back to StoredFilter
+      const roundTripFilter = toStoredFilter(simpleFilter);
+
+      // Verify core query is preserved
+      expect(roundTripFilter.query).toEqual(originalFilter.query);
+
+      // Verify base properties are preserved
+      expect(roundTripFilter.meta.alias).toBe(originalFilter.meta.alias);
+      expect(roundTripFilter.meta.disabled).toBe(originalFilter.meta.disabled);
+      expect(roundTripFilter.meta.negate).toBe(originalFilter.meta.negate);
+      expect(roundTripFilter.$state).toEqual(originalFilter.$state);
+
+      // Verify filterType is preserved (now supported!)
+      expect(roundTripFilter.meta.type).toBe(originalFilter.meta.type);
+
+      // Verify isMultiIndex is preserved (now supported!)
+      expect(roundTripFilter.meta.isMultiIndex).toBe(originalFilter.meta.isMultiIndex);
     });
   });
 });

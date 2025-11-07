@@ -11,13 +11,14 @@
  * Utility functions for filter conversion
  */
 
-import type { SimpleFilter, Filter } from '@kbn/es-query-server';
+import type { AsCodeFilter } from '@kbn/es-query-server';
 import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import type { StoredFilter } from './types';
 
 /**
  * Extract base properties from stored filter
  */
-export function extractBaseProperties(storedFilter: Filter): Partial<SimpleFilter> {
+export function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter> {
   const $state = storedFilter.$state;
   const meta = storedFilter.meta;
 
@@ -29,6 +30,12 @@ export function extractBaseProperties(storedFilter: Filter): Partial<SimpleFilte
     dataViewId: meta?.index || undefined,
     negate: meta?.negate === true ? true : meta?.negate === false ? false : undefined,
     label: meta?.alias || undefined,
+    // New properties for preserving metadata
+    isMultiIndex:
+      meta?.isMultiIndex === true ? true : meta?.isMultiIndex === false ? false : undefined,
+    filterType: meta?.type || undefined,
+    key: meta?.key || undefined,
+    value: meta?.value || undefined,
   };
 }
 

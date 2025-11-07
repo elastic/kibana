@@ -8,26 +8,26 @@
  */
 
 /**
- * Functions for converting stored filters to SimpleFilter format
+ * Functions for converting stored filters to AsCodeFilter format
  *
- * Conversion Strategy (in order of precedence):
- * 1. Legacy Migration: Normalize legacy Kibana filters with top-level query properties
- * 2. Full Compatibility: Direct conversion to SimpleFilterCondition (simple operators)
- * 3. Enhanced Compatibility: Parse complex query structures into SimpleFilterCondition
- * 4. High-Fidelity: Preserve complex filters as RawDSL (custom queries, scripts, etc.)
- * 5. Group Filters: Convert combined/bool queries to FilterGroup
- * 6. Fallback: Preserve as RawDSL to avoid data loss
+ * CONVERSION STRATEGIES:
+ * 1. Direct Compatibility: Uses simple condition format (primary path for simple operators)
+ * 2. Full Compatibility: Direct conversion to AsCodeConditionFilter (simple operators)
+ * 3. Enhanced Compatibility: Parse complex query structures into AsCodeConditionFilter
+ * 4. Group Handling: Convert combined/bool filters into AsCodeGroupFilter
+ * 5. Preserve Original: When conversion would lose data or semantics, preserve as DSL (AsCodeDSLFilter)
+ *
+ * See: fromStoredFilter() for the main entry point
  */
 
 import type {
-  SimpleFilter,
-  SimpleFilterCondition,
-  SimpleFilterGroup,
-  SimpleDSLFilter,
-  SimpleRangeValue,
-  Filter,
+  AsCodeFilter,
+  AsCodeConditionFilter,
+  AsCodeGroupFilter,
+  AsCodeDSLFilter,
 } from '@kbn/es-query-server';
 import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import type { StoredFilter } from './types';
 import { migrateFilter } from '../es_query/migrate_filter';
 import { FilterConversionError } from './errors';
 import { extractBaseProperties } from './utils';
@@ -93,44 +93,61 @@ interface FilterQuery {
 }
 
 /**
- * Convert stored Filter (from saved objects/URL state) to SimpleFilter
+ * Validate that an array contains values of a single type (homogeneous)
+ * @throws FilterConversionError if array contains mixed types
+ */
+function validateHomogeneousArray(values: Array<string | number | boolean>, context: string): void {
+  if (values.length > 0) {
+    const firstType = typeof values[0];
+    const isHomogeneous = values.every((v) => typeof v === firstType);
+
+    if (!isHomogeneous) {
+      throw new FilterConversionError(
+        `${context} must have homogeneous value types, got mixed types: ${values
+          .map((v) => typeof v)
+          .join(', ')}`
+      );
+    }
+  }
+}
+
+/**
+ * Convert stored Filter (from saved objects/URL state) to AsCodeFilter
  *
- * Accepts unknown to handle potentially malformed or legacy filter data from saved objects.
- * Validates and transforms the input into a known good SimpleFilter format.
+ * This function handles the conversion from legacy Filter format to the modern As Code API.
+ * Validates and transforms the input into a known good AsCodeFilter format.
  *
- * @param storedFilter - Filter data from saved objects (may be legacy, modern, or malformed)
- * @returns SimpleFilter with condition, group, or dsl format
+ * @param storedFilter The filter to convert (typically from saved object or URL state)
+ * @returns AsCodeFilter with condition, group, or dsl format
  * @throws FilterConversionError if filter is null/undefined or critically malformed
  */
-export function fromStoredFilter(storedFilter: unknown): SimpleFilter {
+export function fromStoredFilter(storedFilter: unknown): AsCodeFilter {
   try {
     // Handle null/undefined input
     if (!storedFilter) {
       throw new FilterConversionError('Cannot convert null or undefined filter');
     }
 
-    // Cast to Filter for type-safe access (we validate shape through type guards below)
-    const filter = storedFilter as Filter;
+    // Cast to StoredFilter for type-safe access (we validate shape through type guards below)
+    const filter = storedFilter as StoredFilter;
 
     // Migrate legacy filter formats to modern format only if needed
     // This avoids unnecessary processing for modern filters, which would lose properties
     // via migrateFilter's pick() call. Legacy filters have top-level query properties
     // (range, exists, match_all, match) that need to be moved under .query
-    const normalizedFilter = isLegacyFilter(filter)
-      ? (migrateFilter(filter as Parameters<typeof migrateFilter>[0]) as Filter)
-      : filter;
+    const normalizedFilter = isLegacyFilter(filter) ? migrateFilter(filter) : filter;
 
     // Extract base properties from stored filter
     const baseProperties = extractBaseProperties(normalizedFilter);
 
-    // STRATEGY 1: Full Compatibility - Direct SimpleFilter conversion
+    // STRATEGY 1: Full Compatibility - Direct AsCodeFilter conversion
     if (isFullyCompatible(normalizedFilter)) {
       try {
         const condition = convertToSimpleCondition(normalizedFilter);
         return {
           ...baseProperties,
           condition,
-        } as SimpleFilter;
+        };
       } catch (conversionError) {
         // If conversion fails, fall through to enhanced handling
       }
@@ -144,7 +161,7 @@ export function fromStoredFilter(storedFilter: unknown): SimpleFilter {
         return {
           ...baseProperties,
           condition,
-        } as SimpleFilter;
+        };
       } catch (conversionError) {
         // If conversion fails, fall through to DSL handling
       }
@@ -155,7 +172,7 @@ export function fromStoredFilter(storedFilter: unknown): SimpleFilter {
       return {
         ...baseProperties,
         dsl: convertToRawDSLWithReason(normalizedFilter),
-      } as SimpleFilter;
+      };
     }
 
     // STRATEGY 4: Handle grouped filters
@@ -165,7 +182,7 @@ export function fromStoredFilter(storedFilter: unknown): SimpleFilter {
         return {
           ...baseProperties,
           group,
-        } as SimpleFilter;
+        };
       } catch (conversionError) {
         // If conversion fails, fall through to DSL handling
       }
@@ -175,7 +192,7 @@ export function fromStoredFilter(storedFilter: unknown): SimpleFilter {
     return {
       ...baseProperties,
       dsl: convertToRawDSLWithReason(normalizedFilter),
-    } as SimpleFilter;
+    };
   } catch (error) {
     if (error instanceof FilterConversionError) {
       throw error;
@@ -190,7 +207,9 @@ export function fromStoredFilter(storedFilter: unknown): SimpleFilter {
 /**
  * Convert stored filter to simple condition (Strategy 1 & 2)
  */
-export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCondition {
+export function convertToSimpleCondition(
+  storedFilter: StoredFilter
+): AsCodeConditionFilter['condition'] {
   const meta = storedFilter.meta || {};
   const query = (storedFilter.query || {}) as FilterQuery;
 
@@ -205,12 +224,17 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
     return {
       field,
       operator: meta.negate ? SIMPLE_FILTER_OPERATOR.NOT_EXISTS : SIMPLE_FILTER_OPERATOR.EXISTS,
-    } as SimpleFilterCondition;
+    };
   }
 
   if (query.range) {
     const rangeQuery = query.range[field];
-    const rangeValue: SimpleRangeValue = {};
+    const rangeValue: {
+      gte?: number | string;
+      lte?: number | string;
+      gt?: number | string;
+      lt?: number | string;
+    } = {};
 
     if (rangeQuery?.gte !== undefined) rangeValue.gte = rangeQuery.gte;
     if (rangeQuery?.lte !== undefined) rangeValue.lte = rangeQuery.lte;
@@ -227,6 +251,10 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
   if (query.terms) {
     const values = query.terms[field];
     const valueArray = Array.isArray(values) ? values : [values];
+
+    // Validate that all values are the same type (homogeneous array)
+    validateHomogeneousArray(valueArray, 'Terms query');
+
     return {
       field,
       operator: meta.negate
@@ -284,19 +312,19 @@ export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCond
 /**
  * Convert stored filter to filter group
  */
-export function convertToFilterGroup(storedFilter: Filter): SimpleFilterGroup {
+export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['group'] {
   // Handle combined filter format (legacy): meta.type === 'combined' with params array
   if (storedFilter.meta?.type === 'combined' && Array.isArray(storedFilter.meta.params)) {
     // ExtendedFilter type includes optional 'relation' property
     const type = storedFilter.meta.relation === 'or' ? 'or' : 'and';
 
-    // Type guard: params should be Filter[] for combined filters
+    // Type guard: params should be StoredFilter[] for combined filters
     const params = storedFilter.meta.params;
     if (!Array.isArray(params) || params.some((p) => typeof p === 'string')) {
-      throw new FilterConversionError('Combined filter params must be Filter array');
+      throw new FilterConversionError('Combined filter params must be StoredFilter array');
     }
 
-    const conditions = (params as Filter[]).map((param) => {
+    const conditions = (params as StoredFilter[]).map((param) => {
       // Each param is itself a complete stored filter
       // Recursively convert it to get the condition
       const paramFilter = fromStoredFilter(param);
@@ -314,7 +342,7 @@ export function convertToFilterGroup(storedFilter: Filter): SimpleFilterGroup {
 
     return {
       type,
-      conditions: conditions as SimpleFilterGroup['conditions'],
+      conditions: conditions as AsCodeGroupFilter['group']['conditions'],
     };
   }
 
@@ -330,7 +358,7 @@ export function convertToFilterGroup(storedFilter: Filter): SimpleFilterGroup {
 
   const conditions = clauses.map((clause: unknown) => {
     // Create a mock stored filter for each clause to convert recursively
-    const mockStored: Filter = {
+    const mockStored: StoredFilter = {
       meta: storedFilter.meta,
       query: clause as Record<string, unknown>,
     };
@@ -341,14 +369,16 @@ export function convertToFilterGroup(storedFilter: Filter): SimpleFilterGroup {
 
   return {
     type,
-    conditions: conditions as SimpleFilterGroup['conditions'],
+    conditions,
   };
 }
 
 /**
  * STRATEGY 2: Convert with enhancement - parse complex structures when possible
  */
-export function convertWithEnhancement(storedFilter: Filter): SimpleFilterCondition {
+export function convertWithEnhancement(
+  storedFilter: StoredFilter
+): AsCodeConditionFilter['condition'] {
   // Handle query-based filters (legacy filters already migrated to query format)
   if (storedFilter.query) {
     return parseQueryFilter(storedFilter);
@@ -360,7 +390,7 @@ export function convertWithEnhancement(storedFilter: Filter): SimpleFilterCondit
 /**
  * Parse query-based filters (match_phrase, range, exists, etc.)
  */
-export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
+export function parseQueryFilter(storedFilter: StoredFilter): AsCodeConditionFilter['condition'] {
   const query = storedFilter.query as FilterQuery | undefined;
   if (!query) {
     throw new FilterConversionError('Filter query is undefined');
@@ -423,6 +453,9 @@ export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
     const field = Object.keys(query.terms)[0];
     const values = query.terms[field];
 
+    // Validate that all values are the same type (homogeneous array)
+    validateHomogeneousArray(values, 'Terms query');
+
     return {
       field,
       operator: meta.negate
@@ -446,7 +479,7 @@ export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
 /**
  * STRATEGY 3: Convert to RawDSL with preservation reason
  */
-export function convertToRawDSLWithReason(storedFilter: Filter): SimpleDSLFilter {
+export function convertToRawDSLWithReason(storedFilter: StoredFilter): AsCodeDSLFilter['dsl'] {
   // Preserved as RawDSL for maximum compatibility
   return {
     query: storedFilter.query || storedFilter,

@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
+import type { Writable } from 'utility-types';
+import type { storedFilterSchema } from '@kbn/es-query-server';
+
+/**
+ * Local type definition for stored filters (legacy/runtime format)
+ * Inferred from the storedFilterSchema in @kbn/es-query-server
+ */
+export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;
+
 // ====================================================================
 // VALIDATION TYPES
 // ====================================================================

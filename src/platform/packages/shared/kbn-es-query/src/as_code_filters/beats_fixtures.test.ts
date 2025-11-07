@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import { diff } from 'jest-diff';
 import { fromStoredFilter } from './from_stored_filter';
 import { toStoredFilter } from './to_stored_filter';
-import { isConditionFilter, isGroupFilter, isDSLFilter, isSimpleFilter } from './type_guards';
-import type { Filter } from '../..';
+import { isConditionFilter, isGroupFilter, isDSLFilter, isAsCodeFilter } from './type_guards';
+import type { StoredFilter } from './types';
+import { uniqueBeatsFilters } from '../__fixtures__/unique_beats_filters';
 
 /**
  * Unique Beats Filters Test Suite
@@ -26,8 +25,7 @@ import type { Filter } from '../..';
 
 describe('Unique Beats Filters', () => {
   // Load the deduplicated unique filters from our curated dataset
-  const uniqueFiltersPath = join(__dirname, 'fixtures', 'unique_beats_filters.json');
-  let uniqueFilters: Filter[] = [];
+  const uniqueFilters: StoredFilter[] = uniqueBeatsFilters as unknown as StoredFilter[];
 
   // Properties to ignore during round-trip comparison
   const ignoredProperties = new Set([
@@ -149,7 +147,7 @@ describe('Unique Beats Filters', () => {
       expect(hasCondition || hasGroup || hasDSL).toBe(true);
 
       // Test validation - verify filter has valid structure
-      expect(isSimpleFilter(simplified)).toBe(true);
+      expect(isAsCodeFilter(simplified)).toBe(true);
 
       // Test round-trip conversion
       const backToStored = toStoredFilter(simplified);
@@ -159,7 +157,7 @@ describe('Unique Beats Filters', () => {
 
       // Test that we can convert back again
       const roundTrip = fromStoredFilter(backToStored);
-      expect(isSimpleFilter(roundTrip)).toBe(true);
+      expect(isAsCodeFilter(roundTrip)).toBe(true);
 
       // Analyze round-trip fidelity
       const roundTripAnalysis = analyzeRoundTripDifferences(filter, backToStored);
@@ -184,10 +182,6 @@ describe('Unique Beats Filters', () => {
 
   beforeAll(() => {
     try {
-      // Load the unique filters dataset
-      const content = readFileSync(uniqueFiltersPath, 'utf-8');
-      uniqueFilters = JSON.parse(content);
-
       // Log analysis results for debugging
       // eslint-disable-next-line no-console
       console.log(`\n📊 Unique Beats Filters Analysis:`);

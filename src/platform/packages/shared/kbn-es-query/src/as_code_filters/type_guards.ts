@@ -12,12 +12,12 @@
  */
 
 import type {
-  SimpleFilter,
-  SimpleFilterCondition,
-  SimpleFilterGroup,
-  SimpleDSLFilter,
-  Filter,
+  AsCodeFilter,
+  AsCodeConditionFilter,
+  AsCodeGroupFilter,
+  AsCodeDSLFilter,
 } from '@kbn/es-query-server';
+import type { StoredFilter } from './types';
 
 /**
  * Legacy filter interface for legacy Kibana filter format
@@ -52,9 +52,9 @@ export function isLegacyFilter(value: unknown): value is LegacyFilter {
 // ====================================================================
 
 /**
- * Type guard to check if value has the minimal structure of a Filter
+ * Type guard to check if value has the minimal structure of a StoredFilter
  */
-function isStoredFilter(value: unknown): value is Filter {
+function isStoredFilter(value: unknown): value is StoredFilter {
   return typeof value === 'object' && value !== null;
 }
 
@@ -272,27 +272,21 @@ export function isStoredGroupFilter(storedFilter: unknown): boolean {
 /**
  * Type guard to check if filter has a condition property
  */
-export function isConditionFilter(
-  filter: SimpleFilter
-): filter is SimpleFilter & { condition: SimpleFilterCondition } {
+export function isConditionFilter(filter: AsCodeFilter): filter is AsCodeConditionFilter {
   return 'condition' in filter && filter.condition !== undefined;
 }
 
 /**
  * Type guard to check if filter has a group property
  */
-export function isGroupFilter(
-  filter: SimpleFilter
-): filter is SimpleFilter & { group: SimpleFilterGroup } {
+export function isGroupFilter(filter: AsCodeFilter): filter is AsCodeGroupFilter {
   return 'group' in filter && filter.group !== undefined;
 }
 
 /**
  * Type guard to check if filter has a dsl property
  */
-export function isDSLFilter(
-  filter: SimpleFilter
-): filter is SimpleFilter & { dsl: SimpleDSLFilter } {
+export function isDSLFilter(filter: AsCodeFilter): filter is AsCodeDSLFilter {
   return 'dsl' in filter && filter.dsl !== undefined;
 }
 
@@ -300,8 +294,8 @@ export function isDSLFilter(
  * Type guard to check if condition requires a value
  */
 export function isConditionWithValue(
-  condition: SimpleFilterCondition
-): condition is SimpleFilterCondition & { value: unknown } {
+  condition: AsCodeConditionFilter['condition']
+): condition is AsCodeConditionFilter['condition'] & { value: unknown } {
   return !['exists', 'not_exists'].includes(condition.operator);
 }
 
@@ -309,26 +303,26 @@ export function isConditionWithValue(
  * Type guard to check if condition is existence-only
  */
 export function isExistenceCondition(
-  condition: SimpleFilterCondition
-): condition is SimpleFilterCondition & { operator: 'exists' | 'not_exists' } {
+  condition: AsCodeConditionFilter['condition']
+): condition is AsCodeConditionFilter['condition'] & { operator: 'exists' | 'not_exists' } {
   return ['exists', 'not_exists'].includes(condition.operator);
 }
 
 /**
- * Type guard to check if condition is a nested SimpleFilterGroup
+ * Type guard to check if condition is a nested AsCodeGroupFilter
  */
 export function isNestedFilterGroup(
-  condition: SimpleFilterCondition | SimpleFilterGroup
-): condition is SimpleFilterGroup {
+  condition: AsCodeConditionFilter['condition'] | AsCodeGroupFilter['group']
+): condition is AsCodeGroupFilter['group'] {
   const c = condition as { conditions?: unknown };
   return 'conditions' in condition && Array.isArray(c.conditions);
 }
 
 /**
- * Type guard to check if a SimpleFilter has valid structure
+ * Type guard to check if an AsCodeFilter has valid structure
  * Validates that exactly one of condition, group, or dsl is present
  */
-export function isSimpleFilter(filter: SimpleFilter): boolean {
+export function isAsCodeFilter(filter: AsCodeFilter): boolean {
   const hasCondition = isConditionFilter(filter);
   const hasGroup = isGroupFilter(filter);
   const hasDSL = isDSLFilter(filter);

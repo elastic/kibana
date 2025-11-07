@@ -15,7 +15,8 @@ import {
 } from './from_stored_filter';
 import { FilterConversionError } from './errors';
 import { isConditionFilter, isGroupFilter, isDSLFilter } from './type_guards';
-import type { Filter } from '@kbn/es-query-server';
+import type { StoredFilter } from './types';
+import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
 describe('fromStoredFilter', () => {
   describe('Legacy filter migration', () => {
@@ -235,6 +236,32 @@ describe('fromStoredFilter', () => {
       expect(() => fromStoredFilter(null)).toThrow(FilterConversionError);
       expect(() => fromStoredFilter(undefined)).toThrow(FilterConversionError);
     });
+
+    it('should preserve spatial filters with geo_shape queries as DSL', () => {
+      const spatialFilter = spatialFilterFixture;
+
+      const result = fromStoredFilter(spatialFilter);
+
+      // Should be converted to DSL format due to geo_shape complexity
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        expect(result.dsl.query).toEqual(spatialFilter.query);
+        expect(result.label).toBe('intersects shape');
+        expect(result.disabled).toBe(false);
+        expect(result.negate).toBe(false);
+        expect(result.pinned).toBe(false); // appState = not pinned
+      }
+    });
+
+    it('should preserve isMultiIndex property in meta for spatial filters', () => {
+      const spatialFilter = spatialFilterFixture;
+
+      const result = fromStoredFilter(spatialFilter);
+
+      // Verify isMultiIndex is extracted from meta
+      expect(isDSLFilter(result)).toBe(true);
+      expect(result.isMultiIndex).toBe(true);
+    });
   });
 
   describe('convertToSimpleCondition', () => {
@@ -242,7 +269,7 @@ describe('fromStoredFilter', () => {
       const storedFilter = {
         meta: { key: 'field' },
         query: { exists: { field: 'test_field' } },
-      } as Filter;
+      } as StoredFilter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -260,7 +287,7 @@ describe('fromStoredFilter', () => {
             age: { gte: 18, lte: 65 },
           },
         },
-      } as Filter;
+      } as StoredFilter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -279,7 +306,7 @@ describe('fromStoredFilter', () => {
             status: ['active', 'pending'],
           },
         },
-      } as Filter;
+      } as StoredFilter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -290,11 +317,27 @@ describe('fromStoredFilter', () => {
       });
     });
 
+    it('should throw for non-homogeneous terms arrays', () => {
+      const storedFilter = {
+        meta: { key: 'status' },
+        query: {
+          terms: {
+            status: ['active', 123, true], // Mixed types
+          },
+        },
+      } as StoredFilter;
+
+      expect(() => convertToSimpleCondition(storedFilter)).toThrow(FilterConversionError);
+      expect(() => convertToSimpleCondition(storedFilter)).toThrow(
+        /Terms query must have homogeneous value types/
+      );
+    });
+
     it('should handle negated filters', () => {
       const storedFilter = {
         meta: { key: 'status', negate: true },
         query: { term: { status: 'inactive' } },
-      } as Filter;
+      } as StoredFilter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -309,7 +352,7 @@ describe('fromStoredFilter', () => {
       const storedFilter = {
         meta: {},
         query: { term: { username: 'john' } },
-      } as Filter;
+      } as StoredFilter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -320,7 +363,7 @@ describe('fromStoredFilter', () => {
       const storedFilter = {
         meta: { key: 'field' },
         query: { unsupported_query: { field: 'value' } },
-      } as Filter;
+      } as StoredFilter;
 
       expect(() => convertToSimpleCondition(storedFilter)).toThrow(FilterConversionError);
     });
@@ -335,7 +378,7 @@ describe('fromStoredFilter', () => {
             message: 'error occurred',
           },
         },
-      } as Filter;
+      } as StoredFilter;
 
       const result = parseQueryFilter(storedFilter);
 
@@ -354,7 +397,7 @@ describe('fromStoredFilter', () => {
             message: { query: 'error occurred' },
           },
         },
-      } as Filter;
+      } as StoredFilter;
 
       const result = parseQueryFilter(storedFilter);
 
@@ -376,7 +419,7 @@ describe('fromStoredFilter', () => {
             },
           },
         },
-      } as Filter;
+      } as StoredFilter;
 
       const result = parseQueryFilter(storedFilter);
 

@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { FilterStateStore } from '@kbn/es-query-constants';
 
-export const filterStateStoreSchema = schema.oneOf(
+const filterStateStoreSchema = schema.oneOf(
   [schema.literal(FilterStateStore.APP_STATE), schema.literal(FilterStateStore.GLOBAL_STATE)],
   {
     meta: {

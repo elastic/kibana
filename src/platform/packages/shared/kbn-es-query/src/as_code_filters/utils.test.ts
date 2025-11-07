@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter } from '@kbn/es-query-server';
+import type { StoredFilter } from './types';
 import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 import { extractBaseProperties, getFilterTypeForOperator } from './utils';
+import { FilterStateStore } from '../..';
 
 describe('Utils', () => {
   describe('extractBaseProperties', () => {
     it('should extract all base properties from stored filter', () => {
-      const storedFilter: Filter = {
-        $state: { store: 'globalState' },
+      const storedFilter: StoredFilter = {
+        $state: { store: FilterStateStore.GLOBAL_STATE },
         meta: {
           key: 'test_field',
           disabled: true,
@@ -24,6 +25,9 @@ describe('Utils', () => {
           params: { custom: 'metadata' },
           negate: true,
           alias: 'Test Filter',
+          isMultiIndex: true,
+          type: 'spatial_filter',
+          value: 'intersects',
         },
       };
 
@@ -36,11 +40,15 @@ describe('Utils', () => {
         dataViewId: 'test-index',
         negate: true,
         label: 'Test Filter',
+        key: 'test_field',
+        isMultiIndex: true,
+        filterType: 'spatial_filter',
+        value: 'intersects',
       });
     });
 
     it('should handle missing properties gracefully', () => {
-      const storedFilter = {} as unknown as Filter;
+      const storedFilter = {} as unknown as StoredFilter;
 
       const result = extractBaseProperties(storedFilter);
 
@@ -51,12 +59,16 @@ describe('Utils', () => {
         dataViewId: undefined,
         negate: undefined,
         label: undefined,
+        key: undefined,
+        isMultiIndex: undefined,
+        filterType: undefined,
+        value: undefined,
       });
     });
 
     it('should detect non-global state as not pinned', () => {
-      const storedFilter: Filter = {
-        $state: { store: 'appState' },
+      const storedFilter: StoredFilter = {
+        $state: { store: FilterStateStore.APP_STATE },
         meta: { key: 'field1' },
       };
 
@@ -69,7 +81,7 @@ describe('Utils', () => {
       const storedFilter = {
         $state: {},
         meta: { key: 'field1', disabled: false },
-      } as unknown as Filter;
+      } as unknown as StoredFilter;
 
       const result = extractBaseProperties(storedFilter);
 
@@ -80,6 +92,10 @@ describe('Utils', () => {
         dataViewId: undefined,
         negate: undefined,
         label: undefined,
+        key: 'field1',
+        isMultiIndex: undefined,
+        filterType: undefined,
+        value: undefined,
       });
     });
   });

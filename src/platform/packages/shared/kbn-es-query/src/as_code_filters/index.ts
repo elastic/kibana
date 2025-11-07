@@ -8,10 +8,10 @@
  */
 
 /**
- * SimpleFilter API
+ * As Code Filter API
  *
- * This module provides utilities for working with simple filters in Kibana's
- * * as Code API endpoints, including type definitions and conversion utilities.
+ * This module provides utilities for working with As Code filters in Kibana's
+ * as Code API endpoints, including type definitions and conversion utilities.
  */
 
 // Core types and interfaces
@@ -23,4 +23,4 @@ export { fromStoredFilter } from './from_stored_filter';
 export { toStoredFilter } from './to_stored_filter';
 
 // Type guards
-export { isSimpleFilter } from './type_guards';
+export { isAsCodeFilter } from './type_guards';
