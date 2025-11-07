@@ -113,7 +113,6 @@ export const MetricsExperienceGrid = ({
     filters = [],
     isFieldsLoading = false,
   } = useGridData({
-    indexPattern,
     dimensions,
     pageSize: PAGE_SIZE,
     currentPage,
@@ -125,7 +124,6 @@ export const MetricsExperienceGrid = ({
 
   const { leftSideActions, rightSideActions } = useToolbarActions({
     fields: allFields,
-    indexPattern,
     renderToggleActions,
     requestParams,
   });
@@ -230,7 +228,7 @@ export const MetricsExperienceGrid = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {isDiscoverLoading && <MetricsGridLoadingProgress />}
+          {(isDiscoverLoading || isFieldsLoading) && <MetricsGridLoadingProgress />}
           <MetricsGrid
             columns={columns}
             dimensions={dimensions}

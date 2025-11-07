@@ -20,11 +20,11 @@ export const useFilteredFields = ({
   searchTerm,
 }: {
   fields: MetricField[];
-  dimensions: string[];
-  searchTerm: string;
+  dimensions?: string[];
+  searchTerm?: string;
 }) => {
-  const dimensionsSet = useMemo(() => new Set(dimensions), [dimensions]);
-  const searchTermLower = useMemo(() => searchTerm.toLowerCase(), [searchTerm]);
+  const dimensionsSet = useMemo(() => (dimensions ? new Set(dimensions) : null), [dimensions]);
+  const searchTermLower = useMemo(() => searchTerm?.toLowerCase(), [searchTerm]);
 
   return useMemo(() => {
     return fields.filter((field) => {
@@ -36,7 +36,7 @@ export const useFilteredFields = ({
         return false;
       }
 
-      if (dimensionsSet.size > 0) {
+      if (dimensionsSet && dimensionsSet.size > 0) {
         const hasMatchingDimension = field.dimensions.some((d) => dimensionsSet.has(d.name));
         if (!hasMatchingDimension) {
           return false;

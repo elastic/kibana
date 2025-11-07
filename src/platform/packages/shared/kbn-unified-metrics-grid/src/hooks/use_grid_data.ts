@@ -15,10 +15,8 @@ import { usePagination } from './use_pagination';
 import { useValueFilters } from './use_value_filters';
 import { useFilteredFields } from './use_filtered_fields';
 import { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
-import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 
 export const useGridData = ({
-  indexPattern,
   dimensions,
   pageSize,
   currentPage,
@@ -28,7 +26,6 @@ export const useGridData = ({
   allFields,
 }: {
   allFields: MetricField[];
-  indexPattern: string;
   searchTerm: string;
   dimensions: string[];
   pageSize: number;
@@ -36,69 +33,51 @@ export const useGridData = ({
   currentPage: number;
   timeRange: TimeRange | undefined;
 }) => {
-  // Build kuery from valueFilters
-  const kuery = useMemo(() => {
-    if (valueFilters.length === 0) return undefined;
+  // STEP 1: Build kuery from valueFilters and prepare Lens filters
+  const { kuery, filters } = useValueFilters(valueFilters);
 
-    const filtersMap = valueFilters.reduce((acc, filter) => {
-      const [field, value] = filter.split(FIELD_VALUE_SEPARATOR);
-      const arr = acc.get(field) || [];
-      arr.push(`"${value}"`);
-      acc.set(field, arr);
-      return acc;
-    }, new Map<string, string[]>());
-
-    return Array.from(filtersMap.entries())
-      .map(([field, values]) =>
-        values.length > 1 ? `${field}:(${values.join(' or ')})` : `${field}:${values[0]}`
-      )
-      .join(' and ');
-  }, [valueFilters]);
-
-  // STEP 2: Calculate candidate fields based on dimensions + search term
-  // This gives us the shortlist of fields we want to check against kuery
-  const candidateFields = useFilteredFields({
+  // STEP 2: Calculate filtered fields based on dimensions + search term
+  const filteredFields = useFilteredFields({
     fields: allFields,
     dimensions,
     searchTerm,
   });
 
-  const candidateFieldNames = useMemo(
-    () => candidateFields.map((field) => field.name),
-    [candidateFields]
-  );
+  const { filteredFieldNames, filteredIndices } = useMemo(() => {
+    const uniqueNames = new Set<string>();
+    const uniqueIndices = new Set<string>();
+
+    filteredFields.forEach((field) => {
+      uniqueNames.add(field.name);
+      uniqueIndices.add(field.index);
+    });
+
+    return {
+      filteredFieldNames: Array.from(uniqueNames),
+      filteredIndices: Array.from(uniqueIndices),
+    };
+  }, [filteredFields]);
 
   // STEP 3: When value filters exist, perform optimized search with field list
   // PERFORMANCE: Only checks the candidate fields (e.g., 50) instead of all fields (e.g., 1000+)
   const { data: searchedFields = [], isFetching: isFetchingSearch } = useMetricFieldsSearchQuery({
-    fields: candidateFieldNames,
-    index: indexPattern,
+    fields: filteredFieldNames,
+    index: filteredIndices.join(','),
     timeRange,
     kuery: kuery || '', // Safe since we control enabled
-    enabled: !!kuery && candidateFieldNames.length > 0,
+    enabled: !!kuery && filteredFieldNames.length > 0,
   });
 
-  // Use searched fields when kuery is active, otherwise use all fields
-  const fields = kuery ? searchedFields : allFields;
-  const isFieldsLoading = kuery ? isFetchingSearch : false;
-
-  // Filter by dimensions and search term (client-side for display)
-  const filteredDimensions = useMemo(() => (kuery ? [] : dimensions), [kuery, dimensions]);
-  const filteredFields = useFilteredFields({
-    fields,
-    dimensions: filteredDimensions,
-    searchTerm,
-  });
+  // STEP 4: Filter out noData searched fields
+  const filteredAndSearchedFields = useFilteredFields({ fields: searchedFields });
+  const items = kuery ? filteredAndSearchedFields : filteredFields;
 
   // Paginate the filtered results
   const { currentPageItems, totalPages, totalCount } = usePagination({
-    items: filteredFields,
+    items,
     pageSize,
     currentPage,
   });
-
-  // Transform valueFilters to filters format
-  const filters = useValueFilters(valueFilters);
 
   // Build the result
   const buildResult = useCallback(() => {
@@ -107,10 +86,9 @@ export const useGridData = ({
       filteredFieldsCount: totalCount,
       totalPages,
       filters,
-      isFieldsLoading,
-      allFields, // Always the full field list for toolbar (never changes based on value filters)
+      isFieldsLoading: kuery ? isFetchingSearch : false,
     };
-  }, [currentPageItems, totalCount, totalPages, filters, isFieldsLoading, allFields]);
+  }, [currentPageItems, totalCount, totalPages, filters, isFetchingSearch, kuery]);
 
   // State management
   const [stableResult, setStableResult] = useState<ReturnType<typeof buildResult>>();
@@ -120,15 +98,8 @@ export const useGridData = ({
   );
 
   useEffect(() => {
-    // Only update when:
-    // 1. No kuery (no request needed), OR
-    // 2. Kuery request has finished (!isSearchFieldsFetching)
-    const shouldUpdate = kuery?.trim() === '' || !isFetchingSearch;
-
-    if (shouldUpdate) {
-      updateResult(buildResult);
-    }
-  }, [buildResult, updateResult, isFetchingSearch, kuery]);
+    updateResult(buildResult);
+  }, [buildResult, updateResult]);
 
   return stableResult;
 };

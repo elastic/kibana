@@ -22,7 +22,6 @@ import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   fields: MetricField[];
-  indexPattern: string;
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
 }
