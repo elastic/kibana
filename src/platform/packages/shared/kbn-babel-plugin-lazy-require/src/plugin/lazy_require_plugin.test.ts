@@ -33,7 +33,7 @@ describe('@kbn/babel-plugin-lazy-require', () => {
     return ctx;
   }
 
-  function transformCode(code: string, filename = 'test.js'): string {
+  function transformCode(code: string, filename = 'file.js'): string {
     const plugins: any[] = [lazyRequirePlugin];
     // Add JSX support if the code contains JSX
     if (code.includes('<') && code.includes('>')) {
@@ -300,6 +300,128 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       const moduleIdx = code.indexOf('_module');
       const consoleIdx = code.indexOf('console');
       if (consoleIdx !== -1) expect(moduleIdx).toBeLessThan(consoleIdx);
+    });
+  });
+
+  describe('constructor usage exclusion', () => {
+    it('keeps eager when constructor calls a method that constructs an imported class (non-test files)', () => {
+      const code = transformCode(
+        `
+        import { X } from './pkg';
+        export class A {
+          constructor() {
+            this.init();
+          }
+          init() {
+            return new X();
+          }
+        }
+      `,
+        'component.ts'
+      );
+      expect(code).toMatch(/import\s+\{\s*X\s*\}\s+from\s+['"]\.\/pkg['"]/);
+      expect(code).not.toContain('get X');
+    });
+
+    it('keeps eager for nested constructor calls in methods invoked by constructor (non-test files)', () => {
+      const code = transformCode(
+        `
+        import { PatternLayout } from './layouts';
+        import { ConsoleAppender } from './appenders';
+        export class S {
+          constructor() { this.setupSystem(); }
+          setupSystem() {
+            const a = new ConsoleAppender(new PatternLayout());
+            return a;
+          }
+        }
+      `,
+        'component.ts'
+      );
+      expect(code).toMatch(/import\s+\{\s*PatternLayout\s*\}\s+from\s+['"]\.\/layouts['"]/);
+      expect(code).toMatch(/import\s+\{\s*ConsoleAppender\s*\}\s+from\s+['"]\.\/appenders['"]/);
+      expect(code).not.toContain('get PatternLayout');
+      expect(code).not.toContain('get ConsoleAppender');
+    });
+
+    it('does not transform default import used with new (test files only)', () => {
+      const code = transformCode(
+        `
+        import Foo from './cls';
+        function make() {
+          return new Foo();
+        }
+      `,
+        'sample.test.js'
+      );
+      expect(code).toMatch(/import\s+Foo\s+from\s+['"]\.\/cls['"]/);
+      expect(code).not.toContain('get Foo');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('does not transform named import used with new (test files only)', () => {
+      const code = transformCode(
+        `
+        import { Bar } from './pkg';
+        export function f() { return new Bar(); }
+      `,
+        'sample.test.ts'
+      );
+      expect(code).toMatch(/import\s+\{\s*Bar\s*\}\s+from\s+['"]\.\/pkg['"]/);
+      expect(code).not.toContain('get Bar');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('does not transform namespace import used with new on a member (test files only)', () => {
+      const code = transformCode(
+        `
+        import * as ns from './pkg';
+        export const x = () => new ns.Foo();
+      `,
+        'component.spec.tsx'
+      );
+      expect(code).toMatch(/import\s+\*\s+as\s+ns\s+from\s+['"]\.\/pkg['"]/);
+      expect(code).not.toContain('get ns');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('does not transform require assigned then constructed (test files only)', () => {
+      const result = transformCode(
+        `
+        const Cls = require('./cls');
+        module.exports = () => new Cls();
+      `,
+        'something.test.js'
+      );
+      expect(result).toContain(`const Cls = require('./cls')`);
+      expect(result).not.toContain('get Cls');
+      expect(result).not.toContain('_imports');
+    });
+
+    it('does not transform destructured require when constructed (test files only)', () => {
+      const result = transformCode(
+        `
+        const { Lexer } = require('./lexer');
+        module.exports = () => new Lexer();
+      `,
+        'lexer.test.ts'
+      );
+      expect(result).toContain(`require('./lexer')`);
+      expect(result).not.toContain('get Lexer');
+      expect(result).not.toContain('_imports');
+    });
+
+    it('handles deep member new expressions (new ns.sub.Foo()) (test files only)', () => {
+      const code = transformCode(
+        `
+        import * as lib from './lib';
+        export const y = () => new lib.sub.Foo();
+      `,
+        'deep.spec.ts'
+      );
+      expect(code).toMatch(/import\s+\*\s+as\s+lib\s+from\s+['"]\.\/lib['"]/);
+      expect(code).not.toContain('get lib');
+      expect(code).not.toContain('_imports');
     });
   });
 

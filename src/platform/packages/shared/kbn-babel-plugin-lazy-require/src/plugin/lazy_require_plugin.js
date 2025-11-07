@@ -17,6 +17,9 @@ const {
   detectModuleLevelUsage,
   detectJsxUsage,
   detectJestMockUsage,
+  detectConstructorUsage,
+  detectConstructorInitNewUsage,
+  detectClassExtendsUsage,
 } = require('./helpers');
 
 // Modules that should never be lazy-loaded
@@ -53,6 +56,10 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         if (filename.includes('.mock.') || filename.includes('.mocks.')) {
           return;
         }
+
+        const isTestFile =
+          /(^|\/)(__tests__|__test__)(\/|$)/.test(filename) ||
+          /\.(test|spec)\.[tj]sx?$/.test(filename);
         // State tracking
         const modules = new Map(); // requirePath -> { cacheId, requirePath, outerFunc? }
         const properties = new Map(); // varName -> { moduleRequirePath, propertyKey, isConst, needsInterop? }
@@ -283,6 +290,35 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
         // Exclude from transformation
         for (const varName of importsUsedInJestMocks) {
+          properties.delete(varName);
+          declarationsToRemove.delete(varName);
+        }
+
+        // Detect and exclude constructor usage (new Foo(), new ns.Foo()) in test files only.
+        // This preserves eager import semantics for constructors in tests to avoid deferring
+        // module initialization past jest beforeEach/afterEach hooks (e.g., Date mocking),
+        // while keeping non-test files eligible for lazy loading.
+        if (isTestFile) {
+          const importsUsedAsConstructors = detectConstructorUsage(programPath, properties, t);
+          for (const varName of importsUsedAsConstructors) {
+            properties.delete(varName);
+            declarationsToRemove.delete(varName);
+          }
+        }
+
+        // Detect `new` usage inside constructors or methods invoked by constructors (one hop)
+        // Keep these eager even in non-test files, as constructor flows generally expect
+        // import-time semantics for dependencies used during instantiation.
+        const importsUsedInCtorInit = detectConstructorInitNewUsage(programPath, properties, t);
+        for (const varName of importsUsedInCtorInit) {
+          properties.delete(varName);
+          declarationsToRemove.delete(varName);
+        }
+
+        // Detect imports used in class extends clauses
+        // Classes need their parent class available at definition time, not instantiation time.
+        const importsUsedInExtends = detectClassExtendsUsage(programPath, properties, t);
+        for (const varName of importsUsedInExtends) {
           properties.delete(varName);
           declarationsToRemove.delete(varName);
         }

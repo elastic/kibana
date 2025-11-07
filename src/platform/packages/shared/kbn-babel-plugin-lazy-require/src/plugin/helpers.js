@@ -329,10 +329,165 @@ function detectModuleLevelUsage(programPath, properties, isSimpleRequireCall, t)
   return importsUsedInModuleLevelCode;
 }
 
+/**
+ * Helper function to extract the root identifier from a node.
+ * Handles both simple identifiers and member expression chains.
+ * Examples:
+ *   - Foo => 'Foo'
+ *   - ns.Foo => 'ns'
+ *   - ns.sub.Foo => 'ns'
+ */
+function getRootIdentifierFromNode(node, t) {
+  if (t.isIdentifier(node)) {
+    return node.name;
+  }
+  // Handle cases like ns.Foo or ns.sub.Foo
+  if (t.isMemberExpression(node)) {
+    let current = node;
+    while (t.isMemberExpression(current.object)) {
+      current = current.object;
+    }
+    if (t.isIdentifier(current.object)) {
+      return current.object.name;
+    }
+    if (t.isIdentifier(current)) {
+      return current.name;
+    }
+  }
+  return null;
+}
+
+/**
+ * Detect which imports are used as constructors via `new`
+ * Returns a Set of variable names that should not be lazy-loaded
+ *
+ * Handles:
+ *   - new Foo()
+ *   - new ns.Foo()
+ *   - new ns.sub.Foo()
+ */
+function detectConstructorUsage(programPath, properties, t) {
+  const importsUsedAsConstructors = new Set();
+
+  programPath.traverse({
+    NewExpression(newPath) {
+      const callee = newPath.node.callee;
+      const rootName = getRootIdentifierFromNode(callee, t);
+      if (rootName && properties.has(rootName)) {
+        importsUsedAsConstructors.add(rootName);
+      }
+    },
+  });
+
+  return importsUsedAsConstructors;
+}
+
+/**
+ * Detect imports used via `new` inside a class constructor or inside class methods
+ * that are directly invoked from the constructor (one hop).
+ * Returns a Set of variable names that should not be lazy-loaded.
+ */
+function detectConstructorInitNewUsage(programPath, properties, t) {
+  const importsUsedInCtorFlow = new Set();
+
+  const collectNewsInPath = (nodePath) => {
+    nodePath.traverse({
+      NewExpression(newPath) {
+        const root = getRootIdentifierFromNode(newPath.node.callee, t);
+        if (root && properties.has(root)) {
+          importsUsedInCtorFlow.add(root);
+        }
+      },
+    });
+  };
+
+  programPath.traverse({
+    ClassDeclaration(classPath) {
+      const body = classPath.get('body.body');
+      if (!Array.isArray(body)) return;
+
+      const methodsByName = new Map();
+      for (const el of body) {
+        if (el.isClassMethod() && t.isIdentifier(el.node.key)) {
+          methodsByName.set(el.node.key.name, el);
+        }
+      }
+
+      const ctor = methodsByName.get('constructor');
+      if (!ctor) return;
+
+      // Collect direct `new` in constructor
+      collectNewsInPath(ctor);
+
+      // Find calls like this.methodName(...) in constructor
+      const calledMethodNames = new Set();
+      ctor.traverse({
+        CallExpression(callPath) {
+          const callee = callPath.node.callee;
+          if (
+            t.isMemberExpression(callee) &&
+            t.isThisExpression(callee.object) &&
+            t.isIdentifier(callee.property)
+          ) {
+            calledMethodNames.add(callee.property.name);
+          }
+        },
+      });
+
+      // For one hop, scan those methods for `new`
+      for (const name of calledMethodNames) {
+        const methodPath = methodsByName.get(name);
+        if (methodPath) {
+          collectNewsInPath(methodPath);
+        }
+      }
+    },
+  });
+
+  return importsUsedInCtorFlow;
+}
+
+/**
+ * Detect imports used in class extends clauses
+ * Returns a Set of variable names that should not be lazy-loaded
+ *
+ * Classes need their parent class available at definition time, not instantiation time.
+ * Example: class Foo extends Bar needs Bar to be eagerly loaded.
+ */
+function detectClassExtendsUsage(programPath, properties, t) {
+  const importsUsedInExtends = new Set();
+
+  programPath.traverse({
+    ClassDeclaration(classPath) {
+      const superClass = classPath.node.superClass;
+      if (superClass) {
+        const rootName = getRootIdentifierFromNode(superClass, t);
+        if (rootName && properties.has(rootName)) {
+          importsUsedInExtends.add(rootName);
+        }
+      }
+    },
+    ClassExpression(classPath) {
+      const superClass = classPath.node.superClass;
+      if (superClass) {
+        const rootName = getRootIdentifierFromNode(superClass, t);
+        if (rootName && properties.has(rootName)) {
+          importsUsedInExtends.add(rootName);
+        }
+      }
+    },
+  });
+
+  return importsUsedInExtends;
+}
+
 module.exports = {
   isInTypeContext,
   shouldSkipIdentifier,
   detectModuleLevelUsage,
   detectJsxUsage,
   detectJestMockUsage,
+  detectConstructorUsage,
+  detectConstructorInitNewUsage,
+  detectClassExtendsUsage,
 };
