@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract, AuditLogger } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract, CoreAuditService } from '@kbn/core/server';
 import { ThreatHuntingHypothesisDescriptorClient } from './saved_objects/threat_hunting_hypothesis_descriptor';
 import { ThreatHuntingHypothesisActions } from './auditing/actions';
 import { hypothesisDefinitions } from './lib/hypothesis_definitions';
@@ -19,12 +19,12 @@ export type ThreatHuntingHypothesesService = ReturnType<
 export const initThreatHuntingHypothesisDefinitions = async (
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
-  auditLogger: AuditLogger
+  auditService: CoreAuditService
 ) => {
   const initService = createThreatHuntingHypothesesInitService(
     savedObjectsClient,
     logger,
-    auditLogger
+    auditService
   );
   await initService.init();
 };
@@ -32,13 +32,13 @@ export const initThreatHuntingHypothesisDefinitions = async (
 export const createThreatHuntingHypothesesInitService = (
   soClient: SavedObjectsClientContract,
   logger: Logger,
-  auditLogger: AuditLogger
+  auditService: CoreAuditService
 ) => {
   const loggingService = createThreatHuntingHypothesesLoggerService(
     logger,
     'threat_hunting_initialisation'
   );
-  const auditLoggerService = createThreatHuntingHypothesesAuditLoggerService(auditLogger);
+  const auditLoggerService = createThreatHuntingHypothesesAuditLoggerService(auditService);
 
   const descriptor = new ThreatHuntingHypothesisDescriptorClient({
     soClient,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AuditLogger, AuditEvent } from '@kbn/core/server';
+import type { CoreAuditService, AuditEvent } from '@kbn/core/server';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { ThreatHuntingHypothesisActions } from '../auditing/actions';
 
@@ -12,7 +12,8 @@ export type ThreatHuntingHypothesesAuditLoggerService = ReturnType<
   typeof createThreatHuntingHypothesesAuditLoggerService
 >;
 
-export const createThreatHuntingHypothesesAuditLoggerService = (rootAuditLogger?: AuditLogger) => {
+export const createThreatHuntingHypothesesAuditLoggerService = (auditService: CoreAuditService) => {
+  const auditLogger = auditService.withoutRequest; // assuming user never initiates these actions directly
   const log = (action: ThreatHuntingHypothesisActions, msg: string, error?: Error) => {
     const outcome = error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.UNKNOWN;
 
@@ -34,7 +35,7 @@ export const createThreatHuntingHypothesesAuditLoggerService = (rootAuditLogger?
         type,
       },
     };
-    return rootAuditLogger?.log(event);
+    return auditLogger?.log(event);
   };
   return {
     log,

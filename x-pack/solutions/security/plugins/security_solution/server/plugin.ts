@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger, LogMeta, AuditLogger } from '@kbn/core/server';
+import type { Logger, LogMeta, CoreAuditService } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -146,7 +146,7 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
-import { initThreatHuntingHypothesisDefinitions } from './lib/entity_analytics/hypothesis_threat_hunting/engine/initialisation_service';
+import { initThreatHuntingHypothesisDefinitions } from './lib/entity_analytics/hypothesis_threat_hunting/initialisation_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -154,7 +154,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
   private readonly config: ConfigType;
   private readonly logger: Logger;
-  private readonly auditLogger: AuditLogger;
+  private auditService: CoreAuditService | null = null;
   private readonly appClientFactory: AppClientFactory;
   private readonly productFeaturesService: ProductFeaturesService;
 
@@ -187,6 +187,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.pluginContext = context;
     this.config = serverConfig;
     this.logger = context.logger.get();
+
     this.appClientFactory = new AppClientFactory();
     this.productFeaturesService = new ProductFeaturesService(
       this.logger,
@@ -615,10 +616,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, auditLogger, productFeaturesService } = this;
-
+    const { config, logger, productFeaturesService } = this;
     this.ruleMonitoringService.start(core, plugins);
-
+    this.auditService = core.security.audit;
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([
         ManifestConstants.SAVED_OBJECT_TYPE,
@@ -640,7 +640,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const fleetStartServices = plugins.fleet!;
     // Initialise entity analytics threat hunting hypothesis definitions
     if (config.experimentalFeatures.entityThreatHuntingEnabled) {
-      initThreatHuntingHypothesisDefinitions(savedObjectsClient, logger, auditLogger);
+      initThreatHuntingHypothesisDefinitions(savedObjectsClient, logger, this.auditService);
     }
     const { packageService } = fleetStartServices;
 
