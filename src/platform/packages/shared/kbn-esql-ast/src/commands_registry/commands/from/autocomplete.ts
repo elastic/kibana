@@ -24,7 +24,6 @@ import { isSubQuery, isSource } from '../../../ast/is';
 
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
-const EMPTY_SOURCES_ARRAY: never[] = [];
 const EMPTY_EXTENSIONS = { recommendedFields: [], recommendedQueries: [] };
 const PIPE_SORT_TEXT = '0';
 
@@ -59,11 +58,7 @@ async function handleFromAutocomplete(
 
   // Cursor before FROM keyword
   if (command.location.min > cursorPos) {
-    return getSourceSuggestions(
-      context?.sources ?? EMPTY_SOURCES_ARRAY,
-      EMPTY_SOURCES_ARRAY,
-      innerText
-    );
+    return getSourceSuggestions(context?.sources ?? [], [], innerText);
   }
 
   // Extract text relative to command start (critical for subqueries)
@@ -107,13 +102,13 @@ function suggestInitialSources(
   context: ICommandContext | undefined,
   innerText: string
 ): ISuggestionItem[] {
-  let sources = context?.sources ?? EMPTY_SOURCES_ARRAY;
+  let sources = context?.sources ?? [];
 
   if (context?.isCursorInSubquery) {
     sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
   }
 
-  const suggestions = getSourceSuggestions(sources, EMPTY_SOURCES_ARRAY, innerText);
+  const suggestions = getSourceSuggestions(sources, [], innerText);
 
   // Only suggest subqueries when not already inside a subquery
   if (!context?.isCursorInSubquery) {
