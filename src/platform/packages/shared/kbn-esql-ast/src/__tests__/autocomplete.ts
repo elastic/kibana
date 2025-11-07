@@ -334,6 +334,11 @@ export function getFunctionSignaturesByReturnType(
           ? `${name.toUpperCase()} $0`
           : name.toUpperCase();
       }
+
+      const hasNoArguments = signatures.every((sig) => sig.params.length === 0);
+      if (hasNoArguments) {
+        return `${name.toUpperCase()}()`;
+      }
       return customParametersSnippet
         ? `${name.toUpperCase()}(${customParametersSnippet})`
         : `${name.toUpperCase()}($0)`;
