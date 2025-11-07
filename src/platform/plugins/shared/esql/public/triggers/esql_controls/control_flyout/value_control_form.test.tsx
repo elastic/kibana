@@ -38,7 +38,6 @@ jest.mock('@kbn/esql-utils', () => {
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
-    isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
   };
@@ -106,6 +105,14 @@ describe('ValueControlForm', () => {
         'Medium'
       );
       expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
+
+      // control type radio should be rendered and default to 'single'
+      const selectionTypeContainer = await findByTestId('esqlControlSelectionType');
+      expect(selectionTypeContainer).toBeInTheDocument();
+      const singleRadioButton = within(selectionTypeContainer).getByLabelText(
+        'Only allow a single selection'
+      );
+      expect(singleRadioButton).toBeChecked();
 
       // control grow switch should be rendered and default to 'false'
       expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();

@@ -66,7 +66,6 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
     elasticsearch: {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
-      pingTimeout: duration('30s'),
     },
     path: { data: '/tmp' },
     savedObjects: {

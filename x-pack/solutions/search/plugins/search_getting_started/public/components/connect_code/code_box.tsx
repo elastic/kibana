@@ -19,9 +19,10 @@ import { API_KEY_PLACEHOLDER } from '../../constants';
 
 interface Props {
   selectedLanguage: AvailableLanguages;
+  codeBlockLanguage: string;
 }
 
-export const CodeBox = ({ selectedLanguage }: Props) => {
+export const CodeBox = ({ selectedLanguage, codeBlockLanguage }: Props) => {
   const { cloud } = useKibana().services;
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
@@ -47,8 +48,9 @@ export const CodeBox = ({ selectedLanguage }: Props) => {
     <EuiCodeBlock
       isCopyable
       fontSize="m"
-      language={selectedLanguage === 'curl' ? 'bash' : selectedLanguage}
+      language={codeBlockLanguage}
       overflowHeight={700}
+      data-test-subj="gettingStartedExampleCode"
     >
       {codeExample}
     </EuiCodeBlock>

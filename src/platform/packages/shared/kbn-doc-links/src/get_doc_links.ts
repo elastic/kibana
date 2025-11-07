@@ -352,6 +352,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       dynamicIndexSettings: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-modules#dynamic-index-settings`,
       indexTemplates: `${ELASTIC_DOCS}manage-data/data-store/templates`,
       mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping`,
+      mappingReference: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference`,
       mappingAnalyzer: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/analyzer`,
       mappingCoerce: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/coerce`,
       mappingCopyTo: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/copy-to`,
@@ -442,6 +443,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
       publicBaseUrl: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-publicBaseUrl`,
+      troubleshootServerNotReady: `${ELASTIC_DOCS}troubleshoot/kibana/error-server-not-ready`,
     },
     logging: {
       enableDeprecationHttpDebugLogs: `${ELASTIC_DOCS}reference/kibana/configuration-reference/logging-settings#enable-http-debug-logs`,
@@ -510,6 +512,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryDsl: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/querydsl`,
       queryESQL: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLExamples: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
+      queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#esql-multi-values-controls`,
     },
     search: {
       sessions: `${ELASTIC_DOCS}explore-analyze/discover/search-sessions`,
