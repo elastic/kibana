@@ -145,7 +145,7 @@ export const TABLE_COLUMNS = {
   },
   result: {
     display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableresultHeader', {
-      defaultMessage: 'Result',
+      defaultMessage: 'Simulation result',
     }),
   },
 } as const;

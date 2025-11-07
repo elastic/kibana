@@ -142,8 +142,8 @@ export function StreamDetailEnrichmentContentImpl() {
         // Field exists in samples AND in detected fields - modified by the simulated processing steps
         fieldResult = 'modified';
       } else {
-        // Field not in samples - it's new
-        fieldResult = 'new';
+        // Field not in samples - newly introduced, also counts as modified
+        fieldResult = 'modified';
       }
 
       let editorField: SchemaEditorField;

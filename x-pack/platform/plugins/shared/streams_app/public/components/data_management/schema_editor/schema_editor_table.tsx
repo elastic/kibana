@@ -186,13 +186,6 @@ const createCellRenderer =
       );
     }
 
-    if (columnId === 'source') {
-      if (field.streamSource) {
-        return <>{field.streamSource}</>;
-      }
-      return EMPTY_CONTENT;
-    }
-
     if (columnId === 'result') {
       const editorField = field as SchemaEditorField;
       if (editorField.result) {

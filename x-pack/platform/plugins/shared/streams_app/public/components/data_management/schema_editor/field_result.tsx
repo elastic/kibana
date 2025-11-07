@@ -11,22 +11,13 @@ import { i18n } from '@kbn/i18n';
 import type { SchemaEditorField } from './types';
 
 const FIELD_RESULT_MAP = {
-  new: {
-    color: 'success' as const,
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorNewResultLabel', {
-      defaultMessage: 'New',
-    }),
-    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorNewResultTooltip', {
-      defaultMessage: 'The simulated processing steps newly introduce this field.',
-    }),
-  },
   modified: {
     color: 'warning' as const,
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorModifiedResultLabel', {
       defaultMessage: 'Modified',
     }),
     tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorModifiedResultTooltip', {
-      defaultMessage: 'The simulated processing steps change this field.',
+      defaultMessage: 'The simulated processing steps modify the values of this field.',
     }),
   },
   unchanged: {
@@ -35,7 +26,7 @@ const FIELD_RESULT_MAP = {
       defaultMessage: 'Unchanged',
     }),
     tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorUnchangedResultTooltip', {
-      defaultMessage: 'The simulated processing steps do not modify this field.',
+      defaultMessage: 'The simulated processing steps do not modify the values of this field.',
     }),
   },
 };
