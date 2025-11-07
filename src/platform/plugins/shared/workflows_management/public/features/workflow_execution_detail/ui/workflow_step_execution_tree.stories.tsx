@@ -14,7 +14,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { SafeParseReturnType } from '@kbn/zod';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
