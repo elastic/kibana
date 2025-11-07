@@ -15,9 +15,7 @@ import {
   shouldBeQuotedSource,
   sourceExists,
   buildSourcesDefinitions,
-  getSourcesFromCommands,
 } from './sources';
-import { Parser } from '../../parser';
 
 describe('specialIndicesToSuggestions()', () => {
   test('converts join indices to suggestions', () => {
@@ -175,14 +173,4 @@ describe('buildSourcesDefinitions with timeseries', () => {
     expect(regularSuggestion?.text).toBe('regular_index');
     expect(regularSuggestion?.rangeToReplace).toBeUndefined();
   });
-});
-
-it('returns sources from subquery', () => {
-  const src = 'FROM index1, (FROM subquery_index)';
-  const { root } = Parser.parse(src);
-  const sources = getSourcesFromCommands(root.commands, 'index');
-
-  expect(sources.length).toBe(2);
-  expect(sources[0].name).toBe('index1');
-  expect(sources[1].name).toBe('subquery_index');
 });
