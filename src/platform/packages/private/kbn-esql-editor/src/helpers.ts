@@ -334,19 +334,46 @@ export const onKeyDownResizeHandler = (
 };
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
+  const hoverContainersCSS = css`
+    background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
+    line-height: 1.5rem;
+    border-radius: ${theme.euiTheme.border.radius.medium} !important;
+    box-shadow: ${theme.euiTheme.shadows.l.down} !important;
+  `;
   return css`
     .monaco-hover {
       display: block !important;
-      background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
-      line-height: 1.5rem;
-      border-radius: ${theme.euiTheme.border.radius.medium} !important;
-      ${euiShadow(theme, 'l')}
+      ${hoverContainersCSS}
+    }
+
+    // Fixes inline suggestions hover styles
+    .monaco-hover:has(.inlineSuggestionsHints) {
+      height: auto !important;
+      width: auto !important;
+      overflow-y: hidden !important;
+      a {
+        color: ${theme.euiTheme.colors.plainDark} !important;
+      }
+      .inlineSuggestionStatusBarItemLabel {
+        font-size: 10px !important;
+        display: flex;
+        align-items: center;
+      }
       .slider {
         display: none;
       }
-      a {
-        color: ${theme.euiTheme.colors.accent} !important;
+      .keybinding {
+        opacity: 1 !important;
       }
+      .monaco-keybinding-key {
+        background-color: ${theme.euiTheme.colors.backgroundBaseNeutral} !important;
+        box-shadow: none !important;
+        border: 1px solid ${theme.euiTheme.border.color} !important;
+      }
+    }
+
+    .monaco-scrollable-element {
+      ${hoverContainersCSS}
     }
     .hover-row.status-bar {
       display: none;

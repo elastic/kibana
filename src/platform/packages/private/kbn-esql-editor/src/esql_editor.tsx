@@ -142,15 +142,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const {
-    application,
-    core,
-    fieldsMetadata,
-    uiSettings,
-    uiActions,
-    data,
-    usageCollection,
-  } = kibana.services;
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
+    kibana.services;
 
   const favoritesClient = useMemo(
     () =>
