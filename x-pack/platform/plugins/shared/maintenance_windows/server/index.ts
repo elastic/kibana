@@ -33,7 +33,7 @@ export type MaintenanceWindowClient = PublicMethodsOf<MaintenanceWindowClientCla
 
 export type { MaintenanceWindowsConfig } from './config';
 
-export { maintenanceWindowCategoryIdTypes } from '../server/application/constants';
+export { maintenanceWindowCategoryIdTypes } from './application/constants';
 export { getMockMaintenanceWindow } from './data/test_helpers';
 export { maintenanceWindowClientMock } from './maintenance_window_client.mock';
 export type { MaintenanceWindowClientMock } from './maintenance_window_client.mock';
