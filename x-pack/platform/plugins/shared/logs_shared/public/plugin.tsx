@@ -105,7 +105,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     discoverShared.features.registry.register({
       id: 'observability-logs-fetch-document-by-id',
       fetchLogDocumentById: async (params, signal) => {
-        const { fetchLogDocumentById } = await import('./services/fetch_log_document_by_id');
+        const { fetchLogDocumentById } = await import('./services/log/fetch_log_document_by_id');
         return fetchLogDocumentById(
           {
             ...params,
