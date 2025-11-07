@@ -163,20 +163,14 @@ export const ContextMenu = ({
   };
 
   const checkIsEsqlQuerySelected = async () => {
-    try {
-      const requests = await getRequests();
-      // Check if any selected request is an ES|QL query (POST to /_query)
-      const hasEsqlQuery = requests.some(
-        (req) =>
-          req.method === 'POST' &&
-          (req.url === '/_query' ||
-            req.url.startsWith('/_query?') ||
-            req.url.startsWith('/_query/'))
-      );
-      setIsEsqlQuerySelected(hasEsqlQuery);
-    } catch (error) {
-      setIsEsqlQuerySelected(false);
-    }
+    const requests = await getRequests();
+    // Check if any selected request is an ES|QL query (POST to /_query)
+    const hasEsqlQuery = requests.some(
+      (req) =>
+        req.method === 'POST' &&
+        (req.url === '/_query' || req.url.startsWith('/_query?') || req.url.startsWith('/_query/'))
+    );
+    setIsEsqlQuerySelected(hasEsqlQuery);
   };
 
   const onCopyAsSubmit = async (language?: string) => {
