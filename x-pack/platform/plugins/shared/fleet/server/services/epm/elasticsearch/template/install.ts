@@ -169,7 +169,9 @@ export async function prepareDataStreamTemplates(
       ilmMigrationStatusMap,
       ilmPolicies,
     });
-    updatedILMMigrationStatusMap.set(dataStream.type, ilmMigrationStatus);
+    if (ilmMigrationStatus === 'success') {
+      updatedILMMigrationStatusMap.set(dataStream.type, ilmMigrationStatus);
+    }
     return { componentTemplates, indexTemplate };
   });
 
