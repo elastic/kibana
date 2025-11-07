@@ -39,11 +39,11 @@ export type StoredFilterMeta = Writable<TypeOf<typeof storedFilterMetaSchema>>;
 export type StoredFilterState = TypeOf<typeof filterStateStoreSchema>;
 
 /**
- * Schema-inferred types for Filter API
+ * Schema-inferred types for As Code Filter API
  *
  * These types are inferred from validation schemas and provide runtime validation compatibility.
  */
-export type Filter = Writable<TypeOf<typeof filterSchema>>;
-export type ConditionFilter = Writable<TypeOf<typeof conditionFilterSchema>>;
-export type GroupFilter = Writable<TypeOf<typeof groupFilterSchema>>;
-export type DSLFilter = Writable<TypeOf<typeof dslFilterSchema>>;
+export type AsCodeFilter = Writable<TypeOf<typeof filterSchema>>;
+export type AsCodeConditionFilter = Writable<TypeOf<typeof conditionFilterSchema>>;
+export type AsCodeGroupFilter = Writable<TypeOf<typeof groupFilterSchema>>;
+export type AsCodeDSLFilter = Writable<TypeOf<typeof dslFilterSchema>>;
