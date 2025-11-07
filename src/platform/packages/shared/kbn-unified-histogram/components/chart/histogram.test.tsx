@@ -118,6 +118,7 @@ describe('Histogram', () => {
       esqlVariables: fetchParams.esqlVariables,
       attributes: (await getMockLensAttributes())!.attributes,
       onLoad: lensProps.onLoad!,
+      lastReloadRequestTime: fetchParams.lastReloadRequestTime,
     });
     expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     const updatedFetchParams = { ...fetchParams, searchSessionId: '321' };

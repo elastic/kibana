@@ -32,6 +32,7 @@ export const getFetchParamsMock = (
         timeRange: { from: '2025-09-30T22:00:00.000Z', to: '2025-10-31T13:16:54.878Z' },
         relativeTimeRange: { from: 'now-1M', to: 'now' },
         dataView: dataViewWithTimefieldMock,
+        lastReloadRequestTime: new Date('2025-09-30T22:00:00.000Z').getTime(),
         ...partialParams,
       },
       services: unifiedHistogramServicesMock,
