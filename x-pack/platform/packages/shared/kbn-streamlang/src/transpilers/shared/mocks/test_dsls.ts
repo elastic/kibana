@@ -15,6 +15,7 @@ import type {
   ManualIngestPipelineProcessor,
   AppendProcessor,
   ConvertProcessor,
+  ReplaceProcessor,
 } from '../../../../types/processors';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
@@ -30,6 +31,18 @@ export const comprehensiveTestDSL: StreamlangDSL = {
         eq: 404,
       },
     } as ConvertProcessor,
+    // Replace a string pattern
+    {
+      action: 'replace',
+      from: 'message',
+      pattern: 'error',
+      replacement: 'warning',
+      to: 'clean_message',
+      where: {
+        field: 'log_level',
+        eq: 'ERROR',
+      },
+    } as ReplaceProcessor,
     // Rename a field
     {
       action: 'rename',
