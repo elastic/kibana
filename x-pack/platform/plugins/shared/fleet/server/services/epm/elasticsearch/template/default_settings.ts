@@ -18,6 +18,10 @@ export async function getILMPolicies(
     { deprecatedILMPolicy?: IlmGetLifecycleLifecycle; newILMPolicy?: IlmGetLifecycleLifecycle }
   >
 > {
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  if (isILMPolicyDisabled) {
+    return new Map();
+  }
   const esClient = appContextService.getInternalUserESClient();
 
   const ilmPolicies = new Map<
@@ -59,6 +63,10 @@ export async function getILMPolicies(
 export async function saveILMMigrationChanges(
   updatedILMMigrationStatusMap: Map<string, 'success' | undefined>
 ) {
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  if (isILMPolicyDisabled) {
+    return;
+  }
   const soClient = appContextService.getInternalUserSOClient();
   const settings = await getSettingsOrUndefined(soClient);
   const ilmMigrationStatus = settings?.ilm_migration_status ?? {};
@@ -87,6 +95,10 @@ export async function saveILMMigrationChanges(
 }
 
 export async function getILMMigrationStatus(): Promise<Map<string, 'success' | undefined>> {
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  if (isILMPolicyDisabled) {
+    return new Map();
+  }
   const soClient = appContextService.getInternalUserSOClient();
 
   const settings = await getSettingsOrUndefined(soClient);
@@ -154,20 +166,21 @@ export function buildDefaultSettings({
   >;
 }) {
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  if (isILMPolicyDisabled) {
+    return {
+      index: {},
+    };
+  }
   const defaultIlmPolicy = isOtelInputType
     ? `${type}@lifecycle`
     : getILMPolicy(type, ilmMigrationStatusMap, ilmPolicies);
 
   return {
     index: {
-      ...(isILMPolicyDisabled
-        ? {}
-        : {
-            // ILM Policy must be added here, for now point to the default global ILM policy name
-            lifecycle: {
-              name: ilmPolicy ? ilmPolicy : defaultIlmPolicy,
-            },
-          }),
+      // ILM Policy must be added here, for now point to the default global ILM policy name
+      lifecycle: {
+        name: ilmPolicy ? ilmPolicy : defaultIlmPolicy,
+      },
     },
   };
 }
