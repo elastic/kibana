@@ -56,9 +56,8 @@ export function initializeUnifiedSearchManager(
     timefilter: { timefilter: timefilterService },
   } = dataService.query;
 
-  const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  const panelsReload$ = new Subject<void>();
+  const reload$ = new Subject<void>();
   const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
   function setQuery(query: Query) {
@@ -257,8 +256,7 @@ export function initializeUnifiedSearchManager(
         .getAutoRefreshFetch$()
         .pipe(
           tap(() => {
-            controlGroupReload$.next();
-            panelsReload$.next();
+            reload$.next();
           }),
           switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))
         )
@@ -320,11 +318,11 @@ export function initializeUnifiedSearchManager(
 
   return {
     api: {
+      reload$,
       filters$,
       esqlVariables$,
       forceRefresh: () => {
-        controlGroupReload$.next();
-        panelsReload$.next();
+        reload$.next();
       },
       query$,
       refreshInterval$,
@@ -336,7 +334,6 @@ export function initializeUnifiedSearchManager(
       unifiedSearchFilters$,
     },
     internalApi: {
-      controlGroupReload$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           unifiedSearchFilters$,
@@ -358,7 +355,6 @@ export function initializeUnifiedSearchManager(
           )
         );
       },
-      panelsReload$,
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),

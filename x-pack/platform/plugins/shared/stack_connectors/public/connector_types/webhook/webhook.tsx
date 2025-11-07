@@ -12,6 +12,7 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { WebhookMethods } from '../../../common/auth/constants';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/webhook/constants';
 import type { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
@@ -21,7 +22,7 @@ export function getConnectorType(): ConnectorTypeModel<
   WebhookActionParams
 > {
   return {
-    id: '.webhook',
+    id: CONNECTOR_ID,
     iconClass: 'logoWebhook',
     selectMessage: i18n.translate('xpack.stackConnectors.components.webhook.selectMessageText', {
       defaultMessage: 'Send a request to a web service.',

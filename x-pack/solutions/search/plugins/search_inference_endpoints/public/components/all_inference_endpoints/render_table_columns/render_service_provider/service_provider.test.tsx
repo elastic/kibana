@@ -319,4 +319,31 @@ describe('ServiceProvider component', () => {
       expect(icon).toBeInTheDocument();
     });
   });
+
+  describe('with custom service', () => {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
+      inference_id: 'custom-endpoint-1',
+      service: 'custom',
+      service_settings: {
+        api_key: 'test-key',
+      },
+      task_type: 'text_embedding',
+    };
+
+    it('renders the component with custom service name', () => {
+      renderComponent('custom' as ServiceProviderKeys, mockEndpoint);
+
+      expect(screen.getByText('custom')).toBeInTheDocument();
+      const icon = screen.getByTestId('table-column-service-provider-custom');
+      expect(icon).toBeInTheDocument();
+    });
+
+    it('renders the component with unknown service name', () => {
+      renderComponent('unknown_service' as ServiceProviderKeys, mockEndpoint);
+
+      expect(screen.getByText('unknown_service')).toBeInTheDocument();
+      const icon = screen.getByTestId('table-column-service-provider-unknown_service');
+      expect(icon).toBeInTheDocument();
+    });
+  });
 });
