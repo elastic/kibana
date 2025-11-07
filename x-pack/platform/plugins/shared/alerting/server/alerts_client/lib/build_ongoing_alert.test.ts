@@ -175,6 +175,7 @@ for (const flattened of [true, false]) {
         .replaceState({ start: '2023-03-28T12:27:28.159Z', duration: '36000000' });
       legacyAlert.setFlappingHistory([false, false, true, true]);
       legacyAlert.setMaintenanceWindowIds(['maint-xyz']);
+      legacyAlert.setMaintenanceWindowNames(['maint-xyz-name']);
 
       const alert = flattened
         ? {
@@ -259,6 +260,7 @@ for (const flattened of [true, false]) {
         .replaceState({ start: '2023-03-28T12:27:28.159Z', duration: '36000000' });
       legacyAlert.setFlappingHistory([false, false, true, true]);
       legacyAlert.setMaintenanceWindowIds(['maint-xyz']);
+      legacyAlert.setMaintenanceWindowNames(['maint-xyz-name']);
 
       const alert = flattened
         ? {

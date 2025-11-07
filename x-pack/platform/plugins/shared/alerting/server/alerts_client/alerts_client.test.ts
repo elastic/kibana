@@ -376,6 +376,7 @@ describe('Alerts Client', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id1',
+              title: 'test-name1',
             },
             {
               ...getMockMaintenanceWindow(),
@@ -383,6 +384,7 @@ describe('Alerts Client', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id2',
+              title: 'test-name2',
             },
           ],
           maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
@@ -2464,13 +2466,19 @@ describe('Alerts Client', () => {
         });
       });
 
-      describe('updateAlertMaintenanceWindowIds', () => {
-        test('should update alerts with new maintenance window Ids', async () => {
+      describe('updateAlertMaintenanceWindowIdsAndNames', () => {
+        test('should update alerts with new maintenance window Ids and names', async () => {
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
-          const alert2 = new Alert('2', { meta: { maintenanceWindowIds: ['mw1', 'mw2'] } });
-          const alert3 = new Alert('3', { meta: { maintenanceWindowIds: ['mw2', 'mw3'] } });
+          const alert1 = new Alert('1', {
+            meta: { maintenanceWindowIds: ['mw1'], maintenanceWindowNames: ['mw1'] },
+          });
+          const alert2 = new Alert('2', {
+            meta: { maintenanceWindowIds: ['mw1', 'mw2'], maintenanceWindowNames: ['mw1', 'mw2'] },
+          });
+          const alert3 = new Alert('3', {
+            meta: { maintenanceWindowIds: ['mw2', 'mw3'], maintenanceWindowNames: ['mw2', 'mw3'] },
+          });
 
           jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
@@ -2479,7 +2487,7 @@ describe('Alerts Client', () => {
           });
 
           // @ts-ignore
-          await alertsClient.updateAlertMaintenanceWindowIds([
+          await alertsClient.updateAlertMaintenanceWindowIdsAndNames([
             alert1.getUuid(),
             alert2.getUuid(),
             alert3.getUuid(),
@@ -2497,9 +2505,16 @@ describe('Alerts Client', () => {
             source: expect.anything(),
             lang: 'painless',
             params: {
-              [alert1.getUuid()]: ['mw1'],
-              [alert2.getUuid()]: ['mw1', 'mw2'],
-              [alert3.getUuid()]: ['mw2', 'mw3'],
+              paramIds: {
+                [alert1.getUuid()]: ['mw1'],
+                [alert2.getUuid()]: ['mw1', 'mw2'],
+                [alert3.getUuid()]: ['mw2', 'mw3'],
+              },
+              paramNames: {
+                [alert1.getUuid()]: ['mw1'],
+                [alert2.getUuid()]: ['mw1', 'mw2'],
+                [alert3.getUuid()]: ['mw2', 'mw3'],
+              },
             },
           });
         });
@@ -2508,7 +2523,9 @@ describe('Alerts Client', () => {
           clusterClient.updateByQuery.mockRejectedValueOnce('something went wrong!');
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
+          const alert1 = new Alert('1', {
+            meta: { maintenanceWindowIds: ['mw1'], maintenanceWindowNames: ['mw1'] },
+          });
 
           jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
@@ -2516,11 +2533,11 @@ describe('Alerts Client', () => {
 
           await expect(
             // @ts-ignore
-            alertsClient.updateAlertMaintenanceWindowIds([alert1.getUuid()])
+            alertsClient.updateAlertMaintenanceWindowIdsAndNames([alert1.getUuid()])
           ).rejects.toBe('something went wrong!');
 
           expect(logger.warn).toHaveBeenCalledWith(
-            `Error updating alert maintenance window IDs for test.rule-type:1 'rule-name': something went wrong!`,
+            `Error updating alert maintenance window IDs and names for test.rule-type:1 'rule-name': something went wrong!`,
             logTags
           );
         });
@@ -2569,7 +2586,7 @@ describe('Alerts Client', () => {
 
           const updateSpy = jest
             // @ts-ignore
-            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIdsAndNames')
             // @ts-ignore
             .mockResolvedValueOnce({});
 
@@ -2616,7 +2633,7 @@ describe('Alerts Client', () => {
 
           const updateSpy = jest
             // @ts-ignore
-            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIdsAndNames')
             // @ts-ignore
             .mockResolvedValueOnce({});
 
@@ -2671,7 +2688,7 @@ describe('Alerts Client', () => {
 
           const updateSpy = jest
             // @ts-ignore
-            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIdsAndNames')
             // @ts-ignore
             .mockResolvedValueOnce({});
 
@@ -2726,10 +2743,10 @@ describe('Alerts Client', () => {
 
           const updateSpy = jest
             // @ts-ignore
-            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIdsAndNames')
             // @ts-ignore
             .mockImplementationOnce(() => {
-              throw new Error('Failed to update alerts with maintenance window IDs');
+              throw new Error('Failed to update alerts with maintenance window IDs and names');
             });
 
           const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
@@ -2750,7 +2767,7 @@ describe('Alerts Client', () => {
           ]);
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error updating maintenance window IDs: Failed to update alerts with maintenance window IDs`,
+            `Error updating maintenance window IDs: Failed to update alerts with maintenance window IDs and names`,
             logTags
           );
         });

@@ -268,6 +268,7 @@ export class Alert<
           // the flapping flag, and the UUID
           meta: {
             maintenanceWindowIds: this.meta.maintenanceWindowIds,
+            maintenanceWindowNames: this.meta.maintenanceWindowNames,
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
             uuid: this.meta.uuid,

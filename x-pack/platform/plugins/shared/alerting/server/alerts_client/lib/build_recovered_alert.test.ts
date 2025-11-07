@@ -124,6 +124,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const updatedRule = {
         ...alertRule,
@@ -267,6 +268,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
@@ -439,6 +441,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
@@ -551,6 +554,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
