@@ -15,9 +15,10 @@ import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-interna
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ServerHandles } from '../types';
 
-export async function startServers(): Promise<ServerHandles> {
-  const kibanaLog = resolve(os.tmpdir(), 'kibana.log');
+export async function startServers(log: ToolingLog): Promise<ServerHandles> {
+  log.info(`Starting ES + Kibana`);
 
+  const kibanaLog = resolve(os.tmpdir(), 'kibana.log');
   const { startES } = createTestServers({
     adjustTimeout: () => {},
     settings: {
@@ -76,14 +77,16 @@ export async function stopServers({
   try {
     await delay(2);
     await Promise.race([
-      serverHandles.kibanaRoot?.shutdown(),
+      serverHandles.kibanaRoot.shutdown(),
       timeout(8, 'Timeout waiting for Kibana to stop'),
     ]);
 
     log.info("Kibana's shutdown done!");
-  } catch (ex) {
+  } catch (err) {
     log.error('Error while stopping kibana.');
-    log.error(ex);
+    if (err instanceof Error || typeof err === 'string') {
+      log.error(err);
+    }
   }
 
   try {
@@ -93,9 +96,11 @@ export async function stopServers({
       timeout(5, 'Timeout waiting for ES to stop'),
     ]);
     log.info('ES Stopped!');
-  } catch (ex) {
+  } catch (err) {
     log.error('Error while stopping ES.');
-    log.error(ex);
+    if (err instanceof Error || typeof err === 'string') {
+      log.error(err);
+    }
   }
 }
 

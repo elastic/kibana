@@ -50,32 +50,40 @@ findExistingSnapshotSha() {
 
 echo "Check changes in Saved Objects"
 
-# Obtain an existing snapshot from merge base commit (or one of its ancestors)
-EXISTING_SNAPSHOT_SHA="$(findExistingSnapshotSha "$GITHUB_PR_MERGE_BASE")"
-if [[ $? -ne 0 ]]; then
-  echo "❌ Could not find an existing snapshot to use as a baseline. Aborting Saved Objects checks" >&2
-  exit 1
-fi
-
-# Check compatibility from current serverless release ONLY if it's a PR for the 'main' branch
-if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
-  # Obtain the current serverless release SHA from serverless-gitops
-  GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha)"
+if is_pr; then
+  # We are on the 'pull_request' pipeline, the goal is to test against the merge-base commit.
+  # First, we try to obtain its SHA (or one of its ancestors)
+  MERGE_BASE_REV="$(findExistingSnapshotSha "$GITHUB_PR_MERGE_BASE")"
   if [[ $? -ne 0 ]]; then
-    echo "❌ Couldn't determine current serverless release SHA. Aborting Saved Objects checks" >&2
+    echo "❌ Could not find an existing snapshot to use as a baseline. Aborting Saved Objects checks" >&2
     exit 1
   fi
 
-  # Expand to get the full SHA
-  GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse "$GITHUB_SERVERLESS_RELEASE_REV")"
-  if [[ $? -ne 0 || -z "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
-    echo "❌ Couldn't expand current serverless release SHA. Skipping check against Serverless baseline."  >&2
-    node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA"
-    exit 1
+  if ! is_auto_commit_disabled; then
+    # The step might update files like removed_types.json and/or SO fixtures
+    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" --fix
   else
-    node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA" --baseline "$GITHUB_SERVERLESS_RELEASE_SHA"
+    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV"
   fi
-
 else
-  node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA"
+  # We are on the 'on-merge' pipeline, the goal is to test against current serverless release,
+  # and ONLY if we are in the main branch (older versions most likely won't be compatible)
+  if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
+    # Obtain the current serverless release SHA from serverless-gitops
+    GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha)"
+    if [[ $? -ne 0 ]]; then
+      echo "❌ Couldn't determine current serverless release SHA. Aborting Saved Objects checks" >&2
+      exit 1
+    fi
+
+    # Expand to get the full SHA
+    GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse "$GITHUB_SERVERLESS_RELEASE_REV")"
+    if [[ $? -ne 0 || -z "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
+      echo "❌ Couldn't expand current serverless release SHA. Skipping check against Serverless baseline."  >&2
+      exit 1
+    fi
+
+    # Perform the check against current serverless release
+    node scripts/check_saved_objects --baseline "$GITHUB_SERVERLESS_RELEASE_SHA"
+  fi
 fi
