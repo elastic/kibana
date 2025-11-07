@@ -41,7 +41,7 @@ import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import { isEsqlTableTypeDataset } from '../../utils';
 
-const ACCESSOR = 'metric_formula_accessor';
+const ACCESSOR = 'gauge_accessor';
 const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
 function getAccessorName(type: 'metric' | 'max' | 'min' | 'goal') {
