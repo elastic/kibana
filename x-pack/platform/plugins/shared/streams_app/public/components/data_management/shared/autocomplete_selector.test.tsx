@@ -241,8 +241,6 @@ describe('AutocompleteSelector', () => {
         />
       );
 
-      // Icon should be visible in the selected value
-      expect(screen.getByTestId('field-icon-keyword')).toBeInTheDocument();
       // Selected value should not have icon (only dropdown options have icons)
       expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
       expect(screen.queryByTestId('field-icon-unknown')).not.toBeInTheDocument();
