@@ -39,21 +39,22 @@ export async function executor(
   const latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
   const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
 
-  const { results, sourceFieldsPerResult, groupingObjectsPerResult } = await fetchEsqlQuery({
-    ruleId,
-    alertLimit,
-    params,
-    spacePrefix,
-    services: {
-      share,
-      scopedClusterClient,
-      logger,
-      ruleResultService,
-    },
-    dateStart,
-    dateEnd,
-    sourceFieldsParams,
-  });
+  const { results, sourceFieldsPerResult, groupingObjectsPerResult, flappingFieldsPerResult } =
+    await fetchEsqlQuery({
+      ruleId,
+      alertLimit,
+      params,
+      spacePrefix,
+      services: {
+        share,
+        scopedClusterClient,
+        logger,
+        ruleResultService,
+      },
+      dateStart,
+      dateEnd,
+      sourceFieldsParams,
+    });
 
   const trackedAlerts = alertsClient.getTrackedAlerts() ?? [];
   const trackedAlertsByAlertId = new Map<string, Alert & { alertUuid: string }>();
@@ -97,6 +98,7 @@ export async function executor(
         [ALERT_GROUPING]: groupingObject,
         'lineage.parents': trackedAlert ? getLineage(trackedAlert) : [],
         'alert.start': trackedAlert?.['alert.start'] ?? new Date().toISOString(),
+        'alert.flapping': flappingFieldsPerResult[alertId],
         ...sourceFields,
       },
     });
