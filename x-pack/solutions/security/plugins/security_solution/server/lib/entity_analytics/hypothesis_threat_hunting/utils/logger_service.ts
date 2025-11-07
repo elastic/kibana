@@ -6,11 +6,24 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { createHypothesesThreatHuntingLogger } from './logger';
 
-export type LoggerService = ReturnType<typeof createLoggerService>;
+export type ThreatHuntingHypothesesLoggerService = ReturnType<
+  typeof createThreatHuntingHypothesesLoggerService
+>;
 
-export const createLoggerService = (rootLogger: Logger, namespace: string) => {
+type HypothesesThreatHuntingLogLevel = Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>;
+
+const createHypothesesThreatHuntingLogger = (logger: Logger, namespace: string) => {
+  return {
+    log: (level: HypothesesThreatHuntingLogLevel, msg: string) => {
+      logger[level](`[Hypotheses Threat Hunting][namespace: ${namespace}] ${msg}`);
+    },
+  };
+};
+export const createThreatHuntingHypothesesLoggerService = (
+  rootLogger: Logger,
+  namespace: string
+) => {
   const logger = createHypothesesThreatHuntingLogger(rootLogger, namespace);
 
   const log = (level: 'debug' | 'info' | 'warn' | 'error', msg: string) => {

@@ -45,14 +45,14 @@ export class ThreatHuntingHypothesisDescriptorClient {
   }
 
   async bulkCreate(sources: ThreatHuntingHypothesis[]) {
-    const createdSources = await this.deps.soClient.bulkCreate(
+    const createdHypotheses = await this.deps.soClient.bulkCreate(
       sources.map((source) => ({
         type: threatHuntingHypothesisTypeName,
         attributes: { ...source },
       })),
       { refresh: 'wait_for' }
     );
-    return createdSources;
+    return createdHypotheses.saved_objects.map((so) => so.attributes);
   }
 
   async update(id: string, updates: Partial<ThreatHuntingHypothesis>) {
