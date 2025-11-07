@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('content management', function () {
+    loadTestFile(require.resolve('./created_by'));
     loadTestFile(require.resolve('./updated_by'));
     loadTestFile(require.resolve('./favorites'));
     loadTestFile(require.resolve('./dashboard_search'));
