@@ -11,11 +11,13 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import Os from 'os';
 
+/**
+ * globs for the archive
+ */
 export const CACHE_MATCH_GLOBS = ['**/target/types/**', '**/tsconfig*.type_check.json'];
 export const CACHE_IGNORE_GLOBS = [
   '**/node_modules/**',
   '**/.git/**',
-  '**/target_archive/**',
   '.moon/cache/**',
   '.es/**',
   '.es-data/**',
@@ -27,23 +29,27 @@ export const CACHE_IGNORE_GLOBS = [
 export const ARCHIVE_FILE_NAME = 'ts-build-artifacts.tar.gz';
 export const ARCHIVE_METADATA_FILE_NAME = 'ts-build-artifacts.meta.json';
 
-const GCS_BUCKET_NAME = 'ci-typescript-archives.kibana.dev/ts_type_check';
+export const GCS_BUCKET_NAME = 'ci-typescript-archives';
 
-export const GCS_BUCKET_URI = `gs://${GCS_BUCKET_NAME}`;
-export const GCS_COMMITS_PREFIX = `${GCS_BUCKET_URI}/commits`;
-export const GCS_PULL_REQUESTS_PREFIX = `${GCS_BUCKET_URI}/prs`;
+export const GCS_BUCKET_PATH = 'ts_type_check';
+
+export const GCS_BUCKET_URI = `gs://${GCS_BUCKET_NAME}/${GCS_BUCKET_PATH}`;
+
+export const COMMITS_PATH = `commits`;
+export const PULL_REQUESTS_PATH = `prs`;
+export const GCS_COMMITS_PREFIX = `${GCS_BUCKET_URI}/${COMMITS_PATH}`;
+export const GCS_PULL_REQUESTS_PREFIX = `${GCS_BUCKET_URI}/${PULL_REQUESTS_PATH}`;
 
 export const GCLOUD_ACTIVATE_SCRIPT = Path.resolve(
   REPO_ROOT,
   '.buildkite/scripts/common/activate_service_account.sh'
 );
 
-export const LOCAL_CACHE_ROOT = Path.resolve(Os.tmpdir(), 'kibana-ts-type-check-cache');
-export const LOCAL_METADATA_RELATIVE_DIR = Path.join('target', '.ts-type-check-cache');
-export const LOCAL_METADATA_RELATIVE_PATH = Path.join(
-  LOCAL_METADATA_RELATIVE_DIR,
-  ARCHIVE_METADATA_FILE_NAME
-);
+const BASE_DIR = Path.resolve(Os.tmpdir(), 'kibana-ts-type-check-cache');
+
+export const TMP_DIR = Path.join(BASE_DIR, 'tmp');
+export const LOCAL_CACHE_ROOT = Path.join(BASE_DIR, 'archives');
+
 export const MAX_COMMITS_TO_CHECK = 50;
 
 export const TYPES_DIRECTORY_GLOB = '**/target/types';

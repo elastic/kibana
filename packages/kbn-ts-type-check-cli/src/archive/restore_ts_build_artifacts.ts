@@ -8,28 +8,20 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import execa from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { MAX_COMMITS_TO_CHECK } from './constants';
+import { GcsFileSystem } from './file_system/gcs_file_system';
+import { LocalFileSystem } from './file_system/local_file_system';
 import {
   buildCandidateShaList,
-  cleanTypeCheckArtifacts,
-  getTarPlatformOptions,
-  resolveTarEnvironment,
-  isCiEnvironment,
-  locateLocalArchive,
-  locateRemoteArchive,
   getPullRequestNumber,
+  isCiEnvironment,
   readRecentCommitShas,
   resolveCurrentCommitSha,
   withGcsAuth,
-  writeRestoreMetadataDocument,
 } from './utils';
-import { MAX_COMMITS_TO_CHECK } from './constants';
 
 export async function restoreTSBuildArtifacts(log: SomeDevLog) {
   try {
-    const now = Date.now();
-
     log.info(`Restoring TypeScript build artifacts`);
     const currentSha = await resolveCurrentCommitSha();
     const history = await readRecentCommitShas(MAX_COMMITS_TO_CHECK);
@@ -42,89 +34,15 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
     const prNumber = getPullRequestNumber();
 
-    const archiveCandidate = isCiEnvironment()
-      ? await locateRemoteArchive(log, candidateShas, { prNumber })
-      : await locateLocalArchive(candidateShas);
-
-    if (!archiveCandidate) {
-      log.info('No cached TypeScript build artifacts available to restore.');
-      return;
-    }
-
-    await cleanTypeCheckArtifacts(log);
-
-    log.info(`Cleaned artifacts`);
-
-    if (archiveCandidate.kind === 'remote') {
-      log.info(
-        `Streaming TypeScript build artifacts from ${archiveCandidate.remotePath} (${archiveCandidate.source})`
-      );
-      await withRemoteTarExtraction(archiveCandidate.remotePath, log);
+    if (isCiEnvironment()) {
+      await withGcsAuth(log, async () => {
+        await new GcsFileSystem(log).restoreArchive({ shas: candidateShas, prNumber });
+      });
     } else {
-      await extractLocalArchive(archiveCandidate.archivePath);
+      await new LocalFileSystem(log).restoreArchive({ shas: candidateShas, prNumber });
     }
-
-    await writeRestoreMetadataDocument(archiveCandidate);
-
-    const tookInMs = Math.round(Date.now() - now);
-
-    log.info(
-      `Restored TypeScript build artifacts from commit ${archiveCandidate.sha} in ${tookInMs}ms.`
-    );
   } catch (error) {
     const restoreErrorDetails = error instanceof Error ? error.message : String(error);
     log.warning(`Failed to restore TypeScript build artifacts: ${restoreErrorDetails}`);
   }
 }
-
-const extractBaseArgs = ['--directory', REPO_ROOT, ...getTarPlatformOptions()];
-
-const buildExtractArgs = (fileArg: string) => [
-  '--extract',
-  '--file',
-  fileArg,
-  '--gzip',
-  ...extractBaseArgs,
-];
-
-const extractLocalArchive = async (archivePath: string) => {
-  const tarArgs = buildExtractArgs(archivePath);
-  await execa('tar', tarArgs, {
-    cwd: REPO_ROOT,
-    stdout: 'ignore',
-    stderr: 'inherit',
-    env: resolveTarEnvironment(),
-    buffer: false,
-  });
-};
-
-const withRemoteTarExtraction = async (remotePath: string, log: SomeDevLog) => {
-  await withGcsAuth(log, async () => {
-    const tarArgs = buildExtractArgs('-');
-    const tarProcess = execa('tar', tarArgs, {
-      cwd: REPO_ROOT,
-      stdin: 'pipe',
-      stdout: 'ignore',
-      stderr: 'inherit',
-      env: resolveTarEnvironment(),
-      buffer: false,
-    });
-
-    const catProcess = execa('gcloud', ['storage', 'cat', remotePath], {
-      cwd: REPO_ROOT,
-      stdout: 'pipe',
-      stderr: 'inherit',
-      buffer: false,
-    });
-
-    if (!catProcess.stdout || !tarProcess.stdin) {
-      tarProcess.kill();
-      catProcess.kill();
-      throw new Error('Failed to establish stream between gcloud and tar.');
-    }
-
-    catProcess.stdout.pipe(tarProcess.stdin);
-
-    await Promise.all([catProcess, tarProcess]);
-  });
-};

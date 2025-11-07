@@ -169,7 +169,7 @@ run(
 
     if (shouldUseArchive) {
       if (hasLocalChanges) {
-        log.verbose('Skipping TypeScript cache archive because uncommitted changes were detected.');
+        log.info('Skipping TypeScript cache archive because uncommitted changes were detected.');
       } else {
         await archiveTSBuildArtifacts(log);
       }

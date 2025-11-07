@@ -59,10 +59,6 @@ else
   BUCKET_NAME="$CALL_ARGUMENT"
 fi
 
-if [[ "$BUCKET_NAME" == */* ]]; then
-  BUCKET_NAME="${BUCKET_NAME%%/*}"
-fi
-
 if [[ -z "$EMAIL" ]]; then
   case "$BUCKET_NAME" in
     "elastic-kibana-coverage-live")
@@ -83,7 +79,7 @@ if [[ -z "$EMAIL" ]]; then
     "ci-artifacts.kibana.dev")
       EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
       ;;
-    "ci-typescript-archives.kibana.dev")
+    "ci-typescript-archives")
       EMAIL="kibana-ci-access-ts-archives@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "kibana-ci-access-chromium-blds")
