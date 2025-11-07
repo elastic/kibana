@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_GROUPING, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { ESQLParams } from '@kbn/response-ops-rule-params/esql';
@@ -38,53 +39,70 @@ export async function executor(
   const latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
   const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
 
-  const { results, sourceFieldsPerResult, groupingObjectsPerResult } = await fetchEsqlQuery({
-    ruleId,
-    alertLimit,
-    params,
-    spacePrefix,
-    services: {
-      share,
-      scopedClusterClient,
-      logger,
-      ruleResultService,
-    },
-    dateStart,
-    dateEnd,
-    sourceFieldsParams,
-  });
+  const { results, sourceFieldsPerResult, groupingObjectsPerResult, flappingFieldsPerResult } =
+    await fetchEsqlQuery({
+      ruleId,
+      alertLimit,
+      params,
+      spacePrefix,
+      services: {
+        share,
+        scopedClusterClient,
+        logger,
+        ruleResultService,
+      },
+      dateStart,
+      dateEnd,
+      sourceFieldsParams,
+    });
 
   const trackedAlerts = alertsClient.getTrackedAlerts() ?? [];
+  const trackedAlertsByAlertId = new Map<string, Alert & { alertUuid: string }>();
   const activeAlerts: any = [];
-  for (const alertId of Object.keys(results)) {
-    const sourceFields = sourceFieldsPerResult[alertId];
-    const groupingObject = groupingObjectsPerResult[alertId]
-      ? unflattenObject(groupingObjectsPerResult[alertId])
-      : undefined;
-
-    activeAlerts.push({
-      id: alertId,
-      state: { latestTimestamp, dateStart, dateEnd },
-      payload: {
-        [ALERT_GROUPING]: groupingObject,
-        ...sourceFields,
-      },
-    });
-  }
-
   const recoveredAlerts: any = [];
   for (const alertUuid of Object.keys(trackedAlerts)) {
     const alert = trackedAlerts[alertUuid];
     const alertId = alert[ALERT_INSTANCE_ID];
+
+    trackedAlertsByAlertId.set(alertId, {
+      ...alert,
+      alertUuid,
+    });
+
     if (!results[alertId]) {
       recoveredAlerts.push({
         id: alertId,
         state: { latestTimestamp, dateStart, dateEnd },
         payload: {
           [ALERT_GROUPING]: alert[ALERT_GROUPING],
+          'alert.flapping': alert['alert.flapping'] ? false : undefined, // if alert was previously flapping and recovered, it is no longer flapping
+          'lineage.parents': getLineage({ ...alert, alertUuid }),
+          'alert.start': alert['alert.start'],
+          'alert.end': new Date().toISOString(),
         },
       });
     }
+  }
+
+  for (const alertId of Object.keys(results)) {
+    const sourceFields = sourceFieldsPerResult[alertId];
+    const groupingObject = groupingObjectsPerResult[alertId]
+      ? unflattenObject(groupingObjectsPerResult[alertId])
+      : undefined;
+
+    const trackedAlert = trackedAlertsByAlertId.get(alertId);
+
+    activeAlerts.push({
+      id: alertId,
+      state: { latestTimestamp, dateStart, dateEnd },
+      payload: {
+        [ALERT_GROUPING]: groupingObject,
+        'lineage.parents': trackedAlert ? getLineage(trackedAlert) : [],
+        'alert.start': trackedAlert?.['alert.start'] ?? new Date().toISOString(),
+        'alert.flapping': flappingFieldsPerResult[alertId],
+        ...sourceFields,
+      },
+    });
   }
 
   alertsClient.writeAlerts(activeAlerts, recoveredAlerts);
@@ -98,4 +116,11 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
   }
+}
+
+export function getLineage(trackedAlert: {
+  'lineage.parents'?: string[];
+  alertUuid: string;
+}): string[] {
+  return [...(trackedAlert['lineage.parents'] || []), trackedAlert.alertUuid];
 }

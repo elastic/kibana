@@ -99,7 +99,8 @@ export function parseCliOptions(): CliOptions {
       '--slash-logs',
       'This will index everything through Streams slash logs endpoint',
       DEFAULTS.SLASH_LOGS
-    );
+    )
+    .option('--loop-schedule', 'This will loop the schedule indefinitely', DEFAULTS.LOOP_SCHEDULE);
 
   program.parse(process.argv);
   return program.opts() as CliOptions;

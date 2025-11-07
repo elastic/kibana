@@ -1,0 +1,17 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  dataset: "fake_stack"
+  interval: 10000 # 10 seconds
+
+# The sequence of states and their duration
+schedule:
+  - template: "bad"
+    duration: "5m"
+  - template: "good"
+    duration: "5m"
