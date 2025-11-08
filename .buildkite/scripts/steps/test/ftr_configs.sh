@@ -81,7 +81,7 @@ while read -r config; do
 
   # prevent non-zero exit code from breaking the loop
   set +e;
-  node ./scripts/functional_tests \
+  DISABLE_CI_LOG_OUTPUT_CAPTURE=1 node ./scripts/functional_tests \
     --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config" \
