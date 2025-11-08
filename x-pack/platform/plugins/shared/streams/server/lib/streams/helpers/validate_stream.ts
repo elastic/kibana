@@ -19,6 +19,7 @@ import type {
   RemoveByPrefixProcessor,
   RemoveProcessor,
   RenameProcessor,
+  ReplaceProcessor,
   SetProcessor,
   StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
@@ -128,6 +129,12 @@ const actionStepValidators: {
   },
   remove_by_prefix: (step: RemoveByPrefixProcessor) => checkFieldName(step.from),
   remove: (step: RemoveProcessor) => checkFieldName(step.from),
+  replace: (step: ReplaceProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation
   manual_ingest_pipeline: () => {},
