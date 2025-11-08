@@ -595,7 +595,116 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "fieldsMetadata",
+        "id": "def-common.createProxiedFieldsMap",
+        "type": "Function",
+        "tags": [],
+        "label": "createProxiedFieldsMap",
+        "description": [
+          "\nCreates a proxied fields map that dynamically handles prefixed field lookups for FieldMetadata instances.\nWhen accessing a field like 'resource.attributes.service.name', if not found,\nit will look for 'service.name' and create a prefixed variant on-the-fly.\n\nThis ensures consistent behavior between getByName() and find() methods\nwithout triplicating the payload with all prefix variants."
+        ],
+        "signature": [
+          "(fields: ",
+          "FieldsMetadataMap",
+          ") => ",
+          "FieldsMetadataMap"
+        ],
+        "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/utils/create_proxied_fields_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fieldsMetadata",
+            "id": "def-common.createProxiedFieldsMap.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "FieldsMetadataMap"
+            ],
+            "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/utils/create_proxied_fields_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldsMetadata",
+        "id": "def-common.createProxiedPlainFields",
+        "type": "Function",
+        "tags": [],
+        "label": "createProxiedPlainFields",
+        "description": [
+          "\nCreates a proxied fields map for plain field metadata objects (used on client-side).\nWorks the same way as createProxiedFieldsMap but for plain objects instead of FieldMetadata instances."
+        ],
+        "signature": [
+          "(fields: Record<string, { name?: string | undefined; } & { allowed_values?: ({ description: string; name: string; } & { expected_event_types?: string[] | undefined; beta?: string | undefined; })[] | undefined; beta?: string | undefined; dashed_name?: string | undefined; description?: string | undefined; doc_values?: boolean | undefined; example?: unknown; expected_values?: string[] | undefined; flat_name?: string | undefined; format?: string | undefined; ignore_above?: number | undefined; index?: boolean | undefined; input_format?: string | undefined; level?: string | undefined; multi_fields?: { flat_name: string; name: string; type: string; }[] | undefined; normalize?: string[] | undefined; object_type?: string | undefined; original_fieldset?: string | undefined; otel?: (({ stability: \"experimental\" | \"stable\"; } & { note?: string | undefined; } & ({ relation: \"match\"; } | { relation: \"equivalent\"; attribute: string; } | { relation: \"related\"; attribute: string; } | { relation: \"conflict\"; attribute: string; } | { relation: \"otlp\"; otlp_field: string; } | { relation: \"metric\"; metric: string; })) | { relation: \"na\"; })[] | undefined; output_format?: string | undefined; output_precision?: number | undefined; pattern?: string | undefined; required?: boolean | undefined; scaling_factor?: number | undefined; short?: string | undefined; source?: \"unknown\" | \"ecs\" | \"metadata\" | \"integration\" | \"otel\" | undefined; type?: string | undefined; documentation_url?: string | undefined; otel_equivalent?: string | undefined; }>) => Record<string, { name?: string | undefined; } & { allowed_values?: ({ description: string; name: string; } & { expected_event_types?: string[] | undefined; beta?: string | undefined; })[] | undefined; beta?: string | undefined; dashed_name?: string | undefined; description?: string | undefined; doc_values?: boolean | undefined; example?: unknown; expected_values?: string[] | undefined; flat_name?: string | undefined; format?: string | undefined; ignore_above?: number | undefined; index?: boolean | undefined; input_format?: string | undefined; level?: string | undefined; multi_fields?: { flat_name: string; name: string; type: string; }[] | undefined; normalize?: string[] | undefined; object_type?: string | undefined; original_fieldset?: string | undefined; otel?: (({ stability: \"experimental\" | \"stable\"; } & { note?: string | undefined; } & ({ relation: \"match\"; } | { relation: \"equivalent\"; attribute: string; } | { relation: \"related\"; attribute: string; } | { relation: \"conflict\"; attribute: string; } | { relation: \"otlp\"; otlp_field: string; } | { relation: \"metric\"; metric: string; })) | { relation: \"na\"; })[] | undefined; output_format?: string | undefined; output_precision?: number | undefined; pattern?: string | undefined; required?: boolean | undefined; scaling_factor?: number | undefined; short?: string | undefined; source?: \"unknown\" | \"ecs\" | \"metadata\" | \"integration\" | \"otel\" | undefined; type?: string | undefined; documentation_url?: string | undefined; otel_equivalent?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/utils/create_proxied_fields_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fieldsMetadata",
+            "id": "def-common.createProxiedPlainFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "Record<string, { name?: string | undefined; } & { allowed_values?: ({ description: string; name: string; } & { expected_event_types?: string[] | undefined; beta?: string | undefined; })[] | undefined; beta?: string | undefined; dashed_name?: string | undefined; description?: string | undefined; doc_values?: boolean | undefined; example?: unknown; expected_values?: string[] | undefined; flat_name?: string | undefined; format?: string | undefined; ignore_above?: number | undefined; index?: boolean | undefined; input_format?: string | undefined; level?: string | undefined; multi_fields?: { flat_name: string; name: string; type: string; }[] | undefined; normalize?: string[] | undefined; object_type?: string | undefined; original_fieldset?: string | undefined; otel?: (({ stability: \"experimental\" | \"stable\"; } & { note?: string | undefined; } & ({ relation: \"match\"; } | { relation: \"equivalent\"; attribute: string; } | { relation: \"related\"; attribute: string; } | { relation: \"conflict\"; attribute: string; } | { relation: \"otlp\"; otlp_field: string; } | { relation: \"metric\"; metric: string; })) | { relation: \"na\"; })[] | undefined; output_format?: string | undefined; output_precision?: number | undefined; pattern?: string | undefined; required?: boolean | undefined; scaling_factor?: number | undefined; short?: string | undefined; source?: \"unknown\" | \"ecs\" | \"metadata\" | \"integration\" | \"otel\" | undefined; type?: string | undefined; documentation_url?: string | undefined; otel_equivalent?: string | undefined; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/utils/create_proxied_fields_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldsMetadata",
+        "id": "def-common.extractPrefixParts",
+        "type": "Function",
+        "tags": [],
+        "label": "extractPrefixParts",
+        "description": [
+          "\nExtracts prefix and base field name from a potentially prefixed field name.\nSupports: 'attributes.*' and 'resource.attributes.*'"
+        ],
+        "signature": [
+          "(fieldName: string) => ExtractedParts"
+        ],
+        "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/utils/create_proxied_fields_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fieldsMetadata",
+            "id": "def-common.extractPrefixParts.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/utils/create_proxied_fields_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "fieldsMetadata",
@@ -969,6 +1078,21 @@
           "; }>]>"
         ],
         "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldsMetadata",
+        "id": "def-common.SUPPORTED_PREFIXES",
+        "type": "Object",
+        "tags": [],
+        "label": "SUPPORTED_PREFIXES",
+        "description": [],
+        "signature": [
+          "readonly [\"resource.attributes.\", \"attributes.\"]"
+        ],
+        "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/utils/create_proxied_fields_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
