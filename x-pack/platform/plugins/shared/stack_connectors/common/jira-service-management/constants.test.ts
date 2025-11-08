@@ -8,7 +8,7 @@
 import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULE_TAGS_TEMPLATE } from './constants';
 
-describe('contants', () => {
+describe('constants', () => {
   describe('tags', () => {
     it('uses the same string as the public directory', () => {
       expect(`{{${AlertProvidedActionVariables.ruleTags}}}`).toEqual(RULE_TAGS_TEMPLATE);
