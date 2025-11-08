@@ -269,16 +269,6 @@ export class RenderingService {
 
     const apmConfig = getApmConfig(request.url.pathname);
 
-    const logger = this.coreContext.logger.get('apmConfig');
-
-    logger.warn(`--- APM config ---`);
-    logger.warn(JSON.stringify(apmConfig));
-
-    // eslint-disable-next-line no-console
-    console.warn(`--- APM config ---`);
-    // eslint-disable-next-line no-console
-    console.warn(JSON.stringify(apmConfig));
-
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
