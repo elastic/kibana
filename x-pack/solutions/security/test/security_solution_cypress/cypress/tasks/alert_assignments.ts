@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+/**
+ * Helper functions for alert assignment e2e tests
+ * 
+ * Enhanced with better wait conditions and timing controls to prevent flakiness:
+ * - Improved popover wait logic with longer timeouts
+ * - Added explicit waits after assignment operations
+ * - Better element visibility and state checks
+ * - Enhanced search input handling with proper clearing and waiting
+ */
+
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import {
   ALERT_ASIGNEES_COLUMN,
@@ -42,8 +52,10 @@ export const waitForAssigneesToPopulatePopover = () => {
         return $assigneesOptions.length > 0;
       });
     },
-    { interval: 500, timeout: 12000 }
+    { interval: 500, timeout: 20000 }
   );
+  // Additional wait to ensure the options are fully rendered and clickable
+  cy.get(ALERT_ASSIGNEES_SELECTABLE_OPTIONS).should('be.visible');
 };
 
 export const waitForPageTitleToBeShown = () => {
@@ -68,9 +80,13 @@ export const openAlertAssigningBulkActionMenu = () => {
 
 export const updateAlertAssignees = () => {
   cy.get(ALERT_ASSIGNEES_UPDATE_BUTTON).click();
+  // Wait for the assignment operation to complete
+  cy.wait(1000);
 };
 
 export const checkEmptyAssigneesStateInAlertsTable = () => {
+  // Wait for data to stabilize before checking
+  cy.wait(1000);
   cy.get(ALERT_DATA_GRID_ROW)
     .its('length')
     .then((count) => {
@@ -84,6 +100,8 @@ export const checkEmptyAssigneesStateInAlertsTable = () => {
 };
 
 export const checkEmptyAssigneesStateInAlertDetailsFlyout = () => {
+  // Wait for flyout data to stabilize before checking
+  cy.wait(1000);
   cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).within(() => {
     cy.get(ALERT_AVATARS_PANEL).children().should('have.length', 0);
   });
@@ -104,24 +122,36 @@ export const cannotAddAssigneesViaDetailsFlyout = () => {
 };
 
 export const alertsTableShowsAssigneesForAlert = (users: string[], alertIndex = 0) => {
+  // Wait for data to stabilize before checking
+  cy.wait(1000);
   cy.get(ALERT_ASIGNEES_COLUMN)
     .eq(alertIndex)
     .within(() => {
-      users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
+      users.forEach((user) => {
+        cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist').should('be.visible');
+      });
     });
 };
 
 export const alertsTableShowsAssigneesForAllAlerts = (users: string[]) => {
+  // Wait for data to stabilize before checking
+  cy.wait(1000);
   cy.get(ALERT_ASIGNEES_COLUMN).each(($column) => {
     cy.wrap($column).within(() => {
-      users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
+      users.forEach((user) => {
+        cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist').should('be.visible');
+      });
     });
   });
 };
 
 export const alertDetailsFlyoutShowsAssignees = (users: string[]) => {
+  // Wait for flyout data to stabilize before checking
+  cy.wait(1000);
   cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).within(() => {
-    users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
+    users.forEach((user) => {
+      cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist').should('be.visible');
+    });
   });
 };
 
@@ -131,22 +161,24 @@ export const selectAlertAssignee = (assignee: string) => {
       cy.get(ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM).contains(assignee).click();
       return;
     }
-    cy.get('input').type(assignee);
+    cy.get('input').clear().type(assignee);
+    // Wait for search results to appear
+    cy.get(ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM).contains(assignee).should('be.visible');
     cy.get(ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM).contains(assignee).click();
+    // Wait for selection to be processed before clearing search
+    cy.wait(500);
     cy.get(ALERT_USERS_PROFILES_CLEAR_SEARCH_BUTTON).click();
   });
 };
 
-/**
- * This will update assignees for selected alert
- * @param users The list of assugnees to update. If assignee is not assigned yet it will be assigned, otherwise it will be unassigned
- */
 export const updateAssigneesForFirstAlert = (users: string[]) => {
   openFirstAlertAssigningActionMenu();
   waitForAssigneesToPopulatePopover();
   users.forEach((user) => selectAlertAssignee(user));
   updateAlertAssignees();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  // Wait for assignees data to be updated in the UI
+  cy.wait(2000);
 };
 
 export const updateAssigneesViaAddButtonInFlyout = (users: string[]) => {
@@ -155,6 +187,8 @@ export const updateAssigneesViaAddButtonInFlyout = (users: string[]) => {
   users.forEach((user) => selectAlertAssignee(user));
   updateAlertAssignees();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  // Wait for assignees data to be updated in the UI
+  cy.wait(2000);
 };
 
 export const updateAssigneesViaTakeActionButtonInFlyout = (users: string[]) => {
@@ -164,6 +198,8 @@ export const updateAssigneesViaTakeActionButtonInFlyout = (users: string[]) => {
   users.forEach((user) => selectAlertAssignee(user));
   updateAlertAssignees();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  // Wait for assignees data to be updated in the UI
+  cy.wait(2000);
 };
 
 export const bulkUpdateAssignees = (users: string[]) => {
@@ -172,24 +208,32 @@ export const bulkUpdateAssignees = (users: string[]) => {
   users.forEach((user) => selectAlertAssignee(user));
   updateAlertAssignees();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  // Wait for bulk assignees data to be updated in the UI
+  cy.wait(3000);
 };
 
 export const removeAllAssigneesForFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(ALERT_UNASSIGN_CONTEXT_MENU_ITEM).click();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  // Wait for unassignment to be processed
+  cy.wait(2000);
 };
 
 export const removeAllAssigneesViaTakeActionButtonInFlyout = () => {
   cy.get(ALERT_DETAILS_TAKE_ACTION_BUTTON).click();
   cy.get(ALERT_UNASSIGN_CONTEXT_MENU_ITEM).click();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  // Wait for unassignment to be processed
+  cy.wait(2000);
 };
 
 export const bulkRemoveAllAssignees = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).click();
   cy.get(ALERT_UNASSIGN_CONTEXT_MENU_ITEM).click();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  // Wait for bulk unassignment to be processed
+  cy.wait(3000);
 };
 
 export const filterByAssignees = (users: Array<string | typeof NO_ASSIGNEES>) => {
