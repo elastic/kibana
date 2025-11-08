@@ -20,6 +20,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import type { OnTimeChangeProps } from '@elastic/eui';
+import { useScreenReaderAnnouncements } from '../../../a11y_announcements/hooks/use_screen_reader_context';
 import { inputsActions } from '../../store/inputs';
 import type { InputsRange } from '../../store/inputs/model';
 import type { InputsModelId } from '../../store/inputs/constants';
@@ -99,6 +100,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       dispatch(hostsActions.setHostTablesActivePageToZero());
       dispatch(networkActions.setNetworkTablesActivePageToZero());
     }, [dispatch]);
+    const { announce } = useScreenReaderAnnouncements();
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
     const { dataView: experimentalDataView } = useDataView();
@@ -199,18 +201,20 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
             filterManager,
             setTablesActivePageToZero,
           });
+          announce('[TEST] onRefresh announcement');
         } else {
           queries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
-      [updateSearch, id, filterManager, queries, setTablesActivePageToZero]
+      [updateSearch, id, filterManager, queries, setTablesActivePageToZero, announce]
     );
 
     const onSaved = useCallback(
       (newSavedQuery: SavedQuery) => {
         setSavedQuery({ id, savedQuery: newSavedQuery });
+        announce('[TEST] onSaved announcement');
       },
-      [id, setSavedQuery]
+      [id, setSavedQuery, announce]
     );
 
     const onSavedQueryUpdated = useCallback(
@@ -246,11 +250,24 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         updateSearchBar = set('savedQuery', savedQueryUpdated, updateSearchBar);
 
         updateSearch(updateSearchBar);
+        announce('[TEST] onSavedQueryUpdated announcement');
       },
-      [id, toStr, end, fromStr, start, filterManager, updateSearch, setTablesActivePageToZero]
+      [
+        id,
+        toStr,
+        end,
+        fromStr,
+        start,
+        filterManager,
+        updateSearch,
+        setTablesActivePageToZero,
+        announce,
+      ]
     );
 
     const onClearSavedQuery = useCallback(() => {
+      announce('[TEST] onClearSavedQuery announcement');
+
       if (savedQuery != null) {
         updateSearch({
           id,
@@ -269,6 +286,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           filterManager,
           setTablesActivePageToZero,
         });
+        announce('[TEST] onClearSavedQuery announcement');
       }
     }, [
       savedQuery,
@@ -280,6 +298,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       start,
       filterManager,
       setTablesActivePageToZero,
+      announce,
     ]);
 
     useEffect(() => {

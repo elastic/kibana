@@ -41,6 +41,8 @@ import {
   dataViewManagerReducer,
   initialDataViewManagerState,
 } from '../../data_view_manager/redux/reducer';
+import type { AnnouncementState } from '../../a11y_announcements/a11y_announcements.slice';
+import { announcementReducer } from '../../a11y_announcements/a11y_announcements.slice';
 
 enableMapSet();
 
@@ -73,7 +75,8 @@ export const createInitialState = (
   dataTableState: DataTableState,
   groupsState: GroupState,
   analyzerState: AnalyzerState,
-  notesState: NotesState
+  notesState: NotesState,
+  announcementState: AnnouncementState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -137,6 +140,7 @@ export const createInitialState = (
     },
     notes: notesState,
     dataViewManager: initialDataViewManagerState.dataViewManager,
+    announcement: announcementState,
   };
 
   return preloadedState;
@@ -161,4 +165,5 @@ export const createReducer: (
     ...pluginsReducer,
     notes: notesReducer,
     dataViewManager: dataViewManagerReducer,
+    announcement: announcementReducer,
   });
