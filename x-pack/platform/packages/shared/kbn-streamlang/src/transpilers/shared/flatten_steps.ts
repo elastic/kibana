@@ -45,7 +45,7 @@ export function flattenSteps(
     // If the processor has an inline where, combine with parent as "and"
     if ('where' in processor && processor.where) {
       const { where, ...rest } = processor;
-      const combinedCondition = combineConditionsAsAnd(parentCondition, where) as Condition;
+      const combinedCondition = combineConditionsAsAnd(parentCondition, where);
       return [
         {
           ...rest,

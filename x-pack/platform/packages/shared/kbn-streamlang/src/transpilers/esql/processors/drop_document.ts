@@ -6,6 +6,7 @@
  */
 
 import { Builder, type ESQLAstCommand } from '@kbn/esql-ast';
+import type { Condition } from '../../../../types/conditions';
 import type { DropDocumentProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 
@@ -13,7 +14,7 @@ export const convertDropDocumentProcessorToESQL = (
   processor: DropDocumentProcessor
 ): ESQLAstCommand[] => {
   const { where } = processor;
-  const whereCondition = conditionToESQLAst(where);
+  const whereCondition = conditionToESQLAst(where as Condition);
   return [
     Builder.command({
       name: 'WHERE',
