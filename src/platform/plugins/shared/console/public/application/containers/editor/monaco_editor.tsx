@@ -76,7 +76,6 @@ export const MonacoEditor = ({
       notifications,
       settings: settingsService,
       autocompleteInfo,
-      dataViews,
       data,
       licensing,
       application,
@@ -186,7 +185,7 @@ export const MonacoEditor = ({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         const getLicense = licensing?.getLicense;
-        return await getESQLSources(dataViews, { application, http }, getLicense);
+        return await getESQLSources({ application, http }, getLicense);
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
@@ -214,7 +213,7 @@ export const MonacoEditor = ({
       },
     };
     return callbacks;
-  }, [licensing, dataViews, application, http, data?.search?.search]);
+  }, [licensing, application, http, data?.search?.search]);
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
@@ -303,6 +302,7 @@ export const MonacoEditor = ({
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        links={true}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',

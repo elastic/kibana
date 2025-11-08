@@ -63,7 +63,7 @@ import { DatatableInspectorTables } from '../../../common/expressions/defs/datat
 import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
-import { DatatableAppearanceSettings } from './components/toolbar/appearance_settings';
+import { DatatableAppearanceSettings } from './components/appearance_settings';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
