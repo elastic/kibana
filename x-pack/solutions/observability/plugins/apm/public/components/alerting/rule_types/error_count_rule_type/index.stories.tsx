@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ErrorCountRuleParams } from '.';
 import { ErrorCountRuleType } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
@@ -43,13 +43,13 @@ const stories: Meta<{}> = {
       createCallApmApi(coreMock);
 
       return (
-        <IntlProvider locale="en">
+        <MockApmPluginStorybook>
           <KibanaReactContext.Provider>
             <div style={{ width: 400 }}>
               <StoryComponent />
             </div>
           </KibanaReactContext.Provider>
-        </IntlProvider>
+        </MockApmPluginStorybook>
       );
     },
   ],
