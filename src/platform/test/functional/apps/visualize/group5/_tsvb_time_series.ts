@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
+import path from 'path';
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+const cursorScript = fs.readFileSync(path.resolve(__dirname, './cursor_display.js'), 'utf8');
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder, timeToVisualize, dashboard, common, visChart } = getPageObjects(
@@ -41,6 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Time Series', () => {
       beforeEach(async () => {
+        browser.execute(cursorScript);
         await visualBuilder.setTime();
         await visualBuilder.clickPanelOptions('timeSeries');
         await visualBuilder.setDropLastBucket(true);
