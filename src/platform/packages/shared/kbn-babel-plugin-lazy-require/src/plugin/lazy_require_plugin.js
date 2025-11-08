@@ -54,7 +54,14 @@ const {
 
 // Modules that should never be lazy-loaded
 // Supports exact matches ('react') and trailing wildcards ('@testing-library/*')
-const EXCLUDED_MODULES = ['react', 'React', '@jest/globals', '@testing-library/*'];
+const EXCLUDED_MODULES = [
+  'react',
+  'React',
+  '@jest/globals',
+  '@testing-library/*',
+  '@elastic/eui/lib/test/*',
+  '@elastic/eui/test-env/test/*',
+];
 
 // File patterns for files that should skip transformation
 const MOCK_FILE_PATTERNS = ['.mock.', '.mocks.'];
