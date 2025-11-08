@@ -23,6 +23,7 @@ import {
   PROCESSOR_EVENT,
   PROCESSOR_NAME,
   SERVICE_NAME,
+  SERVICE_VERSION,
   TIMESTAMP_US,
   TRACE_ID,
   TRANSACTION_ID,
@@ -81,6 +82,7 @@ export async function getErrorSampleDetails({
     TIMESTAMP_US,
     AT_TIMESTAMP,
     SERVICE_NAME,
+    SERVICE_VERSION,
     ERROR_ID,
     ERROR_GROUP_ID,
   ] as const);
