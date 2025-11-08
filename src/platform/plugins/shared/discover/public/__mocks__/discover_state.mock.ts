@@ -329,7 +329,7 @@ export function getDiscoverStateMock({
   );
 
   internalState.dispatch(
-    internalStateActions.setAppState({
+    internalStateActions.resetAppState({
       tabId: internalState.getState().tabs.unsafeCurrentId,
       appState: getInitialState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),

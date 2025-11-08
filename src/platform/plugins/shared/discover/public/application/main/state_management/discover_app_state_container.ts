@@ -49,10 +49,6 @@ import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
 export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAppState> {
   /**
-   * Returns the previous state, used for diffing e.g. if fetching new data is necessary
-   */
-  getPrevious: () => DiscoverAppState;
-  /**
    * Initializes the app state and starts syncing it with the URL
    */
   initAndSync: () => () => void;
@@ -66,10 +62,6 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
    * @param merge if true, the given state is merged with the current state
    */
   replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => Promise<void>;
-  /**
-   * Resets the state container to a given state, clearing the previous state
-   */
-  resetToState: (appState: DiscoverAppState) => void;
   /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
@@ -211,11 +203,6 @@ export const getDiscoverAppStateContainer = ({
       savedSearch: newSavedSearch,
       services,
     });
-  };
-
-  const resetToState = (appState: DiscoverAppState) => {
-    addLog('[appState] reset state to', appState);
-    internalState.dispatch(injectCurrentTab(internalStateActions.resetAppState)({ appState }));
   };
 
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
@@ -364,13 +351,9 @@ export const getDiscoverAppStateContainer = ({
     }
   };
 
-  const getPrevious = () => selectTab(internalState.getState(), tabId).previousAppState;
-
   return {
     ...appStateContainer,
-    getPrevious,
     initAndSync,
-    resetToState,
     updateUrlWithCurrentState,
     replaceUrlState,
     update,

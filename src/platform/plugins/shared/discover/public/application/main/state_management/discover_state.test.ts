@@ -151,7 +151,7 @@ describe('Discover state', () => {
       state.appState.update({
         dataSource: createDataViewDataSource({ dataViewId: 'second' }),
       });
-      expect(state.appState.getPrevious()).toEqual(stateA);
+      expect(state.getCurrentTab().previousAppState).toEqual(stateA);
     });
 
     test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {

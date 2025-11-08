@@ -95,7 +95,7 @@ describe('Test discover app state container', () => {
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'second' }),
     });
-    expect(state.getPrevious()).toEqual(stateA);
+    expect(getCurrentTab().previousAppState).toEqual(stateA);
   });
 
   describe('getAppStateFromSavedSearch', () => {

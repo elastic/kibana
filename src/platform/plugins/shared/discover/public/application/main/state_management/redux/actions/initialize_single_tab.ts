@@ -289,8 +289,8 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       stateContainer.savedSearchState.set(savedSearch);
     }
 
-    // Make sure app state container is completely reset
-    stateContainer.appState.resetToState(initialAppState);
+    // Make sure app state is completely reset
+    dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
     stateContainer$.next(stateContainer);

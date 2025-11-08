@@ -111,6 +111,11 @@ describe('tab mapping utils', () => {
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,
@@ -182,6 +187,11 @@ describe('tab mapping utils', () => {
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,

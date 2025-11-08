@@ -466,6 +466,7 @@ export function getDiscoverStateContainer({
         runtimeStateManager,
         services,
         setDataView,
+        getCurrentTab,
       })
     );
 
