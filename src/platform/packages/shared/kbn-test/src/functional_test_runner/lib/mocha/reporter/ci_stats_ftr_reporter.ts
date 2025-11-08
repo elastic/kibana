@@ -62,7 +62,7 @@ export function setupCiStatsFtrTestGroupReporter({
   const start = Date.now();
   const group: CiStatsReportTestsOptions['group'] = {
     startTime: new Date(start).toJSON(),
-    durationMs: 0,
+    durationMs: process.uptime() * 1000,
     type: testGroupType,
     name: Path.relative(REPO_ROOT, config.path),
     result: 'skip',
@@ -136,7 +136,7 @@ export function setupCiStatsFtrTestGroupReporter({
     }
 
     // update the durationMs
-    group.durationMs = Date.now() - startMs;
+    group.durationMs = process.uptime() * 1000;
     group.result = failCount ? 'fail' : passCount ? 'pass' : 'skip';
   });
 
