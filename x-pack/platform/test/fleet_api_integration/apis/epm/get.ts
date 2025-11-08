@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types/models/epm';
 import fs from 'fs';
 import path from 'path';
