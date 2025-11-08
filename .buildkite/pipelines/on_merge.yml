@@ -106,7 +106,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/check_types.sh
+  - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
       image: family/kibana-ubuntu-2404

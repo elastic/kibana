@@ -42,6 +42,7 @@ if [[ "$CURRENT_GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
       else
         echo "Activated service account $GCLOUD_SA_PROXY_EMAIL"
       fi
+      echo "OK"
     else
       echo "gcloud is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
       exit 1
@@ -77,6 +78,9 @@ if [[ -z "$EMAIL" ]]; then
       ;;
     "ci-artifacts.kibana.dev")
       EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "ci-typescript-archives")
+      EMAIL="kibana-ci-access-ts-archives@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "kibana-ci-access-chromium-blds")
       EMAIL="kibana-ci-access-chromium-blds@$GCLOUD_EMAIL_POSTFIX"
