@@ -26,11 +26,11 @@ import type { KnowledgeBaseItem } from '../../../../../../common/types/models/ep
 import { licenseService } from '../../../../license';
 import { appContextService } from '../../../../app_context';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
-export const README_PATH_PATTERN = '/docs/README.md';
+export const DOCS_PATH_PATTERN = '/docs/';
 
 /**
  * Extract knowledge base files directly from the package archive
- * This includes both files from docs/knowledge_base/ and the main docs/README.md
+ * This includes all .md files from the docs/ folder (including docs/knowledge_base/)
  */
 async function extractKnowledgeBaseFromArchive(
   archiveIterator: ArchiveIterator,
@@ -46,14 +46,18 @@ async function extractKnowledgeBaseFromArchive(
 
         // Determine the filename based on the path
         let fileName: string;
-        const knowledgeBaseIndex = entry.path.indexOf(KNOWLEDGE_BASE_PATH);
+        const docsIndex = entry.path.indexOf(DOCS_PATH_PATTERN);
 
-        if (knowledgeBaseIndex >= 0) {
-          // Remove the leading path (docs/knowledge_base/) so we aren't storing it in the field in ES
-          fileName = entry.path.substring(knowledgeBaseIndex + KNOWLEDGE_BASE_PATH.length);
-        } else if (entry.path.endsWith(README_PATH_PATTERN)) {
-          // For README.md, use a simple filename
-          fileName = 'README.md';
+        if (docsIndex >= 0) {
+          // Extract path relative to docs/ folder
+          const pathAfterDocs = entry.path.substring(docsIndex + DOCS_PATH_PATTERN.length);
+
+          // If it's in knowledge_base subfolder, remove that prefix too for backward compatibility
+          if (pathAfterDocs.startsWith('knowledge_base/')) {
+            fileName = pathAfterDocs.substring('knowledge_base/'.length);
+          } else {
+            fileName = pathAfterDocs;
+          }
         } else {
           // Fallback to basename
           fileName = path.basename(entry.path);
@@ -65,9 +69,7 @@ async function extractKnowledgeBaseFromArchive(
         });
       }
     },
-    (entryPath: string) =>
-      (entryPath.includes(KNOWLEDGE_BASE_PATH) && entryPath.endsWith('.md')) ||
-      entryPath.endsWith(README_PATH_PATTERN)
+    (entryPath: string) => entryPath.includes(DOCS_PATH_PATTERN) && entryPath.endsWith('.md')
   );
 
   return knowledgeBaseItems;

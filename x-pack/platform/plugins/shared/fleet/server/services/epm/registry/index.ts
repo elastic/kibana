@@ -666,25 +666,24 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
 
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
-    // Handle knowledge base assets specially - they use docs/knowledge_base/ path structure
-    // or are the main README.md file
-    if (path.includes('docs/knowledge_base/') || path.endsWith('/docs/README.md')) {
+    // Handle knowledge base assets specially - they include all .md files from the docs/ folder
+    if (path.includes('/docs/') && path.endsWith('.md')) {
       // Extract package info and filename from the path
       const pathWithoutPrefix = path.replace(/^\/package\//, '');
       const [pkgkey, ...rest] = pathWithoutPrefix.split('/');
       const docsIndex = rest.indexOf('docs');
 
       if (docsIndex >= 0) {
-        let fileName: string;
+        // Get path after docs/
+        const pathAfterDocs = rest.slice(docsIndex + 1).join('/');
 
-        // Check if this is a knowledge_base file or README.md
-        if (rest[docsIndex + 1] === 'knowledge_base') {
-          fileName = rest.slice(docsIndex + 2).join('/');
-        } else if (rest[docsIndex + 1] === 'README.md') {
-          fileName = 'README.md';
+        let fileName: string;
+        // If it's in knowledge_base subfolder, remove that prefix for backward compatibility
+        if (pathAfterDocs.startsWith('knowledge_base/')) {
+          fileName = pathAfterDocs.substring('knowledge_base/'.length);
         } else {
-          // Not a knowledge base asset, skip
-          return map;
+          // For other .md files in docs/, use the full path relative to docs/
+          fileName = pathAfterDocs;
         }
 
         // Create KB asset parts with elasticsearch service but keep original file reference

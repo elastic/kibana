@@ -184,8 +184,8 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     expect(INTEGRATION_KNOWLEDGE_INDEX).toBe('.integration_knowledge');
   });
 
-  it('should index README.md along with knowledge_base files', async () => {
-    // Mock knowledge base content including README.md
+  it('should index all .md files from docs folder including README and knowledge_base files', async () => {
+    // Mock knowledge base content including all .md files from docs/
     const knowledgeBaseContent: KnowledgeBaseItem[] = [
       {
         fileName: 'README.md',
@@ -201,9 +201,16 @@ describe('Knowledge Base End-to-End Integration Test', () => {
         installed_at: new Date().toISOString(),
         path: '/knowledge_base/setup-guide.md',
       },
+      {
+        fileName: 'CHANGELOG.md',
+        content: '# Changelog\n\n## v1.0.0\n\nInitial release.',
+        version: '1.0.0',
+        installed_at: new Date().toISOString(),
+        path: '/docs/CHANGELOG.md',
+      },
     ];
 
-    // Save knowledge base content with README.md
+    // Save knowledge base content with all docs/ .md files
     await saveKnowledgeBaseContentToIndex({
       esClient,
       pkgName: 'test-readme-package',
@@ -220,9 +227,9 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       pkgName: 'test-readme-package',
     });
 
-    // Verify that both README.md and knowledge_base files are present
+    // Verify that all docs/ .md files are present
     expect(retrievedKnowledgeBase).toBeDefined();
-    expect(retrievedKnowledgeBase?.items).toHaveLength(2);
+    expect(retrievedKnowledgeBase?.items).toHaveLength(3);
 
     // Check that README.md is included
     const readme = retrievedKnowledgeBase?.items.find((item) => item.fileName === 'README.md');
@@ -236,6 +243,14 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     );
     expect(setupGuide).toBeDefined();
     expect(setupGuide?.content).toContain('Setup Guide');
+
+    // Check that CHANGELOG.md from docs root is also included
+    const changelog = retrievedKnowledgeBase?.items.find(
+      (item) => item.fileName === 'CHANGELOG.md'
+    );
+    expect(changelog).toBeDefined();
+    expect(changelog?.content).toContain('Changelog');
+    expect(changelog?.content).toContain('v1.0.0');
   });
 
   it('should handle package version upgrades correctly', async () => {
