@@ -15,23 +15,30 @@ export function runCheckSavedObjectsCli() {
 
   run(
     async ({ log, flagsReader }) => {
-      const shas: string[] = flagsReader.arrayOfStrings('baseline') ?? [];
-      if (!shas.length) {
+      const gitRev = flagsReader.string('gitRev');
+      const fix = flagsReader.boolean('fix');
+
+      if (!gitRev) {
         throw new Error(
-          'No baseline SHAs provided, cannot check changes in Saved Objects. Please provide one or more --baseline SHAs'
+          'No baseline SHA provided, cannot check changes in Saved Objects. Please provide a --baseline <gitRev>'
         );
+      } else {
+        await checkSavedObjects({ gitRev, log, fix });
+        process.exit(0);
       }
-      await checkSavedObjects({ shas, log });
-      process.exit(0);
     },
     {
       description: `
       Determine if the changes performed to the Saved Objects mappings are following our standards.
 
-      Usage: node ${scriptName} --baseline <mergeBaseSHA> --baseline <serverlessSHA>
+      Usage: node ${scriptName} --baseline <gitRev>
     `,
       flags: {
-        string: ['baseline'],
+        alias: {
+          baseline: 'gitRev',
+        },
+        boolean: ['fix'],
+        string: ['gitRev'],
         default: {
           verify: true,
           mappings: true,
