@@ -302,3 +302,99 @@ Output:
   FROM logs-*
   | SORT @timestamp DESC, log.level ASC
 ```
+
+## Adding Comments to Commands
+
+You can add comments to any command by passing an `options` parameter with a `comment` property. This is useful for explaining technical preview workarounds, documenting complex queries, or providing context for specific commands.
+
+### Basic Comment Usage
+
+```ts
+import { from, stats, evaluate, drop } from '@kbn/esql-composer';
+
+const query = from('metrics-*')
+  .pipe(
+    stats('AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name')
+    evaluate(
+      '__DIMENSIONS__ = CONCAT(host.name)',
+      undefined,
+      { 
+        comment: 'Technical preview: This command will be removed in GA' 
+      }
+    ),
+    drop(
+      'host.name',
+      { comment: 'Clean up original dimension field' }
+    )
+  );
+
+console.log(query.toString({ withComments: true }));
+```
+
+Output:
+```sql
+FROM metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
+  // Technical preview: This command will be removed in GA
+  | EVAL __DIMENSIONS__ = CONCAT(host.name)
+  // Clean up original dimension field
+  | DROP host.name
+```
+
+### Comment Support by Command
+
+All commands support the optional `options` parameter with a `comment` property:
+
+- `evaluate(body, params?, options?)` - EVAL command
+- `stats(body, params?, options?)` - STATS command
+- `where(body, params?, options?)` - WHERE command
+- `rename(body, params?, options?)` - RENAME command
+- `limit(value, options?)` - LIMIT command
+- `drop(...columns, options?)` - DROP command (options must be last argument)
+- `keep(...columns, options?)` - KEEP command (options must be last argument)
+- `sort(...sorts, options?)` - SORT command (options must be last argument)
+
+### With Parameters
+
+```ts
+const query = from('logs-*')
+  .pipe(
+    stats(
+      'avg_duration = ??funcName(??duration) BY service.name',
+      { funcName: 'AVG', duration: 'transaction.duration.us' },
+      { comment: 'Calculate average duration by service' }
+    )
+  );
+```
+
+### Rendering Comments
+
+By default, `toString()` uses the basic pretty printer which doesn't render comments. To see comments in the output, use the `withComments` option:
+
+```ts
+const query = from('logs-*')
+  .pipe(evaluate('new_field = old_field * 2', undefined, { comment: 'Calculate doubled value' }));
+
+// Without comments (default behavior)
+console.log(query.toString());
+// FROM logs-*
+//   | EVAL new_field = old_field * 2
+
+// With comments
+console.log(query.toString({ withComments: true }));
+// FROM logs-*
+//   // Calculate doubled value
+//   | EVAL new_field = old_field * 2
+```
+
+### Backward Compatibility
+
+The comment feature is completely optional and backward compatible. All existing code continues to work unchanged:
+
+```ts
+// Works exactly as before
+const query = from('logs-*')
+  .pipe(stats('count = COUNT(*)'))
+  .pipe(evaluate('new_field = old_field * 2'));
+```
+
