@@ -1,0 +1,13 @@
+steps:
+  - command: .buildkite/scripts/steps/lint.sh
+    label: 'Linting'
+    agents:
+      machineType: n2-standard-16
+      preemptible: true
+      diskSizeGb: 80
+    key: linting
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

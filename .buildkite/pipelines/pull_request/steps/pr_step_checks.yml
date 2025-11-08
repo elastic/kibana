@@ -1,0 +1,13 @@
+steps:
+  - command: .buildkite/scripts/steps/checks.sh
+    label: 'Checks'
+    key: checks
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+      diskSizeGb: 85
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
