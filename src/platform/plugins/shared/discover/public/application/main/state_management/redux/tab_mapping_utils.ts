@@ -26,17 +26,8 @@ export const fromSavedObjectTabToTabState = ({
   tab: DiscoverSessionTab;
   existingTab?: TabState;
   initialAppState?: DiscoverAppState;
-}): TabState => ({
-  ...DEFAULT_TAB_STATE,
-  ...existingTab,
-  id: tab.id,
-  label: tab.label,
-  initialInternalState: {
-    serializedSearchSource: tab.serializedSearchSource,
-    visContext: tab.visContext,
-    controlGroupJson: tab.controlGroupJson,
-  },
-  appState: initialAppState ?? {
+}): TabState => {
+  const appState: DiscoverAppState = initialAppState ?? {
     columns: tab.columns,
     filters: tab.serializedSearchSource.filter,
     grid: tab.grid,
@@ -55,12 +46,28 @@ export const fromSavedObjectTabToTabState = ({
     sampleSize: tab.sampleSize,
     breakdownField: tab.breakdownField,
     density: tab.density,
-  },
-  globalState: {
-    timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
-    refreshInterval: tab.timeRange ? tab.refreshInterval : existingTab?.globalState.refreshInterval,
-  },
-});
+  };
+
+  return {
+    ...DEFAULT_TAB_STATE,
+    ...existingTab,
+    id: tab.id,
+    label: tab.label,
+    initialInternalState: {
+      serializedSearchSource: tab.serializedSearchSource,
+      visContext: tab.visContext,
+      controlGroupJson: tab.controlGroupJson,
+    },
+    appState,
+    previousAppState: existingTab?.appState ?? appState,
+    globalState: {
+      timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
+      refreshInterval: tab.timeRange
+        ? tab.refreshInterval
+        : existingTab?.globalState.refreshInterval,
+    },
+  };
+};
 
 export const fromSavedObjectTabToSavedSearch = async ({
   tab,

@@ -69,7 +69,7 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
   /**
    * Resets the state container to a given state, clearing the previous state
    */
-  resetToState: (state: DiscoverAppState) => void;
+  resetToState: (appState: DiscoverAppState) => void;
   /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
@@ -193,20 +193,11 @@ export const getDiscoverAppStateContainer = ({
     return selectTab(state, tabId).appState;
   };
 
-  let previousState = getAppState(internalState.getState());
-
   const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
     get: () => getAppState(internalState.getState()),
     set: (appState) => {
       if (!appState) {
         return;
-      }
-
-      previousState = appStateContainer.get();
-
-      // When updating to an ES|QL query, sync the data source
-      if (isOfAggregateQueryType(appState.query)) {
-        appState = { ...appState, dataSource: createEsqlDataSource() };
       }
 
       internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
@@ -222,10 +213,9 @@ export const getDiscoverAppStateContainer = ({
     });
   };
 
-  const resetToState = (state: DiscoverAppState) => {
-    addLog('[appState] reset state to', state);
-    previousState = state;
-    appStateContainer.set(state);
+  const resetToState = (appState: DiscoverAppState) => {
+    addLog('[appState] reset state to', appState);
+    internalState.dispatch(injectCurrentTab(internalStateActions.resetAppState)({ appState }));
   };
 
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
@@ -370,12 +360,11 @@ export const getDiscoverAppStateContainer = ({
     if (replace) {
       return replaceUrlState(newPartial);
     } else {
-      previousState = { ...appStateContainer.get() };
       setState(appStateContainer, newPartial);
     }
   };
 
-  const getPrevious = () => previousState;
+  const getPrevious = () => selectTab(internalState.getState(), tabId).previousAppState;
 
   return {
     ...appStateContainer,

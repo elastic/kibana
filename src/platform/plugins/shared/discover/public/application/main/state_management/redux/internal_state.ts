@@ -27,6 +27,7 @@ import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
@@ -40,6 +41,7 @@ import { loadDataViewList, initializeTabs } from './actions';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
+import { createEsqlDataSource } from '../../../../../common/data_sources';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -177,6 +179,20 @@ export const internalStateSlice = createSlice({
 
     setAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
       withTab(state, action, (tab) => {
+        let appState = action.payload.appState;
+
+        // When updating to an ES|QL query, sync the data source
+        if (isOfAggregateQueryType(appState.query)) {
+          appState = { ...appState, dataSource: createEsqlDataSource() };
+        }
+
+        tab.previousAppState = tab.appState;
+        tab.appState = appState;
+      }),
+
+    resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+      withTab(state, action, (tab) => {
+        tab.previousAppState = action.payload.appState;
         tab.appState = action.payload.appState;
       }),
 
