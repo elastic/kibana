@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -62,6 +62,7 @@ const styles = {
 };
 
 const DELAY_FOR_HIDING_SPINNER = 500;
+const DISCOVER_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';
 
 const getLanguageLabelByValue = (value: string) => {
   return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
@@ -158,11 +159,11 @@ export const ContextMenu = ({
     await copyText(requestsAsCode);
   };
 
-  const checkIsKbnRequestSelected = async () => {
+  const checkIsKbnRequestSelected = useCallback(async () => {
     setIsKbnRequestSelected(await getIsKbnRequestSelected());
-  };
+  }, [getIsKbnRequestSelected]);
 
-  const checkIsEsqlQuerySelected = async () => {
+  const checkIsEsqlQuerySelected = useCallback(async () => {
     const requests = await getRequests();
     // Check if any selected request is an ES|QL query (POST to /_query)
     const hasEsqlQuery = requests.some(
@@ -171,7 +172,7 @@ export const ContextMenu = ({
         (req.url === '/_query' || req.url.startsWith('/_query?') || req.url.startsWith('/_query/'))
     );
     setIsEsqlQuerySelected(hasEsqlQuery);
-  };
+  }, [getRequests]);
 
   const onCopyAsSubmit = async (language?: string) => {
     const withLanguage = language || currentLanguage;
@@ -229,9 +230,9 @@ export const ContextMenu = ({
     autoIndent(event);
   };
 
-  const openInDiscover = async () => {
+  const openInDiscover = useCallback(async () => {
     closePopover();
-    const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+    const discoverLocator = share.url.locators.get(DISCOVER_LOCATOR_ID);
     if (!discoverLocator) {
       notifications.toasts.addWarning({
         title: i18n.translate('console.consoleMenu.discoverNotAvailable', {
@@ -298,7 +299,7 @@ export const ContextMenu = ({
         }),
       });
     }
-  };
+  }, [share, getRequests, notifications]);
 
   const button = (
     <EuiButtonIcon
