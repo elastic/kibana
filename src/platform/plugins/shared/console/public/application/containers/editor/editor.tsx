@@ -84,12 +84,12 @@ const useStyles = () => {
 interface Props {
   loading: boolean;
   inputEditorValue: string;
-  isEmbeddable: boolean;
   setInputEditorValue: (value: string) => void;
+  enableSuggestWidgetRepositioning: boolean;
 }
 
 export const Editor = memo(
-  ({ loading, inputEditorValue, setInputEditorValue, isEmbeddable }: Props) => {
+  ({ loading, inputEditorValue, setInputEditorValue, enableSuggestWidgetRepositioning }: Props) => {
     const {
       services: { storage, objectStorageClient },
     } = useServicesContext();
@@ -207,7 +207,7 @@ export const Editor = memo(
                         value={inputEditorValue}
                         setValue={setInputEditorValue}
                         customParsedRequestsProvider={customParsedRequestsProvider}
-                        isEmbeddable={isEmbeddable}
+                        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
                       />
                     )}
                   </EuiSplitPanel.Inner>
