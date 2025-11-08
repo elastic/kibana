@@ -7,13 +7,42 @@
 
 import type { ThreatHuntingHypothesis } from '../types';
 
-export const HYPOTHESES_VERSION = 1;
+export const HYPOTHESES_VERSION = 11;
 
 // Co-Pilot generated this example so far. More definitions can be added following this structure.
-export const hypothesisDefinitions: ThreatHuntingHypothesis[] = [
+export const getHypothesisDefinitions: ThreatHuntingHypothesis = (version) => [
   {
-    title: 'UPDATED SUSPICIOUS POWERSHELL ACTIVITY',
+    title: 'UPDATED SUSPICIOUS POWERSHELL ACTIVITY UPDATE',
     hypothesisId: 'suspicious_powershell_activity_v1',
+    summary:
+      'Detects potentially malicious PowerShell activity that may indicate an attacker is using PowerShell for reconnaissance or lateral movement within the network.',
+    managed: true,
+    sourceType: 'pre_built',
+    version, // should use HYPOTHESES_VERSION
+    threat: [
+      {
+        framework: 'MITRE ATT&CK',
+        tactic: [
+          {
+            id: 'TA0007',
+            name: 'Lateral Movement',
+            reference: 'https://attack.mitre.org/tactics/TA0007/',
+          },
+        ],
+        technique: [
+          {
+            id: 'T1086',
+            name: 'PowerShell',
+            reference: 'https://attack.mitre.org/techniques/T1086/',
+          },
+        ],
+      },
+    ],
+    tags: ['powershell', 'lateral_movement', 'reconnaissance'],
+  },
+  {
+    title: 'UPDATED SUSPICIOUS POWERSHELL ACTIVITY V2 UPDATE',
+    hypothesisId: 'suspicious_powershell_activity_v3',
     summary:
       'Detects potentially malicious PowerShell activity that may indicate an attacker is using PowerShell for reconnaissance or lateral movement within the network.',
     managed: true,

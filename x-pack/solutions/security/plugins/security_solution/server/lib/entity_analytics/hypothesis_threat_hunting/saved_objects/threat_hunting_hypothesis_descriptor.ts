@@ -13,6 +13,12 @@ interface ThreatHuntingHypothesisDependencies {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+export interface HypothesisUpsertResult {
+  created: number;
+  updated: number;
+  results: Array<{ action: 'created' | 'updated'; hypothesis: ThreatHuntingHypothesis }>;
+}
+
 export class ThreatHuntingHypothesisDescriptorClient {
   constructor(private readonly deps: ThreatHuntingHypothesisDependencies) {}
   getSavedObjectId() {
@@ -43,47 +49,52 @@ export class ThreatHuntingHypothesisDescriptorClient {
     await this.deps.savedObjectsClient.delete(threatHuntingHypothesisTypeName, id);
   }
 
-  async bulkCreate(sources: ThreatHuntingHypothesis[]) {
+  async bulkCreate(hypotheses: ThreatHuntingHypothesis[]) {
     const createdHypotheses = await this.deps.savedObjectsClient.bulkCreate(
-      sources.map((source) => ({
+      hypotheses.map((hypothesis) => ({
         type: threatHuntingHypothesisTypeName,
-        attributes: { ...source },
+        attributes: { ...hypothesis },
       })),
-      { refresh: 'wait_for' }
+      { refresh: 'wait_for', overwrite: false }
     );
-    return createdHypotheses.saved_objects.map((so) => so.attributes);
+    return createdHypotheses;
   }
 
-  async update(id: string, updates: Partial<ThreatHuntingHypothesis>) {
+  async update(updates: Partial<ThreatHuntingHypothesis>, soId: string) {
     const { attributes } = await this.deps.savedObjectsClient.update<ThreatHuntingHypothesis>(
       threatHuntingHypothesisTypeName,
-      id,
+      soId,
       updates,
+      { refresh: 'wait_for' }
+    );
+    return { attributes, id: updates.hypothesisId };
+  }
+
+  async create(hypothesis: ThreatHuntingHypothesis) {
+    const { attributes } = await this.deps.savedObjectsClient.create<ThreatHuntingHypothesis>(
+      threatHuntingHypothesisTypeName,
+      { ...hypothesis },
       { refresh: 'wait_for' }
     );
     return attributes;
   }
 
-  bulkUpsert = async (hypotheses: ThreatHuntingHypothesis[]) => {
+  bulkUpsert = async (hypotheses: ThreatHuntingHypothesis[]): Promise<HypothesisUpsertResult> => {
     if (hypotheses.length === 0) {
       return { created: 0, updated: 0, results: [] };
     }
     const existing = await this.getAll();
+    const soIdByHypothesisId = this.mapHypothesisIdToSoId(existing);
     let createdCount = 0;
     let updatedCount = 0;
-    const results: Array<{ action: 'created' | 'updated'; hypothesis: ThreatHuntingHypothesis }> =
-      [];
+    const results: HypothesisUpsertResult['results'] = [];
     await asyncForEach(hypotheses, async (hypothesis) => {
       const existingHypothesis = Object.values(existing).find(
         (eh) => eh.hypothesisId === hypothesis.hypothesisId
       );
       if (!existingHypothesis) {
         try {
-          await this.deps.savedObjectsClient.create<ThreatHuntingHypothesis>(
-            threatHuntingHypothesisTypeName,
-            hypothesis,
-            { id: this.getSavedObjectId(), refresh: 'wait_for' }
-          );
+          await this.create(hypothesis);
           createdCount++;
           results.push({ action: 'created', hypothesis });
         } catch (error) {
@@ -93,12 +104,13 @@ export class ThreatHuntingHypothesisDescriptorClient {
         }
       } else {
         try {
-          await this.deps.savedObjectsClient.update<ThreatHuntingHypothesis>(
-            threatHuntingHypothesisTypeName,
-            this.getSavedObjectId(),
-            hypothesis,
-            { refresh: 'wait_for' }
-          );
+          const soId = soIdByHypothesisId.get(hypothesis.hypothesisId);
+          if (!soId) {
+            throw new Error(
+              `Saved Object ID not found for Hypothesis ID: ${hypothesis.hypothesisId}`
+            );
+          }
+          await this.update({ ...hypothesis }, soId);
           updatedCount++;
           results.push({ action: 'updated', hypothesis });
         } catch (error) {
@@ -110,4 +122,12 @@ export class ThreatHuntingHypothesisDescriptorClient {
     });
     return { created: createdCount, updated: updatedCount, results };
   };
+
+  private mapHypothesisIdToSoId(existing: Record<string, ThreatHuntingHypothesis>) {
+    const soIdByHypothesisId = new Map<string, string>();
+    for (const [soId, attrs] of Object.entries(existing)) {
+      if (attrs.hypothesisId) soIdByHypothesisId.set(attrs.hypothesisId, soId);
+    }
+    return soIdByHypothesisId;
+  }
 }
