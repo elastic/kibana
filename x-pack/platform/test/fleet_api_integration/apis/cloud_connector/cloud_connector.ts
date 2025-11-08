@@ -712,7 +712,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(body).to.have.property('message');
-        expect(body.message).to.match(/Package policy must contain role_arn variable/);
+        expect(body.message).to.match(/Package policy must contain role_arn and external_id/);
       });
 
       it('should validate that external_id is required when updating vars', async () => {
@@ -730,9 +730,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(body).to.have.property('message');
-        expect(body.message).to.match(
-          /Package policy must contain valid external_id secret reference/
-        );
+        expect(body.message).to.match(/Package policy must contain role_arn and external_id/);
       });
 
       it('should return 400 for non-existent cloud connector id', async () => {
@@ -772,7 +770,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(body).to.have.property('message');
-        expect(body.message).to.match(/Package policy must contain role_arn variable/);
+        expect(body.message).to.match(/Package policy must contain role_arn and external_id/);
       });
 
       it('should preserve packagePolicyCount when updating', async () => {

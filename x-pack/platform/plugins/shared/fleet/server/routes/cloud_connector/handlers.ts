@@ -7,15 +7,22 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { cloudConnectorService } from '../../services';
+import {
+  cloudConnectorService,
+  agentPolicyService,
+  createAgentPolicyWithCloudConnector,
+} from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import type {
   GetCloudConnectorsResponse,
   GetOneCloudConnectorResponse,
   CreateCloudConnectorResponse,
   UpdateCloudConnectorResponse,
   DeleteCloudConnectorResponse,
+  CreateAgentPolicyWithCloudConnectorResponse,
+  UpdateCloudConnectorRequest,
 } from '../../../common/types/rest_spec/cloud_connector';
 import type {
   CreateCloudConnectorRequestSchema,
@@ -23,6 +30,7 @@ import type {
   GetCloudConnectorsRequestSchema,
   UpdateCloudConnectorRequestSchema,
   DeleteCloudConnectorRequestSchema,
+  CreateAgentPolicyWithCloudConnectorRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
 
 export const createCloudConnectorHandler: FleetRequestHandler<
@@ -61,7 +69,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const { page, perPage } = request.query;
+  const { page, perPage, cloudProvider } = request.query;
   const logger = appContextService
     .getLogger()
     .get('CloudConnectorService getCloudConnectorsHandler');
@@ -71,6 +79,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
     const cloudConnectors = await cloudConnectorService.getList(internalSoClient, {
       page: page ? parseInt(page, 10) : undefined,
       perPage: perPage ? parseInt(perPage, 10) : undefined,
+      cloudProvider,
     });
 
     logger.info('Successfully retrieved cloud connectors list');
@@ -136,7 +145,8 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
     const result = await cloudConnectorService.update(
       internalSoClient,
       cloudConnectorId,
-      request.body
+      // Type cast is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
+      request.body as Partial<UpdateCloudConnectorRequest>
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
     const body: UpdateCloudConnectorResponse = {
@@ -181,6 +191,83 @@ export const deleteCloudConnectorHandler: FleetRequestHandler<
       statusCode: 400,
       body: {
         message: error.message,
+      },
+    });
+  }
+};
+
+export const createCloudConnectorWithPackagePolicyHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof CreateAgentPolicyWithCloudConnectorRequestSchema.query>,
+  TypeOf<typeof CreateAgentPolicyWithCloudConnectorRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const spaceId = fleetContext.spaceId;
+  const logger = appContextService
+    .getLogger()
+    .get('httpCreateCloudConnectorWithPackagePolicyHandler');
+
+  const {
+    cloud_connector: cloudConnectorRequest,
+    package_policy: packagePolicyRequest,
+    force,
+    ...newPolicy
+  } = request.body;
+
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
+  logger.debug(
+    `Creating cloud connector [${cloudConnectorRequest.name}] with agent policy [${newPolicy.name}] and package policy [${packagePolicyRequest.name}]`
+  );
+
+  try {
+    const result = await createAgentPolicyWithCloudConnector({
+      soClient,
+      esClient,
+      agentPolicyService,
+      newPolicy,
+      cloudConnectorRequest,
+      packagePolicyRequest,
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+    });
+
+    logger.info(
+      `Successfully created cloud connector [${result.cloudConnectorId}] with agent policy [${result.agentPolicyId}] and package policy [${result.packagePolicyId}]`
+    );
+
+    const body: CreateAgentPolicyWithCloudConnectorResponse = {
+      item: {
+        agent_policy_id: result.agentPolicyId,
+        cloud_connector_id: result.cloudConnectorId,
+        package_policy_id: result.packagePolicyId,
+      },
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    logger.error(
+      `Failed to create cloud connector with package policy: ${error.message}`,
+      error.stack
+    );
+
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
+
+    return response.customError({
+      statusCode: 500,
+      body: {
+        message: `Failed to create cloud connector with package policy: ${error.message}`,
       },
     });
   }

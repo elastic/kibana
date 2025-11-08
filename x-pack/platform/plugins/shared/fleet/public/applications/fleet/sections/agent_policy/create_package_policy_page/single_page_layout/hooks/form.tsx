@@ -27,6 +27,7 @@ import {
   type PackagePolicy,
   type PackageInfo,
   SetupTechnology,
+  type OnSaveQueryParamKeys,
 } from '../../../../../types';
 import {
   useStartServices,
@@ -36,6 +37,8 @@ import {
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
   useFleetStatus,
+  sendGetOnePackagePolicy,
+  sendCreateAgentPolicyWithCloudConnector,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import type { NewPackagePolicyInput } from '../../../../../../../../common';
@@ -54,6 +57,7 @@ import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
+import { extractCloudConnectorVars, shouldUseCloudConnectorAPI } from '../../utils';
 import {
   getAzureArmPropsFromPackagePolicy,
   getCloudFormationPropsFromPackagePolicy,
@@ -64,6 +68,96 @@ import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensu
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
 const DEFAULT_AGENTLESS_LIMIT = 5;
+
+interface HandleCloudConnectorCreationParams {
+  packagePolicy: NewPackagePolicy;
+  newAgentPolicy: NewAgentPolicy;
+  setFormState: (state: PackagePolicyFormState) => void;
+  notifications: any;
+  spaceId: string | undefined;
+  setSavedPackagePolicy: (policy: PackagePolicy) => void;
+  onSaveNavigate: (policy: PackagePolicy, paramsToApply?: OnSaveQueryParamKeys[]) => void;
+}
+
+async function handleCloudConnectorCreation({
+  packagePolicy,
+  newAgentPolicy,
+  setFormState,
+  notifications,
+  spaceId,
+  setSavedPackagePolicy,
+  onSaveNavigate,
+}: HandleCloudConnectorCreationParams): Promise<{ success: boolean }> {
+  try {
+    setFormState('LOADING');
+
+    // Extract cloud connector configuration from package policy
+    const cloudConnectorData = extractCloudConnectorVars(packagePolicy);
+
+    if (!cloudConnectorData) {
+      throw new Error('Failed to extract cloud connector configuration from package policy');
+    }
+
+    // Prepare package policy data (remove policy_id/policy_ids as they'll be set by backend)
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { policy_id, policy_ids, ...packagePolicyFields } = packagePolicy;
+
+    // Call the new atomic internal API
+    const { error: atomicError, data: atomicData } = await sendCreateAgentPolicyWithCloudConnector({
+      // Agent policy fields from newAgentPolicy
+      ...newAgentPolicy,
+      // Cloud connector configuration
+      cloud_connector: cloudConnectorData,
+      // Package policy fields
+      package_policy: packagePolicyFields,
+    });
+
+    if (atomicError) {
+      setFormState('VALID');
+      notifications.toasts.addError(atomicError, {
+        title: i18n.translate('xpack.fleet.createPackagePolicy.atomicCreateErrorTitle', {
+          defaultMessage: 'Error creating integration with cloud connector',
+        }),
+      });
+      return { success: false };
+    }
+
+    // Success! The backend created all three resources atomically
+    // Now fetch the full package policy to set savedPackagePolicy state
+    const packagePolicyResponse = await sendGetOnePackagePolicy(atomicData!.item.package_policy_id);
+
+    if (packagePolicyResponse?.data?.item) {
+      const fullPackagePolicy = packagePolicyResponse.data.item;
+      setSavedPackagePolicy(fullPackagePolicy);
+
+      // Install Kibana assets
+      if (fullPackagePolicy.package) {
+        await ensurePackageKibanaAssetsInstalled({
+          currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
+          pkgName: fullPackagePolicy.package.name,
+          pkgVersion: fullPackagePolicy.package.version,
+          toasts: notifications.toasts,
+        });
+      }
+
+      // Set form state to submitted (agentless doesn't need agent enrollment)
+      setFormState('SUBMITTED');
+
+      // Navigate to integration policies page and show enrollment flyout
+      onSaveNavigate(fullPackagePolicy, ['openEnrollmentFlyout']);
+    }
+
+    return { success: true };
+  } catch (e) {
+    setFormState('VALID');
+    notifications.toasts.addError(e, {
+      title: i18n.translate('xpack.fleet.createPackagePolicy.atomicCreateExceptionTitle', {
+        defaultMessage: 'Error creating integration with cloud connector',
+      }),
+    });
+    return { success: false };
+  }
+}
 
 export async function createAgentPolicy({
   packagePolicy,
@@ -480,8 +574,16 @@ export function useOnSubmit({
         setFormState('CONFIRM');
         return;
       }
+      // Check if we should use the atomic cloud connector API BEFORE creating policy
+      const useCloudConnectorAPI = shouldUseCloudConnectorAPI(
+        packagePolicy,
+        selectedPolicyTab,
+        !!packagePolicy.cloud_connector_id
+      );
+
       let createdPolicy = overrideCreatedAgentPolicy;
-      if (!overrideCreatedAgentPolicy) {
+      // Only create policy via legacy flow if NOT using cloud connector API
+      if (!overrideCreatedAgentPolicy && !useCloudConnectorAPI) {
         try {
           setFormState('LOADING');
           const newPolicy = await createAgentPolicyIfNeeded({
@@ -579,6 +681,27 @@ export function useOnSubmit({
 
       const forceInstall = force || shouldForceInstallOnAgentless;
 
+      // Use the atomic cloud connector API (already checked above)
+      if (useCloudConnectorAPI && !overrideCreatedAgentPolicy) {
+        // Use the new atomic API for creating agent policy + cloud connector + package policy
+        const result = await handleCloudConnectorCreation({
+          packagePolicy,
+          newAgentPolicy,
+          setFormState,
+          notifications,
+          spaceId,
+          setSavedPackagePolicy,
+          onSaveNavigate,
+        });
+
+        if (!result.success) {
+          return;
+        }
+
+        return; // Exit early - don't run legacy flow
+      }
+
+      // EXISTING CODE CONTINUES HERE (legacy flow for non-cloud-connector scenarios)
       setFormState('LOADING');
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
@@ -707,7 +830,7 @@ export function useOnSubmit({
       withSysMonitoring,
       newAgentPolicy,
       updatePackagePolicy,
-      notifications.toasts,
+      notifications,
       agentPolicies,
       onSaveNavigate,
       confirmForceInstall,

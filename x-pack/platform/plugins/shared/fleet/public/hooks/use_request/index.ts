@@ -23,3 +23,4 @@ export * from './fleet_server_hosts';
 export * from './fleet_proxies';
 export * from './health_check';
 export * from './spaces';
+export * from './cloud_connector';
