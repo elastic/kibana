@@ -40,9 +40,8 @@ export interface JobIdObject {
 
   destIndexValidated: boolean;
 
-  datafeedValid?: boolean;
+  datafeedInvalid?: boolean;
   datafeedWarningMessage?: string;
-  datafeedValidated?: boolean;
 }
 
 export interface SkippedJobs {
@@ -186,7 +185,7 @@ export class JobImportService {
     };
   }
 
-  public async validateJobDatafeeds(
+  public async validateJobsDatafeeds(
     jobs: ImportedAdJob[],
     validateDatafeedPreview: MlApi['validateDatafeedPreview']
   ): Promise<{ jobId: string; hasWarning: boolean; warningMessage?: string }[]> {

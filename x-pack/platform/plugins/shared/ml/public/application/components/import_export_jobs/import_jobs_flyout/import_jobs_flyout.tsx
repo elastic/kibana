@@ -44,6 +44,11 @@ import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
 
+interface DatafeedValidationInfo {
+  hasWarning: boolean;
+  warningMessage?: string;
+}
+
 export interface Props {
   isDisabled: boolean;
   onImportComplete: (() => void) | null;
@@ -146,7 +151,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         getFilters
       );
 
-      let datafeedValidations: { jobId: string; hasWarning: boolean; warningMessage?: string }[];
+      // Create datafeed validation map based on job type
+      const datafeedValidationMap = new Map<string, DatafeedValidationInfo>();
 
       if (loadedFile.jobType === 'anomaly-detector') {
         const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
@@ -154,21 +160,28 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         );
         setAdJobs(tempJobs);
 
-        datafeedValidations = await jobImportService.validateJobDatafeeds(
+        const validations = await jobImportService.validateJobsDatafeeds(
           tempJobs,
           validateDatafeedPreview
         );
+
+        // Populate the map with validation results
+        validations.forEach((validation) => {
+          datafeedValidationMap.set(validation.jobId, {
+            hasWarning: validation.hasWarning,
+            warningMessage: validation.warningMessage,
+          });
+        });
       } else if (loadedFile.jobType === 'data-frame-analytics') {
         const tempJobs = (loadedFile.jobs as DataFrameAnalyticsConfig[]).filter((j) =>
           validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.id)
         );
         setDfaJobs(tempJobs);
-        datafeedValidations = [];
       }
 
       setJobIdObjects(
         validatedJobs.jobs.map(({ jobId, destIndex }) => {
-          const datafeedValidation = datafeedValidations.find((v) => v.jobId === jobId);
+          const datafeedValidation = datafeedValidationMap.get(jobId);
           return {
             jobId,
             originalId: jobId,
@@ -180,12 +193,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
             destIndexValid: true,
             destIndexInvalidMessage: '',
             destIndexValidated: false,
-            datafeedValid:
-              loadedFile.jobType === 'data-frame-analytics'
-                ? true
-                : !datafeedValidation?.hasWarning,
+            datafeedInvalid: datafeedValidation?.hasWarning,
             datafeedWarningMessage: datafeedValidation?.warningMessage,
-            datafeedValidated: true,
           };
         })
       );
@@ -391,7 +400,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           hideCloseButton
           size="m"
           data-test-subj="mlJobMgmtImportJobsFlyout"
-          aria-label={i18n.translate('xpack.ml.importExport.importFlyout.flyoutAriaLabel', {
+          aria-label={i18n.translate('xpack.ml.importExportJobs.importFlyout.flyoutAriaLabel', {
             defaultMessage: 'Import jobs flyout',
           })}
         >
@@ -516,12 +525,12 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                             )}
 
                             {jobType === 'anomaly-detector' &&
-                              jobId.datafeedValid === false &&
+                              jobId.datafeedInvalid === true &&
                               jobId.datafeedWarningMessage && (
                                 <EuiFormRow>
                                   <EuiCallOut
                                     title={i18n.translate(
-                                      'xpack.ml.importExport.importFlyout.datafeedWarning.title',
+                                      'xpack.ml.importExportJobs.importFlyout.datafeedWarning.title',
                                       {
                                         defaultMessage: 'Datafeed Warning',
                                       }
