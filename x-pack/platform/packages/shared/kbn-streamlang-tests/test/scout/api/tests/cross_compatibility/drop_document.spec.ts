@@ -68,5 +68,23 @@ apiTest.describe(
         );
       }
     );
+
+    apiTest('should raise a runtime error when where is omitted', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'drop_document',
+          } as DropDocumentProcessor,
+        ],
+      };
+
+      // Both transpilers should throw validation errors with no where clause
+      expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        'where clause is required in drop_document.'
+      );
+      expect(() => transpileEsql(streamlangDSL)).toThrow(
+        'where clause is required in drop_document.'
+      );
+    });
   }
 );
