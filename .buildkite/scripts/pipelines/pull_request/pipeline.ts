@@ -497,6 +497,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/private\/kbn-import-resolver/,
         /^src\/platform\/packages\/private\/kbn-jest-serializers/,
         /^src\/platform\/packages\/private\/kbn-repo-packages/,
+        /^src\/platform\/packages\/shared\/kbn-babel-plugin-lazy-require/,
         /^src\/platform\/packages\/shared\/kbn-babel-register/,
         /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
         /^src\/platform\/packages\/shared\/kbn-repo-info/,
