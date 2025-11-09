@@ -419,14 +419,18 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await waitFor(() => {
-      const createLink = screen.getByText('Create new');
-      fireEvent.click(createLink);
+      const createLink = screen.getByRole('link', { name: /Create new/i });
+      expect(createLink).toBeInTheDocument();
     });
 
-    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
-    expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
+    const createLink = screen.getByRole('link', { name: /Create new/i });
 
-    window.open = originalOpen;
+    // Verify that the link has the correct href and target attributes
+    expect(createLink).toHaveAttribute('href', '/app/workflows');
+    expect(createLink).toHaveAttribute('target', '_blank');
+
+    // Verify that getUrlForApp was called (indirectly through the component)
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
   });
 
   test('should handle missing HTTP service gracefully', async () => {
@@ -776,17 +780,15 @@ describe('WorkflowsParamsFields', () => {
     });
 
     // Find the "View all workflows" link button in the footer
-    const viewAllWorkflowsButton = screen.getByRole('button', { name: 'View all workflows' });
-    expect(viewAllWorkflowsButton).toBeInTheDocument();
+    const viewAllWorkflowsLink = screen.getByRole('link', { name: 'View all workflows' });
+    expect(viewAllWorkflowsLink).toBeInTheDocument();
 
-    // Click the "View all workflows" button
-    fireEvent.click(viewAllWorkflowsButton);
+    // Verify that the link has the correct href and target attributes
+    expect(viewAllWorkflowsLink).toHaveAttribute('href', '/app/workflows');
+    expect(viewAllWorkflowsLink).toHaveAttribute('target', '_blank');
 
-    // Verify that the workflows page was opened in a new tab
+    // Verify that getUrlForApp was called (indirectly through the component)
     expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
-    expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
-
-    window.open = originalOpen;
   });
 
   test('should show disabled badge for disabled workflows', async () => {
