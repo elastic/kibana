@@ -222,6 +222,7 @@ export const getFormStateFromActionStep = (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
     step.action === 'date' ||
+    step.action === 'drop_document' ||
     step.action === 'set' ||
     step.action === 'convert'
   ) {
@@ -329,6 +330,15 @@ export const convertFormStateToProcessor = (
           ignore_failure,
           to: isEmpty(to) ? undefined : to,
           output_format: isEmpty(output_format) ? undefined : output_format,
+        },
+      };
+    }
+
+    if (formState.action === 'drop_document') {
+      return {
+        processorDefinition: {
+          action: 'drop_document',
+          where: formState.where,
         },
       };
     }
