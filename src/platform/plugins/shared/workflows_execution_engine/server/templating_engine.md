@@ -7,8 +7,8 @@ The Workflow Templating Engine provides powerful template rendering capabilities
 1. [Syntax Overview](#syntax-overview)
 2. [Error Message Retrieval](#error-message-retrieval)
 3. [Template Rendering Behavior](#template-rendering-behavior)
-4. [Engine Configuration](#engine-configuration)
-5. [Adding New Filters/Tags Guide](#adding-new-filterstags-guide)
+4. [Adding New Filters/Tags Guide](#adding-new-filterstags-guide)
+5. [Engine Configuration](#engine-configuration)
 
 ---
 
@@ -369,72 +369,6 @@ data: "{{ jsonString | json_parse | json }}"
 
 ---
 
-## Engine Configuration
-
-The templating engine is configured with specific Liquid options that affect behavior and error handling.
-
-### Custom Filter Registration
-
-Custom filters are registered during engine initialization:
-
-```typescript
-this.engine.registerFilter('json_parse', (value: unknown): unknown => {
-  if (typeof value !== 'string') {
-    return value;
-  }
-  try {
-    return JSON.parse(value);
-  } catch (error) {
-    return value; // Return original on parse failure
-  }
-});
-```
-
-**Current Custom Filters:**
-- `json_parse`: Converts JSON strings to objects/arrays
-
----
-
-
-### Liquid Standard Compliance
-
-The engine follows the [Liquid template language](https://shopify.github.io/liquid/) specification with some Kibana-specific extensions.
-
-### Supported Features
-
-✅ **Standard Liquid Features:**
-- Variables and filters
-- Tags (if, for, assign, case, etc.)
-- Liquid blocks
-- Filter chaining
-- String, number, boolean, array, object types
-
-✅ **Kibana Extensions:**
-- `${{ }}` expression evaluation syntax
-- Custom `json_parse` filter
-- Recursive object/array rendering
-- Enhanced error messages
-
-### Migration Considerations
-
-When upgrading liquidjs:
-
-1. **Check breaking changes**: Review liquidjs changelog
-2. **Test custom filters**: Ensure compatibility
-3. **Update error handling**: Adjust error message parsing if format changes
-4. **Validate templates**: Test existing workflows
-
-### Version Update Process
-
-1. Update `package.json` dependency
-2. Run tests: `yarn test templating_engine`
-3. Test error message extraction
-4. Validate UI parsing
-5. Update documentation if behavior changes
-
----
-
-
 ## Adding New Filters/Tags Guide
 
 This guide covers the complete process of adding custom filters or tags to the templating engine.
@@ -624,6 +558,46 @@ Tags are more complex than filters. Refer to [liquidjs tag documentation](https:
 4. **Documentation**: Document filter behavior and examples
 5. **Testing**: Cover edge cases (null, undefined, wrong types)
 6. **OSS First**: Contribute to liquidjs when possible
+
+---
+
+## Engine Configuration
+
+### Liquid Standard Compliance
+
+The engine follows the [Liquid template language](https://shopify.github.io/liquid/) specification with some Kibana-specific extensions.
+
+### Supported Features
+
+✅ **Standard Liquid Features:**
+- Variables and filters
+- Tags (if, for, assign, case, etc.)
+- Liquid blocks
+- Filter chaining
+- String, number, boolean, array, object types
+
+✅ **Kibana Extensions:**
+- `${{ }}` expression evaluation syntax
+- Custom `json_parse` filter
+- Recursive object/array rendering
+- Enhanced error messages
+
+### Migration Considerations
+
+When upgrading liquidjs:
+
+1. **Check breaking changes**: Review liquidjs changelog
+2. **Test custom filters**: Ensure compatibility
+3. **Update error handling**: Adjust error message parsing if format changes
+4. **Validate templates**: Test existing workflows
+
+### Version Update Process
+
+1. Update `package.json` dependency
+2. Run tests: `yarn test templating_engine`
+3. Test error message extraction
+4. Validate UI parsing
+5. Update documentation if behavior changes
 
 ---
 
