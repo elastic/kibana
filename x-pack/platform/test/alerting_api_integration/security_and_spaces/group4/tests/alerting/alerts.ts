@@ -1498,6 +1498,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             severity_improving: false,
                             rule: {
@@ -1543,6 +1544,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             severity_improving: false,
                             rule: {
@@ -1604,6 +1606,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             previous_action_group: 'default',
                             rule: {
@@ -1649,6 +1652,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             previous_action_group: 'default',
                             rule: {
@@ -1758,6 +1762,7 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      maintenance_window_names: [],
                       pending_recovered_count: 0,
                       severity_improving: false,
                       rule: {
@@ -1803,6 +1808,7 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      maintenance_window_names: [],
                       pending_recovered_count: 0,
                       severity_improving: false,
                       rule: {
