@@ -58,7 +58,11 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
   children: (
-    args: { data: L[] | null; cellId: string } & CascadeRowCellNestedVirtualizationAnchorProps<G>
+    args: {
+      data: L[] | null;
+      cellId: string;
+      nodePath: string[];
+    } & CascadeRowCellNestedVirtualizationAnchorProps<G>
   ) => React.ReactNode;
 }
 

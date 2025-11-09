@@ -131,11 +131,20 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       data: leafData,
       cellId: leafCacheKey,
       key: leafCacheKey,
+      nodePath,
       getScrollElement,
       getScrollOffset,
       getScrollMargin,
     });
-  }, [children, leafData, leafCacheKey, getScrollElement, getScrollOffset, getScrollMargin]);
+  }, [
+    children,
+    leafData,
+    leafCacheKey,
+    nodePath,
+    getScrollElement,
+    getScrollOffset,
+    getScrollMargin,
+  ]);
 
   return (
     <EuiFlexGroup>

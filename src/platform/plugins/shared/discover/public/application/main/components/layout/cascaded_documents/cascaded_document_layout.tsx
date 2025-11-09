@@ -66,16 +66,20 @@ const ESQLDataCascade = React.memo(
     const globalTimeRange = globalState?.timeRange;
     const { scopedProfilesManager } = useScopedServices();
     const { expressions } = useDiscoverServices();
+    // use a ref to store the query columns for each query, so setting this value will not trigger a re-render
+    const queryColumnsMap = useRef<
+      Map<string[], NonNullable<Awaited<ReturnType<typeof fetchEsql>>['esqlQueryColumns']>>
+    >(new Map());
 
     const queryMeta = useMemo(() => {
       return getESQLStatsQueryMeta((query as AggregateQuery).esql);
     }, [query]);
 
     const scopedESQLQueryFetch = useCallback(
-      async (esqlQuery: AggregateQuery) => {
+      (esqlQuery: AggregateQuery) => {
         const inspectorAdapters = { requests: new RequestAdapter() };
 
-        const { records } = await fetchEsql({
+        return fetchEsql({
           query: esqlQuery,
           dataView,
           data: props.services.data,
@@ -93,8 +97,6 @@ const ESQLDataCascade = React.memo(
           scopedProfilesManager,
           inspectorAdapters,
         });
-
-        return records;
       },
       [
         dataView,
@@ -130,19 +132,26 @@ const ESQLDataCascade = React.memo(
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => (
+      ({
+        data: cellData,
+        cellId,
+        getScrollElement,
+        getScrollOffset,
+        getScrollMargin,
+        nodePath,
+      }) => (
         <ESQLDataCascadeLeafCell
           {...props}
           dataView={dataView}
           cellData={cellData!}
-          queryMeta={queryMeta}
           cellId={cellId}
+          queryColumns={queryColumnsMap.current.get(nodePath) ?? []}
           getScrollElement={getScrollElement}
           getScrollOffset={getScrollOffset}
           getScrollMargin={getScrollMargin}
         />
       ),
-      [dataView, props, queryMeta]
+      [dataView, props]
     );
 
     const fetchCascadeData = useCallback(
@@ -159,7 +168,13 @@ const ESQLDataCascade = React.memo(
           return [];
         }
 
-        return scopedESQLQueryFetch(newQuery);
+        const { records, esqlQueryColumns } = await scopedESQLQueryFetch(newQuery);
+
+        if (esqlQueryColumns) {
+          queryColumnsMap.current.set(nodePath, esqlQueryColumns);
+        }
+
+        return records;
       },
       [query, scopedESQLQueryFetch]
     );

@@ -137,6 +137,7 @@ export function useGetGroupBySelectorRenderer({
     (availableColumns: string[], currentSelectedColumns: string[]) => {
       return (
         <CascadeGroupingSelectionPopover
+          key="cascade-grouping-selection-popover"
           availableColumns={availableColumns}
           currentSelectedColumns={currentSelectedColumns}
           cascadeGroupingChangeHandler={cascadeGroupingChangeHandler}

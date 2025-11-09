@@ -21,11 +21,12 @@ import {
 import type { CascadeRowCellNestedVirtualizationAnchorProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 interface ESQLDataCascadeLeafCellProps
   extends Omit<
       UnifiedDataTableProps,
+      | 'columns'
       | 'loadingState'
       | 'onSetColumns'
       | 'sampleSizeState'
@@ -37,7 +38,7 @@ interface ESQLDataCascadeLeafCellProps
     CascadeRowCellNestedVirtualizationAnchorProps<DataTableRecord> {
   cellData: DataTableRecord[];
   cellId: string;
-  queryMeta: ESQLStatsQueryMeta;
+  queryColumns: DatatableColumn[];
 }
 
 interface CustomCascadeGridBodyProps
@@ -191,12 +192,10 @@ export const ESQLDataCascadeLeafCell = React.memo(
   ({
     cellData,
     cellId,
-    queryMeta,
     dataGridDensityState,
     showTimeCol,
     dataView,
     services,
-    columns,
     showKeyboardShortcuts,
     renderDocumentView,
     externalCustomRenderers,
@@ -204,12 +203,15 @@ export const ESQLDataCascadeLeafCell = React.memo(
     getScrollMargin,
     getScrollOffset,
   }: ESQLDataCascadeLeafCellProps) => {
-    const [, setVisibleColumns] = useState(queryMeta.groupByFields.map((group) => group.field));
     const [sampleSize, setSampleSize] = useState(cellData.length);
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
+
+    // TODO: Implement column selection logic,
+    // probably requires a new selection component that will be used within the row
+    const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
 
@@ -268,8 +270,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
       [cellData, cellId, getScrollElement, getScrollMargin, getScrollOffset, isCellInFullScreenMode]
     );
 
-    const derivedColumns = useMemo(() => [], []);
-
     return (
       <EuiPanel paddingSize="none">
         <UnifiedDataTable
@@ -283,8 +283,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
           consumer={`discover_esql_cascade_row_leaf_${cellId}`}
           rows={cellData}
           loadingState={DataLoadingState.loaded}
-          columns={derivedColumns}
-          onSetColumns={setVisibleColumns}
+          columns={selectedColumns}
+          onSetColumns={setSelectedColumns}
           sampleSizeState={sampleSize}
           renderCustomToolbar={renderCustomToolbarWithElements}
           onUpdateSampleSize={setSampleSize}
