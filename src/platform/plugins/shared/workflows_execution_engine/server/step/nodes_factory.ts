@@ -67,6 +67,8 @@ import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/st
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import type { StepTypeRegistry } from '../step_type_registry';
+import { CustomStepImpl } from './custom_step_impl';
 
 export class NodesFactory {
   constructor(
@@ -76,13 +78,31 @@ export class NodesFactory {
     private workflowTaskManager: WorkflowTaskManager,
     private urlValidator: UrlValidator,
     private workflowGraph: WorkflowGraph,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    private stepTypeRegistry: StepTypeRegistry
   ) {}
 
   // eslint-disable-next-line complexity
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
+
+    // Check if this is a custom registered step type
+    if (node.stepType && this.stepTypeRegistry.has(node.stepType)) {
+      const stepDefinition = this.stepTypeRegistry.get(node.stepType)!;
+      this.workflowLogger.logInfo(`Creating custom step: ${node.stepType}`, {
+        event: { action: 'custom-step-creation', outcome: 'success' },
+        tags: ['step-factory', 'custom-step'],
+      });
+      return new CustomStepImpl(
+        node as AtomicGraphNode,
+        stepDefinition,
+        stepExecutionRuntime,
+        this.connectorExecutor,
+        this.workflowRuntime,
+        stepLogger
+      );
+    }
 
     // Handle elasticsearch.* and kibana.* actions
     if (node.stepType && node.stepType.startsWith('elasticsearch.')) {

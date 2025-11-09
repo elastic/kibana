@@ -43,7 +43,9 @@ export const loadConnectorsThunk = createAsyncThunk<
       if (hasChanged) {
         addDynamicConnectorsToCache(currentConnectorTypes);
 
-        const schema = getWorkflowZodSchema(currentConnectorTypes);
+        // Get registered step types from state to pass to schema generation
+        const registeredStepTypes = state.detail.registeredStepTypes?.stepTypes ?? [];
+        const schema = getWorkflowZodSchema(currentConnectorTypes, registeredStepTypes);
         dispatch(_setGeneratedSchemaInternal(schema));
       }
 

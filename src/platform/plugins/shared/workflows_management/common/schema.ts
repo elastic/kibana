@@ -936,24 +936,28 @@ export function getAllConnectorsWithDynamic(
 
 // Dynamic schemas that include all connectors (static + Elasticsearch + dynamic)
 // These use lazy loading to keep large generated files out of the main bundle
-export const getWorkflowZodSchema = (dynamicConnectorTypes: Record<string, ConnectorTypeInfo>) => {
+export const getWorkflowZodSchema = (
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
+  registeredStepTypes: Array<{ id: string; title: string; description?: string }> = []
+) => {
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors);
+  return generateYamlSchemaFromConnectors(allConnectors, registeredStepTypes);
 };
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 
 export const getWorkflowZodSchemaLoose = (
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
+  registeredStepTypes: Array<{ id: string; title: string; description?: string }> = []
 ) => {
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, true);
+  return generateYamlSchemaFromConnectors(allConnectors, registeredStepTypes, true);
 };
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 
 // Legacy exports for backward compatibility - these will be deprecated
 // TODO: Remove these once all consumers are updated to use the lazy-loaded versions
-export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(staticConnectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(staticConnectors, true);
+export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(staticConnectors, []);
+export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(staticConnectors, [], true);
 
 // Partially recreated from x-pack/platform/plugins/shared/alerting/server/connector_adapters/types.ts
 // TODO: replace with dynamic schema

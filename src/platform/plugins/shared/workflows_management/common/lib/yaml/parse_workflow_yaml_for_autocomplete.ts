@@ -15,12 +15,7 @@ import { formatZodError } from '../zod/format_zod_error';
 
 export function parseWorkflowYamlForAutocomplete(
   yamlString: string
-):
-  | z.SafeParseReturnType<
-      z.input<typeof WorkflowSchemaForAutocomplete>,
-      z.output<typeof WorkflowSchemaForAutocomplete>
-    >
-  | { success: false; error: Error } {
+): z.SafeParseReturnType<any, any> | { success: false; error: Error } {
   const parseResult = parseYamlToJSONWithoutValidation(yamlString);
   if (!parseResult.success) {
     return {

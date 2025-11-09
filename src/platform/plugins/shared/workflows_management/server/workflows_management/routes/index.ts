@@ -9,11 +9,13 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 
 // Import all route registration functions
 import { registerDeleteWorkflowByIdRoute } from './delete_workflow_by_id';
 import { registerDeleteWorkflowsBulkRoute } from './delete_workflows_bulk';
 import { registerGetConnectorsRoute } from './get_connectors';
+import { registerGetRegisteredStepTypesRoute } from './get_registered_step_types';
 import { registerGetStepExecutionRoute } from './get_step_execution';
 import { registerGetWorkflowAggsRoute } from './get_workflow_aggs';
 import { registerGetWorkflowByIdRoute } from './get_workflow_by_id';
@@ -37,15 +39,17 @@ export function defineRoutes(
   router: IRouter,
   api: WorkflowsManagementApi,
   logger: Logger,
-  spaces: SpacesServiceStart
+  spaces: SpacesServiceStart,
+  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
 ) {
-  const deps: RouteDependencies = { router, api, logger, spaces };
+  const deps: RouteDependencies = { router, api, logger, spaces, getWorkflowExecutionEngine };
 
   // Register all routes
   registerGetWorkflowStatsRoute(deps);
   registerGetWorkflowAggsRoute(deps);
   registerGetWorkflowByIdRoute(deps);
   registerGetConnectorsRoute(deps);
+  registerGetRegisteredStepTypesRoute(deps);
   registerPostSearchWorkflowsRoute(deps);
   registerPostCreateWorkflowRoute(deps);
   registerPutUpdateWorkflowRoute(deps);

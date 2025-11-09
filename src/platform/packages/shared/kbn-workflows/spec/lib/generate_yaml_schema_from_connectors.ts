@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
+  BaseStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -21,6 +22,12 @@ import {
   WaitStepSchema,
   WorkflowSchema,
 } from '../schema';
+
+export interface RegisteredStepTypeInfo {
+  id: string;
+  title: string;
+  description?: string;
+}
 
 function generateStepSchemaForConnector(
   connector: ConnectorContractUnion,
@@ -35,8 +42,25 @@ function generateStepSchemaForConnector(
   });
 }
 
+function generateStepSchemaForRegisteredType(
+  registeredType: RegisteredStepTypeInfo,
+  stepSchema: z.ZodType,
+  loose: boolean = false
+) {
+  return BaseStepSchema.extend({
+    type: z.literal(registeredType.id),
+    with: z.record(z.string(), z.any()).optional().describe(registeredType.description || ''),
+    // Add common step properties
+    if: z.string().optional(),
+    foreach: z.string().optional(),
+    'timeout-seconds': z.number().int().positive().optional(),
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  });
+}
+
 function createRecursiveStepSchema(
   connectors: ConnectorContractUnion[],
+  registeredStepTypes: RegisteredStepTypeInfo[] = [],
   loose: boolean = false
 ): z.ZodType {
   // Use a simpler approach to avoid infinite recursion during validation
@@ -54,6 +78,10 @@ function createRecursiveStepSchema(
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
 
+    const registeredStepSchemas = registeredStepTypes.map((rst) =>
+      generateStepSchemaForRegisteredType(rst, stepSchema, loose)
+    );
+
     // Return discriminated union with all step types
     // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
@@ -64,6 +92,7 @@ function createRecursiveStepSchema(
       WaitStepSchema,
       httpSchema,
       ...connectorSchemas,
+      ...registeredStepSchemas,
     ]);
   });
 
@@ -72,12 +101,13 @@ function createRecursiveStepSchema(
 
 export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContractUnion[],
+  registeredStepTypes: RegisteredStepTypeInfo[] = [],
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
   loose: boolean = false
 ) {
-  const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
+  const recursiveStepSchema = createRecursiveStepSchema(connectors, registeredStepTypes, loose);
 
   if (loose) {
     return WorkflowSchema.partial().extend({

@@ -43,6 +43,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { createIndexes } from '../common';
+import { StepTypeRegistry } from './step_type_registry';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -57,12 +58,14 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private readonly stepTypeRegistry: StepTypeRegistry;
   private setupDependencies?: SetupDependencies;
   private initializePromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
+    this.stepTypeRegistry = new StepTypeRegistry(this.logger);
   }
 
   public setup(
@@ -118,6 +121,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest: fakeRequest!,
                 dependencies,
+                stepTypeRegistry: pluginInstance.stepTypeRegistry,
               });
             },
             cancel: async () => {
@@ -167,6 +171,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest: fakeRequest!,
                 dependencies,
+                stepTypeRegistry: pluginInstance.stepTypeRegistry,
               });
             },
             cancel: async () => {
@@ -177,7 +182,11 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
 
-    return {};
+    return {
+      registerStepType: (definition) => {
+        this.stepTypeRegistry.register(definition);
+      },
+    };
   }
 
   public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
@@ -244,6 +253,7 @@ export class WorkflowsExecutionEnginePlugin
           config: this.config,
           fakeRequest: request, // will be undefined if not available
           dependencies,
+          stepTypeRegistry: this.stepTypeRegistry,
         });
       } else {
         // Normal manual execution - schedule a task
@@ -379,6 +389,9 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflow,
       executeWorkflowStep,
       cancelWorkflowExecution,
+      getRegisteredStepTypes: () => {
+        return this.stepTypeRegistry.getAllMetadata();
+      },
     };
   }
 

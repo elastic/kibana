@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-step-example-plugin",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Example plugin demonstrating how to register custom workflow step types",
+  "plugin": {
+    "id": "workflowsStepExample",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "workflowsExecutionEngine"
+    ]
+  }
+}
+

@@ -17,7 +17,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel, StepTypeDefinition } from '@kbn/workflows';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
@@ -27,8 +27,31 @@ export interface ExecuteWorkflowStepResponse {
   workflowExecutionId: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExecutionEnginePluginSetup {}
+export interface WorkflowsExecutionEnginePluginSetup {
+  /**
+   * Register a custom step type that can be used in workflows.
+   *
+   * @param definition - The step type definition including id, schemas, and handler
+   * @throws Error if a step type with the same id is already registered
+   *
+   * @example
+   * ```typescript
+   * setup(core, plugins) {
+   *   plugins.workflowsExecutionEngine.registerStepType({
+   *     id: 'custom_step',
+   *     title: 'Custom Step',
+   *     description: 'A custom step implementation',
+   *     inputSchema: z.object({ value: z.string() }),
+   *     outputSchema: z.object({ result: z.string() }),
+   *     handler: async (context) => {
+   *       return { output: { result: 'done' } };
+   *     }
+   *   });
+   * }
+   * ```
+   */
+  registerStepType(definition: StepTypeDefinition): void;
+}
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow(
     workflow: WorkflowExecutionEngineModel,
@@ -43,6 +66,12 @@ export interface WorkflowsExecutionEnginePluginStart {
   ): Promise<ExecuteWorkflowStepResponse>;
 
   cancelWorkflowExecution(workflowExecutionId: string, spaceId: string): Promise<void>;
+
+  /**
+   * Get all registered custom step types
+   * @returns Array of registered step type IDs with their metadata (id, title, description)
+   */
+  getRegisteredStepTypes(): Array<{ id: string; title: string; description?: string }>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {

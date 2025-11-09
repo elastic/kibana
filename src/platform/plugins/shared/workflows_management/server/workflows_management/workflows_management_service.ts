@@ -1164,9 +1164,10 @@ export class WorkflowsService {
       loose?: false;
     },
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    registeredStepTypes: Array<{ id: string; title: string; description?: string }> = []
   ): Promise<z.ZodType> {
     const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
-    return getWorkflowZodSchema(connectorsByType);
+    return getWorkflowZodSchema(connectorsByType, registeredStepTypes);
   }
 }

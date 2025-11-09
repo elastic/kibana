@@ -10,6 +10,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 // Pagination constants
@@ -31,6 +32,7 @@ export interface RouteDependencies {
   api: WorkflowsManagementApi;
   logger: Logger;
   spaces: SpacesServiceStart;
+  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>;
 }
 
 export type RouteHandler = (deps: RouteDependencies) => void;

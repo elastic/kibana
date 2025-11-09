@@ -19,7 +19,8 @@ const initialState: WorkflowDetailState = {
   workflow: undefined,
   computed: undefined,
   connectors: undefined,
-  schema: getWorkflowZodSchema({}),
+  registeredStepTypes: undefined,
+  schema: getWorkflowZodSchema({}, []),
   focusedStepId: undefined,
   stepExecutions: undefined,
   highlightedStepId: undefined,
@@ -67,6 +68,12 @@ const workflowDetailSlice = createSlice({
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
     },
+    setRegisteredStepTypes: (
+      state,
+      action: { payload: WorkflowDetailState['registeredStepTypes'] }
+    ) => {
+      state.registeredStepTypes = action.payload;
+    },
 
     // Internal actions - these are not for components usage
     _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
@@ -94,6 +101,7 @@ export const {
   setHighlightedStepId,
   setIsTestModalOpen,
   setConnectors,
+  setRegisteredStepTypes,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,

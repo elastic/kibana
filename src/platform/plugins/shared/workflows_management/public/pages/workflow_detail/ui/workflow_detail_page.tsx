@@ -21,6 +21,7 @@ import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { setYamlString } from '../../../entities/workflows/store';
 import { selectWorkflowName } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
+import { loadRegisteredStepTypesThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_registered_step_types_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
@@ -31,11 +32,13 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
   const loadConnectors = useAsyncThunk(loadConnectorsThunk);
+  const loadRegisteredStepTypes = useAsyncThunk(loadRegisteredStepTypesThunk);
   const [loadWorkflow, { isLoading, error }] = useAsyncThunkState(loadWorkflowThunk);
 
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount
-  }, [loadConnectors]);
+    loadRegisteredStepTypes(); // dispatch load registered step types on mount
+  }, [loadConnectors, loadRegisteredStepTypes]);
 
   useEffect(() => {
     if (id) {
