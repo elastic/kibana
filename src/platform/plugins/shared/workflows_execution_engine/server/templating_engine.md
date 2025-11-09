@@ -37,6 +37,35 @@ with:
   message: "Processing {{ items | size }} items"
 ```
 
+
+### Escaping Template Syntax
+
+If you need to output literal `{{ }}` characters in your template (without them being interpreted as template syntax), use the `{% raw %}` tag:
+
+```yaml
+# If you need literal {{ }} in output
+value: "{% raw %}{{ _ingest.timestamp }}{% endraw %}"
+# Renders to: "{{ _ingest.timestamp }}" (literal text, not evaluated)
+```
+
+**Use when:**
+- You need to output template syntax as literal text
+- Passing template strings to external systems that use `{{ }}` syntax
+- Creating examples or documentation within templates
+
+**Example:**
+```yaml
+# Passing Elasticsearch ingest pipeline syntax
+pipeline: |
+  {
+    "set": {
+      "field": "timestamp",
+      "value": "{% raw %}{{ _ingest.timestamp }}{% endraw %}"
+    }
+  }
+# Result: The literal string "{{ _ingest.timestamp }}" is in the output
+```
+
 ### Object/Array Templates
 
 Templates can be embedded within nested objects and arrays. The engine recursively processes all string values.
@@ -220,19 +249,6 @@ message: "{{ }}"
 # Error:
 "invalid value expression"
 # Position: Highlights the empty expression
-```
-
-### Error Handling in Code
-
-```typescript
-try {
-  return this.engine.parseAndRenderSync(template, context);
-} catch (error) {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  // Remove line/column numbers for user-facing messages
-  const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
-  throw new Error(customerFacingErrorMessage);
-}
 ```
 
 ---
