@@ -398,9 +398,6 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle create new workflow click', async () => {
-    const originalOpen = window.open;
-    window.open = jest.fn();
-
     // Mock the application service
     const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
@@ -725,9 +722,6 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should render view all workflows link and handle click to open in new tab', async () => {
-    const originalOpen = window.open;
-    window.open = jest.fn();
-
     // Mock the application service
     const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
