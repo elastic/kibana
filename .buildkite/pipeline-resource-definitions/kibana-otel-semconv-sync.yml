@@ -9,7 +9,7 @@ metadata:
       title: Pipeline link
 spec:
   type: buildkite-pipeline
-  owner: 'group:obs-ux-logs-team'
+  owner: 'group:obs-onboarding-team'
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -21,7 +21,7 @@ spec:
       env:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_ON_SUCCESS: 'true'
-        SLACK_NOTIFICATIONS_CHANNEL: '#obs-ux-logs'
+        SLACK_NOTIFICATIONS_CHANNEL: '#obs-onboarding'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main
@@ -36,7 +36,7 @@ spec:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
       teams:
-        obs-ux-logs-team:
+        obs-onboarding-team:
           access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
@@ -55,4 +55,4 @@ spec:
         - kibana
         - observability
         - opentelemetry
-        - obs-ux-logs
+        - obs-onboarding
