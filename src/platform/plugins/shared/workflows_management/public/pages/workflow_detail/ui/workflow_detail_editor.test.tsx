@@ -10,12 +10,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
-import { TestWrapper } from '../../../shared/test_utils';
-import { createMockStore } from '../../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _setComputedDataInternal,
   setYamlString,
-} from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+} from '../../../entities/workflows/store/workflow_detail/slice';
+import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
 const mockUseKibana = jest.fn();

@@ -354,6 +354,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DATA_CONNECTORS_ENABLED_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_CONNECTORS_ENABLED_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"dataConnectors:enabled\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.DATE_FORMAT_DOW_ID",
         "type": "string",
         "tags": [],

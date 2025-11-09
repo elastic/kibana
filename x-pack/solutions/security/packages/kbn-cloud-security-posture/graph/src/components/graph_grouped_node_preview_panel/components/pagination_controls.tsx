@@ -18,6 +18,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { i18nNamespaceKey } from '../constants';
+import { PAGE_SIZE_BTN_TEST_ID } from '../test_ids';
+import { PAGE_SIZE_OPTIONS } from '../use_pagination';
 
 const rowsPerPageLabel = i18n.translate(`${i18nNamespaceKey}.rowsPerPageLabel`, {
   defaultMessage: 'Rows per page',
@@ -32,58 +34,52 @@ const paginationLabel = i18n.translate(`${i18nNamespaceKey}.paginationLabel`, {
 });
 
 export interface PaginationControlsProps {
-  pageIndex: number;
-  pageSize: number;
-  pageCount?: number;
-  onChangeItemsPerPage: (pageSize: number) => void;
-  onChangePage: (pageIndex: number) => void;
+  totalHits: number;
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+  };
+  goToPage: (pageIndex: number) => void;
+  setPageSize: (pageSize: number) => void;
 }
 
 export const PaginationControls = ({
-  pageSize,
-  pageIndex,
-  pageCount = 10,
-  onChangeItemsPerPage,
-  onChangePage,
+  totalHits,
+  pagination,
+  goToPage,
+  setPageSize,
 }: PaginationControlsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [activePage, setActivePage] = useState(pageIndex);
-  const [rowSize, setRowSize] = useState(pageSize);
 
   const onButtonClick = () => setIsPopoverOpen((s) => !s);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const goToPage = (pageNumber: number) => {
-    setActivePage(pageNumber);
-    onChangePage(pageNumber);
-  };
-
   const getIconType = (size: number) => {
-    return size === rowSize ? 'check' : 'empty';
+    return size === pagination.pageSize ? 'check' : 'empty';
   };
 
   const button = (
     <EuiButtonEmpty
+      data-test-subj={PAGE_SIZE_BTN_TEST_ID}
       size="xs"
       color="text"
       iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}
-      aria-label="Rows per page"
+      aria-label={rowsPerPageLabel}
     >
-      {`${rowsPerPageLabel}: ${rowSize}`}
+      {`${rowsPerPageLabel}: ${pagination.pageSize}`}
     </EuiButtonEmpty>
   );
 
-  const items = [10, 20, 50].map((rowsNumber) => {
+  const items = PAGE_SIZE_OPTIONS.map((rowsNumber) => {
     return (
       <EuiContextMenuItem
         key={`${rowsNumber} rows`}
         icon={getIconType(rowsNumber)}
         onClick={() => {
           closePopover();
-          setRowSize(rowsNumber);
-          onChangeItemsPerPage(rowsNumber);
+          setPageSize(rowsNumber);
         }}
       >
         {`${rowsNumber} ${rowsLabel}`}
@@ -91,11 +87,12 @@ export const PaginationControls = ({
     );
   });
 
+  const pageCount = Math.ceil(totalHits / pagination.pageSize);
+
   return (
     <EuiFlexGroup
       justifyContent="spaceBetween"
       alignItems="center"
-      responsive={false}
       wrap
       css={css`
         flex-grow: 0;
@@ -116,7 +113,7 @@ export const PaginationControls = ({
         <EuiPagination
           aria-label={paginationLabel}
           pageCount={pageCount}
-          activePage={activePage}
+          activePage={pagination.pageIndex}
           onPageClick={goToPage}
         />
       </EuiFlexItem>

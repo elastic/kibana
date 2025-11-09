@@ -11,7 +11,7 @@ import type {
   ConnectorContractUnion,
   DynamicConnectorContract,
   EnhancedInternalConnectorContract,
-  EsWorkflow,
+  EsWorkflowCreate,
 } from './v1';
 import { ExecutionStatus } from './v1';
 import type {
@@ -32,10 +32,7 @@ import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
-): Omit<
-  EsWorkflow,
-  'spaceId' | 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'
-> {
+): EsWorkflowCreate {
   // TODO: handle merge, if, foreach, etc.
 
   return {
@@ -44,7 +41,6 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     tags: workflowDefinition.tags ?? [],
     enabled: workflowDefinition.enabled,
     definition: workflowDefinition,
-    deleted_at: null,
     valid: true,
   };
 }
