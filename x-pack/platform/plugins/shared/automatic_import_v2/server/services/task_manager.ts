@@ -20,9 +20,27 @@ const TASK_TYPE = 'automaticImport-aiWorkflow';
 export class TaskManagerService {
   private logger: Logger;
   private taskManager: TaskManagerStartContract | null = null;
+  // Mock AI process for testing
+  // This will be replaced with the real AIWorkflowService
+  private mockAIProcess?: (params: {
+    integrationId: string;
+    dataStreamId: string;
+    samples?: any[];
+  }) => Promise<void>;
 
-  constructor(logger: Logger, taskManagerSetup: TaskManagerSetupContract) {
+  constructor(
+    logger: Logger,
+    taskManagerSetup: TaskManagerSetupContract,
+    options?: {
+      mockAIProcess?: (params: {
+        integrationId: string;
+        dataStreamId: string;
+        samples?: any[];
+      }) => Promise<void>;
+    }
+  ) {
     this.logger = logger.get('taskManagerService');
+    this.mockAIProcess = options?.mockAIProcess;
 
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
@@ -99,10 +117,25 @@ export class TaskManagerService {
 
     this.logger.info(`Running task ${taskId}`, params);
 
-    // Placeholder for actual AI workflow
-    // This is where you'll implement your long-running task logic and update the task status as needed.
     try {
-      await new Promise((resolve) => setTimeout(resolve, 20000)); // 20 seconds to simulate AI work
+      // TODO: Inject AIWorkflowService here
+      // Production will look like:
+      //   await this.aiWorkflowService.executeWorkflow({
+      //     integrationId: params.integrationId,
+      //     dataStreamId: params.dataStreamId,
+      //     samples: params.samples,
+      //   });
+
+      if (this.mockAIProcess) {
+        // Test mode: Execute mock AI workflow (includes status updates)
+        await this.mockAIProcess({
+          integrationId: params.integrationId,
+          dataStreamId: params.dataStreamId,
+          samples: params.samples,
+        });
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
 
       this.logger.info(`Task ${taskId} completed successfully`);
 
