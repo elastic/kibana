@@ -47,17 +47,21 @@ export function useMonacoMarkersChangedInterceptor({
       owner: string,
       markers: monaco.editor.IMarkerData[]
     ) => {
-      return markers.map((marker) => {
-        if (owner === 'yaml') {
-          return formatMonacoYamlMarker(
-            marker,
-            editorModel,
-            workflowYamlSchema,
-            yamlDocumentRef.current
-          );
-        }
-        return marker;
-      });
+      return markers
+        .map((marker) => {
+          if (owner === 'yaml') {
+            return formatMonacoYamlMarker(
+              marker,
+              editorModel,
+              workflowYamlSchema,
+              yamlDocumentRef.current
+            );
+          }
+          return marker;
+        })
+        .filter(
+          (marker): marker is monaco.editor.IMarker | monaco.editor.IMarkerData => marker !== null
+        ); // Filter out null markers (dynamic values that should bypass validation)
     },
     [workflowYamlSchema, yamlDocumentRef]
   );
