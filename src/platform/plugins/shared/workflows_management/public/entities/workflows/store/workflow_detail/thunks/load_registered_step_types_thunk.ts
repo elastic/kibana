@@ -10,12 +10,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { getWorkflowZodSchema } from '../../../../../../common/schema';
-import { setRegisteredStepTypes, _setGeneratedSchemaInternal } from '../slice';
-import type { RootState, RegisteredStepTypesResponse } from '../../types';
 import type { WorkflowsServices } from '../../../../../types';
 import { clearConnectorTypeSuggestionsCache } from '../../../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_type/get_connector_type_suggestions';
+import type { RegisteredStepTypesResponse, RootState } from '../../types';
+import { _setGeneratedSchemaInternal, setRegisteredStepTypes } from '../slice';
 
-export interface LoadRegisteredStepTypesParams {}
+export type LoadRegisteredStepTypesParams = Record<string, never>;
 
 export type LoadRegisteredStepTypesResponse = RegisteredStepTypesResponse;
 
@@ -47,7 +47,7 @@ export const loadRegisteredStepTypesThunk = createAsyncThunk<
       if (hasChanged) {
         // Clear autocomplete cache so new step types appear in suggestions
         clearConnectorTypeSuggestionsCache();
-        
+
         // Get connectors from state to pass to schema generation
         const connectorTypes = state.detail.connectors?.connectorTypes ?? {};
         const schema = getWorkflowZodSchema(connectorTypes, currentRegisteredStepTypes);
@@ -69,4 +69,3 @@ export const loadRegisteredStepTypesThunk = createAsyncThunk<
     }
   }
 );
-

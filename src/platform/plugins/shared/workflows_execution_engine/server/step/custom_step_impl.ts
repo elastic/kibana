@@ -48,10 +48,13 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<any> {
    */
   public override async getInput(): Promise<any> {
     const configuration = this.node.configuration;
+    
+    // Extract the 'with' property which contains the step inputs
+    const withData = configuration.with || {};
 
-    // Evaluate templates in the configuration
+    // Evaluate templates in the 'with' data
     const evaluatedConfig = this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-      configuration
+      withData
     );
 
     // Validate input against the step's input schema
@@ -91,19 +94,28 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<any> {
           getVariable: (key: string) => {
             return this.stepExecutionRuntime.contextManager.getVariable(key);
           },
+          setStepState: async (state: Record<string, any>) => {
+            await this.stepExecutionRuntime.setCurrentStepState(state);
+          },
+          getStepState: () => {
+            return this.stepExecutionRuntime.getCurrentStepState();
+          },
         },
         logger: {
           debug: (message: string, meta?: object) => {
-            this.workflowLogger.debug(message, meta);
+            this.workflowLogger.logDebug(message, meta);
           },
           info: (message: string, meta?: object) => {
-            this.workflowLogger.info(message, meta);
+            this.workflowLogger.logInfo(message, meta);
           },
           warn: (message: string, meta?: object) => {
-            this.workflowLogger.warn(message, meta);
+            this.workflowLogger.logWarn(message, meta);
           },
           error: (message: string, meta?: object) => {
-            this.workflowLogger.error(message, meta);
+            // logError expects (message, error?, additionalData?)
+            // If meta contains an error property, pass it as the error parameter
+            const errorObj = meta && typeof meta === 'object' && 'error' in meta ? (meta.error instanceof Error ? meta.error : undefined) : undefined;
+            this.workflowLogger.logError(message, errorObj, meta);
           },
         },
         abortSignal: this.stepExecutionRuntime.abortController.signal,

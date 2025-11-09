@@ -45,10 +45,12 @@ export function getStepsCollectionSchema(
 
     if (!isEnterForeach(node)) {
       stepsSchema = stepsSchema.extend({
-        [node.stepId]: z.object({
-          output: getOutputSchemaForStepType(node.stepType).optional(),
-          error: z.any().optional(),
-        }),
+        [node.stepId]: z
+          .object({
+            output: getOutputSchemaForStepType(node.stepType).optional(),
+            error: z.any().optional(),
+          })
+          .passthrough(), // Allow additional properties from step state
       });
     } else {
       // if the step is a foreach, add the foreach schema to the step state schema

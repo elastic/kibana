@@ -56,11 +56,18 @@ export function getSchemaAtPath(
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
-          return partial
-            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
-            : { schema: null, scopedToPath: null };
+          // Check if this object allows passthrough (additional properties)
+          // If so, treat unknown properties as z.any() (without description to avoid warnings)
+          if (current._def.unknownKeys === 'passthrough') {
+            current = z.any();
+          } else {
+            return partial
+              ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+              : { schema: null, scopedToPath: null };
+          }
+        } else {
+          current = shape[segment];
         }
-        current = shape[segment];
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
         const validBranch = branches.find((branch: z.ZodType) =>

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,7 +19,10 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { setYamlString } from '../../../entities/workflows/store';
-import { selectWorkflowName } from '../../../entities/workflows/store/workflow_detail/selectors';
+import {
+  selectRegisteredStepTypes,
+  selectWorkflowName,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
 import { loadRegisteredStepTypesThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_registered_step_types_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
@@ -32,12 +35,15 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
   const loadConnectors = useAsyncThunk(loadConnectorsThunk);
-  const loadRegisteredStepTypes = useAsyncThunk(loadRegisteredStepTypesThunk);
+  const [loadRegisteredStepTypes, { isLoading: isLoadingStepTypes }] = useAsyncThunkState(
+    loadRegisteredStepTypesThunk
+  );
   const [loadWorkflow, { isLoading, error }] = useAsyncThunkState(loadWorkflowThunk);
+  const registeredStepTypes = useSelector(selectRegisteredStepTypes);
 
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount
-    loadRegisteredStepTypes(); // dispatch load registered step types on mount
+    loadRegisteredStepTypes({}); // dispatch load registered step types on mount
   }, [loadConnectors, loadRegisteredStepTypes]);
 
   useEffect(() => {
@@ -59,6 +65,23 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const onCloseExecutionDetail = useCallback(() => {
     setSelectedExecution(null);
   }, [setSelectedExecution]);
+
+  // Wait for registered step types to load before rendering editor to prevent race condition
+  if (isLoadingStepTypes || !registeredStepTypes) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingSpinner size="xl" />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.workflowDetail.loadingStepTypes.title"
+              defaultMessage="Loading workflow editor..."
+            />
+          </h2>
+        }
+      />
+    );
+  }
 
   if (error) {
     return (

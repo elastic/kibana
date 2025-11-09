@@ -15,6 +15,7 @@ import { formatZodError } from '../zod/format_zod_error';
 
 export function parseWorkflowYamlForAutocomplete(
   yamlString: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): z.SafeParseReturnType<any, any> | { success: false; error: Error } {
   const parseResult = parseYamlToJSONWithoutValidation(yamlString);
   if (!parseResult.success) {

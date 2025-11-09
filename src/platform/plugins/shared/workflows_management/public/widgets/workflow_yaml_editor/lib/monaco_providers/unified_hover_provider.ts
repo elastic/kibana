@@ -15,9 +15,9 @@ import { monaco } from '@kbn/monaco';
 import type { HoverContext, ProviderConfig } from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset } from '../../../../../common/lib/yaml';
-import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 import { getWorkflowsStore } from '../../../../entities/workflows/store/store';
 import { selectRegisteredStepTypes } from '../../../../entities/workflows/store/workflow_detail/selectors';
+import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 
 /**
  * Unified hover provider that delegates to connector-specific handlers

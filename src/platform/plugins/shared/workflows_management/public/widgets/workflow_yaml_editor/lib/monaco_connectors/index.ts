@@ -13,4 +13,5 @@ export { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 // Specific connector handlers
 export { ElasticsearchMonacoConnectorHandler } from './elasticsearch_connector_handler';
 export { KibanaMonacoConnectorHandler } from './kibana_monaco_connector_handler';
+export { RegisteredStepMonacoHandler } from './registered_step_monaco_handler';
 export { GenericMonacoConnectorHandler } from './generic_monaco_connector_handler';

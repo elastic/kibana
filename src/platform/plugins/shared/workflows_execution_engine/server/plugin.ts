@@ -19,7 +19,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  EsWorkflowExecution,
+  StepTypeDefinition,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
@@ -121,7 +125,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest: fakeRequest!,
                 dependencies,
-                stepTypeRegistry: pluginInstance.stepTypeRegistry,
+                stepTypeRegistry: this.stepTypeRegistry,
               });
             },
             cancel: async () => {
@@ -171,7 +175,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest: fakeRequest!,
                 dependencies,
-                stepTypeRegistry: pluginInstance.stepTypeRegistry,
+                stepTypeRegistry: this.stepTypeRegistry,
               });
             },
             cancel: async () => {
@@ -183,7 +187,7 @@ export class WorkflowsExecutionEnginePlugin
     });
 
     return {
-      registerStepType: (definition) => {
+      registerStepType: (definition: StepTypeDefinition) => {
         this.stepTypeRegistry.register(definition);
       },
     };

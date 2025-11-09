@@ -957,7 +957,11 @@ export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZo
 // Legacy exports for backward compatibility - these will be deprecated
 // TODO: Remove these once all consumers are updated to use the lazy-loaded versions
 export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(staticConnectors, []);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(staticConnectors, [], true);
+export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(
+  staticConnectors,
+  [],
+  true
+);
 
 // Partially recreated from x-pack/platform/plugins/shared/alerting/server/connector_adapters/types.ts
 // TODO: replace with dynamic schema

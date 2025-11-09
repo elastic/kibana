@@ -20,11 +20,15 @@ import {
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
 import { generateConnectorSnippet } from '../../../snippets/generate_connector_snippet';
-import { getWorkflowsStore } from '../../../../../entities/workflows/store/store';
-import { selectRegisteredStepTypes } from '../../../../../entities/workflows/store/workflow_detail/selectors';
 
 // Cache for connector type suggestions to avoid recalculating on every keystroke
 const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
+
+export interface RegisteredStepTypeInfo {
+  id: string;
+  title: string;
+  description?: string;
+}
 
 /**
  * Get connector type suggestions with better grouping and filtering
@@ -32,7 +36,8 @@ const connectorTypeSuggestionsCache = new Map<string, monaco.languages.Completio
 export function getConnectorTypeSuggestions(
   typePrefix: string,
   range: monaco.IRange,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  registeredStepTypes?: RegisteredStepTypeInfo[]
 ): monaco.languages.CompletionItem[] {
   // Create a cache key based on the type prefix and context
   const cacheKey = `${typePrefix}|${JSON.stringify(range)}`;
@@ -136,13 +141,11 @@ export function getConnectorTypeSuggestions(
       });
     });
 
-    // Add registered custom step types
-    try {
-      const store = getWorkflowsStore();
-      const registeredStepTypes = selectRegisteredStepTypes(store.getState());
-      const matchingCustomSteps = registeredStepTypes?.stepTypes?.filter((stepType) =>
+    // Add registered custom step types if provided
+    if (registeredStepTypes && registeredStepTypes.length > 0) {
+      const matchingCustomSteps = registeredStepTypes.filter((stepType) =>
         stepType.id.toLowerCase().includes(typePrefix.toLowerCase())
-      ) ?? [];
+      );
 
       matchingCustomSteps.forEach((stepType) => {
         const snippetText = `\${1:${stepType.id}}\n  type: ${stepType.id}\n  with:\n    \${2:# Configure step parameters}`;
@@ -166,9 +169,6 @@ export function getConnectorTypeSuggestions(
           preselect: false,
         });
       });
-    } catch (error) {
-      // If we can't access the store, skip custom steps
-      // console.warn('Could not fetch registered step types for autocomplete', error);
     }
 
     // Then add matching connectors

@@ -11,4 +11,3 @@ import { useSelector } from 'react-redux';
 import { selectRegisteredStepTypes } from '../../workflows/store/workflow_detail/selectors';
 
 export const useRegisteredStepTypes = () => useSelector(selectRegisteredStepTypes);
-

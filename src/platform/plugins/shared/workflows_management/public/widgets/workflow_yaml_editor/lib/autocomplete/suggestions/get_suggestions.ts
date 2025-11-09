@@ -114,7 +114,8 @@ export function getSuggestions(
     return getConnectorTypeSuggestions(
       lineParseResult.fullKey,
       adjustedRange,
-      autocompleteContext.dynamicConnectorTypes
+      autocompleteContext.dynamicConnectorTypes,
+      autocompleteContext.registeredStepTypes ?? undefined
     );
   }
 

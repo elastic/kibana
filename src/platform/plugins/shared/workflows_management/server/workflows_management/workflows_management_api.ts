@@ -265,7 +265,12 @@ export class WorkflowsManagementApi {
     const registeredStepTypes = workflowsExecutionEngine.getRegisteredStepTypes();
     const parsedYaml = parseWorkflowYamlToJSON(
       workflowYaml,
-      await this.workflowsService.getWorkflowZodSchema({ loose: false }, spaceId, request, registeredStepTypes)
+      await this.workflowsService.getWorkflowZodSchema(
+        { loose: false },
+        spaceId,
+        request,
+        registeredStepTypes
+      )
     );
 
     if (parsedYaml.error) {

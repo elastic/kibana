@@ -46,6 +46,27 @@ export interface StepHandlerContext {
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getVariable(key: string): any;
+
+    /**
+     * Set the persistent state for this step.
+     * State is persisted and accessible in subsequent steps via {{ steps.stepName.key }}
+     * This allows custom steps to store data that can be referenced later in the workflow.
+     * 
+     * @example
+     * // In a setvar step:
+     * context.contextManager.setStepState({ x: 10, userName: "Alice" });
+     * 
+     * // In a later step, access via:
+     * // {{ steps.setVarStep.x }} or {{ steps.setVarStep.userName }}
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setStepState(state: Record<string, any>): Promise<void>;
+
+    /**
+     * Get the current persistent state for this step
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getStepState(): Record<string, any> | undefined;
   };
 
   /**
@@ -144,5 +165,42 @@ export interface StepTypeDefinition {
    * If not specified, uses workflow-level or default timeout
    */
   timeout?: string;
+
+  /**
+   * Optional documentation/help configuration for the UI
+   * This controls what users see when hovering over the step in the editor
+   */
+  documentation?: {
+    /**
+     * Short summary shown in hover (one line)
+     * @example "Define variables accessible throughout the workflow"
+     */
+    summary?: string;
+
+    /**
+     * Detailed description with usage examples (markdown supported)
+     * @example "This step allows you to set variables that can be accessed in subsequent steps via `{{ steps.stepName.variableName }}`"
+     */
+    details?: string;
+
+    /**
+     * External documentation URL
+     * @example "https://docs.example.com/custom-steps/setvar"
+     */
+    url?: string;
+
+    /**
+     * Usage examples in YAML format
+     * @example
+     * ```yaml
+     * - name: myStep
+     *   type: setvar
+     *   with:
+     *     variables:
+     *       x: 10
+     * ```
+     */
+    examples?: string[];
+  };
 }
 

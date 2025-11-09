@@ -14,7 +14,11 @@ import type { StepTypeDefinition } from '@kbn/workflows';
  * Set Variable Step
  *
  * This step type allows users to define variables that can be accessed
- * throughout the workflow using {{ variables.variableName }} syntax.
+ * throughout the workflow using {{ steps.stepName.variableName }} syntax.
+ *
+ * Variables are stored in the step's state, making them accessible to all
+ * subsequent steps in the workflow without requiring any changes to the
+ * core workflow engine.
  *
  * Example usage in workflow YAML:
  * ```yaml
@@ -28,19 +32,16 @@ import type { StepTypeDefinition } from '@kbn/workflows';
  *         isActive: true
  *
  *   - name: useVariable
- *     type: http
+ *     type: console
  *     with:
- *       url: "https://api.example.com/user"
- *       body:
- *         count: "{{ variables.x }}"
- *         name: "{{ variables.userName }}"
+ *       message: "Count: {{ steps.setVarStep.x }}, User: {{ steps.setVarStep.userName }}"
  * ```
  */
 export const setvarStepDefinition: StepTypeDefinition = {
   id: 'setvar',
   title: 'Set Variable',
   description:
-    'Define variables that can be accessed throughout the workflow via {{ variables.variableName }}',
+    'Define variables that can be accessed throughout the workflow via {{ steps.stepName.variableName }}',
 
   // Input schema: accepts a record of variable names to values
   inputSchema: z.object({
@@ -53,18 +54,39 @@ export const setvarStepDefinition: StepTypeDefinition = {
     variablesSet: z.array(z.string()),
   }),
 
+  // Documentation for UI hover
+  documentation: {
+    summary: 'Store values in step state for use throughout the workflow',
+    details:
+      'Variables are stored in the step\'s persistent state and can be accessed in subsequent steps using `{{ steps.stepName.variableName }}` syntax.',
+    examples: [
+      `- name: setVarStep
+  type: setvar
+  with:
+    variables:
+      x: 10
+      userName: "Alice"
+      isActive: true
+
+- name: useVariable
+  type: console
+  with:
+    message: "User {{ steps.setVarStep.userName }} has count {{ steps.setVarStep.x }}"`,
+    ],
+  },
+
   // Handler function that sets the variables
   handler: async (context) => {
     try {
       const { variables } = context.input;
 
-      // Set each variable in the workflow context
-      const variableNames: string[] = [];
-      for (const [key, value] of Object.entries(variables)) {
-        context.contextManager.setVariable(key, value);
-        variableNames.push(key);
-        context.logger.debug(`Set variable: ${key}`, { value });
-      }
+      // Store variables in step state so they can be accessed via {{ steps.stepName.key }}
+      await context.contextManager.setStepState(variables);
+
+      const variableNames = Object.keys(variables);
+      context.logger.debug(`Set ${variableNames.length} variable(s)`, {
+        variables: variableNames,
+      });
 
       context.logger.info(`Successfully set ${variableNames.length} variable(s)`, {
         variables: variableNames,
