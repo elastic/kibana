@@ -39,6 +39,7 @@ import type {
   SetFormState,
   WhereBlockFormState,
   ConvertFormState,
+  DropFormState,
 } from './types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
@@ -132,6 +133,11 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
   where: ALWAYS_CONDITION,
 });
 
+const defaultDropProcessorFormState = (): DropFormState => ({
+  action: 'drop_document',
+  where: ALWAYS_CONDITION,
+});
+
 const defaultGrokProcessorFormState: (
   sampleDocs: FlattenRecord[],
   formStateDependencies: FormStateDependencies
@@ -177,6 +183,7 @@ const defaultProcessorFormStateByType: Record<
   convert: defaultConvertProcessorFormState,
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
+  drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   set: defaultSetProcessorFormState,
