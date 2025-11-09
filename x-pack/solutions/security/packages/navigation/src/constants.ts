@@ -23,6 +23,7 @@ export enum LinkCategoryType {
  * since they are mixed together in the navigationTree.
  */
 export enum SecurityGroupName {
+  alertDetections = 'securityGroup:alertDetections',
   rules = 'securityGroup:rules',
   explore = 'securityGroup:explore',
   investigations = 'securityGroup:investigations',
@@ -31,3 +32,6 @@ export enum SecurityGroupName {
   machineLearning = 'securityGroup:machineLearning',
   launchpad = 'securityGroup:launchpad',
 }
+
+/** Feature flag for the alerts and attacks alignment feature */
+export const ATTACKS_ALERTS_ALIGNMENT_ENABLED = 'securitySolution.attacksAlertsAlignment' as const;

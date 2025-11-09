@@ -98,6 +98,8 @@ export const AI_VALUE_PATH = `${REPORTS_PATH}/ai_value` as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
+export const ATTACKS_PATH = '/attacks' as const;
+export const ALERT_DETECTIONS = '/alert_detections' as const;
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
@@ -184,6 +186,9 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 
 /** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
+
+/** Feature flag for the alerts and attacks alignment feature */
+export const ATTACKS_ALERTS_ALIGNMENT_ENABLED = 'securitySolution.attacksAlertsAlignment' as const;
 
 /** Feature flag for the default AI connector setting */
 export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
