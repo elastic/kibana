@@ -13,6 +13,7 @@ import type YAML from 'yaml';
 import { isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
+import { getPathAtOffset } from '../../../../common/lib/yaml';
 import {
   getScalarValueAtPosition,
   isDynamicValue,
