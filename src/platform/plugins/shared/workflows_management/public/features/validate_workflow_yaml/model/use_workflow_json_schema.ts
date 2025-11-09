@@ -15,6 +15,7 @@ import { useMemo } from 'react';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import { useRegisteredStepTypes } from '../../../entities/registered_steps/model/use_registered_step_types';
 
 const WorkflowSchemaUriStrict = 'file:///workflow-schema.json';
 const WorkflowSchemaUriStrictWithDynamicConnectors =
@@ -39,6 +40,7 @@ export const useWorkflowJsonSchema = ({
   loose = false,
 }: UseWorkflowJsonSchemaOptions = {}): UseWorkflowJsonSchemaResult => {
   const connectorsData = useAvailableConnectors();
+  const registeredStepTypesData = useRegisteredStepTypes();
 
   // TODO: download from server instead of generating on client
 
@@ -47,14 +49,20 @@ export const useWorkflowJsonSchema = ({
   return useMemo(() => {
     try {
       let uri = loose ? WorkflowSchemaUriLoose : WorkflowSchemaUriStrict;
-      if (connectorsData?.connectorTypes) {
+      if (connectorsData?.connectorTypes || registeredStepTypesData?.stepTypes) {
         uri = loose
           ? WorkflowSchemaUriLooseWithDynamicConnectors
           : WorkflowSchemaUriStrictWithDynamicConnectors;
       }
       const zodSchema = loose
-        ? getWorkflowZodSchemaLoose(connectorsData?.connectorTypes ?? {})
-        : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
+        ? getWorkflowZodSchemaLoose(
+            connectorsData?.connectorTypes ?? {},
+            registeredStepTypesData?.stepTypes ?? []
+          )
+        : getWorkflowZodSchema(
+            connectorsData?.connectorTypes ?? {},
+            registeredStepTypesData?.stepTypes ?? []
+          ); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
       // Post-process to improve validation messages and add display names for connectors
@@ -71,7 +79,7 @@ export const useWorkflowJsonSchema = ({
         uri: null,
       };
     }
-  }, [connectorsData, loose]);
+  }, [connectorsData, registeredStepTypesData, loose]);
 };
 
 /**

@@ -19,7 +19,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  EsWorkflowExecution,
+  StepTypeDefinition,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
@@ -29,6 +33,7 @@ import { resumeWorkflow, runWorkflow } from './execution_functions';
 import { LogsRepository } from './repositories/logs_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { StepTypeRegistry } from './step_type_registry';
 import type {
   ExecuteWorkflowStepResponse,
   WorkflowsExecutionEnginePluginSetup,
@@ -57,12 +62,14 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private readonly stepTypeRegistry: StepTypeRegistry;
   private setupDependencies?: SetupDependencies;
   private initializePromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
+    this.stepTypeRegistry = new StepTypeRegistry(this.logger);
   }
 
   public setup(
@@ -118,6 +125,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest: fakeRequest!,
                 dependencies,
+                stepTypeRegistry: this.stepTypeRegistry,
               });
             },
             cancel: async () => {
@@ -167,6 +175,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest: fakeRequest!,
                 dependencies,
+                stepTypeRegistry: this.stepTypeRegistry,
               });
             },
             cancel: async () => {
@@ -177,7 +186,11 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
 
-    return {};
+    return {
+      registerStepType: (definition: StepTypeDefinition) => {
+        this.stepTypeRegistry.register(definition);
+      },
+    };
   }
 
   public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
@@ -244,6 +257,7 @@ export class WorkflowsExecutionEnginePlugin
           config: this.config,
           fakeRequest: request, // will be undefined if not available
           dependencies,
+          stepTypeRegistry: this.stepTypeRegistry,
         });
       } else {
         // Normal manual execution - schedule a task
@@ -379,6 +393,9 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflow,
       executeWorkflowStep,
       cancelWorkflowExecution,
+      getRegisteredStepTypes: () => {
+        return this.stepTypeRegistry.getAllMetadata();
+      },
     };
   }
 

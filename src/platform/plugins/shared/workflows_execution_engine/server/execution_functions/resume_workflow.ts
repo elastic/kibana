@@ -15,6 +15,7 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { StepTypeRegistry } from '../step_type_registry';
 import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
@@ -34,6 +35,7 @@ export async function resumeWorkflow({
   logger,
   config,
   fakeRequest,
+  stepTypeRegistry,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -49,6 +51,7 @@ export async function resumeWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
+  stepTypeRegistry: StepTypeRegistry;
 }): Promise<void> {
   const {
     workflowRuntime,
@@ -73,6 +76,7 @@ export async function resumeWorkflow({
     logsRepository,
     coreStart,
     dependencies,
+    stepTypeRegistry,
     fakeRequest // Provided by Task Manager's first-class API key support
   );
   await workflowRuntime.resume();

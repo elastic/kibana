@@ -30,6 +30,7 @@ export interface AutocompleteContext {
   path: (string | number)[];
   absoluteOffset: number;
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
+  registeredStepTypes: Array<{ id: string; title: string; description?: string }> | null;
   isInLiquidBlock: boolean;
   isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;

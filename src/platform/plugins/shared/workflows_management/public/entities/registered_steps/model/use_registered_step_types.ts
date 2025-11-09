@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Base handler
-export { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
+import { useSelector } from 'react-redux';
+import { selectRegisteredStepTypes } from '../../workflows/store/workflow_detail/selectors';
 
-// Specific connector handlers
-export { ElasticsearchMonacoConnectorHandler } from './elasticsearch_connector_handler';
-export { KibanaMonacoConnectorHandler } from './kibana_monaco_connector_handler';
-export { RegisteredStepMonacoHandler } from './registered_step_monaco_handler';
-export { GenericMonacoConnectorHandler } from './generic_monaco_connector_handler';
+export const useRegisteredStepTypes = () => useSelector(selectRegisteredStepTypes);

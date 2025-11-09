@@ -431,14 +431,17 @@ export const WorkflowConstsSchema = z.record(
 
 const StepSchema = z.lazy(() =>
   z.union([
+    // Control flow steps
     ForEachStepSchema,
     IfStepSchema,
+    ParallelStepSchema,
+    MergeStepSchema,
+    // Built-in action steps
     WaitStepSchema,
     HttpStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
-    ParallelStepSchema,
-    MergeStepSchema,
+    // Connector steps
     BaseConnectorStepSchema,
   ])
 );
@@ -470,9 +473,9 @@ export const WorkflowSchema = z.object({
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
-// Schema is required for autocomplete because WorkflowGraph and WorkflowDefinition use it to build the autocomplete context.
-// The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
-export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
+// Lightweight schema for autocomplete - gracefully handles parsing errors
+// to enable building workflow graphs even with partial/invalid YAML
+export const WorkflowSchemaForAutocomplete: z.ZodType<any> = WorkflowSchema.partial()
   .extend({
     triggers: z
       .array(z.object({ type: z.string().catch('') }).passthrough())
@@ -550,6 +553,7 @@ export const WorkflowContextSchema = z.object({
     )
     .optional(),
   consts: z.record(z.string(), z.any()).optional(),
+  variables: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;

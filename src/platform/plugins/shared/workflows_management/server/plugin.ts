@@ -187,7 +187,7 @@ export class WorkflowsPlugin
     this.spaces = plugins.spaces?.spacesService;
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces!);
+    defineRoutes(router, this.api, this.logger, this.spaces!, getWorkflowExecutionEngine);
 
     return {
       management: this.api,

@@ -24,13 +24,20 @@ import { generateConnectorSnippet } from '../../../snippets/generate_connector_s
 // Cache for connector type suggestions to avoid recalculating on every keystroke
 const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
 
+export interface RegisteredStepTypeInfo {
+  id: string;
+  title: string;
+  description?: string;
+}
+
 /**
  * Get connector type suggestions with better grouping and filtering
  */
 export function getConnectorTypeSuggestions(
   typePrefix: string,
   range: monaco.IRange,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  registeredStepTypes?: RegisteredStepTypeInfo[]
 ): monaco.languages.CompletionItem[] {
   // Create a cache key based on the type prefix and context
   const cacheKey = `${typePrefix}|${JSON.stringify(range)}`;
@@ -133,6 +140,36 @@ export function getConnectorTypeSuggestions(
         preselect: false,
       });
     });
+
+    // Add registered custom step types if provided
+    if (registeredStepTypes && registeredStepTypes.length > 0) {
+      const matchingCustomSteps = registeredStepTypes.filter((stepType) =>
+        stepType.id.toLowerCase().includes(typePrefix.toLowerCase())
+      );
+
+      matchingCustomSteps.forEach((stepType) => {
+        const snippetText = `\${1:${stepType.id}}\n  type: ${stepType.id}\n  with:\n    \${2:# Configure step parameters}`;
+        const extendedRange = {
+          startLineNumber: range.startLineNumber,
+          endLineNumber: range.endLineNumber,
+          startColumn: range.startColumn,
+          endColumn: Math.max(range.endColumn, 1000),
+        };
+
+        suggestions.push({
+          label: stepType.id,
+          kind: monaco.languages.CompletionItemKind.Module,
+          insertText: snippetText,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          range: extendedRange,
+          documentation: stepType.description || 'Custom registered step',
+          filterText: stepType.id,
+          sortText: `!!${stepType.id}`, // Sort after built-in but before connectors
+          detail: 'Custom workflow step',
+          preselect: false,
+        });
+      });
+    }
 
     // Then add matching connectors
     const matchingConnectors = allConnectors
@@ -249,4 +286,12 @@ function getBuiltInStepTypesFromSchema(): Array<{
 
   builtInStepTypesCache = stepTypes;
   return stepTypes;
+}
+
+/**
+ * Clear the autocomplete suggestions cache
+ * Should be called when registered step types change
+ */
+export function clearConnectorTypeSuggestionsCache(): void {
+  connectorTypeSuggestionsCache.clear();
 }

@@ -41,6 +41,8 @@ export class WorkflowContextManager {
   private fakeRequest?: KibanaRequest;
   private coreStart?: CoreStart;
   private dependencies: ContextDependencies;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private variables: Record<string, any> = {};
 
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
@@ -215,7 +217,33 @@ export class WorkflowContextManager {
       consts: workflowExecution.workflowDefinition.consts || {},
       event: workflowExecution.context?.event,
       inputs: workflowExecution.context?.inputs,
+      variables: this.variables, // Add variables to context
     };
+  }
+
+  /**
+   * Set a variable in the workflow context.
+   * Variables are accessible throughout the workflow via {{ variables.variableName }}
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setVariable(key: string, value: any): void {
+    this.variables[key] = value;
+  }
+
+  /**
+   * Get a variable from the workflow context.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public getVariable(key: string): any {
+    return this.variables[key];
+  }
+
+  /**
+   * Get all variables from the workflow context.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public getAllVariables(): Record<string, any> {
+    return { ...this.variables };
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {

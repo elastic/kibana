@@ -35,6 +35,7 @@ import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import { useRegisteredStepTypes } from '../../../entities/registered_steps/model/use_registered_step_types';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
 import {
@@ -62,6 +63,7 @@ import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
   KibanaMonacoConnectorHandler,
+  RegisteredStepMonacoHandler,
 } from '../lib/monaco_connectors';
 import {
   registerMonacoConnectorHandler,
@@ -204,6 +206,7 @@ export const WorkflowYAMLEditor = ({
 
   // Data
   const connectorsData = useAvailableConnectors();
+  const registeredStepTypesData = useRegisteredStepTypes();
 
   useEffect(() => {
     if (connectorsData?.connectorTypes) {
@@ -338,6 +341,15 @@ export const WorkflowYAMLEditor = ({
         // Monaco YAML hover is now disabled via configuration (hover: false)
         // The unified hover provider will handle all hover content including validation errors
 
+        // Register custom step types handler BEFORE generic handler (higher priority)
+        if (registeredStepTypesData?.stepTypes && registeredStepTypesData.stepTypes.length > 0) {
+          const registeredStepHandler = new RegisteredStepMonacoHandler(
+            registeredStepTypesData.stepTypes
+          );
+          registerMonacoConnectorHandler(registeredStepHandler);
+        }
+
+        // Register generic handler last (lowest priority, catches everything else)
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 

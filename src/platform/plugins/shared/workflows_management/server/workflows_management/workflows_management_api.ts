@@ -133,10 +133,13 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     // Parse and update the YAML to change the name
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const registeredStepTypes = workflowsExecutionEngine.getRegisteredStepTypes();
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
       { loose: false },
       spaceId,
-      request
+      request,
+      registeredStepTypes
     );
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
     if (parsedYaml.error) {
@@ -203,10 +206,13 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const registeredStepTypes = workflowsExecutionEngine.getRegisteredStepTypes();
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
       { loose: false },
       spaceId,
-      request
+      request,
+      registeredStepTypes
     );
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, zodSchema);
 
@@ -233,7 +239,6 @@ export class WorkflowsManagementApi {
       spaceId,
       inputs: manualInputs,
     };
-    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
         id: 'test-workflow',
@@ -256,9 +261,16 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const registeredStepTypes = workflowsExecutionEngine.getRegisteredStepTypes();
     const parsedYaml = parseWorkflowYamlToJSON(
       workflowYaml,
-      await this.workflowsService.getWorkflowZodSchema({ loose: false }, spaceId, request)
+      await this.workflowsService.getWorkflowZodSchema(
+        { loose: false },
+        spaceId,
+        request,
+        registeredStepTypes
+      )
     );
 
     if (parsedYaml.error) {
@@ -266,7 +278,6 @@ export class WorkflowsManagementApi {
     }
 
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
-    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
       {
         id: 'test-workflow',
@@ -385,10 +396,13 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<JsonSchema7Type> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const registeredStepTypes = workflowsExecutionEngine.getRegisteredStepTypes();
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
       { loose: false },
       spaceId,
-      request
+      request,
+      registeredStepTypes
     );
     return getJsonSchemaFromYamlSchema(zodSchema);
   }

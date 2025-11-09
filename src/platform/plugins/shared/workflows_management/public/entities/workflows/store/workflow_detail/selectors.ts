@@ -88,4 +88,8 @@ export const selectIsTestModalOpen = createSelector(
 );
 
 export const selectConnectors = createSelector(selectDetailState, (detail) => detail.connectors);
+export const selectRegisteredStepTypes = createSelector(
+  selectDetailState,
+  (detail) => detail.registeredStepTypes
+);
 export const selectSchema = createSelector(selectDetailState, (detail) => detail.schema);

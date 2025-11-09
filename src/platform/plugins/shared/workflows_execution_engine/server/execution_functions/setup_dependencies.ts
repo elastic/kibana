@@ -45,6 +45,7 @@ export async function setupDependencies(
   logsRepository: LogsRepository,
   coreStart: CoreStart, // CoreStart for creating esClientAsUser
   dependencies: ContextDependencies,
+  stepTypeRegistry: import('../step_type_registry').StepTypeRegistry,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fakeRequest?: any // KibanaRequest from task manager
 ) {
@@ -136,7 +137,8 @@ export async function setupDependencies(
     workflowTaskManager,
     urlValidator,
     workflowExecutionGraph,
-    stepExecutionRuntimeFactory
+    stepExecutionRuntimeFactory,
+    stepTypeRegistry
   );
 
   return {

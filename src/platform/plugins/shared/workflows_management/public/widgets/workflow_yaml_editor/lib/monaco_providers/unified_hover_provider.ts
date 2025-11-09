@@ -15,6 +15,8 @@ import { monaco } from '@kbn/monaco';
 import type { HoverContext, ProviderConfig } from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset } from '../../../../../common/lib/yaml';
+import { getWorkflowsStore } from '../../../../entities/workflows/store/store';
+import { selectRegisteredStepTypes } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 
 /**
@@ -206,6 +208,23 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       //   stepContext: context.stepContext,
       //   parameterContext: context.parameterContext,
       // });
+
+      // Check if this is a registered custom step type - if so, skip connector hover
+      // (Registered custom steps are not connectors, they're custom step implementations)
+      try {
+        const store = getWorkflowsStore();
+        const registeredStepTypes = selectRegisteredStepTypes(store.getState());
+        const isRegisteredCustomStep = registeredStepTypes?.stepTypes?.some(
+          (stepType) => stepType.id === context.connectorType
+        );
+        if (isRegisteredCustomStep) {
+          // console.log('UnifiedHoverProvider: Skipping hover for registered custom step:', context.connectorType);
+          return null;
+        }
+      } catch (error) {
+        // If we can't access the store, continue with connector hover as fallback
+        // console.warn('UnifiedHoverProvider: Could not check registered step types', error);
+      }
 
       // Find appropriate Monaco handler
       const handler = getMonacoConnectorHandler(context.connectorType);

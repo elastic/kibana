@@ -16,6 +16,10 @@ import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowZodSchemaType } from '../../../../common/schema';
 import type { ConnectorsResponse } from '../../connectors/model/types';
 
+export interface RegisteredStepTypesResponse {
+  stepTypes: Array<{ id: string; title: string; description?: string }>;
+}
+
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
@@ -33,6 +37,8 @@ export interface WorkflowDetailState {
   isTestModalOpen: boolean;
   /** The connectors data */
   connectors?: ConnectorsResponse;
+  /** The registered custom step types */
+  registeredStepTypes?: RegisteredStepTypesResponse;
   /** The schema for the workflow */
   schema: WorkflowZodSchemaType;
 }

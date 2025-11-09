@@ -31,6 +31,7 @@ import {
   isExitWorkflowTimeoutZone,
 } from '@kbn/workflows/graph';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import { CustomStepImpl } from './custom_step_impl';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
@@ -62,6 +63,7 @@ import {
 import { WaitStepImpl } from './wait_step/wait_step';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { UrlValidator } from '../lib/url_validator';
+import type { StepTypeRegistry } from '../step_type_registry';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -76,13 +78,31 @@ export class NodesFactory {
     private workflowTaskManager: WorkflowTaskManager,
     private urlValidator: UrlValidator,
     private workflowGraph: WorkflowGraph,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    private stepTypeRegistry: StepTypeRegistry
   ) {}
 
   // eslint-disable-next-line complexity
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
+
+    // Check if this is a custom registered step type
+    if (node.stepType && this.stepTypeRegistry.has(node.stepType)) {
+      const stepDefinition = this.stepTypeRegistry.get(node.stepType)!;
+      this.workflowLogger.logInfo(`Creating custom step: ${node.stepType}`, {
+        event: { action: 'custom-step-creation', outcome: 'success' },
+        tags: ['step-factory', 'custom-step'],
+      });
+      return new CustomStepImpl(
+        node as AtomicGraphNode,
+        stepDefinition,
+        stepExecutionRuntime,
+        this.connectorExecutor,
+        this.workflowRuntime,
+        stepLogger
+      );
+    }
 
     // Handle elasticsearch.* and kibana.* actions
     if (node.stepType && node.stepType.startsWith('elasticsearch.')) {
