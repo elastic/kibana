@@ -79,8 +79,28 @@ describe('TaskManagerService Integration Tests', () => {
       await automaticImportService.initialize(mockSecurity, coreStart.savedObjects);
       savedObjectService = (automaticImportService as any).savedObjectService;
 
-      // Initialize TaskManagerService
-      taskManagerService = new TaskManagerService(kbnRoot.logger.get(), taskManagerSetup);
+      // Initialize TaskManagerService to test the actual run task functionality
+      // TODO: Replace the run task
+      taskManagerService = new TaskManagerService(kbnRoot.logger.get(), taskManagerSetup, {
+        mockAIProcess: async ({ integrationId, dataStreamId, samples }) => {
+          // Simulate AI workflow processing (long-running task)
+          await new Promise((resolve) => setTimeout(resolve, 8000)); // 8 seconds processing
+
+          // Update datastream status to completed (like real AI workflow would)
+          const dataStream = await savedObjectService.getDataStream(dataStreamId);
+          const currentVersion = dataStream.attributes.metadata?.version || '0.0.0';
+          await savedObjectService.updateDataStream(
+            {
+              ...dataStream.attributes,
+              job_info: {
+                ...dataStream.attributes.job_info,
+                status: TASK_STATUSES.completed,
+              },
+            },
+            currentVersion
+          );
+        },
+      });
       taskManagerService.initialize(taskManagerStart);
     } catch (error) {
       if (kbnRoot) {
@@ -248,5 +268,167 @@ describe('TaskManagerService Integration Tests', () => {
       await savedObjectService.deleteIntegration(integrationSavedObject.id);
       await expect(savedObjectService.getDataStream(dataStreamSavedObject.id)).rejects.toThrow();
     });
+
+    it('should schedule and track 5 concurrent AI workflow tasks', async () => {
+      const mockUser = {
+        username: 'test-user-concurrent',
+        roles: ['admin'],
+        profile_uid: 'test-profile-uid-concurrent',
+      } as any;
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const numConcurrentTasks = 5;
+      const createdObjects: Array<{
+        integration: any;
+        dataStream: any;
+        taskId: string;
+      }> = [];
+
+      try {
+        // Schedule 5 concurrent AI workflow tasks
+        for (let i = 0; i < numConcurrentTasks; i++) {
+          const integrationId = `concurrent-int-${i}`;
+          const dataStreamId = `concurrent-ds-${i}`;
+
+          // Create integration
+          const integrationData = {
+            integration_id: integrationId,
+            data_stream_count: 1,
+            created_by: mockUser.username,
+            status: TASK_STATUSES.pending,
+            metadata: {
+              title: `Concurrent AI Workflow Test ${i}`,
+              description: `Testing concurrent execution capability`,
+              created_at: new Date().toISOString(),
+              version: '1.0.0',
+            },
+          };
+
+          const integration = await savedObjectService.insertIntegration(
+            mockRequest,
+            integrationData
+          );
+
+          // Schedule AI workflow task
+          const taskParams = {
+            integrationId: integration.id,
+            dataStreamId,
+          };
+
+          const scheduledTask = await taskManagerService.scheduleAIWorkflowTask(taskParams);
+
+          // Create data stream with task reference
+          const dataStreamData = {
+            integration_id: integration.id,
+            data_stream_id: dataStreamId,
+            created_by: mockUser.username,
+            job_info: {
+              job_id: scheduledTask.taskId,
+              job_type: 'ai-workflow',
+              status: TASK_STATUSES.pending,
+            },
+            metadata: {
+              sample_count: 0,
+              created_at: new Date().toISOString(),
+              version: '0.0.0',
+              input_type: INPUT_TYPES.filestream,
+            },
+            result: {},
+          };
+
+          const dataStream = await savedObjectService.insertDataStream(mockRequest, dataStreamData);
+
+          createdObjects.push({
+            integration,
+            dataStream,
+            taskId: scheduledTask.taskId,
+          });
+        }
+
+        // Verify all 5 tasks were scheduled successfully
+        expect(createdObjects).toHaveLength(numConcurrentTasks);
+
+        const taskIds = createdObjects.map((obj) => obj.taskId);
+        const uniqueTaskIds = new Set(taskIds);
+        expect(uniqueTaskIds.size).toBe(numConcurrentTasks);
+
+        // Trigger all tasks to run concurrently using Promise.all
+        // Note: We don't check initial "pending" status because TaskManager may auto-claim tasks
+        await Promise.all(
+          createdObjects.map(async (obj) => {
+            try {
+              await taskManagerStart.runSoon(obj.taskId);
+            } catch (error) {
+              // Ignore errors if task is already running or has completed (not found)
+              if (
+                !error.message.includes('currently running') &&
+                !error.message.includes('not found')
+              ) {
+                throw error;
+              }
+            }
+          })
+        );
+
+        // Poll TaskManager to verify multiple tasks are running concurrently
+        // Check every second for up to 10 seconds
+        let maxConcurrentRunning = 0;
+        const pollInterval = 1000; // 1 second
+        const maxPollTime = 10000; // 10 seconds
+        const pollStartTime = Date.now();
+
+        while (Date.now() - pollStartTime < maxPollTime) {
+          await new Promise((resolve) => setTimeout(resolve, pollInterval));
+
+          // Count how many tasks are currently in "running" status
+          const statuses = await Promise.all(
+            createdObjects.map(async (obj) => {
+              try {
+                const task = await taskManagerStart.get(obj.taskId);
+                return task.status;
+              } catch {
+                return null;
+              }
+            })
+          );
+
+          const runningCount = statuses.filter((status) => status === 'running').length;
+          maxConcurrentRunning = Math.max(maxConcurrentRunning, runningCount);
+
+          // If we've seen at least 2 tasks running simultaneously, we've proven concurrency
+          if (maxConcurrentRunning >= 2) {
+            break;
+          }
+        }
+
+        // Verify that at least 2 tasks ran concurrently (proves parallel execution)
+        expect(maxConcurrentRunning).toBeGreaterThanOrEqual(2);
+
+        // Wait for all tasks to complete (they run for 8 seconds each)
+        // The task runner will automatically update datastream status to 'completed' when done
+        await new Promise((resolve) => setTimeout(resolve, 12000)); // Wait 12 seconds
+
+        // Verify all datastreams now show completed status (updated by the tasks themselves)
+        for (const obj of createdObjects) {
+          const retrievedDataStream = await savedObjectService.getDataStream(obj.dataStream.id);
+          expect(retrievedDataStream.attributes.job_info.status).toBe(TASK_STATUSES.completed);
+          expect(retrievedDataStream.attributes.job_info.job_id).toBe(obj.taskId);
+          expect(retrievedDataStream.attributes.integration_id).toBe(obj.integration.id);
+        }
+
+        // This test verifies that TaskManager's cost-based concurrency model allows
+        // multiple AI workflows to execute concurrently. With TaskCost.Normal (2)
+        // and capacity=50, the system can handle up to ~25 concurrent workflows.
+        // Concurrency is verified by polling TaskManager and confirming multiple tasks
+        // are in "running" status simultaneously (not sequential execution).
+        // Tasks automatically update their datastream job_info.status to completed when done.
+      } finally {
+        // Clean up all created objects (data streams first, then integrations)
+        for (const obj of createdObjects) {
+          await savedObjectService.deleteDataStream(obj.dataStream.id).catch(() => {});
+          await savedObjectService.deleteIntegration(obj.integration.id).catch(() => {});
+        }
+      }
+    }, 120000);
   });
 });

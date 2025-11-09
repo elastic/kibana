@@ -14,7 +14,7 @@ export const TASK_STATUSES = {
   completed: 'completed',
   failed: 'failed',
   cancelled: 'cancelled',
-};
+} as const;
 
 export const INPUT_TYPES = {
   awsCloudwatch: 'aws-cloudwatch',
@@ -31,4 +31,4 @@ export const INPUT_TYPES = {
   kafka: 'kafka',
   tcp: 'tcp',
   udp: 'udp',
-};
+} as const;
