@@ -116,8 +116,15 @@ const buildDslFilter = (
         ? []
         : [
             {
-              exists: {
-                field: 'target.entity.id',
+              bool: {
+                should: [
+                  { exists: { field: 'user.target.entity.id' } },
+                  { exists: { field: 'host.target.entity.id' } },
+                  { exists: { field: 'service.target.entity.id' } },
+                  { exists: { field: 'entity.target.id' } },
+                  { exists: { field: 'target.entity.id' } },
+                ],
+                minimum_should_match: 1,
               },
             },
           ]),
@@ -175,18 +182,50 @@ const buildEsqlQuery = ({
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+| WHERE event.action IS NOT NULL AND (
+    user.entity.id IS NOT NULL OR
+    host.entity.id IS NOT NULL OR
+    service.entity.id IS NOT NULL OR
+    entity.id IS NOT NULL OR
+    actor.entity.id IS NOT NULL
+  )
+| EVAL actorEntityId = COALESCE(
+    user.entity.id,
+    host.entity.id,
+    service.entity.id,
+    entity.id,
+    actor.entity.id
+  )
+| EVAL targetEntityId = COALESCE(
+    user.target.entity.id,
+    host.target.entity.id,
+    service.target.entity.id,
+    entity.target.id,
+    target.entity.id
+  )
+| EVAL detectedActorEntityType = CASE(
+    user.entity.id IS NOT NULL, "user",
+    host.entity.id IS NOT NULL, "host",
+    service.entity.id IS NOT NULL, "service",
+    ""
+  )
+| EVAL detectedTargetEntityType = CASE(
+    user.target.entity.id IS NOT NULL, "user",
+    host.target.entity.id IS NOT NULL, "host",
+    service.target.entity.id IS NOT NULL, "service",
+    ""
+  )
 | MV_EXPAND actor.entity.id
 | MV_EXPAND target.entity.id
 ${
   isEnrichPolicyExists
     ? `
-| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
+| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
+| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
 
 // Construct actor and target entities data
 | EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actor.entity.id, "\\"",
+    "\\"id\\":\\"", actorEntityId, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", COALESCE(actorEntityName, ""), "\\"",
@@ -200,7 +239,7 @@ ${
     "}",
   "}")
 | EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", COALESCE(target.entity.id, ""), "\\"",
+    "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", COALESCE(targetEntityName, ""), "\\"",
@@ -274,23 +313,23 @@ ${
   // actor attributes
   actorNodeId = CASE(
     // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
-    MV_COUNT(VALUES(actor.entity.id)) == 1, TO_STRING(VALUES(actor.entity.id)),
-    MD5(MV_CONCAT(MV_SORT(VALUES(actor.entity.id)), ","))
+    MV_COUNT(VALUES(actorEntityId)) == 1, TO_STRING(VALUES(actorEntityId)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(actorEntityId)), ","))
   ),
-  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
+  actorIdsCount = COUNT_DISTINCT(actorEntityId),
   actorEntityName = VALUES(actorEntityName),
   actorHostIp = VALUES(actorHostIp),
   actorsDocData = VALUES(actorDocData),
   // target attributes
   targetNodeId = CASE(
     // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
-    COUNT_DISTINCT(target.entity.id) == 0, null,
+    COUNT_DISTINCT(targetEntityId) == 0, null,
     CASE(
-      MV_COUNT(VALUES(target.entity.id)) == 1, TO_STRING(VALUES(target.entity.id)),
-      MD5(MV_CONCAT(MV_SORT(VALUES(target.entity.id)), ","))
+      MV_COUNT(VALUES(targetEntityId)) == 1, TO_STRING(VALUES(targetEntityId)),
+      MD5(MV_CONCAT(MV_SORT(VALUES(targetEntityId)), ","))
     )
   ),
-  targetIdsCount = COUNT_DISTINCT(target.entity.id),
+  targetIdsCount = COUNT_DISTINCT(targetEntityId),
   targetEntityName = VALUES(targetEntityName),
   targetHostIp = VALUES(targetHostIp),
   targetsDocData = VALUES(targetDocData)

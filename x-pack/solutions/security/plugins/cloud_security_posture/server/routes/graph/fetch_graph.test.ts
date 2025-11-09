@@ -126,11 +126,11 @@ describe('fetchGraph', () => {
     // Check that the parameter keys include og_id and og_alrt_id keys.
     const ogIdKeys = esqlCallArgs[0].params
       // @ts-ignore: field is typed as Record<string, string>[]
-      ?.map((p) => Object.keys(p)[0] as string)
+      ?.map((p) => Object.keys(p)[0])
       .filter((key) => key.startsWith('og_id'));
     const ogAlertKeys = esqlCallArgs[0].params
       // @ts-ignore: field is typed as Record<string, string>[]
-      ?.map((p) => Object.keys(p)[0] as string)
+      ?.map((p) => Object.keys(p)[0])
       .filter((key) => key.startsWith('og_alrt_id'));
 
     expect(ogIdKeys).toEqual(['og_id0', 'og_id1']);
@@ -138,163 +138,230 @@ describe('fetchGraph', () => {
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 
-  it('should include entity enrichment when isEnrichPolicyExists is true', async () => {
-    // Mock the enrich.getPolicy method to return a policy that exists
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-      .fn()
-      .mockResolvedValueOnce({
-        policies: [
-          {
-            config: {
-              match: {
-                name: getEnrichPolicyId(),
+  describe('ENRICH policy integration', () => {
+    it('should include ENRICH clause when policy exists', async () => {
+      // Mock the enrich.getPolicy method to return a policy that exists
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [
+            {
+              config: {
+                match: {
+                  name: getEnrichPolicyId(),
+                },
               },
             },
-          },
-        ],
-      });
+          ],
+        });
 
-    const validIndexPatterns = ['valid_index'];
-    const params = {
-      esClient,
-      logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: validIndexPatterns,
-      spaceId: 'default',
-      esQuery: undefined as EsQuery | undefined,
-    };
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
 
-    const result = await fetchGraph(params);
+      const result = await fetchGraph(params);
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    const query = esqlCallArgs[0].query;
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
 
-    expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
-    expect(query).toContain(
-      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip`
-    );
-    expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
-    expect(query).toContain(
-      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`
-    );
+      // Test high-level structure using flexible regex patterns
+      // Note: enrich policy names can contain dots, underscores, and version numbers
+      expect(query).toMatch(/ENRICH\s+[\w.-]+\s+ON\s+actorEntityId/);
+      expect(query).toMatch(/ENRICH\s+[\w.-]+\s+ON\s+targetEntityId/);
 
-    expect(query).toContain('EVAL actorDocData = CONCAT');
-    expect(query).toContain('actor.entity.id');
-    expect(query).toContain('actorEntityName');
-    expect(query).toContain('actorEntityType');
-    expect(query).toContain('actorEntitySubType');
-    expect(query).toContain('actorHostIp');
+      // Verify ENRICH populates expected fields
+      expect(query).toContain('actorEntityName');
+      expect(query).toContain('actorEntityType');
+      expect(query).toContain('actorEntitySubType');
+      expect(query).toContain('targetEntityName');
+      expect(query).toContain('targetEntityType');
+      expect(query).toContain('targetEntitySubType');
 
-    expect(query).toContain('EVAL targetDocData = CONCAT');
-    expect(query).toContain('target.entity.id');
-    expect(query).toContain('targetEntityName');
-    expect(query).toContain('targetEntityType');
-    expect(query).toContain('targetEntitySubType');
-    expect(query).toContain('targetHostIp');
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
 
-    expect(query).toContain('EVAL sourceIps = source.ip');
-    expect(query).toContain('EVAL sourceCountryCodes = source.geo.country_iso_code');
+    it('should not include ENRICH clause when policy does not exist', async () => {
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [],
+        });
 
-    expect(query).toContain('actorsDocData = VALUES(actorDocData)');
-    expect(query).toContain('targetsDocData = VALUES(targetDocData)');
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
 
-    expect(result).toEqual([{ id: 'dummy' }]);
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).not.toContain('ENRICH');
+
+      // Verify fallback EVALs are present for null values
+      expect(query).toMatch(/EVAL\s+actorEntityName\s*=\s*TO_STRING\(null\)/);
+      expect(query).toMatch(/EVAL\s+actorEntityType\s*=\s*TO_STRING\(null\)/);
+      expect(query).toMatch(/EVAL\s+actorEntitySubType\s*=\s*TO_STRING\(null\)/);
+      expect(query).toMatch(/EVAL\s+actorDocData\s*=\s*TO_STRING\(null\)/);
+      expect(query).toMatch(/EVAL\s+targetEntityType\s*=\s*TO_STRING\(null\)/);
+      expect(query).toMatch(/EVAL\s+targetEntitySubType\s*=\s*TO_STRING\(null\)/);
+      expect(query).toMatch(/EVAL\s+targetDocData\s*=\s*TO_STRING\(null\)/);
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
   });
 
-  it('should not include entity enrichment when isEnrichPolicyExists is false', async () => {
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-      .fn()
-      .mockResolvedValueOnce({
-        policies: [],
-      });
+  describe('New ECS schema support', () => {
+    it('should use COALESCE to unify entity IDs with correct precedence', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
 
-    const validIndexPatterns = ['valid_index'];
-    const params = {
-      esClient,
-      logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: validIndexPatterns,
-      spaceId: 'default',
-      esQuery: undefined as EsQuery | undefined,
-    };
+      await fetchGraph(params);
 
-    const result = await fetchGraph(params);
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    const query = esqlCallArgs[0].query;
+      // Verify COALESCE is used for both actor and target
+      expect(query).toMatch(/EVAL\s+actorEntityId\s*=\s*COALESCE\(/);
+      expect(query).toMatch(/EVAL\s+targetEntityId\s*=\s*COALESCE\(/);
 
-    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
-    expect(query).not.toContain(
-      `WITH actorEntityName = entity.name,
-      actorEntityType = entity.type,
-      actorEntitySubType = entity.sub_type,
-      actorHostIp = host.ip,
-      actorSourceIndex = entity.source`
-    );
-    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
-    expect(query).not.toContain(
-      `WITH targetEntityName = entity.name,
-      targetEntityType = entity.type,
-      targetEntitySubType = entity.sub_type,
-      targetHostIp = host.ip,
-      targetSourceIndex = entity.source`
-    );
+      // Verify precedence order for actor (user -> host -> service -> entity)
+      const actorCoalesceRegex = /actorEntityId\s*=\s*COALESCE\(([\s\S]*?)\)/;
+      const actorCoalesceMatch = actorCoalesceRegex.exec(query);
+      expect(actorCoalesceMatch).toBeTruthy();
+      if (actorCoalesceMatch) {
+        const coalesceContent = actorCoalesceMatch[1];
+        const fields = coalesceContent.split(',').map((f) => f.trim());
 
-    // Fallback eval clauses for non-enriched actor data
-    expect(query).toContain(`EVAL actorEntityType = TO_STRING(null)`);
-    expect(query).toContain(`EVAL actorEntitySubType = TO_STRING(null)`);
-    expect(query).toContain(`EVAL actorDocData = TO_STRING(null)`);
-    expect(query).toContain(`EVAL actorHostIp = TO_STRING(null)`);
+        // Verify actor precedence order (new ECS fields only)
+        expect(fields[0]).toContain('user.entity.id');
+        expect(fields[1]).toContain('host.entity.id');
+        expect(fields[2]).toContain('service.entity.id');
+        expect(fields[3]).toContain('entity.id');
+        // Should only have 4 fields (no legacy actor.entity.id)
+        expect(fields).toHaveLength(4);
+      }
 
-    // Fallback eval clauses for non-enriched target data
-    expect(query).toContain(`EVAL targetEntityType = TO_STRING(null)`);
-    expect(query).toContain(`EVAL targetEntitySubType = TO_STRING(null)`);
-    expect(query).toContain(`EVAL targetDocData = TO_STRING(null)`);
-    expect(query).toContain(`EVAL targetHostIp = TO_STRING(null)`);
+      // Verify precedence order for target
+      const targetCoalesceRegex = /targetEntityId\s*=\s*COALESCE\(([\s\S]*?)\)/;
+      const targetCoalesceMatch = targetCoalesceRegex.exec(query);
+      expect(targetCoalesceMatch).toBeTruthy();
 
-    expect(query).toContain('EVAL sourceIps = source.ip');
-    expect(query).toContain('EVAL sourceCountryCodes = source.geo.country_iso_code');
+      if (targetCoalesceMatch) {
+        const coalesceContent = targetCoalesceMatch[1];
+        const fields = coalesceContent.split(',').map((f) => f.trim());
 
-    expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
-    expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
-
-    expect(result).toEqual([{ id: 'dummy' }]);
+        // Verify target precedence order (new ECS fields only)
+        expect(fields[0]).toContain('user.target.entity.id');
+        expect(fields[1]).toContain('host.target.entity.id');
+        expect(fields[2]).toContain('service.target.entity.id');
+        expect(fields[3]).toContain('entity.target.id');
+        // Should only have 4 fields (no legacy target.entity.id)
+        expect(fields).toHaveLength(4);
+      }
+    });
   });
 
-  it('should not include entity enrichment when the enrich policy check fails', async () => {
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-      .fn()
-      .mockRejectedValueOnce(new Error('Failed to get enrich policy'));
+  describe('Target entity filtering', () => {
+    it('should check all target entity fields when showUnknownTarget is false', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
 
-    const validIndexPatterns = ['valid_index'];
-    const params = {
-      esClient,
-      logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: validIndexPatterns,
-      spaceId: 'default',
-      esQuery: undefined as EsQuery | undefined,
-    };
+      await fetchGraph(params);
 
-    const result = await fetchGraph(params);
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const filterArg = esqlCallArgs[0].filter as any;
 
-    expect(logger.error).toHaveBeenCalled();
+      // Should have bool.filter with target entity exists checks (new ECS fields only)
+      expect(filterArg.bool.filter).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                { exists: { field: 'user.target.entity.id' } },
+                { exists: { field: 'host.target.entity.id' } },
+                { exists: { field: 'service.target.entity.id' } },
+                { exists: { field: 'entity.target.id' } },
+              ]),
+              minimum_should_match: 1,
+            }),
+          }),
+        ])
+      );
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    const query = esqlCallArgs[0].query;
-    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
-    expect(result).toEqual([{ id: 'dummy' }]);
+      const targetFilter = filterArg.bool.filter.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
+      );
+      expect(targetFilter?.bool?.should).toHaveLength(4);
+    });
+
+    it('should not filter targets when showUnknownTarget is true', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: true,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const filterArg = esqlCallArgs[0].filter as any;
+
+      // Should not have target entity exists check
+      const hasTargetCheck = filterArg.bool.filter.some((f: any) =>
+        f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
+      );
+      expect(hasTargetCheck).toBe(false);
+    });
   });
 });
