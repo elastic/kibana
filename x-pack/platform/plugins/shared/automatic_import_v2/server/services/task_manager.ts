@@ -11,7 +11,8 @@ import type {
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import { MAX_ATTEMPTS_AI_WORKFLOWS, MAX_CONCURRENT_AI_WORKFLOWS } from './constants';
+import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { MAX_ATTEMPTS_AI_WORKFLOWS } from './constants';
 import { TASK_STATUSES } from './saved_objects/constants';
 
 const TASK_TYPE = 'automaticImport-aiWorkflow';
@@ -30,7 +31,8 @@ export class TaskManagerService {
         description: 'Executes long-running AI agent workflows for automatic import',
         timeout: '30m',
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
-        maxConcurrency: MAX_CONCURRENT_AI_WORKFLOWS,
+        cost: TaskCost.Normal,
+        priority: TaskPriority.Normal,
         createTaskRunner: ({ taskInstance }) => ({
           run: async () => this.runTask(taskInstance),
           cancel: async () => this.cancelTask(taskInstance),
@@ -56,10 +58,12 @@ export class TaskManagerService {
       throw new Error('TaskManager not initialized');
     }
 
-    // for each task, we don't want an error if task with same id already exists.
-    // therefore we use ensureScheduled with some id that ensures a pattern based on datastream and integration id
+    // Generate a task ID that is always under 50 characters
+    // Pattern: ai-task-{integrationId}-{dataStreamId}
+    const taskId = `ai-task-${params.integrationId}-${params.dataStreamId}`;
+
     const taskInstance = await this.taskManager.ensureScheduled({
-      id: `automaticImport-aiWorkflow-${params.integrationId}-${params.dataStreamId}`,
+      id: taskId,
       taskType: TASK_TYPE,
       params,
       state: { task_status: TASK_STATUSES.pending },
