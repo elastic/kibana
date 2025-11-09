@@ -357,7 +357,7 @@ export class StreamsApp {
   }
 
   async expectPreviewPanelVisible() {
-    await expect(this.page.getByTestId('routingPreviewPanelWithResults')).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppRoutingPreviewPanelWithResults')).toBeVisible();
   }
 
   async saveRuleOrder() {
