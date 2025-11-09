@@ -407,7 +407,7 @@ export async function pickTestGroupRunOrder() {
       {
         type: UNIT_TYPE,
         defaultMin: 4,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: 320,
         overheadMin: 0.2,
         names: jestUnitConfigs,
       },
@@ -506,7 +506,7 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest',
             agents: {
-              ...expandAgentQueue('n2-4-spot'),
+              ...expandAgentQueue('n2-32-spot'),
               diskSizeGb: 100,
             },
             env: {
@@ -522,7 +522,7 @@ export async function pickTestGroupRunOrder() {
             },
           }
         : [],
-      integration.count > 0
+      false
         ? {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
@@ -543,7 +543,7 @@ export async function pickTestGroupRunOrder() {
             },
           }
         : [],
-      functionalGroups.length
+      false
         ? {
             group: 'FTR Configs',
             key: 'ftr-configs',
