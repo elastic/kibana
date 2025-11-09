@@ -116,8 +116,15 @@ const buildDslFilter = (
         ? []
         : [
             {
-              exists: {
-                field: 'target.entity.id',
+              bool: {
+                should: [
+                  { exists: { field: 'user.target.entity.id' } },
+                  { exists: { field: 'host.target.entity.id' } },
+                  { exists: { field: 'service.target.entity.id' } },
+                  { exists: { field: 'entity.target.id' } },
+                  { exists: { field: 'target.entity.id' } },
+                ],
+                minimum_should_match: 1,
               },
             },
           ]),
@@ -175,16 +182,48 @@ const buildEsqlQuery = ({
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+| WHERE event.action IS NOT NULL AND (
+    user.entity.id IS NOT NULL OR
+    host.entity.id IS NOT NULL OR
+    service.entity.id IS NOT NULL OR
+    entity.id IS NOT NULL OR
+    actor.entity.id IS NOT NULL
+  )
+| EVAL actorEntityId = COALESCE(
+    user.entity.id,
+    host.entity.id,
+    service.entity.id,
+    entity.id,
+    actor.entity.id
+  )
+| EVAL targetEntityId = COALESCE(
+    user.target.entity.id,
+    host.target.entity.id,
+    service.target.entity.id,
+    entity.target.id,
+    target.entity.id
+  )
+| EVAL detectedActorEntityType = CASE(
+    user.entity.id IS NOT NULL, "user",
+    host.entity.id IS NOT NULL, "host",
+    service.entity.id IS NOT NULL, "service",
+    ""
+  )
+| EVAL detectedTargetEntityType = CASE(
+    user.target.entity.id IS NOT NULL, "user",
+    host.target.entity.id IS NOT NULL, "host",
+    service.target.entity.id IS NOT NULL, "service",
+    ""
+  )
 ${
   isEnrichPolicyExists
     ? `
-| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
+| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
+| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
 
 // Construct actor and target entities data
 | EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actor.entity.id, "\\"",
+    "\\"id\\":\\"", actorEntityId, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", actorEntityName, "\\"",
@@ -198,7 +237,7 @@ ${
     "}",
   "}")
 | EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", target.entity.id, "\\"",
+    "\\"id\\":\\"", targetEntityId, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", targetEntityName, "\\"",
@@ -266,26 +305,34 @@ ${
     CONCAT(actorEntityType, ":", actorEntitySubType),
     actorEntityType IS NOT NULL,
     actorEntityType,
-    actor.entity.id
+    detectedActorEntityType IS NOT NULL,
+    detectedActorEntityType,
+    actorEntityId
   )
 | EVAL targetEntityGroup = CASE(
     targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
     CONCAT(targetEntityType, ":", targetEntitySubType),
     targetEntityType IS NOT NULL,
     targetEntityType,
-    target.entity.id
+    detectedTargetEntityType IS NOT NULL,
+    detectedTargetEntityType,
+    targetEntityId
   )
 
-| EVAL actorLabel = CASE(actorEntitySubType IS NOT NULL, actorEntitySubType, actor.entity.id)
-| EVAL targetLabel = CASE(targetEntitySubType IS NOT NULL, targetEntitySubType, target.entity.id)
+| EVAL actorLabel = CASE(actorEntitySubType IS NOT NULL, actorEntitySubType, actorEntityId)
+| EVAL targetLabel = CASE(targetEntitySubType IS NOT NULL, targetEntitySubType, targetEntityId)
 | EVAL actorEntityType = CASE(
     actorEntityType IS NOT NULL,
     actorEntityType,
+    detectedActorEntityType IS NOT NULL,
+    detectedActorEntityType,
     ""
   )
 | EVAL targetEntityType = CASE(
     targetEntityType IS NOT NULL,
     targetEntityType,
+    detectedTargetEntityType IS NOT NULL,
+    detectedTargetEntityType,
     ""
   )
 | STATS badge = COUNT(*),
@@ -297,16 +344,16 @@ ${
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
   // actor attributes
   actorEntityGroup = VALUES(actorEntityGroup),
-  actorIds = VALUES(actor.entity.id),
-  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
+  actorIds = VALUES(actorEntityId),
+  actorIdsCount = COUNT_DISTINCT(actorEntityId),
   actorEntityType = VALUES(actorEntityType),
   actorLabel = VALUES(actorLabel),
   actorsDocData = VALUES(actorDocData),
   actorHostIp = VALUES(actorHostIp),
   // target attributes
   targetEntityGroup = VALUES(targetEntityGroup),
-  targetIds = VALUES(target.entity.id),
-  targetIdsCount = COUNT_DISTINCT(target.entity.id),
+  targetIds = VALUES(targetEntityId),
+  targetIdsCount = COUNT_DISTINCT(targetEntityId),
   targetEntityType = VALUES(targetEntityType),
   targetLabel = VALUES(targetLabel),
   targetsDocData = VALUES(targetDocData)
