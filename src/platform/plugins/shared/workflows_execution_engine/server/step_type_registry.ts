@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepTypeDefinition } from '@kbn/workflows';
 import type { Logger } from '@kbn/core/server';
+import type { StepTypeDefinition } from '@kbn/workflows';
 
 /**
  * Registry for custom workflow step types.
@@ -150,4 +150,3 @@ export class StepTypeRegistry {
     }
   }
 }
-

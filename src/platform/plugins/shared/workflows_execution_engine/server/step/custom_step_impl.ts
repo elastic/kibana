@@ -10,13 +10,13 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { StepTypeDefinition, StepHandlerContext } from '@kbn/workflows';
+import type { StepHandlerContext, StepTypeDefinition } from '@kbn/workflows';
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { BaseAtomicNodeImplementation, type RunStepResult } from './node_implementation';
+import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { ConnectorExecutor } from '../connector_executor';
 
 /**
  * Implementation for custom registered step types.
@@ -48,14 +48,13 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<any> {
    */
   public override async getInput(): Promise<any> {
     const configuration = this.node.configuration;
-    
+
     // Extract the 'with' property which contains the step inputs
     const withData = configuration.with || {};
 
     // Evaluate templates in the 'with' data
-    const evaluatedConfig = this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-      withData
-    );
+    const evaluatedConfig =
+      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
 
     // Validate input against the step's input schema
     try {
@@ -83,9 +82,8 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<any> {
             return this.stepExecutionRuntime.contextManager.getContext();
           },
           evaluateTemplate: async (template: string) => {
-            const result = this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-              template
-            );
+            const result =
+              this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(template);
             return result;
           },
           setVariable: (key: string, value: any) => {
@@ -114,7 +112,12 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<any> {
           error: (message: string, meta?: object) => {
             // logError expects (message, error?, additionalData?)
             // If meta contains an error property, pass it as the error parameter
-            const errorObj = meta && typeof meta === 'object' && 'error' in meta ? (meta.error instanceof Error ? meta.error : undefined) : undefined;
+            const errorObj =
+              meta && typeof meta === 'object' && 'error' in meta
+                ? meta.error instanceof Error
+                  ? meta.error
+                  : undefined
+                : undefined;
             this.workflowLogger.logError(message, errorObj, meta);
           },
         },
@@ -164,4 +167,3 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<any> {
     }
   }
 }
-

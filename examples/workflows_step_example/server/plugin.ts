@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type {
   WorkflowsStepExamplePluginSetup,
   WorkflowsStepExamplePluginSetupDeps,
@@ -82,4 +88,3 @@ export class WorkflowsStepExamplePlugin
     this.logger.debug('WorkflowsStepExample: Stop');
   }
 }
-

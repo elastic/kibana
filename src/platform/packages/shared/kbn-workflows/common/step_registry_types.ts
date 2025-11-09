@@ -51,11 +51,11 @@ export interface StepHandlerContext {
      * Set the persistent state for this step.
      * State is persisted and accessible in subsequent steps via {{ steps.stepName.key }}
      * This allows custom steps to store data that can be referenced later in the workflow.
-     * 
+     *
      * @example
      * // In a setvar step:
      * context.contextManager.setStepState({ x: 10, userName: "Alice" });
-     * 
+     *
      * // In a later step, access via:
      * // {{ steps.setVarStep.x }} or {{ steps.setVarStep.userName }}
      */
@@ -203,4 +203,3 @@ export interface StepTypeDefinition {
     examples?: string[];
   };
 }
-

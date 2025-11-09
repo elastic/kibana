@@ -49,7 +49,10 @@ function generateStepSchemaForRegisteredType(
 ) {
   return BaseStepSchema.extend({
     type: z.literal(registeredType.id),
-    with: z.record(z.string(), z.any()).optional().describe(registeredType.description || ''),
+    with: z
+      .record(z.string(), z.any())
+      .optional()
+      .describe(registeredType.description || ''),
     // Add common step properties
     if: z.string().optional(),
     foreach: z.string().optional(),

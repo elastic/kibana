@@ -15,10 +15,10 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { StepTypeRegistry } from '../step_type_registry';
 import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
-import type { StepTypeRegistry } from '../step_type_registry';
 
 export async function resumeWorkflow({
   workflowRunId,

@@ -15,4 +15,3 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { WorkflowsStepExamplePluginSetup, WorkflowsStepExamplePluginStart } from './types';
-

@@ -9,9 +9,9 @@
 
 import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import type { StepTypeDefinition } from '@kbn/workflows';
+import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import type { ActionContext, HoverContext } from '../monaco_providers/provider_interfaces';
 import type { ActionInfo } from '../monaco_providers/types';
-import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 
 /**
  * Handler for registered custom step types.
@@ -55,7 +55,7 @@ export class RegisteredStepMonacoHandler extends BaseMonacoConnectorHandler {
       // Title and Summary
       content.push(`**${stepDef.title}**`);
       content.push('');
-      
+
       // Summary/Description (use documentation.summary if available, otherwise use description)
       const summary = doc?.summary || stepDef.description;
       if (summary) {
@@ -71,9 +71,7 @@ export class RegisteredStepMonacoHandler extends BaseMonacoConnectorHandler {
 
       // Documentation URL
       if (doc?.url) {
-        content.push(
-          `📖 **[View Documentation](${doc.url})** - Opens in new tab`
-        );
+        content.push(`📖 **[View Documentation](${doc.url})** - Opens in new tab`);
         content.push('');
       }
 
@@ -140,4 +138,3 @@ export class RegisteredStepMonacoHandler extends BaseMonacoConnectorHandler {
     return actions;
   }
 }
-

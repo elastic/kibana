@@ -58,7 +58,7 @@ export const setvarStepDefinition: StepTypeDefinition = {
   documentation: {
     summary: 'Store values in step state for use throughout the workflow',
     details:
-      'Variables are stored in the step\'s persistent state and can be accessed in subsequent steps using `{{ steps.stepName.variableName }}` syntax.',
+      "Variables are stored in the step's persistent state and can be accessed in subsequent steps using `{{ steps.stepName.variableName }}` syntax.",
     examples: [
       `- name: setVarStep
   type: setvar
@@ -109,4 +109,3 @@ export const setvarStepDefinition: StepTypeDefinition = {
     }
   },
 };
-

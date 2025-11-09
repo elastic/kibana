@@ -17,7 +17,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { WorkflowExecutionEngineModel, StepTypeDefinition } from '@kbn/workflows';
+import type { StepTypeDefinition, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;

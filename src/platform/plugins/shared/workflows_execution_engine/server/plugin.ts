@@ -33,6 +33,7 @@ import { resumeWorkflow, runWorkflow } from './execution_functions';
 import { LogsRepository } from './repositories/logs_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { StepTypeRegistry } from './step_type_registry';
 import type {
   ExecuteWorkflowStepResponse,
   WorkflowsExecutionEnginePluginSetup,
@@ -47,7 +48,6 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { createIndexes } from '../common';
-import { StepTypeRegistry } from './step_type_registry';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 

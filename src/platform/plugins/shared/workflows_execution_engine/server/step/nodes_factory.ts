@@ -31,6 +31,7 @@ import {
   isExitWorkflowTimeoutZone,
 } from '@kbn/workflows/graph';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import { CustomStepImpl } from './custom_step_impl';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
@@ -62,13 +63,12 @@ import {
 import { WaitStepImpl } from './wait_step/wait_step';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { UrlValidator } from '../lib/url_validator';
+import type { StepTypeRegistry } from '../step_type_registry';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-import type { StepTypeRegistry } from '../step_type_registry';
-import { CustomStepImpl } from './custom_step_impl';
 
 export class NodesFactory {
   constructor(
