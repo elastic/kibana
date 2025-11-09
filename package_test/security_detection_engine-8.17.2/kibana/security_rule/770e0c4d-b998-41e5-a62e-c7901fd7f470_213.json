@@ -1,0 +1,156 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies native Windows host and network enumeration commands spawned by the Windows Management Instrumentation Provider Service (WMIPrvSE).",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.forwarded*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Enumeration Command Spawned via WMIPrvSE",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and process.command_line != null and \n  process.name:\n  (\n    \"arp.exe\", \"dsquery.exe\", \"dsget.exe\", \"gpresult.exe\", \"hostname.exe\", \"ipconfig.exe\", \"nbtstat.exe\",\n    \"net.exe\", \"net1.exe\", \"netsh.exe\", \"netstat.exe\", \"nltest.exe\", \"ping.exe\", \"qprocess.exe\", \"quser.exe\",\n    \"qwinsta.exe\", \"reg.exe\", \"sc.exe\", \"systeminfo.exe\", \"tasklist.exe\", \"tracert.exe\", \"whoami.exe\"\n  ) and\n  process.parent.name:\"wmiprvse.exe\" and \n  not (\n    process.name : \"sc.exe\" and process.args : \"RemoteRegistry\" and process.args : \"start=\" and \n    process.args : (\"demand\", \"disabled\")\n  ) and\n  not process.args : \"tenable_mw_scan\"\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "770e0c4d-b998-41e5-a62e-c7901fd7f470",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: System",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1047",
+            "name": "Windows Management Instrumentation",
+            "reference": "https://attack.mitre.org/techniques/T1047/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1016",
+            "name": "System Network Configuration Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1016/",
+            "subtechnique": [
+              {
+                "id": "T1016.001",
+                "name": "Internet Connection Discovery",
+                "reference": "https://attack.mitre.org/techniques/T1016/001/"
+              }
+            ]
+          },
+          {
+            "id": "T1018",
+            "name": "Remote System Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1018/"
+          },
+          {
+            "id": "T1057",
+            "name": "Process Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1057/"
+          },
+          {
+            "id": "T1087",
+            "name": "Account Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1087/"
+          },
+          {
+            "id": "T1518",
+            "name": "Software Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1518/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 213
+  },
+  "id": "770e0c4d-b998-41e5-a62e-c7901fd7f470_213",
+  "type": "security-rule"
+}

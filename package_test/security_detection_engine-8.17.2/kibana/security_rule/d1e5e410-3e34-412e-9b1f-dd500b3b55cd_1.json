@@ -1,0 +1,126 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies a successful console login activity by an EC2 instance profile using an assumed role. This is uncommon behavior and could indicate an attacker using compromised credentials to further exploit an environment. An EC2 instance assumes a role using their EC2 ID as the session name. This rule looks for the pattern \"i-\" which is the beginning pattern for assumed role sessions started by an EC2 instance and a successful `ConsoleLogin` or `GetSigninToken` API call.",
+    "false_positives": [
+      "This is very uncommon behavior and should result in minimal false positives, ensure validity of the triggered event and include exceptions where necessary."
+    ],
+    "from": "now-6m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "AWS EC2 Instance Console Login via Assumed Role",
+    "query": "any where event.dataset == \"aws.cloudtrail\"\n   and event.provider == \"signin.amazonaws.com\"\n   and event.action in (\"ConsoleLogin\", \"GetSigninToken\") \n   and event.outcome == \"success\"\n   and aws.cloudtrail.user_identity.type == \"AssumedRole\"\n   and stringContains (user.id, \":i-\")\n",
+    "references": [
+      "https://redcanary.com/blog/aws-sts/",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_enable-console-custom-url.html/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.user_identity.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "d1e5e410-3e34-412e-9b1f-dd500b3b55cd",
+    "severity": "high",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS EC2",
+      "Data Source: AWS STS",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Lateral Movement",
+      "Tactic: Credential Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1021",
+            "name": "Remote Services",
+            "reference": "https://attack.mitre.org/techniques/T1021/",
+            "subtechnique": [
+              {
+                "id": "T1021.007",
+                "name": "Cloud Services",
+                "reference": "https://attack.mitre.org/techniques/T1021/007/"
+              }
+            ]
+          },
+          {
+            "id": "T1550",
+            "name": "Use Alternate Authentication Material",
+            "reference": "https://attack.mitre.org/techniques/T1550/",
+            "subtechnique": [
+              {
+                "id": "T1550.001",
+                "name": "Application Access Token",
+                "reference": "https://attack.mitre.org/techniques/T1550/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": []
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "d1e5e410-3e34-412e-9b1f-dd500b3b55cd_1",
+  "type": "security-rule"
+}

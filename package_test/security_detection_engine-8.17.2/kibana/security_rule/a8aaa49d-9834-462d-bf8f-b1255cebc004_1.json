@@ -1,0 +1,104 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule detects successful authentications via PAM grantors that are not commonly used. This could indicate an attacker is attempting to escalate privileges or maintain persistence on the system by modifying the default PAM configuration.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "auditbeat-*",
+      "logs-auditd_manager.auditd-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Authentication via Unusual PAM Grantor",
+    "new_terms_fields": [
+      "auditd.data.grantors",
+      "agent.id"
+    ],
+    "query": "event.category:authentication and host.os.type:linux and event.action:authenticated and event.outcome:success and\nauditd.data.grantors:(* and not (pam_rootok or *pam_cap* or *pam_permit*))\n",
+    "related_integrations": [
+      {
+        "package": "auditd_manager",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "auditd.data.grantors",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "a8aaa49d-9834-462d-bf8f-b1255cebc004",
+    "setup": "## Setup\nThis rule requires the use of the `auditd_manager` integration. `Auditd_manager` is a tool designed to simplify and enhance the management of the audit subsystem in Linux systems. It provides a user-friendly interface and automation capabilities for configuring and monitoring system auditing through the auditd daemon. With `auditd_manager`, administrators can easily define audit rules, track system events, and generate comprehensive audit reports, improving overall security and compliance in the system. The following steps should be executed in order to install and deploy `auditd_manager` on a Linux system.\n```\nKibana -->\nManagement -->\nIntegrations -->\nAuditd Manager -->\nAdd Auditd Manager\n```\n`Auditd_manager` subscribes to the kernel and receives events as they occur without any additional configuration. However, if more advanced configuration is required to detect specific behavior, audit rules can be added to the integration in either the \"audit rules\" configuration box or the \"auditd rule files\" box by specifying a file to read the audit rules from.\nFor this detection rule to trigger, no additional configuration is required.\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Tactic: Persistence",
+      "Data Source: Auditd Manager"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1543",
+            "name": "Create or Modify System Process",
+            "reference": "https://attack.mitre.org/techniques/T1543/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1556",
+            "name": "Modify Authentication Process",
+            "reference": "https://attack.mitre.org/techniques/T1556/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "a8aaa49d-9834-462d-bf8f-b1255cebc004_1",
+  "type": "security-rule"
+}

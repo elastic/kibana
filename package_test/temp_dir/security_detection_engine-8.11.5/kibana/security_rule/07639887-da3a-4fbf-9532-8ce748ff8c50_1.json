@@ -1,0 +1,77 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects setting modifications for protected branches of a GitHub repository. Branch protection rules can be used to enforce certain workflows or requirements before a contributor can push changes to a branch in your repository. Changes to these protected branch settings should be investigated and verified as legitimate activity. Unauthorized changes could be used to lower your organization's security posture and leave you exposed for future attacks.",
+        "from": "now-9m",
+        "index": [
+            "logs-github.audit-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "GitHub Protected Branch Settings Changed",
+        "query": "configuration where event.dataset == \"github.audit\" \n  and github.category == \"protected_branch\" and event.type == \"change\" \n",
+        "related_integrations": [
+            {
+                "package": "github",
+                "version": "^1.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "github.category",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "07639887-da3a-4fbf-9532-8ce748ff8c50",
+        "severity": "medium",
+        "tags": [
+            "Domain: Cloud",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Github"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1562",
+                        "name": "Impair Defenses",
+                        "reference": "https://attack.mitre.org/techniques/T1562/",
+                        "subtechnique": [
+                            {
+                                "id": "T1562.001",
+                                "name": "Disable or Modify Tools",
+                                "reference": "https://attack.mitre.org/techniques/T1562/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "07639887-da3a-4fbf-9532-8ce748ff8c50_1",
+    "type": "security-rule"
+}

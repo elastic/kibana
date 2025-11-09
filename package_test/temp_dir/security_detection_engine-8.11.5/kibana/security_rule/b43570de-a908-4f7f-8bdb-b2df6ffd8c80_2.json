@@ -1,0 +1,102 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies attempts to disable/modify the code signing policy through system native utilities. Code signing provides authenticity on a program, and grants the user with the ability to check whether the program has been tampered with. By allowing the execution of unsigned or self-signed code, threat actors can craft and execute malicious code.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Code Signing Policy Modification Through Built-in tools",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n(\n  /* Windows */\n  ((process.name: \"bcdedit.exe\" or process.pe.original_file_name == \"bcdedit.exe\") and   process.args: (\"-set\", \"/set\") and \n  process.args: (\"TESTSIGNING\", \"nointegritychecks\", \"loadoptions\", \"DISABLE_INTEGRITY_CHECKS\")) or\n  \n  /* MacOS */\n  (process.executable: \"/usr/bin/csrutil\" and process.args: \"disable\")\n)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "b43570de-a908-4f7f-8bdb-b2df6ffd8c80",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "macOS",
+            "Threat Detection",
+            "Defense Evasion",
+            "Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1553",
+                        "name": "Subvert Trust Controls",
+                        "reference": "https://attack.mitre.org/techniques/T1553/",
+                        "subtechnique": [
+                            {
+                                "id": "T1553.006",
+                                "name": "Code Signing Policy Modification",
+                                "reference": "https://attack.mitre.org/techniques/T1553/006/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "b43570de-a908-4f7f-8bdb-b2df6ffd8c80_2",
+    "type": "security-rule"
+}

@@ -1,0 +1,100 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "A suspicious WerFault child process was detected, which may indicate an attempt to run via the SilentProcessExit registry key manipulation. Verify process details such as command line, network connections and file writes.",
+        "false_positives": [
+            "Custom Windows error reporting debugger or applications restarted by WerFault after a crash."
+        ],
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious WerFault Child Process",
+        "note": "",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n\n  process.parent.name : \"WerFault.exe\" and \n  \n  /* args -s and -t used to execute a process via SilentProcessExit mechanism */\n  (process.parent.args : \"-s\" and process.parent.args : \"-t\" and process.parent.args : \"-c\") and \n  \n  not process.executable : (\"?:\\\\Windows\\\\SysWOW64\\\\Initcrypt.exe\", \"?:\\\\Program Files (x86)\\\\Heimdal\\\\Heimdal.Guard.exe\")\n",
+        "references": [
+            "https://www.hexacorn.com/blog/2019/09/19/silentprocessexit-quick-look-under-the-hood/",
+            "https://www.hexacorn.com/blog/2019/09/20/werfault-command-line-switches-v0-1/",
+            "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Persistence/persistence_SilentProcessExit_ImageHijack_sysmon_13_1.evtx",
+            "https://blog.menasec.net/2021/01/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "ac5012b8-8da8-440b-aaaf-aedafdea2dff",
+        "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Defense Evasion",
+            "Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 105
+    },
+    "id": "ac5012b8-8da8-440b-aaaf-aedafdea2dff_105",
+    "type": "security-rule"
+}
