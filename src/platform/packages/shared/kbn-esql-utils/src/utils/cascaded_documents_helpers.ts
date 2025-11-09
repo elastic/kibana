@@ -267,12 +267,6 @@ export const constructCascadeQuery = ({
     throw new Error('Query is malformed');
   }
 
-  const dataSourceCommand = getESQLQueryDataSourceCommand(EditorESQLQuery);
-
-  if (!dataSourceCommand) {
-    throw new Error('Query does not have a data source');
-  }
-
   const summarizedStatsCommand = getStatsCommandToOperateOn(EditorESQLQuery);
 
   if (!summarizedStatsCommand) {
@@ -304,16 +298,35 @@ export const constructCascadeQuery = ({
       // when a column name is not assigned, one is created automatically that includes backticks
       (groupDeclarationCommandSummary ?? summarizedStatsCommand).grouping[`\`${pathSegment}\``];
 
-    const isOperable = groupValue && nodePathMap[pathSegment];
+    // check if we have a value for the path segment in the node path map to match on
+    if (!(groupValue && nodePathMap[pathSegment])) {
+      throw new Error(`The "${pathSegment}" field is not operable`);
+    }
 
-    if (isOperable && isColumn(groupValue.definition)) {
-      return handleStatsByColumnLeafOperation(dataSourceCommand, {
+    const operatingStatsCommandIndex = EditorESQLQuery.ast.commands.findIndex(
+      (cmd) => cmd.text === summarizedStatsCommand.command.text
+    );
+
+    // create a new query to contain the cascade operation query
+    const cascadeOperationQuery = EsqlQuery.fromSrc('');
+
+    // include all the existing commands up to the operating stats command in the cascade operation query
+    EditorESQLQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd) => {
+      mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
+    });
+
+    if (isColumn(groupValue.definition)) {
+      return handleStatsByColumnLeafOperation(cascadeOperationQuery, {
         [pathSegment]: nodePathMap[pathSegment],
       });
-    } else if (isOperable && isFunctionExpression(groupValue.definition)) {
+    } else if (isFunctionExpression(groupValue.definition)) {
       switch (groupValue.definition.name) {
         case 'categorize': {
-          return handleStatsByCategorizeLeafOperation(dataSourceCommand, groupValue, nodePathMap);
+          return handleStatsByCategorizeLeafOperation(
+            cascadeOperationQuery,
+            groupValue,
+            nodePathMap
+          );
         }
         default: {
           throw new Error(
@@ -332,15 +345,10 @@ export const constructCascadeQuery = ({
  * helps us with fetching leaf node data for stats operation in the data cascade experience.
  */
 function handleStatsByColumnLeafOperation(
-  dataSourceCommand: ESQLCommand<'from' | 'ts'>,
+  cascadeOperationQuery: EsqlQuery,
   columnInterpolationRecord: Record<string, string>
 ): AggregateQuery {
-  // create new query which we will modify to contain the valid query for the cascade experience
-  const cascadeOperationQuery = EsqlQuery.fromSrc('');
-
-  // set data source for the new query
-  mutate.generic.commands.append(cascadeOperationQuery.ast, dataSourceCommand);
-
+  // build a where command with match expressions for the selected column
   const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
     return Builder.command({
       name: 'where',
@@ -370,16 +378,10 @@ function handleStatsByColumnLeafOperation(
  * Handles the stats command for a leaf operation that contains a categorize function by modifying the query and adding necessary commands.
  */
 function handleStatsByCategorizeLeafOperation(
-  dataSourceCommand: ESQLCommand<'from' | 'ts'>,
+  cascadeOperationQuery: EsqlQuery,
   categorizeCommand: StatsFieldSummary,
   nodePathMap: Record<string, string>
 ): AggregateQuery {
-  // create new query which we will modify to contain the valid query for the cascade experience
-  const cascadeOperationQuery = EsqlQuery.fromSrc('');
-
-  // set data source for the new query
-  mutate.generic.commands.append(cascadeOperationQuery.ast, dataSourceCommand);
-
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
     name: 'where',
@@ -444,22 +446,8 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]):
     throw new Error(`Query does not include a "stats" command`);
   }
 
-  let statsCommandToOperateOn: StatsCommand | null = null;
-  let statsCommandToOperateOnGrouping: StatsCommandSummary['grouping'] | null = null;
-
-  // accounting for the possibility of multiple stats commands in the query,
-  // we always want to operate on the last stats command that has valid grouping options
-  for (let i = statsCommands.length - 1; i >= 0; i--) {
-    ({ grouping: statsCommandToOperateOnGrouping } = mutate.commands.stats.summarizeCommand(
-      EditorESQLQuery,
-      statsCommands[i]
-    ));
-
-    if (statsCommandToOperateOnGrouping && Object.keys(statsCommandToOperateOnGrouping).length) {
-      statsCommandToOperateOn = statsCommands[i] as StatsCommand;
-      break;
-    }
-  }
+  const { grouping: statsCommandToOperateOnGrouping, command: statsCommandToOperateOn } =
+    getStatsCommandToOperateOn(EditorESQLQuery) ?? {};
 
   if (!statsCommandToOperateOn) {
     throw new Error(`No valid "stats" command was found in the query`);
@@ -520,7 +508,7 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]):
 
   // Get the position of the original stats command
   const statsCommandIndex = EditorESQLQuery.ast.commands.findIndex(
-    (cmd) => cmd === statsCommandToOperateOn
+    (cmd) => cmd.text === statsCommandToOperateOn.text
   );
 
   // remove stats command
