@@ -21,7 +21,6 @@ import {
 import { useWorkflowExecution } from '@kbn/workflows-ui';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import {
   selectWorkflowDefinition,
   selectWorkflowGraph,
