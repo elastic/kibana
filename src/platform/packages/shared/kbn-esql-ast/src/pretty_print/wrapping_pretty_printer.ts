@@ -404,10 +404,7 @@ export class WrappingPrettyPrinter {
           suffix: isLastArg ? '' : needsComma ? ',' : '',
         });
         const indentation = arg.indented ? '' : indent;
-        let formattedArg = arg.txt;
-        if (args[i].type === 'query') {
-          formattedArg = `(\n${this.opts.tab.repeat(2)}${formattedArg}\n${indentation})`;
-        }
+        const formattedArg = arg.txt;
         const separator = isFirstArg ? '' : '\n';
         txt += separator + indentation + formattedArg;
         lines++;
@@ -680,8 +677,37 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitParensExpression', (ctx, inp: Input): Output => {
-      const child = ctx.visitChild(inp);
-      const formatted = `(${child.txt.trimStart()})`;
+      // Check if parent is FORK command
+      const parent = ctx.parent?.node;
+      const isForkBranch =
+        !Array.isArray(parent) &&
+        parent?.type === 'command' &&
+        parent.name === 'fork' &&
+        ctx.node.child?.type === 'query';
+
+      let formatted: string;
+      if (isForkBranch) {
+        const baseIndent = inp.indent + this.opts.tab;
+        const childText = this.visitor.visitQuery(ctx.node.child as ESQLAstQueryExpression, {
+          indent: baseIndent,
+          remaining: this.opts.wrap - baseIndent.length,
+        });
+
+        const lines = childText.txt.split('\n');
+
+        for (let i = 0; i < lines.length; i++) {
+          if (i === 0) {
+            lines[i] = '  ' + lines[i];
+          } else if (lines[i].startsWith('  ')) {
+            lines[i] = lines[i].slice(2);
+          }
+        }
+
+        formatted = `(\n${lines.join('\n')}\n${inp.indent})`;
+      } else {
+        const child = ctx.visitChild(inp);
+        formatted = `(${child.txt.trimStart()})`;
+      }
 
       return this.decorateWithComments(inp, ctx.node, formatted);
     })

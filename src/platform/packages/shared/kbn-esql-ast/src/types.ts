@@ -18,7 +18,8 @@ export type ESQLAstCommand =
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
   | ESQLAstCompletionCommand
-  | ESQLAstFuseCommand;
+  | ESQLAstFuseCommand
+  | ESQLAstForkCommand;
 
 export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
 
@@ -142,6 +143,10 @@ export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   fields: ESQLAstField[];
   targetField?: ESQLColumn;
   inferenceId: ESQLLiteral | undefined;
+}
+
+export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
+  args: ESQLForkParens[];
 }
 
 /**
@@ -383,6 +388,10 @@ export interface ESQLSource extends ESQLAstBaseItem {
 export interface ESQLParens extends ESQLAstBaseItem {
   type: 'parens';
   child: ESQLAstExpression;
+}
+
+export interface ESQLForkParens extends ESQLParens {
+  child: ESQLAstQueryExpression;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {

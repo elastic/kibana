@@ -213,8 +213,10 @@ export function getAstContext(
   queryContainsSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
 
   Walker.walk(queryAst, {
-    visitParens: (node) => {
-      if (isSubQuery(node) && within(offset, node)) {
+    visitParens: (node, parent) => {
+      const isForkBranch = parent?.type === 'command' && parent.name === 'fork';
+
+      if (isSubQuery(node) && within(offset, node) && !isForkBranch) {
         innermostSubquery = node.child;
       }
     },
