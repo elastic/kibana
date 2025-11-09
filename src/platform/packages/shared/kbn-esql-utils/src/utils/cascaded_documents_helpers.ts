@@ -286,7 +286,7 @@ export const constructCascadeQuery = ({
 
     let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
 
-    if (groupDeclarationCommandIndex !== -1) {
+    if (groupDeclarationCommandIndex >= 0) {
       groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
         EditorESQLQuery,
         groupDeclarationCommandIndex
@@ -299,7 +299,7 @@ export const constructCascadeQuery = ({
       (groupDeclarationCommandSummary ?? summarizedStatsCommand).grouping[`\`${pathSegment}\``];
 
     // check if we have a value for the path segment in the node path map to match on
-    if (!(groupValue && nodePathMap[pathSegment])) {
+    if (!(groupValue && nodePathMap[pathSegment] !== undefined)) {
       throw new Error(`The "${pathSegment}" field is not operable`);
     }
 
@@ -307,11 +307,19 @@ export const constructCascadeQuery = ({
       (cmd) => cmd.text === summarizedStatsCommand.command.text
     );
 
-    // create a new query to contain the cascade operation query
+    // create a new query to populate with the cascade operation query
     const cascadeOperationQuery = EsqlQuery.fromSrc('');
 
     // include all the existing commands up to the operating stats command in the cascade operation query
-    EditorESQLQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd) => {
+    EditorESQLQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd, idx, arr) => {
+      if (idx === arr.length - 1 && cmd.name === 'stats') {
+        // however, when the last command is a stats command, we don't want to include it in the cascade operation query
+        // since where commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a stats command
+        // and moreover this STATS command doesn't provide any useful context even if it defines new runtime fields
+        // we would not be leveraging them for the cascade operation
+        return;
+      }
+
       mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
     });
 
@@ -353,14 +361,17 @@ function handleStatsByColumnLeafOperation(
     return Builder.command({
       name: 'where',
       args: [
-        Builder.expression.func.binary('==', [
-          Builder.expression.column({
-            args: [Builder.identifier({ name: key })],
-          }),
-          Number.isInteger(Number(value))
-            ? Builder.expression.literal.integer(Number(value))
-            : Builder.expression.literal.string(value),
-        ]),
+        Number.isInteger(Number(value))
+          ? Builder.expression.func.binary('==', [
+              Builder.expression.column({
+                args: [Builder.identifier({ name: key })],
+              }),
+              Builder.expression.literal.integer(Number(value)),
+            ])
+          : Builder.expression.func.call('match_phrase', [
+              Builder.identifier({ name: key }),
+              Builder.expression.literal.string(value),
+            ]),
       ],
     });
   });
@@ -403,7 +414,7 @@ function handleStatsByCategorizeLeafOperation(
         }
 
         return Builder.expression.func.call('match', [
-          // this search does work well on the keyword field, so we need to remove the keyword suffix to get the actual field name
+          // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
           Builder.identifier({ name: matchField.replace(/\.keyword\b/i, '') }),
           Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
           Builder.expression.map({
@@ -549,7 +560,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
   const fieldIsRuntimeDeclared = fieldDeclarationCommandIndex >= 0;
 
-  let fieldDeclarationCommand: ESQLCommand<'stats'> | null = null;
+  let fieldDeclarationCommand: StatsCommand | null = null;
 
   // if the field that's being filtered on is a new field created by some stats command in the query,
   // then we want to find the command that created it
@@ -557,7 +568,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     fieldDeclarationCommand = mutate.commands.stats.byIndex(
       ast,
       fieldDeclarationCommandIndex
-    ) as ESQLCommand<'stats'>;
+    ) as StatsCommand;
   }
 
   const datasourceCommand = getESQLQueryDataSourceCommand(ESQLQuery);

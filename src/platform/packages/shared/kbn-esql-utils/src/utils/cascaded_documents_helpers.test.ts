@@ -177,7 +177,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"'
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(clientip, "192.168.1.1")'
           );
         });
 
@@ -224,7 +224,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | STATS visits_per_client = COUNT(), p95_bytes_client = PERCENTILE(bytes, 95), median_bytes_client = MEDIAN(bytes) BY url.keyword, clientip | WHERE `url.keyword` == "https://www.elastic.co/downloads/beats/metricbeat"'
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(`url.keyword`, "https://www.elastic.co/downloads/beats/metricbeat")'
           );
         });
       });
