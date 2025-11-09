@@ -6,4 +6,3 @@
  */
 
 export const MAX_ATTEMPTS_AI_WORKFLOWS = 3;
-export const MAX_CONCURRENT_AI_WORKFLOWS = 10;
