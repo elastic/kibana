@@ -12,16 +12,15 @@ import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 
-import { SideNav } from '../side_nav';
 import { useNestedMenu } from './use_nested_menu';
+import { SecondaryMenu } from '../secondary_menu';
 
 export interface PrimaryMenuItemProps
-  extends Omit<ComponentProps<typeof SideNav.PrimaryMenuItem>, 'children' | 'isHighlighted'> {
+  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'children' | 'isHighlighted'> {
   children: ReactNode;
   hasSubmenu?: boolean;
   isHighlighted?: boolean;
   isCurrent?: boolean;
-  isCollapsed: boolean;
   onClick?: () => void;
 }
 
@@ -61,18 +60,17 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
 
   return (
     <div css={wrapperStyle}>
-      <SideNav.PrimaryMenuItem
+      <SecondaryMenu.Item
         id={id}
-        isHorizontal
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
         onClick={handleClick}
+        hasSubmenu={hasSubmenu}
         {...props}
-        as={hasSubmenu ? 'button' : 'a'}
       >
         {children}
-        {hasSubmenu && <EuiIcon color="text" css={arrowStyle} type="arrowRight" size="m" />}
-      </SideNav.PrimaryMenuItem>
+        {hasSubmenu && <EuiIcon color="textDisabled" css={arrowStyle} type="arrowRight" size="m" />}
+      </SecondaryMenu.Item>
     </div>
   );
 };

@@ -22,7 +22,7 @@ export const suricataRowRenderer: RowRenderer = {
   },
   renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
-      <SuricataDetails data={data} timelineId={scopeId} />
+      <SuricataDetails data={data} scopeId={scopeId} />
     </RowRendererContainer>
   ),
 };
