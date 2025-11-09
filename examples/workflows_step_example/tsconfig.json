@@ -13,7 +13,6 @@
     "@kbn/core",
     "@kbn/zod",
     "@kbn/workflows",
-    "@kbn/workflows-execution-engine-plugin"
   ]
 }
 
