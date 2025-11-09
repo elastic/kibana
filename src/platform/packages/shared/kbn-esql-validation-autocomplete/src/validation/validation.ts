@@ -32,9 +32,10 @@ import { getSubqueriesToValidate } from './helpers';
  */
 export async function validateQuery(
   queryString: string,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  options?: { forceRefresh?: boolean }
 ): Promise<ValidationResult> {
-  return validateAst(queryString, callbacks);
+  return validateAst(queryString, callbacks, options);
 }
 
 function shouldValidateCallback<K extends keyof ESQLCallbacks>(
@@ -52,7 +53,8 @@ function shouldValidateCallback<K extends keyof ESQLCallbacks>(
  */
 async function validateAst(
   queryString: string,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  options?: { forceRefresh?: boolean }
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
@@ -74,7 +76,12 @@ async function validateAst(
 
   const sourceQuery = queryString.split('|')[0];
   const sourceFields = shouldValidateCallback(callbacks, 'getColumnsFor')
-    ? await new QueryColumns(EsqlQuery.fromSrc(sourceQuery).ast, sourceQuery, callbacks).asMap()
+    ? await new QueryColumns(
+        EsqlQuery.fromSrc(sourceQuery).ast,
+        sourceQuery,
+        callbacks,
+        options
+      ).asMap()
     : new Map();
 
   if (shouldValidateCallback(callbacks, 'getColumnsFor') && sourceFields.size > 0) {
@@ -122,7 +129,7 @@ async function validateAst(
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryForColumns, queryString, callbacks).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
       : new Map();
 
     const references: ReferenceMaps = {

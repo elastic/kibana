@@ -72,9 +72,14 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
       { open: '"', close: '"' },
     ],
   },
-  validate: async (model: monaco.editor.ITextModel, code: string, callbacks?: ESQLCallbacks) => {
+  validate: async (
+    model: monaco.editor.ITextModel,
+    code: string,
+    callbacks?: ESQLCallbacks,
+    options?: { forceRefresh?: boolean }
+  ) => {
     const text = code ?? model.getValue();
-    const { errors, warnings } = await validateQuery(text, callbacks);
+    const { errors, warnings } = await validateQuery(text, callbacks, options);
     const monacoErrors = wrapAsMonacoMessages(text, errors);
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };

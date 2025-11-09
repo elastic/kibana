@@ -646,15 +646,18 @@ const ESQLEditorInternal = function ESQLEditor({
     };
   }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
 
-  const parseMessages = useCallback(async () => {
-    if (editorModel.current) {
-      return await ESQLLang.validate(editorModel.current, code, esqlCallbacks);
-    }
-    return {
-      errors: [],
-      warnings: [],
-    };
-  }, [esqlCallbacks, code]);
+  const parseMessages = useCallback(
+    async (options?: { forceRefresh?: boolean }) => {
+      if (editorModel.current) {
+        return await ESQLLang.validate(editorModel.current, code, esqlCallbacks, options);
+      }
+      return {
+        errors: [],
+        warnings: [],
+      };
+    },
+    [esqlCallbacks, code]
+  );
 
   useEffect(() => {
     const setQueryToTheCache = async () => {
@@ -686,10 +689,12 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
-    async ({ active }: { active: boolean }) => {
+    async ({ active, forceRefresh }: { active: boolean; forceRefresh?: boolean }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
+      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages({
+        forceRefresh,
+      });
 
       let allErrors = parserErrors;
       let allWarnings = parserWarnings;
@@ -751,9 +756,11 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   // Refresh the fields cache when a new field has been added to the lookup index
-  const onNewFieldsAddedToLookupIndex = useCallback(() => {
+  const onNewFieldsAddedToLookupIndex = useCallback(async () => {
     esqlFieldsCache.clear?.();
-  }, [esqlFieldsCache]);
+
+    await queryValidation({ active: true, forceRefresh: true });
+  }, [esqlFieldsCache, queryValidation]);
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editor1,
