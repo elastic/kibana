@@ -81,8 +81,8 @@ export const D3SecurityConnectorExample: SingleFileConnectorDefinition = {
   // ---- Policies ----
   policies: {
     retry: {
-      retryOn5xx: true,
-      retryOn429: true,
+      retryOnStatusCodes: [429, 500, 502, 503, 504],
+      maxRetries: 3,
     },
     
     // Error handling

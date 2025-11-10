@@ -211,9 +211,15 @@ Rate limiting strategies employed by each connector.
 
 ### Rate Limiting Pattern Summary
 
-- **Header-Based**: 6 connectors (Read `Retry-After`, `X-RateLimit-*` headers)
+- **Header-Based**: 6 connectors
+  - Slack API (`slack_api/service.ts`)
+  - Webhook (`webhook/index.ts:176-182`)
+  - Microsoft Teams (`teams/index.ts:160-165`)
+  - Torq (`torq/index.ts:219-225`)
+  - OpenAI (AI connector pattern)
+  - Gemini (Google AI pattern)
 - **Status Code Only**: 24+ connectors (Standard 429 and 5xx)
-- **Response Body Detection**: 1 connector (Teams - error in 200 response)
+- **Response Body Detection**: 1 connector (Teams - error in 200 response, `teams/index.ts:160-165`)
 
 ---
 
@@ -467,9 +473,9 @@ const policies: ConnectorPolicies = {
     resetHeader: "x-ratelimit-reset",
   },
   retry: {
-    retryOn5xx: true,
-    retryOn429: true,
+    retryOnStatusCodes: [429, 500, 502, 503, 504],
     maxRetries: 3,
+    backoffStrategy: 'exponential',
   },
 };
 ```

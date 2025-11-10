@@ -94,8 +94,7 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
   // ---- Policies (optional) ----
   policies: {
     retry: {
-      retryOn5xx: true,
-      retryOn429: true,
+      retryOnStatusCodes: [429, 500, 502, 503, 504],
       maxRetries: 3,
       backoffStrategy: "exponential",
       initialDelay: 1000,

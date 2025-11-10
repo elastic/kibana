@@ -63,7 +63,8 @@ declare module "zod" {
         | "multiSelect"   // Multi-select dropdown (for z.array(z.enum()))
         | "toggle"        // Toggle switch (default for z.boolean())
         | "date"          // Date picker
-        | "dateTime";     // Date and time picker
+        | "dateTime"      // Date and time picker
+        | "document";     // File upload (e.g., GCP service accounts, PEM files)
       
       /**
        * Widget-specific configuration options
@@ -79,6 +80,28 @@ declare module "zod" {
       };
       
       /**
+       * Field label (user-facing name)
+       * 
+       * WHY: Labels should be translatable and explicit rather than derived from
+       * property names. Property name "apiKey" should display as "API Key" or
+       * "Clé API" (French) in the UI.
+       * 
+       * If not provided, UI can derive from property name (camelCase → Title Case),
+       * but explicit labels are better for i18n.
+       * 
+       * @example English
+       * z.string().meta({ label: "API Key" })
+       * 
+       * @example With i18n
+       * z.string().meta({
+       *   label: i18n.translate('xpack.stackConnectors.slack.config.apiKey.label', {
+       *     defaultMessage: 'API Key'
+       *   })
+       * })
+       */
+      label?: string;
+      
+      /**
        * Placeholder text shown in empty input
        * WHY: Placeholder provides example/hint, different from label
        * Label = "API Token", Placeholder = "xoxb-1234-5678-..."
@@ -88,17 +111,59 @@ declare module "zod" {
       
       /**
        * Section/group this field belongs to
+       * 
        * WHY: Long forms need grouping for usability
        * Fields with same section value are grouped together in UI
-       * @example z.string().meta({ section: "Authentication" })
+       * 
+       * SECTION ORDERING:
+       * Sections can be ordered two ways:
+       * 1. Explicit: Use `ConnectorLayout.configSections[].order` in the connector definition
+       * 2. Implicit: Sections appear in order of first field that declares them
+       * 
+       * @example Basic sectioning
+       * z.object({
+       *   url: z.string().meta({ section: "Connection" }),
+       *   apiKey: z.string().meta({ section: "Authentication" }),
+       *   timeout: z.number().meta({ section: "Connection" })
+       * })
+       * // Renders: Connection section (url, timeout), then Authentication section (apiKey)
+       * 
+       * @example With explicit section ordering (via ConnectorLayout)
+       * layout: {
+       *   configSections: [
+       *     { title: "Authentication", fields: ["apiKey"], order: 1 },
+       *     { title: "Connection", fields: ["url", "timeout"], order: 2 }
+       *   ]
+       * }
        */
       section?: string;
       
       /**
-       * Explicit display order (lower = shown first)
+       * Explicit display order within a section (lower = shown first)
+       * 
        * WHY: Object property order in JS/TS isn't always guaranteed
        * Without this, fields might render in any order
-       * @example z.string().meta({ order: 1 })
+       * 
+       * BEHAVIOR:
+       * - If `section` is provided, `order` applies within that section only
+       * - Fields without `order` appear after ordered fields (in definition order)
+       * - Section ordering is controlled by:
+       *   1. `ConnectorLayout.configSections[].order` (explicit section ordering)
+       *   2. First field appearance if no layout specified
+       * 
+       * @example Within a section
+       * z.object({
+       *   url: z.string().meta({ section: "Connection", order: 1 }),
+       *   timeout: z.number().meta({ section: "Connection", order: 2 }),
+       *   apiKey: z.string().meta({ section: "Auth", order: 1 })
+       * })
+       * // Renders: Connection section (url, timeout), then Auth section (apiKey)
+       * 
+       * @example Without sections
+       * z.object({
+       *   important: z.string().meta({ order: 1 }),
+       *   lessImportant: z.string().meta({ order: 2 })
+       * })
        */
       order?: number;
       

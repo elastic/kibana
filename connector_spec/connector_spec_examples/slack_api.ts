@@ -82,6 +82,8 @@ export const SlackApiConnectorExample: SingleFileConnectorDefinition = {
     },
     pagination: {
       strategy: "cursor",
+      parameterLocation: "query_params",
+      resultPath: "channels",  // Slack wraps results in a field (e.g., "channels", "members", etc.)
       cursorParam: "cursor",
       cursorPath: "response_metadata.next_cursor",
       pageSizeParam: "limit",

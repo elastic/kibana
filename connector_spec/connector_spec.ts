@@ -33,9 +33,135 @@
 import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import type { AxiosInstance } from 'axios';
+import { i18n } from '@kbn/i18n';
 
 // Re-export UI utilities for convenience
 export { withUIMeta, UISchemas } from './connector_spec_ui';
+
+// ============================================================================
+// INTERNATIONALIZATION (i18n)
+// ============================================================================
+
+/**
+ * Internationalization Support
+ *
+ * WHY: Connectors are used globally and need to display UI text in multiple languages.
+ * Kibana uses @kbn/i18n for translations.
+ *
+ * APPROACH: Option 1 (Explicit) - Use i18n.translate() for user-facing strings
+ * - Simple to implement
+ * - Follows existing Kibana patterns
+ * - Spec authors manually mark translatable strings
+ * - Translation keys get extracted during build
+ *
+ * FUTURE: May move to auto-extraction (Option 2) when transitioning to YAML specs
+ *
+ * @see https://github.com/elastic/kibana/blob/main/packages/kbn-i18n/README.md
+ */
+
+/**
+ * Fields that should be translated:
+ * 1. Connector metadata (displayName, description)
+ * 2. Field labels (in uiMeta)
+ * 3. Field help text (in uiMeta)
+ * 4. Section titles (in ConnectorLayout)
+ * 5. Action descriptions
+ * 6. Validation error messages
+ * 7. Test result messages
+ *
+ * CONVENTION: Use connector ID as namespace prefix
+ * Format: `xpack.stackConnectors.{connectorId}.{context}.{key}`
+ *
+ * Examples:
+ * - `xpack.stackConnectors.slack.metadata.displayName`
+ * - `xpack.stackConnectors.slack.config.url.label`
+ * - `xpack.stackConnectors.slack.actions.postMessage.description`
+ */
+
+/**
+ * Helper to create namespaced translation keys
+ *
+ * @example
+ * ```typescript
+ * const i18nKeys = createI18nKeys('.slack');
+ *
+ * displayName: i18n.translate(i18nKeys.metadata('displayName'), {
+ *   defaultMessage: 'Slack'
+ * })
+ * ```
+ */
+export function createI18nKeys(connectorId: string) {
+  const base = `xpack.stackConnectors${connectorId}`;
+  return {
+    metadata: (key: string) => `${base}.metadata.${key}`,
+    config: (key: string) => `${base}.config.${key}`,
+    secrets: (key: string) => `${base}.secrets.${key}`,
+    actions: (actionName: string, key: string) => `${base}.actions.${actionName}.${key}`,
+    validation: (key: string) => `${base}.validation.${key}`,
+    test: (key: string) => `${base}.test.${key}`,
+    layout: (key: string) => `${base}.layout.${key}`,
+  };
+}
+
+/**
+ * Example: Translating connector metadata
+ *
+ * @example
+ * ```typescript
+ * const i18nKeys = createI18nKeys('.slack');
+ *
+ * metadata: {
+ *   id: '.slack_api',
+ *   displayName: i18n.translate(i18nKeys.metadata('displayName'), {
+ *     defaultMessage: 'Slack'
+ *   }),
+ *   description: i18n.translate(i18nKeys.metadata('description'), {
+ *     defaultMessage: 'Send messages to Slack channels'
+ *   }),
+ *   // ...
+ * }
+ * ```
+ *
+ * @example Translating field labels (in Zod schema)
+ * ```typescript
+ * configSchema: z.object({
+ *   url: withUIMeta(z.string().url(), {
+ *     label: i18n.translate(i18nKeys.config('url.label'), {
+ *       defaultMessage: 'Webhook URL'
+ *     }),
+ *     helpText: i18n.translate(i18nKeys.config('url.helpText'), {
+ *       defaultMessage: 'The webhook URL from Slack'
+ *     })
+ *   })
+ * })
+ * ```
+ *
+ * @example Translating validation errors
+ * ```typescript
+ * configSchema: z.object({
+ *   url: z.string().url().refine(
+ *     (url) => isAllowed(url),
+ *     {
+ *       message: i18n.translate(i18nKeys.validation('urlNotAllowed'), {
+ *         defaultMessage: 'URL is not in the allowlist'
+ *       })
+ *     }
+ *   )
+ * })
+ * ```
+ *
+ * @example Translating action descriptions
+ * ```typescript
+ * actions: {
+ *   postMessage: {
+ *     description: i18n.translate(i18nKeys.actions('postMessage', 'description'), {
+ *       defaultMessage: 'Post a message to a Slack channel'
+ *     }),
+ *     // ...
+ *   }
+ * }
+ * ```
+ */
 
 // ============================================================================
 // METADATA & IDENTIFICATION
@@ -205,6 +331,40 @@ export type AuthConfig = z.infer<typeof AuthSchema>;
 // ============================================================================
 
 /**
+ * Common retry status code patterns
+ * 
+ * WHY: Provide reusable constants for common retry scenarios instead of
+ * repeating status code arrays across connectors.
+ * 
+ * @example Using a constant
+ * ```typescript
+ * retry: {
+ *   retryOnStatusCodes: RETRY_RATE_LIMIT,
+ *   maxRetries: 3
+ * }
+ * ```
+ * 
+ * @example Combining constants
+ * ```typescript
+ * retry: {
+ *   retryOnStatusCodes: [...RETRY_RATE_LIMIT, ...RETRY_GATEWAY_ERRORS]
+ * }
+ * ```
+ */
+
+/** Retry on rate limit errors (429, and 503 which some APIs use for rate limiting) */
+export const RETRY_RATE_LIMIT = [429, 503] as const;
+
+/** Retry on common server errors (all 5xx errors) */
+export const RETRY_SERVER_ERRORS = [500, 502, 503, 504] as const;
+
+/** Retry on gateway/proxy errors only (not 500) */
+export const RETRY_GATEWAY_ERRORS = [502, 503, 504] as const;
+
+/** Retry on timeout and rate limit errors */
+export const RETRY_TIMEOUT_AND_RATE_LIMIT = [408, 429, 503] as const;
+
+/**
  * Rate limiting policy configuration
  *
  * WHY: External APIs often have rate limits to prevent abuse. Connectors need
@@ -272,25 +432,135 @@ export interface RateLimitPolicy {
 export interface PaginationPolicy {
   /**
    * Pagination strategy
-   *
+   * 
    * cursor: Cursor/token-based pagination (most modern APIs)
    *   USED BY: Slack (response_metadata.next_cursor), Crowdstrike, SentinelOne
    *   REFERENCE: Slack uses cursor pagination in API responses
    *   Example: { "response_metadata": { "next_cursor": "dGVhbTpDMDYxRkE1UEI=" } }
-   *
+   *   
    * offset: Offset/limit-based pagination (traditional REST)
    *   USED BY: Jira, ServiceNow, Resilient
    *   REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/jira/service.ts:436-438
    *   Code: `jql=project="${projectKey}" and summary ~"${title}"` with startAt parameter
-   *
+   *   
    * link_header: RFC 5988 Link header pagination
    *   USED BY: GitHub API, some enterprise REST APIs
    *   Example: Link: <https://api.example.com/data?page=2>; rel="next"
-   *
+   *   
    * none: No pagination support
    *   USED BY: Most single-action connectors (Webhook, Email, Teams, PagerDuty)
    */
   strategy: 'cursor' | 'offset' | 'link_header' | 'none';
+
+  /**
+   * Where pagination parameters are provided
+   *
+   * WHY: Different APIs expect pagination parameters in different locations.
+   * This affects how the framework constructs paginated requests.
+   *
+   * COMMON PATTERNS:
+   * - query_params: Most REST APIs (GET requests)
+   *   USED BY: Slack, Jira, ServiceNow, GitHub
+   *   Example: `GET /api/users?offset=20&limit=10`
+   *
+   * - headers: Some APIs use custom headers for pagination
+   *   USED BY: Some enterprise APIs with custom pagination schemes
+   *   Example: `X-Page: 2`, `X-Per-Page: 50`
+   *
+   * - body: POST-based pagination (search/query APIs)
+   *   USED BY: Elasticsearch, some GraphQL APIs, search endpoints
+   *   Example: `POST /api/search { "query": "...", "offset": 20, "limit": 10 }`
+   *
+   * @example Query parameters (most common)
+   * ```typescript
+   * pagination: {
+   *   strategy: 'offset',
+   *   parameterLocation: 'query_params',
+   *   offsetParam: 'offset',
+   *   limitParam: 'limit'
+   * }
+   * ```
+   *
+   * @example Request body (POST-based search)
+   * ```typescript
+   * pagination: {
+   *   strategy: 'cursor',
+   *   parameterLocation: 'body',
+   *   cursorParam: 'next_token'
+   * }
+   * ```
+   *
+   * @example Headers (custom pagination)
+   * ```typescript
+   * pagination: {
+   *   strategy: 'offset',
+   *   parameterLocation: 'headers',
+   *   offsetParam: 'X-Page',
+   *   limitParam: 'X-Per-Page'
+   * }
+   * ```
+   *
+   * DEFAULT: 'query_params' if not specified
+   */
+  parameterLocation?: 'query_params' | 'headers' | 'body';
+
+  /**
+   * JSON path to the actual data/results in the response
+   *
+   * WHY: Paginated responses typically wrap the actual data with metadata
+   * (pagination info, counts, etc.). This field specifies where to find the
+   * actual data to extract and aggregate across pages.
+   *
+   * USED BY: All connectors with pagination that need to aggregate results
+   *
+   * COMMON PATTERNS:
+   * - `data`: Simple wrapper - `{ "data": [...], "next": "..." }`
+   * - `items`: Common in REST APIs - `{ "items": [...], "nextToken": "..." }`
+   * - `results`: Search APIs - `{ "results": [...], "page": 2 }`
+   * - `data.items`: Nested - `{ "data": { "items": [...] }, "meta": {...} }`
+   *
+   * @example Simple data wrapper
+   * ```typescript
+   * // Response: { "data": [{"id": 1}, {"id": 2}], "nextPage": 2 }
+   * pagination: {
+   *   strategy: 'offset',
+   *   resultPath: 'data',  // Extract the array at "data"
+   *   offsetParam: 'page'
+   * }
+   * ```
+   *
+   * @example Nested path
+   * ```typescript
+   * // Response: { "response": { "items": [...] }, "pagination": { "next": "..." } }
+   * pagination: {
+   *   strategy: 'cursor',
+   *   resultPath: 'response.items',  // Extract nested array
+   *   cursorPath: 'pagination.next'
+   * }
+   * ```
+   *
+   * @example Top-level array (no wrapper)
+   * ```typescript
+   * // Response: [{"id": 1}, {"id": 2}]
+   * pagination: {
+   *   strategy: 'link_header',
+   *   resultPath: undefined  // No wrapper, response is the array itself
+   * }
+   * ```
+   *
+   * @example GitHub API
+   * ```typescript
+   * // Response: { "items": [...], "total_count": 100, "incomplete_results": false }
+   * pagination: {
+   *   strategy: 'link_header',
+   *   resultPath: 'items',
+   *   linkHeaderName: 'Link'
+   * }
+   * ```
+   *
+   * If not specified, the entire response is treated as the result array.
+   */
+  resultPath?: string;
 
   /**
    * For cursor-based pagination
@@ -300,7 +570,7 @@ export interface PaginationPolicy {
    */
   cursorParam?: string;
   cursorPath?: string;
-
+  
   /**
    * For offset-based pagination
    * offsetParam: Parameter for page offset (e.g., "offset", "skip", "startAt")
@@ -309,20 +579,20 @@ export interface PaginationPolicy {
    */
   offsetParam?: string;
   limitParam?: string;
-
+  
   /**
    * For link header pagination
    * linkHeaderName: Header name (usually "Link")
    * EXAMPLE: Link: <https://api.example.com/data?page=2>; rel="next"
    */
   linkHeaderName?: string;
-
+  
   /**
    * Page size parameter name
    * EXAMPLE: "limit" (Slack), "maxResults" (Jira), "top" (Teams)
    */
   pageSizeParam?: string;
-
+  
   /**
    * Default/max page size
    * COMMON: 50-100 for most APIs
@@ -339,25 +609,67 @@ export interface PaginationPolicy {
  */
 export interface RetryPolicy {
   /**
-   * Automatically retry on 5xx errors
+   * HTTP status codes to retry on
    *
-   * USED BY: Most connectors handle 5xx as retryable server errors
-   * REFERENCE: Actions framework handles server errors with retry logic
-   * WHY: 5xx errors are typically temporary server issues (overload, restart)
-   */
-  retryOn5xx?: boolean;
-
-  /**
-   * Retry on 429 (rate limit) with backoff
+   * WHY: Different APIs use different status codes for retryable errors.
+   * Explicit list provides clear, unambiguous retry behavior.
    *
-   * USED BY: Slack API, Teams, OpenAI, most API-based connectors
+   * COMMON PATTERNS:
+   * - Rate limiting: `[429]` or `[429, 503]` (some APIs use 503 for rate limits)
+   * - Server errors: `[500, 502, 503, 504]` (common 5xx errors)
+   * - Gateway errors: `[502, 503, 504]` (exclude 500 if not retryable)
+   * - Timeout + Rate limit: `[408, 429, 503]`
+   *
+   * USED BY: All connectors with retry logic
    * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/slack/index.test.ts:399
-   *   Code: `test('returns a user error for rate-limiting responses', async () => { ... })`
+   *   Code: Slack retries on 429 rate limit errors
    * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/openai.test.ts:626
-   *   Code: `it('marks 429 errors as user errors', async () => { ... })`
-   * WHY: Rate limits require wait time before retry - should use exponential backoff
+   *   Code: OpenAI retries on 429 rate limit errors
+   *
+   * @example Rate limiting only
+   * ```typescript
+   * retry: {
+   *   retryOnStatusCodes: [429],
+   *   maxRetries: 3,
+   *   backoffStrategy: 'exponential'
+   * }
+   * ```
+   *
+   * @example Rate limiting + service unavailable (503 used by some APIs for rate limits)
+   * ```typescript
+   * retry: {
+   *   retryOnStatusCodes: [429, 503],
+   *   maxRetries: 5,
+   *   backoffStrategy: 'exponential'
+   * }
+   * ```
+   *
+   * @example Common server/gateway errors
+   * ```typescript
+   * retry: {
+   *   retryOnStatusCodes: [500, 502, 503, 504],
+   *   maxRetries: 3
+   * }
+   * ```
+   *
+   * @example Gateway errors only (not 500)
+   * ```typescript
+   * retry: {
+   *   retryOnStatusCodes: [502, 503, 504],
+   *   maxRetries: 5
+   * }
+   * ```
+   *
+   * TIP: Use exported constants for common patterns:
+   * ```typescript
+   * import { RETRY_SERVER_ERRORS, RETRY_RATE_LIMIT } from './connector_spec';
+   * 
+   * retry: {
+   *   retryOnStatusCodes: RETRY_SERVER_ERRORS  // [500, 502, 503, 504]
+   * }
+   * ```
    */
-  retryOn429?: boolean;
+  retryOnStatusCodes?: number[];
 
   /**
    * Custom retry logic for specific error patterns
@@ -520,7 +832,7 @@ export interface ConnectorPolicies {
 /**
  * Definition of a single action/sub-action
  */
-export interface ActionDefinition<TInput = unknown, TOutput = unknown> {
+export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   /** Whether this action can be used as a tool in LLM contexts */
   isTool?: boolean;
 
@@ -529,6 +841,55 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown> {
 
   /** Optional output schema for response validation */
   output?: z.ZodSchema<TOutput>;
+
+  /**
+   * Optional error schema for error responses
+   *
+   * WHY: Many APIs have well-defined error response structures. This schema
+   * documents and validates error responses from the external API, improving
+   * type safety and enabling better OpenAPI/OAS generation.
+   *
+   * USED BY: Connectors with OpenAPI specs, structured error APIs
+   * EXAMPLES:
+   * - GitHub API: Structured errors with message, documentation_url, errors array
+   * - Stripe API: Error object with type, code, param, message
+   * - Jira API: errorMessages array with detailed validation errors
+   *
+   * REFERENCE: Many modern APIs follow RFC 7807 (Problem Details for HTTP APIs)
+   *
+   * @example Simple error schema
+   * ```typescript
+   * error: z.object({
+   *   message: z.string(),
+   *   code: z.string().optional()
+   * })
+   * ```
+   *
+   * @example Detailed error schema (RFC 7807)
+   * ```typescript
+   * error: z.object({
+   *   type: z.string(),        // Error type URI
+   *   title: z.string(),       // Human-readable summary
+   *   status: z.number(),      // HTTP status code
+   *   detail: z.string(),      // Detailed explanation
+   *   instance: z.string().optional(), // URI reference to specific occurrence
+   *   errors: z.array(z.object({
+   *     field: z.string(),
+   *     message: z.string()
+   *   })).optional()           // Field-level validation errors
+   * })
+   * ```
+   *
+   * @example OpenAPI-derived error schema
+   * ```typescript
+   * error: z.discriminatedUnion('type', [
+   *   z.object({ type: z.literal('validation_error'), fields: z.record(z.string()) }),
+   *   z.object({ type: z.literal('not_found'), resource: z.string() }),
+   *   z.object({ type: z.literal('rate_limit'), retry_after: z.number() })
+   * ])
+   * ```
+   */
+  error?: z.ZodSchema<TError>;
 
   /** Action handler function */
   handler: (ctx: ActionContext, input: TInput) => Promise<TOutput>;
