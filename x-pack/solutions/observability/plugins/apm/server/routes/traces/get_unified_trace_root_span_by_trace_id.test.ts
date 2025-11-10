@@ -80,7 +80,7 @@ describe('getUnifiedTraceRootSpanByTraceId', () => {
                         constant_score: {
                           filter: {
                             bool: {
-                              must_not: { exists: { field: PARENT_ID } },
+                              must_not: [{ exists: { field: PARENT_ID } }],
                             },
                           },
                         },
@@ -89,10 +89,10 @@ describe('getUnifiedTraceRootSpanByTraceId', () => {
                   },
                 },
               ]),
-              should: [
+              should: expect.arrayContaining([
                 { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.span, ProcessorEvent.transaction] } },
-                { bool: { must_not: { exists: { field: PROCESSOR_EVENT } } } },
-              ],
+                { bool: { must_not: [{ exists: { field: PROCESSOR_EVENT } }] } },
+              ]),
               minimum_should_match: 1,
             }),
           }),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { existsQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { TraceRootSpan } from '@kbn/apm-types';
@@ -50,7 +50,7 @@ export async function getUnifiedTraceRootSpanByTraceId({
     terminate_after: 1,
     query: {
       bool: {
-        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
+        filter: [...termQuery(TRACE_ID, traceId), ...rangeQuery(start, end)],
         must: [
           {
             bool: {
@@ -59,7 +59,7 @@ export async function getUnifiedTraceRootSpanByTraceId({
                   constant_score: {
                     filter: {
                       bool: {
-                        must_not: { exists: { field: PARENT_ID } },
+                        must_not: existsQuery(PARENT_ID),
                       },
                     },
                   },
@@ -69,8 +69,8 @@ export async function getUnifiedTraceRootSpanByTraceId({
           },
         ],
         should: [
-          { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.span, ProcessorEvent.transaction] } },
-          { bool: { must_not: { exists: { field: PROCESSOR_EVENT } } } },
+          ...termsQuery(PROCESSOR_EVENT, ProcessorEvent.span, ProcessorEvent.transaction),
+          { bool: { must_not: existsQuery(PROCESSOR_EVENT) } },
         ],
         minimum_should_match: 1,
       },
