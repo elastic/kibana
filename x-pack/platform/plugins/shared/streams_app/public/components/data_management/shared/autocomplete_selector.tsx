@@ -14,6 +14,7 @@ import { FieldIcon } from '@kbn/react-field';
 export interface Suggestion {
   name: string;
   type?: string;
+  icon?: boolean;
 }
 
 export interface AutocompleteSelectorProps {
@@ -61,11 +62,12 @@ export const AutocompleteSelector = ({
       suggestions.map((suggestion) => ({
         label: suggestion.name,
         value: suggestion.name,
-        ...(showIcon && {
-          prepend: (
-            <FieldIcon type={suggestion.type || 'unknown'} size="s" className="eui-alignMiddle" />
-          ),
-        }),
+        ...(showIcon &&
+          suggestion.icon && {
+            prepend: (
+              <FieldIcon type={suggestion.type || 'unknown'} size="s" className="eui-alignMiddle" />
+            ),
+          }),
         'data-test-subj': `autocomplete-suggestion-${suggestion.name}`,
       })),
     [suggestions, showIcon]
