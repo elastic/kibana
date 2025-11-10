@@ -37,6 +37,7 @@ import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers
 import { setKibanaServices } from './kibana_services';
 import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 
 interface EsqlPluginSetupDependencies {
   uiActions: UiActionsSetup;
@@ -132,6 +133,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     });
 
     const variablesService = new EsqlVariablesService();
+    const telemetryService = new ESQLEditorTelemetryService(core.analytics);
 
     const getJoinIndicesAutocomplete = cacheParametrizedAsyncFunction(
       async (remoteClusters?: string) => {
@@ -199,9 +201,19 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       getInferenceEndpointsAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
+      telemetryService,
     };
 
-    setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
+    setKibanaServices(
+      start,
+      core,
+      data,
+      storage,
+      uiActions,
+      telemetryService,
+      fieldsMetadata,
+      usageCollection
+    );
 
     return start;
   }
