@@ -5,31 +5,24 @@
  * 2.0.
  */
 
-export const generateTitleMock$ = jest.fn();
-export const getChatModelMock$ = jest.fn();
+export const generateTitleMock = jest.fn();
 export const executeAgentMock$ = jest.fn();
-export const getConversationMock$ = jest.fn();
-export const conversationExistsMock$ = jest.fn();
+export const getConversationMock = jest.fn();
+export const conversationExistsMock = jest.fn();
 export const updateConversationMock$ = jest.fn();
 export const createConversationMock$ = jest.fn();
-export const resolveSelectedConnectorIdMock = jest.fn();
+export const resolveServicesMock = jest.fn();
 
 jest.doMock('./utils', () => {
   const actual = jest.requireActual('./utils');
   return {
     ...actual,
-    generateTitle$: generateTitleMock$,
-    getChatModel$: getChatModelMock$,
+    generateTitle: generateTitleMock,
     executeAgent$: executeAgentMock$,
-    getConversation$: getConversationMock$,
-    conversationExists$: conversationExistsMock$,
+    getConversation: getConversationMock,
+    conversationExists: conversationExistsMock,
     updateConversation$: updateConversationMock$,
     createConversation$: createConversationMock$,
-  };
-});
-
-jest.doMock('./utils/resolve_selected_connector_id', () => {
-  return {
-    resolveSelectedConnectorId: resolveSelectedConnectorIdMock,
+    resolveServices: resolveServicesMock,
   };
 });

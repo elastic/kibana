@@ -6,9 +6,14 @@
  */
 import type { Ast } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
-import type { DateRange } from '../../../common/types';
-import type { DatasourceStates } from '../../state_management';
-import type { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
+import type {
+  DateRange,
+  DatasourceStates,
+  Visualization,
+  DatasourceMap,
+  DatasourceLayers,
+  IndexPatternMap,
+} from '@kbn/lens-common';
 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,

@@ -14,31 +14,29 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowListItemDto } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { useWorkflows } from '@kbn/workflows-ui';
+import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
-import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getRunWorkflowTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
+import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
-import type { WorkflowsSearchParams } from '../../../types';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { WorkflowsUtilityBar } from './workflows_utility_bar';
-import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -54,10 +52,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
 
-  const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
-  const canExecuteWorkflow = application?.capabilities.workflowsManagement.executeWorkflow;
-  const canUpdateWorkflow = application?.capabilities.workflowsManagement.updateWorkflow;
-  const canDeleteWorkflow = application?.capabilities.workflowsManagement.deleteWorkflow;
+  const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
+  const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
+  const canUpdateWorkflow = application.capabilities.workflowsManagement.updateWorkflow;
+  const canDeleteWorkflow = application.capabilities.workflowsManagement.deleteWorkflow;
 
   const deselectWorkflows = useCallback(() => {
     setSelectedItems([]);
@@ -76,7 +74,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   }, [refetch, selectedItems]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, any>) => {
+    (id: string, event: Record<string, unknown>) => {
       runWorkflow.mutate(
         { id, inputs: event },
         {
@@ -84,8 +82,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             notifications?.toasts.addSuccess('Workflow run started', {
               toastLifeTimeMs: 3000,
             });
-            application!.navigateToUrl(
-              application!.getUrlForApp('workflows', {
+            application.navigateToUrl(
+              application.getUrlForApp('workflows', {
                 path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
               })
             );
@@ -158,7 +156,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'name',
         name: 'Name',
         dataType: 'string',
-        width: '45%',
         render: (name: string, item) => (
           <div
             css={css`
@@ -185,7 +182,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText
-                  size="s"
+                  size="xs"
                   color="subdued"
                   title={item.description}
                   css={css`
@@ -213,15 +210,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'tags',
         name: 'Tags',
         width: '15%',
-        render: (value: any, workflow: WorkflowListItemDto) => {
+        render: (value: unknown, workflow: WorkflowListItemDto) => {
           return <WorkflowTags tags={workflow.definition?.tags} />;
         },
       },
       {
         field: 'triggers',
         name: 'Trigger',
-        width: '16%',
-        render: (value: any, item: WorkflowListItemDto) => (
+        width: '12%',
+        render: (value: unknown, item: WorkflowListItemDto) => (
           <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
             <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
           </NextExecutionTime>
@@ -317,7 +314,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             description: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit workflow',
             }),
-            href: (item) => application!.getUrlForApp('workflows', { path: `/${item.id}` }),
+            href: (item) => application.getUrlForApp('workflows', { path: `/${item.id}` }),
           },
           {
             enabled: () => !!canCreateWorkflow,
@@ -382,14 +379,26 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           <EuiLoadingSpinner />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText>Loading workflows...</EuiText>
+          <EuiText>
+            <FormattedMessage
+              id="workflows.workflowList.loading"
+              defaultMessage="Loading workflows..."
+            />
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
   if (error) {
-    return <EuiText>Error loading workflows</EuiText>;
+    return (
+      <EuiText>
+        <FormattedMessage
+          id="workflows.workflowList.error"
+          defaultMessage="Error loading workflows"
+        />
+      </EuiText>
+    );
   }
 
   // Show empty state if no workflows exist and no filters are applied
@@ -408,8 +417,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const showStart = (search.page - 1) * search.limit + 1;
   let showEnd = search.page * search.limit;
-  if (showEnd > (workflows!._pagination.total || 0)) {
-    showEnd = workflows!._pagination.total;
+  if (workflows && showEnd > (workflows._pagination.total || 0)) {
+    showEnd = workflows._pagination.total;
   }
 
   return (
@@ -422,19 +431,23 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         showStart={showStart}
         showEnd={showEnd}
       />
-      <EuiSpacer />
       <EuiBasicTable
         css={css`
           .euiBasicTableAction-showOnHover {
             opacity: 1 !important;
           }
         `}
+        rowProps={() => ({
+          style: { height: '68px' },
+        })}
         columns={columns}
         items={workflows?.results ?? []}
         itemId="id"
         responsiveBreakpoint="xs"
         tableLayout={'fixed'}
-        onChange={({ page: { index: pageIndex, size } }: CriteriaWithPagination<any>) =>
+        onChange={({
+          page: { index: pageIndex, size },
+        }: CriteriaWithPagination<WorkflowListItemDto>) =>
           setSearch({ ...search, page: pageIndex + 1, limit: size })
         }
         selection={{
@@ -445,7 +458,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         pagination={{
           pageSize: search.limit,
           pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
-          totalItemCount: workflows!._pagination.total,
+          totalItemCount: workflows?._pagination?.total ?? 0,
           pageIndex: search.page - 1,
         }}
       />

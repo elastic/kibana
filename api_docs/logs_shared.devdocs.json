@@ -2525,17 +2525,15 @@
               "Filter",
               ">; updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]): Promise<",
               "Filter",
-              ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: ",
+              ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAnomalyUtilsPluginApi",
-                "section": "def-common.MlEntityField",
-                "text": "MlEntityField"
+                "section": "def-common.ML_ENTITY_FIELD_TYPE",
+                "text": "ML_ENTITY_FIELD_TYPE"
               },
-              "[], aggregationInterval: string, threshold: ",
-              "SeverityThreshold",
-              "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
+              " | undefined; } & { fieldName: string; }>[], aggregationInterval: string, threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
               "Observable",
               "<",
               "GetAnomaliesTableDataResult",
@@ -2593,17 +2591,15 @@
               "GetStoppedPartitionResult",
               ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
               "GetDatafeedResultsChartDataResult",
-              ">; getAnomalyCharts$(jobIds: string[], influencers: ",
+              ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAnomalyUtilsPluginApi",
-                "section": "def-common.MlEntityField",
-                "text": "MlEntityField"
+                "section": "def-common.ML_ENTITY_FIELD_TYPE",
+                "text": "ML_ENTITY_FIELD_TYPE"
               },
-              "[], threshold: ",
-              "SeverityThreshold",
-              "[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
+              " | undefined; } & { fieldName: string; }>[], threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
               "QueryDslQueryContainer",
               " | undefined): ",
               "Observable",
@@ -2954,7 +2950,9 @@
         "label": "LogsOverviewProps",
         "description": [],
         "signature": [
-          "{ timeRange: { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; }; height?: ",
+          "{ timeRange: { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; }; nonHighlightingFilters?: ",
+          "QueryDslQueryContainer",
+          "[] | undefined; height?: ",
           "Property",
           ".Height<string | number> | undefined; logsSource?: ",
           {

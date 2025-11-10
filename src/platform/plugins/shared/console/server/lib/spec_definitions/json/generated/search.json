@@ -72,6 +72,7 @@
       "version": "__flag__",
       "_source": "__flag__",
       "_source_excludes": [],
+      "_source_exclude_vectors": "__flag__",
       "_source_includes": [],
       "seq_no_primary_term": "__flag__",
       "q": "",

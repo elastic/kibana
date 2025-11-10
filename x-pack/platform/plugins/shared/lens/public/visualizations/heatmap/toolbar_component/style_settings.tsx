@@ -7,7 +7,9 @@
 
 import React from 'react';
 
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   ValueLabelsSettings,
   ToolbarTitleSettings,
@@ -17,6 +19,45 @@ import {
 } from '../../../shared_components';
 import type { Orientation } from '../../../shared_components';
 import type { HeatmapVisualizationState } from '../types';
+
+export function HeatmapStyleSettings(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
+  return (
+    <>
+      <EuiAccordion
+        id={''}
+        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.titlesAndText', {
+          defaultMessage: 'Titles and text',
+        })}
+        paddingSize="s"
+        initialIsOpen
+      >
+        <HeatmapTitlesAndTextSettings {...props} />
+      </EuiAccordion>
+      <EuiHorizontalRule margin="m" />
+      <EuiAccordion
+        id={''}
+        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.verticalAxis', {
+          defaultMessage: 'Vertical axis',
+        })}
+        paddingSize="s"
+        initialIsOpen
+      >
+        <HeatmapVerticalAxisSettings {...props} />
+      </EuiAccordion>
+      <EuiHorizontalRule margin="m" />
+      <EuiAccordion
+        id={''}
+        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.horizontalAxis', {
+          defaultMessage: 'Horizontal axis',
+        })}
+        paddingSize="s"
+        initialIsOpen
+      >
+        <HeatmapHorizontalAxisSettings {...props} />
+      </EuiAccordion>
+    </>
+  );
+}
 
 export function HeatmapTitlesAndTextSettings({
   state,

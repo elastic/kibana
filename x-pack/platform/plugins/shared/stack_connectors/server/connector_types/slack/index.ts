@@ -10,8 +10,6 @@ import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { IncomingWebhookResult } from '@slack/webhook';
 import { IncomingWebhook } from '@slack/webhook';
 import { pipe } from 'fp-ts/pipeable';
@@ -32,40 +30,34 @@ import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_re
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createAndThrowUserError } from '@kbn/actions-plugin/server/lib/create_and_throw_user_error';
+import type {
+  ConnectorTypeConfigType,
+  ActionParamsType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/slack';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/slack';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 export type SlackConnectorType = ConnectorType<
-  {},
+  ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType,
   unknown
 >;
 export type SlackConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType
 >;
 
-// secrets definition
-
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
-
-const secretsSchemaProps = {
-  webhookUrl: schema.string(),
-};
-const SecretsSchema = schema.object(secretsSchemaProps);
-
-// params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-
-export const ParamsSchema = schema.object({
-  message: schema.string({ minLength: 1 }),
-});
-
 // connector type definition
 
-export const ConnectorTypeId = '.slack';
 // customizing executor is only used for tests
 export function getConnectorType({
   executor = slackExecutor,
@@ -73,18 +65,16 @@ export function getConnectorType({
   executor?: ExecutorType<{}, ConnectorTypeSecretsType, ActionParamsType, unknown>;
 }): SlackConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.slack.title', {
-      defaultMessage: 'Slack',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: ConfigSchema },
       secrets: {
         schema: SecretsSchema,
         customValidator: validateConnectorTypeConfig,

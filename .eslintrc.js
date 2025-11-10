@@ -1275,6 +1275,15 @@ module.exports = {
         ],
       },
     },
+    // Allow node.js imports only for the prebuilt rules package generation scripts
+    {
+      files: [
+        'x-pack/solutions/security/packages/test-api-clients/prebuilt_rules_package_generation/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'off',
+      },
+    },
     {
       // typescript only for front and back end, but excludes the test files.
       // We use this section to add rules in which we do not want to apply to test files.
@@ -2239,9 +2248,10 @@ module.exports = {
      */
     {
       files: [
-        // 'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-        // 'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -2329,6 +2339,7 @@ module.exports = {
         'symbol-description': 'error',
         'vars-on-top': 'error',
         'import/no-duplicates': ['error'],
+        '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
@@ -2386,9 +2397,10 @@ module.exports = {
      */
     {
       files: [
-        // 'src/platform/plugins/shared/workflows_management/public/**/*.{js,mjs,ts,tsx}',
-        // 'src/platform/plugins/shared/workflows_management/common/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/workflows_management/public/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/workflows_management/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -2401,9 +2413,10 @@ module.exports = {
      */
     {
       files: [
-        // 'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
-        // 'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'off',

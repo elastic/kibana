@@ -6,19 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// TODO: remove eslint exception and use i18n for strings
+/* eslint-disable react/jsx-no-literals, @typescript-eslint/no-explicit-any */
 
-import React, { useMemo } from 'react';
-import type { NodeTypes, Node } from '@xyflow/react';
-import { Background, Controls, ReactFlow } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
+import type { Node, NodeTypes } from '@xyflow/react';
+import { Background, Controls, ReactFlow } from '@xyflow/react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { ExecutionGraphEdge, ExecutionGraphNode } from './nodes';
+import { atomicNodes, mainScopeNodes, secondaryScopeNodes } from './nodes/types';
 import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
-import { mainScopeNodes, secondaryScopeNodes, atomicNodes } from './nodes/types';
 
 import '@xyflow/react/dist/style.css';
-import { selectWorkflowGraph } from '../../widgets/workflow_yaml_editor/lib/store';
+import { selectWorkflowGraph } from '../../entities/workflows/store';
 
 export interface ExecutionGraphProps {
   workflowYaml: string | undefined;
@@ -130,7 +132,7 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) 
           <ReactFlowWrapper
             nodes={layoutResult.result.nodes}
             edges={layoutResult.result.edges}
-            nodeTypesMap={nodeTypes as any as NodeTypes}
+            nodeTypesMap={nodeTypes as unknown as NodeTypes}
             edgeTypesMap={edgeTypes}
           />
         </div>

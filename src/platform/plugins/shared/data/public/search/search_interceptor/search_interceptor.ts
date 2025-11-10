@@ -173,19 +173,14 @@ export class SearchInterceptor {
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
     const { sessionId } = options;
-    // Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference
-    const { preference, ...params } = request.params || {};
     const hashOptions = {
-      ...params,
+      ...request.params,
       sessionId,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
-    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
-    if (sessionOptions?.isRestore) return of(undefined); // don't use cache if restoring a session
 
-    return from(createRequestHash(hashOptions));
+    return from(Promise.resolve(createRequestHash(hashOptions)));
   }
 
   /*
@@ -292,7 +287,9 @@ export class SearchInterceptor {
   ) {
     const { sessionId, strategy } = options;
 
-    const search = () => {
+    const search = ({
+      abortSignal = searchAbortController.getSignal(),
+    }: Pick<ISearchOptions, 'abortSignal'> = {}) => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
@@ -302,7 +299,7 @@ export class SearchInterceptor {
         {
           ...options,
           ...this.deps.session.getSearchOptions(sessionId),
-          abortSignal: searchAbortController.getSignal(),
+          abortSignal,
           isSearchStored,
         }
       )
@@ -319,9 +316,9 @@ export class SearchInterceptor {
     const searchTracker = this.deps.session.isCurrentSession(sessionId)
       ? this.deps.session.trackSearch({
           abort: () => searchAbortController.abort(),
-          poll: async () => {
+          poll: async (abortSignal) => {
             if (id) {
-              await search();
+              await search({ abortSignal });
             }
           },
         })
@@ -330,7 +327,10 @@ export class SearchInterceptor {
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
     let isSavedToBackground =
-      this.deps.session.isCurrentSession(sessionId) && this.deps.session.isStored();
+      this.deps.session.isCurrentSession(sessionId) &&
+      (this.deps.session.isSaving() || this.deps.session.isStored());
+    if (isSavedToBackground) searchAbortController.cleanup();
+
     const savedToBackgroundSub =
       this.deps.session.isCurrentSession(sessionId) &&
       this.deps.session.state$
@@ -344,6 +344,7 @@ export class SearchInterceptor {
           take(1)
         )
         .subscribe(() => {
+          searchAbortController.cleanup();
           isSavedToBackground = true;
         });
 
@@ -383,7 +384,7 @@ export class SearchInterceptor {
         id = response.id;
 
         if (!isRunningResponse(response)) {
-          searchTracker?.complete();
+          searchTracker?.complete(response);
         }
       }),
       map((response) => {
@@ -415,8 +416,11 @@ export class SearchInterceptor {
             })
           );
         } else {
-          searchTracker?.error();
-          cancel();
+          // Don't error out the search or cancel if it is being saved to the background
+          if (!isSavedToBackground) {
+            searchTracker?.error(e);
+            cancel();
+          }
           return throwError(e);
         }
       }),
@@ -441,7 +445,20 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
-    const { abortSignal } = options || {};
+    const { abortSignal, requestHash } = options || {};
+
+    if (request.id) {
+      // just polling an existing search, no need to send the body, just the hash
+
+      const { params, ...requestWithoutParams } = request;
+      if (params) {
+        const { body, ...paramsWithoutBody } = params;
+        request = {
+          ...requestWithoutParams,
+          params: paramsWithoutBody,
+        };
+      }
+    }
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
     return this.deps.http
@@ -454,6 +471,7 @@ export class SearchInterceptor {
           body: JSON.stringify({
             ...request,
             ...searchOptions,
+            requestHash,
             stream:
               strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
               strategy === ENHANCED_ES_SEARCH_STRATEGY ||
@@ -531,12 +549,11 @@ export class SearchInterceptor {
    * Creates a new search observable and a corresponding search abort controller
    * If requestHash is defined, tries to return them first from cache.
    */
-  private getSearchResponse$(
-    request: IKibanaSearchRequest,
-    options: IAsyncSearchOptions,
-    requestHash?: string
-  ) {
-    const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
+  private getSearchResponse$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
+    const { requestHash } = options;
+    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
+    const cached =
+      requestHash && !sessionOptions?.isRestore ? this.responseCache.get(requestHash) : undefined; // don't use cache if restoring a session
 
     const searchAbortController =
       cached?.searchAbortController || new SearchAbortController(this.searchTimeout);
@@ -580,10 +597,10 @@ export class SearchInterceptor {
 
     return this.createRequestHash$(request, searchOptions).pipe(
       switchMap((requestHash) => {
+        searchOptions.requestHash = requestHash;
         const { searchAbortController, response$ } = this.getSearchResponse$(
           request,
-          searchOptions,
-          requestHash
+          searchOptions
         );
 
         this.pendingCount$.next(this.pendingCount$.getValue() + 1);

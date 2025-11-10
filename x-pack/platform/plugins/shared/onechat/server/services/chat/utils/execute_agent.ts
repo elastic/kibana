@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { shareReplay, switchMap, Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  RoundInput,
+  RawRoundInput,
   Conversation,
   ChatAgentEvent,
   AgentCapabilities,
 } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../../agents';
 
 export const executeAgent$ = ({
@@ -20,50 +21,48 @@ export const executeAgent$ = ({
   request,
   capabilities,
   agentService,
-  conversation$,
+  conversation,
   nextInput,
   abortSignal,
   defaultConnectorId,
+  browserApiTools,
 }: {
   agentId: string;
   request: KibanaRequest;
   capabilities?: AgentCapabilities;
   agentService: AgentsServiceStart;
-  conversation$: Observable<Conversation>;
-  nextInput: RoundInput;
+  conversation: Conversation;
+  nextInput: RawRoundInput;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
+  browserApiTools?: BrowserApiToolMetadata[];
 }): Observable<ChatAgentEvent> => {
-  return conversation$.pipe(
-    switchMap((conversation) => {
-      return new Observable<ChatAgentEvent>((observer) => {
-        agentService
-          .execute({
-            request,
-            agentId,
-            abortSignal,
-            defaultConnectorId,
-            agentParams: {
-              nextInput,
-              conversation: conversation.rounds,
-              capabilities,
-            },
-            onEvent: (event) => {
-              observer.next(event);
-            },
-          })
-          .then(
-            () => {
-              observer.complete();
-            },
-            (err) => {
-              observer.error(err);
-            }
-          );
+  return new Observable<ChatAgentEvent>((observer) => {
+    agentService
+      .execute({
+        request,
+        agentId,
+        abortSignal,
+        defaultConnectorId,
+        agentParams: {
+          nextInput,
+          conversation,
+          capabilities,
+          browserApiTools,
+        },
+        onEvent: (event) => {
+          observer.next(event);
+        },
+      })
+      .then(
+        () => {
+          observer.complete();
+        },
+        (err) => {
+          observer.error(err);
+        }
+      );
 
-        return () => {};
-      });
-    }),
-    shareReplay()
-  );
+    return () => {};
+  }).pipe(shareReplay());
 };

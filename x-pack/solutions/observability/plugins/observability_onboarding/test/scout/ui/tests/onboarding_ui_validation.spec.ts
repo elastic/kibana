@@ -122,6 +122,39 @@ test.describe('Onboarding UI Validation', () => {
   );
 
   test(
+    'completes Kubernetes onboarding flow with the keyboard only',
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
+    async ({ page, pageObjects }) => {
+      await test.step('selects Kubernetes use case and shows integration cards', async () => {
+        // tab to first item onboarding case card (radio group)
+        await page.keyTo('[data-test-subj="observabilityOnboardingUseCaseCard-host"] input', 'Tab');
+
+        // press arrow key until the kubernetes use case is selected (radio group)
+        await page.keyTo(
+          '[data-test-subj="observabilityOnboardingUseCaseCard-kubernetes"] input',
+          'ArrowRight'
+        );
+
+        await expect(pageObjects.onboarding.kubernetesQuickStartCard).toBeVisible();
+        await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
+      });
+
+      await test.step('navigates correctly when Kubernetes quick-start card is tabbed to and enter is pressed', async () => {
+        await page.keyTo(
+          '[data-test-subj="integration-card:kubernetes-quick-start"] button',
+          'Tab'
+        );
+        await page.keyboard.press('Enter');
+        expect(page.url()).toContain('/kubernetes');
+      });
+
+      await test.step('supports deep-linking to kubernetes category', async () => {
+        await pageObjects.onboarding.openWithCategory('kubernetes');
+      });
+    }
+  );
+
+  test(
     'completes Cloud onboarding flow',
     { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ page, pageObjects }) => {

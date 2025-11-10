@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
-import { stringifyWorkflowDefinition } from '../../../common/lib/yaml_utils';
 import { searchStepExecutions } from './search_step_executions';
+import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;

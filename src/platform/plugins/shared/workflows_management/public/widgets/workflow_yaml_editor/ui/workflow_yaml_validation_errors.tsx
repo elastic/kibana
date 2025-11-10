@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiLoadingSpinner,
-  EuiIcon,
-  useGeneratedHtmlId,
   EuiAccordion,
-  EuiFlexItem,
   EuiFlexGroup,
-  useEuiTheme,
+  EuiFlexItem,
   euiFontSize,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   YamlValidationErrorSeverity,
   YamlValidationResult,
@@ -108,9 +110,29 @@ export function WorkflowYAMLValidationErrors({
         size="m"
       />
     );
-    buttonContent = `${allValidationErrors?.length} validation ${
-      allValidationErrors?.length === 1 ? 'error' : 'errors'
-    }`;
+    const errorCount = allValidationErrors?.filter((error) => error.severity === 'error').length;
+    const warningCount = allValidationErrors?.filter(
+      (error) => error.severity === 'warning'
+    ).length;
+
+    const parts = [];
+    if (errorCount > 0) {
+      parts.push(
+        i18n.translate('workflowsManagement.workflowYAMLValidationErrors.errorCount', {
+          defaultMessage: '{errorCount} error{errorCount, plural, one {} other {s}}',
+          values: { errorCount },
+        })
+      );
+    }
+    if (warningCount > 0) {
+      parts.push(
+        i18n.translate('workflowsManagement.workflowYAMLValidationErrors.warningCount', {
+          defaultMessage: '{warningCount} warning{warningCount, plural, one {} other {s}}',
+          values: { warningCount },
+        })
+      );
+    }
+    buttonContent = parts.join(', ');
   }
 
   const sortedValidationErrors = allValidationErrors?.sort((a, b) => {
@@ -153,6 +175,7 @@ export function WorkflowYAMLValidationErrors({
         <EuiFlexGroup direction="column" gutterSize="s">
           {sortedValidationErrors?.map((error, index) => (
             <button
+              type="button"
               key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
               css={styles.validationError}
               onClick={() => onErrorClick?.(error)}
@@ -164,9 +187,6 @@ export function WorkflowYAMLValidationErrors({
               }}
               tabIndex={0}
             >
-              <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
-                <b>{error.startLineNumber}</b>:{error.startColumn}
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type={
@@ -187,9 +207,21 @@ export function WorkflowYAMLValidationErrors({
                   css={styles.validationErrorIcon}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem css={styles.validationErrorText}>
                 <EuiText color="text" size="xs">
                   <span>{error.message}</span>
+                </EuiText>
+                <EuiText color="subdued" size="xs">
+                  <span>
+                    <FormattedMessage
+                      id="workflowsManagement.workflowYAMLValidationErrors.lineAndColumn"
+                      defaultMessage="Ln {lineNumber}, Col {columnNumber}"
+                      values={{
+                        lineNumber: error.startLineNumber,
+                        columnNumber: error.startColumn,
+                      }}
+                    />
+                  </span>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -227,7 +259,7 @@ const componentStyles = {
     }),
   buttonContent: ({ euiTheme }: UseEuiTheme) => css`
     width: 100%;
-    padding: ${euiTheme.size.m} 0;
+    padding: ${euiTheme.size.s} 0;
     color: ${euiTheme.colors.textParagraph};
     flex-wrap: nowrap !important;
   `,
@@ -264,10 +296,12 @@ const componentStyles = {
         textDecoration: 'underline',
       },
     }),
-  validationErrorLineNumber: css({
-    minWidth: '3rem',
-    display: 'block',
-  }),
+  validationErrorText: (euiThemeContext: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      flexDirection: 'row',
+      gap: euiThemeContext.euiTheme.size.s,
+    }),
   validationErrorIcon: css({
     marginTop: '0.125rem',
     flexShrink: 0,

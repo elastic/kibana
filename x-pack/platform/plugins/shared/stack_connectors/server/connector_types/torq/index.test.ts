@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 
 import axios from 'axios';
-import type { ActionTypeConfigType, TorqActionType } from '.';
+import type { TorqConnectorType } from '.';
 import { getActionType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
@@ -19,6 +19,7 @@ import type { Services } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ConnectorTypeConfigType } from '@kbn/connector-schemas/torq';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -36,7 +37,7 @@ axios.create = jest.fn(() => axios);
 
 const services: Services = actionsMock.createServices();
 
-let actionType: TorqActionType;
+let actionType: TorqConnectorType;
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
@@ -69,7 +70,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [token]: expected value of type [string] but got [undefined]"`
+      `"error validating connector type secrets: Field \\"token\\": Required"`
     );
   });
 });
@@ -100,22 +101,22 @@ describe('config validation', () => {
     {
       name: 'invalid URL leads to error',
       url: 'iamnotavalidurl',
-      errorMsg: `"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl"`,
+      errorMsg: `"error validating connector type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl"`,
     },
     {
       name: 'incomplete URL leads to error',
       url: 'example.com/do-something',
-      errorMsg: `"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: example.com/do-something"`,
+      errorMsg: `"error validating connector type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: example.com/do-something"`,
     },
     {
       name: 'fails when URL is not a Torq webhook endpoint',
       url: 'http://mylisteningserver:9200/endpoint',
-      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io"`,
+      errorMsg: `"error validating connector type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io"`,
     },
     {
       name: 'fails when URL is an unsupported Torq webhook subdomain',
       url: 'https://hooks.anothersubdomain.torq.io/v1/test',
-      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io"`,
+      errorMsg: `"error validating connector type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io"`,
     },
   ];
   errorCases.forEach(({ name, url, errorMsg }) => {
@@ -147,7 +148,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring send to Torq action: target url is not present in allowedHosts"`
+      `"error validating connector type config: error configuring send to Torq action: target url is not present in allowedHosts"`
     );
   });
 });
@@ -181,7 +182,7 @@ describe('execute Torq action', () => {
   });
 
   test('execute with token happy flow', async () => {
-    const config: ActionTypeConfigType = {
+    const config: ConnectorTypeConfigType = {
       webhookIntegrationUrl: 'https://hooks.torq.io/v1/test',
     };
     await actionType.executor({

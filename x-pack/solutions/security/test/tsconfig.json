@@ -27,6 +27,9 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
+    {
+      "path": "security_solution_api_integration/config/services/detections_response/tsconfig.json"
+    },
     "@kbn/security-solution-test-api-clients",
     "@kbn/test",
     "@kbn/expect",
@@ -58,10 +61,10 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
-    "@kbn/task-manager-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
+    "@kbn/cloud-security-posture-graph",
   ]
 }

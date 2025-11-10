@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
-import { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
+import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { selectFocusedStepInfo } from '../../lib/store';
+import { monaco } from '@kbn/monaco';
+import { selectFocusedStepInfo } from '../../../../entities/workflows/store';
 
 export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEditor | null) => {
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
 
+  const scrollbarWidth = '24px';
   const styles = useMemo(
     () =>
       css({
@@ -24,32 +25,36 @@ export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEdito
           backgroundColor: 'rgba(0, 120, 212, 0.02)',
           border: `1px solid #0078d4`, // Explicit blue color
           borderLeft: `1px solid #0078d4`, // Explicit blue color
-          borderRadius: '3px',
+          borderRadius: '4px',
           boxShadow: `0 1px 3px rgba(0, 120, 212, 0.1)`,
           position: 'relative', // Enable relative positioning for action buttons
+          width: `calc(100% - ${scrollbarWidth}) !important`, // To add a space between decoration and the scrollbar
         },
         '.workflow-step-selected-first': {
           backgroundColor: 'rgba(0, 120, 212, 0.02)',
           borderTop: `1px solid #0078d4`, // Explicit blue color
           borderLeft: `1px solid #0078d4`, // Explicit blue color
           borderRight: `1px solid #0078d4`, // Explicit blue color
-          borderTopLeftRadius: '3px',
-          borderTopRightRadius: '3px',
+          borderTopLeftRadius: '4px',
+          borderTopRightRadius: '4px',
           position: 'relative', // Enable relative positioning for action buttons
+          width: `calc(100% - ${scrollbarWidth}) !important`, // To add a space between decoration and the scrollbar
         },
         '.workflow-step-selected-middle': {
           backgroundColor: 'rgba(0, 120, 212, 0.02)',
           borderLeft: `1px solid #0078d4`, // Left border to connect with first/last
           borderRight: `1px solid #0078d4`, // Right border to connect with first/last
+          width: `calc(100% - ${scrollbarWidth}) !important`, // To add a space between decoration and the scrollbar
         },
         '.workflow-step-selected-last': {
           backgroundColor: 'rgba(0, 120, 212, 0.02)',
           borderBottom: `1px solid #0078d4`, // Explicit blue color
           borderLeft: `1px solid #0078d4`, // Explicit blue color
           borderRight: `1px solid #0078d4`, // Explicit blue color
-          borderBottomLeftRadius: '3px',
-          borderBottomRightRadius: '3px',
+          borderBottomLeftRadius: '4px',
+          borderBottomRightRadius: '4px',
           boxShadow: `0 1px 3px rgba(0, 120, 212, 0.1)`,
+          width: `calc(100% - ${scrollbarWidth}) !important`, // To add a space between decoration and the scrollbar
         },
       }),
     []

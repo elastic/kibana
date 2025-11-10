@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
 import { useCallback, useState } from 'react';
-import type { z } from '@kbn/zod';
 import type YAML from 'yaml';
+import type { monaco } from '@kbn/monaco';
+import type { z } from '@kbn/zod';
 import { formatMonacoYamlMarker } from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
@@ -20,7 +20,7 @@ export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (
     editorModel: monaco.editor.ITextModel,
     owner: string,
-    markers: monaco.editor.IMarker[] | monaco.editor.IMarkerData[]
+    markers: monaco.editor.IMarkerData[]
   ) => monaco.editor.IMarker[] | monaco.editor.IMarkerData[];
   handleMarkersChanged: (
     editorModel: monaco.editor.ITextModel,
@@ -45,11 +45,11 @@ export function useMonacoMarkersChangedInterceptor({
     (
       editorModel: monaco.editor.ITextModel,
       owner: string,
-      markers: monaco.editor.IMarker[] | monaco.editor.IMarkerData[]
+      markers: monaco.editor.IMarkerData[]
     ) => {
       return markers.map((marker) => {
         if (owner === 'yaml') {
-          marker = formatMonacoYamlMarker(
+          return formatMonacoYamlMarker(
             marker,
             editorModel,
             workflowYamlSchema,
@@ -72,6 +72,7 @@ export function useMonacoMarkersChangedInterceptor({
       for (const marker of markers) {
         if (!isYamlValidationMarkerOwner(owner)) {
           // console.log('skipping marker for unknown owner', owner);
+          // eslint-disable-next-line no-continue
           continue;
         }
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockRouter as createMockRouter } from '@kbn/core-http-router-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 export const mockLogger = loggingSystemMock.create().get();
@@ -35,13 +35,14 @@ export const createMockWorkflowsApi = (): WorkflowsManagementApi => {
         return target[prop];
       },
     }
-  ) as any;
+  ) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
 
 export const createMockResponse = () => ({
   ok: jest.fn().mockReturnThis(),
   notFound: jest.fn().mockReturnThis(),
   badRequest: jest.fn().mockReturnThis(),
+  conflict: jest.fn().mockReturnThis(),
   customError: jest.fn().mockReturnThis(),
 });
 

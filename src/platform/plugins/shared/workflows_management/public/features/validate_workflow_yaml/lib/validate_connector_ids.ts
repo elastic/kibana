@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
-import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/snippets/generate_connector_snippet';
+import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
-  dynamicConnectorTypes: Record<string, any> | null,
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null,
   connectorsManagementUrl?: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];

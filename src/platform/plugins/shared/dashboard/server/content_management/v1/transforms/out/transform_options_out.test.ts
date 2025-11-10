@@ -8,22 +8,12 @@
  */
 
 import { transformOptionsOut } from './transform_options_out';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
 describe('transformOptionsOut', () => {
-  it('should parse JSON and set default options', () => {
+  it('should not provide any defaults', () => {
     const optionsJSON = JSON.stringify({});
     const result = transformOptionsOut(optionsJSON);
-    expect(result).toEqual(DEFAULT_DASHBOARD_OPTIONS);
-  });
-
-  it('should override default options with provided options', () => {
-    const optionsJSON = JSON.stringify({ hidePanelTitles: true });
-    const result = transformOptionsOut(optionsJSON);
-    expect(result).toEqual({
-      ...DEFAULT_DASHBOARD_OPTIONS,
-      hidePanelTitles: true,
-    });
+    expect(result).toEqual({});
   });
 
   it('should pick only supported options', () => {
@@ -33,7 +23,6 @@ describe('transformOptionsOut', () => {
     });
     const result = transformOptionsOut(optionsJSON);
     expect(result).toEqual({
-      ...DEFAULT_DASHBOARD_OPTIONS,
       hidePanelTitles: true,
     });
     expect(result).not.toHaveProperty('unsupportedOption');
