@@ -14,10 +14,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
+import { MAINTENANCE_WINDOWS_APP_ID } from '@kbn/maintenance-windows-plugin/common';
 import type { AlertNavigationHandler } from './alert_navigation_registry';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
-import { MAINTENANCE_WINDOWS_APP_ID, getMaxAlertLimit } from '../common';
+import { getMaxAlertLimit } from '../common';
 import type { Rule } from '../common';
 
 export interface PluginSetupContract {

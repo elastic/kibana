@@ -16,8 +16,8 @@ import {
   EuiPopover,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import * as i18n from '../translations';
-import type { MaintenanceWindowStatus } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface TableActionsPopoverProps {

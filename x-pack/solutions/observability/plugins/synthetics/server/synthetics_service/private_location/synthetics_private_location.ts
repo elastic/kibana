@@ -8,7 +8,7 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
   BROWSER_TEST_NOW_RUN,

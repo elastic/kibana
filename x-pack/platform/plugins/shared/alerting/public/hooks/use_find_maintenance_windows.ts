@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import { type MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 import { findMaintenanceWindows } from '../services/maintenance_windows_api/find';
-import { type MaintenanceWindowStatus } from '../../common';
 
 interface UseFindMaintenanceWindowsProps {
   enabled?: boolean;

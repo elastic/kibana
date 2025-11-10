@@ -15,7 +15,7 @@ import {
   getMWTelemetry,
 } from './get_telemetry_from_kibana';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 
 const elasticsearch = elasticsearchServiceMock.createStart();

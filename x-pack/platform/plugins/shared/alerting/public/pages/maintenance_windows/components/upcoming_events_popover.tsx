@@ -23,9 +23,9 @@ import {
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { recurringSummary } from '@kbn/response-ops-recurring-schedule-form/utils/recurring_summary';
 import { getPresets } from '@kbn/response-ops-recurring-schedule-form/utils/get_presets';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/maintenance-windows-plugin/common';
 import * as i18n from '../translations';
-import type { MaintenanceWindow } from '../../../../common';
-import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
 

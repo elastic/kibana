@@ -9,12 +9,12 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 
+import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '@kbn/maintenance-windows-plugin/common';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
 import * as i18n from './translations';
 import { PageHeader } from './components/page_header';
 import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
-import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
 import { useGetMaintenanceWindow } from '../../hooks/use_get_maintenance_window';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 

@@ -7,7 +7,7 @@
 
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import type { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';

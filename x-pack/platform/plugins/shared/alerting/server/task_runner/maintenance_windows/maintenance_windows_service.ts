@@ -6,9 +6,9 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { MaintenanceWindow } from '../../application/maintenance_window/types';
+import type { MaintenanceWindowClient } from '@kbn/maintenance-windows-plugin/server';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { filterMaintenanceWindowsIds } from './get_maintenance_windows';
-import type { MaintenanceWindowClientApi } from '../../types';
 import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { withAlertingSpan } from '../lib';
 
@@ -16,7 +16,7 @@ export const DEFAULT_CACHE_INTERVAL_MS = 60000; // 1 minute cache
 
 interface MaintenanceWindowServiceOpts {
   cacheInterval?: number;
-  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
+  getMaintenanceWindowClientWithRequest: (request: KibanaRequest) => MaintenanceWindowClient;
   logger: Logger;
 }
 

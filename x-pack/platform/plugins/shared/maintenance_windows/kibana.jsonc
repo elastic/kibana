@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/maintenance-windows-plugin",
+  "owner": "@elastic/response-ops",
+  "description": "Exposes the Maintenance Windows feature to define time windows to suppress notifications.",
+  "plugin": {
+    "id": "maintenanceWindows",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "maintenanceWindows"],
+    "requiredPlugins": ["features", "licensing", "taskManager", "navigation"],
+    "extraPublicDirs": ["common"]
+  }
+}

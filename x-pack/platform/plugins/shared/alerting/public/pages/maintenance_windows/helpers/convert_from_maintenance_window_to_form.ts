@@ -14,8 +14,9 @@ import type {
   RecurringSchedule,
 } from '@kbn/response-ops-recurring-schedule-form/types';
 import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FormProps } from '../components/schema';
-import type { RRuleParams, MaintenanceWindow } from '../../../../common';
+import type { RRuleParams } from '../../../../common';
 
 export const convertFromMaintenanceWindowToForm = (
   maintenanceWindow: MaintenanceWindow

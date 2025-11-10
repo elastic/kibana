@@ -137,7 +137,8 @@
     "@kbn/discover-utils",
     "@kbn/deeplinks-management",
     "@kbn/observability-nav-icons",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/maintenance-windows-plugin"
   ],
   "exclude": ["target/**/*"]
 }

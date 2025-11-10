@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '@kbn/alerting-plugin/common';
-import type { MaintenanceWindowCreateBody } from '@kbn/alerting-plugin/common';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '@kbn/maintenance-windows-plugin/common';
+import type { MaintenanceWindowCreateBody } from '@kbn/maintenance-windows-plugin/common';
 import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
 import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../../tasks/login';

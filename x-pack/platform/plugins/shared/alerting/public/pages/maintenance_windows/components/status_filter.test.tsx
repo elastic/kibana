@@ -11,7 +11,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { StatusFilter } from './status_filter';
-import { MaintenanceWindowStatus } from '../../../../common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 
 describe('StatusFilter', () => {
   let appMockRenderer: AppMockRenderer;
