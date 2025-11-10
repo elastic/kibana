@@ -91,7 +91,7 @@ export function QuickEditVisor({
 
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
-    if (sourceFromUpdatedQuery && sourceFromUpdatedQuery !== selectedSource[0]?.label) {
+    if (sourceFromUpdatedQuery && selectedSource.length === 0) {
       setSelectedSource([{ label: sourceFromUpdatedQuery }]);
     }
     setSearchValue('');
