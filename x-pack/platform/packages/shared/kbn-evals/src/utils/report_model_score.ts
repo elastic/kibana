@@ -183,63 +183,90 @@ function buildReportHeader(model: Model, evaluatorModel: Model): string[] {
     `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`,
   ];
 }
-
 export interface EvaluatorFormatConfig {
-  hidePercentage?: boolean;
   decimalPlaces?: number;
   unitSuffix?: string;
-  showDecimalOnlyIfNeeded?: boolean;
+  statsToInclude?: Array<keyof EvaluatorStats>;
+}
+
+export interface EvaluatorScoreGroup {
+  evaluatorNames: string[];
+  combinedColumnName: string;
 }
 
 export interface EvaluationTableOptions {
   firstColumnHeader?: string;
   styleRowName?: (name: string) => string;
   statsToInclude?: Array<keyof EvaluatorStats>;
-  decimalPlaces?: number;
   evaluatorFormats?: Map<string, EvaluatorFormatConfig>;
+  evaluatorScoreGroups?: EvaluatorScoreGroup[];
 }
 
 /**
- * Token evaluator names that should be combined into a single column
+ * Returns the default evaluator score groups configuration
+ * By default, token evaluators are grouped into a single column
  */
-const TOKEN_EVALUATORS = ['Input Tokens', 'Output Tokens', 'Cached Tokens'] as const;
-const COMBINED_TOKENS_COLUMN = 'Tokens';
+function getDefaultEvaluatorScoreGroups(): EvaluatorScoreGroup[] {
+  return [
+    {
+      evaluatorNames: ['Input Tokens', 'Output Tokens', 'Cached Tokens'],
+      combinedColumnName: 'Tokens',
+    },
+  ];
+}
 
 /**
  * Gets default evaluator-specific format configurations
  */
 function getDefaultEvaluatorFormats(): Map<string, EvaluatorFormatConfig> {
   return new Map([
-    ['Input Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
-    ['Output Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
-    ['Cached Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
     [
-      COMBINED_TOKENS_COLUMN,
-      { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true },
+      'Input Tokens',
+      { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
     ],
-    ['Tool Calls', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
-    ['Latency', { hidePercentage: true, unitSuffix: 's' }],
+    [
+      'Output Tokens',
+      { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+    ],
+    [
+      'Cached Tokens',
+      { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+    ],
+    ['Tool Calls', { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'min', 'max'] }],
+    ['Latency', { unitSuffix: 's', statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] }],
   ]);
 }
 
 /**
- * Combines token evaluator columns into a single column
- * Returns the new column names and a map indicating which columns are combined
+ * Groups evaluator scores based on evaluator score group configurations
+ * Returns the new column names and a map of combined column names to their group configs
  */
-function combineTokenColumns(evaluatorNames: string[]): {
+function groupEvaluatorScores(
+  evaluatorNames: string[],
+  evaluatorScoreGroups: EvaluatorScoreGroup[]
+): {
   columnNames: string[];
-  hasTokens: boolean;
+  groupMapping: Map<string, EvaluatorScoreGroup>;
 } {
-  const hasAllTokenEvaluators = TOKEN_EVALUATORS.every((name) => evaluatorNames.includes(name));
+  const groupMapping = new Map<string, EvaluatorScoreGroup>();
+  const evaluatorsToRemove = new Set<string>();
 
-  if (!hasAllTokenEvaluators) {
-    return { columnNames: evaluatorNames, hasTokens: false };
+  for (const group of evaluatorScoreGroups) {
+    const hasAllEvaluators = group.evaluatorNames.every((name) => evaluatorNames.includes(name));
+
+    if (hasAllEvaluators) {
+      groupMapping.set(group.combinedColumnName, group);
+      group.evaluatorNames.forEach((name) => evaluatorsToRemove.add(name));
+    }
   }
 
-  const columnNames = evaluatorNames.filter((name) => !TOKEN_EVALUATORS.includes(name as any));
-  columnNames.push(COMBINED_TOKENS_COLUMN);
+  const columnNames = evaluatorNames.filter((name) => !evaluatorsToRemove.has(name));
 
-  return { columnNames, hasTokens: true };
+  for (const [combinedName] of groupMapping) {
+    columnNames.push(combinedName);
+  }
+
+  return { columnNames, groupMapping };
 }
 
 /**
@@ -254,19 +281,20 @@ export function createEvaluationReportTable(
     firstColumnHeader = 'Dataset',
     styleRowName = (name) => name,
     statsToInclude,
-    decimalPlaces = 2,
     evaluatorFormats,
+    evaluatorScoreGroups = getDefaultEvaluatorScoreGroups(),
   } = options;
 
   const { datasetScoresWithStats, repetitions } = report;
 
   const evaluatorNames = getUniqueEvaluatorNames(datasetScoresWithStats);
-  const { columnNames, hasTokens } = combineTokenColumns(evaluatorNames);
+  const { columnNames, groupMapping } = groupEvaluatorScores(evaluatorNames, evaluatorScoreGroups);
   const overallStats = calculateOverallStats(datasetScoresWithStats);
   const totalExamples = sumBy(datasetScoresWithStats, (d) => d.numExamples);
 
   const defaultFormats = getDefaultEvaluatorFormats();
   const mergedFormats = new Map([...defaultFormats, ...(evaluatorFormats || [])]);
+  const defaultDecimalPlaces = 2;
 
   const formatExampleCount = (numExamples: number): string => {
     return repetitions > 1
@@ -274,31 +302,30 @@ export function createEvaluationReportTable(
       : numExamples.toString();
   };
 
-  const examplesHeader =
-    repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
-
+  const examplesHeader = '#';
   const tableHeaders = [firstColumnHeader, examplesHeader, ...columnNames];
 
   const datasetRows = datasetScoresWithStats.map((dataset) => {
     const row = [styleRowName(dataset.name), formatExampleCount(dataset.numExamples)];
 
     columnNames.forEach((columnName) => {
-      if (hasTokens && columnName === COMBINED_TOKENS_COLUMN) {
-        const inputStats = dataset.evaluatorStats.get('Input Tokens');
-        const outputStats = dataset.evaluatorStats.get('Output Tokens');
-        const cachedStats = dataset.evaluatorStats.get('Cached Tokens');
+      const group = groupMapping.get(columnName);
 
-        const evaluatorConfig = mergedFormats.get(COMBINED_TOKENS_COLUMN) || {};
-        const tokenDecimalPlaces = evaluatorConfig.decimalPlaces ?? decimalPlaces;
-        const showDecimalOnlyIfNeeded = evaluatorConfig.showDecimalOnlyIfNeeded ?? false;
+      if (group) {
+        const evaluatorStatsMap = new Map<string, Partial<EvaluatorStats>>();
+        group.evaluatorNames.forEach((evaluatorName) => {
+          const stats = dataset.evaluatorStats.get(evaluatorName);
+          if (stats) {
+            evaluatorStatsMap.set(evaluatorName, stats);
+          }
+        });
 
-        const cellContent = formatCombinedTokensCell(
-          inputStats,
-          outputStats,
-          cachedStats,
+        const cellContent = formatEvaluatorScoreGroupCell(
+          evaluatorStatsMap,
+          group,
           false,
-          tokenDecimalPlaces,
-          showDecimalOnlyIfNeeded,
+          defaultDecimalPlaces,
+          mergedFormats,
           statsToInclude
         );
         row.push(cellContent);
@@ -309,7 +336,7 @@ export function createEvaluationReportTable(
             stats,
             columnName,
             false,
-            decimalPlaces,
+            defaultDecimalPlaces,
             mergedFormats,
             statsToInclude
           );
@@ -329,22 +356,23 @@ export function createEvaluationReportTable(
   ];
 
   columnNames.forEach((columnName) => {
-    if (hasTokens && columnName === COMBINED_TOKENS_COLUMN) {
-      const inputStats = overallStats.get('Input Tokens');
-      const outputStats = overallStats.get('Output Tokens');
-      const cachedStats = overallStats.get('Cached Tokens');
+    const group = groupMapping.get(columnName);
 
-      const evaluatorConfig = mergedFormats.get(COMBINED_TOKENS_COLUMN) || {};
-      const tokenDecimalPlaces = evaluatorConfig.decimalPlaces ?? decimalPlaces;
-      const showDecimalOnlyIfNeeded = evaluatorConfig.showDecimalOnlyIfNeeded ?? false;
+    if (group) {
+      const evaluatorStatsMap = new Map<string, Partial<EvaluatorStats>>();
+      group.evaluatorNames.forEach((evaluatorName) => {
+        const stats = overallStats.get(evaluatorName);
+        if (stats) {
+          evaluatorStatsMap.set(evaluatorName, stats);
+        }
+      });
 
-      const cellContent = formatCombinedTokensCell(
-        inputStats,
-        outputStats,
-        cachedStats,
+      const cellContent = formatEvaluatorScoreGroupCell(
+        evaluatorStatsMap,
+        group,
         true,
-        tokenDecimalPlaces,
-        showDecimalOnlyIfNeeded,
+        defaultDecimalPlaces,
+        mergedFormats,
         statsToInclude
       );
       overallRow.push(cellContent);
@@ -355,7 +383,7 @@ export function createEvaluationReportTable(
           stats,
           columnName,
           true,
-          decimalPlaces,
+          defaultDecimalPlaces,
           mergedFormats,
           statsToInclude
         );
@@ -372,71 +400,34 @@ export function createEvaluationReportTable(
 }
 
 /**
- * Formats a combined tokens cell showing input, output, and cached tokens as vertical sections
+ * Formats an evaluator score group cell showing multiple evaluators as vertical sections
  */
-function formatCombinedTokensCell(
-  inputStats: Partial<EvaluatorStats> | undefined,
-  outputStats: Partial<EvaluatorStats> | undefined,
-  cachedStats: Partial<EvaluatorStats> | undefined,
+function formatEvaluatorScoreGroupCell(
+  evaluatorStatsMap: Map<string, Partial<EvaluatorStats>>,
+  group: EvaluatorScoreGroup,
   isBold: boolean,
-  decimalPlaces: number,
-  showDecimalOnlyIfNeeded: boolean,
+  defaultDecimalPlaces: number,
+  evaluatorFormats: Map<string, EvaluatorFormatConfig>,
   statsToInclude?: Array<keyof EvaluatorStats>
 ): string {
-  const colorFn = isBold ? chalk.bold.green : chalk.cyan;
   const sections: string[] = [];
   const separator = chalk.gray('────────────────');
 
-  const labels = { mean: 'mean', median: 'median', stdDev: 'std', min: 'min', max: 'max' };
-
-  const formatNumber = (value: number | undefined): string => {
-    if (value === undefined) return '-';
-    if (showDecimalOnlyIfNeeded && Number.isInteger(value)) {
-      return value.toString();
+  for (const evaluatorName of group.evaluatorNames) {
+    const stats = evaluatorStatsMap.get(evaluatorName);
+    if (stats && stats.count !== undefined && stats.count > 0) {
+      const statsContent = formatStatsCell(
+        stats,
+        evaluatorName,
+        isBold,
+        defaultDecimalPlaces,
+        evaluatorFormats,
+        statsToInclude
+      );
+      if (statsContent) {
+        sections.push(`${chalk.white(evaluatorName)}\n${statsContent}`);
+      }
     }
-    return value.toFixed(decimalPlaces);
-  };
-
-  const shouldInclude = (stat: keyof EvaluatorStats) => {
-    return !statsToInclude || statsToInclude.includes(stat);
-  };
-
-  const formatTokenSection = (label: string, stats: Partial<EvaluatorStats>): string => {
-    const lines: string[] = [chalk.white(label)];
-
-    if (shouldInclude('mean') && stats.mean !== undefined) {
-      lines.push(colorFn(`${labels.mean}: ${formatNumber(stats.mean)}`));
-    }
-
-    if (shouldInclude('median') && stats.median !== undefined) {
-      lines.push(colorFn(`${labels.median}: ${formatNumber(stats.median)}`));
-    }
-
-    if (shouldInclude('stdDev') && stats.stdDev !== undefined) {
-      lines.push(colorFn(`${labels.stdDev}: ${formatNumber(stats.stdDev)}`));
-    }
-
-    if (shouldInclude('min') && stats.min !== undefined) {
-      lines.push(colorFn(`${labels.min}: ${formatNumber(stats.min)}`));
-    }
-
-    if (shouldInclude('max') && stats.max !== undefined) {
-      lines.push(colorFn(`${labels.max}: ${formatNumber(stats.max)}`));
-    }
-
-    return lines.join('\n');
-  };
-
-  if (inputStats && inputStats.count !== undefined && inputStats.count > 0) {
-    sections.push(formatTokenSection('Input Tokens', inputStats));
-  }
-
-  if (outputStats && outputStats.count !== undefined && outputStats.count > 0) {
-    sections.push(formatTokenSection('Output Tokens', outputStats));
-  }
-
-  if (cachedStats && cachedStats.count !== undefined && cachedStats.count > 0) {
-    sections.push(formatTokenSection('Cached Tokens', cachedStats));
   }
 
   if (sections.length === 0) {
@@ -464,46 +455,43 @@ function formatStatsCell(
 
   const evaluatorConfig = evaluatorFormats.get(evaluatorName) || {};
   const decimalPlaces = evaluatorConfig.decimalPlaces ?? defaultDecimalPlaces;
-  const showDecimalOnlyIfNeeded = evaluatorConfig.showDecimalOnlyIfNeeded ?? false;
   const unitSuffix = evaluatorConfig.unitSuffix || '';
-  const hidePercentage = evaluatorConfig.hidePercentage ?? false;
+  const effectiveStatsToInclude = evaluatorConfig.statsToInclude || statsToInclude;
 
-  const labels = { mean: 'mean', median: 'median', stdDev: 'std', min: 'min', max: 'max' };
+  const labels: Partial<Record<keyof EvaluatorStats, string>> = {
+    percentage: 'percentage',
+    mean: 'mean',
+    median: 'median',
+    stdDev: 'std',
+    min: 'min',
+    max: 'max',
+  };
 
   const formatNumber = (value: number): string => {
-    if (showDecimalOnlyIfNeeded && Number.isInteger(value)) {
-      return value.toString();
+    if (Number.isInteger(value)) {
+      return value.toFixed(0);
     }
     return value.toFixed(decimalPlaces);
   };
 
   const shouldInclude = (stat: keyof EvaluatorStats) => {
-    return !statsToInclude || statsToInclude.includes(stat);
+    return !effectiveStatsToInclude || effectiveStatsToInclude.includes(stat);
   };
 
-  if (shouldInclude('percentage') && stats.percentage !== undefined && !hidePercentage) {
-    lines.push(percentageColor(`${(stats.percentage * 100).toFixed(1)}%`));
-  }
+  const defaultFormatter = (key: keyof EvaluatorStats, value: number): string => {
+    return colorFn(`${labels[key]}: ${formatNumber(value)}${unitSuffix}`);
+  };
 
-  if (shouldInclude('mean') && stats.mean !== undefined) {
-    lines.push(colorFn(`${labels.mean}: ${formatNumber(stats.mean)}${unitSuffix}`));
-  }
+  const customFormatters: Partial<Record<keyof EvaluatorStats, (value: number) => string>> = {
+    percentage: (value) => percentageColor(`${(value * 100).toFixed(1)}%`),
+  };
 
-  if (shouldInclude('median') && stats.median !== undefined) {
-    lines.push(colorFn(`${labels.median}: ${formatNumber(stats.median)}${unitSuffix}`));
-  }
-
-  if (shouldInclude('stdDev') && stats.stdDev !== undefined) {
-    lines.push(colorFn(`${labels.stdDev}: ${formatNumber(stats.stdDev)}${unitSuffix}`));
-  }
-
-  if (shouldInclude('min') && stats.min !== undefined) {
-    lines.push(colorFn(`${labels.min}: ${formatNumber(stats.min)}${unitSuffix}`));
-  }
-
-  if (shouldInclude('max') && stats.max !== undefined) {
-    lines.push(colorFn(`${labels.max}: ${formatNumber(stats.max)}${unitSuffix}`));
-  }
+  (Object.keys(labels) as Array<keyof EvaluatorStats>).forEach((key) => {
+    if (shouldInclude(key) && stats[key] !== undefined) {
+      const formatter = customFormatters[key] || ((value: number) => defaultFormatter(key, value));
+      lines.push(formatter(stats[key] as number));
+    }
+  });
 
   return lines.join('\n');
 }
