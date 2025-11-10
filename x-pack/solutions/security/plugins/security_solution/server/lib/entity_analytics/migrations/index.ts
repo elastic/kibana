@@ -57,7 +57,7 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await updateRiskScoreMappings(paramsWithScopedLogger);
   await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
   await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
-  if (experimentalFeatures.entityThreatHuntingEnabled) {   
+  if (experimentalFeatures.entityThreatHuntingEnabled) {
     await updateThreatHuntingHypothesisDefinitions(paramsWithScopedLogger);
   }
 };
