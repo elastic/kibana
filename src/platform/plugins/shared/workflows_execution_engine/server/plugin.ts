@@ -25,7 +25,11 @@ import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import type { WorkflowsExecutionEngineConfig } from './config';
 
-import { resumeWorkflow, runWorkflow } from './execution_functions';
+import {
+  checkAndSkipIfExistingScheduledExecution,
+  resumeWorkflow,
+  runWorkflow,
+} from './execution_functions';
 import { LogsRepository } from './repositories/logs_repository/logs_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -43,89 +47,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
-
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
-
-/**
- * Checks if there's an existing non-terminal scheduled execution for a workflow.
- * If found, creates a SKIPPED execution and returns true.
- * If not found, returns false.
- */
-export async function checkAndSkipIfExistingScheduledExecution(
-  workflow: WorkflowExecutionEngineModel,
-  spaceId: string,
-  esClient: Client,
-  workflowExecutionRepository: WorkflowExecutionRepository,
-  logger: Logger
-): Promise<boolean> {
-  // Check if there's already a scheduled workflow execution in non-terminal state
-  const existingExecutionsResponse = await esClient.search<EsWorkflowExecution>({
-    index: WORKFLOWS_EXECUTIONS_INDEX,
-    query: {
-      bool: {
-        must: [
-          { term: { workflowId: workflow.id } },
-          { term: { spaceId } },
-          { term: { triggeredBy: 'scheduled' } },
-        ],
-        must_not: [
-          {
-            terms: {
-              status: [
-                ExecutionStatus.COMPLETED,
-                ExecutionStatus.FAILED,
-                ExecutionStatus.CANCELLED,
-                ExecutionStatus.SKIPPED,
-                ExecutionStatus.TIMED_OUT,
-              ],
-            },
-          },
-        ],
-      },
-    },
-    size: 1,
-  });
-
-  if (existingExecutionsResponse.hits.hits.length > 0) {
-    // There's already a non-terminal scheduled execution - create SKIPPED execution
-    const workflowCreatedAt = new Date();
-    const skippedExecution: Partial<EsWorkflowExecution> = {
-      id: generateUuid(),
-      spaceId,
-      workflowId: workflow.id,
-      isTestRun: workflow.isTestRun,
-      workflowDefinition: workflow.definition,
-      yaml: workflow.yaml,
-      context: {
-        workflowRunId: `scheduled-${Date.now()}`,
-        spaceId,
-        inputs: {},
-        event: {
-          type: 'scheduled',
-          timestamp: new Date().toISOString(),
-          source: 'task-manager',
-        },
-        triggeredBy: 'scheduled',
-      },
-      status: ExecutionStatus.SKIPPED,
-      createdAt: workflowCreatedAt.toISOString(),
-      createdBy: '',
-      triggeredBy: 'scheduled',
-      cancelRequested: true,
-      cancellationReason: 'Skipped due to existing non-terminal scheduled execution',
-      cancelledAt: workflowCreatedAt.toISOString(),
-      cancelledBy: 'system',
-    };
-    await workflowExecutionRepository.createWorkflowExecution(skippedExecution);
-    logger.info(
-      `Skipping scheduled workflow ${workflow.id} execution - found existing non-terminal scheduled execution`
-    );
-    return true;
-  }
-
-  return false;
-}
 
 export class WorkflowsExecutionEnginePlugin
   implements
@@ -295,7 +217,6 @@ export class WorkflowsExecutionEnginePlugin
               const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
                 workflow,
                 spaceId,
-                esClient,
                 workflowExecutionRepository,
                 logger
               );

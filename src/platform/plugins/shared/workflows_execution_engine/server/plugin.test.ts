@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { checkAndSkipIfExistingScheduledExecution } from './plugin';
+import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
 
@@ -71,7 +71,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
         spaceId,
-        esClient,
         workflowExecutionRepository,
         logger
       );
@@ -132,7 +131,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
         spaceId,
-        esClient,
         workflowExecutionRepository,
         logger
       );
@@ -203,7 +201,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         const result = await checkAndSkipIfExistingScheduledExecution(
           workflow,
           spaceId,
-          esClient,
           workflowExecutionRepository,
           logger
         );
@@ -234,7 +231,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         const result = await checkAndSkipIfExistingScheduledExecution(
           workflow,
           spaceId,
-          esClient,
           workflowExecutionRepository,
           logger
         );
@@ -256,7 +252,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       const result = await checkAndSkipIfExistingScheduledExecution(
         { ...workflow, id: 'different-workflow-id' },
         spaceId,
-        esClient,
         workflowExecutionRepository,
         logger
       );
@@ -276,7 +271,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
         'different-space',
-        esClient,
         workflowExecutionRepository,
         logger
       );
@@ -296,7 +290,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
         spaceId,
-        esClient,
         workflowExecutionRepository,
         logger
       );
@@ -328,7 +321,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       await checkAndSkipIfExistingScheduledExecution(
         workflow,
         spaceId,
-        esClient,
         workflowExecutionRepository,
         logger
       );
