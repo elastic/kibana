@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButtonGroup,
@@ -14,7 +13,6 @@ import {
   EuiPageHeaderSection,
   EuiPageTemplate,
   EuiSelect,
-  useEuiTheme,
   type EuiButtonGroupOptionProps,
   EuiSpacer,
 } from '@elastic/eui';
@@ -56,7 +54,6 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
   onCopyPlayground,
 }) => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
-  const { euiTheme } = useEuiTheme();
   const options: Array<EuiButtonGroupOptionProps & { id: PlaygroundViewMode }> = [
     {
       id: PlaygroundViewMode.preview,
@@ -81,10 +78,10 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
 
   return (
     <EuiPageTemplate.Header
-      css={{
+      css={({ euiTheme }) => ({
         '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' },
         backgroundColor: euiTheme.colors.emptyShade,
-      }}
+      })}
       paddingSize="s"
       data-test-subj="saved-playground-header"
     >
@@ -126,10 +123,14 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
           data-test-subj="viewModeSelector"
         />
       </EuiPageHeaderSection>
-      <EuiPageHeaderSection>
+      <EuiPageHeaderSection
+        css={({ euiTheme }) => ({
+          paddingRight: euiTheme.size.s,
+        })}
+      >
         <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="playground-header-actions">
           <DataActionButton />
-          <EuiSpacer css={css({ borderLeft: euiTheme.border.thin })} />
+          <EuiSpacer css={({ euiTheme }) => ({ borderLeft: euiTheme.border.thin })} />
           <ViewCodeAction selectedPageMode={pageMode} />
           <EuiSpacer />
           <SavedPlaygroundSaveButton hasChanges={hasChanges} />
