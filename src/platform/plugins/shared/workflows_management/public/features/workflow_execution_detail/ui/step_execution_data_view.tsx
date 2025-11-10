@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { JSONDataView } from '../../../shared/ui/json_data_view';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 
 const Titles = {
   output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {
@@ -61,6 +62,33 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
             values={{ mode: Titles[mode].toLowerCase() }}
           />
         </EuiText>
+      );
+    }
+
+    // Check if the data is a markdown string (common patterns: starts with #, contains markdown syntax)
+    const isMarkdown = useMemo(() => {
+      if (typeof data === 'string') {
+        const trimmed = data.trim();
+        // Check for common markdown patterns
+        return (
+          trimmed.startsWith('#') ||
+          (trimmed.includes('##') && trimmed.includes('**')) ||
+          (trimmed.includes('[') && trimmed.includes('](')) ||
+          trimmed.includes('\n##') ||
+          trimmed.includes('\n###')
+        );
+      }
+      return false;
+    }, [data]);
+
+    // If it's markdown, render it with the Markdown component
+    if (isMarkdown && typeof data === 'string') {
+      // Replace literal \n with actual newlines if present
+      const processedMarkdown = data.replace(/\\n/g, '\n');
+      return (
+        <div style={{ padding: '16px' }}>
+          <Markdown markdown={processedMarkdown} openLinksInNewTab={true} />
+        </div>
       );
     }
 

@@ -7,12 +7,14 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ToolsSetup } from '@kbn/onechat-plugin/server';
-import { observabilityUpdatesTool } from './observability_updates_tool';
+import { observabilityAlertsTool } from './observability_alerts_tool';
+import { observabilityCatchupTool } from './observability_catchup_tool';
 
 export function registerObservabilityTool(toolsSetup: ToolsSetup, logger: Logger): void {
-  logger.debug('Registering Observability CatchUp tool');
+  logger.debug('Registering Observability tools');
 
-  toolsSetup.register(observabilityUpdatesTool());
+  toolsSetup.register(observabilityAlertsTool());
+  toolsSetup.register(observabilityCatchupTool());
 
-  logger.info('Registered Observability CatchUp tool');
+  logger.info('Registered Observability tools');
 }

@@ -26,8 +26,11 @@ When the user requests a catch-up without specifying a time range, use the follo
       instructions: `**CRITICAL: Tool Selection Priority - READ IN ORDER**
 
 1. **OBSERVABILITY QUERIES**
-   When the user asks about Observability, observability alerts, observability updates, "catch me up on Observability", or wants to catch up on Observability activity, use 'platform.catchup.observability.summary'.
-   Examples: "catch me up on Observability", "observability updates", "observability alerts", "what happened in Observability"
+   When the user asks about Observability, observability updates, or "catch me up on Observability", use 'platform.catchup.observability.summary'.
+   When the user asks specifically about observability alerts only, use 'platform.catchup.observability.alerts'.
+   Examples: 
+   - "catch me up on Observability", "observability updates", "what happened in Observability" → Use 'platform.catchup.observability.summary'
+   - "observability alerts", "show me observability alerts" → Use 'platform.catchup.observability.alerts'
 
 2. **EXTERNAL SYSTEMS**
    When the user asks about external systems, ALWAYS use the specialized external tools:
@@ -101,7 +104,9 @@ When formatting your responses, use markdown to improve readability:
             'platform.catchup.security.rule_changes',
             // Security summary tool (for general catch-up queries)
             'platform.catchup.security.summary',
-            // Observability summary tool (for observability catch-up queries)
+            // Individual observability tools (for specific queries)
+            'platform.catchup.observability.alerts',
+            // Observability summary tool (for general catch-up queries)
             'platform.catchup.observability.summary',
             // 'platform.catchup.search.summary', // Temporarily disabled
             'platform.catchup.external.slack',

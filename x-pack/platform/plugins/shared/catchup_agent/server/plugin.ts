@@ -26,6 +26,8 @@ import { registerObservabilityTool } from './tools/observability/register_tools'
 import { registerExternalTools } from './tools/external/register_tools';
 import { registerCorrelationTool } from './tools/correlation/register_tools';
 import { registerSummaryTool } from './tools/summary/register_tools';
+import { registerPrioritizationTools } from './tools/prioritization/register_tools';
+import { registerWorkflowTools } from './tools/workflow/register_tools';
 import { registerCatchupAgent } from './agents/register_agent';
 import { setPluginServices } from './services/service_locator';
 
@@ -91,6 +93,14 @@ export class CatchupAgentPlugin
       this.logger.info('Registering Summary tool...');
       registerSummaryTool(plugins.onechat.tools, this.logger);
       this.logger.info('Summary tool registered');
+
+      this.logger.info('Registering Prioritization tools...');
+      registerPrioritizationTools(plugins.onechat.tools, this.logger);
+      this.logger.info('Prioritization tools registered');
+
+      this.logger.info('Registering Workflow tools...');
+      registerWorkflowTools(plugins.onechat.tools, this.logger);
+      this.logger.info('Workflow tools registered');
 
       // Register the main agent
       this.logger.info('Registering CatchUp Agent...');

@@ -38,7 +38,7 @@ export const detectionsSummaryTool = (): BuiltinToolDefinition<typeof detections
     
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get detections from November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
-Returns aggregated statistics including total count, counts by severity, and top rules.`,
+Returns aggregated statistics including total count, counts by severity, and sample alerts with entity fields (host.name, user.name, source.ip, destination.ip, etc.) prioritized by severity.`,
     schema: detectionsSummarySchema,
     handler: async ({ start, end }, { request, esClient, logger }) => {
       try {
@@ -209,11 +209,78 @@ Returns aggregated statistics including total count, counts by severity, and top
             )}`
           );
 
+          // Fetch sample alerts with entity fields, prioritizing critical/high severity
+          // Limit to top 20 alerts to avoid overwhelming the response
+          // Note: ES|QL doesn't support _id directly, so we'll use metadata._id if available
+          const alertsQuery = `FROM ${indexPattern}
+| WHERE ${dateFilter}
+  AND kibana.alert.workflow_status == "open"
+  AND kibana.alert.building_block_type IS NULL
+| EVAL severity = COALESCE(kibana.alert.severity, "unknown")
+| SORT severity DESC, @timestamp DESC
+| LIMIT 20
+| KEEP 
+    @timestamp,
+    severity,
+    kibana.alert.rule.name,
+    kibana.alert.rule.uuid,
+    kibana.alert.rule.rule_id,
+    kibana.alert.reason,
+    kibana.alert.risk_score,
+    host.name,
+    host.ip,
+    user.name,
+    user.id,
+    source.ip,
+    source.port,
+    destination.ip,
+    destination.port,
+    event.action,
+    event.category,
+    event.type,
+    message`;
+
+          let sampleAlerts: any[] = [];
+          try {
+            logger.info(`[CatchUp Agent] Fetching sample alerts with entity fields...`);
+            const alertsResult = await executeEsql({
+              query: alertsQuery,
+              esClient: esClient.asCurrentUser,
+            });
+
+            // Transform ES|QL result into array of alert objects
+            if (alertsResult.columns && alertsResult.values) {
+              const columnMap = new Map(
+                alertsResult.columns.map((col: any, idx: number) => [col.name, idx])
+              );
+
+              sampleAlerts = alertsResult.values.map((row: any[]) => {
+                const alert: any = {};
+                columnMap.forEach((index, fieldName) => {
+                  const value = row[index];
+                  if (value !== null && value !== undefined) {
+                    alert[fieldName] = value;
+                  }
+                });
+                return alert;
+              });
+
+              logger.info(
+                `[CatchUp Agent] Fetched ${sampleAlerts.length} sample alerts with entity fields`
+              );
+            }
+          } catch (error: any) {
+            logger.warn(
+              `[CatchUp Agent] Failed to fetch sample alerts: ${error.message}. Continuing with summary only.`
+            );
+            // Continue without sample alerts - summary is still useful
+          }
+
           // Generate URL to alerts page with time range
           const { core } = getPluginServices();
           const alertsPageUrl = getAlertsPageUrl(request, core, normalizedStart, normalizedEnd);
 
-          // Return both the grouped results and a summary
+          // Return both the grouped results and a summary with sample alerts
           return {
             results: [
               {
@@ -232,6 +299,38 @@ Returns aggregated statistics including total count, counts by severity, and top
                   start: normalizedStart,
                   end: normalizedEnd || null,
                   alerts_page_url: alertsPageUrl,
+                  sample_alerts: sampleAlerts,
+                  // Extract entity information from sample alerts for easy access
+                  entities: {
+                    hosts: Array.from(
+                      new Set(
+                        sampleAlerts
+                          .map((a: any) => a['host.name'])
+                          .filter((h: any) => h)
+                      )
+                    ).slice(0, 10),
+                    users: Array.from(
+                      new Set(
+                        sampleAlerts
+                          .map((a: any) => a['user.name'])
+                          .filter((u: any) => u)
+                      )
+                    ).slice(0, 10),
+                    source_ips: Array.from(
+                      new Set(
+                        sampleAlerts
+                          .map((a: any) => a['source.ip'])
+                          .filter((ip: any) => ip)
+                      )
+                    ).slice(0, 10),
+                    destination_ips: Array.from(
+                      new Set(
+                        sampleAlerts
+                          .map((a: any) => a['destination.ip'])
+                          .filter((ip: any) => ip)
+                      )
+                    ).slice(0, 10),
+                  },
                 },
               },
             ],

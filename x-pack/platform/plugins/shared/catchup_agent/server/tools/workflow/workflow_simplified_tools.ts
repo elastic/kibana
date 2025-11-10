@@ -19,6 +19,7 @@ import { createErrorResult } from '@kbn/onechat-server';
  */
 
 const MAX_ARRAY_SIZE = 5;
+const MAX_SLACK_MESSAGES = 50; // Higher limit for Slack messages to ensure correlation works
 
 /**
  * Simplifies tool results by:
@@ -98,43 +99,51 @@ function simplifyToolResult(toolResults: any[]): any {
     simplified.alerts_page_url = source.alerts_page_url;
   }
 
-  // For Slack messages, limit arrays
+  // For Slack messages, limit arrays but preserve full text for correlation
+  // We need the full text to extract URLs for correlation, so don't truncate here
+  // Use a higher limit for Slack messages to ensure all messages are available for correlation
+  // Truncation can happen later in the summary generator for display purposes
   if (Array.isArray(source.userMentionMessages)) {
     simplified.userMentionMessages = source.userMentionMessages
-      .slice(0, MAX_ARRAY_SIZE)
+      .slice(0, MAX_SLACK_MESSAGES)
       .map((m: any) => ({
-        text: m.text?.substring(0, 200), // Truncate long messages
+        text: m.text || m.message, // Preserve full text for correlation
+        message: m.message || m.text, // Support both field names
         channel: m.channel,
         permalink: m.permalink,
         timestamp: m.timestamp,
+        user: m.user || m.username || m.user_name,
       }));
-    if (source.userMentionMessages.length > MAX_ARRAY_SIZE) {
+    if (source.userMentionMessages.length > MAX_SLACK_MESSAGES) {
       simplified.userMentionMessages_truncated = true;
       simplified.total_userMentionMessages = source.userMentionMessages.length;
     }
   }
 
   if (Array.isArray(source.channelMessages)) {
-    simplified.channelMessages = source.channelMessages.slice(0, MAX_ARRAY_SIZE).map((m: any) => ({
-      text: m.text?.substring(0, 200),
+    simplified.channelMessages = source.channelMessages.slice(0, MAX_SLACK_MESSAGES).map((m: any) => ({
+      text: m.text || m.message, // Preserve full text for correlation
+      message: m.message || m.text, // Support both field names
       channel: m.channel,
       permalink: m.permalink,
       timestamp: m.timestamp,
+      user: m.user || m.username || m.user_name,
     }));
-    if (source.channelMessages.length > MAX_ARRAY_SIZE) {
+    if (source.channelMessages.length > MAX_SLACK_MESSAGES) {
       simplified.channelMessages_truncated = true;
       simplified.total_channelMessages = source.channelMessages.length;
     }
   }
 
   if (Array.isArray(source.dmMessages)) {
-    simplified.dmMessages = source.dmMessages.slice(0, MAX_ARRAY_SIZE).map((m: any) => ({
-      text: m.text?.substring(0, 200),
-      user: m.user,
+    simplified.dmMessages = source.dmMessages.slice(0, MAX_SLACK_MESSAGES).map((m: any) => ({
+      text: m.text || m.message, // Preserve full text for correlation
+      message: m.message || m.text, // Support both field names
+      user: m.user || m.username || m.user_name,
       permalink: m.permalink,
       timestamp: m.timestamp,
     }));
-    if (source.dmMessages.length > MAX_ARRAY_SIZE) {
+    if (source.dmMessages.length > MAX_SLACK_MESSAGES) {
       simplified.dmMessages_truncated = true;
       simplified.total_dmMessages = source.dmMessages.length;
     }
@@ -591,5 +600,128 @@ export const workflowRerankTool = (): BuiltinToolDefinition<typeof workflowReran
       }
     },
     tags: ['prioritization', 'rerank', 'workflow', 'simplified'],
+  };
+};
+
+/**
+ * Simplified summary generator tool for workflows
+ * Wraps the original tool and stringifies the response
+ */
+const workflowSummaryGeneratorSchema = z.object({
+  correlatedData: z
+    .record(z.unknown())
+    .describe('Correlated data from correlation engine'),
+  format: z
+    .enum(['markdown', 'json'])
+    .optional()
+    .default('markdown')
+    .describe('Output format: markdown or json'),
+});
+
+export const workflowSummaryGeneratorTool = (): BuiltinToolDefinition<
+  typeof workflowSummaryGeneratorSchema
+> => {
+  const toolId = 'platform.catchup.workflow.summary.generator';
+  return {
+    id: toolId,
+    type: ToolType.builtin,
+    description: `Simplified summary generator tool optimized for workflow execution.
+    Wraps the original summary generator tool and stringifies responses to avoid storage issues.
+    Use this tool in workflows instead of platform.catchup.summary.generator.`,
+    schema: workflowSummaryGeneratorSchema,
+    handler: async ({ correlatedData, format = 'markdown' }, { runner, logger }) => {
+      logger.info(`==> Workflow Summary Generator [${toolId}]: Handler INVOKED with format: ${format}`);
+      logger.info(`==> Workflow Summary Generator [${toolId}]: correlatedData type: ${typeof correlatedData}, keys: ${correlatedData ? Object.keys(correlatedData).join(', ') : 'null'}`);
+      try {
+        // Call the original tool
+        logger.info(`==> Workflow Summary Generator: Calling base tool platform.catchup.summary.generator`);
+        const originalResult = await runner.runTool({
+          toolId: 'platform.catchup.summary.generator',
+          toolParams: { correlatedData, format },
+        });
+        logger.info(`==> Workflow Summary Generator: Base tool returned ${originalResult.results?.length || 0} results`);
+
+        // Check for error results
+        const errorResult = originalResult.results.find(
+          (r: any) => r.type === ToolResultType.error
+        );
+        if (errorResult) {
+          return {
+            results: [errorResult],
+          };
+        }
+
+        // Extract the summary data
+        const originalData = originalResult.results[0]?.data;
+        if (!originalData) {
+          logger.warn('Workflow summary generator: No data returned from original tool');
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: JSON.stringify({
+                  summary: '',
+                  format: format || 'markdown',
+                }),
+              },
+            ],
+          };
+        }
+
+        // Log summary info for debugging
+        const summaryText = originalData.summary || '';
+        const summaryLength = typeof summaryText === 'string' ? summaryText.length : 0;
+        const hasCorrelations = typeof summaryText === 'string' && summaryText.includes('## Correlations');
+        const correlationsCount = typeof summaryText === 'string' ? (summaryText.match(/## Correlations/g) || []).length : 0;
+        logger.info(`==> Workflow Summary Generator: CRITICAL CHECK - Summary length: ${summaryLength}, Has Correlations section: ${hasCorrelations}, Correlations header count: ${correlationsCount}`);
+        if (hasCorrelations) {
+          const correlationsIndex = summaryText.indexOf('## Correlations');
+          const correlationsPreview = summaryText.substring(correlationsIndex, Math.min(correlationsIndex + 500, summaryText.length));
+          logger.info(`==> Workflow Summary Generator: CRITICAL - Correlations section found at index ${correlationsIndex}`);
+          logger.info(`==> Workflow Summary Generator: CRITICAL - Correlations section preview (500 chars): ${correlationsPreview}`);
+          // Log the end of the summary to verify it's complete
+          const summaryEnd = summaryText.substring(Math.max(0, summaryText.length - 300));
+          logger.info(`==> Workflow Summary Generator: Summary ends with (last 300 chars): ${summaryEnd}`);
+        } else {
+          logger.error(`==> Workflow Summary Generator: ERROR - Correlations section NOT found in summary! Summary length: ${summaryLength}`);
+          logger.error(`==> Workflow Summary Generator: ERROR - Summary ends with: ${summaryText.substring(Math.max(0, summaryText.length - 200))}`);
+        }
+
+        // CRITICAL: Return the summary as a direct string in the data field
+        // This ensures the full summary is preserved and not truncated
+        // The workflow execution engine stores this in a text field, so we return it directly
+        // as a string rather than nested in an object to avoid any truncation issues
+        if (typeof summaryText === 'string' && summaryText.length > 0) {
+          logger.info(`==> Workflow Summary Generator: Returning summary as direct string, length: ${summaryText.length}`);
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: summaryText, // Return the markdown directly as a string
+              },
+            ],
+          };
+        }
+
+        // Fallback: return as JSON string if summary is not a string
+        const stringifiedData = JSON.stringify(originalData);
+        logger.info(`==> Workflow Summary Generator: Stringified data length: ${stringifiedData.length} characters`);
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: stringifiedData,
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`Error in workflow summary generator tool: ${errorMessage}`);
+        return {
+          results: [createErrorResult(`Error generating summary: ${errorMessage}`)],
+        };
+      }
+    },
+    tags: ['summary', 'generator', 'workflow', 'simplified'],
   };
 };

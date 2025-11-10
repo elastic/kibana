@@ -12,6 +12,7 @@ import {
   workflowSlackTool,
   workflowCorrelationEngineTool,
   workflowRerankTool,
+  workflowSummaryGeneratorTool,
 } from './workflow_simplified_tools';
 
 /**
@@ -39,6 +40,12 @@ export function registerWorkflowTools(toolsSetup: ToolsSetup, logger: Logger): v
     toolsSetup.register(workflowRerankTool());
     logger.info(
       'Registered workflow rerank tool (platform.catchup.workflow.prioritization.rerank)'
+    );
+
+    const summaryTool = workflowSummaryGeneratorTool();
+    toolsSetup.register(summaryTool);
+    logger.info(
+      `Registered workflow summary generator tool (${summaryTool.id}) - handler present: ${!!summaryTool.handler}`
     );
 
     logger.info('Workflow-specific simplified tools registered successfully');

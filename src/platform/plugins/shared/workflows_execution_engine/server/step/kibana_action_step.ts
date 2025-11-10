@@ -247,6 +247,26 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       throw new Error(`HTTP ${response.status}: ${await response.text()}`);
     }
 
-    return response.json();
+    const result = await response.json();
+    
+    // SPECIAL HANDLING: If this is a tool execution that returns a summary as a direct string,
+    // extract it from the results structure to avoid truncation issues in the UI
+    // This handles the case where platform.catchup.workflow.summary.generator returns
+    // {results: [{type: "other", data: "markdown string"}]}
+    // We extract the data field if it's a string to preserve the full content
+    if (
+      result &&
+      typeof result === 'object' &&
+      Array.isArray(result.results) &&
+      result.results.length === 1 &&
+      result.results[0]?.type === 'other' &&
+      typeof result.results[0]?.data === 'string' &&
+      result.results[0].data.length > 500 // Only for large strings (likely markdown summaries)
+    ) {
+      // Return the data directly as a string to avoid nested structure truncation
+      return result.results[0].data;
+    }
+    
+    return result;
   }
 }

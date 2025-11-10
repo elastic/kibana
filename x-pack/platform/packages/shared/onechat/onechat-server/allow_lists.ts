@@ -17,6 +17,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'platform.catchup.security.rule_changes',
   'platform.catchup.security.summary',
   // Observability CatchUp tools
+  'platform.catchup.observability.alerts',
   'platform.catchup.observability.summary',
   // Search CatchUp tools
   'platform.catchup.search.summary',
@@ -37,6 +38,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'platform.catchup.workflow.external.slack',
   'platform.catchup.workflow.correlation.engine',
   'platform.catchup.workflow.prioritization.rerank',
+  'platform.catchup.workflow.summary.generator',
 ];
 
 /**
