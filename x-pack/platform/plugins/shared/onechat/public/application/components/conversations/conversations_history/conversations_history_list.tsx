@@ -7,7 +7,6 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -27,6 +26,7 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { groupConversationsByTime } from '../../../utils/group_conversations';
 import { NoConversationsPrompt } from './no_conversations_prompt';
 import { useConversationList } from '../../../hooks/use_conversation_list';
+import { NewConversationButton } from '../new_conversation_button';
 
 const EMPTY_CONTAINER_HEIGHT = 300;
 
@@ -139,8 +139,6 @@ export const ConversationHistoryList: React.FC = () => {
 
 const PopoverHeader = () => {
   const { euiTheme } = useEuiTheme();
-  const { isEmbeddedContext, setConversationId } = useConversationContext();
-  const { createOnechatUrl } = useNavigation();
 
   const headerStyles = css`
     padding: ${euiTheme.size.s} ${euiTheme.size.m};
@@ -160,28 +158,7 @@ const PopoverHeader = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="plus"
-            size="s"
-            color="primary"
-            {...(isEmbeddedContext
-              ? {
-                  onClick: () => {
-                    setConversationId?.(undefined);
-                  },
-                }
-              : {
-                  href: createOnechatUrl(appPaths.chat.new),
-                })}
-            aria-label={i18n.translate('xpack.onechat.newConversationButton.ariaLabel', {
-              defaultMessage: 'Create new conversation',
-            })}
-            data-test-subj="agentBuilderNewConversationButton"
-          >
-            {i18n.translate('xpack.onechat.newConversationButton.display', {
-              defaultMessage: 'New',
-            })}
-          </EuiButtonEmpty>
+          <NewConversationButton />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
