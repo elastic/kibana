@@ -41,12 +41,7 @@ export const ProjectPicker: React.FC<ProjectPickerProps> = ({
   }, [cpsManager]);
 
   // do not render the component if cpsManager is not available or required props are missing or there aren't linked projects
-  if (
-    !cpsManager ||
-    !onProjectRoutingChange ||
-    !originProject ||
-    linkedProjects.length === 0
-  ) {
+  if (!cpsManager || !onProjectRoutingChange || !originProject || linkedProjects.length === 0) {
     return null;
   }
 

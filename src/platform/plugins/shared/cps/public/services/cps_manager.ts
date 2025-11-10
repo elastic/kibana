@@ -9,7 +9,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import type { CPSProject, ProjectTagsResponse } from '../../common/types'; 
+import type { CPSProject, ProjectTagsResponse } from '../../common/types';
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
