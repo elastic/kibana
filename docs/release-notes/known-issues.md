@@ -18,7 +18,7 @@ When agentless integrations are deployed in {{fleet}} in an {{ech}} deployment, 
 
 **Resolved**
 
-This issue is resolved in {{stack}} 9.1.6 and 9.2.0.
+This issue is resolved in {{stack}} 9.1.6.
 
 ::::
 
