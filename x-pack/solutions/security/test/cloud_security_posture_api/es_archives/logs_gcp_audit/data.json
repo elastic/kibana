@@ -742,3 +742,121 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "7",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "new-schema-user@example.com"
+        }
+      },
+      "user": {
+        "entity": {
+          "id": "new-schema-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "new-schema-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "new-schema-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateServiceAccount",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "id": "new-schema-event-id",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "creation"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.serviceAccounts.create",
+              "resource": "projects/new-schema-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-new-schema"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateServiceAccountRequest",
+            "name": "projects/new-schema-project-id/serviceAccounts/test-sa@new-schema-project-id.iam.gserviceaccount.com",
+            "accountId": "test-sa"
+          },
+          "resource_name": "projects/new-schema-project-id/serviceAccounts/test-sa@new-schema-project-id.iam.gserviceaccount.com",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.ServiceAccount",
+            "name": "projects/new-schema-project-id/serviceAccounts/test-sa@new-schema-project-id.iam.gserviceaccount.com",
+            "projectId": "new-schema-project-id",
+            "uniqueId": "123456789",
+            "email": "test-sa@new-schema-project-id.iam.gserviceaccount.com"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/new-schema-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.2"
+        ],
+        "user": [
+          "new-schema-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.2"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "projects/new-schema-project-id/serviceAccounts/test-sa"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/new-schema-project-id/serviceAccounts/test-sa"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/350.0.0"
+      }
+    }
+  }
+}
