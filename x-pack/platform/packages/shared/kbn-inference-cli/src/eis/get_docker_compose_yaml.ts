@@ -26,9 +26,9 @@ export function getDockerComposeYaml({
     services:
       eis-gateway:
         image: ${config.eisGateway.image}
-        expose:
-          - "8443"
-          - "8051"
+        ports:
+          - "8443:8443"
+          - "8051:8051"
         volumes:
           - "${config.eisGateway.mount.acl}:/app/acl/acl.yaml:ro"
           - "${config.eisGateway.mount.tls.cert}:/certs/tls/tls.crt:ro"
@@ -45,7 +45,7 @@ ${credentials
           ENTITLEMENTS_SKIP_CHECK: "true"
           TELEMETRY_EXPORTER_TYPE: "none"
           TLS_VERIFY_CLIENT_CERTS: "false"
-          LOGGER_LEVEL: "error"
+          LOGGER_LEVEL: "info"
         healthcheck:
           test: [
             'CMD-SHELL',
@@ -53,20 +53,6 @@ ${credentials
               config.eisGateway.ports[1]
             }/health");if err!=nil||resp.StatusCode!=200{os.Exit(1)}}'' > /tmp/health.go; go run /tmp/health.go',
           ]
-          interval: 1s
-          timeout: 2s
-          retries: 10
-
-      gateway-proxy:
-        image: nginx:alpine
-        ports:
-          - "${config.eisGateway.ports[0]}:80"
-        volumes:
-          - ${config.nginx.file}:/etc/nginx/nginx.conf:ro
-        depends_on:
-          - eis-gateway
-        healthcheck:
-          test: ["CMD", "curl", "http://localhost:80/" ]
           interval: 1s
           timeout: 2s
           retries: 10
