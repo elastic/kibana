@@ -116,7 +116,7 @@ describe('getUnifiedTraceSpan', () => {
           query: {
             bool: {
               filter: [{ term: { [SPAN_ID]: spanId } }, { term: { [TRACE_ID]: traceId } }],
-              should: [
+              should: expect.arrayContaining([
                 {
                   terms: {
                     [PROCESSOR_EVENT]: [ProcessorEvent.span, ProcessorEvent.transaction],
@@ -124,12 +124,10 @@ describe('getUnifiedTraceSpan', () => {
                 },
                 {
                   bool: {
-                    must_not: {
-                      exists: { field: PROCESSOR_EVENT },
-                    },
+                    must_not: [{ exists: { field: PROCESSOR_EVENT } }],
                   },
                 },
-              ],
+              ]),
               minimum_should_match: 1,
             },
           },
@@ -274,9 +272,7 @@ describe('getUnifiedTraceSpan', () => {
       });
       expect(query.should).toContainEqual({
         bool: {
-          must_not: {
-            exists: { field: PROCESSOR_EVENT },
-          },
+          must_not: [{ exists: { field: PROCESSOR_EVENT } }],
         },
       });
       expect(query.minimum_should_match).toBe(1);

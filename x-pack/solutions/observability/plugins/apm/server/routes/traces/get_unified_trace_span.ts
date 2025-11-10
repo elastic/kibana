@@ -6,7 +6,7 @@
  */
 
 import type { SpanDocument } from '@kbn/apm-types';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { existsQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { SPAN_ID, TRACE_ID, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
@@ -33,8 +33,8 @@ export async function getUnifiedTraceSpan({
       bool: {
         filter: [...termQuery(SPAN_ID, spanId), ...termQuery(TRACE_ID, traceId)],
         should: [
-          { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.span, ProcessorEvent.transaction] } },
-          { bool: { must_not: { exists: { field: PROCESSOR_EVENT } } } },
+          ...termsQuery(PROCESSOR_EVENT, ProcessorEvent.span, ProcessorEvent.transaction),
+          { bool: { must_not: existsQuery(PROCESSOR_EVENT) } },
         ],
         minimum_should_match: 1,
       },
