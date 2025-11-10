@@ -190,6 +190,11 @@ export function ESQLControlsFlyout({
     onSaveControl,
   ]);
 
+  const onCloseFlyout = useCallback(() => {
+    telemetryService.trackEsqlControlConfigCancelled(initialVariableType);
+    closeFlyout();
+  }, [closeFlyout]);
+
   const formBody =
     variableNamePrefix === VariableNamePrefix.VALUE ? (
       <ValueControlForm
@@ -239,7 +244,7 @@ export function ESQLControlsFlyout({
       <Footer
         onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
-        closeFlyout={closeFlyout}
+        closeFlyout={onCloseFlyout}
         onCreateControl={onCreateControl}
       />
     </>

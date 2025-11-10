@@ -15,6 +15,7 @@ import {
   missingSortBeforeLimit,
 } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import {
+  ESQL_CONTROL_CONFIG_CANCELLED,
   ESQL_CONTROL_CONFIG_OPENED,
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
@@ -142,6 +143,12 @@ export class ESQLEditorTelemetryService {
 
   public trackEsqlControlFlyoutOpened(controlType: string) {
     this._reportEvent(ESQL_CONTROL_CONFIG_OPENED, {
+      control_kind: controlType,
+    });
+  }
+
+  public trackEsqlControlConfigCancelled(controlType: string) {
+    this._reportEvent(ESQL_CONTROL_CONFIG_CANCELLED, {
       control_kind: controlType,
     });
   }
