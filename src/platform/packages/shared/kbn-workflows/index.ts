@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './spec/lib/generate_yaml_schema';
+export * from './spec/lib/generate_yaml_schema_from_connectors';
 export * from './spec/lib/get_json_schema_from_yaml_schema';
 export * from './spec/schema';
 export * from './types/latest';
