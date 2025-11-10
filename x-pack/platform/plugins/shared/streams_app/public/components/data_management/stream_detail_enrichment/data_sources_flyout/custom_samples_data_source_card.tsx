@@ -42,7 +42,7 @@ export const CustomSamplesDataSourceCard = ({
     (newDataSource: CustomSamplesDataSourceWithUIAttributes) => {
       if (newDataSource.storageKey) {
         const urlSchemaDataSource = dataSourceConverter.toUrlSchema(newDataSource);
-        localStorage.setItem(newDataSource.storageKey, JSON.stringify(urlSchemaDataSource));
+        sessionStorage.setItem(newDataSource.storageKey, JSON.stringify(urlSchemaDataSource));
       }
     },
     debounceOptions

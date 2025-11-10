@@ -42,22 +42,27 @@ export const dataSourceMachine = setup({
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
     restorePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
-        const dataSource = localStorage.getItem(context.dataSource.storageKey);
+        const dataSource = sessionStorage.getItem(context.dataSource.storageKey);
         if (dataSource) {
-          return { dataSource: JSON.parse(dataSource) };
+          return {
+            dataSource: {
+              ...context.dataSource,
+              documents: JSON.parse(dataSource).documents,
+            },
+          };
         }
       }
       return {};
     }),
     updatePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
-        localStorage.setItem(context.dataSource.storageKey, JSON.stringify(context.dataSource));
+        sessionStorage.setItem(context.dataSource.storageKey, JSON.stringify(context.dataSource));
       }
       return {};
     }),
     removePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
-        localStorage.removeItem(context.dataSource.storageKey);
+        sessionStorage.removeItem(context.dataSource.storageKey);
       }
       return {};
     }),

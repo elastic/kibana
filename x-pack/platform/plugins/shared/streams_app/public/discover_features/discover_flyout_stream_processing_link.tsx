@@ -23,6 +23,7 @@ import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { isMetadataField } from '@kbn/fields-metadata-plugin/common';
+import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../common/url_schema/common';
 import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
@@ -63,10 +64,13 @@ export function DiscoverFlyoutStreamProcessingLink({
           type: 'custom-samples',
           enabled: true,
           name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-            defaultMessage: 'Discover document',
+            defaultMessage: 'Discover document from {streamName}',
+            values: {
+              streamName: value,
+            },
           }),
           documents: [formattedDoc],
-          storageKey: `streams:${value}__custom-samples__discover-document`,
+          storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${value}__discover-document`,
         },
       ],
     },

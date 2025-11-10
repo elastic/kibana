@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EventObject } from 'xstate5';
 import { fromCallback } from 'xstate5';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
 import type {
   CustomSamplesDataSource,
   EnrichmentDataSource,
@@ -21,11 +21,11 @@ export function createUrlInitializerActor({
   core,
   urlStateStorageContainer,
 }: Pick<StreamEnrichmentServiceDependencies, 'core' | 'urlStateStorageContainer'>) {
-  return fromCallback<EventObject, { streamName: string }>(({ input, sendBack }) => {
+  return fromCallback(({ sendBack }) => {
     const urlStateValues =
       urlStateStorageContainer.get<EnrichmentUrlState>(ENRICHMENT_URL_STATE_KEY) ?? undefined;
 
-    const persistedCustomSamplesSources = retrievePersistedCustomSamplesSources(input.streamName);
+    const persistedCustomSamplesSources = retrievePersistedCustomSamplesSources();
 
     if (!urlStateValues) {
       return sendBack({
@@ -97,17 +97,19 @@ const getDataSourcesWithDefault = (dataSources: EnrichmentDataSource[]) => {
   return dataSources;
 };
 
-const retrievePersistedCustomSamplesSources = (streamName: string) => {
-  const storedSourcesKeys = Object.keys(localStorage).filter((key) =>
-    key.startsWith(`streams:${streamName}__custom-samples__`)
+const retrievePersistedCustomSamplesSources = () => {
+  const storedSourcesKeys = Object.keys(sessionStorage).filter((key) =>
+    key.startsWith(CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX)
   );
 
   const sources: Record<string, CustomSamplesDataSource> = {};
 
   storedSourcesKeys.forEach((key) => {
-    const dataSource = localStorage.getItem(key);
+    const dataSource = sessionStorage.getItem(key);
     if (dataSource) {
-      sources[key] = { ...JSON.parse(dataSource), documents: [] };
+      const parsedDataSource = JSON.parse(dataSource);
+      parsedDataSource.enabled = false;
+      sources[key] = { ...parsedDataSource, documents: [] };
     }
   });
 

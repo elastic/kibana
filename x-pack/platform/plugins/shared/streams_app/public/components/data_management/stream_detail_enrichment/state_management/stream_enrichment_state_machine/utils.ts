@@ -11,6 +11,7 @@ import type { AssignArgs } from 'xstate5';
 import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { v4 as uuidv4 } from 'uuid';
+import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
 import type { StreamEnrichmentContextType } from './types';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
@@ -59,7 +60,7 @@ export const createDefaultCustomSamplesDataSource = (
   name: DATA_SOURCES_I18N.customSamples.defaultName,
   enabled: true,
   documents: [],
-  storageKey: `streams:${streamName}__custom-samples__${uuidv4()}`,
+  storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__${uuidv4()}`,
 });
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {

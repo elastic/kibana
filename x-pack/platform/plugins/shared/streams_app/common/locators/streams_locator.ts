@@ -10,7 +10,10 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { v4 as uuidv4 } from 'uuid';
-import { ENRICHMENT_URL_STATE_KEY } from '../url_schema/common';
+import {
+  CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX,
+  ENRICHMENT_URL_STATE_KEY,
+} from '../url_schema/common';
 import type {
   CustomSamplesDataSource,
   EnrichmentUrlState,
@@ -84,8 +87,10 @@ const parseAndPersistCustomSamplesDataSource = (
   dataSource: CustomSamplesDataSource,
   streamName: string
 ) => {
-  const key = dataSource.storageKey ?? `streams:${streamName}__custom-samples__${uuidv4()}`;
-  localStorage.setItem(key, JSON.stringify(dataSource));
+  const key =
+    dataSource.storageKey ??
+    `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__${uuidv4()}`;
+  sessionStorage.setItem(key, JSON.stringify(dataSource));
   return {
     name: dataSource.name,
     enabled: dataSource.enabled,
