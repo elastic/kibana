@@ -830,6 +830,208 @@ describe('Run Scheduled Report Task', () => {
                 - filename: {{filename}}
                 - objectType: {{objectType}}
                 - date: {{date}}
+                - payload.title: {{payload.title}}
+                - payload.objectType: {{payload.objectType}}
+                - payload.version: {{payload.version}}
+                - output.contentType: {{output.contentType}}
+                - output.csvContainsFormulas: {{output.csvContainsFormulas}}
+                - output.maxSizeReached: {{output.maxSizeReached}}
+                - output.metrics.pdf.cpu: {{output.metrics.pdf.cpu}}
+                - output.metrics.pdf.cpuInPercentage: {{output.metrics.pdf.cpuInPercentage}}
+                - output.metrics.pdf.memory: {{output.metrics.pdf.memory}}
+                - output.metrics.pdf.memoryInMegabytes: {{output.metrics.pdf.memoryInMegabytes}}
+                `,
+              },
+            },
+          },
+        },
+        'default'
+      );
+      expect(soClient.get).not.toHaveBeenCalled();
+      expect(emailNotificationService.notify).toHaveBeenCalledWith({
+        contentType: 'application/pdf',
+        emailParams: {
+          bcc: ['test2@test.com'],
+          cc: undefined,
+          spaceId: 'default',
+          to: ['test1@test.com'],
+          subject: 'Scheduled Report: Test Report - 2025-06-04T00:00:00.000Z',
+          message: `
+                # Your report is ready
+
+                - title: Test Report
+                - filename: Test Report\\-2025\\-06\\-04T00:00:00\\.000Z\\.pdf
+                - objectType: test
+                - date: 2025\\-06\\-04T00:00:00\\.000Z
+                - payload.title: Test Report
+                - payload.objectType: test
+                - payload.version: 8\\.0\\.0
+                - output.contentType: application/pdf
+                - output.csvContainsFormulas: false
+                - output.maxSizeReached: false
+                - output.metrics.pdf.cpu: 0.11005001073746828
+                - output.metrics.pdf.cpuInPercentage: 11.01
+                - output.metrics.pdf.memory: 347602944
+                - output.metrics.pdf.memoryInMegabytes: 331.5
+                `,
+        },
+        filename: 'Test Report-2025-06-04T00:00:00.000Z.pdf',
+        id: '290357209345723095',
+        index: '.reporting-fantastic',
+        relatedObject: {
+          id: 'report-so-id',
+          namespace: 'default',
+          type: 'scheduled-report',
+        },
+        reporting: mockReporting,
+      });
+      expect(mockReporting.getEventTracker).toHaveBeenCalledWith(
+        '290357209345723095',
+        'test1',
+        'test'
+      );
+      expect(mockEventTracker.completeNotification).toHaveBeenCalledWith({
+        byteSize: 2097152,
+        scheduleType: 'scheduled',
+        scheduledTaskId: 'report-so-id',
+      });
+    });
+
+    it('handles invalid email template errors, reporting them in the notification text', async () => {
+      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
+      const byteSize = 2097152; // 2MB
+      const output = {
+        content_type: 'application/pdf',
+        csv_contains_formulas: false,
+        max_size_reached: false,
+        metrics: {
+          pdf: {
+            cpu: 0.11005001073746828,
+            cpuInPercentage: 11.01,
+            memory: 347602944,
+            memoryInMegabytes: 331.5,
+          },
+        },
+      };
+
+      // @ts-expect-error
+      await task.notify(
+        savedReport,
+        // @ts-expect-error
+        taskInstance,
+        output,
+        byteSize,
+        {
+          ...scheduledReport,
+          attributes: {
+            ...scheduledReport.attributes,
+            notification: {
+              email: {
+                ...scheduledReport.attributes.notification!.email,
+                subject: 'Invalid report subject: {{',
+              },
+            },
+          },
+        },
+        'default'
+      );
+      expect(soClient.get).not.toHaveBeenCalled();
+      expect(emailNotificationService.notify).toHaveBeenCalledWith({
+        contentType: 'application/pdf',
+        emailParams: {
+          bcc: ['test2@test.com'],
+          cc: undefined,
+          spaceId: 'default',
+          to: ['test1@test.com'],
+          subject:
+            'error rendering mustache template "Invalid report subject: {{": Unclosed tag at 26',
+          message: 'Your scheduled report is attached for you to download or share.',
+        },
+        filename: 'Test Report-2025-06-04T00:00:00.000Z.pdf',
+        id: '290357209345723095',
+        index: '.reporting-fantastic',
+        relatedObject: {
+          id: 'report-so-id',
+          namespace: 'default',
+          type: 'scheduled-report',
+        },
+        reporting: mockReporting,
+      });
+      expect(mockReporting.getEventTracker).toHaveBeenCalledWith(
+        '290357209345723095',
+        'test1',
+        'test'
+      );
+      expect(mockEventTracker.completeNotification).toHaveBeenCalledWith({
+        byteSize: 2097152,
+        scheduleType: 'scheduled',
+        scheduledTaskId: 'report-so-id',
+      });
+    });
+
+    it('sends an email notification with template variables in subject and body', async () => {
+      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
+      const byteSize = 2097152; // 2MB
+      const output = {
+        content_type: 'application/pdf',
+        csv_contains_formulas: false,
+        max_size_reached: false,
+        metrics: {
+          pdf: {
+            cpu: 0.11005001073746828,
+            cpuInPercentage: 11.01,
+            memory: 347602944,
+            memoryInMegabytes: 331.5,
+          },
+        },
+      };
+
+      // @ts-expect-error
+      await task.notify(
+        savedReport,
+        // @ts-expect-error
+        taskInstance,
+        output,
+        byteSize,
+        {
+          ...scheduledReport,
+          attributes: {
+            ...scheduledReport.attributes,
+            notification: {
+              email: {
+                ...scheduledReport.attributes.notification!.email,
+                subject: 'Scheduled Report: {{title}} - {{date}}',
+                message: `
+                # Your report is ready
+
+                - title: {{title}}
+                - filename: {{filename}}
+                - objectType: {{objectType}}
+                - date: {{date}}
                 `,
               },
             },
