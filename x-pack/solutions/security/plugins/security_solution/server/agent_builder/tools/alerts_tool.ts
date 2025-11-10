@@ -11,7 +11,9 @@ import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 
 const alertsSchema = z.object({
-  query: z.string().describe('A natural language query expressing the search request for security alerts'),
+  query: z
+    .string()
+    .describe('A natural language query expressing the search request for security alerts'),
   index: z
     .string()
     .optional()
@@ -43,10 +45,7 @@ Note:
 - This tool is specifically designed for security alerts and understands security-specific fields and terminology.
     `,
     schema: alertsSchema,
-    handler: async (
-      { query: nlQuery, index },
-      { esClient, modelProvider, logger, events }
-    ) => {
+    handler: async ({ query: nlQuery, index }, { esClient, modelProvider, logger, events }) => {
       const alertsIndexPattern = index || '.alerts-security.alerts-*';
       logger.debug(`alerts tool called with query: ${nlQuery}, index: ${alertsIndexPattern}`);
       const results = await runSearchTool({
@@ -62,4 +61,3 @@ Note:
     tags: ['security', 'alerts'],
   };
 };
-

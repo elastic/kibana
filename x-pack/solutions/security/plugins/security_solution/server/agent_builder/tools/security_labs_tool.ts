@@ -10,10 +10,9 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 
-// TODO: Update to follow same pattern as Product Documentation Tool (use llmTasks.retrieveDocumentation instead of kbDataClient)
-// TODO: Investigate how to access kbDataClient from ToolHandlerContext.request
-// For now, this tool will need to be updated once we determine how to access the knowledge base client
-// or convert to use llmTasks.retrieveDocumentation pattern
+// TODO: Update to follow same pattern as Product Documentation Tool (use llmTasks.retrieveDocumentation)
+// TODO: Investigate how to install Security Labs documents using the same installation/retrieval pattern as product documentation
+// This requires determining how Security Labs content should be installed and made available via llmTasks.retrieveDocumentation
 
 const securityLabsSchema = z.object({
   question: z
@@ -44,31 +43,23 @@ Examples:
     handler: async ({ question }, { request, logger }) => {
       logger.debug(`security labs tool called with question: ${question}`);
 
-      // TODO: Access kbDataClient from request context
-      // This requires investigation into how to get the knowledge base data client
-      // from the ToolHandlerContext.request object
-      // For now, return an error indicating the feature needs to be implemented
+      // TODO: Follow the same pattern as Product Documentation Tool
+      // Need to determine how to install Security Labs documents using the same installation/retrieval pattern
+      // as product documentation, then use llmTasks.retrieveDocumentation to retrieve them
+      // This requires investigation into how Security Labs content should be installed and accessed
       return {
         results: [
           createErrorResult({
             message:
-              'Security Labs tool is not yet fully implemented. TODO: Access kbDataClient from request context or convert to use llmTasks.retrieveDocumentation pattern.',
+              'Security Labs tool is not yet fully implemented. TODO: Install Security Labs documents using the same pattern as product documentation, then use llmTasks.retrieveDocumentation to retrieve them.',
             metadata: {
               question,
-              note: 'This tool needs to be updated to access kbDataClient or use llmTasks.retrieveDocumentation',
+              note: 'This tool needs to be updated to use llmTasks.retrieveDocumentation pattern, following the same installation/retrieval approach as product documentation',
             },
           }),
         ],
       };
-
-      // Future implementation will:
-      // 1. Get kbDataClient from request context
-      // 2. Call kbDataClient.getKnowledgeBaseDocumentEntries with SECURITY_LABS_RESOURCE
-      // 3. Parse YAML frontmatter to extract slug and title
-      // 4. Create content references
-      // 5. Return results in ToolResultType format
     },
     tags: ['security-labs', 'knowledge-base'],
   };
 };
-
