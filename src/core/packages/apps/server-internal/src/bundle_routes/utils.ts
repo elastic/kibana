@@ -14,7 +14,7 @@ import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs';
 
 export const generateFileHash = (fd: number): Promise<string> => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha256');
   const read = createReadStream(null as any, {
     fd,
     start: 0,
