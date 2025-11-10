@@ -11,8 +11,8 @@ import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import { EuiGlobalToastList } from '@elastic/eui';
 import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { debounceTime } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 
