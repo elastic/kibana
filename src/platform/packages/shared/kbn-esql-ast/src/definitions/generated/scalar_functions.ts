@@ -14850,7 +14850,7 @@ const toAggregateMetricDoubleDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.to_aggregate_metric_double', {
     defaultMessage: 'Encode a numeric to an aggregate_metric_double.',
   }),
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {

@@ -1378,6 +1378,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/platform/test/serverless/functional/test_suites/visualizations/ @elastic/kibana-visualizations
 /x-pack/platform/test/serverless/fixtures/kbn_archives/lens/ @elastic/kibana-visualizations
+/src/platform/packages/shared/kbn-monaco/src/languages/console @elastic/kibana-management
 
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
