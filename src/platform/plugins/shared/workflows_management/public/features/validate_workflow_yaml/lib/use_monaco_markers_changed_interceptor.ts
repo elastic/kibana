@@ -11,7 +11,10 @@ import { useCallback, useState } from 'react';
 import type YAML from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import { formatMonacoYamlMarker } from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
+import {
+  formatMonacoYamlMarker,
+  SUPPRESS_MARKER,
+} from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { isYamlValidationMarkerOwner, type YamlValidationResult } from '../model/types';
@@ -47,17 +50,19 @@ export function useMonacoMarkersChangedInterceptor({
       owner: string,
       markers: monaco.editor.IMarkerData[]
     ) => {
-      return markers.map((marker) => {
-        if (owner === 'yaml') {
-          return formatMonacoYamlMarker(
-            marker,
-            editorModel,
-            workflowYamlSchema,
-            yamlDocumentRef.current
-          );
-        }
-        return marker;
-      });
+      return markers
+        .map((marker) => {
+          if (owner === 'yaml') {
+            return formatMonacoYamlMarker(
+              marker,
+              editorModel,
+              workflowYamlSchema,
+              yamlDocumentRef.current
+            );
+          }
+          return marker;
+        })
+        .filter((marker): marker is monaco.editor.IMarkerData => marker !== SUPPRESS_MARKER); // Filter out suppressed markers (dynamic values that should bypass validation)
     },
     [workflowYamlSchema, yamlDocumentRef]
   );
