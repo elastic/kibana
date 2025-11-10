@@ -297,7 +297,7 @@ export const ProjectHeader = ({
                   <ProjectPicker
                     projectRouting={projectRouting}
                     onProjectRoutingChange={onProjectRoutingChange}
-                    cps={cps}
+                    cpsManager={cps?.cpsManager}
                   />
                 </EuiHeaderSectionItem>
               )}

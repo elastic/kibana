@@ -21,25 +21,22 @@ describe('ProjectPickerComponent', () => {
     onProjectRoutingChange: jest.fn(),
     originProject: {
       _id: 'origin',
-      _alias: 'Origin Project',
+      _alias: 'Origin CPSProject',
       _type: 'observability',
-      _csp: 'aws',
-      _region: 'us-east-1',
+      _organisation: 'test-org',
     },
     linkedProjects: [
       {
         _id: 'linked1',
-        _alias: 'Linked Project 1',
+        _alias: 'Linked CPSProject 1',
         _type: 'security',
-        _csp: 'azure',
-        _region: 'eastus',
+        _organisation: 'test-org',
       },
       {
         _id: 'linked2',
-        _alias: 'Linked Project 2',
+        _alias: 'Linked CPSProject 2',
         _type: 'elasticsearch',
-        _csp: 'gcp',
-        _region: 'us-central1',
+        _organisation: 'test-org',
       },
     ],
   };

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Project } from '../types';
+import type { CPSProject } from '../types';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { strings } from './strings';
 
 interface ProjectListItemProps {
-  project: Project;
+  project: CPSProject;
   index: number;
   isOriginProject?: boolean;
 }

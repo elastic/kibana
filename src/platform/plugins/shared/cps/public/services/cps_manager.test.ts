@@ -9,7 +9,7 @@
 
 import { CPSManager } from './cps_manager';
 import type { HttpSetup } from '@kbn/core/public';
-import type { Project, ProjectTagsResponse } from '../types';
+import type { CPSProject, ProjectTagsResponse } from '../../common/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('CPSManager', () => {
@@ -17,21 +17,23 @@ describe('CPSManager', () => {
   const mockLogger = loggingSystemMock.createLogger();
   let cpsManager: CPSManager;
 
-  const mockOriginProject: Project = {
+  const mockOriginProject: CPSProject = {
     _id: 'origin-id',
     _alias: 'Origin Project',
     _type: 'observability',
     _csp: 'aws',
     _region: 'us-east-1',
+    _organisation: 'org-1',
   };
 
-  const mockLinkedProjects: Project[] = [
+  const mockLinkedProjects: CPSProject[] = [
     {
       _id: 'linked-1',
       _alias: 'B Project',
       _type: 'security',
       _csp: 'azure',
       _region: 'eastus',
+      _organisation: 'org-2',
     },
     {
       _id: 'linked-2',
@@ -39,6 +41,7 @@ describe('CPSManager', () => {
       _type: 'elasticsearch',
       _csp: 'gcp',
       _region: 'us-central1',
+      _organisation: 'org-3',
     },
   ];
 
@@ -122,7 +125,7 @@ describe('CPSManager', () => {
     });
 
     it('should update cached data after refresh', async () => {
-      const updatedProject: Project = {
+      const updatedProject: CPSProject = {
         ...mockOriginProject,
         _alias: 'Updated Project',
       };

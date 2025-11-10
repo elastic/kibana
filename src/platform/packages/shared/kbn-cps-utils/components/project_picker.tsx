@@ -9,38 +9,40 @@
 
 import React, { useState, useEffect } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSPluginStart, Project } from '../types';
+import type { CPSManager, CPSProject } from '../types';
 import { ProjectPickerComponent } from './project_picker_component';
 
 export interface ProjectPickerProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
   wrappingContainer?: (children: React.ReactNode) => React.ReactElement;
-  cps?: CPSPluginStart;
+  cpsManager?: CPSManager;
 }
 
 export const ProjectPicker: React.FC<ProjectPickerProps> = ({
   projectRouting,
   onProjectRoutingChange,
   wrappingContainer = (children) => children as React.ReactElement,
-  cps,
+  cpsManager,
 }) => {
-  const [originProject, setOriginProject] = useState<Project | null>(null);
-  const [linkedProjects, setLinkedProjects] = useState<Project[]>([]);
-  console.log('CPS Plugin Start:', cps);
+  const [originProject, setOriginProject] = useState<CPSProject | null>(null);
+  const [linkedProjects, setLinkedProjects] = useState<CPSProject[]>([]);
+
   useEffect(() => {
     // Only fetch projects in serverless environments where cpsManager is available
-    if (!cps?.cpsManager) return;
+    if (!cpsManager) return;
 
-    cps.cpsManager.fetchProjects().then((projectsData) => {
-      setOriginProject(projectsData.origin);
-      setLinkedProjects(projectsData.linkedProjects);
+    cpsManager.fetchProjects().then((projectsData) => {
+      if (projectsData) {
+        setOriginProject(projectsData.origin);
+        setLinkedProjects(projectsData.linkedProjects);
+      }
     });
-  }, [cps]);
+  }, [cpsManager]);
 
   // do not render the component if cpsManager is not available or required props are missing or there aren't linked projects
   if (
-    !cps?.cpsManager ||
+    !cpsManager ||
     !onProjectRoutingChange ||
     !originProject ||
     linkedProjects.length === 0

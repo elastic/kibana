@@ -16,19 +16,19 @@
  * Keep these types in sync with the types in @kbn/cps/public.
  */
 
-export interface Project {
+export interface CPSProject {
   _id: string;
   _alias: string;
   _type: string;
-  _csp: string;
-  _region: string;
+  _organisation: string;
   [key: string]: string;
 }
 
-export interface CPSManager {
-  fetchProjects: () => Promise<{ origin: Project | null; linkedProjects: Project[] }>;
+export interface ProjectsData {
+  origin: CPSProject | null;
+  linkedProjects: CPSProject[];
 }
 
-export interface CPSPluginStart {
-  cpsManager?: CPSManager;
+export interface CPSManager {
+  fetchProjects: () => Promise<ProjectsData | null>;
 }

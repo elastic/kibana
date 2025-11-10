@@ -1,6 +1,6 @@
 # @kbn/cps-utils
 
-Shared utilities and components for Cross-Project Search (CPS) functionality in Kibana.
+Shared utilities and components for Cross-CPSProject Search (CPS) functionality in Kibana.
 
 ## Overview
 

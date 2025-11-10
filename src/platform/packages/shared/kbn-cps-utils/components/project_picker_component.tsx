@@ -23,7 +23,7 @@ import {
   EuiFlexGroup,
   EuiTitle,
 } from '@elastic/eui';
-import type { Project } from '../types';
+import type { CPSProject } from '../types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -34,8 +34,8 @@ import { strings } from './strings';
 export interface ProjectPickerComponentProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  originProject: Project;
-  linkedProjects: Project[];
+  originProject: CPSProject;
+  linkedProjects: CPSProject[];
 }
 
 const projectPickerOptions = [

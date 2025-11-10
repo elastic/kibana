@@ -12,44 +12,40 @@ import { render, screen, act } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { Project, CPSManager, CPSPluginStart } from '../types';
+import type { CPSProject, CPSManager } from '../types';
 import { ProjectPicker } from './project_picker';
 
 // Mock the lazy-loaded component
 jest.mock('./project_picker_component', () => ({
   ProjectPickerComponent: jest.fn(({ originProject }) => (
-    <div data-test-subj="project-picker-component">Project: {originProject._alias}</div>
+    <div data-test-subj="project-picker-component">CPSProject: {originProject._alias}</div>
   )),
 }));
 
 describe('ProjectPicker', () => {
-  const mockOriginProject: Project = {
+  const mockOriginProject: CPSProject = {
     _id: 'origin-project',
-    _alias: 'Origin Project',
+    _alias: 'Origin CPSProject',
     _type: 'observability',
-    _csp: 'aws',
-    _region: 'us-east-1',
+    _organisation: 'test-org',
   };
 
-  const mockLinkedProjects: Project[] = [
+  const mockLinkedProjects: CPSProject[] = [
     {
       _id: 'linked-1',
-      _alias: 'Linked Project 1',
+      _alias: 'Linked CPSProject 1',
       _type: 'security',
-      _csp: 'azure',
-      _region: 'eastus',
+      _organisation: 'test-org',
     },
   ];
 
-  const mockCPSManager = {
-    fetchProjects: jest.fn().mockResolvedValue({
-      origin: mockOriginProject,
-      linkedProjects: mockLinkedProjects,
-    }),
-  };
+  const mockFetchProjects = jest.fn().mockResolvedValue({
+    origin: mockOriginProject,
+    linkedProjects: mockLinkedProjects,
+  });
 
-  const mockCPSService: CPSPluginStart = {
-    cpsManager: mockCPSManager as unknown as CPSManager,
+  const mockCPSManager: CPSManager = {
+    fetchProjects: mockFetchProjects,
   };
 
   const renderProjectPicker = async (
@@ -57,13 +53,13 @@ describe('ProjectPicker', () => {
       projectRouting?: ProjectRouting;
       onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
       wrappingContainer?: (children: React.ReactNode) => React.ReactElement;
-      cps?: CPSPluginStart;
+      cpsManager?: CPSManager;
     } = {}
   ) => {
     const defaultProps = {
       projectRouting: undefined,
       onProjectRoutingChange: jest.fn(),
-      cps: mockCPSService,
+      cpsManager: mockCPSManager,
       ...props,
     };
 
@@ -83,7 +79,7 @@ describe('ProjectPicker', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCPSManager.fetchProjects.mockResolvedValue({
+    mockFetchProjects.mockResolvedValue({
       origin: mockOriginProject,
       linkedProjects: mockLinkedProjects,
     });
@@ -99,11 +95,11 @@ describe('ProjectPicker', () => {
     it('should call fetchProjects when component mounts', async () => {
       await renderProjectPicker();
 
-      expect(mockCPSManager.fetchProjects).toHaveBeenCalledTimes(1);
+      expect(mockFetchProjects).toHaveBeenCalledTimes(1);
     });
 
     it('should not render when cpsManager is not available', async () => {
-      await renderProjectPicker({ cps: {} as CPSPluginStart });
+      await renderProjectPicker({ cpsManager: undefined });
       expect(screen.queryByTestId('project-picker-component')).not.toBeInTheDocument();
     });
 
@@ -113,7 +109,7 @@ describe('ProjectPicker', () => {
     });
 
     it('should not render when there is no origin project', async () => {
-      mockCPSManager.fetchProjects.mockResolvedValueOnce({
+      mockFetchProjects.mockResolvedValueOnce({
         origin: null,
         linkedProjects: mockLinkedProjects,
       });
@@ -122,7 +118,7 @@ describe('ProjectPicker', () => {
     });
 
     it('should not render when there are no linked projects', async () => {
-      mockCPSManager.fetchProjects.mockResolvedValueOnce({
+      mockFetchProjects.mockResolvedValueOnce({
         origin: mockOriginProject,
         linkedProjects: [],
       });
