@@ -485,7 +485,11 @@ const ESQLEditorInternal = function ESQLEditor({
         result: (async () => {
           const [getHistoryItemsFn, favoritesClientInstance] = args;
           const historyItems = getHistoryItemsFn('desc');
-          const items = historyItems.map((item) => item.queryString);
+          // exclude error queries from history items as
+          // we don't want to suggest them
+          const historyStarredItems = historyItems
+            .filter((item) => item.status !== 'error')
+            .map((item) => item.queryString);
 
           const { favoriteMetadata } = (await favoritesClientInstance?.getFavorites()) || {};
 
@@ -493,10 +497,10 @@ const ESQLEditorInternal = function ESQLEditor({
             Object.keys(favoriteMetadata).forEach((id) => {
               const item = favoriteMetadata[id];
               const { queryString } = item;
-              items.push(queryString);
+              historyStarredItems.push(queryString);
             });
           }
-          return items;
+          return historyStarredItems;
         })(),
       }),
       () => 'historyStarredItems'
