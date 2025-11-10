@@ -8,9 +8,10 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 import type { TestFailure } from './test_failure';
 
-export const buildFailureHtml = (testFailure: TestFailure): string => {
+export const buildFailureHtml = (testFailure: TestFailure, destinationDir?: string): string => {
   const {
     suite,
     title,
@@ -27,16 +28,48 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
 
   const testDuration = duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
 
+  const isCI = process.env.CI === 'true';
+
   const screenshots = attachments
     .filter((a) => a.contentType.startsWith('image/'))
-    .map((s) => {
-      const base64 = fs.readFileSync(s.path!).toString('base64');
-      const escapedName = (s.name || 'screenshot').replace(/"/g, '&quot;');
-      return `
-        <div class="screenshotContainer">
-          <img class="screenshot img-fluid img-thumbnail" src="data:${s.contentType};base64,${base64}" alt="${escapedName}" />
-        </div>
-      `;
+    .map((s, index) => {
+      if (!s.path) {
+        return ''; // No path available
+      }
+
+      try {
+        const base64 = fs.readFileSync(s.path).toString('base64');
+        let imgSrc: string;
+
+        // In CI with destination dir, copy screenshot and use relative path
+        // Buildkite's native HTML artifact support (Sept 2025) authorizes access to all
+        // artifacts in the same job when viewing HTML, so relative links work
+        if (isCI && destinationDir) {
+          const ext = path.extname(s.path) || '.png';
+          const screenshotFileName = `${testFailure.id}-screenshot-${index}${ext}`;
+          const screenshotDestPath = path.join(destinationDir, screenshotFileName);
+
+          try {
+            fs.copyFileSync(s.path, screenshotDestPath);
+            // Use relative path - Buildkite authorizes access to all job artifacts
+            imgSrc = screenshotFileName;
+          } catch (copyError) {
+            // Fallback to base64 if copy fails
+            imgSrc = `data:image/png;base64,${base64}`;
+          }
+        } else {
+          // Local development - always use base64
+          imgSrc = `data:image/png;base64,${base64}`;
+        }
+
+        return `
+          <div class="screenshotContainer">
+            <img class="screenshot img-fluid img-thumbnail" src="${imgSrc}" alt="screenshot" />
+          </div>
+        `;
+      } catch (readError) {
+        return ''; // Skip if can't read file
+      }
     });
 
   const errorStackTrace = error?.stack_trace || 'No stack trace available';
@@ -47,7 +80,6 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline'; img-src 'self' data:; style-src 'self' 'unsafe-inline';" />
     <style>
       /* Reset and base styles */
       * {
