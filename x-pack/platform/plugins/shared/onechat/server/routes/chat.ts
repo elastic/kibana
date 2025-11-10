@@ -28,8 +28,7 @@ import type { ChatService } from '../services/chat';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-
-const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 export function registerChatRoutes({
   router,
@@ -197,7 +196,7 @@ export function registerChatRoutes({
         'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
       options: {
         timeout: {
-          idleSocket: SOCKET_TIMEOUT_MS,
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
         tags: ['oas-tag:agent builder'],
         availability: {
@@ -397,7 +396,7 @@ export function registerChatRoutes({
         '8. `round_complete`',
       options: {
         timeout: {
-          idleSocket: SOCKET_TIMEOUT_MS,
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
         tags: ['oas-tag:agent builder'],
         availability: {
