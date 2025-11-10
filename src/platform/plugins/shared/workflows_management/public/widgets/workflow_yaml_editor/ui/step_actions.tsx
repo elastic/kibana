@@ -21,7 +21,10 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './run_step_button';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
-import { selectEditorFocusedStepInfo, selectIsExecutionsTab } from '../../../entities/workflows/store';
+import {
+  selectEditorFocusedStepInfo,
+  selectIsExecutionsTab,
+} from '../../../entities/workflows/store';
 
 export interface StepActionsProps {
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;

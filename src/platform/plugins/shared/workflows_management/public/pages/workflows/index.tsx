@@ -74,7 +74,7 @@ export function WorkflowsPage() {
                 <EuiFlexGroup
                   alignItems="center"
                   justifyContent="flexStart"
-                  gutterSize="s"
+                  gutterSize="m"
                   responsive={false}
                   wrap={false}
                 >
