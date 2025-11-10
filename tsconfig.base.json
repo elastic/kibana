@@ -184,6 +184,8 @@
       "@kbn/ci-stats-reporter/*": ["src/platform/packages/private/kbn-ci-stats-reporter/*"],
       "@kbn/ci-stats-shipper-cli": ["packages/kbn-ci-stats-shipper-cli"],
       "@kbn/ci-stats-shipper-cli/*": ["packages/kbn-ci-stats-shipper-cli/*"],
+      "@kbn/classic-stream-flyout": ["x-pack/platform/packages/shared/kbn-classic-stream-flyout"],
+      "@kbn/classic-stream-flyout/*": ["x-pack/platform/packages/shared/kbn-classic-stream-flyout/*"],
       "@kbn/cleanup-before-exit": ["src/platform/packages/shared/kbn-cleanup-before-exit"],
       "@kbn/cleanup-before-exit/*": ["src/platform/packages/shared/kbn-cleanup-before-exit/*"],
       "@kbn/cli-dev-mode": ["packages/kbn-cli-dev-mode"],
