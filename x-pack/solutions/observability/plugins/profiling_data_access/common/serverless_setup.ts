@@ -6,7 +6,6 @@
  */
 import type { RecursivePartial } from '@elastic/eui';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { merge } from 'lodash';
 import type { ProfilingESClient } from './profiling_es_client';
 
 export interface ProfilingSetupOptions {
@@ -17,12 +16,12 @@ export interface ProfilingSetupOptions {
   spaceId: string;
 }
 
-export interface SetupStateType {
-  type: 'self-managed';
-  setupState: SetupState;
+export interface ServerlessSetupStateType {
+  type: 'serverless';
+  setupState: ServerlessSetupState;
 }
 
-export interface SetupState {
+interface ServerlessSetupState {
   data: {
     available: boolean;
   };
@@ -33,14 +32,11 @@ export interface SetupState {
     created: boolean;
     pre_8_9_1_data: boolean;
   };
-  settings: {
-    configured: boolean;
-  };
 }
 
-export type PartialSetupState = RecursivePartial<SetupState>;
+export type PartialServerlessSetupState = RecursivePartial<ServerlessSetupState>;
 
-export function createDefaultSetupState(): SetupState {
+export function createDefaultServerlessSetupState(): ServerlessSetupState {
   return {
     data: {
       available: false,
@@ -52,23 +48,9 @@ export function createDefaultSetupState(): SetupState {
       created: false,
       pre_8_9_1_data: false,
     },
-    settings: {
-      configured: false,
-    },
   };
 }
 
-export function areResourcesSetup(state: SetupState): boolean {
-  return state.resource_management.enabled && state.resources.created && state.settings.configured;
-}
-
-function mergeRecursivePartial<T>(base: T, partial: RecursivePartial<T>): T {
-  return merge(base, partial);
-}
-
-export function mergePartialSetupStates<T extends SetupState>(
-  base: T,
-  partials: Array<RecursivePartial<T>>
-): T {
-  return partials.reduce<T>(mergeRecursivePartial, base);
+export function areServerlessResourcesSetup(state: ServerlessSetupState): boolean {
+  return state.resource_management.enabled && state.resources.created;
 }

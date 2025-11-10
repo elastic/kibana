@@ -14,3 +14,4 @@ export {
 } from './fleet_policies';
 
 export type { ProfilingCloudSetupOptions } from './cloud_setup';
+export { MAX_BUCKETS } from './cluster_settings';

@@ -141,7 +141,7 @@ export function registerSetupRoute({
             },
           });
 
-          logger.debug('[DONE] Setting up Universal Profiling on Cloud');
+          logger.debug('Setting up Universal Profiling on Cloud');
         } else if (type === 'self-managed') {
           logger.debug('Setting up self-managed Universal Profiling');
 
@@ -150,9 +150,9 @@ export function registerSetupRoute({
             setupParams: commonSetupParams,
           });
 
-          logger.debug('[DONE] Setting up self-managed Universal Profiling');
+          logger.debug('Setting up self-managed Universal Profiling');
         } else {
-          logger.debug('[SKIPPED] Setting up on serverless Universal Profiling');
+          logger.debug('Skipping setting up Universal Profiling on serverless ');
         }
 
         // Wait until Profiling ES plugin creates all resources

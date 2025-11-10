@@ -11,6 +11,8 @@ import type { SetupStateType } from '../../../common/setup';
 import type { RegisterServicesParams } from '../register_services';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
+import { serverlessSetupState } from './serverless_setup_state';
+import type { ServerlessSetupStateType } from '../../../common/serverless_setup';
 
 export interface SetupStateParams {
   soClient: SavedObjectsClientContract;
@@ -27,7 +29,9 @@ export async function getSetupState({
   soClient,
   spaceId,
   isServerless,
-}: RegisterServicesParams & SetupStateParams): Promise<CloudSetupStateType | SetupStateType> {
+}: RegisterServicesParams & SetupStateParams): Promise<
+  CloudSetupStateType | SetupStateType | ServerlessSetupStateType
+> {
   const kibanaInternalProfilingESClient = createProfilingEsClient({
     esClient: esClient.asInternalUser,
     useDefaultAuth: false,
@@ -37,8 +41,21 @@ export async function getSetupState({
     useDefaultAuth: false,
   });
 
+  if (isServerless) {
+    return {
+      type: 'serverless',
+      setupState: await serverlessSetupState({
+        client: kibanaInternalProfilingESClient,
+        clientWithProfilingAuth: profilingESClient,
+        logger,
+        soClient,
+        spaceId: spaceId ?? DEFAULT_SPACE_ID,
+      }),
+    };
+  }
+
   const isCloudEnabled = deps.cloud?.isCloudEnabled;
-  if (isCloudEnabled && !isServerless) {
+  if (isCloudEnabled) {
     if (!deps.fleet) {
       throw new Error('Elastic Fleet is required to set up Universal Profiling on Cloud');
     }
@@ -68,7 +85,7 @@ export async function getSetupState({
   });
 
   return {
-    type: isServerless ? 'serverless' : 'self-managed',
+    type: 'self-managed',
     setupState,
   };
 }

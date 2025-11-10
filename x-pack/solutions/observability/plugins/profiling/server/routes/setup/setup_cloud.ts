@@ -6,7 +6,7 @@
  */
 
 import type { CloudSetupState } from '@kbn/profiling-data-access-plugin/common/cloud_setup';
-import { enableResourceManagement } from '../../lib/setup/cluster_settings';
+import { enableResourceManagement, setMaximumBuckets } from '../../lib/setup/cluster_settings';
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
@@ -29,6 +29,7 @@ export async function setupCloud({
     ...(setupState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
     ...(setupState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
     ...(setupState.policies.apm.profilingEnabled ? [removeProfilingFromApmPackagePolicy] : []),
+    ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
   ];
   // Give priority to admin functions as if something fails we won't procceed to viewer functions
   await Promise.all(executeAdminFunctions.map((fn) => fn(setupParams)));

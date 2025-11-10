@@ -11,6 +11,7 @@ import { areCloudResourcesSetup } from '../../../common/cloud_setup';
 import { areResourcesSetup } from '../../../common/setup';
 import type { RegisterServicesParams } from '../register_services';
 import { getSetupState } from '../setup_state';
+import { areServerlessResourcesSetup } from '../../../common/serverless_setup';
 
 export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
@@ -39,10 +40,22 @@ export function createGetStatusService(params: RegisterServicesParams) {
         () => `Set up state for: ${type}: ${JSON.stringify(setupState, null, 2)}`
       );
 
+      let hasSetup = false;
+      switch (type) {
+        case 'cloud':
+          hasSetup = areCloudResourcesSetup(setupState);
+          break;
+        case 'self-managed':
+          hasSetup = areResourcesSetup(setupState);
+          break;
+        case 'serverless':
+          hasSetup = areServerlessResourcesSetup(setupState);
+          break;
+      }
+
       return {
         type,
-        has_setup:
-          type === 'cloud' ? areCloudResourcesSetup(setupState) : areResourcesSetup(setupState),
+        has_setup: hasSetup,
         has_data: setupState.data.available,
         pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
       };
