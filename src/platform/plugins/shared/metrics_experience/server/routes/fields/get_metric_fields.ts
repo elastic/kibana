@@ -85,14 +85,12 @@ export async function getMetricFields({
     kuery,
   });
 
-  const finalFields = enrichedMetricFields
-    .filter((field) => !field.noData) // Filter out fields with no data when kuery is applied
-    .map((field) => {
-      return {
-        ...field,
-        dimensions: field.dimensions.sort((a, b) => a.name.localeCompare(b.name)),
-      };
-    });
+  const finalFields = enrichedMetricFields.map((field) => {
+    return {
+      ...field,
+      dimensions: field.dimensions.sort((a, b) => a.name.localeCompare(b.name)),
+    };
+  });
 
   return { fields: finalFields, total: kuery ? finalFields.length : allMetricFields.length };
 }

@@ -9,12 +9,12 @@
 
 import { useMemo } from 'react';
 
-export const usePagination = <T>({
+export const usePagination = <TItem>({
   items,
   pageSize,
   currentPage,
 }: {
-  items: T[];
+  items: TItem[];
   pageSize: number;
   currentPage: number;
 }) => {

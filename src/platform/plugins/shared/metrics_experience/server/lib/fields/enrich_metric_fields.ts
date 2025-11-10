@@ -22,7 +22,7 @@ import { normalizeUnit } from './normalize_unit';
 export interface MetricMetadata {
   dimensions: string[];
   unitFromSample?: string;
-  totalHits?: number;
+  totalHits: number;
 }
 export type MetricMetadataMap = Map<string, MetricMetadata>;
 
@@ -34,7 +34,7 @@ export function generateMapKey(indexName: string, fieldName: string) {
   return `${fieldName}>${indexName}`;
 }
 
-export function buildMetricMetadataMap(
+function buildMetricMetadataMap(
   response: {
     responses: InferSearchResponseOf<
       {
@@ -62,27 +62,24 @@ export function buildMetricMetadataMap(
       }
 
       const fields = searchResult.hits.hits[0].fields ?? {};
-      const { dimensions, unitFromSample } = Object.entries(fields).reduce(
+      const { dimensions, unitFromSample } = Object.entries(fields).reduce<
+        Omit<MetricMetadata, 'totalHits'>
+      >(
         (acc, [fieldName, fieldValue]) => {
-          const value = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
-
           if (fieldName === semconvFlat.unit.name) {
+            const value = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
+
             if (typeof value === 'string') {
               acc.unitFromSample = value;
             }
             return acc;
+          } else {
+            acc.dimensions.push(fieldName);
           }
-
-          acc.dimensions.push(fieldName);
 
           return acc;
         },
-        { dimensions: [], unitFromSample: undefined, scopeName: undefined, dataSet: '' } as {
-          dimensions: string[];
-          unitFromSample?: string | undefined;
-          scopeName?: string | undefined;
-          dataSet: string;
-        }
+        { dimensions: [], unitFromSample: undefined }
       );
 
       return [
@@ -151,7 +148,7 @@ export async function sampleMetricMetadata({
     const metricMetadataMap: MetricMetadataMap = new Map();
 
     for (const { name } of metricFields) {
-      metricMetadataMap.set(name, { dimensions: [] });
+      metricMetadataMap.set(name, { dimensions: [], totalHits: 0 });
     }
     return metricMetadataMap;
   }
@@ -204,7 +201,6 @@ export async function enrichMetricFields({
       return {
         ...field,
         dimensions: cacheKey ? uniqueDimensionSets.get(cacheKey) ?? [] : [],
-        noData: false,
         unit: normalizeUnit({ fieldName: field.name, unit: field.unit ?? unitFromSample }),
       };
     })

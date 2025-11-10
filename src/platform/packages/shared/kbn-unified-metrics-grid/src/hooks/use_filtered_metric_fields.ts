@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { useMemo, useRef, useEffect } from 'react';
+import type { TimeRange } from '@kbn/es-query';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { useValueFilters } from './use_value_filters';
+import { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
+
+export const useFilteredMetricFields = ({
+  allFields,
+  dimensions,
+  searchTerm,
+  valueFilters,
+  timeRange,
+  onFilterComplete,
+}: {
+  allFields: MetricField[];
+  dimensions: string[];
+  searchTerm: string;
+  valueFilters: string[];
+  timeRange: TimeRange | undefined;
+  onFilterComplete?: () => void;
+}) => {
+  const { kuery, filters } = useValueFilters(valueFilters);
+
+  // Client-side filtering by dimensions and search term
+  const dimensionsSet = useMemo(
+    () => (dimensions.length > 0 ? new Set(dimensions) : null),
+    [dimensions]
+  );
+  const searchTermLower = useMemo(() => searchTerm?.toLowerCase(), [searchTerm]);
+
+  const filteredFields = useMemo(() => {
+    return allFields.filter((field) => {
+      if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
+        return false;
+      }
+
+      if (dimensionsSet && dimensionsSet.size > 0) {
+        const hasMatchingDimension = field.dimensions.some((d) => dimensionsSet.has(d.name));
+        if (!hasMatchingDimension) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [allFields, searchTermLower, dimensionsSet]);
+
+  const { fieldNames, indices } = useMemo(() => {
+    return filteredFields.reduce(
+      (acc, field) => {
+        acc.fieldNames.add(field.name);
+        acc.indices.add(field.index);
+        return acc;
+      },
+      { fieldNames: new Set<string>(), indices: new Set<string>() }
+    );
+  }, [filteredFields]);
+
+  const shouldSearch = !!kuery && fieldNames.size > 0;
+
+  const { data: fieldsFilteredByValue = [], isFetching } = useMetricFieldsSearchQuery({
+    fields: Array.from(fieldNames),
+    index: Array.from(indices).join(','),
+    timeRange,
+    kuery,
+    enabled: shouldSearch,
+  });
+
+  const lastValueRef = useRef<{
+    fields: MetricField[];
+    filters: Array<{ field: string; value: string }>;
+  }>({ fields: filteredFields, filters });
+
+  const shouldUpdate = useMemo(
+    () => (shouldSearch && !isFetching) || !shouldSearch,
+    [shouldSearch, isFetching]
+  );
+
+  if (shouldUpdate) {
+    lastValueRef.current = {
+      fields: shouldSearch && !isFetching ? fieldsFilteredByValue : filteredFields,
+      filters,
+    };
+  }
+
+  useEffect(() => {
+    if (shouldUpdate) {
+      onFilterComplete?.();
+    }
+  }, [shouldUpdate, onFilterComplete]);
+
+  return {
+    ...lastValueRef.current,
+    isLoading: shouldSearch && isFetching,
+  };
+};

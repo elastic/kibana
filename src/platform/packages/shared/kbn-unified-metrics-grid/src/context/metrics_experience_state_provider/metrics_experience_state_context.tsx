@@ -47,7 +47,9 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   );
 
   const onValuesChange = useCallback(
-    (values: string[]) => setValueFilters(values),
+    (values: string[]) => {
+      setValueFilters(values);
+    },
     [setValueFilters]
   );
 

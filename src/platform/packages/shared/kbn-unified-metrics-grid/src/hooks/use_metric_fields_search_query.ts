@@ -13,15 +13,11 @@ import { useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider/use_metrics_experience_client';
 
-/**
- * Separate hook for searching/filtering fields with kuery.
- * Used when value filters are applied to optimize performance by passing a specific field list.
- */
 export const useMetricFieldsSearchQuery = (params?: {
   fields: string[];
   index: string;
   timeRange: TimeRange | undefined;
-  kuery: string;
+  kuery: string | undefined;
   enabled?: boolean;
 }) => {
   const { client } = useMetricsExperienceClient();
@@ -73,7 +69,7 @@ export const useMetricFieldsSearchQuery = (params?: {
         if (lastPage?.fields.length === 0) return;
         return lastPage?.page + 1;
       },
-      staleTime: 5 * 60 * 1000, // 5 minutes - search results are more dynamic
+      staleTime: 10 * 60 * 1000, // 10 minutes
     });
 
   useEffect(() => {
