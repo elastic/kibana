@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/control_group_state_builder';
+import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 import type { StartDeps } from './plugin';

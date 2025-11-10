@@ -14,19 +14,16 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { Writable } from '@kbn/utility-types';
 
 const dataViewReferenceName = 'optionsListDataView';
-
-type MutableControlState = Partial<{
-  -readonly [P in keyof OptionsListDSLControlState]: OptionsListDSLControlState[P];
-}>;
 
 export const createOptionsListInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const workingState = { ...state } as EmbeddableStateWithType;
     references.forEach((reference) => {
       if (reference.name === dataViewReferenceName) {
-        (workingState as MutableControlState).dataViewId = reference.id;
+        (workingState as Writable<Partial<OptionsListDSLControlState>>).dataViewId = reference.id;
       }
     });
     return workingState as EmbeddableStateWithType;
@@ -42,7 +39,7 @@ export const createOptionsListExtract = (): EmbeddablePersistableStateService['e
       references.push({
         name: dataViewReferenceName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        id: (workingState as MutableControlState).dataViewId!,
+        id: (workingState as Partial<OptionsListDSLControlState>).dataViewId!,
       });
       delete workingState.dataViewId;
     }

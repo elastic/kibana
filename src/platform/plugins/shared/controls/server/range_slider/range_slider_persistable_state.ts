@@ -14,19 +14,16 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
+import type { Writable } from '@kbn/utility-types';
 
 const dataViewReferenceName = 'rangeSliderDataView';
-
-type MutableRangeSliderState = Partial<{
-  -readonly [P in keyof RangeSliderControlState]: RangeSliderControlState[P];
-}>;
 
 export const createRangeSliderInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const workingState = { ...state } as EmbeddableStateWithType;
     references.forEach((reference) => {
       if (reference.name === dataViewReferenceName) {
-        (workingState as MutableRangeSliderState).dataViewId = reference.id;
+        (workingState as Writable<Partial<RangeSliderControlState>>).dataViewId = reference.id;
       }
     });
     return workingState as EmbeddableStateWithType;
@@ -42,7 +39,7 @@ export const createRangeSliderExtract = (): EmbeddablePersistableStateService['e
       references.push({
         name: dataViewReferenceName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        id: (workingState as MutableRangeSliderState).dataViewId!,
+        id: (workingState as Partial<RangeSliderControlState>).dataViewId!,
       });
       delete workingState.dataViewId;
     }

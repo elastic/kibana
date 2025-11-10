@@ -18,3 +18,4 @@ export type {
   ControlPanelState,
 } from './types';
 export { apiHasEditorConfig } from './types';
+export { controlGroupStateBuilder } from './control_group_state_builder';

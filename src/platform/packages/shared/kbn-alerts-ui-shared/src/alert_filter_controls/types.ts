@@ -11,6 +11,7 @@ import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Writable } from '@kbn/utility-types';
 
 export type FilterUrlFormat = Record<
   string,
@@ -25,7 +26,7 @@ export interface FilterContextType {
   addControl: (controls: FilterControlConfig) => void;
 }
 
-export type FilterControlConfig = Omit<OptionsListDSLControlState, 'dataViewId'> & {
+export type FilterControlConfig = Omit<Writable<OptionsListDSLControlState>, 'dataViewId'> & {
   /*
    * Determines the presence and order of a control
    * */
