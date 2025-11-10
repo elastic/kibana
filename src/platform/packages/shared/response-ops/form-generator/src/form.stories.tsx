@@ -23,43 +23,31 @@ const webhookConnectorFormSchema = z.object({
     widgetOptions: { label: 'Method', default: 'post' },
   }),
   url: withUIMeta(z.url(), { widget: 'text', widgetOptions: { label: 'URL' } }),
-  // authType: withUIMeta(
-  //   z.discriminatedUnion('type', [
-  //     z.object({
-  //       type: z.literal('none'),
-  //     }),
-  //     z.object({
-  //       type: z.literal('basic'),
-  //       username: z.string(),
-  //       password: z.string(),
-  //     }),
-  //     z.object({
-  //       type: z.literal('ssl'),
-  //       password: z.string(),
-  //       authType: z.discriminatedUnion('type', [
-  //         z.object({
-  //           type: z.literal('crt_key'),
-  //           crtFile: z.string().meta({
-  //             widget: 'fileUpload',
-  //             widgetOptions: { accept: '.crt,.cert,.cer,.pem', label: 'CRT File' },
-  //           }),
-  //           keyFile: z.string().meta({
-  //             widget: 'fileUpload',
-  //             widgetOptions: { accept: '.key,.pem', label: 'KEY File' },
-  //           }),
-  //         }),
-  //         z.object({
-  //           type: z.literal('pfx'),
-  //           keyFile: z.string().meta({
-  //             widget: 'fileUpload',
-  //             widgetOptions: { accept: '.pfx,.p12', label: 'PFX File' },
-  //           }),
-  //         }),
-  //       ]),
-  //     }),
-  //   ]),
-  //   { widget: 'card', widtgetOptions: { label: 'Authentication' } }
-  // ),
+  authType: withUIMeta(
+    z.discriminatedUnion('type', [
+      withUIMeta(z.object({ type: z.literal('none') }), {
+        widgetOptions: { label: 'None' },
+      }),
+      withUIMeta(
+        z.object({
+          type: z.literal('basic'),
+          username: withUIMeta(z.string().min(1, { message: 'Username cannot be empty' }), {
+            widget: 'text',
+            widgetOptions: { label: 'Username' },
+          }),
+          password: withUIMeta(z.string().min(1, { message: 'Password cannot be empty' }), {
+            widget: 'password',
+            widgetOptions: { label: 'Password' },
+          }),
+        }),
+        { widgetOptions: { label: 'Basic Authentication' } }
+      ),
+    ]),
+    {
+      widget: 'formFieldset',
+      widgetOptions: { label: 'Authentication', default: 'basic' },
+    }
+  ),
 });
 
 const meta = {

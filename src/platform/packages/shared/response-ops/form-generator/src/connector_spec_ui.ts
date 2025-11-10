@@ -74,7 +74,8 @@ export interface UIMetadata {
     | 'toggle' // Toggle switch (default for z.boolean())
     | 'date' // Date picker
     | 'dateTime' // Date and time picker
-    | 'fileUpload'; // File upload input
+    | 'fileUpload' // File upload input
+    | 'formFieldset';
 
   /**
    * Widget-specific configuration options

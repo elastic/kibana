@@ -9,43 +9,16 @@
 
 import React, { useMemo } from 'react';
 import { z } from '@kbn/zod/v4';
-import type {
-  EuiDatePickerProps,
-  EuiFieldNumberProps,
-  EuiFieldPasswordProps,
-  EuiFieldTextProps,
-  EuiSelectProps,
-  EuiSuperSelectProps,
-  EuiSwitchProps,
-  EuiTextAreaProps,
-} from '@elastic/eui';
-import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiButton, EuiForm } from '@elastic/eui';
 import { useFormState } from './use_form_state';
 import type { UIMetadata } from './connector_spec_ui';
 import { getUIMeta } from './connector_spec_ui';
-
-interface WidgetPropsMap {
-  text: EuiFieldTextProps;
-  password: EuiFieldPasswordProps;
-  json: EuiTextAreaProps;
-  code: EuiTextAreaProps;
-  keyValue: Record<string, unknown>;
-  number: EuiFieldNumberProps;
-  select: EuiSelectProps;
-  textarea: EuiTextAreaProps;
-  multiSelect: EuiSuperSelectProps<string>;
-  toggle: EuiSwitchProps;
-  date: EuiDatePickerProps;
-  dateTime: EuiDatePickerProps;
-  fileUpload: any;
-}
+import { getDiscriminatedUnionInitialValue, getWidget } from './widgets';
 
 type WidgetType = NonNullable<UIMetadata['widget']>;
-type AnyWidgetProps = WidgetPropsMap[WidgetType];
 
 export interface FieldDefinition {
   id: string;
-  render: React.ComponentType<AnyWidgetProps>;
   staticProps: {
     fullWidth?: boolean;
     placeholder?: string;
@@ -55,48 +28,10 @@ export interface FieldDefinition {
   initialValue?: unknown;
   value?: unknown;
   validate: (value: unknown) => string[] | string | undefined;
+  schema?: z.ZodTypeAny;
+  widget?: WidgetType;
 }
 
-const widgetComponents: Partial<{
-  [K in WidgetType]: {
-    Component: React.ComponentType<WidgetPropsMap[K]>;
-    enhanceProps?: (schema: z.ZodTypeAny, props: WidgetPropsMap[K]) => WidgetPropsMap[K];
-  };
-}> = {
-  text: {
-    Component: EuiFieldText,
-  },
-  select: {
-    Component: EuiSelect,
-    enhanceProps: (schema, props) => {
-      if (schema instanceof z.ZodEnum) {
-        const mappedOptions = schema.options.map((option) => ({
-          value: option.valueOf(),
-          text: option.valueOf(),
-        }));
-        return { ...props, options: mappedOptions };
-      }
-      return props;
-    },
-  },
-};
-const getRenderFn = ({ schema }: { schema: z.ZodTypeAny }): React.ComponentType<AnyWidgetProps> => {
-  const metadata = getUIMeta(schema);
-  const widget = metadata?.widget;
-
-  if (!widget || !(widget in widgetComponents) || !widgetComponents[widget]) {
-    throw new Error(`Unsupported widget type: ${widget}`);
-  }
-
-  const widgetConfig = widgetComponents[widget]!;
-  const { Component, enhanceProps } = widgetConfig;
-
-  return (props) => {
-    const finalProps = enhanceProps ? enhanceProps(schema, props) : props;
-
-    return <Component {...(finalProps as any)} />;
-  };
-};
 const getStaticProps = ({ schema }: { schema: z.ZodTypeAny }) => {
   const uiMeta = getUIMeta(schema) || {};
   const { placeholder, label, widgetOptions } = uiMeta;
@@ -127,14 +62,20 @@ const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
       throw new Error(`UI metadata is missing for field: ${key}`);
     }
 
-    const renderFn = getRenderFn({ schema: schemaAny });
     const staticProps = getStaticProps({ schema: schemaAny });
+
+    let initialValue = staticProps.default;
+
+    if (uiMeta.widget === 'formFieldset' && schemaAny instanceof z.ZodDiscriminatedUnion) {
+      initialValue = getDiscriminatedUnionInitialValue(schemaAny, staticProps.default);
+    }
 
     fields.push({
       id: key,
-      render: renderFn,
       staticProps,
-      initialValue: staticProps.default,
+      initialValue,
+      schema: schemaAny,
+      widget: uiMeta.widget,
       validate: (value: unknown) => {
         try {
           schemaAny.parse(value);
@@ -168,24 +109,33 @@ export const Form = ({ connectorSchema, onSubmit }: FormProps) => {
   return (
     <EuiForm component="form" onSubmit={form.handleSubmit(_onSubmit)}>
       {fields.map((field) => {
-        const { render: RenderComponent, id, staticProps } = field;
+        const { id, staticProps, widget, schema: fieldSchema } = field;
+
+        if (!widget) {
+          throw new Error(`Widget type is required for field: ${id}`);
+        }
+
+        const WidgetComponent = getWidget(widget);
+
+        if (!WidgetComponent) {
+          throw new Error(`Unsupported widget type: ${widget}`);
+        }
+
         return (
-          <EuiFormRow
+          <WidgetComponent
             key={id}
+            fieldId={id}
+            value={form.values[id]}
             label={staticProps.label}
+            placeholder={staticProps.placeholder}
+            fullWidth={staticProps.fullWidth}
             error={form.errors[id]}
             isInvalid={!!form.errors[id]}
-          >
-            <RenderComponent
-              {...staticProps}
-              value={form.values[id]}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                form.handleChange(id, e.target.value)
-              }
-              onBlur={() => form.handleBlur(id)}
-              isInvalid={!!form.errors[id]}
-            />
-          </EuiFormRow>
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
+            schema={fieldSchema}
+            widgetOptions={staticProps}
+          />
         );
       })}
       <EuiButton type="submit" fill>
