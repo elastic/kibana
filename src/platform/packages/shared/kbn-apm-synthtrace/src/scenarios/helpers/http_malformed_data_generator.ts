@@ -15,7 +15,6 @@
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { getRandomItem } from './http_field_generators';
 
-
 /**
  * Types of data malformations.
  */
