@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useConversationTitle, useHasActiveConversation } from '../../hooks/use_conversation';
+import { useConversationTitle, useHasActiveConversation } from '../../../hooks/use_conversation';
 
 const labels = {
   ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {

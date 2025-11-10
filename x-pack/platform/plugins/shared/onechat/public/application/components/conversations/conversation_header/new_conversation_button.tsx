@@ -8,12 +8,12 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useNavigation } from '../../hooks/use_navigation';
-import { appPaths } from '../../utils/app_paths';
-import { useConversationId } from '../../context/conversation/use_conversation_id';
-import { useIsSendingMessage } from '../../hooks/use_is_sending_message';
-import { useSendMessage } from '../../context/send_message/send_message_context';
-import { useConversationContext } from '../../context/conversation/conversation_context';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export const NewConversationButton: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();

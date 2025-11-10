@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
-import { ConversationsHistoryPopover } from './conversations_history_popover';
+import { ConversationsHistoryPopover } from '../conversations_history/conversations_history_popover';
 
 export const ConversationsHistoryButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

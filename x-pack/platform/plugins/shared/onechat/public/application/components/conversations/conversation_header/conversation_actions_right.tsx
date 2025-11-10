@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { NewConversationButton } from './new_conversation_button';
 
-export const ConversationActions: React.FC<{}> = () => {
+export const ConversationRightActions: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
 
   const actionsContainerStyles = css`
@@ -29,8 +29,8 @@ export const ConversationActions: React.FC<{}> = () => {
   };
 
   return (
-    <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.container}>
+    <div css={actionsContainerStyles} aria-label={labels.container}>
       <NewConversationButton />
-    </EuiPageHeaderSection>
+    </div>
   );
 };

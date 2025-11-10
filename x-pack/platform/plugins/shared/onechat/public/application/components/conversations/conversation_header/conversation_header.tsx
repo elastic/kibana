@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { ConversationActions } from './conversation_actions';
-import { ConversationsHistoryButton } from './conversations_history/conversations_history_button';
+import { ConversationRightActions } from './conversation_actions_right';
+import { ConversationLeftActions } from './conversation_actions_left';
 import { ConversationTitle } from './conversation_title';
 
 interface ConversationHeaderProps {
@@ -50,13 +50,13 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   return (
     <div css={containerStyles}>
       <div css={leftSectionStyles}>
-        <ConversationsHistoryButton />
+        <ConversationLeftActions />
       </div>
       <div css={centerSectionStyles}>
         <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
       </div>
       <div css={rightSectionStyles}>
-        <ConversationActions onClose={onClose} />
+        <ConversationRightActions onClose={onClose} />
       </div>
     </div>
   );
