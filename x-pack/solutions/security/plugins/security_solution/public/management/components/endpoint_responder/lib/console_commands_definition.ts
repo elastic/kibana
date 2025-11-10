@@ -110,16 +110,16 @@ const capabilitiesAndPrivilegesValidator = (
     const privileges = command.commandDefinition.meta.privileges;
     const agentCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
     const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-    const responderCapability =
+    const responderCapabilities =
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName] ?? [];
     let errorMessage = '';
 
     // We only validate Agent capabilities for the command for Endpoint agents
     if (agentType === 'endpoint') {
-      if (!responderCapability.length) {
+      if (!responderCapabilities.length) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       } else if (
-        !responderCapability.some((capability) => agentCapabilities.includes(capability))
+        !responderCapabilities.some((capability) => agentCapabilities.includes(capability))
       ) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       }

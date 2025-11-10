@@ -73,7 +73,6 @@ export const MemoryDumpActionResult = memo<
   if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
     return (
       <ResultComponent>
-        {}
         <MemoryDumpResponseActionOutputResult
           action={actionDetails}
           agentId={endpointId}
