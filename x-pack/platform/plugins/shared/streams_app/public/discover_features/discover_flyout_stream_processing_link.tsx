@@ -63,12 +63,15 @@ export function DiscoverFlyoutStreamProcessingLink({
         {
           type: 'custom-samples',
           enabled: true,
-          name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-            defaultMessage: 'Discover document from {streamName}',
-            values: {
-              streamName: value,
-            },
-          }),
+          name: i18n.translate(
+            'xpack.streams.discoverFlyoutStreamProcessingLink.customSamplesName',
+            {
+              defaultMessage: 'Discover document from {streamName}',
+              values: {
+                streamName: value,
+              },
+            }
+          ),
           documents: [formattedDoc],
           storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${value}__discover-document`,
         },
