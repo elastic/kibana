@@ -28,6 +28,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import type { LanguageDocumentationSections } from '../../types';
+import { SEARCH_DEBOUNCE_TIME } from '../shared';
 
 interface DocumentationProps {
   language: string;
@@ -62,7 +63,7 @@ function DocumentationContent({
     () => {
       setDebouncedSearchText(searchText);
     },
-    250,
+    SEARCH_DEBOUNCE_TIME,
     [searchText]
   );
 
