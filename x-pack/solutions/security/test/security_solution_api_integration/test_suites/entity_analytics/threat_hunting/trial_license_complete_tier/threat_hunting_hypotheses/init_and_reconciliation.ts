@@ -5,56 +5,38 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-
-export default ({ getService }: FtrProviderContext) => {
-  const es = getService('es');
-  const supertest = getService('supertest');
+import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration/ftr_provider_context';
+export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const log = getService('log');
-  const spacesService = getService('spaces');
 
-  const deleteAllThreatHuntingHypothesesSavedObjects = async () => {
-    await es.deleteByQuery({
-      index: '.kibana*',
-      refresh: true,
-      ignore_unavailable: true,
-      body: {
-        query: {
-          term: { type: 'threat-hunting-hypothesis' },
-        },
-      },
+  describe('@ess Threat Hunting Hypotheses init', () => {
+    it('should create the hypotheses saved objects on Kibana startup', async () => {
+      await retry.tryForTime(60_000, async () => {
+        const res = await kibanaServer.savedObjects.find({
+          type: 'threat-hunting-hypothesis',
+        });
+        log.debug(`found ${res.total} threat-hunting-hypothesis SOs`);
+        if (!res.total || res.total === 0) {
+          throw new Error('Not initialised yet');
+        }
+        return res;
+      });
     });
-  };
-  // can you mock hypothesis definitions OR the HYPOTHESIS_VERSION?
-  // if latter then you can change the version to force reconciliation
-  describe('@ess @serverless @skipInServerlessMKI Threat Hunting Hypotheses Initialisation and Reconciliation ', () => {
-    before(async () => {
-      await deleteAllThreatHuntingHypothesesSavedObjects();
-      const HYPOTHESES_VERSION_TEST = 1;
-      const hypotheses = getHypothesisDefinitions(HYPOTHESES_VERSION_TEST);
-      // 1. make sure feature flag is on
-    });
-    it('should initialise Threat Hunting Hypotheses definitions on startup', async () => {
+    it('should delete outdated hypotheses saved objects upon reconciliation', async () => {
       /**
-       * 1. confirm the hard coded list and the list of saved objects match
-       * 2. confirm using version 1 matching all in the list
-       * 3. confirm logging
-       * 4. confirm auditing
-       * 5. confirm idempotent
-       */
-    });
-    it('should reconcile Threat Hunting Hypotheses definitions', async () => {
-      /**
-       * 1. confirm if version bumps, and there are removed from registry,
-       *    they get removed from saved objects via DELETE
-       * 2. confirm if version bumps, and there are additions to registry,
-       *    they get added to saved objects via CREATE
-       * 3. confirm if version bumps, and there are updates to existing definitions in registry,
-       *    they get updated in saved objects via UPDATE
-       * 4. confirm logging
-       * 5. confirm auditing
+       * TODO: Implement
+       * 1. Create outdated saved objects (with version less than HYPOTHESES_VERSION)
+       * 2. Trigger the reconciliation process -
+       * reference: x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/migrations/index.ts
+       * call run migrations for all entity analytics, add threat hunting to this - await entityAnalyticsRoutes.runMigrations();?
+       *
+       * Then split init_and_recon out - init just in start() init_and_recon called via above entityAnalyticsRoutes.runMigrations()
+       * rename to updateThreatHuntingHypothesesDefinitions instead of init_and_recon
+       * 3. Verify that the outdated saved objects have been deleted
+       *
        */
     });
   });
-};
+}

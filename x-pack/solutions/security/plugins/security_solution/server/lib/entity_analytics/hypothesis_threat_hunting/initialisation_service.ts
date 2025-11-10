@@ -11,7 +11,7 @@ import { ThreatHuntingHypothesisDescriptorClient } from './saved_objects/threat_
 import { createThreatHuntingHypothesesAuditLoggerService } from './utils/audit_logger_service';
 import { createThreatHuntingHypothesesLoggerService } from './utils/logger_service';
 import { ThreatHuntingHypothesisActions } from './auditing/actions';
-import { getHypothesisDefinitions } from './lib/hypothesis_definitions';
+import { getHypothesisDefinitions, HYPOTHESES_VERSION } from './lib/hypothesis_definitions';
 
 export type ThreatHuntingHypothesesInitService = ReturnType<
   typeof createThreatHuntingHypothesesInitService
@@ -63,7 +63,6 @@ export const createThreatHuntingHypothesesInitService = (
         error
       );
     }
-    // return a safe default so orchestrator doesn't blow up
     return { created: 0, updated: 0, results: [] };
   };
 

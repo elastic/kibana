@@ -7,10 +7,12 @@
 
 import type { ThreatHuntingHypothesis } from '../types';
 
-export const HYPOTHESES_VERSION = 11;
+export const HYPOTHESES_VERSION = 1;
 
 // Co-Pilot generated this example so far. More definitions can be added following this structure.
-export const getHypothesisDefinitions: ThreatHuntingHypothesis = (version) => [
+export const getHypothesisDefinitions = (
+  version = HYPOTHESES_VERSION
+): ThreatHuntingHypothesis[] => [
   {
     title: 'UPDATED SUSPICIOUS POWERSHELL ACTIVITY UPDATE',
     hypothesisId: 'suspicious_powershell_activity_v1',
@@ -77,9 +79,9 @@ const randomTag = (allTags: string[]) => allTags[Math.floor(Math.random() * allT
 export const hypothesisDefinitionsScaled: ThreatHuntingHypothesis[] = Array.from(
   { length: 25000 },
   (_, i) => ({
-    ...hypothesisDefinitions[0],
-    title: `${hypothesisDefinitions[0].title} #${i + 1}`,
+    ...getHypothesisDefinitions(HYPOTHESES_VERSION)[0],
+    title: `${getHypothesisDefinitions(HYPOTHESES_VERSION)[0].title} #${i + 1}`,
     id: `hypothesis-${i + 1}`,
-    tags: [randomTag(hypothesisDefinitions[0].tags || []), `auto_${i + 1}`],
+    tags: [randomTag(getHypothesisDefinitions(HYPOTHESES_VERSION)[0].tags || []), `auto_${i + 1}`],
   })
 );

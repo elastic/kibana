@@ -8,7 +8,8 @@
 import type { ThreatHuntingHypothesisDescriptorClient } from '../saved_objects/threat_hunting_hypothesis_descriptor';
 
 /**
- * Util to delete all Threat Hunting Hypotheses saved objects for testing and debugging purposes.
+ * For Testing and Debugging:
+ * Util to delete all Threat Hunting Hypotheses saved objects
  * @param descriptor
  */
 export const deleteAll = async (

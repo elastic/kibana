@@ -7,6 +7,6 @@
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Threat Hunting', function () {
-    // TODO: loadTestFile(require.resolve('./fileHere'));
+    loadTestFile(require.resolve('./threat_hunting_hypotheses/init_and_reconciliation'));
   });
 }
