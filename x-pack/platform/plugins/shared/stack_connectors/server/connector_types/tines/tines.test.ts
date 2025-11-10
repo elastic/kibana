@@ -12,7 +12,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { TinesConnector, WEBHOOK_AGENT_TYPE } from './tines';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { API_MAX_RESULTS, TINES_CONNECTOR_ID } from '../../../common/tines/constants';
+import { API_MAX_RESULTS, CONNECTOR_ID } from '@kbn/connector-schemas/tines';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 jest.mock('axios');
@@ -116,7 +116,7 @@ describe('TinesConnector', () => {
   const connector = new TinesConnector({
     configurationUtilities: actionsConfigMock.create(),
     config: { url },
-    connector: { id: '1', type: TINES_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     secrets: { email, token },
     logger,
     services: actionsMock.createServices(),

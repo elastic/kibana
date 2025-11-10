@@ -36,7 +36,8 @@
     "optionalPlugins": [
       "cloud",
       "licenseManagement",
-      "workflowsManagement"
+      "workflowsManagement",
+      "usageCollection"
     ],
     "extraPublicDirs": []
   }
