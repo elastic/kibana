@@ -94,6 +94,6 @@ Examples:
       // 3. Enrich documents with content references
       // 4. Return results in ToolResultType format
     },
-    tags: ['product-documentation'],
+    tags: ['security', 'product-documentation'],
   };
 };
