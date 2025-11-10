@@ -24,4 +24,3 @@ export const getSpaceIdFromRequest = (request: KibanaRequest): string => {
   // Fallback to default space
   return DEFAULT_SPACE_ID;
 };
-

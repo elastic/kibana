@@ -11,7 +11,8 @@ export const createSecurityAgentDefinition = (): BuiltInAgentDefinition => {
   return {
     id: 'core.security.agent',
     name: 'Security Agent',
-    description: 'Agent specialized in security analysis tasks, including alert investigation, threat intelligence, and security documentation.',
+    description:
+      'Agent specialized in security analysis tasks, including alert investigation, threat intelligence, and security documentation.',
     labels: ['security'],
     configuration: {
       instructions: `You are a Security Agent specialized in security analysis and threat intelligence. Your primary responsibilities include:
@@ -46,4 +47,3 @@ Always prioritize security best practices and provide actionable recommendations
     },
   };
 };
-
