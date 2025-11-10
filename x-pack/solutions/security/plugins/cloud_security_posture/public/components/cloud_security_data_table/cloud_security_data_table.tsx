@@ -200,8 +200,8 @@ export const CloudSecurityDataTable = ({
    * mode should be passed as a key to the UnifiedDataTable component to force a re-render when the mode changes.
    */
   const computeDataTableRendering = useMemo(() => {
-    // Enable virtualization mode when the table is set to a large page size.
-    const isVirtualizationEnabled = pageSize >= 100;
+    // Enable virtualization mode when the table is set to a large page size and has many rows.
+    const isVirtualizationEnabled = pageSize >= 100 && total >= 100;
 
     const getWrapperHeight = () => {
       if (height) return height;
@@ -219,7 +219,7 @@ export const CloudSecurityDataTable = ({
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize, height, filters?.length, hasDistributionBar]);
+  }, [pageSize, total, height, filters?.length, hasDistributionBar]);
 
   const { filterManager } = data.query;
 
