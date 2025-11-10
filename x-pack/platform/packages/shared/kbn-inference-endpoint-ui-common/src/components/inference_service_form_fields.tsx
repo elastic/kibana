@@ -31,7 +31,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { isMapWithStringValues } from '../types/types';
+import { isMapWithStringValues, FieldType } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
@@ -235,9 +235,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       // Iterate through the new provider configurations so we can ensure all fields supporting task type are added
       Object.keys(newProvider?.configurations ?? {}).forEach((k) => {
         if (
-          newConfig[k] !== undefined &&
-          newProvider?.configurations[k]?.supported_task_types &&
-          !newProvider?.configurations[k].supported_task_types.includes(taskType)
+          (newConfig[k] !== undefined &&
+            newProvider?.configurations[k]?.supported_task_types &&
+            !newProvider?.configurations[k].supported_task_types.includes(taskType)) ||
+          // Tempo fix for inference endpoint creation to ensure headers aren't sent until full custom header support is added here https://github.com/elastic/kibana/pull/242187
+          (newProvider?.configurations[k]?.type === FieldType.MAP && enableCustomHeaders !== true)
         ) {
           delete newConfig[k];
         } else if (
@@ -271,7 +273,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, secrets, updateFieldValues, updatedProviders, getOverrides]
+    [config, secrets, updateFieldValues, updatedProviders, getOverrides, enableCustomHeaders]
   );
 
   const onProviderChange = useCallback(
