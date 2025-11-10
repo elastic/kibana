@@ -33,13 +33,11 @@ export const commands = {
         defaultMessage: 'CHANGE_POINT',
       }),
       preview: true,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.change_point.markdown',
-            {
-              defaultMessage: `### CHANGE POINT
+      description: {
+        markdownContent: i18n.translate(
+          'languageDocumentation.documentationESQL.change_point.markdown',
+          {
+            defaultMessage: `### CHANGE POINT
 \`CHANGE POINT\`detects spikes, dips, and change points in a metric.
 
 The command adds columns to the table with the change point type and p-value, that indicates how extreme the change point is (lower values indicate greater changes).
@@ -84,13 +82,13 @@ ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
 | 13          | 42            | step_change  | 0.0           |
 
 `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+            ignoreTag: true,
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          }
+        ),
+        openLinksInNewTab: true,
+      },
       license: { licenses: [{ name: 'platinum' }], hasMultipleLicenses: false },
     },
     {
@@ -98,13 +96,11 @@ ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
         defaultMessage: 'COMPLETION',
       }),
       preview: true,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.completion.markdown',
-            {
-              defaultMessage: `### COMPLETION
+      description: {
+        markdownContent: i18n.translate(
+          'languageDocumentation.documentationESQL.completion.markdown',
+          {
+            defaultMessage: `### COMPLETION
 
 The \`COMPLETION\` processing command uses a machine learning model to generate text completions based on the provided prompt. The command works with any LLM deployed to the [Elasticsearch inference API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put) and can be chained with other ES|QL commands for further processing.
 
@@ -175,25 +171,23 @@ FROM movies
 | The Prestige | Rival magicians engage in dangerous competition. | 8.5 |
 
 `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like COMPLETION, prompt, inference_id',
-            }
-          )}
-        />
-      ),
+            ignoreTag: true,
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like COMPLETION, prompt, inference_id',
+          }
+        ),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.dissect', {
         defaultMessage: 'DISSECT',
       }),
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.dissect.markdown',
-            {
-              defaultMessage: `### DISSECT
+      description: {
+        markdownContent: i18n.translate(
+          'languageDocumentation.documentationESQL.dissect.markdown',
+          {
+            defaultMessage: `### DISSECT
 \`DISSECT\` enables you to extract structured data out of a string. \`DISSECT\` matches the string against a delimiter-based pattern, and extracts the specified keys as columns.
 
 Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/dissect-processor.html) for the syntax of dissect patterns.
@@ -202,22 +196,21 @@ Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/e
 ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
 | DISSECT a "%'\{Y\}-%\{M\}-%\{D\}T%\{h\}:%\{m\}:%\{s\}Z - %\{msg\} - %\{ip\}'"
 \`\`\`            `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+            ignoreTag: true,
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          }
+        ),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.drop', {
         defaultMessage: 'DROP',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.drop.markdown', {
-            defaultMessage: `### DROP
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.drop.markdown', {
+          defaultMessage: `### DROP
 Use \`DROP\` to remove columns from a table:
 
 \`\`\` esql
@@ -232,23 +225,19 @@ FROM employees
 | DROP height*
 \`\`\`
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.enrich', {
         defaultMessage: 'ENRICH',
       }),
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.enrich.markdown',
-            {
-              defaultMessage: `### ENRICH
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.enrich.markdown', {
+          defaultMessage: `### ENRICH
 You can use \`ENRICH\` to add data from your existing indices to incoming records. It's similar to [ingest enrich](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html), but it works at query time.
 
 \`\`\` esql
@@ -283,22 +272,20 @@ By default (if no \`WITH\` is defined), \`ENRICH\` will add all the enrich field
 
 In case of name collisions, the newly created fields will override the existing fields.
             `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+          ignoreTag: true,
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.eval', {
         defaultMessage: 'EVAL',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.eval.markdown', {
-            defaultMessage: `### EVAL
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.eval.markdown', {
+          defaultMessage: `### EVAL
 \`EVAL\` enables you to add new columns:
 
 \`\`\` esql
@@ -318,22 +305,20 @@ FROM employees
 #### Functions
 \`EVAL\` supports various functions for calculating values. Refer to Functions for more information.
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.fork', {
         defaultMessage: 'FORK',
       }),
       preview: true,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.fork.markdown', {
-            defaultMessage: `### FORK
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.fork.markdown', {
+          defaultMessage: `### FORK
 \`FORK\` creates multiple execution branches to operate on the same input data and combines the results in a single output table.
 
 \`\`\` esql
@@ -408,22 +393,20 @@ FROM books METADATA _score
 | Keith Faulkner | 1.59 | fork1 | null |
 | null | null | fork2 | 18 |
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            ignoreTag: true,
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          ignoreTag: true,
+        }),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.grok', {
         defaultMessage: 'GROK',
       }),
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.grok.markdown', {
-            defaultMessage: `### GROK
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.grok.markdown', {
+          defaultMessage: `### GROK
 \`GROK\` enables you to extract structured data out of a string. \`GROK\` matches the string against patterns, based on regular expressions, and extracts the specified patterns as columns.
 
 Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html) for the syntax of grok patterns.
@@ -433,24 +416,22 @@ ROW a = "12 15.5 15.6 true"
 | GROK a "%'\{NUMBER:b:int\} %\{NUMBER:c:float\} %\{NUMBER:d:double\} %\{WORD:e:boolean\}'"
 \`\`\`
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.inline_stats', {
         defaultMessage: 'INLINE STATS',
       }),
       preview: true,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.inline_stats.markdown',
-            {
-              defaultMessage: `### INLINE STATS
+      description: {
+        markdownContent: i18n.translate(
+          'languageDocumentation.documentationESQL.inline_stats.markdown',
+          {
+            defaultMessage: `### INLINE STATS
 \`INLINE STATS\` groups rows according to a common value
 and calculates one or more aggregated values over the grouped rows. The results
 are appended as new columns to the input rows.
@@ -587,22 +568,21 @@ FROM employees
 | 10004 | 36174 | 38292.0 | 54221.0 | 67286.0 |
 | 10005 | 63528 | 38292.0 | 54221.0 | 67286.0 |
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            ignoreTag: true,
+          }
+        ),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.keep', {
         defaultMessage: 'KEEP',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.keep.markdown', {
-            defaultMessage: `### KEEP
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.keep.markdown', {
+          defaultMessage: `### KEEP
 The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
 
 To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
@@ -626,22 +606,19 @@ FROM employees
 | KEEP h*, *
 \`\`\`
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.limit', {
         defaultMessage: 'LIMIT',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.limit.markdown',
-            {
-              defaultMessage: `### LIMIT
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.limit.markdown', {
+          defaultMessage: `### LIMIT
 The \`LIMIT\` processing command enables you to limit the number of rows:
 
 \`\`\` esql
@@ -649,25 +626,20 @@ FROM employees
 | LIMIT 5
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.lookup', {
         defaultMessage: 'LOOKUP JOIN',
       }),
       preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.lookup.markdown',
-            {
-              defaultMessage: `### LOOKUP JOIN
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.lookup.markdown', {
+          defaultMessage: `### LOOKUP JOIN
 You can use \`LOOKUP JOIN\` to add data from an existing index to incoming rows. While this is similar to \`ENRICH\`, it does not require an enrich policy to be executed beforehand. Additionally, if multiple matching documents are found in the lookup index, they will generate multiple output rows.
 
 \`\`\` esql
@@ -698,48 +670,43 @@ FROM employees
 
 In case of name collisions, the fields from the lookup index will override the existing fields.
             `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+          ignoreTag: true,
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.mv_expand', {
         defaultMessage: 'MV_EXPAND',
       }),
       preview: true,
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.mv_expand.markdown',
-            {
-              defaultMessage: `### MV_EXPAND
+      description: {
+        markdownContent: i18n.translate(
+          'languageDocumentation.documentationESQL.mv_expand.markdown',
+          {
+            defaultMessage: `### MV_EXPAND
 The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:
 \`\`\` esql
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
 \`\`\`
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          }
+        ),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.rename', {
         defaultMessage: 'RENAME',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.rename.markdown',
-            {
-              defaultMessage: `### RENAME
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.rename.markdown', {
+          defaultMessage: `### RENAME
 Use \`RENAME\` to rename a column using the following syntax:
 
 \`\`\` esql
@@ -764,26 +731,21 @@ FROM employees
 | RENAME first_name AS fn, last_name AS ln
 \`\`\`
             `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+          ignoreTag: true,
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.rerank', {
         defaultMessage: 'RERANK',
       }),
       preview: true,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.rerank.markdown',
-            {
-              defaultMessage: `### RERANK
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.rerank.markdown', {
+          defaultMessage: `### RERANK
 \`RERANK\` uses an inference model to compute a new relevance score
 for an initial set of documents, directly within your ES|QL queries.
 
@@ -892,26 +854,23 @@ FROM books METADATA _score
 | The Lord of the Rings - Boxed Set | 3.768855094909668 | 0.0010020040208473802 | 0.001396648003719747 |
 | Return of the King Being the Third Part of The Lord of the Rings | 3.6248698234558105 | 9.000900317914784E-4 | 0.001396648003719747 |
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          ignoreTag: true,
+        }),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.sampleCommand', {
         defaultMessage: 'SAMPLE',
       }),
       preview: true,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.sampleCommand.markdown',
-            {
-              defaultMessage: `### SAMPLE
+      description: {
+        markdownContent: i18n.translate(
+          'languageDocumentation.documentationESQL.sampleCommand.markdown',
+          {
+            defaultMessage: `### SAMPLE
 The \`SAMPLE\` command samples a fraction of the table rows.
 
 **Syntax**
@@ -942,22 +901,21 @@ FROM employees
 | 10081          |
 
 `,
-              ignoreTag: true,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+            ignoreTag: true,
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          }
+        ),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.sort', {
         defaultMessage: 'SORT',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.sort.markdown', {
-            defaultMessage: `### SORT
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.sort.markdown', {
+          defaultMessage: `### SORT
 Use the \`SORT\` command to sort rows on one or more fields:
 
 \`\`\` esql
@@ -991,22 +949,19 @@ FROM employees
 | SORT first_name ASC NULLS FIRST
 \`\`\`
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.stats', {
         defaultMessage: 'STATS ... BY',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.stats.markdown',
-            {
-              defaultMessage: `### STATS ... BY
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.stats.markdown', {
+          defaultMessage: `### STATS ... BY
 Use \`STATS ... BY\` to group rows according to a common value and calculate one or more aggregated values over the grouped rows.
 
 **Examples**:
@@ -1077,23 +1032,19 @@ FROM employees
 
 **Note**: Grouping on a single expression is currently much more optimized than grouping on many expressions.
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.where', {
         defaultMessage: 'WHERE',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.where.markdown',
-            {
-              defaultMessage: `### WHERE
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.where.markdown', {
+          defaultMessage: `### WHERE
 Use \`WHERE\` to produce a table that contains all the rows from the input table for which the provided condition evaluates to \`true\`:
 
 \`\`\` esql
@@ -1109,12 +1060,11 @@ Refer to **Operators** for an overview of the supported operators.
 #### Functions
 \`WHERE\` supports various functions for calculating values. Refer to **Functions** for more information.
             `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
   ],
 };

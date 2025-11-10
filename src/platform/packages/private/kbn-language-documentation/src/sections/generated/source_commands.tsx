@@ -29,11 +29,9 @@ export const commands = {
       label: i18n.translate('languageDocumentation.documentationESQL.from', {
         defaultMessage: 'FROM',
       }),
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.from.markdown', {
-            defaultMessage: `### FROM
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.from.markdown', {
+          defaultMessage: `### FROM
 The \`FROM\` source command returns a table with up to 10,000 documents from a data stream, index, or alias. Each row in the resulting table represents a document. Each column corresponds to a field, and can be accessed by the name of that field.
 
 \`\`\` esql
@@ -81,22 +79,20 @@ FROM employees METADATA _index, _id
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.fuse', {
         defaultMessage: 'FUSE',
       }),
       preview: true,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.fuse.markdown', {
-            defaultMessage: `### FUSE
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.fuse.markdown', {
+          defaultMessage: `### FUSE
 
 The \`FUSE\` [processing command](https://www.elastic.co/docs/reference/query-languages/esql/commands/processing-commands) merges rows from multiple result sets and assigns new relevance scores. \`FUSE\` is for search use cases. Learn more about [how search works in ES|QL](https://www.elastic.co/docs/solutions/search/esql-for-search#how-search-works-in-esql).
 
@@ -159,21 +155,20 @@ FROM books METADATA _id, _index, _score
 
 Refer to the [reference documentation](https://www.elastic.co/docs/reference/query-languages/esql/commands/fuse) for more information, including additional examples and limitations.
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            ignoreTag: true,
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          ignoreTag: true,
+        }),
+        openLinksInNewTab: true,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.row', {
         defaultMessage: 'ROW',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.row.markdown', {
-            defaultMessage: `### ROW
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.row.markdown', {
+          defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
 
 \`\`\` esql
@@ -192,39 +187,36 @@ ROW supports the use of functions:
 ROW a = ROUND(1.23, 0)
 \`\`\`
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.show', {
         defaultMessage: 'SHOW',
       }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
-            defaultMessage: `### SHOW
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
+          defaultMessage: `### SHOW
 The \`SHOW INFO\` source command returns the deployment's version, build date and hash.
             `,
-            ignoreTag: true,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-          })}
-        />
-      ),
+          ignoreTag: true,
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        }),
+        openLinksInNewTab: false,
+      },
     },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.ts', {
         defaultMessage: 'TS',
       }),
       preview: true,
-      description: (
-        <Markdown
-          openLinksInNewTab={true}
-          markdownContent={i18n.translate('languageDocumentation.documentationESQL.ts.markdown', {
-            defaultMessage: `### TS
+      description: {
+        markdownContent: i18n.translate('languageDocumentation.documentationESQL.ts.markdown', {
+          defaultMessage: `### TS
 \`TS\` is similar to [\`FROM\`](/reference/query-languages/esql/commands/from.md), with the following key differences:
 
  - It targets only [time series data streams](https://www.elastic.co/docs/manage-data/data-store/data-streams/time-series-data-stream-tsds).
@@ -332,12 +324,12 @@ TS metrics
 | STATS SUM(AVG_OVER_TIME(memory_usage)) BY host, TBUCKET(1 hour)
 \`\`\`
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            ignoreTag: true,
-          })}
-        />
-      ),
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          ignoreTag: true,
+        }),
+        openLinksInNewTab: true,
+      },
     },
   ],
 };

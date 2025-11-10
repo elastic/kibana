@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LanguageDocumentationSections } from '../types';
-import { elementToString } from './element_to_string';
 
 /**
  * Filters the documentation groups based on the search criteria.
@@ -44,8 +43,8 @@ export const getFilteredGroups = (
           const labelMatch = helpItem.label.toLocaleLowerCase().includes(normalizedSearchText);
           const descriptionMatch =
             searchInDescription &&
-            elementToString(helpItem.description)
-              ?.toLocaleLowerCase()
+            helpItem.description?.markdownContent
+              .toLocaleLowerCase()
               .includes(normalizedSearchText);
 
           if (labelMatch) {

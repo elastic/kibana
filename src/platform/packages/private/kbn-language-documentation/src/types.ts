@@ -20,7 +20,7 @@ export interface DocumentationGroup {
 
 export interface DocumentationGroupItem {
   label: string;
-  description?: JSX.Element;
+  description?: { markdownContent: string; openLinksInNewTab?: boolean };
 }
 
 export interface Signature {

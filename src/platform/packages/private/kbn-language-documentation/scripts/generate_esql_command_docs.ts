@@ -185,10 +185,6 @@ function generateCommandItemDoc({
   preview,
   license,
 }: CommandItemMetadata): string {
-  function generateMarkdownProps(props: { openLinksInNewTab?: boolean }): string {
-    return props.openLinksInNewTab ? ' openLinksInNewTab={true}' : '';
-  }
-
   function generateDescriptionOptions(
     options: {
       ignoreTag?: boolean;
@@ -220,12 +216,11 @@ function generateCommandItemDoc({
       label: i18n.translate('${labelKey}', {
         defaultMessage: '${labelDefaultMessage}',
       }),${previewProp}
-      description: (
-        <Markdown${generateMarkdownProps({ openLinksInNewTab })}
-          markdownContent={i18n.translate('${descriptionKey}', {
-            defaultMessage: \`${description}\`${generateDescriptionOptions(descriptionOptions)}
-          })}
-        />
-      ),${licenseProp}
+      description: {
+        markdownContent: i18n.translate('${descriptionKey}', {
+          defaultMessage: \`${description}\`${generateDescriptionOptions(descriptionOptions)}
+        }),
+        openLinksInNewTab: ${openLinksInNewTab ? 'true' : 'false'},
+      },${licenseProp}
 }`;
 }
