@@ -22,26 +22,9 @@ export const CreateAgentlessPolicyRequestSchema = {
     }),
   }),
   body: SimplifiedCreatePackagePolicyRequestBodySchema.extends({
-    cloud_connector_id: schema.maybe(
-      schema.nullable(
-        schema.string({
-          meta: {
-            description: 'ID of the cloud connector associated with this package policy.',
-          },
-        })
-      )
-    ),
-    supports_cloud_connector: schema.maybe(
-      schema.nullable(
-        schema.boolean({
-          defaultValue: false,
-          meta: {
-            description: 'Indicates whether the package policy supports cloud connectors.',
-          },
-        })
-      )
-    ),
     // Remove all properties that are not relevant for agentless policies
+    cloud_connector_id: undefined,
+    supports_cloud_connector: undefined,
     policy_id: undefined,
     policy_ids: undefined,
     supports_agentless: undefined,

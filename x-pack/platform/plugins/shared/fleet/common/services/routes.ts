@@ -206,7 +206,7 @@ export const packagePolicyRouteService = {
   },
 };
 
-export const agentlesPolicyRouteService = {
+export const agentlessPolicyRouteService = {
   getCreatePath: () => {
     return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
   },

@@ -7,10 +7,12 @@
 
 import { API_VERSIONS } from '../../../common';
 
-import { agentlesPolicyRouteService } from '../../../common/services';
+import { agentlessPolicyRouteService } from '../../../common/services';
 import type {
   CreateAgentlessPolicyRequest,
+  CreateAgentlessPolicyResponse,
   DeleteAgentlessPolicyRequest,
+  DeleteAgentlessPolicyResponse,
 } from '../../../common/types/rest_spec/agentless_policy';
 
 import { sendRequestForRq } from './use_request';
@@ -19,8 +21,8 @@ export const sendCreateAgentlessPolicy = (
   body: CreateAgentlessPolicyRequest['body'],
   query?: CreateAgentlessPolicyRequest['query']
 ) => {
-  return sendRequestForRq<any>({
-    path: agentlesPolicyRouteService.getCreatePath(),
+  return sendRequestForRq<CreateAgentlessPolicyResponse>({
+    path: agentlessPolicyRouteService.getCreatePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
@@ -32,8 +34,8 @@ export const sendDeleteAgentlessPolicy = (
   policyId: string,
   query?: DeleteAgentlessPolicyRequest['query']
 ) => {
-  return sendRequestForRq<any>({
-    path: agentlesPolicyRouteService.getDeletePath(policyId),
+  return sendRequestForRq<DeleteAgentlessPolicyResponse>({
+    path: agentlessPolicyRouteService.getDeletePath(policyId),
     method: 'delete',
     version: API_VERSIONS.public.v1,
     query,
