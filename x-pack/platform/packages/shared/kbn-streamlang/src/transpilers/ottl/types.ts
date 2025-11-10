@@ -16,31 +16,20 @@ export interface OTTLTransformProcessor {
   log_statements: OTTLStatement[];
 }
 
-export interface OTTLRoutingConnector {
-  match_once: boolean;
-  default_pipelines: string[];
-  table: Array<{
-    context: 'log';
-    condition: string;
-    pipelines: string[];
-  }>;
-}
-
+/**
+ * OTEL collector configuration for dynamic processor injection
+ *
+ * This is the format expected by elasticpipelineextension for Elasticsearch documents.
+ * It contains ONLY processor configurations - no pipelines, connectors, receivers, or exporters.
+ *
+ * The static OTEL config (config.sampling.yaml) defines the pipeline structure and references
+ * these dynamic processors by name (e.g., transform/stream_processing).
+ *
+ * @see https://www.elastic.co/guide/en/observability/current/otel-collector-config.html
+ */
 export interface OTELConfig {
-  receivers: Record<string, any>;
+  /** Processor configurations that will be injected into static pipelines */
   processors: Record<string, OTTLTransformProcessor | any>;
-  connectors: Record<string, OTTLRoutingConnector>;
-  exporters: Record<string, any>;
-  service: {
-    pipelines: Record<
-      string,
-      {
-        receivers: string[];
-        processors: string[];
-        exporters: string[];
-      }
-    >;
-  };
 }
 
 export interface OTTLTranspilationOptions {
@@ -58,11 +47,11 @@ export interface OTTLTranspilationOptions {
 }
 
 export interface OTELConfigGeneratorOptions extends OTTLTranspilationOptions {
-  /** Receiver configuration */
+  /** Receiver configuration (deprecated - receivers defined in static config) */
   receiverType?: 'filelog' | 'otlp';
   filelogInclude?: string[];
 
-  /** Output configuration */
+  /** Output configuration (deprecated - exporters defined in static config) */
   outputIndex?: string;
 
   /** Stream filtering */

@@ -13,6 +13,7 @@ import { managementRoutes } from './streams/management/route';
 import { internalSchemaRoutes } from './internal/streams/schema/route';
 import { internalProcessingRoutes } from './internal/streams/processing/route';
 import { internalSamplesRoutes } from './internal/streams/samples';
+import { internalSamplingRoutes } from './internal/streams/sampling/route';
 import { ingestRoutes } from './streams/ingest/route';
 import { internalLifecycleRoutes } from './internal/streams/lifecycle/route';
 import { groupRoutes } from './streams/group/route';
@@ -38,6 +39,7 @@ export const streamsRouteRepository = {
   ...internalLifecycleRoutes,
   ...internalProcessingRoutes,
   ...internalSamplesRoutes,
+  ...internalSamplingRoutes,
   ...failureStoreRoutes,
   ...internalFeaturesRoutes,
   ...internalIngestRoutes,

@@ -339,11 +339,9 @@ export class State {
         return;
       }
 
-      // Generate OTEL collector configuration from all wired streams
-      const otelConfig = convertToOtelConfig(wiredStreams, {
-        receiverType: 'otlp',
-        includeDebugExporter: false,
-      });
+      // Generate OTEL processor configuration from all wired streams
+      // This creates only processor configs - the static OTEL config defines pipelines/connectors
+      const otelConfig = convertToOtelConfig(wiredStreams, {});
 
       // Store in .otel-pipeline-config index
       await dependencies.scopedClusterClient.asCurrentUser.index({

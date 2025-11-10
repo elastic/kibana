@@ -155,6 +155,8 @@ const StreamEnrichmentCleanupOnUnmount = () => {
   useEffect(() => {
     return () => {
       const context = service.getSnapshot().context;
+      
+      // Clean up grok expressions
       context.stepRefs.forEach((procRef) => {
         const procContext = procRef.getSnapshot().context;
         if (isActionBlock(procContext.step) && isGrokProcessor(procContext.step)) {
@@ -164,6 +166,8 @@ const StreamEnrichmentCleanupOnUnmount = () => {
           });
         }
       });
+
+      // Note: Sampling cleanup is now handled by XState exit actions in the data source machine
     };
   }, [service]);
 

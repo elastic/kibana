@@ -11,189 +11,198 @@ import { convertConditionToOTTL } from './condition_to_ottl';
 import { convertStreamlangProcessorsToOTTL } from './conversions';
 import { flattenSteps } from '../shared/flatten_steps';
 import type { OTELConfig, OTELConfigGeneratorOptions } from './types';
-import { getPipelineName, sanitizePipelineName } from './ottl_helpers';
 
 /**
- * Converts a hierarchy of wired streams to a complete OTEL collector configuration
+ * Performs breadth-first traversal of the stream tree
+ */
+function breadthFirstTraversal(
+  streams: Streams.WiredStream.Definition[]
+): Streams.WiredStream.Definition[] {
+  const result: Streams.WiredStream.Definition[] = [];
+  const streamMap = new Map(streams.map((s) => [s.name, s]));
+  const visited = new Set<string>();
+  const queue: string[] = [];
+
+  // Find root streams
+  for (const stream of streams) {
+    if (isRoot(stream.name)) {
+      queue.push(stream.name);
+      visited.add(stream.name);
+    }
+  }
+
+  // BFS traversal
+  while (queue.length > 0) {
+    const currentName = queue.shift()!;
+    const currentStream = streamMap.get(currentName);
+
+    if (currentStream) {
+      result.push(currentStream);
+
+      // Add children to queue
+      for (const stream of streams) {
+        const parentId = getParentId(stream.name);
+        if (parentId === currentName && !visited.has(stream.name)) {
+          queue.push(stream.name);
+          visited.add(stream.name);
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Validates processor configuration
+ * @public - Can be used to validate generated processor configs
+ */
+export function validateProcessorConfig(config: OTELConfig): string[] {
+  const errors: string[] = [];
+
+  // Check that the transform/stream_processing processor exists
+  if (!config.processors['transform/stream_processing']) {
+    errors.push('Missing required processor: transform/stream_processing');
+  }
+
+  // Check that it has log_statements
+  const processor = config.processors['transform/stream_processing'];
+  if (processor && (!processor.log_statements || processor.log_statements.length === 0)) {
+    errors.push('Processor transform/stream_processing has no log_statements');
+  }
+
+  return errors;
+}
+
+/**
+ * Converts a hierarchy of wired streams to processor configuration for dynamic injection
  *
- * This generates:
- * - Receivers (filelog or otlp)
- * - Processors (transform processors for each stream's processing steps)
- * - Connectors (routing connectors for stream hierarchy)
- * - Exporters (Elasticsearch and optionally debug)
- * - Service pipelines (connecting everything together)
+ * This generates ONLY processor configurations that will be injected into static pipelines.
+ * The static OTEL config (config.sampling.yaml) defines:
+ * - Pipeline structure (logs/stream_processing)
+ * - Connectors (routing/stream_ingress, routing/stream_egress)
+ * - Receivers and exporters
+ *
+ * This function creates a single transform processor with conditional logic in breadth-first order:
+ * 1. Initialize stream.name to root stream (unconditionally)
+ * 2. For each stream: process data, add metadata, route to children
+ *
+ * @example Basic usage
+ * ```typescript
+ * const config = convertToOtelConfig(streams, {
+ *   includeJsonParsing: true,
+ *   ignoreUnsupportedProcessors: false
+ * });
+ * // Returns: { processors: { "transform/stream_processing": {...} } }
+ * ```
  *
  * @param streams Array of wired stream definitions
  * @param options Configuration options
- * @returns Complete OTEL collector configuration
+ * @returns Processor configuration for Elasticsearch document
  */
 export function convertToOtelConfig(
   streams: Streams.WiredStream.Definition[],
   options: OTELConfigGeneratorOptions = {}
 ): OTELConfig {
   const config: OTELConfig = {
-    receivers: {},
     processors: {},
-    connectors: {},
-    exporters: {},
-    service: {
-      pipelines: {},
-    },
   };
-
-  // Setup receivers
-  if (options.receiverType === 'otlp') {
-    config.receivers.otlp = {
-      protocols: {
-        grpc: {},
-        http: {},
-      },
-    };
-  } else {
-    config.receivers.filelog = {
-      include: options.filelogInclude || ['**/*.log'],
-    };
-  }
-
-  // Setup exporters
-  config.exporters.elasticsearch = {
-    endpoints: [options.elasticsearchEndpoint || 'http://localhost:9200'],
-    ...(options.elasticsearchApiKey ? { api_key: options.elasticsearchApiKey } : {}),
-    logs_index: options.outputIndex || 'logs',
-    mapping: {
-      mode: 'otel',
-    },
-  };
-
-  if (options.includeDebugExporter) {
-    config.exporters.debug = {
-      verbosity: 'detailed',
-    };
-  }
 
   // Filter streams if requested
   const filteredStreams = options.includeOnlyStreamsWithProcessing
     ? filterStreamsWithProcessing(streams)
     : streams;
 
-  // Add JSON parsing processor for root stream
-  if (options.includeJsonParsing) {
-    config.processors['transform/json_parsing'] = {
-      error_mode: 'ignore',
-      log_statements: [
-        {
-          context: 'log',
-          conditions: ['body != nil and Substring(body, 0, 2) == "{"'],
-          statements: [
-            'set(cache, ParseJSON(body))',
-            'flatten(cache, "")',
-            'merge_maps(attributes, cache, "upsert")',
-          ],
-        },
-      ],
-    };
+  if (filteredStreams.length === 0) {
+    return config;
   }
 
-  // Create output pipeline
-  const outputPipelineName = getPipelineName('output');
-  config.service.pipelines[outputPipelineName] = {
-    receivers: filteredStreams.map((stream) => `routing/${sanitizePipelineName(stream.name)}`),
-    processors: [],
-    exporters: ['elasticsearch', ...(options.includeDebugExporter ? ['debug'] : [])],
-  };
+  // Perform breadth-first traversal to get processing order
+  const orderedStreams = breadthFirstTraversal(filteredStreams);
 
-  // Process each stream
-  filteredStreams.forEach((streamDef) => {
+  // Build a single transform processor with all stream logic
+  const allStatements: any[] = [];
+
+  // Find the root stream to initialize stream.name
+  const rootStream = orderedStreams.find((s) => isRoot(s.name));
+  if (rootStream) {
+    // Initialize stream.name to root stream unconditionally
+    allStatements.push({
+      context: 'log',
+      statements: [`set(attributes["stream.name"], "${rootStream.name}")`],
+    });
+  }
+
+  // Add JSON parsing for root streams if requested
+  if (options.includeJsonParsing) {
+    allStatements.push({
+      context: 'log',
+      conditions: ['body != nil and Substring(body, 0, 2) == "{"'],
+      statements: [
+        'set(cache, ParseJSON(body))',
+        'flatten(cache, "")',
+        'merge_maps(attributes, cache, "upsert")',
+      ],
+    });
+  }
+
+  // Process each stream in breadth-first order
+  for (const streamDef of orderedStreams) {
     const streamName = streamDef.name;
-    const sanitizedStreamName = sanitizePipelineName(streamName);
 
-    // Create routing connector
-    let routingTable = streamDef.ingest.wired.routing
-      .filter((routing) => {
-        // Only include routes to streams that are in our filtered list
-        return filteredStreams.some((s) => s.name === routing.destination);
-      })
-      .filter((routing) => {
-        // Filter out disabled routes
-        return routing.status !== 'disabled';
-      })
-      .map((routing) => ({
-        context: 'log' as const,
-        condition: convertConditionToOTTL(routing.where),
-        pipelines: [getPipelineName(routing.destination)],
-      }));
-
-    // If no routing rules, route to output
-    if (routingTable.length === 0) {
-      routingTable = [
-        {
-          context: 'log' as const,
-          condition: 'true',
-          pipelines: [outputPipelineName],
-        },
-      ];
-    }
-
-    config.connectors[`routing/${sanitizedStreamName}`] = {
-      match_once: true,
-      default_pipelines: [outputPipelineName],
-      table: routingTable,
-    };
-
-    // Convert Streamlang processing to OTTL
+    // 1. Process this stream's data (when stream.name == streamName)
     const flattenedSteps = flattenSteps(streamDef.ingest.processing.steps);
-    const ottlStatements = convertStreamlangProcessorsToOTTL(flattenedSteps, streamName, options);
-    const ottlProcessor = {
-      error_mode: options.ignoreUnsupportedProcessors
-        ? ('ignore' as const)
-        : ('propagate' as const),
-      log_statements: ottlStatements,
-    };
+    const processingStatements = convertStreamlangProcessorsToOTTL(
+      flattenedSteps,
+      streamName,
+      options
+    );
 
-    // Add processing transform if there are statements
-    if (ottlProcessor.log_statements.length > 0) {
-      config.processors[`transform/${sanitizedStreamName}_processing`] = ottlProcessor;
+    if (processingStatements.length > 0) {
+      for (const stmt of processingStatements) {
+        // Add condition to only process when stream.name matches
+        allStatements.push({
+          context: stmt.context,
+          conditions: [...(stmt.conditions || []), `attributes["stream.name"] == "${streamName}"`],
+          statements: stmt.statements,
+        });
+      }
     }
 
-    // Add stream metadata processor
-    config.processors[`transform/${sanitizedStreamName}_metadata`] = {
-      log_statements: [
-        {
-          context: 'log',
-          statements: [
-            `set(attributes["stream.name"], "${streamName}")`,
-            `set(attributes["target_stream"], "${streamName}")`,
-          ],
-        },
+    // 2. Add stream metadata (when stream.name == streamName)
+    allStatements.push({
+      context: 'log',
+      conditions: [`attributes["stream.name"] == "${streamName}"`],
+      statements: [
+        `set(attributes["target_stream"], "${streamName}")`,
+        `set(attributes["otel_processed"], true)`,
       ],
-    };
+    });
 
-    // Create pipeline
-    const processorList: string[] = [];
+    // 3. Route to children by changing stream.name (when stream.name == streamName AND routing condition)
+    const activeRoutings = streamDef.ingest.wired.routing.filter(
+      (routing) =>
+        routing.status !== 'disabled' && filteredStreams.some((s) => s.name === routing.destination)
+    );
 
-    // JSON parsing for root stream
-    if (isRoot(streamName) && options.includeJsonParsing) {
-      processorList.push('transform/json_parsing');
+    for (const routing of activeRoutings) {
+      const ottlCondition = convertConditionToOTTL(routing.where);
+      allStatements.push({
+        context: 'log',
+        conditions: [
+          `attributes["stream.name"] == "${streamName}"`,
+          ottlCondition !== 'true' ? ottlCondition : undefined,
+        ].filter(Boolean),
+        statements: [`set(attributes["stream.name"], "${routing.destination}")`],
+      });
     }
+  }
 
-    // Stream-specific processing
-    if (ottlProcessor.log_statements.length > 0) {
-      processorList.push(`transform/${sanitizedStreamName}_processing`);
-    }
-
-    // Metadata tagging
-    processorList.push(`transform/${sanitizedStreamName}_metadata`);
-
-    config.service.pipelines[getPipelineName(streamName)] = {
-      receivers: [
-        isRoot(streamName)
-          ? options.receiverType || 'filelog'
-          : `routing/${sanitizePipelineName(getParentId(streamName)!)}`,
-      ],
-      processors: processorList,
-      exporters: [`routing/${sanitizedStreamName}`],
-    };
-  });
+  // Create the single transform processor
+  config.processors['transform/stream_processing'] = {
+    error_mode: options.ignoreUnsupportedProcessors ? 'ignore' : 'propagate',
+    log_statements: allStatements,
+  };
 
   return config;
 }

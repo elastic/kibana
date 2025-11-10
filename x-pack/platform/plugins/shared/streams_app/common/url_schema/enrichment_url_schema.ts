@@ -90,10 +90,16 @@ export const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
  */
 export interface RawSamplesDataSource extends BaseDataSource {
   type: 'raw-samples';
+  /**
+   * Optional OTTL (OpenTelemetry Transformation Language) condition to filter sampled documents
+   * Example: attributes["service.name"] == "my-service"
+   */
+  condition?: string;
 }
 
 const rawSamplesDataSourceSchema = baseDataSourceSchema.extend({
   type: z.literal('raw-samples'),
+  condition: z.string().optional(),
 }) satisfies z.Schema<RawSamplesDataSource>;
 
 /**

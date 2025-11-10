@@ -22,6 +22,11 @@ import {
   createDataCollectionFailureNotifier,
   createDataCollectorActor,
 } from './data_collector_actor';
+import {
+  createSamplingConfigActor,
+  createSamplingConfigFailureNotifier,
+  createSamplingDisableActor,
+} from './sampling_configuration_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
@@ -37,9 +42,12 @@ export const dataSourceMachine = setup({
   },
   actors: {
     collectData: getPlaceholderFor(createDataCollectorActor),
+    configureSampling: getPlaceholderFor(createSamplingConfigActor),
+    disableSampling: getPlaceholderFor(createSamplingDisableActor),
   },
   actions: {
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
+    notifySamplingConfigFailure: getPlaceholderFor(createSamplingConfigFailureNotifier),
     restorePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
         const documents = localStorage.getItem(context.dataSource.storageKey);
@@ -69,6 +77,7 @@ export const dataSourceMachine = setup({
   guards: {
     isEnabled: ({ context }) => context.dataSource.enabled,
     isValidData: (_, params: { data?: SampleDocument[] }) => Array.isArray(params.data),
+    isRawSamplesType: ({ context }) => context.dataSource.type === 'raw-samples',
     shouldCollectData: ({ context, event }) => {
       assertEvent(event, 'dataSource.change');
       /**
@@ -89,6 +98,7 @@ export const dataSourceMachine = setup({
     streamName: input.streamName,
     simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
   }),
+  exit: 'disableSamplingOnExit',
   initial: 'determining',
   states: {
     determining: {
@@ -96,7 +106,7 @@ export const dataSourceMachine = setup({
       always: [{ target: 'enabled', guard: 'isEnabled' }, { target: 'disabled' }],
     },
     enabled: {
-      initial: 'loadingData',
+      initial: 'configuringSampling',
       on: {
         'dataSource.disable': {
           target: 'disabled',
@@ -125,6 +135,36 @@ export const dataSourceMachine = setup({
         ],
       },
       states: {
+        configuringSampling: {
+          always: [
+            {
+              guard: 'isRawSamplesType',
+              target: 'enablingSampling',
+            },
+            {
+              target: 'loadingData',
+            },
+          ],
+        },
+        enablingSampling: {
+          invoke: {
+            id: 'samplingConfigActor',
+            src: 'configureSampling',
+            input: ({ context }) => ({
+              condition:
+                context.dataSource.type === 'raw-samples'
+                  ? context.dataSource.condition
+                  : undefined,
+            }),
+            onDone: {
+              target: 'loadingData',
+            },
+            onError: {
+              target: 'loadingData',
+              actions: [{ type: 'notifySamplingConfigFailure' }],
+            },
+          },
+        },
         idle: {},
         loadingData: {
           invoke: {
@@ -193,9 +233,24 @@ export const createDataSourceMachineImplementations = ({
 }: DataSourceMachineDeps): MachineImplementationsFrom<typeof dataSourceMachine> => ({
   actors: {
     collectData: createDataCollectorActor({ data, streamsRepositoryClient }),
+    configureSampling: createSamplingConfigActor({ streamsRepositoryClient }),
+    disableSampling: createSamplingDisableActor({ streamsRepositoryClient }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
+    notifySamplingConfigFailure: createSamplingConfigFailureNotifier({ toasts }),
+    disableSamplingOnExit: ({ context }) => {
+      if (context.dataSource.type === 'raw-samples') {
+        streamsRepositoryClient
+          .fetch('DELETE /internal/streams/sampling/configure', {
+            signal: null,
+            params: {},
+          })
+          .catch(() => {
+            // Silently catch errors during cleanup
+          });
+      }
+    },
   },
 });
 

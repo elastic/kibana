@@ -38,7 +38,7 @@ export const transpile = (
 };
 
 export { convertConditionToOTTL } from './condition_to_ottl';
-export { convertToOtelConfig } from './otel_config_generator';
+export { convertToOtelConfig, validateProcessorConfig } from './otel_config_generator';
 export * from './types';
 export * from './ottl_helpers';
 export * from './field_mapping';
