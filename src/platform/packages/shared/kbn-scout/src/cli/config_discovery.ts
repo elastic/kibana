@@ -10,18 +10,23 @@
 import fs from 'fs';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
-import path from 'path';
+import path, { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
 import { measurePerformance } from '../common';
 import { validateWithScoutCiConfig } from '../config/discovery';
+import { hasTestsInPlaywrightConfig } from '../playwright/runner/run_tests';
+import { getPlaywrightGrepTag } from '../playwright/utils';
+import type { CliSupportedServerModes } from '../types';
 
 const getCountByType = (configs: Map<string, any>, type: 'plugin' | 'package'): number => {
   return Array.from(configs.values()).filter((config) => config.type === type).length;
 };
 
-export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: ToolingLog) => {
+export const runDiscoverPlaywrightConfigs = async (flagsReader: FlagsReader, log: ToolingLog) => {
   const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
+  const findWithTests = flagsReader.boolean('withTests')!;
 
   const scoutConfigs = measurePerformance(log, 'Discovering Playwright config files', () =>
     getScoutPlaywrightConfigs(searchPaths, log)
@@ -29,6 +34,60 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
 
   const pluginCount = getCountByType(scoutConfigs, 'plugin');
   const packageCount = getCountByType(scoutConfigs, 'package');
+
+  if (findWithTests) {
+    const startTime = Date.now();
+    log.info('Filtering Playwright configs to only those with tests...');
+
+    const tagsAndConfigsRunMap: Record<string, string[]> = {};
+
+    const testRunMatrix: Record<string, CliSupportedServerModes[]> = {
+      platform: ['serverless=es', 'serverless=security', 'serverless=oblt', 'stateful'],
+      observability: ['serverless=oblt', 'stateful'],
+      security: ['serverless=security', 'stateful'],
+      search: ['serverless=es', 'stateful'],
+    };
+
+    for (const module of scoutConfigs.entries()) {
+      const [itemName, data] = module;
+      const moduleRunMatrix = testRunMatrix[data.group as keyof typeof testRunMatrix];
+
+      for (const pwConfigPath of data.configs) {
+        const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
+        for (const runMatrixEntry of moduleRunMatrix) {
+          const pwGrepTag = getPlaywrightGrepTag(runMatrixEntry);
+          const pwCmdArgs = ['test', `--config=${pwConfigPath}`, `--grep=${pwGrepTag}`];
+          const statusCode = await hasTestsInPlaywrightConfig(
+            log,
+            pwBinPath,
+            pwCmdArgs,
+            pwConfigPath
+          );
+          // log.info(`npx playwright ${pwCmdArgs.join(' ')}`);
+          if (statusCode === 0) {
+            if (!tagsAndConfigsRunMap[pwGrepTag]) {
+              tagsAndConfigsRunMap[pwGrepTag] = [];
+            }
+            tagsAndConfigsRunMap[pwGrepTag].push(pwConfigPath);
+          } else {
+            log.info(`No tests found in config '${pwConfigPath}' for tag '${pwGrepTag}'`);
+          }
+        }
+      }
+    }
+
+    const endTime = Date.now();
+    const durationSecs = ((endTime - startTime) / 1000).toFixed(2);
+    log.info(
+      `Filtering completed in ${durationSecs} seconds. Playwright configs with tests filtered.`
+    );
+
+    log.info('Playwright configs with tests found for each tag:');
+    Object.entries(tagsAndConfigsRunMap).forEach(([tag, configs]) => {
+      log.info(`Tag: ${tag}`);
+      configs.forEach((config) => log.info(` - ${config}`));
+    });
+  }
 
   const finalMessage =
     scoutConfigs.size === 0
@@ -91,7 +150,7 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   `,
   flags: {
     string: ['searchPaths'],
-    boolean: ['save', 'validate'],
+    boolean: ['save', 'validate', 'withTests'],
     default: { searchPaths: DEFAULT_TEST_PATH_PATTERNS, save: false, validate: false },
   },
   run: ({ flagsReader, log }) => {
