@@ -46,7 +46,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const sampleData = getService('sampleData');
   const rules = getService('rules');
 
-  describe('Embeddable alerts panel', () => {
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
@@ -102,7 +101,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     for (const solution of ['stack', 'observability', 'security']) {
-      describe(`with ${solution} role`, () => {
+      describe(`with ${solution} role`, function () {
+        this.tags('skipFIPS');
         const ruleName = `${solution}-rule`;
 
         before(async () => {
@@ -186,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('when user doesnt have access', function () {
-      this.tags(['skipFIPS']);
+      this.tags('skipFIPS');
       it("should show a missing authz prompt when the user doesn't have access to a panel's rule types", async () => {
         // User with o11y-only access should see a missing authz prompt in the security panel
         await security.testUser.setRoles([`observability_alerting`]);
