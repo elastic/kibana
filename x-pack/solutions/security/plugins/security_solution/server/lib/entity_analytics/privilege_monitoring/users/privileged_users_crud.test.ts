@@ -48,18 +48,6 @@ describe('createPrivilegedUsersCrudService', () => {
     jest.clearAllMocks();
 
     mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
-    // const deps: PrivilegeMonitoringGlobalDependencies = {
-    //   logger: loggingSystemMock.createLogger(),
-    //   clusterClient: mockEsClient,
-    //   namespace: 'default',
-    //   kibanaVersion: '9.0.0',
-    //   taskManager: taskManagerMock.createStart(),
-    //   auditLogger: auditLoggerMock.create(),
-    //   telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
-    //   savedObjects: savedObjectsServiceMock.createStartContract(),
-    // };
-
-    // const dataClient = new PrivilegeMonitoringDataClient(deps);
     crudService = createPrivilegedUsersCrudService({
       esClient: mockEsClient.asCurrentUser,
       index: getPrivilegedMonitorUsersIndex('default'),
