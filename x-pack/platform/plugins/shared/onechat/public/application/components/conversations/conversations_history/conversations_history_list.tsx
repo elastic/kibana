@@ -6,7 +6,16 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFlexItem, EuiLoadingSpinner, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationWithoutRounds } from '@kbn/onechat-common';
@@ -119,10 +128,62 @@ export const ConversationHistoryList: React.FC = () => {
     >
       {(list, search) => (
         <div>
+          <PopoverHeader />
           <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
           {list}
         </div>
       )}
     </EuiSelectable>
+  );
+};
+
+const PopoverHeader = () => {
+  const { euiTheme } = useEuiTheme();
+  const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const { createOnechatUrl } = useNavigation();
+
+  const headerStyles = css`
+    padding: ${euiTheme.size.s} ${euiTheme.size.m};
+    border-bottom: 1px solid ${euiTheme.border.color};
+  `;
+
+  return (
+    <div css={headerStyles}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h5>
+              {i18n.translate('xpack.onechat.conversationSidebar.title', {
+                defaultMessage: 'Conversations',
+              })}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="plus"
+            size="s"
+            color="primary"
+            {...(isEmbeddedContext
+              ? {
+                  onClick: () => {
+                    setConversationId?.(undefined);
+                  },
+                }
+              : {
+                  href: createOnechatUrl(appPaths.chat.new),
+                })}
+            aria-label={i18n.translate('xpack.onechat.newConversationButton.ariaLabel', {
+              defaultMessage: 'Create new conversation',
+            })}
+            data-test-subj="agentBuilderNewConversationButton"
+          >
+            {i18n.translate('xpack.onechat.newConversationButton.display', {
+              defaultMessage: 'New',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };
