@@ -386,6 +386,13 @@ export const config: PluginConfigDescriptor = {
           taskInterval: schema.maybe(schema.string()),
         })
       ),
+      fleetPolicyRevisionCleanup: schema.maybe(
+        schema.object({
+          max_revisions: schema.number({ defaultValue: 10 }),
+          frequency: schema.string({ defaultValue: '1h' }),
+          max_policies_per_run: schema.number({ defaultValue: 100 }),
+        })
+      ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),

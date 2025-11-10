@@ -19,6 +19,7 @@ const _allowedExperimentalValues = {
   enableAgentStatusAlerting: true,
   enableAgentPrivilegeLevelChange: false,
   installIntegrationsKnowledge: false,
+  fleetPolicyRevisionsCleanupTask: false,
 };
 
 /**
